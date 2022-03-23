@@ -40,7 +40,9 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps) => {
         },
         onSuccess: async (theCase: Case) => {
           if (theCase) {
-            casesToasts.showSuccessAttach(theCase, {
+            casesToasts.showSuccessAttach({
+              theCase,
+              attachments: props.attachments,
               title: props.toastTitle,
               content: props.toastContent,
             });

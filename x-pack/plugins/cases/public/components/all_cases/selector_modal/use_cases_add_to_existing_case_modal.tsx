@@ -58,7 +58,9 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
             closeModal();
             createNewCaseFlyout.open();
           } else {
-            casesToasts.showSuccessAttach(theCase, {
+            casesToasts.showSuccessAttach({
+              theCase,
+              attachments: props.attachments,
               title: props.toastTitle,
               content: props.toastContent,
             });

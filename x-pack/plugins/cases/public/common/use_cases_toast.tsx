@@ -9,10 +9,16 @@ import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { Case } from '../../common';
+import { Case, CommentType } from '../../common';
 import { useToasts } from '../common/lib/kibana';
 import { useCaseViewNavigation } from '../common/navigation';
-import { CASE_SUCCESS_SYNC_TEXT, CASE_SUCCESS_TOAST, VIEW_CASE } from './translations';
+import { CaseAttachments } from '../types';
+import {
+  CASE_ALERT_SUCCESS_SYNC_TEXT,
+  CASE_ALERT_SUCCESS_TOAST,
+  CASE_SUCCESS_TOAST,
+  VIEW_CASE,
+} from './translations';
 
 const LINE_CLAMP = 3;
 const Title = styled.span`
@@ -28,57 +34,99 @@ const EuiTextStyled = styled(EuiText)`
   `}
 `;
 
+function getToastTitle({
+  theCase,
+  title,
+  attachments,
+}: {
+  theCase: Case;
+  title?: string;
+  attachments?: CaseAttachments;
+}): string {
+  if (title !== undefined) {
+    return title;
+  }
+  if (attachments !== undefined) {
+    for (const attachment of attachments) {
+      if (attachment.type === CommentType.alert) {
+        return CASE_ALERT_SUCCESS_TOAST(theCase.title);
+      }
+    }
+  }
+  return CASE_SUCCESS_TOAST(theCase.title);
+}
+
+function getToastContent({
+  theCase,
+  content,
+  attachments,
+}: {
+  theCase: Case;
+  content?: string;
+  attachments?: CaseAttachments;
+}): string | undefined {
+  if (content !== undefined) {
+    return content;
+  }
+  if (attachments !== undefined) {
+    for (const attachment of attachments) {
+      if (attachment.type === CommentType.alert && theCase.settings.syncAlerts) {
+        return CASE_ALERT_SUCCESS_SYNC_TEXT;
+      }
+    }
+  }
+  return undefined;
+}
+
 export const useCasesToast = () => {
   const { navigateToCaseView } = useCaseViewNavigation();
 
   const toasts = useToasts();
 
   return {
-    showSuccessAttach: (
-      theCase: Case,
-      { title, content }: { title?: string; content?: string } = {}
-    ) => {
+    showSuccessAttach: ({
+      theCase,
+      attachments,
+      title,
+      content,
+    }: {
+      theCase: Case;
+      attachments?: CaseAttachments;
+      title?: string;
+      content?: string;
+    }) => {
       const onViewCaseClick = () => {
         navigateToCaseView({
           detailName: theCase.id,
         });
       };
+      const renderTitle = getToastTitle({ theCase, title, attachments });
+      const renderContent = getToastContent({ theCase, content, attachments });
+
       return toasts.addSuccess({
         color: 'success',
         iconType: 'check',
-        title: toMountPoint(<Title>{title ? title : CASE_SUCCESS_TOAST(theCase.title)}</Title>),
+        title: toMountPoint(<Title>{renderTitle}</Title>),
         text: toMountPoint(
-          <CaseToastSuccessContent
-            content={content}
-            syncAlerts={theCase.settings.syncAlerts}
-            onViewCaseClick={onViewCaseClick}
-          />
+          <CaseToastSuccessContent content={renderContent} onViewCaseClick={onViewCaseClick} />
         ),
       });
     },
   };
 };
+
 export const CaseToastSuccessContent = ({
-  syncAlerts,
   onViewCaseClick,
   content,
 }: {
-  syncAlerts: boolean;
   onViewCaseClick: () => void;
   content?: string;
 }) => {
-  let toastContent: string | undefined;
-  if (content !== undefined) {
-    toastContent = content;
-  } else if (syncAlerts) {
-    toastContent = CASE_SUCCESS_SYNC_TEXT;
-  }
-
   return (
     <>
-      {toastContent !== undefined ? (
+      {content !== undefined ? (
         <EuiTextStyled size="s" data-test-subj="toaster-content-sync-text">
-          {toastContent}
+          {content}
         </EuiTextStyled>
       ) : null}
       <EuiButtonEmpty
