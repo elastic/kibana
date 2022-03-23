@@ -7,7 +7,7 @@
 
 import { expectedExportedRule, getNewRule } from '../../objects/rule';
 
-import { TOASTER } from '../../screens/alerts_detection_rules';
+import { TOASTER_BODY } from '../../screens/alerts_detection_rules';
 
 import { exportFirstRule } from '../../tasks/alerts_detection_rules';
 import { createCustomRule } from '../../tasks/api_calls/rules';
@@ -23,19 +23,17 @@ describe('Export rules', () => {
   });
 
   beforeEach(() => {
-    cy.intercept(
-      'POST',
-      '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
-    ).as('export');
+    // Rules get exported via _bulk_action endpoint
+    cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createCustomRule(getNewRule()).as('ruleResponse');
   });
 
   it('Exports a custom rule', function () {
     exportFirstRule();
-    cy.wait('@export').then(({ response }) => {
+    cy.wait('@bulk_action').then(({ response }) => {
       cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
-      cy.get(TOASTER).should(
+      cy.get(TOASTER_BODY).should(
         'have.text',
         'Successfully exported 1 of 1 rule. Prebuilt rules were excluded from the resulting file.'
       );
