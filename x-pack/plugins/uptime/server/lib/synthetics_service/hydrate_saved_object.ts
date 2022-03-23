@@ -43,10 +43,13 @@ export const hydrateSavedObjects = async ({
         missingInfoIds
       );
 
-      const updatedObjects = monitors
+      const updatedObjects: SyntheticsMonitorSavedObject[] = [];
+      monitors
         .filter((monitor) => missingInfoIds.includes(monitor.id))
-        .map((monitor) => {
+        .forEach((monitor) => {
           let resultAttributes: Partial<SyntheticsMonitor> = monitor.attributes;
+
+          let isUpdated = false;
 
           esDocs.forEach((doc) => {
             // to make sure the document is ingested after the latest update of the monitor
@@ -57,15 +60,21 @@ export const hydrateSavedObjects = async ({
             if (doc.config_id !== monitor.id) return monitor;
 
             if (doc.url?.full) {
+              isUpdated = true;
               resultAttributes = { ...resultAttributes, urls: doc.url?.full };
             }
 
             if (doc.url?.port) {
+              isUpdated = true;
               resultAttributes = { ...resultAttributes, ['url.port']: doc.url?.port };
             }
           });
-
-          return { ...monitor, attributes: resultAttributes };
+          if (isUpdated) {
+            updatedObjects.push({
+              ...monitor,
+              attributes: resultAttributes,
+            } as SyntheticsMonitorSavedObject);
+          }
         });
 
       await server.authSavedObjectsClient?.bulkUpdate(updatedObjects);

@@ -21,6 +21,7 @@ import {
   FetchMonitorManagementListQueryArgs,
   ICMPSimpleFields,
   MonitorFields,
+  Ping,
   ServiceLocations,
   EncryptedSyntheticsMonitorWithId,
   TCPSimpleFields,
@@ -47,6 +48,7 @@ interface Props {
   monitorList: MonitorManagementListState;
   onPageStateChange: (state: MonitorManagementListPageState) => void;
   onUpdate: () => void;
+  errorSummaries?: Ping[];
 }
 
 export const MonitorManagementList = ({
@@ -58,13 +60,18 @@ export const MonitorManagementList = ({
   },
   onPageStateChange,
   onUpdate,
+  errorSummaries,
 }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
   const isXl = useBreakpoints().up('xl');
 
   const { total } = list as MonitorManagementListState['list'];
   const monitors: EncryptedSyntheticsMonitorWithId[] = useMemo(
-    () => list.monitors.map((monitor) => ({ ...monitor.attributes, id: monitor.id })),
+    () =>
+      list.monitors.map((monitor) => ({
+        ...monitor.attributes,
+        id: monitor.id,
+      })),
     [list.monitors]
   );
 
@@ -90,7 +97,7 @@ export const MonitorManagementList = ({
     pageIndex: pageIndex - 1, // page index for EuiBasicTable is base 0
     pageSize,
     totalItemCount: total || 0,
-    pageSizeOptions: [10, 25, 50, 100],
+    pageSizeOptions: [5, 10, 25, 50, 100],
   };
 
   const sorting: EuiTableSortingType<EncryptedSyntheticsMonitorWithId> = {
@@ -188,6 +195,8 @@ export const MonitorManagementList = ({
           name={fields[ConfigKey.NAME]}
           isDisabled={!canEdit}
           onUpdate={onUpdate}
+          errorSummaries={errorSummaries}
+          monitors={list.monitors}
         />
       ),
     },

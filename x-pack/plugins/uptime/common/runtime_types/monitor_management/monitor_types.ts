@@ -307,7 +307,9 @@ export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
 >;
 
 export const MonitorManagementListResultCodec = t.type({
-  monitors: t.array(t.interface({ id: t.string, attributes: EncryptedSyntheticsMonitorCodec })),
+  monitors: t.array(
+    t.interface({ id: t.string, attributes: EncryptedSyntheticsMonitorCodec, updated_at: t.string })
+  ),
   page: t.number,
   perPage: t.number,
   total: t.union([t.number, t.null]),
