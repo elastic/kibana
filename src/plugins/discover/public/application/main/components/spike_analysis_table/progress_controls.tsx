@@ -32,7 +32,7 @@ export function ProgressControls({
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 data-test-subj="apmCorrelationsProgressTitleMessage"
-                id="xpack.discover.correlations.progressTitle"
+                id="discover.correlations.progressTitle"
                 defaultMessage="Progress: {progress}% — {progressMessage}"
                 values={{ progress: Math.round(progress * 100), progressMessage }}
               />
@@ -40,7 +40,7 @@ export function ProgressControls({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiProgress
-              aria-label={i18n.translate('xpack.discover.correlations.progressAriaLabel', {
+              aria-label={i18n.translate('discover.correlations.progressAriaLabel', {
                 defaultMessage: 'Progress',
               })}
               value={Math.round(progress * 100)}
@@ -54,7 +54,7 @@ export function ProgressControls({
         {!isRunning && (
           <EuiButton size="s" onClick={onRefresh}>
             <FormattedMessage
-              id="xpack.discover.correlations.refreshButtonTitle"
+              id="discover.correlations.refreshButtonTitle"
               defaultMessage="Refresh"
             />
           </EuiButton>
@@ -62,7 +62,7 @@ export function ProgressControls({
         {isRunning && (
           <EuiButton size="s" onClick={onCancel}>
             <FormattedMessage
-              id="xpack.discover.correlations.cancelButtonTitle"
+              id="discover.correlations.cancelButtonTitle"
               defaultMessage="Cancel"
             />
           </EuiButton>
