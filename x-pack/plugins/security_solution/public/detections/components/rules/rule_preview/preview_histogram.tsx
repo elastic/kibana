@@ -63,7 +63,7 @@ export const PreviewHistogram = ({
   index,
 }: PreviewHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
-  const { timelines: timelinesUi, cases: casesUi } = useKibana().services;
+  const { timelines: timelinesUi, cases } = useKibana().services;
   const from = useMemo(() => `now-1${timeFrame}`, [timeFrame]);
   const to = useMemo(() => 'now', []);
   const startDate = useMemo(() => formatDate(from), [from]);
@@ -156,7 +156,7 @@ export const PreviewHistogram = ({
         : i18n.QUERY_PREVIEW_TITLE(totalCount),
     [isLoading, totalCount, thresholdTotalCount, isThresholdRule]
   );
-  const CasesContext = casesUi.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
 
   return (
     <>
