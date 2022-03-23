@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { NoDataCard, ElasticAgentCard } from './no_data_page';
 export { KibanaPageTemplateSolutionNavAvatar } from './solution_nav_avatar';
