@@ -70,11 +70,15 @@ import {
   selectAutoApplyEnabled,
   selectTriggerApplyChanges,
   selectDatasourceLayers,
+  applyChanges,
+  selectChangesApplied,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import type { Datatable } from '../../../../../../../src/plugins/expressions/public';
+import { ApplyChangesIllustration } from '../../../assets/apply_changes_illustration';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -144,6 +148,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+  const changesApplied = useLensSelector(selectChangesApplied);
   const triggerApply = useLensSelector(selectTriggerApplyChanges);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
@@ -333,7 +338,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, expressionExists, dispatchLens]);
 
-  const renderEmptyWorkspace = () => {
+  const renderDragDropMessage = () => {
     return (
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
@@ -341,7 +346,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         data-test-subj="empty-workspace"
         size="s"
       >
-        <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
+        <DropIllustration
+          aria-hidden={true}
+          className={classNames(
+            'lnsWorkspacePanel__promptIllustration',
+            'lnsWorkspacePanel__dropIllustration'
+          )}
+        />
         <h2>
           <strong>
             {!expressionExists
@@ -355,14 +366,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         </h2>
         {!expressionExists && (
           <>
-            <EuiTextColor className="lnsWorkspacePanel__subtext" color="subdued" component="div">
+            <EuiTextColor color="subdued" component="div">
               <p>
                 {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
                   defaultMessage: 'Lens is the recommended editor for creating visualizations',
                 })}
               </p>
             </EuiTextColor>
-            <p>
+            <p className="lnsWorkspacePanel__actions">
               <EuiLink
                 href="https://www.elastic.co/products/kibana/feedback"
                 target="_blank"
@@ -379,11 +390,43 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     );
   };
 
-  const renderVisualization = () => {
-    if (localState.expressionToRender === null) {
-      return renderEmptyWorkspace();
-    }
+  const renderApplyChangesMessage = () => {
+    return (
+      <EuiText
+        className={classNames('lnsWorkspacePanel__emptyContent')}
+        textAlign="center"
+        data-test-subj="empty-workspace"
+        size="s"
+      >
+        <ApplyChangesIllustration
+          aria-hidden={true}
+          className="lnsWorkspacePanel__promptIllustration"
+        />
+        <h2>
+          <strong>
+            {i18n.translate('xpack.lens.editorFrame.applyChangesWorkspacePrompt', {
+              defaultMessage: 'Apply changes to render visualization',
+            })}
+          </strong>
+        </h2>
+        <p className="lnsWorkspacePanel__actions">
+          <EuiButtonEmpty
+            size="s"
+            className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+            iconType="checkInCircleFilled"
+            onClick={() => dispatchLens(applyChanges())}
+            data-test-subj="lnsWorkspaceApplyChanges"
+          >
+            {i18n.translate('xpack.lens.editorFrame.applyChanges', {
+              defaultMessage: 'Apply changes',
+            })}
+          </EuiButtonEmpty>
+        </p>
+      </EuiText>
+    );
+  };
 
+  const renderVisualization = () => {
     return (
       <VisualizationWrapper
         expression={localState.expressionToRender}
@@ -402,7 +445,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const dragDropContext = useContext(DragContext);
 
-  const renderDragDrop = () => {
+  const renderWorkspace = () => {
+    const renderWorkspaceContents = !changesApplied
+      ? renderApplyChangesMessage
+      : localState.expressionToRender === null
+      ? renderDragDropMessage
+      : renderVisualization;
+
     const customWorkspaceRenderer =
       activeDatasourceId &&
       datasourceMap[activeDatasourceId]?.getCustomWorkspaceRenderer &&
@@ -428,7 +477,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         order={dropProps.order}
       >
         <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {renderVisualization()}
+          {renderWorkspaceContents()}
         </EuiPageContentBody>
       </DragDrop>
     );
@@ -444,7 +493,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       visualizationMap={visualizationMap}
       isFullscreen={isFullscreen}
     >
-      {renderDragDrop()}
+      {renderWorkspace()}
     </WorkspacePanelWrapper>
   );
 });

@@ -36,7 +36,6 @@ import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
 import {
-  applyChanges,
   setState,
   updateDatasourceState,
   updateVisualizationState,
@@ -71,6 +70,10 @@ const defaultProps = {
   getSuggestionForField: () => undefined,
   lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
+};
+
+const SELECTORS = {
+  applyChangesButton: 'button[data-test-subj="lnsWorkspaceApplyChanges"]',
 };
 
 describe('workspace_panel', () => {
@@ -233,18 +236,13 @@ describe('workspace_panel', () => {
         },
       });
     });
-
-    // nothing should change
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-    "kibana
-    | lens_merge_tables layerIds=\\"first\\" tables={datasource}
-    | testVis"
-  `);
-
-    act(() => {
-      mounted.lensStore.dispatch(applyChanges());
-    });
     instance.update();
+
+    // renders apply-changes prompt
+    expect(instance.exists(SELECTORS.applyChangesButton)).toBeTruthy();
+    expect(instance.exists(expressionRendererMock)).toBeFalsy();
+
+    instance.find(SELECTORS.applyChangesButton).simulate('click');
 
     // should update
     expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
@@ -261,13 +259,9 @@ describe('workspace_panel', () => {
         },
       });
     });
+    instance.update();
 
-    // should not update
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-      "kibana
-      | lens_merge_tables layerIds=\\"first\\" tables={new-datasource}
-      | new-vis"
-    `);
+    expect(instance.exists(expressionRendererMock)).toBeFalsy();
 
     act(() => {
       mounted.lensStore.dispatch(enableAutoApply());
@@ -921,9 +915,7 @@ describe('workspace_panel', () => {
     expect(showingErrors()).toBeFalsy();
 
     // errors should appear when problem changes are applied
-    act(() => {
-      lensStore.dispatch(applyChanges());
-    });
+    instance.find(SELECTORS.applyChangesButton).simulate('click');
     instance.update();
 
     expect(showingErrors()).toBeTruthy();
