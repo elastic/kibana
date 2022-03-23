@@ -34,6 +34,7 @@ import { EditRuleFlyout } from './components/edit_rule_flyout';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { NoDataPrompt } from './components/prompts/no_data_prompt';
 import { NoPermissionPrompt } from './components/prompts/no_permission_prompt';
+import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import {
   deleteRules,
   RuleTableItem,
@@ -112,7 +113,7 @@ export function RulesPage() {
     setRefreshInterval(refreshIntervalChanged);
   };
 
-  const { rulesState, setRulesState, reload, noData } = useFetchRules({
+  const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
     searchText,
     ruleLastResponseFilter,
     page,
@@ -256,6 +257,9 @@ export function RulesPage() {
       ) : (
         <NoPermissionPrompt />
       );
+    }
+    if (initialLoad) {
+      return <CenterJustifiedSpinner />;
     }
     return (
       <>

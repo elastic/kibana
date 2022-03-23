@@ -31,6 +31,7 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
   });
 
   const [noData, setNoData] = useState<boolean>(true);
+  const [initialLoad, setInitialLoad] = useState<boolean>(true);
 
   const fetchRules = useCallback(async () => {
     setRulesState((oldState) => ({ ...oldState, isLoading: true }));
@@ -56,6 +57,7 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
     } catch (_e) {
       setRulesState((oldState) => ({ ...oldState, isLoading: false, error: RULES_LOAD_ERROR }));
     }
+    setInitialLoad(false);
   }, [http, page, searchText, ruleLastResponseFilter, sort]);
   useEffect(() => {
     fetchRules();
@@ -66,5 +68,6 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
     reload: fetchRules,
     setRulesState,
     noData,
+    initialLoad,
   };
 }
