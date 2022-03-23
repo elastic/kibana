@@ -6,6 +6,7 @@
  */
 
 import Semver from 'semver';
+import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import {
   omit,
@@ -21,8 +22,7 @@ import {
   cloneDeep,
 } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import pMap from 'p-map';
+import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { withSpan } from '@kbn/apm-utils';
 import {
@@ -35,7 +35,6 @@ import {
   SavedObjectAttributes,
   SavedObjectsBulkUpdateObject,
 } from '../../../../../src/core/server';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
   Alert as Rule,
@@ -106,6 +105,14 @@ import {
   getModifiedSearch,
   modifyFilterKueryNode,
 } from './lib/mapped_params_utils';
+import { AlertingRulesConfig } from '../config';
+import {
+  formatExecutionLogResult,
+  getExecutionLogAggregation,
+  IExecutionLogResult,
+} from '../lib/get_execution_log_aggregation';
+import { validateSnoozeDate } from '../lib/validate_snooze_date';
+import { RuleMutedError } from '../lib/errors/rule_muted';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -157,7 +164,7 @@ export interface ConstructorOptions {
   authorization: AlertingAuthorization;
   actionsAuthorization: ActionsAuthorization;
   ruleTypeRegistry: RuleTypeRegistry;
-  minimumScheduleInterval: string;
+  minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
   namespace?: string;
@@ -173,6 +180,10 @@ export interface ConstructorOptions {
 export interface MuteOptions extends IndexType {
   alertId: string;
   alertInstanceId: string;
+}
+
+export interface SnoozeOptions extends IndexType {
+  snoozeEndTime: string | -1;
 }
 
 export interface FindOptions extends IndexType {
@@ -283,6 +294,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
+    | 'snoozeEndTime'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -309,14 +321,24 @@ export interface GetAlertSummaryParams {
   numberOfExecutions?: number;
 }
 
-const MAX_RULES_NUMBER_FOR_BULK_EDIT = 10000;
-const API_KEY_GENERATE_CONCURRENCY = 50;
+export interface GetExecutionLogByIdParams {
+  id: string;
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: estypes.Sort;
+}
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const preconfiguredConnectorActionRefPrefix = 'preconfigured:';
+
+const MAX_RULES_NUMBER_FOR_BULK_EDIT = 10000;
+const API_KEY_GENERATE_CONCURRENCY = 50;
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
@@ -331,7 +353,7 @@ export class RulesClient {
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly authorization: AlertingAuthorization;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  private readonly minimumScheduleInterval: string;
+  private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly minimumScheduleIntervalInMs: number;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
@@ -344,6 +366,7 @@ export class RulesClient {
   private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
     'monitoring',
     'mapped_params',
+    'snoozeEndTime',
   ];
 
   constructor({
@@ -372,7 +395,7 @@ export class RulesClient {
     this.taskManager = taskManager;
     this.ruleTypeRegistry = ruleTypeRegistry;
     this.minimumScheduleInterval = minimumScheduleInterval;
-    this.minimumScheduleIntervalInMs = parseDuration(minimumScheduleInterval);
+    this.minimumScheduleIntervalInMs = parseDuration(minimumScheduleInterval.value);
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.authorization = authorization;
     this.createAPIKey = createAPIKey;
@@ -431,9 +454,16 @@ export class RulesClient {
     // Validate that schedule interval is not less than configured minimum
     const intervalInMs = parseDuration(data.schedule.interval);
     if (intervalInMs < this.minimumScheduleIntervalInMs) {
-      throw Boom.badRequest(
-        `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
-      );
+      if (this.minimumScheduleInterval.enforce) {
+        throw Boom.badRequest(
+          `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+        );
+      } else {
+        // just log warning but allow rule to be created
+        this.logger.warn(
+          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+        );
+      }
     }
 
     // Extract saved object references for this rule
@@ -456,6 +486,7 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
+      snoozeEndTime: null,
       params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
@@ -714,6 +745,70 @@ export class RulesClient {
     });
   }
 
+  public async getExecutionLogForRule({
+    id,
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
+    this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+
+    try {
+      // Make sure user has access to this rule
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        operation: ReadOperations.GetExecutionLog,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_EXECUTION_LOG,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_EXECUTION_LOG,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    const results = await eventLogClient.aggregateEventsBySavedObjectIds(
+      'alert',
+      [id],
+      {
+        start: parsedDateStart.toISOString(),
+        end: parsedDateEnd.toISOString(),
+        filter,
+        aggs: getExecutionLogAggregation({
+          page,
+          perPage,
+          sort,
+        }),
+      },
+      rule.legacyId !== null ? [rule.legacyId] : undefined
+    );
+
+    return formatExecutionLogResult(results);
+  }
+
   public async find<Params extends RuleTypeParams = never>({
     options: { fields, ...options } = {},
     excludeFromPublicApi = false,
@@ -735,7 +830,7 @@ export class RulesClient {
     }
 
     const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
-    const filterKueryNode = options.filter ? esKuery.fromKueryExpression(options.filter) : null;
+    const filterKueryNode = options.filter ? fromKueryExpression(options.filter) : null;
     let sortField = mapSortField(options.sortField);
     if (excludeFromPublicApi) {
       try {
@@ -851,7 +946,7 @@ export class RulesClient {
       ...options,
       filter:
         (authorizationFilter && filter
-          ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter as KueryNode])
+          ? nodeBuilder.and([fromKueryExpression(filter), authorizationFilter as KueryNode])
           : authorizationFilter) ?? filter,
       page: 1,
       perPage: 0,
@@ -1113,9 +1208,16 @@ export class RulesClient {
     // Validate that schedule interval is not less than configured minimum
     const intervalInMs = parseDuration(data.schedule.interval);
     if (intervalInMs < this.minimumScheduleIntervalInMs) {
-      throw Boom.badRequest(
-        `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
-      );
+      if (this.minimumScheduleInterval.enforce) {
+        throw Boom.badRequest(
+          `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+        );
+      } else {
+        // just log warning but allow rule to be updated
+        this.logger.warn(
+          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+        );
+      }
     }
 
     // Extract saved object references for this rule
@@ -1619,6 +1721,7 @@ export class RulesClient {
           lastDuration: 0,
           lastExecutionDate: new Date().toISOString(),
           error: null,
+          warning: null,
         },
       });
       try {
@@ -1790,6 +1893,85 @@ export class RulesClient {
     }
   }
 
+  public async snooze({
+    id,
+    snoozeEndTime,
+  }: {
+    id: string;
+    snoozeEndTime: string | -1;
+  }): Promise<void> {
+    if (typeof snoozeEndTime === 'string') {
+      const snoozeDateValidationMsg = validateSnoozeDate(snoozeEndTime);
+      if (snoozeDateValidationMsg) {
+        throw new RuleMutedError(snoozeDateValidationMsg);
+      }
+    }
+    return await retryIfConflicts(
+      this.logger,
+      `rulesClient.snooze('${id}', ${snoozeEndTime})`,
+      async () => await this.snoozeWithOCC({ id, snoozeEndTime })
+    );
+  }
+
+  private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime: string | -1 }) {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: attributes.alertTypeId,
+        consumer: attributes.consumer,
+        operation: WriteOperations.Snooze,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.SNOOZE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.SNOOZE,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    // If snoozeEndTime is -1, instead mute all
+    const newAttrs =
+      snoozeEndTime === -1
+        ? { muteAll: true, snoozeEndTime: null }
+        : { snoozeEndTime: new Date(snoozeEndTime).toISOString(), muteAll: false };
+
+    const updateAttributes = this.updateMeta({
+      ...newAttrs,
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    );
+  }
+
   public async muteAll({ id }: { id: string }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
@@ -1839,6 +2021,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: true,
       mutedInstanceIds: [],
+      snoozeEndTime: null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1901,6 +2084,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: false,
       mutedInstanceIds: [],
+      snoozeEndTime: null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });

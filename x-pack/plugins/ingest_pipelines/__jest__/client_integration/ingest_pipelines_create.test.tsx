@@ -79,8 +79,8 @@ describe('<PipelinesCreate />', () => {
       await actions.clickShowRequestLink();
 
       // Verify request flyout opens
-      expect(exists('requestFlyout')).toBe(true);
-      expect(find('requestFlyout.title').text()).toBe('Request');
+      expect(exists('apiRequestFlyout')).toBe(true);
+      expect(find('apiRequestFlyout.apiRequestFlyoutTitle').text()).toBe('Request');
     });
 
     describe('form validation', () => {

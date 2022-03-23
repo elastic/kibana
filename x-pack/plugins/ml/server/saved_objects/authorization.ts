@@ -7,7 +7,10 @@
 
 import { KibanaRequest } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../../security/server';
-import { ML_JOB_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
+import {
+  ML_JOB_SAVED_OBJECT_TYPE,
+  ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+} from '../../common/types/saved_objects';
 
 export function authorizationProvider(authorization: SecurityPluginSetup['authz']) {
   async function authorizationCheck(request: KibanaRequest) {
@@ -15,8 +18,10 @@ export function authorizationProvider(authorization: SecurityPluginSetup['authz'
 
     if (shouldAuthorizeRequest === false) {
       return {
-        canCreateGlobally: true,
-        canCreateAtSpace: true,
+        canCreateJobsGlobally: true,
+        canCreateJobsAtSpace: true,
+        canCreateTrainedModelsGlobally: true,
+        canCreateTrainedModelsAtSpace: true,
       };
     }
 
@@ -27,21 +32,43 @@ export function authorizationProvider(authorization: SecurityPluginSetup['authz'
     // for completeness.
     const checkPrivilegesDynamicallyWithRequest =
       authorization.checkPrivilegesDynamicallyWithRequest(request);
+
     const createMLJobAuthorizationAction = authorization.actions.savedObject.get(
       ML_JOB_SAVED_OBJECT_TYPE,
       'create'
     );
-    const canCreateGlobally = (
+    const createMLTrainedMOdelAuthorizationAction = authorization.actions.savedObject.get(
+      ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+      'create'
+    );
+
+    const canCreateJobsGlobally = (
       await checkPrivilegesWithRequest.globally({
         kibana: [createMLJobAuthorizationAction],
       })
     ).hasAllRequested;
-    const canCreateAtSpace = (
+
+    const canCreateJobsAtSpace = (
       await checkPrivilegesDynamicallyWithRequest({ kibana: [createMLJobAuthorizationAction] })
     ).hasAllRequested;
+
+    const canCreateTrainedModelsGlobally = (
+      await checkPrivilegesWithRequest.globally({
+        kibana: [createMLTrainedMOdelAuthorizationAction],
+      })
+    ).hasAllRequested;
+
+    const canCreateTrainedModelsAtSpace = (
+      await checkPrivilegesDynamicallyWithRequest({
+        kibana: [createMLTrainedMOdelAuthorizationAction],
+      })
+    ).hasAllRequested;
+
     return {
-      canCreateGlobally,
-      canCreateAtSpace,
+      canCreateJobsGlobally,
+      canCreateJobsAtSpace,
+      canCreateTrainedModelsGlobally,
+      canCreateTrainedModelsAtSpace,
     };
   }
 

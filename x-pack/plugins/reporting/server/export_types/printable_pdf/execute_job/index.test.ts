@@ -74,10 +74,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
 
   expect(generatePdfObservable).toHaveBeenCalledWith(
     expect.anything(),
-    expect.anything(),
-    expect.anything(),
-    expect.objectContaining({ browserTimezone: 'UTC' }),
-    undefined
+    expect.objectContaining({ browserTimezone: 'UTC' })
   );
 });
 
