@@ -146,7 +146,7 @@ export function OverviewPage({ routeParams }: Props) {
       {hasData && (
         <>
           <ObservabilityHeaderMenu />
-          <ObservabilityStatusProgress />
+          <ObservabilityStatusProgress onViewDetailsClick={() => setIsFlyoutVisible(true)} />
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <SectionContainer

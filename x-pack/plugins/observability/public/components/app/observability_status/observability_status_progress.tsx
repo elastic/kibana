@@ -20,8 +20,14 @@ import { reduce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasData } from '../../../hooks/use_has_data';
 
-const LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY = 'HIDE_GUIDED_SETUP_KEY';
-export function ObservabilityStatusProgress() {
+const LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY = 'HIDE_GUIDED_SETUP';
+
+interface ObservabilityStatusProgressProps {
+  onViewDetailsClick: () => {};
+}
+export function ObservabilityStatusProgress({
+  onViewDetailsClick,
+}: ObservabilityStatusProgressProps) {
   const { hasDataMap, isAllRequestsComplete } = useHasData();
   const hideGuidedSetupLocalStorageKey = window.localStorage.getItem(
     LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY
@@ -86,7 +92,7 @@ export function ObservabilityStatusProgress() {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButton size="s">
+                <EuiButton size="s" onClick={onViewDetailsClick}>
                   <FormattedMessage
                     id="xpack.observability.status.progressBarViewDetails"
                     defaultMessage="View details"
