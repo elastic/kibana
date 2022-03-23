@@ -7,12 +7,19 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function CasesNavigationProvider({ getPageObject }: FtrProviderContext) {
+export function CasesNavigationProvider({ getPageObject, getService }: FtrProviderContext) {
   const common = getPageObject('common');
+  const testSubjects = getService('testSubjects');
 
   return {
     async navigateToApp() {
-      return await common.navigateToApp('cases');
+      await common.navigateToApp('cases');
+      await testSubjects.existOrFail('cases-app', { timeout: 2000 });
+    },
+
+    async navigateToConfigurationPage() {
+      await this.navigateToApp();
+      common.clickAndValidate('configure-case-button', 'case-configure-title');
     },
   };
 }

@@ -13,5 +13,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./create_case_form'));
     loadTestFile(require.resolve('./edit_case_form'));
     loadTestFile(require.resolve('./list_view'));
+    loadTestFile(require.resolve('./configure'));
   });
 };
