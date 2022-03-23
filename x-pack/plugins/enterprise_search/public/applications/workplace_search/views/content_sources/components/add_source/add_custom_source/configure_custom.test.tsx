@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import '../../../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import '../../../../../../__mocks__/shallow_useeffect.mock';
+import { setMockActions, setMockValues } from '../../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -14,7 +14,7 @@ import { shallow } from 'enzyme';
 
 import { EuiForm, EuiFieldText } from '@elastic/eui';
 
-import { staticSourceData } from '../../source_data';
+import { staticSourceData } from '../../../source_data';
 
 import { ConfigureCustom } from './configure_custom';
 
@@ -50,7 +50,7 @@ describe('ConfigureCustom', () => {
     const wrapper = shallow(<ConfigureCustom />);
 
     const preventDefault = jest.fn();
-    wrapper.find('form').simulate('submit', { preventDefault });
+    wrapper.find('EuiForm').simulate('submit', { preventDefault });
 
     expect(preventDefault).toHaveBeenCalled();
     expect(createContentSource).toHaveBeenCalled();
