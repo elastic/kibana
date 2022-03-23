@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useReducer, useState } from 'react';
-import { isEqual, pickBy } from 'lodash/fp';
+import { isEqual, pick, pickBy } from 'lodash/fp';
 
 import { TimelineId } from '../../../../../public/types';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
@@ -123,6 +123,16 @@ export const getColumnHeader = (timelineId: string, fieldName: string): ColumnHe
   ...getAlertColumnHeader(timelineId, fieldName),
 });
 
+/**
+ * Returns only the column header options needed
+ */
+export const getCleanColumnHeader = (columnHeader: ColumnHeaderOptions): ColumnHeaderOptions => {
+  return pick(
+    ['id', 'columnHeaderType', 'displayAsText', 'initialWidth', 'linkField'],
+    columnHeader
+  );
+};
+
 interface SelectionState {
   toAdd: Record<string, true>;
   toRemove: Record<string, true>;
@@ -175,11 +185,23 @@ export const useFieldSelection = (columnHeaders: ColumnHeaderOptions[]) => {
     { toAdd: {}, toRemove: {} }
   );
 
-  const [currentColumnHeaders, setCurrentColumnHeaders] = useState(columnHeaders);
+  const originalColumnHeaders = useMemo(
+    // We need to clean the columnHeaders to prevent EuiDataGrid error
+    () => columnHeaders.map(getCleanColumnHeader),
+    [columnHeaders]
+  );
 
+  const [currentColumnHeaders, setCurrentColumnHeaders] = useState(originalColumnHeaders);
   const currentSelected = useMemo(
     () => new Set(currentColumnHeaders.map(({ id }) => id)),
     [currentColumnHeaders]
+  );
+
+  const isSelected = useCallback(
+    (fieldName: string): boolean =>
+      selectionState.toAdd[fieldName] != null ||
+      (currentSelected.has(fieldName) && selectionState.toRemove[fieldName] == null),
+    [selectionState, currentSelected]
   );
 
   const addSelected = useCallback((...names: string[]) => {
@@ -195,34 +217,31 @@ export const useFieldSelection = (columnHeaders: ColumnHeaderOptions[]) => {
     dispatchSelection({ type: 'RESET' });
   }, []);
 
-  const hasChanges: boolean = useMemo(
-    () =>
-      // compare current selected ids with the original columnHeaders ids
-      !isEqual(
-        [
-          ...Object.keys(selectionState.toAdd),
-          ...currentColumnHeaders
-            .filter(({ id }) => selectionState.toRemove[id] == null)
-            .map(({ id }) => id),
-        ],
-        columnHeaders.map(({ id }) => id)
-      ),
-    [selectionState, currentColumnHeaders, columnHeaders]
-  );
-
-  const isSelected = useCallback(
-    (fieldName: string): boolean =>
-      selectionState.toAdd[fieldName] != null ||
-      (currentSelected.has(fieldName) && selectionState.toRemove[fieldName] == null),
-    [selectionState, currentSelected]
-  );
-
   const getSelectedColumnHeaders = useCallback(
     (timelineId: string): ColumnHeaderOptions[] => [
       ...Object.keys(selectionState.toAdd).map((id) => getColumnHeader(timelineId, id)),
       ...currentColumnHeaders.filter(({ id }) => selectionState.toRemove[id] == null),
     ],
     [selectionState, currentColumnHeaders]
+  );
+
+  const getSelectedIds = useCallback(
+    () => [
+      ...Object.keys(selectionState.toAdd),
+      ...currentColumnHeaders
+        .filter(({ id }) => selectionState.toRemove[id] == null)
+        .map(({ id }) => id),
+    ],
+    [selectionState, currentColumnHeaders]
+  );
+
+  const hasChanges: boolean = useMemo(
+    () =>
+      !isEqual(
+        getSelectedIds(),
+        originalColumnHeaders.map(({ id }) => id)
+      ),
+    [getSelectedIds, originalColumnHeaders]
   );
 
   return {
