@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import {
-  ComponentTemplateListItem,
-  ComponentTemplateDeserialized,
-  ComponentTemplateSerialized,
-} from '../../../shared_imports';
 import { httpServiceMock } from '../../../../../../../../../../src/core/public/mocks';
 import { API_BASE_PATH } from './constants';
 
