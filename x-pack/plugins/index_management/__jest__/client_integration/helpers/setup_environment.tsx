@@ -79,7 +79,7 @@ export const WithAppDependencies =
       <KibanaReactContextProvider>
         <AppContextProvider value={mergedDependencies}>
           <MappingsEditorProvider>
-            <ComponentTemplatesProvider value={componentTemplatesMockDependencies}>
+            <ComponentTemplatesProvider value={componentTemplatesMockDependencies(httpSetup)}>
               <GlobalFlyoutProvider>
                 <Comp {...props} />
               </GlobalFlyoutProvider>

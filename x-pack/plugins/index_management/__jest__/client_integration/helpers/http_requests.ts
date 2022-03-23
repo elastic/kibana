@@ -94,8 +94,8 @@ const registerHttpRequestMockHelpers = (
   const setCreateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/index_templates`, response, error);
 
-  const setUpdateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('PUT', `${API_BASE_PATH}/index_templates/:name`, response, error);
+  const setUpdateTemplateResponse = (templateId: string, response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('PUT', `${API_BASE_PATH}/index_templates/${templateId}`, response, error);
 
   const setUpdateIndexSettingsResponse = (
     indexName: string,
@@ -112,6 +112,9 @@ const registerHttpRequestMockHelpers = (
   const setLoadNodesPluginsResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/nodes/plugins`, response, error);
 
+  const setLoadTelemetryResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', '/api/ui_counters/_report', response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -127,6 +130,7 @@ const registerHttpRequestMockHelpers = (
     setSimulateTemplateResponse,
     setLoadComponentTemplatesResponse,
     setLoadNodesPluginsResponse,
+    setLoadTelemetryResponse,
   };
 };
 

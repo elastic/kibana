@@ -12,7 +12,7 @@ import { WithAppDependencies } from '../helpers';
 
 import { formSetup, TestSubjects } from './template_form.helpers';
 
-export const setup = (httpSetup: HttpSetup, isLegacy: boolean = false) => {
+export const setup = async (httpSetup: HttpSetup, isLegacy: boolean = false) => {
   const route = isLegacy
     ? { pathname: '/create_template', search: '?legacy=true' }
     : { pathname: '/create_template' };

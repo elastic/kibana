@@ -49,6 +49,7 @@ describe('<TemplateClone />', () => {
 
   beforeAll(() => {
     jest.useFakeTimers();
+    httpRequestsMockHelpers.setLoadTelemetryResponse({});
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
     httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone.name, templateToClone);
   });

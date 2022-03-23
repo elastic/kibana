@@ -9,6 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import '../../../test/global_mocks';
+import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 
 import {
@@ -93,7 +94,7 @@ describe('<TemplateCreate />', () => {
     (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
   });
 
-  describe.skip('composable index template', () => {
+  describe('composable index template', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup(httpSetup);
@@ -126,7 +127,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe.skip('legacy index template', () => {
+  describe('legacy index template', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup(httpSetup, true);
@@ -160,31 +161,29 @@ describe('<TemplateCreate />', () => {
         await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
       });
 
-      it.skip('should set the correct page title', async () => {
+      it('should set the correct page title', async () => {
         const { exists, find } = testBed;
 
         expect(exists('stepComponents')).toBe(true);
         expect(find('stepTitle').text()).toEqual('Component templates (optional)');
       });
 
-      it.skip(`doesn't render the deprecated legacy index template warning`, () => {
+      it(`doesn't render the deprecated legacy index template warning`, () => {
         const { exists } = testBed;
         expect(exists('legacyIndexTemplateDeprecationWarning')).toBe(false);
       });
 
-      // TODO: WASAAA
-      it.only('should list the available component templates', () => {
+      it('should list the available component templates', () => {
         const {
           actions: {
             componentTemplates: { getComponentTemplatesInList },
           },
         } = testBed;
-        console.log(testBed.component.html());
         const componentsFound = getComponentTemplatesInList();
         expect(componentsFound).toEqual(componentTemplates.map((c) => c.name));
       });
 
-      it.skip('should allow to search for a component', async () => {
+      it('should allow to search for a component', async () => {
         const {
           component,
           form: { setInputValue },
@@ -202,7 +201,7 @@ describe('<TemplateCreate />', () => {
         expect(componentsFound).toEqual(['test_component_template_2']);
       });
 
-      it.skip('should allow to filter component by Index settings, mappings and aliases', async () => {
+      it('should allow to filter component by Index settings, mappings and aliases', async () => {
         const {
           find,
           exists,
@@ -242,7 +241,7 @@ describe('<TemplateCreate />', () => {
         expect(exists('componentTemplatesList')).toBe(false); // no component has aliases defined.
       });
 
-      it.skip('should allow to select and unselect a component template', async () => {
+      it('should allow to select and unselect a component template', async () => {
         const {
           find,
           exists,
@@ -272,7 +271,7 @@ describe('<TemplateCreate />', () => {
       });
     });
 
-    describe.skip('index settings (step 3)', () => {
+    describe('index settings (step 3)', () => {
       beforeEach(async () => {
         const { actions } = testBed;
         // Logistics
@@ -297,7 +296,7 @@ describe('<TemplateCreate />', () => {
       });
     });
 
-    describe.skip('mappings (step 4)', () => {
+    describe('mappings (step 4)', () => {
       const navigateToMappingsStep = async () => {
         const { actions } = testBed;
         // Logistics
@@ -368,7 +367,7 @@ describe('<TemplateCreate />', () => {
           httpRequestsMockHelpers.setLoadNodesPluginsResponse(['mapper-size']);
 
           await act(async () => {
-            testBed = await setup();
+            testBed = await setup(httpSetup);
           });
           testBed.component.update();
           await navigateToMappingsStep();
@@ -382,7 +381,7 @@ describe('<TemplateCreate />', () => {
       });
     });
 
-    describe.skip('aliases (step 5)', () => {
+    describe('aliases (step 5)', () => {
       beforeEach(async () => {
         const { actions } = testBed;
         // Logistics
@@ -413,7 +412,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe.skip('review (step 6)', () => {
+  describe('review (step 6)', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup(httpSetup);
@@ -442,7 +441,7 @@ describe('<TemplateCreate />', () => {
       expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
     });
 
-    describe.skip('tabs', () => {
+    describe('tabs', () => {
       test('should have 3 tabs', () => {
         const { find } = testBed;
 
@@ -501,7 +500,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe.skip('form payload & api errors', () => {
+  describe('form payload & api errors', () => {
     beforeEach(async () => {
       const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
 
@@ -535,49 +534,48 @@ describe('<TemplateCreate />', () => {
         actions.clickNextButton();
       });
 
-      const latestRequest = server.requests[server.requests.length - 1];
-
-      const expected = {
-        name: TEMPLATE_NAME,
-        indexPatterns: DEFAULT_INDEX_PATTERNS,
-        composedOf: ['test_component_template_1'],
-        template: {
-          settings: SETTINGS,
-          mappings: {
-            properties: {
-              [BOOLEAN_MAPPING_FIELD.name]: {
-                type: BOOLEAN_MAPPING_FIELD.type,
-              },
-              [TEXT_MAPPING_FIELD.name]: {
-                type: TEXT_MAPPING_FIELD.type,
-              },
-              [KEYWORD_MAPPING_FIELD.name]: {
-                type: KEYWORD_MAPPING_FIELD.type,
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates`,
+        expect.objectContaining({ body: JSON.stringify({
+          name: TEMPLATE_NAME,
+          indexPatterns: DEFAULT_INDEX_PATTERNS,
+          _kbnMeta: {
+            type: 'default',
+            hasDatastream: false,
+            isLegacy: false,
+          },
+          composedOf: ['test_component_template_1'],
+          template: {
+            settings: SETTINGS,
+            mappings: {
+              properties: {
+                [BOOLEAN_MAPPING_FIELD.name]: {
+                  type: BOOLEAN_MAPPING_FIELD.type,
+                },
+                [TEXT_MAPPING_FIELD.name]: {
+                  type: TEXT_MAPPING_FIELD.type,
+                },
+                [KEYWORD_MAPPING_FIELD.name]: {
+                  type: KEYWORD_MAPPING_FIELD.type,
+                },
               },
             },
+            aliases: ALIASES,
           },
-          aliases: ALIASES,
-        },
-        _kbnMeta: {
-          type: 'default',
-          isLegacy: false,
-          hasDatastream: false,
-        },
-      };
-
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+        })})
+      );
     });
 
     it('should surface the API errors from the put HTTP request', async () => {
       const { component, actions, find, exists } = testBed;
 
       const error = {
-        status: 409,
+        statusCode: 409,
         error: 'Conflict',
         message: `There is already a template with name '${TEMPLATE_NAME}'`,
       };
 
-      httpRequestsMockHelpers.setCreateTemplateResponse(undefined, { body: error });
+      httpRequestsMockHelpers.setCreateTemplateResponse(undefined, error);
 
       await act(async () => {
         actions.clickNextButton();
