@@ -156,7 +156,7 @@ describe('Use cases toast hook', () => {
       expect(onViewCaseClick).not.toHaveBeenCalled();
     });
 
-    it('renders a correct successfull message without content', () => {
+    it('renders a correct successful message without content', () => {
       const result = appMockRender.render(
         <CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />
       );
