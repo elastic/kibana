@@ -11,7 +11,12 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
+import {
+  ControlColumnProps,
+  RowRenderer,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import { APP_ID, APP_UI_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
@@ -33,6 +38,7 @@ import {
   useFieldBrowserOptions,
   FieldEditorActions,
 } from '../../../timelines/components/fields_browser';
+import { useLoadDetailPanel } from '../../../timelines/components/side_panel/hooks/use_load_detail_panel';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -156,6 +162,22 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
+
+  const { openDetailsPanel, FlyoutDetailsPanel } = useLoadDetailPanel({
+    isFlyoutView: true,
+    entityType,
+    sourcerScope: SourcererScopeName.timeline,
+    timelineId: id,
+    tabType: TimelineTabs.query,
+  });
+
+  // TODO: DELETE!
+  const handleOpenTimeline = useCallback(() => {
+    openDetailsPanel('f0a40aefee00b545fe13c9b503cc0f1daf6601fafc3a3f0459fab321fd73afa7', () =>
+      console.log('HELLO!')
+    );
+  }, [openDetailsPanel]);
+
   const graphOverlay = useMemo(() => {
     const shouldShowOverlay =
       (graphEventId != null && graphEventId.length > 0) || sessionViewId !== null;
@@ -194,6 +216,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     <>
       <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
         <FullScreenContainer $isFullScreen={globalFullScreen}>
+          {/* TODO: Delete! */}
+          <button onClick={handleOpenTimeline} type="button">
+            {'Open Flyout'}
+          </button>
           <InspectButtonContainer>
             {timelinesUi.getTGrid<'embedded'>({
               additionalFilters,
@@ -240,14 +266,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             })}
           </InspectButtonContainer>
         </FullScreenContainer>
-        <DetailsPanel
-          browserFields={browserFields}
-          entityType={entityType}
-          docValueFields={docValueFields}
-          isFlyoutView
-          runtimeMappings={runtimeMappings}
-          timelineId={id}
-        />
+        {FlyoutDetailsPanel}
       </CasesContext>
     </>
   );

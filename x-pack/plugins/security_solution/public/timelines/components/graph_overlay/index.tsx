@@ -147,7 +147,9 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewId
   );
   const sessionViewMain = useMemo(() => {
-    return sessionViewId !== null ? sessionView.getSessionView(sessionViewId) : null;
+    return sessionViewId !== null
+      ? sessionView.getSessionView({ sessionEntityId: sessionViewId })
+      : null;
   }, [sessionView, sessionViewId]);
 
   const getStartSelector = useMemo(() => startSelector(), []);

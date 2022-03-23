@@ -6,13 +6,15 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { timelineSelectors } from '../../../store/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
-import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useLoadDetailPanel } from '../../side_panel/hooks/use_load_detail_panel';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   margin: 0;
@@ -25,23 +27,61 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
+const VerticalRule = styled.div`
+  width: 2px;
+  height: 100%;
+  background: ${({ theme }) => theme.eui.euiColorLightShade};
+`;
+
 interface Props {
   timelineId: TimelineId;
 }
 
 const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
   const { sessionView } = useKibana().services;
-
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
   const sessionViewId = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewId
   );
+  const { openDetailsPanel, shouldShowFlyoutDetailsPanel, FlyoutDetailsPanel } = useLoadDetailPanel(
+    {
+      sourcerScope: SourcererScopeName.timeline,
+      timelineId,
+      tabType: TimelineTabs.session,
+    }
+  );
+
+  // TODO: DELETE!
+  const handleOpenTimeline = useCallback(() => {
+    openDetailsPanel('f0a40aefee00b545fe13c9b503cc0f1daf6601fafc3a3f0459fab321fd73afa7', () =>
+      console.log('HELLO!')
+    );
+  }, [openDetailsPanel]);
+
   const sessionViewMain = useMemo(() => {
-    return sessionViewId !== null ? sessionView.getSessionView(sessionViewId) : null;
+    return sessionViewId !== null
+      ? sessionView.getSessionView({ sessionEntityId: sessionViewId })
+      : null;
   }, [sessionView, sessionViewId]);
 
-  return <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>;
+  return (
+    <>
+      {/* TODO: Delete! */}
+      <button onClick={handleOpenTimeline} type="button">
+        {'Open Flyout'}
+      </button>
+      <FullWidthFlexGroup gutterSize="none">
+        <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>
+        {shouldShowFlyoutDetailsPanel && (
+          <>
+            <VerticalRule />
+            <ScrollableFlexItem grow={1}>{FlyoutDetailsPanel}</ScrollableFlexItem>
+          </>
+        )}
+      </FullWidthFlexGroup>
+    </>
+  );
 };
 
 // eslint-disable-next-line import/no-default-export
