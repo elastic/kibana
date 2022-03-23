@@ -164,7 +164,7 @@ export function getServiceColumns({
         );
         return (
           <ListMetric
-            seriesLoading={comparisonDataLoading}
+            isLoading={comparisonDataLoading}
             series={comparisonData?.currentPeriod[serviceName]?.latency}
             comparisonSeries={
               comparisonData?.previousPeriod[serviceName]?.latency
@@ -192,7 +192,7 @@ export function getServiceColumns({
 
         return (
           <ListMetric
-            seriesLoading={comparisonDataLoading}
+            isLoading={comparisonDataLoading}
             series={comparisonData?.currentPeriod[serviceName]?.throughput}
             comparisonSeries={
               comparisonData?.previousPeriod[serviceName]?.throughput
@@ -220,7 +220,7 @@ export function getServiceColumns({
         );
         return (
           <ListMetric
-            seriesLoading={comparisonDataLoading}
+            isLoading={comparisonDataLoading}
             series={
               comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
             }

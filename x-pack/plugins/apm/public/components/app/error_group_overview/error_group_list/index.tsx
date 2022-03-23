@@ -212,7 +212,7 @@ function ErrorGroupList({
           return (
             <SparkPlot
               color={currentPeriodColor}
-              seriesLoading={detailedStatisticsLoading}
+              isLoading={detailedStatisticsLoading}
               series={currentPeriodTimeseries}
               valueLabel={i18n.translate(
                 'xpack.apm.serviceOveriew.errorsTableOccurrences',

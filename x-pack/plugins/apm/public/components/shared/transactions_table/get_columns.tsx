@@ -102,7 +102,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
-            seriesLoading={transactionGroupDetailedStatisticsLoading}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
@@ -137,7 +137,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
-            seriesLoading={transactionGroupDetailedStatisticsLoading}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
@@ -171,7 +171,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
-            seriesLoading={transactionGroupDetailedStatisticsLoading}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined

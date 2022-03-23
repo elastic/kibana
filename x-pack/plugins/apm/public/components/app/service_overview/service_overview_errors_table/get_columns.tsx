@@ -131,7 +131,7 @@ export function getColumns({
         return (
           <SparkPlot
             color={currentPeriodColor}
-            seriesLoading={errorGroupDetailedStatisticsLoading}
+            isLoading={errorGroupDetailedStatisticsLoading}
             series={currentPeriodTimeseries}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',

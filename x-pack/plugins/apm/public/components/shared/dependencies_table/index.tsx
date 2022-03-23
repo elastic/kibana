@@ -95,7 +95,7 @@ export function DependenciesTable(props: Props) {
             compact
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
-            seriesLoading={
+            isLoading={
               status === FETCH_STATUS.LOADING ||
               status === FETCH_STATUS.NOT_INITIATED
             }
@@ -124,7 +124,7 @@ export function DependenciesTable(props: Props) {
             compact
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
-            seriesLoading={
+            isLoading={
               status === FETCH_STATUS.LOADING ||
               status === FETCH_STATUS.NOT_INITIATED
             }
@@ -153,7 +153,7 @@ export function DependenciesTable(props: Props) {
             compact
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
-            seriesLoading={
+            isLoading={
               status === FETCH_STATUS.LOADING ||
               status === FETCH_STATUS.NOT_INITIATED
             }

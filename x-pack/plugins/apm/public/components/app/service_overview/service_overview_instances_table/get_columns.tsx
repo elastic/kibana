@@ -127,7 +127,7 @@ export function getColumns({
             color={currentPeriodColor}
             valueLabel={asMillisecondDuration(latency)}
             hideSeries={!shouldShowSparkPlots}
-            seriesLoading={detailedStatsLoading}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimestamp : undefined
@@ -161,7 +161,7 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asTransactionRate(throughput)}
-            seriesLoading={detailedStatsLoading}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimestamp : undefined
@@ -195,7 +195,7 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(errorRate, 1)}
-            seriesLoading={detailedStatsLoading}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimestamp : undefined
@@ -229,7 +229,7 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(cpuUsage, 1)}
-            seriesLoading={detailedStatsLoading}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimestamp : undefined
@@ -263,7 +263,7 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(memoryUsage, 1)}
-            seriesLoading={detailedStatsLoading}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimestamp : undefined
