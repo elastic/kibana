@@ -36,6 +36,7 @@ import {
   AreaSeriesProps,
   BarSeriesProps,
   LineSeriesProps,
+  ColorVariant,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n-react';
 import type {
@@ -240,6 +241,8 @@ export function XYChart({
     legend,
     layers,
     fittingFunction,
+    endValue,
+    emphasizeFitting,
     gridlinesVisibilitySettings,
     valueLabels,
     hideEndzones,
@@ -857,15 +860,38 @@ export function XYChart({
             areaSeriesStyle: {
               point: {
                 visible: !xAccessor,
-                radius: 5,
+                radius: xAccessor && !emphasizeFitting ? 5 : 0,
               },
               ...(args.fillOpacity && { area: { opacity: args.fillOpacity } }),
+              ...(emphasizeFitting && {
+                fit: {
+                  area: {
+                    opacity: args.fillOpacity || 0.5,
+                  },
+                  line: {
+                    visible: true,
+                    stroke: ColorVariant.Series,
+                    opacity: 1,
+                    dash: [],
+                  },
+                },
+              }),
             },
             lineSeriesStyle: {
               point: {
                 visible: !xAccessor,
-                radius: 5,
+                radius: xAccessor && !emphasizeFitting ? 5 : 0,
               },
+              ...(emphasizeFitting && {
+                fit: {
+                  line: {
+                    visible: true,
+                    stroke: ColorVariant.Series,
+                    opacity: 1,
+                    dash: [],
+                  },
+                },
+              }),
             },
             name(d) {
               // For multiple y series, the name of the operation is used on each, either:
@@ -913,7 +939,7 @@ export function XYChart({
                 <LineSeries
                   key={index}
                   {...seriesProps}
-                  fit={getFitOptions(fittingFunction)}
+                  fit={getFitOptions(fittingFunction, endValue)}
                   curve={curveType}
                 />
               );
@@ -945,7 +971,7 @@ export function XYChart({
                 <AreaSeries
                   key={index}
                   {...seriesProps}
-                  fit={isPercentage ? 'zero' : getFitOptions(fittingFunction)}
+                  fit={isPercentage ? 'zero' : getFitOptions(fittingFunction, endValue)}
                   curve={curveType}
                 />
               );
@@ -954,7 +980,7 @@ export function XYChart({
                 <AreaSeries
                   key={index}
                   {...seriesProps}
-                  fit={getFitOptions(fittingFunction)}
+                  fit={getFitOptions(fittingFunction, endValue)}
                   curve={curveType}
                 />
               );
