@@ -9,22 +9,21 @@ import {
   LogicMounter,
   mockFlashMessageHelpers,
   mockHttpValues,
-} from '../../../../../__mocks__/kea_logic';
-import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
+} from '../../../../../../__mocks__/kea_logic';
+import { sourceConfigData } from '../../../../../__mocks__/content_sources.mock';
 
-import { i18n } from '@kbn/i18n';
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { docLinks } from '../../../../../shared/doc_links';
-import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
+import { docLinks } from '../../../../../../shared/doc_links';
+import { itShowsServerErrorAsFlashMessage } from '../../../../../../test_helpers';
 
-jest.mock('../../../../app_logic', () => ({
+jest.mock('../../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
-import { AppLogic } from '../../../../app_logic';
+import { AppLogic } from '../../../../../app_logic';
 
-import { SOURCE_NAMES } from '../../../../constants';
-import { CustomSource, SourceDataItem } from '../../../../types';
+import { SOURCE_NAMES } from '../../../../../constants';
+import { CustomSource, SourceDataItem } from '../../../../../types';
 
 import { AddCustomSourceLogic, AddCustomSourceSteps } from './add_custom_source_logic';
 
@@ -36,10 +35,6 @@ const CUSTOM_SOURCE_DATA_ITEM: SourceDataItem = {
     isPublicKey: false,
     hasOauthRedirect: false,
     needsBaseUrl: false,
-    helpText: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.helpText.custom', {
-      defaultMessage:
-        'To create a Custom API Source, provide a human-readable and descriptive name. The name will appear as-is in the various search experiences and management interfaces.',
-    }),
     documentationUrl: docLinks.workplaceSearchCustomSources,
     applicationPortalUrl: '',
   },
