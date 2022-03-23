@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { esArchiverResetKibana } from './es_archiver';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 const primaryButton = 0;
