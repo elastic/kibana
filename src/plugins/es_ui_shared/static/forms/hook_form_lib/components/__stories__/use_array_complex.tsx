@@ -98,8 +98,7 @@ const PercentageConfigSelect = ({ path }: { path: string }) => {
     <UseField
       path={path}
       component={SuperSelectField}
-      defaultValue={percentageOptions[0].value}
-      config={configSelect}
+      config={{ ...configSelect, defaultValue: percentageOptions[0].value }}
       componentProps={{
         euiFieldProps: {
           options: percentageOptions,
@@ -114,8 +113,7 @@ const ValueConfigSelect = ({ path }: { path: string }) => {
     <UseField
       path={path}
       component={SuperSelectField}
-      defaultValue={valueOptions[0].value}
-      config={configSelect}
+      config={{ ...configSelect, defaultValue: valueOptions[0].value }}
       componentProps={{
         euiFieldProps: {
           options: valueOptions,
@@ -253,7 +251,10 @@ const FormContent: FC = () => {
 
 const defaultValue = {
   ruleType: 'type_one',
-  processors_type_one: [{ name: 'Processor 1 name', type: 'value', config: 'value_config_1' }],
+  processors_type_one: [
+    { name: 'Processor 1 name', type: 'value', config: 'value_config_3' },
+    { name: 'Processor 2 name', type: 'percentage', config: 'percentage_config_2' },
+  ],
 };
 
 const schema = {
