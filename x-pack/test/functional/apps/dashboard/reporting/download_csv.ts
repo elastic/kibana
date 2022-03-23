@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'discover',
   ]);
+  const kibanaServer = getService('kibanaServer');
 
   const navigateToDashboardApp = async () => {
     log.debug('in navigateToDashboardApp');
@@ -166,10 +167,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Field Formatters and Scripted Fields', () => {
       const dashboardWithScriptedFieldsSearch = 'names dashboard';
+      const reportingHugedataArchive =
+        'x-pack/test/functional/fixtures/kbn_archiver/reporting/hugedata';
 
       before(async () => {
         await reporting.initLogs();
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.importExport.load(reportingHugedataArchive);
 
         await navigateToDashboardApp();
         await PageObjects.dashboard.loadSavedDashboard(dashboardWithScriptedFieldsSearch);
@@ -185,7 +189,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await reporting.teardownLogs();
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
+        await kibanaServer.importExport.unload(reportingHugedataArchive);
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('Download CSV export of a saved search panel', async () => {
