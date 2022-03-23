@@ -208,7 +208,7 @@ export function ProcessTreeNode({
                 {exitCode !== undefined && (
                   <small data-test-subj="sessionView:processTreeNodeExitCode">
                     {' '}
-                    [exit_code: {exitCode}]
+                    [exit_code: {exitCode}]{';'}
                   </small>
                 )}
                 {timeStampOn && (
@@ -219,7 +219,6 @@ export function ProcessTreeNode({
                     {timeStampsNormal}
                   </span>
                 )}
-                ;
               </span>
             </span>
           )}
