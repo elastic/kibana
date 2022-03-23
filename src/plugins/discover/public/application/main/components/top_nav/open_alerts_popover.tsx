@@ -69,7 +69,11 @@ export function AlertsPopover({ searchSource, anchorElement, onClose }: AlertsPo
 
   const hasTimeFieldName = dataView.timeFieldName;
   let createSearchThresholdRuleLink = (
-    <EuiLink onClick={() => setAlertFlyoutVisibility(true)} disabled={!hasTimeFieldName}>
+    <EuiLink
+      data-test-subj="discoverCreateAlertButton"
+      onClick={() => setAlertFlyoutVisibility(true)}
+      disabled={!hasTimeFieldName}
+    >
       <FormattedMessage
         id="discover.alerts.createSearchThreshold"
         defaultMessage="Create search threshold rule"
