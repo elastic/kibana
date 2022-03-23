@@ -9,7 +9,7 @@
 import { EventAnnotationServiceType } from './types';
 
 export class EventAnnotationService {
-  private eventAnnotationService: EventAnnotationServiceType | undefined = undefined;
+  private eventAnnotationService?: EventAnnotationServiceType;
   public async getService() {
     if (!this.eventAnnotationService) {
       const { getEventAnnotationService } = await import('./service');
