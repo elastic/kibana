@@ -15,12 +15,16 @@ describe('ObservabilityStatusBox', () => {
     beforeEach(() => {
       const props = {
         id: 'logs',
-        dataSourceName: 'Logs',
+        title: 'Logs',
         hasData: false,
         description: 'test description',
         modules: [],
-        integrationLink: 'testIntegrationUrl.com',
+        addTitle: 'logs add title',
+        addLink: 'http://example.com',
         learnMoreLink: 'learnMoreUrl.com',
+        goToAppTitle: 'go to app title',
+        goToAppLink: 'go to app link',
+        weight: 1,
       };
 
       render(
@@ -35,8 +39,8 @@ describe('ObservabilityStatusBox', () => {
     });
 
     it('should have a learn more button', () => {
-      const learnMoreLink = screen.getByRole('link') as HTMLAnchorElement;
-      expect(learnMoreLink.href).toContain('learnMoreUrl.com');
+      const learnMoreLink = screen.getByText('Learn more') as HTMLElement;
+      expect(learnMoreLink.closest('a')?.href).toContain('learnMoreUrl.com');
     });
   });
 
@@ -44,7 +48,7 @@ describe('ObservabilityStatusBox', () => {
     beforeEach(() => {
       const props = {
         id: 'logs',
-        dataSourceName: 'Logs',
+        title: 'Logs',
         hasData: true,
         description: 'test description',
         modules: [
@@ -52,8 +56,12 @@ describe('ObservabilityStatusBox', () => {
           { name: 'module2', hasData: false },
           { name: 'module3', hasData: true },
         ],
-        integrationLink: 'addIntegrationUrl.com',
-        learnMoreLink: 'learnMoreUrl.com',
+        addTitle: 'logs add title',
+        addLink: 'addIntegrationUrl.com',
+        learnMoreLink: 'http://example.com',
+        goToAppTitle: 'go to app title',
+        goToAppLink: 'go to app link',
+        weight: 1,
       };
 
       render(
@@ -66,8 +74,8 @@ describe('ObservabilityStatusBox', () => {
     // it('should have a check icon', () => {});
 
     it('should have the integration link', () => {
-      const addIntegrationLink = screen.getByRole('link') as HTMLAnchorElement;
-      expect(addIntegrationLink.href).toContain('addIntegrationUrl.com');
+      const addIntegrationLink = screen.getByText('logs add title') as HTMLElement;
+      expect(addIntegrationLink.closest('a')?.href).toContain('addIntegrationUrl.com');
     });
 
     it('should have the list of modules', () => {

@@ -308,20 +308,4 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
     });
-
-    // it('[DELETE] - /internal/uptime/service/enablement', async () => {
-
-    //   await supertest.delete(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
-    //   const apiResponse = await supertest
-    //     .get(API_URLS.SYNTHETICS_ENABLEMENT)
-    //     .set('kbn-xsrf', 'true')
-    //     .expect(200);
-
-    //   expect(apiResponse.body).eql({
-    //     areApiKeysEnabled: true,
-    //     canEnable: true,
-    //     isEnabled: false,
-    //   });
-    // });
-  });
 }

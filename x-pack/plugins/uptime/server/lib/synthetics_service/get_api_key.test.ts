@@ -39,7 +39,6 @@ describe('getAPIKeyTest', function () {
       security,
     });
 
-    // expect(security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalledTimes(1);
     expect(security.authc.apiKeys.create).toHaveBeenCalledTimes(1);
     expect(security.authc.apiKeys.create).toHaveBeenCalledWith(
       {},
