@@ -276,21 +276,13 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       },
       {
         field: 'file.hash.md5',
-        value: [
-          'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
-          '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
-          'FCDE2B2EDBA56BF408601FB721FE9B5C338D10EE429EA04FAE5511B68FBF8FB9',
-        ],
+        value: ['741462ab431a22233C787BAAB9B653C7'],
         type: 'match_any',
         operator: 'included',
       },
       {
         field: 'file.hash.sha1',
-        value: [
-          'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
-          '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
-          'FCDE2B2EDBA56BF408601FB721FE9B5C338D10EE429EA04FAE5511B68FBF8FB9',
-        ],
+        value: ['aedb279e378BED6C2DB3C9DC9e12ba635e0b391c'],
         type: 'match_any',
         operator: 'included',
       },

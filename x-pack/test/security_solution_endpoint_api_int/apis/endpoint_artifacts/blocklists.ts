@@ -173,6 +173,25 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/invalid hash/));
           });
 
+          it(`should error on [${blocklistApiCall.method}] if no values`, async () => {
+            const body = blocklistApiCall.getBody();
+
+            body.entries = [
+              {
+                field: 'file.hash.md5',
+                operator: 'included',
+                type: 'match_any',
+                value: [],
+              },
+            ];
+
+            await supertest[blocklistApiCall.method](blocklistApiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anErrorMessageWith(/Invalid value \"\[\]\"/));
+          });
+
           it(`should error on [${blocklistApiCall.method}] if signer is set for a non windows os entry item`, async () => {
             const body = blocklistApiCall.getBody();
 

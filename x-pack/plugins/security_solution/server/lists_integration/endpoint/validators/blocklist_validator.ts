@@ -6,7 +6,7 @@
  */
 
 import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { BaseValidator } from './base_validator';
@@ -18,11 +18,12 @@ import {
 import { isValidHash } from '../../../../common/endpoint/service/trusted_apps/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
-const FileHashField = schema.oneOf([
-  schema.literal('file.hash.md5'),
-  schema.literal('file.hash.sha1'),
-  schema.literal('file.hash.sha256'),
-]);
+const allowedHashes: Readonly<string[]> = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
+
+const FileHashField = schema.oneOf(
+  allowedHashes.map((hash) => schema.literal(hash)) as [Type<string>]
+);
+
 const FileExecutablePath = schema.literal('file.executable.caseless');
 const FileCodeSigner = schema.literal('file.Ext.code_signature');
 
@@ -58,7 +59,8 @@ const CommonEntrySchema = {
       schema.string({
         validate: (hash: string) =>
           isValidHash(hash) ? undefined : `invalid hash value [${hash}]`,
-      })
+      }),
+      { minSize: 1 }
     ),
     schema.conditional(
       schema.siblingRef('field'),
@@ -67,13 +69,15 @@ const CommonEntrySchema = {
         schema.string({
           validate: (pathValue: string) =>
             pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
-        })
+        }),
+        { minSize: 1 }
       ),
       schema.arrayOf(
         schema.string({
           validate: (signerValue: string) =>
             signerValue.length > 0 ? undefined : `invalid signer value [${signerValue}]`,
-        })
+        }),
+        { minSize: 1 }
       )
     )
   ),
@@ -90,7 +94,8 @@ const WindowsSignerEntrySchema = schema.object({
       value: schema.arrayOf(schema.string({ minLength: 1 })),
       type: schema.literal('match_any'),
       operator: schema.literal('included'),
-    })
+    }),
+    { minSize: 1 }
   ),
 });
 
@@ -111,7 +116,7 @@ const MacEntrySchema = schema.object({
 });
 
 // Hash entries validator method.
-const hashEntriesValidation = (entries: BlocklistConditionEntry[], allowedHashes: string[]) => {
+const hashEntriesValidation = (entries: BlocklistConditionEntry[]) => {
   const currentHashes = entries.map((entry) => entry.field);
   // If there are more hashes than allowed (three) then return an error
   if (currentHashes.length > allowedHashes.length) {
@@ -150,9 +155,8 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[], allowedHashes
 const entriesSchemaOptions = {
   minSize: 1,
   validate(entries: BlocklistConditionEntry[]) {
-    const allowedHashes = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
     if (allowedHashes.includes(entries[0].field)) {
-      return hashEntriesValidation(entries, allowedHashes);
+      return hashEntriesValidation(entries);
     } else {
       if (entries.length > 1) {
         return 'Only one entry is allowed when no using hash field type';
@@ -260,7 +264,7 @@ export class BlocklistValidator extends BaseValidator {
 
     await this.validateByPolicyItem(updatedItem);
 
-    return updatedItem as UpdateExceptionListItemOptions;
+    return _updatedItem;
   }
 
   private async validateBlocklistData(item: ExceptionItemLikeOptions): Promise<void> {
