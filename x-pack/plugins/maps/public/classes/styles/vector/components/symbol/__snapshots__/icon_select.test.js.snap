@@ -45,6 +45,7 @@ exports[`Should render icon select 1`] = `
       clickOutsideDisables={true}
     >
       <EuiSelectable
+        compressed={true}
         isPreFiltered={false}
         onChange={[Function]}
         options={
@@ -84,12 +85,6 @@ exports[`Should render icon select 1`] = `
       >
         <Component />
       </EuiSelectable>
-      <EuiButton
-        fullWidth={true}
-        onClick={[Function]}
-      >
-        Add custom icon
-      </EuiButton>
     </EuiFocusTrap>
   </EuiPopover>
 </Fragment>
@@ -141,6 +136,7 @@ exports[`Should render icon select with custom icons 1`] = `
       clickOutsideDisables={true}
     >
       <EuiSelectable
+        compressed={true}
         isPreFiltered={false}
         onChange={[Function]}
         options={
@@ -202,12 +198,6 @@ exports[`Should render icon select with custom icons 1`] = `
       >
         <Component />
       </EuiSelectable>
-      <EuiButton
-        fullWidth={true}
-        onClick={[Function]}
-      >
-        Add custom icon
-      </EuiButton>
     </EuiFocusTrap>
   </EuiPopover>
 </Fragment>

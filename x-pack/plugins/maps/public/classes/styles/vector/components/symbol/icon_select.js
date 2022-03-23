@@ -12,6 +12,7 @@ import {
   EuiFieldText,
   EuiPopover,
   EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiFocusTrap,
   keys,
   EuiSelectable,
@@ -35,9 +36,9 @@ export class IconSelect extends Component {
     isModalVisible: false,
   };
 
-  _handleSave = ({svg, cutoff, radius, label}) => {
+  _handleSave = ({ svg, cutoff, radius, label }) => {
     const symbolId = getCustomIconId();
-    const icons = {...this.props.customIcons};
+    const icons = { ...this.props.customIcons };
     icons[symbolId] = { symbolId, label, svg, cutoff, radius };
     this.props.onCustomIconsChange(icons);
     this._hideModal();
@@ -164,7 +165,7 @@ export class IconSelect extends Component {
             />
           ),
         });
-      };
+      }
     }
 
     if (customOptions.length)
@@ -176,11 +177,17 @@ export class IconSelect extends Component {
     const options = [...customOptions, ...makiOptions];
 
     return (
-      <EuiSelectable searchable options={options} onChange={this._onIconSelect}>
+      <EuiSelectable searchable options={options} onChange={this._onIconSelect} compressed={true}>
         {(list, search) => (
           <div style={{ width: '300px' }}>
             <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
+            <EuiPopoverFooter>
+              {' '}
+              <EuiButton fullWidth size="s" onClick={this._toggleModal}>
+                Add custom icon
+              </EuiButton>
+            </EuiPopoverFooter>
           </div>
         )}
       </EuiSelectable>
@@ -199,12 +206,7 @@ export class IconSelect extends Component {
           panelPaddingSize="s"
           display="block"
         >
-          <EuiFocusTrap clickOutsideDisables={true}>
-            {this._renderIconSelectable()}
-            <EuiButton fullWidth onClick={this._toggleModal}>
-              Add custom icon
-            </EuiButton>
-          </EuiFocusTrap>
+          <EuiFocusTrap clickOutsideDisables={true}>{this._renderIconSelectable()}</EuiFocusTrap>
         </EuiPopover>
         {this.state.isModalVisible ? (
           <CustomIconModal
