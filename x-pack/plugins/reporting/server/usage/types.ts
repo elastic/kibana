@@ -20,7 +20,7 @@ interface DocCount {
 }
 
 interface SizeBuckets {
-  sizes?: { values: SizePercentiles };
+  output_size?: { values: SizePercentiles };
 }
 
 interface ObjectTypeBuckets {
@@ -91,7 +91,7 @@ export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
-  sizes: SizePercentiles;
+  output_size: SizePercentiles;
   app: {
     search?: number;
     dashboard?: number;
