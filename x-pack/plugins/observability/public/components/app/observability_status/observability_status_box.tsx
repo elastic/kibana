@@ -31,6 +31,7 @@ export interface ObservabilityStatusBoxProps {
   learnMoreLink: string;
   goToAppTitle: string;
   goToAppLink: string;
+  weight: number;
 }
 
 export function ObservabilityStatusBox(props: ObservabilityStatusBoxProps) {

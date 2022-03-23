@@ -48,6 +48,7 @@ export function getColumns({
   kuery,
   agentName,
   latencyAggregationType,
+  detailedStatsLoading,
   detailedStatsData,
   comparisonEnabled,
   toggleRowDetails,
@@ -60,6 +61,7 @@ export function getColumns({
   kuery: string;
   agentName?: string;
   latencyAggregationType?: LatencyAggregationType;
+  detailedStatsLoading: boolean;
   detailedStatsData?: ServiceInstanceDetailedStatistics;
   comparisonEnabled?: boolean;
   toggleRowDetails: (selectedServiceNodeName: string) => void;
@@ -125,6 +127,7 @@ export function getColumns({
             color={currentPeriodColor}
             valueLabel={asMillisecondDuration(latency)}
             hideSeries={!shouldShowSparkPlots}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimestamp : undefined
@@ -158,6 +161,7 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asTransactionRate(throughput)}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimestamp : undefined
@@ -191,6 +195,7 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(errorRate, 1)}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimestamp : undefined
@@ -224,6 +229,7 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(cpuUsage, 1)}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimestamp : undefined
@@ -257,6 +263,7 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(memoryUsage, 1)}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimestamp : undefined

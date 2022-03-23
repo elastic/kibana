@@ -25,6 +25,8 @@ import { inputsActions } from '../../common/store/inputs';
 import { Network } from './network';
 import { NetworkRoutes } from './navigation';
 import { mockCasesContract } from '../../../../cases/public/mocks';
+import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
+import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_overview';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -76,6 +78,7 @@ const mockProps = {
 };
 
 const mockMapVisibility = jest.fn();
+const mockNavigateToApp = jest.fn();
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -90,6 +93,7 @@ jest.mock('../../common/lib/kibana', () => {
             siem: { crud_alerts: true, read_alerts: true },
             maps: mockMapVisibility(),
           },
+          navigateToApp: mockNavigateToApp,
         },
         storage: {
           get: () => true,
@@ -112,20 +116,27 @@ describe('Network page - rendering', () => {
   beforeAll(() => {
     mockMapVisibility.mockReturnValue({ show: true });
   });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   test('it renders the Setup Instructions text when no index is available', () => {
     mockUseSourcererDataView.mockReturnValue({
       selectedPatterns: [],
       indicesExist: false,
     });
 
-    const wrapper = mount(
+    mount(
       <TestProviders>
         <Router history={mockHistory}>
           <Network {...mockProps} />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
+      deepLinkId: SecurityPageName.landing,
+      path: getAppLandingUrl(),
+    });
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
@@ -134,7 +145,7 @@ describe('Network page - rendering', () => {
       indicesExist: true,
       indexPattern: {},
     });
-    const wrapper = mount(
+    mount(
       <TestProviders>
         <Router history={mockHistory}>
           <Network {...mockProps} />
@@ -142,7 +153,7 @@ describe('Network page - rendering', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
     });
   });
 

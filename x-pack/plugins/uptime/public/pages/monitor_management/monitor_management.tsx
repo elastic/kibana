@@ -7,15 +7,18 @@
 
 import React, { useEffect, useReducer, useCallback, Reducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '../../../../observability/public';
 import { ConfigKey } from '../../../common/runtime_types';
 import { getMonitors } from '../../state/actions';
 import { monitorManagementListSelector } from '../../state/selectors';
-import {
-  MonitorManagementList,
-  MonitorManagementListPageState,
-} from '../../components/monitor_management/monitor_list/monitor_list';
+import { MonitorManagementListPageState } from '../../components/monitor_management/monitor_list/monitor_list';
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
+import { useInlineErrors } from '../../components/monitor_management/hooks/use_inline_errors';
+import { MonitorListTabs } from '../../components/monitor_management/monitor_list/list_tabs';
+import { AllMonitors } from '../../components/monitor_management/monitor_list/all_monitors';
+import { InvalidMonitors } from '../../components/monitor_management/monitor_list/invalid_monitors';
+import { useInvalidMonitors } from '../../components/monitor_management/hooks/use_invalid_monitors';
 
 export const MonitorManagementPage: React.FC = () => {
   const [pageState, dispatchPageAction] = useReducer<typeof monitorManagementPageReducer>(
@@ -47,17 +50,48 @@ export const MonitorManagementPage: React.FC = () => {
 
   const { pageIndex, pageSize, sortField, sortOrder } = pageState as MonitorManagementListPageState;
 
+  const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
+  const { errorSummaries, loading, count } = useInlineErrors({
+    onlyInvalidMonitors: viewType === 'invalid',
+    sortField: pageState.sortField,
+    sortOrder: pageState.sortOrder,
+  });
+
   useEffect(() => {
-    dispatch(getMonitors({ page: pageIndex, perPage: pageSize, sortField, sortOrder }));
-  }, [dispatch, pageState, pageIndex, pageSize, sortField, sortOrder]);
+    if (viewType === 'all') {
+      dispatch(getMonitors({ page: pageIndex, perPage: pageSize, sortField, sortOrder }));
+    }
+  }, [dispatch, pageState, pageIndex, pageSize, sortField, sortOrder, viewType]);
+
+  const { data: monitorSavedObjects, loading: objectsLoading } = useInvalidMonitors(errorSummaries);
 
   return (
-    <MonitorManagementList
-      pageState={pageState}
-      monitorList={monitorList}
-      onPageStateChange={onPageStateChange}
-      onUpdate={onUpdate}
-    />
+    <>
+      <MonitorListTabs
+        invalidTotal={monitorSavedObjects?.length ?? 0}
+        onUpdate={onUpdate}
+        onPageStateChange={onPageStateChange}
+      />
+      {viewType === 'all' ? (
+        <AllMonitors
+          pageState={pageState}
+          monitorList={monitorList}
+          onPageStateChange={onPageStateChange}
+          onUpdate={onUpdate}
+          errorSummaries={errorSummaries}
+        />
+      ) : (
+        <InvalidMonitors
+          pageState={pageState}
+          monitorSavedObjects={monitorSavedObjects}
+          onPageStateChange={onPageStateChange}
+          onUpdate={onUpdate}
+          errorSummaries={errorSummaries}
+          invalidTotal={count ?? 0}
+          loading={Boolean(loading) || Boolean(objectsLoading)}
+        />
+      )}
+    </>
   );
 };
 
