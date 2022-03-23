@@ -71,6 +71,8 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
   margin: -12px !important;
 `;
 
+const ELASTIC_SECURITY_URL = `elastic.co/security`;
+
 export const LandingCards = memo(() => {
   const {
     http: {
@@ -80,7 +82,7 @@ export const LandingCards = memo(() => {
 
   const tooltipContent = (
     <EuiLink color="ghost" href="https://elastic.co/security" target="_blank">
-      {`elastic.co/security`}
+      {ELASTIC_SECURITY_URL}
     </EuiLink>
   );
 
