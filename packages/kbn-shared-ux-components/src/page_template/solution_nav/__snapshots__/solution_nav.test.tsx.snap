@@ -72,11 +72,7 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
       <React.Fragment>
         <FormattedMessage
           defaultMessage="{solutionName} Menu"
-<<<<<<< HEAD
           id="sharedUXComponents.solutionNav.mobileTitleText"
-=======
-          id="sharedUX.solutionNav.mobileTitleText"
->>>>>>> e5c0b4c43c1 ([SharedUX] Migrate PageTemplate > NoDataPage > SolutionNav)
           values={
             Object {
               "solutionName": "Solution",
@@ -161,11 +157,7 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
       <React.Fragment>
         <FormattedMessage
           defaultMessage="{solutionName} Menu"
-<<<<<<< HEAD
           id="sharedUXComponents.solutionNav.mobileTitleText"
-=======
-          id="sharedUX.solutionNav.mobileTitleText"
->>>>>>> e5c0b4c43c1 ([SharedUX] Migrate PageTemplate > NoDataPage > SolutionNav)
           values={
             Object {
               "solutionName": "Solution",
@@ -258,11 +250,7 @@ exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
         />
         <FormattedMessage
           defaultMessage="{solutionName} Menu"
-<<<<<<< HEAD
           id="sharedUXComponents.solutionNav.mobileTitleText"
-=======
-          id="sharedUX.solutionNav.mobileTitleText"
->>>>>>> e5c0b4c43c1 ([SharedUX] Migrate PageTemplate > NoDataPage > SolutionNav)
           values={
             Object {
               "solutionName": "Solution",
