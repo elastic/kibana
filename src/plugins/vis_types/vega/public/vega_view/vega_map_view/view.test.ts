@@ -29,10 +29,10 @@ import {
 } from '../../services';
 import { initVegaLayer, initTmsRasterLayer } from './layers';
 
-import { mapboxgl } from '@kbn/mapbox-gl';
+import { maplibregl } from '@kbn/mapbox-gl';
 
 jest.mock('@kbn/mapbox-gl', () => ({
-  mapboxgl: {
+  maplibregl: {
     setRTLTextPlugin: jest.fn(),
     Map: jest.fn().mockImplementation(() => ({
       getLayer: () => '',
@@ -158,7 +158,7 @@ describe('vega_map_view/view', () => {
       await vegaMapView.init();
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
-      expect(mapboxgl.Map).toHaveBeenCalledWith({
+      expect(maplibregl.Map).toHaveBeenCalledWith({
         style: {
           version: 8,
           sources: {},
@@ -182,7 +182,7 @@ describe('vega_map_view/view', () => {
       await vegaMapView.init();
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
-      expect(mapboxgl.Map).toHaveBeenCalledWith({
+      expect(maplibregl.Map).toHaveBeenCalledWith({
         style: {
           version: 8,
           sources: {},
@@ -204,7 +204,7 @@ describe('vega_map_view/view', () => {
       const vegaMapView = await createVegaMapView();
       await vegaMapView.init();
 
-      expect(mapboxgl.NavigationControl).toHaveBeenCalled();
+      expect(maplibregl.NavigationControl).toHaveBeenCalled();
     });
   });
 });

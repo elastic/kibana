@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Map, Style, MapboxOptions } from '@kbn/mapbox-gl';
+import type { Map, StyleSpecification, MapOptions } from '@kbn/mapbox-gl';
 
 import { View, parse } from 'vega';
 
-import { mapboxgl } from '@kbn/mapbox-gl';
+import { maplibregl } from '@kbn/mapbox-gl';
 
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
@@ -52,7 +52,7 @@ export class VegaMapView extends VegaBaseView {
     return Boolean(this._parser.mapConfig.zoomControl);
   }
 
-  private getMapParams(defaults: { maxZoom: number; minZoom: number }): Partial<MapboxOptions> {
+  private getMapParams(defaults: { maxZoom: number; minZoom: number }): Partial<MapOptions> {
     const { longitude, latitude, scrollWheelZoom } = this._parser.mapConfig;
     const { zoom, maxZoom, minZoom } = validateZoomSettings(
       this._parser.mapConfig,
@@ -82,8 +82,8 @@ export class VegaMapView extends VegaBaseView {
   }
 
   private async initMapContainer(vegaView: View) {
-    let style: Style = defaultMabBoxStyle;
-    let customAttribution: MapboxOptions['customAttribution'] = [];
+    let style: StyleSpecification = defaultMabBoxStyle;
+    let customAttribution: MapOptions['customAttribution'] = [];
     const zoomSettings = {
       minZoom: defaultMapConfig.minZoom,
       maxZoom: defaultMapConfig.maxZoom,
@@ -105,7 +105,7 @@ export class VegaMapView extends VegaBaseView {
       zoomSettings.maxZoom = defaultMapConfig.maxZoom;
       zoomSettings.minZoom = defaultMapConfig.minZoom;
       customAttribution = this._serviceSettings.getAttributionsFromTMSServce(tmsService);
-      style = (await tmsService.getVectorStyleSheet()) as Style;
+      style = (await tmsService.getVectorStyleSheet()) as StyleSpecification;
     } else {
       const config = this._serviceSettings.getTileMapConfig();
       customAttribution = config.options.attribution;
@@ -116,7 +116,7 @@ export class VegaMapView extends VegaBaseView {
 
     // For the correct geration of the PDF/PNG report, we must wait until the map is fully rendered.
     return new Promise((resolve) => {
-      const mapBoxInstance = new mapboxgl.Map({
+      const mapBoxInstance = new maplibregl.Map({
         style,
         customAttribution,
         container: this._$container.get(0),
@@ -147,7 +147,7 @@ export class VegaMapView extends VegaBaseView {
 
   private initControls(mapBoxInstance: Map) {
     if (this.shouldShowZoomControl) {
-      mapBoxInstance.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
+      mapBoxInstance.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
     }
 
     // disable map rotation using right click + drag
