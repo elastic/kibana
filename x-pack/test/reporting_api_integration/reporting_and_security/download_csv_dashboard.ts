@@ -394,7 +394,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await kibanaServer.importExport.unload(kbnArchive);
         await kibanaServer.savedObjects.cleanStandardList();
-
       });
     });
 
