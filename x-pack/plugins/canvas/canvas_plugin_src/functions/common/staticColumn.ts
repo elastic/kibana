@@ -58,7 +58,7 @@ export function staticColumn(): ExpressionFunctionDefinition<
       }
 
       return {
-        type: 'datatable',
+        ...input,
         columns,
         rows,
       };
