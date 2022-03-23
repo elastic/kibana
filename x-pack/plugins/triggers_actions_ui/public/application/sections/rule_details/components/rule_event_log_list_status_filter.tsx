@@ -45,6 +45,7 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
         closePopover={() => setIsPopoverOpen(false)}
         button={
           <EuiFilterButton
+            data-test-subj="ruleEventLogStatusFilterButton"
             iconType="arrowDown"
             hasActiveFilters={selectedOptions.length > 0}
             numActiveFilters={selectedOptions.length}
@@ -63,6 +64,7 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
             return (
               <EuiFilterSelectItem
                 key={status}
+                data-test-subj={`ruleEventLogStatusFilter-${status}`}
                 onClick={onFilterItemClick(status)}
                 checked={selectedOptions.includes(status) ? 'on' : undefined}
               >

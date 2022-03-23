@@ -9,11 +9,14 @@ import React from 'react';
 import uuid from 'uuid';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { useKibana } from '../../../../common/lib/kibana';
+
 import { EuiSuperDatePicker, EuiDataGrid } from '@elastic/eui';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogList, DEFAULT_INITIAL_VISIBLE_COLUMNS } from './rule_event_log_list';
 import { Rule } from '../../../../types';
 
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
 
 const mockLogResponse: any = {
@@ -119,7 +122,18 @@ const loadExecutionLogAggregationsMock = jest.fn();
 
 describe('rule_event_log_list', () => {
   beforeEach(() => {
-    loadExecutionLogAggregationsMock.mockReset();
+    jest.clearAllMocks();
+    useKibanaMock().services.uiSettings.get = jest.fn().mockImplementation((value: string) => {
+      if (value === 'timepicker:quickRanges') {
+        return [
+          {
+            from: 'now-15m',
+            to: 'now',
+            display: 'Last 15 minutes',
+          },
+        ];
+      }
+    });
     loadExecutionLogAggregationsMock.mockResolvedValue(mockLogResponse);
   });
 
@@ -278,5 +292,212 @@ describe('rule_event_log_list', () => {
         perPage: 10,
       })
     );
+  });
+
+  it('can filter by execution log outcome status', async () => {
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Filter by success
+    wrapper.find('[data-test-subj="ruleEventLogStatusFilterButton"]').at(0).simulate('click');
+
+    wrapper.find('[data-test-subj="ruleEventLogStatusFilter-success"]').at(0).simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        id: mockRule.id,
+        sort: [],
+        filter: ['success'],
+        page: 0,
+        perPage: 10,
+      })
+    );
+
+    // Filter by failure as well
+    wrapper.find('[data-test-subj="ruleEventLogStatusFilterButton"]').at(0).simulate('click');
+
+    wrapper.find('[data-test-subj="ruleEventLogStatusFilter-failure"]').at(0).simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        id: mockRule.id,
+        sort: [],
+        filter: ['success', 'failure'],
+        page: 0,
+        perPage: 10,
+      })
+    );
+  });
+
+  it('can paginate', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 100,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('.euiPagination').exists()).toBeTruthy();
+
+    // Paginate to the next page
+    wrapper.find('.euiPagination .euiPagination__item a').at(0).simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        id: mockRule.id,
+        sort: [],
+        filter: [],
+        page: 1,
+        perPage: 10,
+      })
+    );
+
+    // Change the page size
+    wrapper.find('[data-test-subj="tablePaginationPopoverButton"] button').simulate('click');
+
+    wrapper.find('[data-test-subj="tablePagination-50-rows"] button').simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        id: mockRule.id,
+        sort: [],
+        filter: [],
+        page: 0,
+        perPage: 50,
+      })
+    );
+  });
+
+  it('can filter by start and end date', async () => {
+    const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        id: mockRule.id,
+        sort: [],
+        filter: [],
+        page: 0,
+        perPage: 10,
+        dateStart: '1969-12-30T19:00:00-05:00',
+        dateEnd: '1969-12-31T19:00:00-05:00',
+      })
+    );
+
+    wrapper
+      .find('[data-test-subj="superDatePickerToggleQuickMenuButton"] button')
+      .simulate('click');
+
+    wrapper
+      .find('[data-test-subj="superDatePickerCommonlyUsed_Last_15 minutes"] button')
+      .simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        id: mockRule.id,
+        sort: [],
+        filter: [],
+        page: 0,
+        perPage: 10,
+        dateStart: '1969-12-31T18:45:00-05:00',
+        dateEnd: '1969-12-31T19:00:00-05:00',
+      })
+    );
+
+    nowMock.mockRestore();
+  });
+
+  it('can save display columns to localStorage', async () => {
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(
+      JSON.parse(
+        localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
+      )
+    ).toEqual(DEFAULT_INITIAL_VISIBLE_COLUMNS);
+
+    wrapper.find('[data-test-subj="dataGridColumnSelectorButton"] button').simulate('click');
+
+    wrapper
+      .find(
+        '[data-test-subj="dataGridColumnSelectorToggleColumnVisibility-num_active_alerts"] button'
+      )
+      .simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(
+      JSON.parse(
+        localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
+      )
+    ).toEqual([...DEFAULT_INITIAL_VISIBLE_COLUMNS, 'num_active_alerts']);
   });
 });
