@@ -92,16 +92,27 @@ export class Plugin
       order: 8001,
       path: '/alerts',
       navLinkStatus: AppNavLinkStatus.hidden,
+      deepLinks: [
+        {
+          id: 'rules',
+          title: i18n.translate('xpack.observability.rulesLinkTitle', {
+            defaultMessage: 'Rules',
+          }),
+          order: 8002,
+          path: '/alerts/rules',
+          navLinkStatus: AppNavLinkStatus.hidden,
+        },
+      ],
     },
-    {
-      id: 'rules',
-      title: i18n.translate('xpack.observability.rulesLinkTitle', {
-        defaultMessage: 'Rules',
-      }),
-      order: 8002,
-      path: '/rules',
-      navLinkStatus: AppNavLinkStatus.hidden,
-    },
+    // {
+    //   id: 'rules',
+    //   title: i18n.translate('xpack.observability.rulesLinkTitle', {
+    //     defaultMessage: 'Rules',
+    //   }),
+    //   order: 8002,
+    //   path: '/rules',
+    //   navLinkStatus: AppNavLinkStatus.hidden,
+    // },
     getCasesDeepLinks({
       basePath: casesPath,
       extend: {

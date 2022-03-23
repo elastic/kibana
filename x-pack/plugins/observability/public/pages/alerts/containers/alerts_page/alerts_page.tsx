@@ -142,7 +142,7 @@ function AlertsPage() {
   }, []);
 
   const manageRulesHref = config.unsafe.rules.enabled
-    ? http.basePath.prepend('/app/observability/rules')
+    ? http.basePath.prepend('/app/observability/alerts/rules')
     : http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {

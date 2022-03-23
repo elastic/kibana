@@ -19,6 +19,7 @@ import {
   EuiFieldSearch,
   OnRefreshChangeProps,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -121,6 +122,12 @@ export function RulesPage() {
   }, [refreshInterval, reload, isPaused]);
 
   useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+      href: http.basePath.prepend('/app/observability/alerts'),
+    },
     {
       text: RULES_BREADCRUMB_TEXT,
     },
