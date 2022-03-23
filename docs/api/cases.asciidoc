@@ -10,9 +10,9 @@ these APIs:
 * {security-guide}/cases-api-delete-all-comments.html[Delete all comments]
 * {security-guide}/cases-api-delete-comment.html[Delete comment]
 * {security-guide}/cases-api-find-alert.html[Find all alerts attached to a case]
-* {security-guide}/cases-api-find-cases.html[Find cases]
+* <<cases-api-find-cases>>
 * {security-guide}/cases-api-find-cases-by-alert.html[Find cases by alert]
-* {security-guide}/cases-api-find-connectors.html[Find connectors]
+* <<cases-api-find-connectors>>
 * {security-guide}/cases-api-get-case-activity.html[Get all case activity]
 * {security-guide}/cases-api-get-all-case-comments.html[Get all case comments]
 * {security-guide}/cases-api-get-case.html[Get case]
@@ -27,5 +27,10 @@ these APIs:
 * <<cases-api-update>>
 * {security-guide}/cases-api-update-comment.html[Update comment]
 
+//CREATE
 include::cases/cases-api-create.asciidoc[leveloffset=+1]
+//FIND
+include::cases/cases-api-find-cases.asciidoc[leveloffset=+1]
+include::cases/cases-api-find-connectors.asciidoc[leveloffset=+1]
+//UPDATE
 include::cases/cases-api-update.asciidoc[leveloffset=+1]
