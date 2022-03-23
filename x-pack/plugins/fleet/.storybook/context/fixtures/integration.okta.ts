@@ -104,6 +104,7 @@ export const item: GetInfoResponse['item'] = {
       index_pattern: [],
       lens: [],
       ml_module: [],
+      osquery_pack_asset: [],
       security_rule: [],
       tag: [],
     },
@@ -125,7 +126,6 @@ export const item: GetInfoResponse['item'] = {
       index_template: [],
       transform: [],
       ml_model: [],
-      osquery_pack_asset: [],
     },
   },
   policy_templates: [

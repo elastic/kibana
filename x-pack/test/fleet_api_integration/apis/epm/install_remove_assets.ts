@@ -447,6 +447,11 @@ const expectAssetsInstalled = ({
       id: 'sample_security_rule',
     });
     expect(resSecurityRule.id).equal('sample_security_rule');
+    const resOsqueryPackAsset = await kibanaServer.savedObjects.get({
+      type: 'osquery-pack-asset',
+      id: 'sample_osquery_pack_asset',
+    });
+    expect(resOsqueryPackAsset.id).equal('sample_osquery_pack_asset');
     const resTag = await kibanaServer.savedObjects.get({
       type: 'tag',
       id: 'sample_tag',
@@ -525,6 +530,10 @@ const expectAssetsInstalled = ({
         {
           id: 'sample_security_rule',
           type: 'security-rule',
+        },
+        {
+          id: 'sample_osquery_pack_asset',
+          type: 'osquery-pack-asset',
         },
         {
           id: 'sample_tag',
