@@ -102,6 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show correct values for fields with fieldFormatters', async () => {
+        await filterBar.removeAllFilters();
         const expectedTexts = ['2,904', 'win 8: Count', '0B', 'win 8: Min bytes'];
 
         await PageObjects.visEditor.selectAggregation('Terms');
@@ -117,8 +118,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(expectedTexts).to.eql(metricValue);
         });
       });
-
-      afterEach(async () => await filterBar.removeAllFilters());
     });
   });
 }

@@ -253,6 +253,7 @@ export function QueryBarMenu({
       icon: 'filter',
       panel: 2,
       disabled: !Boolean(filters && filters.length > 0),
+      'data-test-subj': 'filter-sets-applyToAllFilters',
     },
     {
       name: i18n.translate('data.filter.options.clearllFiltersButtonLabel', {
@@ -260,7 +261,7 @@ export function QueryBarMenu({
       }),
       disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
       icon: 'crossInACircleFilled',
-      'data-test-subj': 'saved-query-management-removeAllFilters',
+      'data-test-subj': 'filter-sets-removeAllFilters',
       onClick: () => {
         closePopover();
         onQueryBarSubmit({
@@ -406,6 +407,7 @@ export function QueryBarMenu({
             defaultMessage: 'Enable all',
           }),
           icon: 'eye',
+          'data-test-subj': 'filter-sets-enableAllFilters',
           onClick: () => {
             closePopover();
             onEnableAll();
@@ -415,6 +417,7 @@ export function QueryBarMenu({
           name: i18n.translate('data.filter.options.disableAllFiltersButtonLabel', {
             defaultMessage: 'Disable all',
           }),
+          'data-test-subj': 'filter-sets-disableAllFilters',
           icon: 'eyeClosed',
           onClick: () => {
             closePopover();
@@ -425,6 +428,7 @@ export function QueryBarMenu({
           name: i18n.translate('data.filter.options.invertNegatedFiltersButtonLabel', {
             defaultMessage: 'Invert inclusion',
           }),
+          'data-test-subj': 'filter-sets-invertAllFilters',
           icon: 'invert',
           onClick: () => {
             closePopover();
@@ -435,6 +439,7 @@ export function QueryBarMenu({
           name: i18n.translate('data.filter.options.pinAllFiltersButtonLabel', {
             defaultMessage: 'Pin all',
           }),
+          'data-test-subj': 'filter-sets-pinAllFilters',
           icon: 'pin',
           onClick: () => {
             closePopover();
@@ -445,6 +450,7 @@ export function QueryBarMenu({
           name: i18n.translate('data.filter.options.unpinAllFiltersButtonLabel', {
             defaultMessage: 'Unpin all',
           }),
+          'data-test-subj': 'filter-sets-unpinAllFilters',
           icon: 'pin',
           onClick: () => {
             closePopover();
