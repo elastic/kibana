@@ -10947,6 +10947,68 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.getRandomSamplerBucketAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "getRandomSamplerBucketAgg",
+        "description": [],
+        "signature": [
+          "({ calculateBounds, isDefaultTimezone, getConfig, }: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.DateHistogramBucketAggDependencies",
+            "text": "DateHistogramBucketAggDependencies"
+          },
+          ") => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IBucketDateHistogramAggConfig",
+            "text": "IBucketDateHistogramAggConfig"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/random_sampler.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getDateHistogramBucketAgg.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  calculateBounds,\n  isDefaultTimezone,\n  getConfig,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.DateHistogramBucketAggDependencies",
+                "text": "DateHistogramBucketAggDependencies"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+
+      {
+        "parentPluginId": "data",
         "id": "def-common.getDateHistogramMetaDataByDatatableColumn",
         "type": "Function",
         "tags": [],

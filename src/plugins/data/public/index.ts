@@ -139,7 +139,7 @@ import {
   tabifyGetColumns,
   checkColumnForPrecisionError,
 } from '../common';
-
+export { tabifyAggRandomSamplingResponse } from '../common/search/tabify/tabify';
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
 
 export type {
@@ -297,7 +297,6 @@ export { getTime } from '../common';
 export type { SavedObject } from '../common';
 
 export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';
-
 export type { ApplyGlobalFilterActionContext } from './actions';
 export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 export { APPLY_FILTER_TRIGGER } from './triggers';

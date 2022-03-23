@@ -30,7 +30,7 @@ import { inferTimeZone } from '../utils';
 /** @internal */
 export type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;
 
-const updateTimeBuckets = (
+export const updateTimeBuckets = (
   agg: IBucketDateHistogramAggConfig,
   calculateBounds: CalculateBoundsFn,
   customBuckets?: IBucketDateHistogramAggConfig['buckets']

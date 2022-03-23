@@ -89,7 +89,7 @@ export function DiscoverLayout({
     spaces,
     inspector,
   } = useDiscoverServices();
-  const { main$, charts$, totalHits$ } = savedSearchData$;
+  const { main$, charts$, randomSamplingCharts$, totalHits$ } = savedSearchData$;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const viewMode = useMemo(() => {
@@ -316,6 +316,7 @@ export function DiscoverLayout({
                       resetSavedSearch={resetSavedSearch}
                       savedSearch={savedSearch}
                       savedSearchDataChart$={charts$}
+                      savedSearchRandomSamplingCharts$={randomSamplingCharts$}
                       savedSearchDataTotalHits$={totalHits$}
                       stateContainer={stateContainer}
                       indexPattern={indexPattern}

@@ -22,7 +22,11 @@ import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
-import { DataCharts$, DataTotalHits$ } from '../../utils/use_saved_search';
+import {
+  DataCharts$,
+  DataRandomSamplingCharts$,
+  DataTotalHits$,
+} from '../../utils/use_saved_search';
 import { useChartPanels } from './use_chart_panels';
 import { VIEW_MODE, DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { SHOW_FIELD_STATISTICS } from '../../../../../common';
@@ -39,6 +43,7 @@ export function DiscoverChart({
   resetSavedSearch,
   savedSearch,
   savedSearchDataChart$,
+  savedSearchRandomSamplingCharts$,
   savedSearchDataTotalHits$,
   stateContainer,
   indexPattern,
@@ -50,6 +55,7 @@ export function DiscoverChart({
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
   savedSearchDataChart$: DataCharts$;
+  savedSearchRandomSamplingCharts$: DataRandomSamplingCharts$;
   savedSearchDataTotalHits$: DataTotalHits$;
   stateContainer: GetStateReturn;
   indexPattern: DataView;
@@ -214,6 +220,24 @@ export function DiscoverChart({
           >
             <DiscoverHistogramMemoized
               savedSearchData$={savedSearchDataChart$}
+              timefilterUpdateHandler={timefilterUpdateHandler}
+            />
+          </section>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+      )}
+      {isTimeBased && !hideChart && (
+        <EuiFlexItem grow={false}>
+          <section
+            ref={(element) => (chartRef.current.element = element)}
+            tabIndex={-1}
+            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
+              defaultMessage: '[Random] Histogram of found documents',
+            })}
+            className="dscTimechart"
+          >
+            <DiscoverHistogramMemoized
+              savedSearchData$={savedSearchRandomSamplingCharts$}
               timefilterUpdateHandler={timefilterUpdateHandler}
             />
           </section>

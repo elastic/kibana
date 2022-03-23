@@ -93,6 +93,12 @@ export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchSta
     chartData: undefined,
     bucketInterval: undefined,
   });
+  data.randomSamplingCharts$.next({
+    fetchStatus: initialFetchStatus,
+    chartData: undefined,
+    bucketInterval: undefined,
+  });
+
   data.totalHits$.next({
     fetchStatus: initialFetchStatus,
     result: undefined,

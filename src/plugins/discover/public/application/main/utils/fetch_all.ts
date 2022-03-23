@@ -17,7 +17,7 @@ import { updateSearchSource } from './update_search_source';
 import type { SavedSearch, SortOrder } from '../../../services/saved_searches';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
-import { fetchChart } from './fetch_chart';
+import { fetchChart, fetchChartWithRandomSampling } from './fetch_chart';
 import { ISearchSource } from '../../../../../data/public';
 import { Adapters } from '../../../../../inspector';
 import { AppState } from '../services/discover_state';
@@ -101,6 +101,7 @@ export function fetchAll(
     sendLoadingMsg(dataSubjects.documents$);
     sendLoadingMsg(dataSubjects.totalHits$);
     sendLoadingMsg(dataSubjects.charts$);
+    sendLoadingMsg(dataSubjects.randomSamplingCharts$);
 
     const isChartVisible =
       !hideChart && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP;
@@ -108,6 +109,10 @@ export function fetchAll(
     // Start fetching all required requests
     const documents = fetchDocuments(searchSource.createCopy(), fetchDeps);
     const charts = isChartVisible ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
+    const chartsRandomSampling = isChartVisible
+      ? fetchChartWithRandomSampling(searchSource.createCopy(), fetchDeps)
+      : undefined;
+
     const totalHits = !isChartVisible
       ? fetchTotalHits(searchSource.createCopy(), fetchDeps)
       : undefined;
@@ -169,6 +174,18 @@ export function fetchAll(
       })
       .catch(sendErrorTo(dataSubjects.charts$, dataSubjects.totalHits$));
 
+    chartsRandomSampling
+      ?.then((chart) => {
+        dataSubjects.randomSamplingCharts$.next({
+          fetchStatus: FetchStatus.COMPLETE,
+          chartData: chart.chartData,
+          bucketInterval: chart.bucketInterval,
+        });
+
+        checkHitCount(chart.totalHits);
+      })
+      .catch(sendErrorTo(dataSubjects.charts$, dataSubjects.totalHits$));
+
     totalHits
       ?.then((hitCount) => {
         dataSubjects.totalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: hitCount });
@@ -177,7 +194,7 @@ export function fetchAll(
       .catch(sendErrorTo(dataSubjects.totalHits$));
 
     // Return a promise that will resolve once all the requests have finished or failed
-    return Promise.allSettled([documents, charts, totalHits]).then(() => {
+    return Promise.allSettled([documents, charts, chartsRandomSampling, totalHits]).then(() => {
       // Send a complete message to main$ once all queries are done and if main$
       // is not already in an ERROR state, e.g. because the document query has failed.
       // This will only complete main$, if it hasn't already been completed previously

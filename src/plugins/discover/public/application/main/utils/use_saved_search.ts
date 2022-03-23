@@ -30,6 +30,7 @@ export interface SavedSearchData {
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
   charts$: DataCharts$;
+  randomSamplingCharts$: DataCharts$;
   availableFields$: AvailableFields$;
 }
 
@@ -43,6 +44,8 @@ export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
+export type DataRandomSamplingCharts$ = BehaviorSubject<DataChartsMessage>;
+
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
@@ -122,6 +125,10 @@ export const useSavedSearch = ({
 
   const charts$: DataCharts$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
 
+  const randomSamplingCharts$: DataCharts$ = useBehaviorSubject({
+    fetchStatus: initialFetchStatus,
+  });
+
   const availableFields$: AvailableFields$ = useBehaviorSubject({
     fetchStatus: initialFetchStatus,
   });
@@ -132,9 +139,10 @@ export const useSavedSearch = ({
       documents$,
       totalHits$,
       charts$,
+      randomSamplingCharts$,
       availableFields$,
     };
-  }, [main$, charts$, documents$, totalHits$, availableFields$]);
+  }, [main$, charts$, randomSamplingCharts$, documents$, totalHits$, availableFields$]);
 
   /**
    * The observable to trigger data fetching in UI

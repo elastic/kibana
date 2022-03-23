@@ -9,8 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './bucket_agg_type';
 import { BaseAggParams } from '../types';
-import { aggSamplerFnName } from './sampler_fn';
 import { aggRandomSamplerFnName } from './random_sampler_fn';
+import { TimeBuckets } from './lib/time_buckets';
+import { UI_SETTINGS } from '../../../constants';
+import { updateTimeBuckets } from './date_histogram';
+import { AggTypesDependencies } from '../agg_types';
 
 export const RANDOM_SAMPLER_AGG_NAME = 'random_sampler';
 
@@ -26,8 +29,28 @@ export interface AggParamsRandomSampler extends BaseAggParams {
 /**
  * A filtering aggregation used to limit any sub aggregations' processing to a sample of the top-scoring documents.
  */
-export const getRandomSamplerBucketAgg = () =>
-  new BucketAggType({
+export const getRandomSamplerBucketAgg = (deps: AggTypesDependencies) => {
+  if (!deps) {
+    return new BucketAggType({
+      name: RANDOM_SAMPLER_AGG_NAME,
+      title,
+      customLabels: false,
+      expressionName: aggRandomSamplerFnName,
+      params: [
+        {
+          name: 'probability',
+          type: 'number',
+        },
+        {
+          name: 'aggs',
+          type: 'schema',
+        },
+      ],
+    });
+  }
+  const { calculateBounds, getConfig } = deps;
+
+  return new BucketAggType({
     name: RANDOM_SAMPLER_AGG_NAME,
     title,
     customLabels: false,
@@ -42,4 +65,27 @@ export const getRandomSamplerBucketAgg = () =>
         type: 'schema',
       },
     ],
+    decorateAggConfig() {
+      let buckets: any;
+
+      return {
+        buckets: {
+          configurable: true,
+          get() {
+            if (buckets) return buckets;
+
+            buckets = new TimeBuckets({
+              'histogram:maxBars': getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+              'histogram:barTarget': getConfig(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+              dateFormat: getConfig('dateFormat'),
+              'dateFormat:scaled': getConfig('dateFormat:scaled'),
+            });
+            updateTimeBuckets(this, calculateBounds, buckets);
+
+            return buckets;
+          },
+        } as any,
+      };
+    },
   });
+};

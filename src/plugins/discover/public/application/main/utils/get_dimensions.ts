@@ -26,6 +26,51 @@ export function getDimensions(
       ) as HistogramParamsBounds)
     : null;
   const buckets = search.aggs.isDateHistogramBucketAggConfig(agg) ? agg.buckets : undefined;
+  if (!buckets || !bounds) {
+    return;
+  }
+
+  const { esUnit, esValue } = buckets.getInterval();
+  return {
+    x: {
+      accessor: 0,
+      label: agg.makeLabel(),
+      format: agg.toSerializedFieldFormat(),
+      params: {
+        date: true,
+        interval: moment.duration(esValue, esUnit),
+        intervalESValue: esValue,
+        intervalESUnit: esUnit,
+        format: buckets.getScaledDateFormat(),
+        bounds,
+      },
+    },
+    y: {
+      accessor: 1,
+      format: metric.toSerializedFieldFormat(),
+      label: metric.makeLabel(),
+    },
+  };
+}
+
+export function getDimensionsRandomSampling(
+  aggs: IAggConfigs,
+  data: DataPublicPluginStart
+): Dimensions | undefined {
+  const [metric, agg] = aggs.aggs;
+  // console.log('aggs', aggs);
+
+  const { from, to } = data.query.timefilter.timefilter.getTime();
+  agg.params.timeRange = {
+    from: dateMath.parse(from),
+    to: dateMath.parse(to, { roundUp: true }),
+  };
+  const bounds = agg.params.timeRange
+    ? (data.query.timefilter.timefilter.calculateBounds(
+        agg.params.timeRange
+      ) as HistogramParamsBounds)
+    : null;
+  const buckets = search.aggs.isDateHistogramBucketAggConfig(agg) ? agg.buckets : undefined;
 
   if (!buckets || !bounds) {
     return;

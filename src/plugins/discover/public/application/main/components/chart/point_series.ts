@@ -99,5 +99,45 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions): Char
       y: row[yAccessor] as number,
     }));
 
+  console.log('nonsampling', chart);
+  return chart;
+};
+
+export const buildPointSeriesDataRandomSampling = (table: Table, dimensions: Dimensions): Chart => {
+  const { x, y } = dimensions;
+  const yAccessor = 'col-2-1';
+  const xAccessor = table.columns[y.accessor].id;
+  const chart = {} as Chart;
+
+  chart.xAxisOrderedValues = uniq(table.rows.map((r) => r[xAccessor] as number));
+  chart.xAxisFormat = {
+    id: 'date',
+    params: {
+      pattern: 'YYYY-MM-DD HH:mm',
+    },
+  };
+  chart.xAxisLabel = table.columns[x.accessor].name;
+  chart.yAxisFormat = y.format;
+  const { intervalESUnit, intervalESValue, interval, bounds } = x.params;
+  chart.ordered = {
+    date: true,
+    interval,
+    intervalESUnit,
+    intervalESValue,
+    min: bounds.min,
+    max: bounds.max,
+  };
+
+  chart.yAxisLabel = table.columns[y.accessor].name;
+
+  chart.values = table.rows
+    .filter((row) => row && row[yAccessor] !== 'NaN')
+    .map((row) => ({
+      x: row[xAccessor] as number,
+      y: row[yAccessor] as number,
+    }));
+
+  console.log('sampling', chart);
+
   return chart;
 };

@@ -110,7 +110,6 @@ export class AggsService {
     // initialize each agg type and store in memory
     types.getAll().buckets.forEach((type) => {
       const agg = type(aggTypesDependencies);
-      console.log('agg.name, agg', agg.name, agg);
 
       this.initializedAggTypes.set(agg.name, agg);
     });
