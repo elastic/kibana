@@ -22,7 +22,9 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
+import { getAlertUrlTransaction } from '../../../common/utils/formatters';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
 import { KibanaRequest } from '../../../../../../src/core/server';
@@ -63,6 +65,7 @@ export function registerTransactionDurationAnomalyAlertType({
   ruleDataClient,
   alerting,
   ml,
+  basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     logger,
@@ -86,6 +89,7 @@ export function registerTransactionDurationAnomalyAlertType({
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.reason,
+          apmActionVariables.viewInAppUrl,
         ],
       },
       producer: 'apm',
@@ -218,6 +222,19 @@ export function registerTransactionDurationAnomalyAlertType({
             windowSize: params.windowSize,
             windowUnit: params.windowUnit,
           });
+
+          const relativeViewInAppUrl = getAlertUrlTransaction(
+            serviceName,
+            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
+            transactionType
+          );
+
+          const viewInAppUrl = basePath.publicBaseUrl
+            ? new URL(
+                basePath.prepend(relativeViewInAppUrl),
+                basePath.publicBaseUrl
+              ).toString()
+            : relativeViewInAppUrl;
           services
             .alertWithLifecycle({
               id: [
@@ -246,6 +263,7 @@ export function registerTransactionDurationAnomalyAlertType({
               threshold: selectedOption?.label,
               triggerValue: severityLevel,
               reason: reasonMessage,
+              viewInAppUrl,
             });
         });
 
