@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { Logger } from 'kibana/server';
+import { IBasePath, Logger } from 'kibana/server';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../alerting/server';
 import { IRuleDataClient } from '../../../../rule_registry/server';
 import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
@@ -22,6 +22,7 @@ export interface RegisterRuleDependencies {
   alerting: AlertingPluginSetupContract;
   config$: Observable<APMConfig>;
   logger: Logger;
+  basePath: IBasePath;
 }
 
 export function registerApmAlerts(dependencies: RegisterRuleDependencies) {
