@@ -6,8 +6,8 @@
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
-import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
+import { setMockActions, setMockValues } from '../../../../../../__mocks__/kea_logic';
+import { sourceConfigData } from '../../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
@@ -18,8 +18,8 @@ import { EuiSteps } from '@elastic/eui';
 import {
   WorkplaceSearchPageTemplate,
   PersonalDashboardLayout,
-} from '../../../../components/layout';
-import { staticSourceData } from '../../source_data';
+} from '../../../../../components/layout';
+import { staticSourceData } from '../../../source_data';
 
 import { ExternalConnectorConfig } from './external_connector_config';
 import { ExternalConnectorFormFields } from './external_connector_form_fields';

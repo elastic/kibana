@@ -10,18 +10,19 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
   mockKibanaValues,
-} from '../../../../../__mocks__/kea_logic';
-import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
+} from '../../../../../../__mocks__/kea_logic';
+import { sourceConfigData } from '../../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
+import { itShowsServerErrorAsFlashMessage } from '../../../../../../test_helpers';
 
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
 
-import { AddSourceLogic, SourceConfigData } from './add_source_logic';
+import { AddSourceLogic, SourceConfigData } from '../add_source_logic';
+
 import { ExternalConnectorLogic, ExternalConnectorValues } from './external_connector_logic';
 
 describe('ExternalConnectorLogic', () => {
