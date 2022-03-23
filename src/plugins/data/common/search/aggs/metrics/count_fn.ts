@@ -61,6 +61,13 @@ export const aggCount = (): FunctionDefinition => ({
           'Shift the time range for the metric by a set time, for example 1h or 7d. "previous" will use the closest time range from the date histogram or time range filter.',
       }),
     },
+    emptyAsNull: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.metrics.emptyAsNull.help', {
+        defaultMessage:
+          'If set to true, a missing value is treated as null in the resulting data table. If set to false, a "zero" is filled in',
+      }),
+    },
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;

@@ -52,7 +52,7 @@ import { getMlGlobalServices } from '../../../../app';
 import { ListingPageUrlState } from '../../../../../../common/types/common';
 import { getDefaultDFAListState } from '../../../../data_frame_analytics/pages/analytics_management/page';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
-import type { JobType, TrainedModelType } from '../../../../../../common/types/saved_objects';
+import type { JobType, MlSavedObjectType } from '../../../../../../common/types/saved_objects';
 import type { FieldFormatsStart } from '../../../../../../../../../src/plugins/field_formats/public';
 
 interface Tab extends EuiTabbedContentTab {
@@ -170,7 +170,7 @@ export const JobsListPage: FC<{
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
   const tabs = useTabs(isMlEnabledInSpace, spacesApi);
-  const [currentTabId, setCurrentTabId] = useState<JobType | TrainedModelType>('anomaly-detector');
+  const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
   const I18nContext = coreStart.i18n.Context;
   const theme$ = coreStart.theme.theme$;
 
