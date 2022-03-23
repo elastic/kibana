@@ -33,18 +33,6 @@ export const createMlAlertType = (
           }
           return validated;
         },
-        validateMutatedParams: (mutatedOject: unknown) => {
-          const mutatedRuleParams = mutatedOject as MachineLearningRuleParams;
-
-          if (mutatedRuleParams.immutable === true) {
-            throw new Error("Elastic rule can't be edited");
-          }
-
-          if ((mutatedOject as Record<string, unknown>).index) {
-            throw new Error('Machine learning rule does not have index pattern property');
-          }
-          return mutatedRuleParams;
-        },
       },
     },
     actionGroups: [

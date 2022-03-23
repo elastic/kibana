@@ -34,7 +34,6 @@ import { updateRulesBulkRoute } from '../lib/detection_engine/routes/rules/updat
 import { patchRulesBulkRoute } from '../lib/detection_engine/routes/rules/patch_rules_bulk_route';
 import { deleteRulesBulkRoute } from '../lib/detection_engine/routes/rules/delete_rules_bulk_route';
 import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/perform_bulk_action_route';
-import { performBulkEditPOCRoute } from '../lib/detection_engine/routes/rules/perform_bulk_edit_poc_route';
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { getRuleExecutionEventsRoute } from '../lib/detection_engine/routes/rules/get_rule_execution_events_route';
@@ -117,7 +116,6 @@ export const initRoutes = (
   patchRulesBulkRoute(router, ml, isRuleRegistryEnabled);
   deleteRulesBulkRoute(router, isRuleRegistryEnabled);
   performBulkActionRoute(router, ml, logger, isRuleRegistryEnabled);
-  performBulkEditPOCRoute(router, ml, logger, isRuleRegistryEnabled);
 
   getRuleExecutionEventsRoute(router);
 
