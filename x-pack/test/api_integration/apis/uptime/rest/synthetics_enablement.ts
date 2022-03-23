@@ -16,6 +16,10 @@ export default function ({ getService }: FtrProviderContext) {
     const supertest = getService('supertestWithoutAuth');
     const security = getService('security');
 
+    before(async () => {
+      await supertestWithAuth.delete(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true');
+    });
+
     describe('[GET] - /internal/uptime/service/enablement', () => {
       ['manage_security', 'manage_api_key', 'manage_own_api_key'].forEach((privilege) => {
         it(`returns response for an admin with priviledge ${privilege}`, async () => {
