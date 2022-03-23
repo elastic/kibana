@@ -12,7 +12,8 @@ import {
 import { FIRST_PAGE_SELECTOR, SECOND_PAGE_SELECTOR } from '../../screens/pagination';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
-import { openAllHosts, openUncommonProcesses } from '../../tasks/hosts/main';
+import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
+import { openEvents, openUncommonProcesses } from '../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../tasks/hosts/uncommon_processes';
 import { login, visit } from '../../tasks/login';
 import { goToFirstPage, goToSecondPage } from '../../tasks/pagination';
@@ -74,7 +75,8 @@ describe('Pagination', () => {
       .first()
       .invoke('text')
       .then((expectedThirdPageResult) => {
-        openAllHosts();
+        openEvents();
+        waitsForEventsToBeLoaded();
         cy.get(FIRST_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
         openUncommonProcesses();
         waitForUncommonProcessesToBeLoaded();

@@ -402,6 +402,8 @@ export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
 };
 export const loginAndWaitForHostDetailsPage = (hostName = 'suricata-iowa') => {
   loginAndWaitForPage(hostDetailsUrl(hostName));
+
+  cy.get('[data-test-subj="hostDetailsPage"]', { timeout: 12000 }).should('exist');
   cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
 };
 
