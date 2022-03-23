@@ -147,7 +147,7 @@ describe('Use cases toast hook', () => {
       validateContent('View Case');
     });
 
-    it('renders a correct successfull message content', () => {
+    it('renders a correct successful message content', () => {
       const result = appMockRender.render(
         <CaseToastSuccessContent content={'my content'} onViewCaseClick={onViewCaseClick} />
       );
