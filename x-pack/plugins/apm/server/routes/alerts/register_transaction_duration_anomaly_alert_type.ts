@@ -24,7 +24,7 @@ import {
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { getAlertUrlTransactionDurationAnomaly } from '../../../common/utils/formatters';
+import { getAlertUrlTransaction } from '../../../common/utils/formatters';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
 import { KibanaRequest } from '../../../../../../src/core/server';
@@ -223,11 +223,10 @@ export function registerTransactionDurationAnomalyAlertType({
             windowUnit: params.windowUnit,
           });
 
-          // The function args wrapped with arrays because this function is shared with the frontend and the vars there are parsed by parseTechnicalFields()
-          const relativeViewInAppUrl = getAlertUrlTransactionDurationAnomaly(
-            [serviceName],
-            [getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]],
-            [transactionType]
+          const relativeViewInAppUrl = getAlertUrlTransaction(
+            serviceName,
+            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
+            transactionType
           );
 
           const viewInAppUrl = basePath.publicBaseUrl

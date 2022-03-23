@@ -17,57 +17,26 @@ const format = ({
   return `${pathname}?${stringify(query)}`;
 };
 
-export const getAlertUrlErrorCount = (serviceName: any[], serviceEnv: any[]) =>
-  format({
-    pathname: `/app/apm/services/${String(serviceName[0])}/errors`,
-    query: {
-      ...(serviceEnv?.[0]
-        ? { environment: String(serviceEnv[0]) }
-        : { environment: ENVIRONMENT_ALL.value }),
-    },
-  });
-
-export const getAlertUrlTransactionDuration = (
-  serviceName: any[],
-  serviceEnv: any[],
-  transactionType: any[]
+export const getAlertUrlErrorCount = (
+  serviceName: string,
+  serviceEnv: string | undefined
 ) =>
   format({
-    pathname: `/app/apm/services/${serviceName[0]!}`,
+    pathname: `/app/apm/services/${serviceName}/errors`,
     query: {
-      transactionType: transactionType[0]!,
-      ...(serviceEnv?.[0]
-        ? { environment: String(serviceEnv[0]) }
-        : { environment: ENVIRONMENT_ALL.value }),
+      environment: serviceEnv ?? ENVIRONMENT_ALL.value,
     },
   });
-
-export const getAlertUrlTransactionErrorRate = (
-  serviceName: any[],
-  serviceEnv: any[],
-  transactionType: any[]
+// This formatter is for TransactionDuration, TransactionErrorRate, and TransactionDurationAnomaly.
+export const getAlertUrlTransaction = (
+  serviceName: string,
+  serviceEnv: string | undefined,
+  transactionType: string
 ) =>
   format({
-    pathname: `/app/apm/services/${String(serviceName[0]!)}`,
+    pathname: `/app/apm/services/${serviceName}`,
     query: {
-      transactionType: String(transactionType[0]!),
-      ...(serviceEnv?.[0]
-        ? { environment: String(serviceEnv[0]) }
-        : { environment: ENVIRONMENT_ALL.value }),
-    },
-  });
-
-export const getAlertUrlTransactionDurationAnomaly = (
-  serviceName: any[],
-  serviceEnv: any[],
-  transactionType: any[]
-) =>
-  format({
-    pathname: `/app/apm/services/${String(serviceName[0])}`,
-    query: {
-      transactionType: String(transactionType[0]),
-      ...(serviceEnv?.[0]
-        ? { environment: String(serviceEnv[0]) }
-        : { environment: ENVIRONMENT_ALL.value }),
+      transactionType,
+      environment: serviceEnv ?? ENVIRONMENT_ALL.value,
     },
   });

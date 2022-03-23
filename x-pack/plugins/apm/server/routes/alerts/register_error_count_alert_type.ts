@@ -153,8 +153,8 @@ export function registerErrorCountAlertType({
 
             // The function args wrapped with arrays because this function is shared with the frontend and the vars there are parsed by parseTechnicalFields()
             const relativeViewInAppUrl = getAlertUrlErrorCount(
-              [serviceName],
-              [getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]]
+              serviceName,
+              getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]
             );
 
             const viewInAppUrl = basePath.publicBaseUrl

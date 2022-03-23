@@ -11,9 +11,7 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
 import {
   getAlertUrlErrorCount,
-  getAlertUrlTransactionDuration,
-  getAlertUrlTransactionErrorRate,
-  getAlertUrlTransactionDurationAnomaly,
+  getAlertUrlTransaction,
 } from '../../../common/utils/formatters';
 import { AlertType } from '../../../common/alert_types';
 
@@ -35,8 +33,8 @@ export function registerApmAlerts(
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlErrorCount(
-          fields[SERVICE_NAME],
-          fields[SERVICE_ENVIRONMENT]
+          String(fields[SERVICE_NAME][0]!),
+          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0])
         ),
       };
     },
@@ -74,10 +72,10 @@ export function registerApmAlerts(
     format: ({ fields, formatters: { asDuration } }) => {
       return {
         reason: fields[ALERT_REASON]!,
-        link: getAlertUrlTransactionDuration(
-          fields[SERVICE_NAME],
-          fields[SERVICE_ENVIRONMENT],
-          fields[TRANSACTION_TYPE]
+        link: getAlertUrlTransaction(
+          String(fields[SERVICE_NAME][0]!),
+          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
+          String(fields[TRANSACTION_TYPE][0]!)
         ),
       };
     },
@@ -117,10 +115,10 @@ export function registerApmAlerts(
     ),
     format: ({ fields, formatters: { asPercent } }) => ({
       reason: fields[ALERT_REASON]!,
-      link: getAlertUrlTransactionErrorRate(
-        fields[SERVICE_NAME],
-        fields[SERVICE_ENVIRONMENT],
-        fields[TRANSACTION_TYPE]
+      link: getAlertUrlTransaction(
+        String(fields[SERVICE_NAME][0]!),
+        fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
+        String(fields[TRANSACTION_TYPE][0]!)
       ),
     }),
     iconClass: 'bell',
@@ -158,10 +156,10 @@ export function registerApmAlerts(
     ),
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
-      link: getAlertUrlTransactionDurationAnomaly(
-        fields[SERVICE_NAME],
-        fields[SERVICE_ENVIRONMENT],
-        fields[TRANSACTION_TYPE]
+      link: getAlertUrlTransaction(
+        String(fields[SERVICE_NAME][0]!),
+        fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
+        String(fields[TRANSACTION_TYPE][0]!)
       ),
     }),
     iconClass: 'bell',

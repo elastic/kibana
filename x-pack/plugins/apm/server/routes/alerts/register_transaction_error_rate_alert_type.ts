@@ -17,7 +17,7 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
-import { getAlertUrlTransactionErrorRate } from '../../../common/utils/formatters';
+import { getAlertUrlTransaction } from '../../../common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   AlertType,
@@ -211,11 +211,10 @@ export function registerTransactionErrorRateAlertType({
             windowUnit: ruleParams.windowUnit,
           });
 
-          // The function args wrapped with arrays because this function is shared with the frontend and the vars there are parsed by parseTechnicalFields()
-          const relativeViewInAppUrl = getAlertUrlTransactionErrorRate(
-            [serviceName],
-            [getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]],
-            [transactionType]
+          const relativeViewInAppUrl = getAlertUrlTransaction(
+            serviceName,
+            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
+            transactionType
           );
           const viewInAppUrl = basePath.publicBaseUrl
             ? new URL(
