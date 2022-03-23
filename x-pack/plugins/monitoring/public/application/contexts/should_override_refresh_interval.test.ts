@@ -29,7 +29,7 @@ const getMockArguments = ({
 
 describe('shouldOverrideRefreshInterval', () => {
   test('should not override when the interval was updated with the timefilter', () => {
-    const { uiSettings, timefilter } = getMockArguments({ isDefaultSettings: false });
+    const { uiSettings, timefilter } = getMockArguments({ isRefreshIntervalTouched: true });
     expect(shouldOverrideRefreshInterval(uiSettings, timefilter)).toBe(false);
   });
 
