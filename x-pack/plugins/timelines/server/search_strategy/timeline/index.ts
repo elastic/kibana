@@ -206,9 +206,23 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   const indices = request.defaultIndex ?? request.indexType;
 
   const runtimeMappings = {
+    // TODO: remove once ECS is updated to use the new field name
     'process.entry_leader.entity_id': {
       type: 'keyword',
     },
+    // TODO: remove once ECS is updated to use the new field name
+    'process.interactive': {
+      type: 'boolean',
+    },
+    // TODO: remove once ECS is updated to use the new field name
+    'process.entry_leader.entry_meta.type': {
+      type: 'keyword',
+    },
+    // TODO: remove once ECS is updated to use the new field name
+    'process.entry_leader.entry_meta.source.ip': {
+      type: 'ip',
+    },
+    // TODO: replace by checking if process.group_leader.same_as_process is true, once ECS is updated to support same_as_process
     'process.is_entry_leader': {
       type: 'boolean',
       script: {
@@ -216,6 +230,20 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
           "emit(doc.containsKey('process.entry_leader.entity_id') && doc['process.entry_leader.entity_id'].size() > 0 && doc['process.entity_id'].value == doc['process.entry_leader.entity_id'].value)",
       },
     },
+    // TODO: We need an way to override process.end date based on event.action, only when event.action is end, but the code below isn't working
+    // 'process.end': {
+    //   type: 'date',
+    //   script: {
+    //     source: `
+    //         if(doc['event.action'].size() == 0) return;
+    //         if(doc['event.action'].value == 'end') {
+    //           return doc['event.created'].value;
+    //         }
+    //         return;
+    //       `,
+    //     lang: 'painless',
+    //   },
+    // },
   };
 
   const requestSessionLeaders = {
