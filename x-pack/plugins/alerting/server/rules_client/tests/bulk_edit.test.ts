@@ -5,33 +5,23 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { IntervalSchedule, InvalidatePendingApiKey } from '../../types';
-import { RecoveredActionGroup } from '../../../common';
+import { RecoveredActionGroup, AlertTypeParams } from '../../../common';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { resolvable } from '../../test_utils';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
-import { TaskStatus } from '../../../../task_manager/server';
 import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
-
-jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
-  SavedObjectsUtils: {
-    generateId: () => 'mock-saved-object-id',
-  },
 }));
 
 const taskManager = taskManagerMock.createStart();
@@ -42,7 +32,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 
-const kibanaVersion = 'v7.10.0';
+const kibanaVersion = 'v8.2.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
@@ -186,7 +176,6 @@ describe('bulkEdit()', () => {
     });
   });
   describe('tags actions', () => {
-    beforeEach(() => {});
     test('should add new tag', async () => {
       unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
@@ -229,15 +218,13 @@ describe('bulkEdit()', () => {
       expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
       expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
-        {
+        expect.objectContaining({
           id: '1',
+          type: 'alert',
           attributes: expect.objectContaining({
             tags: ['foo', 'test-1'],
           }),
-          references: [],
-          type: 'alert',
-          version: '123',
-        },
+        }),
       ]);
     });
 
@@ -283,15 +270,13 @@ describe('bulkEdit()', () => {
       expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
       expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
-        {
+        expect.objectContaining({
           id: '1',
+          type: 'alert',
           attributes: expect.objectContaining({
             tags: [],
           }),
-          references: [],
-          type: 'alert',
-          version: '123',
-        },
+        }),
       ]);
     });
 
@@ -337,15 +322,13 @@ describe('bulkEdit()', () => {
       expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
       expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
-        {
+        expect.objectContaining({
           id: '1',
+          type: 'alert',
           attributes: expect.objectContaining({
             tags: ['test-1', 'test-2'],
           }),
-          references: [],
-          type: 'alert',
-          version: '123',
-        },
+        }),
       ]);
     });
   });
@@ -587,21 +570,140 @@ describe('bulkEdit()', () => {
   });
 
   describe('params validation', () => {
-    test('should validate params for rules', async () => {
-      // TODO: implement test
-      expect(true).toBe(false);
+    test('should return error for rule that failed params validation', async () => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: '123',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        validate: {
+          params: schema.object({
+            param1: schema.string(),
+          }),
+        },
+        async executor() {},
+        producer: 'alerts',
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        actions: [
+          {
+            field: 'tags',
+            action: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(1);
+
+      expect(result.errors[0]).toHaveProperty(
+        'message',
+        'params invalid: [param1]: expected value of type [string] but got [undefined]'
+      );
+      expect(result.errors[0]).toHaveProperty('rule.id', '1');
+      expect(result.errors[0]).toHaveProperty('rule.name', 'my alert name');
     });
 
     test('should validate mutatedParams for rules', async () => {
-      // TODO: implement test
-      expect(true).toBe(false);
+      ruleTypeRegistry.get.mockReturnValue({
+        id: '123',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        validate: {
+          params: {
+            validate: (rule) => rule as AlertTypeParams,
+            validateMutatedParams: (rule: unknown) => {
+              throw Error('Mutated error for rule');
+            },
+          },
+        },
+        async executor() {},
+        producer: 'alerts',
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        actions: [
+          {
+            field: 'tags',
+            action: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(1);
+
+      expect(result.errors[0]).toHaveProperty(
+        'message',
+        'Mutated params invalid: Mutated error for rule'
+      );
+      expect(result.errors[0]).toHaveProperty('rule.id', '1');
+      expect(result.errors[0]).toHaveProperty('rule.name', 'my alert name');
     });
   });
 
   describe('paramsModifier', () => {
     test('should update index pattern params', async () => {
-      // TODO: implement test
-      expect(true).toBe(false);
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: { index: ['test-index-*'] },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        actions: [],
+        paramsModifier: (params) => {
+          params.index = ['test-index-*'];
+
+          return params;
+        },
+      });
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.rules).toHaveLength(1);
+      expect(result.rules[0]).toHaveProperty('params.index', ['test-index-*']);
+
+      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
+      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
+        expect.objectContaining({
+          id: '1',
+          type: 'alert',
+          attributes: expect.objectContaining({
+            params: expect.objectContaining({
+              index: ['test-index-*'],
+            }),
+          }),
+        }),
+      ]);
     });
   });
 });

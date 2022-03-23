@@ -23,6 +23,6 @@ export function validateMutatedRuleTypeParams<Params extends AlertTypeParams>(
     }
     return mutatedParams;
   } catch (err) {
-    throw Boom.badRequest(`mutated params invalid: ${err.message}`);
+    throw Boom.badRequest(`Mutated params invalid: ${err.message}`);
   }
 }
