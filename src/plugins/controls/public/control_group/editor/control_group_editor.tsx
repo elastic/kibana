@@ -138,10 +138,10 @@ export const ControlGroupEditor = ({
           <EuiFormRow label={ControlGroupStrings.management.labelPosition.getLabelPositionTitle()}>
             <EuiButtonGroup
               color="primary"
+              options={CONTROL_LAYOUT_OPTIONS}
+              data-test-subj="control-group-layout-options"
               idSelected={controlGroupEditorState.controlStyle}
               legend={ControlGroupStrings.management.labelPosition.getLabelPositionLegend()}
-              data-test-subj="control-group-layout-options"
-              options={CONTROL_LAYOUT_OPTIONS}
               onChange={(newControlStyle: string) => {
                 // The UI copy calls this setting labelPosition, but to avoid an unnecessary migration it will be left as controlStyle in the state.
                 updateControlGroupEditorSetting({ controlStyle: newControlStyle as ControlStyle });
@@ -153,6 +153,7 @@ export const ControlGroupEditor = ({
             <>
               <EuiButtonGroup
                 color="primary"
+                data-test-subj="control-group-default-size-options"
                 idSelected={controlGroupEditorState.defaultControlWidth}
                 legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
                 options={CONTROL_WIDTH_OPTIONS}
@@ -167,6 +168,7 @@ export const ControlGroupEditor = ({
                   <EuiSpacer size="s" />
                   <EuiCheckbox
                     id="editControls_setAllSizesCheckbox"
+                    data-test-subj="set-all-control-sizes-checkbox"
                     label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
                     checked={resetAllWidths}
                     onChange={(e) => {
@@ -183,6 +185,7 @@ export const ControlGroupEditor = ({
               <EuiSpacer size="xs" />
               <EuiSwitch
                 label={ControlGroupStrings.management.querySync.getQuerySettingsTitle()}
+                data-test-subj="control-group-query-sync"
                 showLabel={false}
                 checked={fullQuerySyncActive}
                 onChange={(e) => {
@@ -204,6 +207,7 @@ export const ControlGroupEditor = ({
               </EuiText>
               <EuiSpacer size="s" />
               <EuiAccordion
+                data-test-subj="control-group-query-sync-advanced"
                 id={advancedSettingsAccordionId}
                 initialIsOpen={!fullQuerySyncActive}
                 buttonContent={ControlGroupStrings.management.querySync.getAdvancedSettingsTitle()}
@@ -211,6 +215,7 @@ export const ControlGroupEditor = ({
                 <EuiSpacer size="s" />
                 <EuiFormRow hasChildLabel display="columnCompressedSwitch">
                   <EuiSwitch
+                    data-test-subj="control-group-query-sync-time-range"
                     label={ControlGroupStrings.management.querySync.getIgnoreTimerangeTitle()}
                     compressed
                     checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreTimerange)}
@@ -219,6 +224,7 @@ export const ControlGroupEditor = ({
                 </EuiFormRow>
                 <EuiFormRow hasChildLabel display="columnCompressedSwitch">
                   <EuiSwitch
+                    data-test-subj="control-group-query-sync-query"
                     label={ControlGroupStrings.management.querySync.getIgnoreQueryTitle()}
                     compressed
                     checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreQuery)}
@@ -227,6 +233,7 @@ export const ControlGroupEditor = ({
                 </EuiFormRow>
                 <EuiFormRow hasChildLabel display="columnCompressedSwitch">
                   <EuiSwitch
+                    data-test-subj="control-group-query-sync-filters"
                     label={ControlGroupStrings.management.querySync.getIgnoreFilterPillsTitle()}
                     compressed
                     checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreFilters)}
@@ -241,6 +248,7 @@ export const ControlGroupEditor = ({
             <EuiFlexItem grow={false}>
               <EuiSpacer size="xs" />
               <EuiSwitch
+                data-test-subj="control-group-validate-selections"
                 label={ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
                 showLabel={false}
                 checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreValidations)}
@@ -265,6 +273,7 @@ export const ControlGroupEditor = ({
             <EuiFlexItem grow={false}>
               <EuiSpacer size="xs" />
               <EuiSwitch
+                data-test-subj="control-group-chaining"
                 label={ControlGroupStrings.management.controlChaining.getHierarchyTitle()}
                 showLabel={false}
                 checked={controlGroupEditorState.chainingSystem === 'HIERARCHICAL'}
@@ -284,7 +293,6 @@ export const ControlGroupEditor = ({
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiHorizontalRule />
           {controlCount > 0 && (
             <>
               <EuiHorizontalRule margin="m" />

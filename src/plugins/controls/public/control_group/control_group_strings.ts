@@ -46,7 +46,7 @@ export const ControlGroupStrings = {
       }),
     getTitleInputTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.titleInputTitle', {
-        defaultMessage: 'Title',
+        defaultMessage: 'Label',
       }),
     getWidthInputTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.widthInputTitle', {
