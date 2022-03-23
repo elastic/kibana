@@ -1,0 +1,271 @@
+[[cases-api-update]]
+== Update cases API
+++++
+<titleabbrev>Update cases</titleabbrev>
+++++
+
+Updates one or more cases.
+
+=== Request
+
+`PATCH <kibana host>:<port>/api/cases`
+
+`PATCH <kibana host>:<port>/s/<space_id>/api/cases`
+
+=== Prerequisite
+
+You must have `all` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases you're updating.
+
+=== Path parameters
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== Request body
+
+`cases`::
+(Required, array of objects) Array containing one or more case objects.
++
+.Properties of `cases` objects
+[%collapsible%open]
+====
+`connector`::
+(Optional, object) An object that contains the connector configuration.
++
+.Properties of `connector`
+[%collapsible%open]
+=====
+`fields`::
+(Required, object) An object containing the connector fields.
++
+--
+To remove the connector, specify `null`. If you want to omit any individual
+field, specify `null` as its value.
+
+For {ibm-r} connectors, specify:
+
+`issueTypes`:::
+(Required, array of numbers) The issue types of the issue.
+
+`severityCode`:::
+(Required, number) The severity code of the issue.
+
+For {jira} connectors, specify:
+
+`issueType`:::
+(Required, string) The issue type of the issue.
+
+`parent`:::
+(Required, string) The key of the parent issue, when the issue type is
+`Sub-task`.
+
+`priority`:::
+(Required, string) The priority of the issue.
+
+For {sn-itsm} connectors, specify:
+
+`category`:::
+(Required, string) The category of the incident.
+
+`impact`:::
+(Required, string) The effect an incident had on business.
+
+`severity`:::
+(Required, string) The severity of the incident.
+
+`subcategory`:::
+(Required, string) The subcategory of the incident.
+
+`urgency`:::
+(Required, string) The extent to which the incident resolution can be delayed.
+
+For {sn-sir} connectors, specify:
+
+`category`:::
+(Required, string) The category of the incident.
+
+`destIp`:::
+(Required, string) A comma separated list of destination IPs.
+
+`malwareHash`:::
+(Required, string) A comma separated list of malware hashes.
+
+`malwareUrl`:::
+(Required, string) A comma separated list of malware URLs.
+
+`priority`:::
+(Required, string) The priority of the incident.
+
+`sourceIp`:::
+(Required, string) A comma separated list of source IPs.
+
+`subcategory`:::
+(Required, string) The subcategory of the incident.
+
+For {swimlane} connectors, specify:
+
+`caseId`:::
+(Required, string) The identifier for the case.
+--
+
+`id`::
+(Required, string) The identifier for the connector. To remove the connector,
+use `none`.
+//To retrieve connector IDs, use <<cases-api-find-connectors>>).
+
+`name`::
+(Required, string) The name of the connector. To remove the connector, use
+`none`.
+
+`type`::
+(Required, string) The type of the connector. Valid values are: `.jira`, `.none`,
+`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`. To remove the
+connector, use `.none`.
+
+=====
+
+`description`::
+(Optional, string) The updated case description.
+
+`id`::
+(Required, string) The identifier for the case.
+
+`settings`::
+(Optional, object)
+An object that contains the case settings.
++
+.Properties of `settings`
+[%collapsible%open]
+=====
+`syncAlerts`::
+(Required, boolean) Turn on or off synching with alerts.
+=====
+
+`status`::
+(Optional, string) The case status. Valid values are: `closed`, `in-progress`,
+and `open`.
+
+`tags`::
+(Optional, string array) The words and phrases that help categorize cases.
+
+`title`::
+(Optional, string) A title for the case.
+
+`version`::
+(Required, string) The current version of the case.
+//To determine this value, use <<cases-api-get-case>> or <<cases-api-find-cases>>
+====
+
+=== Response code
+
+`200`::
+   Indicates a successful call.
+
+=== Example
+
+Update the description, tags, and connector of case ID
+`a18b38a0-71b0-11ea-a0b2-c51ea50a58e2`:
+
+[source,sh]
+--------------------------------------------------
+PATCH api/cases
+{
+  "cases": [
+    {
+      "id": "a18b38a0-71b0-11ea-a0b2-c51ea50a58e2",
+      "version": "WzIzLDFd",
+      "connector": {
+        "id": "131d4448-abe0-4789-939d-8ef60680b498",
+        "name": "My connector",
+        "type": ".jira",
+        "fields": {
+          "issueType": "10006",
+          "priority": null,
+          "parent": null
+        }
+      },
+      "description": "James Bond clicked on a highly suspicious email
+      banner advertising cheap holidays for underpaid civil servants.
+      Operation bubblegum is active. Repeat - operation bubblegum is
+      now active!",
+      "tags": [
+        "phishing",
+        "social engineering",
+        "bubblegum"
+      ],
+      "settings": {
+        "syncAlerts": true
+      }
+    }
+  ]
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the updated case with a new `version` value. For example:
+
+[source,json]
+--------------------------------------------------
+[
+  {
+    "id": "66b9aa00-94fa-11ea-9f74-e7e108796192",
+    "version": "WzU0OCwxXQ==",
+    "comments": [],
+    "totalComment": 0,
+    "totalAlerts": 0,
+    "title": "This case will self-destruct in 5 seconds",
+    "tags": [
+      "phishing",
+      "social engineering",
+      "bubblegum"
+    ],
+    "settings": {
+      "syncAlerts": true
+    },
+    "owner": "securitySolution",
+    "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active!",
+    "closed_at": null,
+    "closed_by": null,
+    "created_at": "2022-05-13T09:16:17.416Z",
+    "created_by": {
+      "email": "ahunley@imf.usa.gov",
+      "full_name": "Alan Hunley",
+      "username": "ahunley"
+    },
+    "status": "open",
+    "updated_at": "2022-05-13T09:48:33.043Z",
+    "updated_by": {
+      "email": "classified@hms.oo.gov.uk",
+      "full_name": "Classified",
+      "username": "M"
+    },
+    "connector": {
+      "id": "131d4448-abe0-4789-939d-8ef60680b498",
+      "name": "My connector",
+      "type": ".jira",
+      "fields": {
+        "issueType": "10006",
+        "parent": null,
+        "priority": null,
+      }
+    },
+    "external_service": {
+      "external_title": "IS-4",
+      "pushed_by": {
+        "full_name": "Classified",
+        "email": "classified@hms.oo.gov.uk",
+        "username": "M"
+      },
+      "external_url": "https://hms.atlassian.net/browse/IS-4",
+      "pushed_at": "2022-05-13T09:20:40.672Z",
+      "connector_id": "05da469f-1fde-4058-99a3-91e4807e2de8",
+      "external_id": "10003",
+      "connector_name": "Jira"
+    }
+  }
+]
+--------------------------------------------------

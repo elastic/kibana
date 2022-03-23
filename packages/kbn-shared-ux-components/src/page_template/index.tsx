@@ -7,3 +7,4 @@
  */
 
 export { NoDataCard, ElasticAgentCard } from './no_data_page';
+export { KibanaPageTemplateSolutionNavAvatar } from './solution_nav_avatar';

@@ -42,6 +42,11 @@ export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
 export const ToolbarButton = withSuspense(LazyToolbarButton);
 
 /**
+ * An example of the solution toolbar button
+ */
+export { AddFromLibraryButton } from './toolbar';
+
+/**
  * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the
  * `withSuspense` HOC to load this component.
  */
@@ -59,6 +64,23 @@ export const LazyNoDataViews = React.lazy(() =>
 export const NoDataViews = withSuspense(LazyNoDataViews);
 
 /**
+ * A pure `NoDataViews` component, with no services hooks. Consumers should use `React.Suspennse` or the
+ * `withSuspense` HOC to load this component.
+ */
+export const LazyNoDataViewsComponent = React.lazy(() =>
+  import('./empty_state/no_data_views').then(({ NoDataViewsComponent }) => ({
+    default: NoDataViewsComponent,
+  }))
+);
+
+/**
+ * A pure `NoDataViews` component, with no services hooks. The component is wrapped by the `withSuspense` HOC.
+ * This component can be used directly by consumers and will load the `LazyNoDataViewsComponent` lazily with
+ * a predefined fallback and error boundary.
+ */
+export const NoDataViewsComponent = withSuspense(LazyNoDataViewsComponent);
+
+/**
  * The Lazily-loaded `IconButtonGroup` component.  Consumers should use `React.Suspennse` or the
  * `withSuspense` HOC to load this component.
  */
@@ -72,3 +94,22 @@ export const LazyIconButtonGroup = React.lazy(() =>
  * The IconButtonGroup component that is wrapped by the `withSuspence` HOC.
  */
 export const IconButtonGroup = withSuspense(LazyIconButtonGroup);
+
+/**
+ * The Lazily-loaded `KibanaPageTemplateSolutionNavAvatar` component.  Consumers should use `React.Suspennse` or the
+ * `withSuspense` HOC to load this component.
+ */
+export const KibanaPageTemplateSolutionNavAvatarLazy = React.lazy(() =>
+  import('./page_template/solution_nav_avatar').then(({ KibanaPageTemplateSolutionNavAvatar }) => ({
+    default: KibanaPageTemplateSolutionNavAvatar,
+  }))
+);
+
+/**
+ * A `KibanaPageTemplateSolutionNavAvatar` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `KibanaPageTemplateSolutionNavAvatarLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const KibanaPageTemplateSolutionNavAvatar = withSuspense(
+  KibanaPageTemplateSolutionNavAvatarLazy
+);

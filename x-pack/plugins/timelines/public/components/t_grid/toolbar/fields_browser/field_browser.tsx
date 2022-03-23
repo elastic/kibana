@@ -33,7 +33,10 @@ import { CategoriesSelector } from './categories_selector';
 import { FieldTable } from './field_table';
 import { CategoriesBadges } from './categories_badges';
 
-type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width' | 'options'> & {
+export type FieldsBrowserComponentProps = Pick<
+  FieldBrowserProps,
+  'timelineId' | 'width' | 'options'
+> & {
   /**
    * The current timeline column headers
    */
@@ -44,6 +47,9 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width' | 
    * the filter input (as a substring).
    */
   filteredBrowserFields: BrowserFields;
+  /** when true, show only the the selected field */
+  filterSelectedEnabled: boolean;
+  onFilterSelectedChange: (enabled: boolean) => void;
   /**
    * When true, a busy spinner will be shown to indicate the field browser
    * is searching for fields that match the specified `searchInput`
@@ -83,17 +89,19 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width' | 
  * This component has no internal state, but it uses lifecycle methods to
  * set focus to the search input, scroll to the selected category, etc
  */
-const FieldsBrowserComponent: React.FC<Props> = ({
+const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
+  appliedFilterInput,
   columnHeaders,
   filteredBrowserFields,
+  filterSelectedEnabled,
   isSearching,
+  onFilterSelectedChange,
   setSelectedCategoryIds,
   onSearchInputChange,
   onHide,
   options,
   restoreFocusTo,
   searchInput,
-  appliedFilterInput,
   selectedCategoryIds,
   timelineId,
   width = FIELD_BROWSER_WIDTH,
@@ -182,8 +190,10 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             timelineId={timelineId}
             columnHeaders={columnHeaders}
             filteredBrowserFields={filteredBrowserFields}
+            filterSelectedEnabled={filterSelectedEnabled}
             searchInput={appliedFilterInput}
             selectedCategoryIds={selectedCategoryIds}
+            onFilterSelectedChange={onFilterSelectedChange}
             getFieldTableColumns={getFieldTableColumns}
             onHide={onHide}
           />

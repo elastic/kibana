@@ -194,6 +194,7 @@ export class APMPlugin
         ml: plugins.ml,
         config$,
         logger: this.logger!.get('rule'),
+        basePath: core.http.basePath,
       });
     }
 

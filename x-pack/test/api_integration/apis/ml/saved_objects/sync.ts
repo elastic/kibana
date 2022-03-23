@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
-import { JobType } from '../../../../../plugins/ml/common/types/saved_objects';
+import { MlSavedObjectType } from '../../../../../plugins/ml/common/types/saved_objects';
 
 export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
@@ -33,12 +33,16 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  async function runSyncCheckRequest(user: USER, jobType: JobType, expectedStatusCode: number) {
+  async function runSyncCheckRequest(
+    user: USER,
+    mlSavedObjectType: MlSavedObjectType,
+    expectedStatusCode: number
+  ) {
     const { body, status } = await supertest
       .post(`/s/${idSpace1}/api/ml/saved_objects/sync_check`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ jobType });
+      .send({ mlSavedObjectType });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
@@ -46,6 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('GET saved_objects/sync', () => {
     beforeEach(async () => {
+      await ml.api.initSavedObjects();
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
@@ -116,7 +121,9 @@ export default ({ getService }: FtrProviderContext) => {
           'anomaly-detector': { [adJobId3]: { success: true } },
         },
         savedObjectsCreated: {
-          'anomaly-detector': { [adJobIdES]: { success: true } },
+          'anomaly-detector': {
+            [adJobIdES]: { success: true },
+          },
         },
         savedObjectsDeleted: {
           'anomaly-detector': { [adJobId1]: { success: true } },
