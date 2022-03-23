@@ -26,6 +26,7 @@ import {
   EventsQueryTabBody,
   HostAlertsQueryTabBody,
   HostRiskTabBody,
+  SessionsTabBody,
 } from '../navigation';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
@@ -105,6 +106,9 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
           <HostRiskTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.sessions})`}>
+          <SessionsTabBody {...tabProps} />
         </Route>
       </Switch>
     );

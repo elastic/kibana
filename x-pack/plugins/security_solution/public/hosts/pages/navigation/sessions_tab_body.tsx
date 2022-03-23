@@ -6,47 +6,18 @@
  */
 
 import React, { useMemo } from 'react';
-
-import type { Filter } from '@kbn/es-query';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SessionsView } from '../../../common/components/sessions_viewer';
+import { filterHostExternalAlertData } from '../../../common/components/visualization_actions/utils';
 import { AlertsComponentQueryProps } from './types';
 
-const filterHostData: Filter[] = [
-  {
-    query: {
-      bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  exists: {
-                    field: 'host.name',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
-      },
-    },
-    meta: {
-      alias: '',
-      disabled: false,
-      key: 'bool',
-      negate: false,
-      type: 'custom',
-      value:
-        '{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "host.name"}}],"minimum_should_match": 1}}]}}}',
-    },
-  },
-];
 export const SessionsTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => {
-  const { pageFilters, ...rest } = alertsProps;
+  const { pageFilters, filterQuery, ...rest } = alertsProps;
   const hostPageFilters = useMemo(
-    () => (pageFilters != null ? [...filterHostData, ...pageFilters] : filterHostData),
+    () =>
+      pageFilters != null
+        ? [...filterHostExternalAlertData, ...pageFilters]
+        : filterHostExternalAlertData,
     [pageFilters]
   );
 
@@ -56,6 +27,7 @@ export const SessionsTabBody = React.memo((alertsProps: AlertsComponentQueryProp
       timelineId={TimelineId.hostsPageSessions}
       {...rest}
       pageFilters={hostPageFilters}
+      filterQuery={filterQuery}
     />
   );
 });

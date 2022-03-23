@@ -44,6 +44,7 @@ export interface TimelineState {
 export enum TimelineId {
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
+  hostsPageSessions = 'hosts-page-sessions',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
