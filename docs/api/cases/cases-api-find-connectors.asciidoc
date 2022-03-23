@@ -1,0 +1,60 @@
+[[cases-api-find-connectors]]
+== Find connectors API
+++++
+<titleabbrev>Find connectors</titleabbrev>
+++++
+
+Retrieves information about <<action-types,connectors>>.
+
+In particular, only the connectors that are supported for use in cases are
+returned. Refer to the list of supported external incident management systems in
+<<add-case-connectors>>.
+
+=== Request
+
+`GET <kibana host>:<port>/api/cases/configure/connectors/_find`
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/configure/connectors/_find`
+
+=== Prerequisite
+
+You must have `read` privileges for the *Actions and Connectors* feature in the
+*Management* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+=== Path parameters
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== Response code
+
+`200`::
+   Indicates a successful call.
+
+=== Example
+
+[source,sh]
+--------------------------------------------------
+GET api/cases/configure/connectors/_find
+--------------------------------------------------
+// KIBANA
+
+The API returns a JSON object describing the connectors and their settings:
+
+[source,json]
+--------------------------------------------------
+[{
+  "id":"61787f53-4eee-4741-8df6-8fe84fa616f7",
+  "actionTypeId": ".jira",
+  "name":"my-Jira",
+  "isMissingSecrets":false,
+  "config": {
+    "apiUrl":"https://elastic.atlassian.net/",
+    "projectKey":"ES"
+  },
+  "isPreconfigured":false,
+  "referencedByCount":0
+}]
+--------------------------------------------------

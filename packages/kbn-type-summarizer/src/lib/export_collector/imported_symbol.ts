@@ -13,17 +13,17 @@ import { ExportInfo } from '../export_info';
 const cache = new WeakMap<DecSymbol, ImportedSymbol>();
 
 export class ImportedSymbol {
-  static fromSymbol(symbol: DecSymbol, moduleId: string) {
-    const cached = cache.get(symbol);
+  static fromSymbol(source: DecSymbol, importSymbol: DecSymbol, moduleId: string) {
+    const cached = cache.get(source);
     if (cached) {
       return cached;
     }
 
-    if (symbol.declarations.length !== 1) {
+    if (importSymbol.declarations.length !== 1) {
       throw new Error('expected import symbol to have exactly one declaration');
     }
 
-    const dec = symbol.declarations[0];
+    const dec = importSymbol.declarations[0];
     if (
       !ts.isImportClause(dec) &&
       !ts.isExportSpecifier(dec) &&
@@ -41,18 +41,18 @@ export class ImportedSymbol {
     }
 
     const imp = ts.isImportClause(dec)
-      ? new ImportedSymbol(symbol, 'default', dec.name.text, dec.isTypeOnly, moduleId)
+      ? new ImportedSymbol(importSymbol, 'default', dec.name.text, dec.isTypeOnly, moduleId)
       : ts.isNamespaceImport(dec)
-      ? new ImportedSymbol(symbol, '*', dec.name.text, dec.parent.isTypeOnly, moduleId)
+      ? new ImportedSymbol(importSymbol, '*', dec.name.text, dec.parent.isTypeOnly, moduleId)
       : new ImportedSymbol(
-          symbol,
+          importSymbol,
           dec.name.text,
           dec.propertyName?.text,
           dec.isTypeOnly || dec.parent.parent.isTypeOnly,
           moduleId
         );
 
-    cache.set(symbol, imp);
+    cache.set(source, imp);
     return imp;
   }
 
