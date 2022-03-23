@@ -536,6 +536,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'TEST2',
             namespace: 'default',
             is_managed: false,
+            force: true,
           })
           .expect(200);
 
@@ -615,6 +616,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Regular policy',
             namespace: 'default',
             is_managed: false,
+            force: true,
           })
           .expect(200);
 
