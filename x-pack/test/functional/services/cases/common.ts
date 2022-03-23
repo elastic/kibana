@@ -156,5 +156,22 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       );
       await button.click();
     },
+
+    async assertRadioGroupValue(testSubject: string, expectedValue: string) {
+      const assertRadioGroupValue = await testSubjects.find(testSubject);
+      const input = await assertRadioGroupValue.findByCssSelector(':checked');
+      const selectedOptionId = await input.getAttribute('id');
+      expect(selectedOptionId).to.eql(
+        expectedValue,
+        `Expected the radio group value to equal "${expectedValue}" (got "${selectedOptionId}")`
+      );
+    },
+
+    async selectRadioGroupValue(testSubject: string, value: string) {
+      const radioGroup = await testSubjects.find(testSubject);
+      const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
+      await label.click();
+      await this.assertRadioGroupValue(testSubject, value);
+    },
   };
 }

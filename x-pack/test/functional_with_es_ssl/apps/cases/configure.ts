@@ -9,9 +9,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
-  const find = getService('find');
-  const cases = getService('cases');
+  const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
+  const cases = getService('cases');
+  const toasts = getService('toasts');
 
   describe('Configure', function () {
     before(async () => {
@@ -22,6 +23,30 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await cases.api.deleteAllCases();
     });
 
-    it('changes the closure option correctly', async () => {});
+    describe('Closure options', function () {
+      it('defaults the closure option correctly', async () => {
+        await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
+      });
+
+      it('change closure option successfully', async () => {
+        await cases.common.selectRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
+        const toast = await toasts.getToastElement(1);
+        expect(await toast.getVisibleText()).to.be('Saved external connection settings');
+        await toasts.dismissAllToasts();
+      });
+    });
+
+    describe('Connectors', function () {
+      it('defaults the connector to none correctly', async () => {
+        expect(await testSubjects.exists('dropdown-connector-no-connector')).to.be(true);
+      });
+
+      it('opens and closes the connectors flyout correctly', async () => {
+        await common.clickAndValidate('dropdown-connectors', 'dropdown-connector-add-connector');
+        await common.clickAndValidate('dropdown-connector-add-connector', 'euiFlyoutCloseButton');
+        await testSubjects.click('euiFlyoutCloseButton');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+      });
+    });
   });
 };

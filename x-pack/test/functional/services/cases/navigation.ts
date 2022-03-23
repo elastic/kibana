@@ -19,7 +19,7 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
 
     async navigateToConfigurationPage() {
       await this.navigateToApp();
-      common.clickAndValidate('configure-case-button', 'case-configure-title');
+      await common.clickAndValidate('configure-case-button', 'case-configure-title');
     },
   };
 }
