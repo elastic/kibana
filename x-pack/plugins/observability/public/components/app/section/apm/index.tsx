@@ -14,7 +14,7 @@ import {
   Settings,
   XYBrushEvent,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -116,9 +116,26 @@ export function APMSection({ bucketSize }: Props) {
         <EuiFlexItem grow={false}>
           <StyledStat
             title={`${formatTpmStat(stats?.transactions.value)} tpm`}
-            description={i18n.translate('xpack.observability.overview.apm.throughput', {
-              defaultMessage: 'Throughput',
-            })}
+            description={
+              <EuiToolTip
+                content={i18n.translate('xpack.observability.overview.apm.throughputTip', {
+                  defaultMessage:
+                    'Values are calculated for transactions with type "Request" or "page-load". If neither are available, values reflect the top transaction type.',
+                })}
+              >
+                <>
+                  {i18n.translate('xpack.observability.overview.apm.throughput', {
+                    defaultMessage: 'Throughput',
+                  })}{' '}
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="questionInCircle"
+                    className="eui-alignCenter"
+                  />
+                </>
+              </EuiToolTip>
+            }
             isLoading={isLoading}
             color={transactionsColor}
           />
