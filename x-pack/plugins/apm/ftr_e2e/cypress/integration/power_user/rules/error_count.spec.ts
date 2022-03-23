@@ -69,10 +69,6 @@ describe('Rules', () => {
       before(() => {
         cy.loginAsPowerUser();
         deleteAllRules();
-        cy.intercept(
-          'GET',
-          '/api/alerting/rules/_find?page=1&per_page=10&default_search_operator=AND&sort_field=name&sort_order=asc'
-        ).as('list rules API call');
       });
 
       after(() => {
@@ -82,11 +78,6 @@ describe('Rules', () => {
       it('creates a rule', () => {
         // Go to stack management
         cy.visit('/app/management/insightsAndAlerting/triggersActions/rules');
-
-        // Wait for this call to finish so the create rule button does not disappear.
-        // The timeout is set high because at this point we're also waiting for the
-        // full page load.
-        cy.wait('@list rules API call', { timeout: 30000 });
 
         // Create a rule
         cy.contains('button', 'Create rule').click();
