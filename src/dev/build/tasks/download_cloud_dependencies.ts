@@ -22,7 +22,7 @@ export const DownloadCloudDependencies: Task = {
       const buildIdUrl = buildId ? `${buildId[0]}/` : '';
 
       const localArchitecture = [process.arch === 'arm64' ? 'arm64' : 'x86_64'];
-      const allArchitectures = ['arm64, x86_64'];
+      const allArchitectures = ['arm64', 'x86_64'];
       const architectures = config.getDockerCrossCompile() ? allArchitectures : localArchitecture;
       const downloads = architectures.map(async (arch) => {
         const url = `https://${subdomain}-no-kpi.elastic.co/${buildIdUrl}downloads/beats/${beat}/${beat}-${version}-linux-${arch}.tar.gz`;
