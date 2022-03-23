@@ -20,6 +20,7 @@ import { isDefined } from '../../../common/types/guards';
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';
 import type { InfluencersFilterQuery } from '../../../common/types/es_client';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
+import { SWIM_LANE_LABEL_WIDTH } from '../explorer/swimlane_container';
 
 const MAX_CHARTS_PER_ROW = 4;
 
@@ -121,6 +122,18 @@ export class AnomalyExplorerChartsService {
     const boundsMin = bounds?.min ? bounds.min.valueOf() : undefined;
     const boundsMax = bounds?.max ? bounds.max.valueOf() : undefined;
 
+    const containerWidth = chartsContainerWidth + SWIM_LANE_LABEL_WIDTH;
+
+    // Calculate the number of charts per row, depending on the width available, to a max of 4.
+    let chartsPerRow = Math.min(Math.max(Math.floor(containerWidth / 550), 1), MAX_CHARTS_PER_ROW);
+
+    // Expand the charts to not have blank space in the row if necessary
+    if (maxSeries < chartsPerRow) {
+      chartsPerRow = maxSeries;
+    }
+
+    const maxSeriesToPlot = maxSeries ?? Math.max(chartsPerRow * 2, DEFAULT_MAX_SERIES_TO_PLOT);
+
     return this.mlApiServices.results
       .getAnomalyCharts$(
         jobIds,
@@ -129,18 +142,12 @@ export class AnomalyExplorerChartsService {
         selectedEarliestMs,
         selectedLatestMs,
         { min: boundsMin, max: boundsMax },
-        maxSeries,
+        maxSeriesToPlot,
         optimumNumPoints,
         influencerFilterQuery
       )
       .pipe(
         mapObservable((data) => {
-          // Calculate the number of charts per row, depending on the width available, to a max of 4.
-          const chartsPerRow = Math.min(
-            Math.max(Math.floor(chartsContainerWidth / 550), 1),
-            MAX_CHARTS_PER_ROW
-          );
-
           data.chartsPerRow = chartsPerRow;
 
           return data;
