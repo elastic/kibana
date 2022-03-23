@@ -90,6 +90,7 @@ export class TaskPollingLifecycle {
   private middleware: Middleware;
 
   private usageCounter?: UsageCounter;
+  private config: TaskManagerConfig;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -115,6 +116,7 @@ export class TaskPollingLifecycle {
     this.store = taskStore;
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
+    this.config = config;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -237,6 +239,7 @@ export class TaskPollingLifecycle {
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
+      eventLoopDelayConfig: { ...this.config.event_loop_delay },
     });
   };
 
