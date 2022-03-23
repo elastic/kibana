@@ -68,18 +68,16 @@ describe('RuleStatusDropdown', () => {
 
   test('renders status control', () => {
     const wrapper = mountWithIntl(<RuleStatusDropdown {...props} />);
-    expect(
-      wrapper.find('[data-test-subj="statusDropdown"] .euiBadge__childButton').first().props().title
-    ).toBe('Enabled');
+    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Enabled');
   });
 
   test('renders status control as disabled when rule is disabled', () => {
     const wrapper = mountWithIntl(
       <RuleStatusDropdown {...{ ...props, item: { ...props.item, enabled: false } }} />
     );
-    expect(
-      wrapper.find('[data-test-subj="statusDropdown"] .euiBadge__childButton').first().props().title
-    ).toBe('Disabled');
+    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe(
+      'Disabled'
+    );
   });
 
   test('renders status control as snoozed when rule is snoozed', () => {
@@ -90,9 +88,7 @@ describe('RuleStatusDropdown', () => {
         {...{ ...props, item: { ...props.item, snoozeEndTime: SNOOZE_END_TIME } }}
       />
     );
-    expect(
-      wrapper.find('[data-test-subj="statusDropdown"] .euiBadge__childButton').first().props().title
-    ).toBe('Snoozed');
+    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Snoozed');
     expect(wrapper.find('[data-test-subj="remainingSnoozeTime"]').first().text()).toBe('3 days');
   });
 
@@ -102,9 +98,7 @@ describe('RuleStatusDropdown', () => {
     const wrapper = mountWithIntl(
       <RuleStatusDropdown {...{ ...props, item: { ...props.item, muteAll: true } }} />
     );
-    expect(
-      wrapper.find('[data-test-subj="statusDropdown"] .euiBadge__childButton').first().props().title
-    ).toBe('Snoozed');
+    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Snoozed');
     expect(wrapper.find('[data-test-subj="remainingSnoozeTime"]').first().text()).toBe(
       'Indefinitely'
     );
@@ -116,8 +110,8 @@ describe('RuleStatusDropdown', () => {
         {...{ ...props, item: { ...props.item, enabled: false, snoozeEndTime: SNOOZE_END_TIME } }}
       />
     );
-    expect(
-      wrapper.find('[data-test-subj="statusDropdown"] .euiBadge__childButton').first().props().title
-    ).toBe('Disabled');
+    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe(
+      'Disabled'
+    );
   });
 });

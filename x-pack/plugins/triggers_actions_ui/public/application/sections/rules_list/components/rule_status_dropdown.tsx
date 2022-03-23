@@ -57,6 +57,9 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   useEffect(() => {
     setIsEnabled(item.enabled);
   }, [item.enabled]);
+  useEffect(() => {
+    setIsSnoozed(isItemSnoozed(item));
+  }, [item]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -132,6 +135,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
           closePopover={onClosePopover}
           panelPaddingSize="s"
           data-test-subj="statusDropdown"
+          title={badgeMessage}
         >
           <RuleStatusMenu
             onClosePopover={onClosePopover}
