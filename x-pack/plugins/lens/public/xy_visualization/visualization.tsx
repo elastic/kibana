@@ -471,9 +471,13 @@ export const getXyVisualization = ({
     );
   },
 
-  toExpression: (state, layers, attributes) =>
-    toExpression(state, layers, paletteService, attributes),
-  toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
+  shouldBuildDatasourceExpressionManually: () => true,
+
+  toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
+    toExpression(state, layers, paletteService, attributes, datasourceExpressionsByLayers),
+
+  toPreviewExpression: (state, layers, datasourceExpressionsByLayers = {}) =>
+    toPreviewExpression(state, layers, paletteService, datasourceExpressionsByLayers),
 
   getErrorMessages(state, datasourceLayers) {
     // Data error handling below here

@@ -873,7 +873,8 @@ export interface Visualization<T = unknown> {
   toExpression: (
     state: T,
     datasourceLayers: Record<string, DatasourcePublicAPI>,
-    attributes?: Partial<{ title: string; description: string }>
+    attributes?: Partial<{ title: string; description: string }>,
+    datasourceExpressionsByLayers?: Record<string, Ast>
   ) => ExpressionAstExpression | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.
@@ -881,7 +882,8 @@ export interface Visualization<T = unknown> {
    */
   toPreviewExpression?: (
     state: T,
-    datasourceLayers: Record<string, DatasourcePublicAPI>
+    datasourceLayers: Record<string, DatasourcePublicAPI>,
+    datasourceExpressionsByLayers?: Record<string, Ast>
   ) => ExpressionAstExpression | string | null;
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
@@ -906,6 +908,8 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
+
+  shouldBuildDatasourceExpressionManually?: () => boolean;
 }
 
 export interface LensFilterEvent {

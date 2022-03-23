@@ -71,7 +71,11 @@ import {
   ReferenceLineAnnotations,
 } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
-import { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common/types';
+import {
+  CommonXYDataLayerConfigResult,
+  CommonXYLayerConfigResult,
+  DataLayerConfigResult,
+} from '../../common/types';
 
 import './xy_chart.scss';
 
@@ -173,13 +177,13 @@ export function XYChart({
   });
 
   if (filteredLayers.length === 0) {
-    const dataLayers: CommonXYDataLayerConfigResult[] = layers.filter(isDataLayer);
-    const icon: IconType =
-      dataLayers.length > 0 ? getIconForSeriesType(dataLayers[0].seriesType) : 'bar';
+    const icon: IconType = getIconForSeriesType(
+      (layers?.[0] as DataLayerConfigResult)?.seriesType || 'bar'
+    );
     return <EmptyPlaceholder icon={icon} />;
   }
 
-  const dataLayers = filteredLayers.filter(isDataLayer);
+  const dataLayers: CommonXYDataLayerConfigResult[] = filteredLayers.filter(isDataLayer);
 
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = dataLayers[0]?.table.columns.find(

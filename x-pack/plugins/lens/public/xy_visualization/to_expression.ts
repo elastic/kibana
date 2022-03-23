@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import { Ast, toExpression as toExpressionAst } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import type { State, XYDataLayerConfig, XYReferenceLineLayerConfig, ValidLayer } from './types';
+import type {
+  State,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  ValidLayer,
+  ValidXYDataLayerConfig,
+} from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type { YConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
@@ -33,7 +39,8 @@ export const toExpression = (
   state: State,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {}
+  attributes: Partial<{ title: string; description: string }> = {},
+  datasourceExpressionsByLayers: Record<string, Ast>
 ): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
@@ -49,13 +56,21 @@ export const toExpression = (
     });
   });
 
-  return buildExpression(state, metadata, datasourceLayers, paletteService, attributes);
+  return buildExpression(
+    state,
+    metadata,
+    datasourceLayers,
+    paletteService,
+    attributes,
+    datasourceExpressionsByLayers
+  );
 };
 
 export function toPreviewExpression(
   state: State,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  paletteService: PaletteRegistry
+  paletteService: PaletteRegistry,
+  datasourceExpressionsByLayers: Record<string, Ast>
 ) {
   return toExpression(
     {
@@ -84,7 +99,8 @@ export function toPreviewExpression(
     },
     datasourceLayers,
     paletteService,
-    {}
+    {},
+    datasourceExpressionsByLayers
   );
 }
 
@@ -119,7 +135,8 @@ export const buildExpression = (
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {}
+  attributes: Partial<{ title: string; description: string }> = {},
+  datasourceExpressionsByLayers: Record<string, Ast>
 ): Ast | null => {
   const validLayers = state.layers
     .filter<ValidLayer>((layer): layer is ValidLayer => Boolean(layer.accessors.length))
@@ -144,7 +161,7 @@ export const buildExpression = (
     chain: [
       {
         type: 'function',
-        function: 'xyVis',
+        function: 'layeredXyVis',
         arguments: {
           title: [attributes?.title || ''],
           description: [attributes?.description || ''],
@@ -302,17 +319,20 @@ export const buildExpression = (
           hideEndzones: [state?.hideEndzones || false],
           valuesInLegend: [state?.valuesInLegend || false],
           layers: validLayers.map((layer) => {
+            const datasourceExpression = datasourceExpressionsByLayers[layer.layerId];
             if (isDataLayer(layer)) {
               return dataLayerToExpression(
                 layer,
                 datasourceLayers[layer.layerId],
                 metadata,
-                paletteService
+                paletteService,
+                datasourceExpression
               );
             }
             return referenceLineLayerToExpression(
               layer,
-              datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId]
+              datasourceLayers[layer.layerId],
+              datasourceExpression
             );
           }),
         },
@@ -323,14 +343,15 @@ export const buildExpression = (
 
 const referenceLineLayerToExpression = (
   layer: XYReferenceLineLayerConfig,
-  datasourceLayer: DatasourcePublicAPI
+  datasourceLayer: DatasourcePublicAPI,
+  datasourceExpression: Ast
 ): Ast => {
   return {
     type: 'expression',
     chain: [
       {
         type: 'function',
-        function: 'referenceLineLayer',
+        function: 'extendedReferenceLineLayer',
         arguments: {
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
@@ -339,6 +360,15 @@ const referenceLineLayerToExpression = (
             : [],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
+          table: [
+            {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'kibana', arguments: {} },
+                ...datasourceExpression.chain,
+              ],
+            },
+          ],
         },
       },
     ],
@@ -346,10 +376,11 @@ const referenceLineLayerToExpression = (
 };
 
 const dataLayerToExpression = (
-  layer: ValidLayer,
+  layer: ValidXYDataLayerConfig,
   datasourceLayer: DatasourcePublicAPI,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  paletteService: PaletteRegistry
+  paletteService: PaletteRegistry,
+  datasourceExpression: Ast
 ): Ast => {
   const columnToLabel = getColumnToLabelMap(layer, datasourceLayer);
 
@@ -367,7 +398,7 @@ const dataLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'dataLayer',
+        function: 'extendedDataLayer',
         arguments: {
           hide: [Boolean(layer.hide)],
           xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
@@ -383,6 +414,15 @@ const dataLayerToExpression = (
           seriesType: [layer.seriesType],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
+          table: [
+            {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'kibana', arguments: {} },
+                ...datasourceExpression.chain,
+              ],
+            },
+          ],
           ...(layer.palette
             ? {
                 palette: [

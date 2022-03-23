@@ -57,10 +57,12 @@ export interface XYReferenceLineLayerConfig
 
 export type XYLayerConfig = XYDataLayerConfig | XYReferenceLineLayerConfig;
 
-export interface ValidLayer extends XYDataLayerConfig {
+export interface ValidXYDataLayerConfig extends XYDataLayerConfig {
   xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
   layerId: string;
 }
+
+export type ValidLayer = ValidXYDataLayerConfig | XYReferenceLineLayerConfig;
 
 // Persisted parts of the state
 export interface XYState {

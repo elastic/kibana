@@ -9,11 +9,10 @@ import { Ast, AstFunction, fromExpression } from '@kbn/interpreter';
 import { DatasourceStates } from '../../state_management';
 import { Visualization, DatasourcePublicAPI, DatasourceMap } from '../../types';
 
-export function prependDatasourceExpression(
-  visualizationExpression: Ast | string | null,
+export function getDatasourceExpressionsByLayers(
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates
-): Ast | null {
+): null | Record<string, Ast> {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
   Object.entries(datasourceMap).forEach(([datasourceId, datasource]) => {
@@ -28,19 +27,41 @@ export function prependDatasourceExpression(
     });
   });
 
-  if (datasourceExpressions.length === 0 || visualizationExpression === null) {
+  if (datasourceExpressions.length === 0) {
     return null;
   }
-  const parsedDatasourceExpressions: Array<[string, Ast]> = datasourceExpressions.map(
-    ([layerId, expr]) => [layerId, typeof expr === 'string' ? fromExpression(expr) : expr]
+
+  return datasourceExpressions.reduce(
+    (exprs, [layerId, expr]) => ({
+      ...exprs,
+      [layerId]: typeof expr === 'string' ? fromExpression(expr) : expr,
+    }),
+    {}
   );
+}
+
+export function prependDatasourceExpression(
+  visualizationExpression: Ast | string | null,
+  datasourceMap: DatasourceMap,
+  datasourceStates: DatasourceStates
+): Ast | null {
+  const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
+    datasourceMap,
+    datasourceStates
+  );
+
+  if (datasourceExpressionsByLayers === null || visualizationExpression === null) {
+    return null;
+  }
+
+  const parsedDatasourceExpressions = Object.entries(datasourceExpressionsByLayers);
 
   const datafetchExpression: AstFunction = {
     type: 'function',
     function: 'lens_merge_tables',
     arguments: {
       layerIds: parsedDatasourceExpressions.map(([id]) => id),
-      tables: parsedDatasourceExpressions.map(([id, expr]) => expr),
+      tables: parsedDatasourceExpressions.map(([, expr]) => expr),
     },
   };
 
@@ -79,16 +100,32 @@ export function buildExpression({
   if (visualization === null) {
     return null;
   }
+
+  if (visualization.shouldBuildDatasourceExpressionManually?.()) {
+    const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
+      datasourceMap,
+      datasourceStates
+    );
+
+    const visualizationExpression = visualization.toExpression(
+      visualizationState,
+      datasourceLayers,
+      {
+        title,
+        description,
+      },
+      datasourceExpressionsByLayers ?? undefined
+    );
+
+    return typeof visualizationExpression === 'string'
+      ? fromExpression(visualizationExpression)
+      : visualizationExpression;
+  }
+
   const visualizationExpression = visualization.toExpression(visualizationState, datasourceLayers, {
     title,
     description,
   });
 
-  const completeExpression = prependDatasourceExpression(
-    visualizationExpression,
-    datasourceMap,
-    datasourceStates
-  );
-
-  return completeExpression;
+  return prependDatasourceExpression(visualizationExpression, datasourceMap, datasourceStates);
 }
