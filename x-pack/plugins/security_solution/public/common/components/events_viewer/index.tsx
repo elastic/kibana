@@ -11,7 +11,12 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
+import {
+  ControlColumnProps,
+  RowRenderer,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import { APP_ID, APP_UI_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
@@ -33,6 +38,7 @@ import {
   useFieldBrowserOptions,
   FieldEditorActions,
 } from '../../../timelines/components/fields_browser';
+import { useLoadDetailPanel } from '../../../timelines/components/side_panel/hooks/use_load_detail_panel';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -156,11 +162,22 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
+
+  const { openDetailsPanel, FlyoutDetailsPanel } = useLoadDetailPanel({
+    isFlyoutView: true,
+    entityType,
+    sourcerScope: SourcererScopeName.timeline,
+    timelineId: id,
+    tabType: TimelineTabs.query,
+  });
+
   const graphOverlay = useMemo(() => {
     const shouldShowOverlay =
       (graphEventId != null && graphEventId.length > 0) || sessionViewId !== null;
-    return shouldShowOverlay ? <GraphOverlay timelineId={id} /> : null;
-  }, [graphEventId, id, sessionViewId]);
+    return shouldShowOverlay ? (
+      <GraphOverlay timelineId={id} openDetailsPanel={openDetailsPanel} />
+    ) : null;
+  }, [graphEventId, id, sessionViewId, openDetailsPanel]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
@@ -240,14 +257,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             })}
           </InspectButtonContainer>
         </FullScreenContainer>
-        <DetailsPanel
-          browserFields={browserFields}
-          entityType={entityType}
-          docValueFields={docValueFields}
-          isFlyoutView
-          runtimeMappings={runtimeMappings}
-          timelineId={id}
-        />
+        {FlyoutDetailsPanel}
       </CasesContext>
     </>
   );
