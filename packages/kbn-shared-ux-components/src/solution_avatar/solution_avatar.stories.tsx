@@ -7,20 +7,17 @@
  */
 
 import React from 'react';
-import {
-  KibanaPageTemplateSolutionNavAvatar,
-  KibanaPageTemplateSolutionNavAvatarProps,
-} from './solution_nav_avatar';
+import { KibanaSolutionAvatar, KibanaSolutionAvatarProps } from './solution_avatar';
 
 export default {
   title: 'Page Template/Solution Nav Avatar',
   description: 'A wrapper around EuiAvatar, with some extra styling',
 };
 
-type Params = Pick<KibanaPageTemplateSolutionNavAvatarProps, 'size' | 'name'>;
+type Params = Pick<KibanaSolutionAvatarProps, 'size' | 'name'>;
 
 export const PureComponent = (params: Params) => {
-  return <KibanaPageTemplateSolutionNavAvatar {...params} />;
+  return <KibanaSolutionAvatar {...params} />;
 };
 
 PureComponent.argTypes = {

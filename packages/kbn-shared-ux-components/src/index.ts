@@ -100,7 +100,7 @@ export const IconButtonGroup = withSuspense(LazyIconButtonGroup);
  * `withSuspense` HOC to load this component.
  */
 export const KibanaSolutionAvatarLazy = React.lazy(() =>
-  import('./page_template/solution_avatar').then(({ KibanaSolutionAvatar }) => ({
+  import('./solution_avatar').then(({ KibanaSolutionAvatar }) => ({
     default: KibanaSolutionAvatar,
   }))
 );
