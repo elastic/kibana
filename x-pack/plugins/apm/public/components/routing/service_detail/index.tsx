@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { comparisonTypeRt } from '../../../../common/runtime_types/comparison_type_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
@@ -86,6 +86,10 @@ export const serviceDetail = {
             transactionType: t.string,
             refreshPaused: t.union([t.literal('true'), t.literal('false')]),
             refreshInterval: t.string,
+            page: toNumberRt,
+            pageSize: toNumberRt,
+            sortField: t.string,
+            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
           }),
         ]),
       }),

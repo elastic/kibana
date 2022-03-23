@@ -30,7 +30,6 @@ import { ElasticDocsLink } from '../links/elastic_docs_link';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 
 type ApiResponse =
@@ -90,13 +89,19 @@ export function TransactionsTable({
   const history = useHistory();
 
   const {
-    urlParams: {
+    query: {
+      comparisonEnabled,
+      comparisonType,
+      latencyAggregationType,
       page: urlPage = 0,
       pageSize: urlPageSize = numberOfTransactionsPerPage,
       sortField: urlSortField = 'impact',
       sortDirection: urlSortDirection = 'desc',
     },
-  } = useLegacyUrlParams();
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions',
+    '/services/{serviceName}/overview'
+  );
 
   const [tableOptions, setTableOptions] = useState<{
     page: { index: number; size: number };
@@ -118,12 +123,6 @@ export function TransactionsTable({
   const { index, size } = page;
 
   const { transactionType, serviceName } = useApmServiceContext();
-  const {
-    query: { comparisonEnabled, comparisonType, latencyAggregationType },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/transactions',
-    '/services/{serviceName}/overview'
-  );
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
