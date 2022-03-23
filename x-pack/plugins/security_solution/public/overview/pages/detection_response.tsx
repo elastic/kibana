@@ -24,6 +24,18 @@ import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING } from './translations';
 import { inputsSelectors } from '../../common/store/selectors';
 import { DonutChart } from '../../common/components/donut_chart';
 import { alertsData } from './mock_data';
+import {
+  STATUS_LOW_LABEL,
+  STATUS_MEDIUM_LABEL,
+  STATUS_HIGH_LABEL,
+} from '../../common/components/donut_chart/translations';
+import { DonutCard } from '../../common/components/donut_chart/card';
+
+const label = {
+  low: STATUS_LOW_LABEL,
+  medium: STATUS_MEDIUM_LABEL,
+  high: STATUS_HIGH_LABEL,
+};
 
 const DetectionResponseComponent = () => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
@@ -77,20 +89,15 @@ const DetectionResponseComponent = () => {
                   <EuiFlexItem>
                     {hasIndexRead && hasKibanaREAD && (
                       <EuiFlexGroup>
-                        {alertsData().map((data) => (
-                          <EuiFlexItem key={`alerts-status-${data.key}`}>
-                            <DonutChart
-                              height={180}
-                              {...data.statusBySeverity.buckets.reduce((acc, curr) => {
-                                return { ...acc, name: data.key, [curr.key]: curr.doc_count };
-                              }, {})}
-                            />
-                          </EuiFlexItem>
-                        ))}
+                        <DonutCard
+                          title="Alerts"
+                          donutData={alertsData()}
+                          id="alertByStatus"
+                          filterQuery={''}
+                        />
                       </EuiFlexGroup>
                     )}
                   </EuiFlexItem>
-                  <EuiFlexItem />
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>{'[cases chart]'}</EuiFlexItem>

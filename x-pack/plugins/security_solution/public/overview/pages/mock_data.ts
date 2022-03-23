@@ -6,21 +6,24 @@
  */
 
 import { Status } from '../../../common/detection_engine/schemas/common';
+import {
+  STATUS_LOW_LABEL,
+  STATUS_MEDIUM_LABEL,
+  STATUS_HIGH_LABEL,
+} from '../../common/components/donut_chart/translations';
+import {
+  BucketResult,
+  Severity,
+  sortBucketWithGivenValue,
+  StatusBucket,
+  StatusBySeverity,
+} from './utils';
 
-interface StatusBySeverityBucket {
-  key: 'high' | 'medium' | 'low';
-  doc_count: number;
-}
-interface StatusBySeverity {
-  doc_count_error_upper_bound: number;
-  sum_other_doc_count: number;
-  buckets: StatusBySeverityBucket[];
-}
-interface AlertsByStatusBucket {
-  key: Status;
-  doc_count: number;
-  statusBySeverity: StatusBySeverity;
-}
+const label = {
+  low: STATUS_LOW_LABEL,
+  medium: STATUS_MEDIUM_LABEL,
+  high: STATUS_HIGH_LABEL,
+};
 
 export const alertsData = () => {
   const response = {
@@ -111,19 +114,33 @@ export const alertsData = () => {
               ],
             },
           },
-        ],
+        ] as StatusBucket[],
       },
     },
   };
 
-  const sequence: Status[] = ['open', 'acknowledged', 'closed'];
-  const resp: AlertsByStatusBucket[] = [];
-  response.aggregations.alertsByStatus.buckets.forEach((bucket, idx) => {
-    const key = sequence.indexOf(bucket.key as Status);
-    if (key >= 0) {
-      resp[key] = bucket;
-    }
-  });
+  const statusSequence: Status[] = ['open', 'acknowledged', 'closed'];
+  const severitySequence: Severity[] = ['high', 'medium', 'low'];
 
+  const resp: BucketResult<StatusBucket> = sortBucketWithGivenValue(
+    response.aggregations.alertsByStatus.buckets,
+    statusSequence,
+    'key'
+  );
+  resp.forEach((bucket, idx) => {
+    const temp = sortBucketWithGivenValue(bucket.statusBySeverity.buckets, severitySequence, 'key');
+
+    resp[idx].buckets = temp.reduce((acc, curr) => {
+      return [
+        ...acc,
+        {
+          ...acc,
+          name: bucket.key,
+          value: curr.doc_count,
+          label: label[curr.key],
+        },
+      ];
+    }, []);
+  });
   return resp;
 };

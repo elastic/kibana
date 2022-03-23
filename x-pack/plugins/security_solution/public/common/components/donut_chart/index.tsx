@@ -12,15 +12,7 @@ import styled from 'styled-components';
 import { Chart, Datum, Partition, Settings, PartitionLayout, PartialTheme } from '@elastic/charts';
 import { DonutChartLegend } from './donut_chart_legend';
 import { ThemeContext } from './theme_context';
-
-interface DonutChartProps {
-  low: number;
-  height: number;
-  high: number;
-  medium: number;
-  showLegend?: boolean;
-  name?: string;
-}
+import { DonutChartProps } from './types';
 
 const themeOverrides: PartialTheme = {
   chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
@@ -35,59 +27,39 @@ const themeOverrides: PartialTheme = {
   },
 };
 
-export const DonutChart = ({
-  name,
-  height,
-  low,
-  high,
-  medium,
-  showLegend = true,
-}: DonutChartProps) => {
+export const DonutChart = ({ showLegend = true, data, name, height }: DonutChartProps) => {
   const {
     colors: { danger, dangerBehindText, mean, success },
     chartTheme,
   } = useContext(ThemeContext);
+  const sum = data.reduce((acc, curr) => acc + curr.value, 0);
   return (
     <EuiFlexGroup alignItems="stretch" justifyContent="center" responsive={false} gutterSize="none">
-      <EuiFlexItem grow={false} style={{ position: 'relative' }}>
-        {name && (
+      <EuiFlexItem grow={false} style={{ position: 'relative', alignItems: 'center' }}>
+        {data && data.length > 0 && (
           <EuiFlexGroup
             direction="column"
-            style={{ top: '42%', width: '100%', position: 'absolute', zIndex: 1 }}
+            style={{ top: '44%', width: '100%', maxWidth: '77px', position: 'absolute', zIndex: 1 }}
             gutterSize="none"
             alignItems="center"
             justifyContent="center"
           >
             <EuiFlexItem>
-              <EuiText size="s">
-                <strong>{high + low + medium}</strong>
-              </EuiText>
+              <strong>{sum}</strong>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText color={success} size="s">
-                {name}
-              </EuiText>
+            <EuiFlexItem className="eui-textTruncate" style={{ color: success }}>
+              <p className="eui-textTruncate">{name}</p>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        <Chart
-          size={height}
-          aria-label={i18n.translate('xpack.securitySolution.snapshot.donutChart.ariaLabel', {
-            defaultMessage: 'Pie chart showing the current status.',
-            values: { low, total: high + low + medium },
-          })}
-        >
+        <Chart size={height}>
           <Settings
             theme={[themeOverrides, chartTheme.theme ?? {}]}
             baseTheme={chartTheme.baseTheme}
           />
           <Partition
             id="spec_1"
-            data={[
-              { value: low, label: 'Low', name },
-              { value: high, label: 'High', name },
-              { value: medium, label: 'Medium', name },
-            ]}
+            data={data}
             layout={PartitionLayout.sunburst}
             valueAccessor={(d: Datum) => d.value as number}
             layers={[
@@ -119,13 +91,19 @@ export const DonutChart = ({
                   fillColor: '#fff',
                 },
               },
+              {
+                groupByRollup: (d: Datum) => d.name,
+                shape: {
+                  fillColor: '#fff',
+                },
+              },
             ]}
           />
         </Chart>
       </EuiFlexItem>
       {showLegend && (
         <EuiFlexItem style={{ alignSelf: 'center' }}>
-          <DonutChartLegend low={low} high={high} medium={medium} />
+          <DonutChartLegend data={data} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

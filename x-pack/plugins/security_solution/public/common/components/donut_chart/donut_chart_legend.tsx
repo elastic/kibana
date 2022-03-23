@@ -10,7 +10,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { DonutChartLegendRow } from './donut_chart_legend_row';
 import { ThemeContext } from './theme_context';
-import { STATUS_HIGH_LABEL, STATUS_LOW_LABEL, STATUS_MEDIUM_LABEL } from './translations';
+import { DonutChartData } from './types';
 
 const LegendContainer = styled.div`
   max-width: 150px;
@@ -21,38 +21,29 @@ const LegendContainer = styled.div`
   }
 `;
 
-interface Props {
-  low: number;
-  high: number;
-  medium: number;
+interface DonutChartLegendProps {
+  data: DonutChartData[];
 }
 
-export const DonutChartLegend = ({ low, high, medium }: Props) => {
+export const DonutChartLegend = ({ data }: DonutChartLegendProps) => {
   const {
     colors: { mean, danger, dangerBehindText },
   } = useContext(ThemeContext);
+  const colors = [danger, dangerBehindText, mean];
   return (
     <LegendContainer>
-      <DonutChartLegendRow
-        color={danger}
-        content={high}
-        message={STATUS_HIGH_LABEL}
-        data-test-subj={'donutChart-high'}
-      />
-      <EuiSpacer size="m" />
-      <DonutChartLegendRow
-        color={dangerBehindText}
-        content={medium}
-        message={STATUS_MEDIUM_LABEL}
-        data-test-subj={'donutChart-medium'}
-      />
-      <EuiSpacer size="m" />
-      <DonutChartLegendRow
-        color={mean}
-        content={low}
-        message={STATUS_LOW_LABEL}
-        data-test-subj={'donutChart-low'}
-      />
+      {data.map((d, idx) => (
+        <>
+          {idx !== 0 && <EuiSpacer size="m" />}
+          <DonutChartLegendRow
+            key={`donutChart-${d.name}-legend`}
+            color={colors[idx]}
+            content={d.value}
+            message={d.label}
+            data-test-subj={`donutChart-${d.name}-legend`}
+          />
+        </>
+      ))}
     </LegendContainer>
   );
 };
