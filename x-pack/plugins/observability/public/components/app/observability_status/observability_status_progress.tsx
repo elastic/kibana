@@ -23,7 +23,7 @@ import { useHasData } from '../../../hooks/use_has_data';
 const LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY = 'HIDE_GUIDED_SETUP';
 
 interface ObservabilityStatusProgressProps {
-  onViewDetailsClick: () => {};
+  onViewDetailsClick: () => void;
 }
 export function ObservabilityStatusProgress({
   onViewDetailsClick,
