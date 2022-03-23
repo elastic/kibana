@@ -19,7 +19,7 @@ const imageBase64 = Buffer.from(
   'base64'
 );
 
-describe.skip('PdfMaker', () => {
+describe('PdfMaker', () => {
   let layout: ReturnType<typeof createMockLayout>;
   let pdf: PdfMaker;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -41,14 +41,14 @@ describe.skip('PdfMaker', () => {
   });
 
   describe('worker', () => {
-    /**
-     * Leave this test skipped! It is a proof-of-concept for demonstrating that
-     * we correctly handle a worker OOM error. Due to the variability of when
-     * Node will terminate the worker thread for exceeding resource
-     * limits we cannot guarantee this test will always execute in a reasonable
-     * amount of time.
-     */
     it.skip('should report when the PDF worker runs out of memory instead of crashing the main thread', async () => {
+      /**
+       * Leave this test skipped! It is a proof-of-concept for demonstrating that
+       * we correctly handle a worker OOM error. Due to the variability of when
+       * Node will terminate the worker thread for exceeding resource
+       * limits we cannot guarantee this test will always execute in a reasonable
+       * amount of time.
+       */
       const leakyMaker = new (class MemoryLeakPdfMaker extends PdfMaker {
         // From local testing:
         // OOMs after 456.486 seconds with high young generation size
@@ -60,7 +60,7 @@ describe.skip('PdfMaker', () => {
       await expect(leakyMaker.generate()).rejects.toBeInstanceOf(errors.PdfWorkerOutOfMemoryError);
     });
 
-    it.skip('restarts the PDF worker if it crashes', async () => {
+    it('restarts the PDF worker if it crashes', async () => {
       const buggyMaker = new (class BuggyPdfMaker extends PdfMaker {
         protected workerModulePath = path.resolve(__dirname, './buggy_worker.js');
       })(layout, undefined, logger);
