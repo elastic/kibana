@@ -33,7 +33,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'lnsDatatable_rows > lns-dimensionTrigger'
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_rows')).to.eql(
-          'Top values of clientip'
+          'Top 3 values of clientip'
         );
 
         await PageObjects.lens.dragFieldToDimensionTrigger(
@@ -48,7 +48,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'lnsDatatable_rows > lns-empty-dimension'
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_rows', 2)).to.eql(
-          'Top values of @message.raw'
+          'Top 3 values of @message.raw'
         );
       });
 
@@ -56,8 +56,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.reorderDimensions('lnsDatatable_rows', 3, 1);
         await PageObjects.lens.waitForVisualization();
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsDatatable_rows')).to.eql([
-          'Top values of @message.raw',
-          'Top values of clientip',
+          'Top 3 values of @message.raw',
+          'Top 3 values of clientip',
           'bytes',
         ]);
       });
@@ -65,11 +65,11 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       it('should move the column to compatible dimension group', async () => {
         await PageObjects.lens.switchToVisualization('bar');
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
-          'Top values of @message.raw',
+          'Top 3 values of @message.raw',
         ]);
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
-        ).to.eql(['Top values of clientip']);
+        ).to.eql(['Top 3 values of clientip']);
 
         await PageObjects.lens.dragDimensionToDimension(
           'lnsXY_xDimensionPanel > lns-dimensionTrigger',
@@ -81,13 +81,13 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         );
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
-        ).to.eql(['Top values of @message.raw']);
+        ).to.eql(['Top 3 values of @message.raw']);
       });
 
       it('should move the column to non-compatible dimension group', async () => {
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
-        ).to.eql(['Top values of @message.raw']);
+        ).to.eql(['Top 3 values of @message.raw']);
 
         await PageObjects.lens.dragDimensionToDimension(
           'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
@@ -129,7 +129,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'Unique count of @message.raw [1]',
         ]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
-          'Top values of @message.raw',
+          'Top 5 values of @message.raw',
         ]);
       });
 
@@ -159,7 +159,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'Unique count of @timestamp'
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
-          'Top values of @message.raw'
+          'Top 3 values of @message.raw'
         );
       });
 
@@ -244,14 +244,14 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragFieldWithKeyboard('@message.raw', 1, true);
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
-        ).to.eql(['Top values of @message.raw']);
+        ).to.eql(['Top 3 values of @message.raw']);
         await PageObjects.lens.assertFocusedField('@message.raw');
       });
       it('should drop a field to an existing dimension replacing the old one', async () => {
         await PageObjects.lens.dragFieldWithKeyboard('clientip', 1, true);
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
-        ).to.eql(['Top values of clientip']);
+        ).to.eql(['Top 3 values of clientip']);
 
         await PageObjects.lens.assertFocusedField('clientip');
       });
@@ -319,7 +319,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.waitForVisualization();
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
-        ).to.eql(['Top values of clientip']);
+        ).to.eql(['Top 3 values of clientip']);
         await PageObjects.lens.openDimensionEditor(
           'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
         );
