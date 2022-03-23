@@ -25,6 +25,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { ToolingLog } from '@kbn/dev-utils';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import {
   CreateRulesSchema,
@@ -59,6 +60,7 @@ import {
 } from '../../plugins/security_solution/common/constants';
 import { RACAlert } from '../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 import { DetectionMetrics } from '../../plugins/security_solution/server/usage/detections/types';
+import { LegacyRuleActions } from '../../plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -637,7 +639,7 @@ export const createLegacyRuleAction = async (
     .query({ alert_id: alertId })
     .send({
       name: 'Legacy notification with one action',
-      interval: '1m',
+      interval: '1h',
       actions: [
         {
           id: connectorId,
@@ -1981,3 +1983,13 @@ export const getSimpleThreatMatch = (
   ],
   threat_filters: [],
 });
+
+/**
+ * Remove all timelines from the .kibana index
+ * @param es The ElasticSearch handle
+ */
+export const getLegacyActionSO = async (es: Client): Promise<SearchResponse<LegacyRuleActions>> =>
+  es.search({
+    index: '.kibana',
+    q: 'type:siem-detection-engine-rule-actions',
+  });

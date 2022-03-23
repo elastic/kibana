@@ -42,6 +42,7 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
+import { legacyMigrate } from '../../rules/utils';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
@@ -264,13 +265,25 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                if (!rule.enabled) {
-                  throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
-                  await rulesClient.enable({ id: rule.id });
+                const migratedRule = await legacyMigrate({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
+                // This should only be hit if `rule` passed into `legacyMigrate`
+                // is `null` or `rule.id` is null which right now, as typed, should not occur
+                if (migratedRule == null) {
+                  throw new BadRequestError(`An error occurred enabling rule with id:${rule.id}`);
+                }
+
+                if (!migratedRule.enabled) {
+                  throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
+                  await rulesClient.enable({ id: migratedRule.id });
                 }
 
                 return {
-                  ...rule,
+                  ...migratedRule,
                   enabled: true,
                 };
               },
@@ -282,13 +295,25 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                if (rule.enabled) {
-                  throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
-                  await rulesClient.disable({ id: rule.id });
+                const migratedRule = await legacyMigrate({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
+                // This should only be hit if `rule` passed into `legacyMigrate`
+                // is `null` or `rule.id` is null which right now, as typed, should not occur
+                if (migratedRule == null) {
+                  throw new BadRequestError(`An error occurred disabling rule with id:${rule.id}`);
+                }
+
+                if (migratedRule.enabled) {
+                  throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
+                  await rulesClient.disable({ id: migratedRule.id });
                 }
 
                 return {
-                  ...rule,
+                  ...migratedRule,
                   enabled: false,
                 };
               },
@@ -300,8 +325,20 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                const migratedRule = await legacyMigrate({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
+                // This should only be hit if `rule` passed into `legacyMigrate`
+                // is `null` or `rule.id` is null which right now, as typed, should not occur
+                if (migratedRule == null) {
+                  throw new BadRequestError(`An error occurred deleting rule with id:${rule.id}`);
+                }
+
                 await deleteRules({
-                  ruleId: rule.id,
+                  ruleId: migratedRule.id,
                   rulesClient,
                   ruleExecutionLog,
                 });
@@ -316,10 +353,24 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
+                const migratedRule = await legacyMigrate({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
+                // This should only be hit if `rule` passed into `legacyMigrate`
+                // is `null` or `rule.id` is null which right now, as typed, should not occur
+                if (migratedRule == null) {
+                  throw new BadRequestError(
+                    `An error occurred duplicating rule with id:${rule.id}`
+                  );
+                }
+
+                throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
 
                 const createdRule = await rulesClient.create({
-                  data: duplicateRule(rule, isRuleRegistryEnabled),
+                  data: duplicateRule(migratedRule, isRuleRegistryEnabled),
                 });
 
                 return createdRule;
@@ -357,9 +408,23 @@ export const performBulkActionRoute = (
 
                 throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
 
+                const migratedRule = await legacyMigrate({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
+                // This should only be hit if `rule` passed into `legacyMigrate`
+                // is `null` or `rule.id` is null which right now, as typed, should not occur
+                if (migratedRule == null) {
+                  throw new BadRequestError(
+                    `An error occurred duplicating rule with id:${rule.id}`
+                  );
+                }
+
                 const editedRule = body[BulkAction.edit].reduce(
                   (acc, action) => applyBulkActionEditToRule(acc, action),
-                  rule
+                  migratedRule
                 );
 
                 const { tags, params: { timelineTitle, timelineId } = {} } = editedRule;

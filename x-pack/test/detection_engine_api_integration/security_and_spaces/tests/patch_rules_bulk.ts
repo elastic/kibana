@@ -177,6 +177,59 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      xit('should bulk enable two rules and migrate their actions', async () => {
+        const [connector, rule1, rule2] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          createRule(supertest, log, getSimpleRule('rule-1', false)),
+          createRule(supertest, log, getSimpleRule('rule-2', false)),
+        ]);
+        await createLegacyRuleAction(supertest, rule1.id, connector.body.id);
+
+        // const ruleActions = await legacyGetRuleActionsSavedObject({
+        //   ruleAlertId: rule1._id,
+        //   savedObjectsClient,
+        //   logger,
+        // });
+
+        // patch a simple rule's name
+        const { body } = await supertest
+          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .set('kbn-xsrf', 'true')
+          .send([
+            { id: rule1.id, enabled: true },
+            { id: rule2.id, enabled: true },
+          ])
+          .expect(200);
+
+        // @ts-expect-error
+        body.forEach((response) => {
+          const outputRule = getSimpleRuleOutput(response.rule_id, true);
+          outputRule.actions = [
+            {
+              action_type_id: '.slack',
+              group: 'default',
+              id: connector.body.id,
+              params: {
+                message:
+                  'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+            },
+          ];
+          outputRule.throttle = '1m';
+          const bodyToCompare = removeServerGeneratedProperties(response);
+          expect(bodyToCompare).to.eql(outputRule);
+        });
+      });
+
       it('should patch a single rule property of name using the auto-generated id', async () => {
         const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
