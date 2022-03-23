@@ -394,11 +394,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                 },
               });
-
-              if (services.shouldStopExecution() && createdSignalsCount) {
-                // Rule execution was cancelled or timed out, but some alerts were already created
-                // TODO: custom error message?
-              }
             }
           } catch (error) {
             const errorMessage = error.message ?? '(no error message given)';
