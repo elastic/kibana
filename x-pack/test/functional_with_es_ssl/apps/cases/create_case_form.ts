@@ -9,15 +9,14 @@ import expect from '@kbn/expect';
 import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default ({ getPageObject, getService }: FtrProviderContext) => {
+export default ({ getService }: FtrProviderContext) => {
   describe('Create case', function () {
-    const common = getPageObject('common');
     const find = getService('find');
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
 
     before(async () => {
-      await common.navigateToApp('cases');
+      await cases.navigation.navigateToApp();
     });
 
     after(async () => {

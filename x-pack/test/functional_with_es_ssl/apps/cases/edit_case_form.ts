@@ -10,7 +10,6 @@ import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
-  const common = getPageObject('common');
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -21,7 +20,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   describe('Edit case', () => {
     // create the case to test on
     before(async () => {
-      await common.navigateToApp('cases');
+      await cases.navigation.navigateToApp();
       await cases.api.createNthRandomCases(1);
     });
 
@@ -30,7 +29,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await common.navigateToApp('cases');
+      await cases.navigation.navigateToApp();
       await cases.common.goToFirstListedCase();
       await header.waitUntilLoadingHasFinished();
     });
