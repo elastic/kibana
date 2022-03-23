@@ -1317,7 +1317,7 @@ export class RulesClient {
     const qNodeFilter =
       (authorizationFilter && filter
         ? nodeBuilder.and([
-            typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : filter,
+            typeof filter === 'string' ? fromKueryExpression(filter) : filter,
             authorizationFilter as KueryNode,
           ])
         : authorizationFilter) ?? filter;
@@ -1348,7 +1348,7 @@ export class RulesClient {
     const buckets = aggregations?.alertTypeId.buckets;
 
     if (buckets === undefined || buckets.length === 0) {
-      throw Error('Aggregation by alertTypeId|consumer is empty');
+      throw Error('Rules not found');
     }
 
     await pMap(buckets, async ({ key: [ruleType, consumer] }) => {
@@ -1477,7 +1477,7 @@ export class RulesClient {
               message: error.message,
               rule: {
                 id: rule.id,
-                name: rule.attributes.name,
+                name: rule.attributes?.name,
               },
             });
             this.auditLogger?.log(

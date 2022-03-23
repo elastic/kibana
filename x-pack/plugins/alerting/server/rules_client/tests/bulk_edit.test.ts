@@ -105,97 +105,113 @@ describe('bulkEdit()', () => {
 
   beforeEach(async () => {
     rulesClient = new RulesClient(rulesClientParams);
-    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
-    actionsClient.getBulk.mockReset();
-    actionsClient.getBulk.mockResolvedValue([
-      {
-        id: '1',
-        actionTypeId: 'test',
-        config: {
-          from: 'me@me.com',
-          hasAuth: false,
-          host: 'hello',
-          port: 22,
-          secure: null,
-          service: null,
-        },
-        isMissingSecrets: false,
-        name: 'email connector',
-        isPreconfigured: false,
-      },
-    ]);
+    // actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    // actionsClient.getBulk.mockReset();
+    // actionsClient.getBulk.mockResolvedValue([
+    //   {
+    //     id: '1',
+    //     actionTypeId: 'test',
+    //     config: {
+    //       from: 'me@me.com',
+    //       hasAuth: false,
+    //       host: 'hello',
+    //       port: 22,
+    //       secure: null,
+    //       service: null,
+    //     },
+    //     isMissingSecrets: false,
+    //     name: 'email connector',
+    //     isPreconfigured: false,
+    //   },
+    // ]);
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
     });
 
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
+    // ruleTypeRegistry.get.mockReturnValue({
+    //   id: 'myType',
+    //   name: 'Test',
+    //   actionGroups: [
+    //     { id: 'default', name: 'Default' },
+    //     { id: 'custom', name: 'Not the Default' },
+    //   ],
+    //   defaultActionGroupId: 'default',
+    //   minimumLicenseRequired: 'basic',
+    //   isExportable: true,
+    //   recoveryActionGroup: RecoveredActionGroup,
+    //   async executor() {},
+    //   producer: 'alerts',
+    // });
+
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      aggregations: {
+        alertTypeId: {
+          buckets: [{ key: ['myType', 'myApp'], key_as_string: 'myType|myApp', doc_count: 1 }],
+        },
+      },
+      saved_objects: [],
+      per_page: 0,
+      page: 0,
+      total: 1,
+    });
+
     encryptedSavedObjects.createPointInTimeFinderAsInternalUser = jest.fn().mockResolvedValue({
       close: jest.fn(),
       find: function* asyncGenerator() {
-        yield { saved_objects: [{ id: '1' }, { id: '2' }] };
+        yield {
+          saved_objects: [
+            {
+              id: '1',
+              type: 'alert',
+              attributes: {
+                enabled: true,
+                tags: ['foo'],
+                alertTypeId: 'myType',
+                schedule: { interval: '1m' },
+                consumer: 'myApp',
+                scheduledTaskId: 'task-123',
+                params: {},
+                throttle: null,
+                notifyWhen: null,
+                actions: [],
+              },
+              references: [],
+              version: '123',
+            },
+          ],
+        };
       },
     });
 
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
-    ruleTypeRegistry.get.mockReturnValue({
-      id: 'myType',
-      name: 'Test',
-      actionGroups: [
-        { id: 'default', name: 'Default' },
-        { id: 'custom', name: 'Not the Default' },
+    unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'alert',
+          attributes: {
+            enabled: true,
+            tags: ['foo'],
+            alertTypeId: 'myType',
+            schedule: { interval: '1m' },
+            consumer: 'myApp',
+            scheduledTaskId: 'task-123',
+            params: {},
+            throttle: null,
+            notifyWhen: null,
+            actions: [],
+          },
+          references: [],
+          version: '123',
+        },
       ],
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      recoveryActionGroup: RecoveredActionGroup,
-      async executor() {},
-      producer: 'alerts',
     });
   });
   describe('tags actions', () => {
-    beforeEach(() => {
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        aggregations: {
-          alertTypeId: {
-            buckets: [{ key: ['myType', 'myApp'], key_as_string: 'myType|myApp', doc_count: 1 }],
-          },
-        },
-        saved_objects: [],
-        per_page: 0,
-        page: 0,
-        total: 1,
-      });
-
-      encryptedSavedObjects.createPointInTimeFinderAsInternalUser = jest.fn().mockResolvedValue({
-        close: jest.fn(),
-        find: function* asyncGenerator() {
-          yield {
-            saved_objects: [
-              {
-                id: '1',
-                type: 'alert',
-                attributes: {
-                  enabled: true,
-                  tags: ['foo'],
-                  alertTypeId: 'myType',
-                  schedule: { interval: '1m' },
-                  consumer: 'myApp',
-                  scheduledTaskId: 'task-123',
-                  params: {},
-                  throttle: null,
-                  notifyWhen: null,
-                  actions: [],
-                },
-                references: [],
-                version: '123',
-              },
-            ],
-          };
-        },
-      });
-    });
-    test('adds new tag', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+    beforeEach(() => {});
+    test('should add new tag', async () => {
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -248,8 +264,8 @@ describe('bulkEdit()', () => {
       ]);
     });
 
-    test('delete tag', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+    test('should delete tag', async () => {
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -302,8 +318,8 @@ describe('bulkEdit()', () => {
       ]);
     });
 
-    test('set tags', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+    test('should set tags', async () => {
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -357,24 +373,141 @@ describe('bulkEdit()', () => {
     });
   });
 
-  // describe('rules', () => {
-  //   test('aggregates rules by alertTypeId and consumer', async () => {});
-
-  //   test('throws if ruleType is not enabled', async () => {});
-
-  //   test('throws if ruleType is not authorized', async () => {});
-  // });
-
   describe('ruleTypes aggregation and validation', () => {
-    test('aggregates rules by alertTypeId and consumer', async () => {});
+    test('should call unsecuredSavedObjectsClient.find for aggregations by alertTypeId and consumer', async () => {
+      await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        actions: [
+          {
+            field: 'tags',
+            action: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
 
-    test('throws if number of matched rules greater than 10_000', async () => {});
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
+        aggs: {
+          alertTypeId: {
+            multi_terms: {
+              terms: [
+                {
+                  field: 'alert.attributes.alertTypeId',
+                },
+                {
+                  field: 'alert.attributes.consumer',
+                },
+              ],
+            },
+          },
+        },
+        filter: 'alert.attributes.tags: "APM"',
+        page: 1,
+        perPage: 0,
+        type: 'alert',
+      });
+    });
 
-    test('throws aggregations result is empty', async () => {});
+    test('should throw if number of matched rules greater than 10_000', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        aggregations: {
+          alertTypeId: {
+            buckets: [{ key: ['myType', 'myApp'], key_as_string: 'myType|myApp', doc_count: 1 }],
+          },
+        },
+        saved_objects: [],
+        per_page: 0,
+        page: 0,
+        total: 10001,
+      });
 
-    test('throws if ruleType is not enabled', async () => {});
+      await expect(
+        rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          actions: [
+            {
+              field: 'tags',
+              action: 'add',
+              value: ['test-1'],
+            },
+          ],
+        })
+      ).rejects.toThrow('More than 10000 rules matched for bulk edit');
+    });
 
-    test('throws if ruleType is not authorized', async () => {});
+    test('should throw if aggregations result is empty', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        aggregations: {
+          alertTypeId: {
+            buckets: [],
+          },
+        },
+        saved_objects: [],
+        per_page: 0,
+        page: 0,
+        total: 0,
+      });
+
+      await expect(
+        rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          actions: [
+            {
+              field: 'tags',
+              action: 'add',
+              value: ['test-1'],
+            },
+          ],
+        })
+      ).rejects.toThrow('Rules not found');
+    });
+
+    test('should throw if ruleType is not enabled', async () => {
+      ruleTypeRegistry.ensureRuleTypeEnabled.mockImplementation(() => {
+        throw new Error('Not enabled');
+      });
+
+      await expect(
+        rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          actions: [
+            {
+              field: 'tags',
+              action: 'add',
+              value: ['test-1'],
+            },
+          ],
+        })
+      ).rejects.toThrow('Not enabled');
+
+      expect(ruleTypeRegistry.ensureRuleTypeEnabled).toHaveBeenLastCalledWith('myType');
+    });
+
+    test('should throw if ruleType is not authorized', async () => {
+      authorization.ensureAuthorized.mockImplementation(() => {
+        throw new Error('Unauthorized');
+      });
+
+      await expect(
+        rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          actions: [
+            {
+              field: 'tags',
+              action: 'add',
+              value: ['test-1'],
+            },
+          ],
+        })
+      ).rejects.toThrow('Unauthorized');
+
+      expect(authorization.ensureAuthorized).toHaveBeenLastCalledWith({
+        consumer: 'myApp',
+        entity: 'rule',
+        operation: 'update',
+        ruleTypeId: 'myType',
+      });
+    });
   });
 
   describe('apiKeys', () => {
