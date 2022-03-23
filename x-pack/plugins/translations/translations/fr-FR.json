@@ -8728,7 +8728,6 @@
     "xpack.enterpriseSearch.appSearch.documents.search.sortBy.ariaLabel": "Trier les résultats par",
     "xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.ascendingDropDownOptionLabel": "{fieldName} (croiss.)",
     "xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.descendingDropDownOptionLabel": "{fieldName} (décroiss.)",
-    "xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.recentlyUploaded": "Récemment chargé",
     "xpack.enterpriseSearch.appSearch.documents.title": "Documents",
     "xpack.enterpriseSearch.appSearch.editorRoleTypeDescription": "Les éditeurs peuvent gérer les paramètres de recherche.",
     "xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta": "Créer un moteur",
