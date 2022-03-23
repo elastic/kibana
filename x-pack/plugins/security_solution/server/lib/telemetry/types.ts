@@ -243,6 +243,44 @@ interface EndpointMetricOS {
   full: string;
 }
 
+// EP Metadata
+
+export interface EndpointMetadataAggregation {
+  hits: {
+    total: { value: number };
+  };
+  aggregations: {
+    endpoint_metadata: {
+      buckets: Array<{ key: string; doc_count: number; latest_metadata: EndpointMetadataHits }>;
+    };
+  };
+}
+
+interface EndpointMetadataHits {
+  hits: {
+    total: { value: number };
+    hits: EndpointMetadataDocument[];
+  };
+}
+
+export interface EndpointMetadataDocument {
+  _source: {
+    '@timestamp': string;
+    agent: {
+      id: string;
+      version: string;
+    };
+    Endpoint: {
+      capabilities: string[];
+    };
+    elastic: {
+      agent: {
+        id: string;
+      };
+    };
+  };
+}
+
 // List HTTP Types
 
 export const GetTrustedAppsRequestSchema = {

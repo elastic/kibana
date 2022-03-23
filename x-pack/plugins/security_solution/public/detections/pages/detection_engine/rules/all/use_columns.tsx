@@ -196,7 +196,7 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
             {value}
           </EuiText>
         ),
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '85px',
       },
@@ -204,7 +204,7 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
         field: 'severity',
         name: i18n.COLUMN_SEVERITY,
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '12%',
       },

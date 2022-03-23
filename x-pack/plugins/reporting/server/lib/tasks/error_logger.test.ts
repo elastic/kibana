@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createMockLevelLogger } from '../../test_helpers';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { errorLogger } from './error_logger';
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 
 describe('Execute Report Error Logger', () => {
   const errorLogSpy = jest.spyOn(logger, 'error');

@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(getSimplePreviewRule('', 3))
             .expect(200);
           const { logs } = getSimpleRulePreviewOutput(undefined, [
-            { errors: ['Invalid invocation count'], warnings: [] },
+            { errors: ['Invalid invocation count'], warnings: [], duration: 0 },
           ]);
           expect(body).to.eql({ logs });
         });

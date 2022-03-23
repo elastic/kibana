@@ -10,7 +10,7 @@ import { UserAtSpaceScenarios } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   AlertUtils,
   ESTestIndexTool,
@@ -105,7 +105,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 schedule: {
                   interval: '5m',
                 },

@@ -112,7 +112,6 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         esClient,
         usageCollection,
         soClient,
-        kibanaRequest: undefined,
         refreshCache: false,
       },
       context
@@ -135,7 +134,6 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         esClient,
         usageCollection,
         soClient,
-        kibanaRequest: undefined,
         refreshCache: false,
       },
       context
@@ -163,7 +161,6 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         esClient,
         usageCollection,
         soClient,
-        kibanaRequest: undefined,
         refreshCache: false,
       },
       context

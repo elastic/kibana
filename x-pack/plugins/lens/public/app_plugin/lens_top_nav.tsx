@@ -18,7 +18,8 @@ import {
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { tableHasFormulas } from '../../../../../src/plugins/data/common';
-import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
+import { exporters } from '../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   setState,
@@ -28,10 +29,16 @@ import {
   DispatchSetState,
 } from '../state_management';
 import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
+import {
+  combineQueryAndFilters,
+  getLayerMetaInfo,
+  getShowUnderlyingDataLabel,
+} from './show_underlying_data';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
   enableExportToCSV: boolean;
+  showOpenInDiscover?: boolean;
   showCancel: boolean;
   isByValueMode: boolean;
   allowByValue: boolean;
@@ -40,17 +47,20 @@ function getLensTopNavConfig(options: {
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
   contextOriginatingApp?: string;
+  isSaveable: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
     showCancel,
     allowByValue,
     enableExportToCSV,
+    showOpenInDiscover,
     showSaveAndReturn,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     tooltips,
     contextOriginatingApp,
+    isSaveable,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -87,6 +97,21 @@ function getLensTopNavConfig(options: {
         values: { contextOriginatingApp },
       }),
       disableButton: false,
+    });
+  }
+
+  if (showOpenInDiscover) {
+    topNavMenu.push({
+      label: getShowUnderlyingDataLabel(),
+      run: () => {},
+      testId: 'lnsApp_openInDiscover',
+      description: i18n.translate('xpack.lens.app.openInDiscoverAriaLabel', {
+        defaultMessage: 'Open underlying data in Discover',
+      }),
+      disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
+      tooltip: tooltips.showUnderlyingDataWarning,
+      target: '_blank',
+      href: actions.getUnderlyingDataUrl(),
     });
   }
 
@@ -149,7 +174,7 @@ function getLensTopNavConfig(options: {
       iconType: 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !savingToDashboardPermitted,
+      disableButton: !isSaveable,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),
@@ -183,7 +208,9 @@ export const LensTopNavMenu = ({
     uiSettings,
     application,
     attributeService,
+    discover,
     dashboardFeatureFlag,
+    dataViews,
   } = useKibana<LensAppServices>().services;
 
   const dispatch = useLensDispatch();
@@ -192,7 +219,7 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
 
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const {
@@ -237,7 +264,7 @@ export const LensTopNavMenu = ({
 
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
-      getIndexPatternsObjects(indexPatternIds, data.indexPatterns).then(
+      getIndexPatternsObjects(indexPatternIds, dataViews).then(
         ({ indexPatterns: indexPatternObjects, rejectedIds }) => {
           setIndexPatterns(indexPatternObjects);
           setRejectedIndexPatterns(rejectedIds);
@@ -250,7 +277,7 @@ export const LensTopNavMenu = ({
     rejectedIndexPatterns,
     datasourceMap,
     indexPatterns,
-    data.indexPatterns,
+    dataViews,
   ]);
 
   const { TopNavMenu } = navigation.ui;
@@ -290,6 +317,26 @@ export const LensTopNavMenu = ({
     filters,
     initialContext,
   ]);
+
+  const layerMetaInfo = useMemo(() => {
+    if (!activeDatasourceId || !discover) {
+      return;
+    }
+    return getLayerMetaInfo(
+      datasourceMap[activeDatasourceId],
+      datasourceStates[activeDatasourceId].state,
+      activeData,
+      application.capabilities
+    );
+  }, [
+    activeData,
+    activeDatasourceId,
+    datasourceMap,
+    datasourceStates,
+    discover,
+    application.capabilities,
+  ]);
+
   const topNavConfig = useMemo(() => {
     const baseMenuEntries = getLensTopNavConfig({
       showSaveAndReturn:
@@ -299,11 +346,13 @@ export const LensTopNavMenu = ({
             (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
         ) || Boolean(initialContextIsEmbedded),
       enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
+      showOpenInDiscover: Boolean(layerMetaInfo?.isVisible),
       isByValueMode: getIsByValueMode(),
       allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
       showCancel: Boolean(isLinkedToOriginatingApp),
       savingToLibraryPermitted,
       savingToDashboardPermitted,
+      isSaveable,
       contextOriginatingApp,
       tooltips: {
         showExportWarning: () => {
@@ -320,6 +369,9 @@ export const LensTopNavMenu = ({
             }
           }
           return undefined;
+        },
+        showUnderlyingDataWarning: () => {
+          return layerMetaInfo?.error;
         },
       },
       actions: {
@@ -354,7 +406,7 @@ export const LensTopNavMenu = ({
           }
         },
         saveAndReturn: () => {
-          if (savingToDashboardPermitted) {
+          if (isSaveable) {
             // disabling the validation on app leave because the document has been saved.
             onAppLeave((actions) => {
               return actions.default();
@@ -388,6 +440,31 @@ export const LensTopNavMenu = ({
             redirectToOrigin();
           }
         },
+        getUnderlyingDataUrl: () => {
+          if (!layerMetaInfo) {
+            return;
+          }
+          const { error, meta } = layerMetaInfo;
+          // If Discover is not available, return
+          // If there's no data, return
+          if (error || !discover || !meta) {
+            return;
+          }
+          const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
+            query,
+            filters,
+            meta,
+            indexPatterns
+          );
+
+          return discover.locator!.getRedirectUrl({
+            indexPatternId: meta.id,
+            timeRange: data.query.timefilter.timefilter.getTime(),
+            filters: newFilters,
+            query: newQuery,
+            columns: meta.columns,
+          });
+        },
       },
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
@@ -398,6 +475,7 @@ export const LensTopNavMenu = ({
     initialContextIsEmbedded,
     isSaveable,
     activeData,
+    layerMetaInfo,
     getIsByValueMode,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
@@ -414,6 +492,11 @@ export const LensTopNavMenu = ({
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,
+    discover,
+    query,
+    filters,
+    indexPatterns,
+    data.query.timefilter.timefilter,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

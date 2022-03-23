@@ -71,6 +71,7 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
     colorMode: 'palette',
     centralMajorMode,
     ...(centralMajorMode === 'custom' ? { labelMinor: style.subText } : {}),
+    percentageMode,
   });
 
   if (colorsRange && colorsRange.length) {
@@ -80,8 +81,8 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
       range: percentageMode ? 'percent' : 'number',
       continuity: 'none',
       gradient: true,
-      rangeMax: percentageMode ? 100 : Infinity,
-      rangeMin: 0,
+      rangeMax: percentageMode ? 100 : stopsWithColors.stop[stopsWithColors.stop.length - 1],
+      rangeMin: stopsWithColors.stop[0],
     });
 
     gauge.addArgument('palette', buildExpression([palette]));

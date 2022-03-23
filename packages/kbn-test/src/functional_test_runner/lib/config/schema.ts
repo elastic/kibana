@@ -114,6 +114,7 @@ export const schema = Joi.object()
         try: Joi.number().default(120000),
         waitFor: Joi.number().default(20000),
         esRequestTimeout: Joi.number().default(30000),
+        kibanaReportCompletion: Joi.number().default(60_000),
         kibanaStabilize: Joi.number().default(15000),
         navigateStatusPageCheck: Joi.number().default(250),
 
@@ -166,7 +167,9 @@ export const schema = Joi.object()
 
     mochaReporter: Joi.object()
       .keys({
-        captureLogOutput: Joi.boolean().default(!!process.env.CI),
+        captureLogOutput: Joi.boolean().default(
+          !!process.env.CI && !process.env.DISABLE_CI_LOG_OUTPUT_CAPTURE
+        ),
         sendToCiStats: Joi.boolean().default(!!process.env.CI),
       })
       .default(),
@@ -192,12 +195,17 @@ export const schema = Joi.object()
 
     esTestCluster: Joi.object()
       .keys({
-        license: Joi.string().default('basic'),
+        license: Joi.valid('basic', 'trial', 'gold').default('basic'),
         from: Joi.string().default('snapshot'),
-        serverArgs: Joi.array(),
+        serverArgs: Joi.array().items(Joi.string()),
         esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
+        ccs: Joi.object().keys({
+          remoteClusterUrl: Joi.string().uri({
+            scheme: /https?/,
+          }),
+        }),
       })
       .default(),
 
@@ -290,6 +298,7 @@ export const schema = Joi.object()
     security: Joi.object()
       .keys({
         roles: Joi.object().default(),
+        remoteEsRoles: Joi.object(),
         defaultRoles: Joi.array()
           .items(Joi.string())
           .when('$primary', {

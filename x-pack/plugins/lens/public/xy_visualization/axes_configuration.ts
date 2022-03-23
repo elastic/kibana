@@ -6,7 +6,7 @@
  */
 
 import { FormatFactory } from '../../common';
-import { AxisExtentConfig, XYLayerConfig } from '../../common/expressions';
+import { AxisExtentConfig, XYDataLayerConfig } from '../../common/expressions';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import type {
   IFieldFormat,
@@ -33,7 +33,7 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function groupAxesByType(layers: XYLayerConfig[], tables?: Record<string, Datatable>) {
+export function groupAxesByType(layers: XYDataLayerConfig[], tables?: Record<string, Datatable>) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -97,7 +97,7 @@ export function groupAxesByType(layers: XYLayerConfig[], tables?: Record<string,
 }
 
 export function getAxesConfiguration(
-  layers: XYLayerConfig[],
+  layers: XYDataLayerConfig[],
   shouldRotate: boolean,
   tables?: Record<string, Datatable>,
   formatFactory?: FormatFactory

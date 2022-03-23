@@ -14,7 +14,6 @@ import {
   cloneIndex,
   closePit,
   createIndex,
-  fetchIndices,
   openPit,
   OpenPitResponse,
   reindex,
@@ -35,6 +34,7 @@ import {
   removeWriteBlock,
   transformDocs,
   waitForIndexStatusYellow,
+  initAction,
 } from '../../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -111,10 +111,20 @@ describe('migration actions', () => {
     await esServer.stop();
   });
 
-  describe('fetchIndices', () => {
+  describe('initAction', () => {
+    afterAll(async () => {
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Remove persistent test settings
+            cluster: { routing: { allocation: { enable: null } } },
+          },
+        },
+      });
+    });
     it('resolves right empty record if no indices were found', async () => {
       expect.assertions(1);
-      const task = fetchIndices({ client, indices: ['no_such_index'] });
+      const task = initAction({ client, indices: ['no_such_index'] });
       await expect(task()).resolves.toMatchInlineSnapshot(`
                 Object {
                   "_tag": "Right",
@@ -124,7 +134,7 @@ describe('migration actions', () => {
     });
     it('resolves right record with found indices', async () => {
       expect.assertions(1);
-      const res = (await fetchIndices({
+      const res = (await initAction({
         client,
         indices: ['no_such_index', 'existing_index_with_docs'],
       })()) as Either.Right<unknown>;
@@ -138,6 +148,69 @@ describe('migration actions', () => {
           },
         })
       );
+    });
+    it('resolves left with cluster routing allocation disabled', async () => {
+      expect.assertions(3);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Disable all routing allocation
+            cluster: { routing: { allocation: { enable: 'none' } } },
+          },
+        },
+      });
+      const task = initAction({
+        client,
+        indices: ['existing_index_with_docs'],
+      });
+      await expect(task()).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "unsupported_cluster_routing_allocation",
+                },
+              }
+            `);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Allow routing to existing primaries only
+            cluster: { routing: { allocation: { enable: 'primaries' } } },
+          },
+        },
+      });
+      const task2 = initAction({
+        client,
+        indices: ['existing_index_with_docs'],
+      });
+      await expect(task2()).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "unsupported_cluster_routing_allocation",
+                },
+              }
+            `);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Allow routing to new primaries only
+            cluster: { routing: { allocation: { enable: 'new_primaries' } } },
+          },
+        },
+      });
+      const task3 = initAction({
+        client,
+        indices: ['existing_index_with_docs'],
+      });
+      await expect(task3()).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "unsupported_cluster_routing_allocation",
+                },
+              }
+            `);
     });
   });
 
@@ -822,6 +895,7 @@ describe('migration actions', () => {
         }
       `);
     });
+
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       await waitForIndexStatusYellow({
         client,
@@ -843,8 +917,8 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringMatching(
-            /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
+          message: expect.stringContaining(
+            '[timeout_exception] Timed out waiting for completion of [Task'
           ),
           type: 'wait_for_task_completion_timeout',
         },
@@ -1186,6 +1260,7 @@ describe('migration actions', () => {
 
       await expect(task()).rejects.toThrow('index_not_found_exception');
     });
+
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
@@ -1202,8 +1277,8 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringMatching(
-            /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
+          message: expect.stringContaining(
+            '[timeout_exception] Timed out waiting for completion of [Task'
           ),
           type: 'wait_for_task_completion_timeout',
         },

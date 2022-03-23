@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RiskScoreSortField, RiskSeverity } from '../../../common/search_strategy';
+
 export enum UsersType {
   page = 'page',
   details = 'details',
@@ -13,6 +15,7 @@ export enum UsersType {
 export enum UsersTableType {
   allUsers = 'allUsers',
   anomalies = 'anomalies',
+  risk = 'userRisk',
 }
 
 export type AllUsersTables = UsersTableType;
@@ -24,20 +27,27 @@ export interface BasicQueryPaginated {
 
 export type AllUsersQuery = BasicQueryPaginated;
 
-export interface TableUpdates {
-  activePage?: number;
-  limit?: number;
-  isPtrIncluded?: boolean;
-  // sort?: SortField<AllUsersFields>;
+export interface UsersRiskScoreQuery extends BasicQueryPaginated {
+  sort: RiskScoreSortField; // TODO fix it when be is implemented
+  severitySelection: RiskSeverity[];
 }
 
 export interface UsersQueries {
   [UsersTableType.allUsers]: AllUsersQuery;
   [UsersTableType.anomalies]: null | undefined;
+  [UsersTableType.risk]: UsersRiskScoreQuery;
+}
+
+export interface UserDetailsQueries {
+  [UsersTableType.anomalies]: null | undefined;
 }
 
 export interface UsersPageModel {
   queries: UsersQueries;
+}
+
+export interface UserDetailsPageModel {
+  queries: UserDetailsQueries;
 }
 
 export interface UsersDetailsQueries {
@@ -50,5 +60,5 @@ export interface UsersDetailsModel {
 
 export interface UsersModel {
   [UsersType.page]: UsersPageModel;
-  [UsersType.details]: UsersPageModel;
+  [UsersType.details]: UserDetailsPageModel;
 }

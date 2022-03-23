@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Annotation, GetAnnotationsResponse } from '../../../../common/types/annotations';
+import type { Annotation, GetAnnotationsResponse } from '../../../../common/types/annotations';
 import { http, http$ } from '../http_service';
 import { basePath } from './index';
 

@@ -30,6 +30,10 @@ const stories: Meta<{}> = {
             switch (endpoint) {
               case '/internal/apm/services':
                 return { items: [] };
+
+              case '/internal/apm/sorted_and_filtered_services':
+                return { services: [] };
+
               default:
                 return {};
             }

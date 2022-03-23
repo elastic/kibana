@@ -327,6 +327,33 @@ describe('Paginated Table Component', () => {
       );
       expect(wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"]').exists()).toBeFalsy();
     });
+
+    test('Should hide pagination if totalCount is zero', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={mockTheme}>
+          <PaginatedTable
+            activePage={0}
+            columns={getHostsColumns()}
+            headerCount={1}
+            headerSupplement={<p>{'My test supplement.'}</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
+            loading={false}
+            loadPage={loadPage}
+            pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
+            totalCount={0}
+            updateActivePage={updateActivePage}
+            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
+          />
+        </ThemeProvider>
+      );
+
+      expect(wrapper.find('[data-test-subj="numberedPagination"]').exists()).toBeFalsy();
+    });
   });
 
   describe('Events', () => {

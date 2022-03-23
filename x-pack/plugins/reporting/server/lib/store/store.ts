@@ -6,13 +6,14 @@
  */
 
 import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'src/core/server';
-import { LevelLogger, statuses } from '../';
-import { ReportingCore } from '../../';
+import type { ElasticsearchClient, Logger } from 'kibana/server';
+import { statuses } from '../';
+import type { ReportingCore } from '../../';
 import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
-import { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
-import { ReportTaskParams } from '../tasks';
-import { IReport, Report, ReportDocument, SavedReport } from './';
+import type { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
+import type { ReportTaskParams } from '../tasks';
+import type { IReport, Report, ReportDocument } from './';
+import { SavedReport } from './';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
@@ -83,12 +84,12 @@ export class ReportingStore {
   private client?: ElasticsearchClient;
   private ilmPolicyManager?: IlmPolicyManager;
 
-  constructor(private reportingCore: ReportingCore, private logger: LevelLogger) {
+  constructor(private reportingCore: ReportingCore, private logger: Logger) {
     const config = reportingCore.getConfig();
 
     this.indexPrefix = REPORTING_SYSTEM_INDEX;
     this.indexInterval = config.get('queue', 'indexInterval');
-    this.logger = logger.clone(['store']);
+    this.logger = logger.get('store');
   }
 
   private async getClient() {

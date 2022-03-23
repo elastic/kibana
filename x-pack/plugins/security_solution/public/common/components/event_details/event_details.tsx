@@ -40,7 +40,8 @@ import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
-import { HostRisk } from '../../containers/hosts_risk/types';
+import { HostRisk } from '../../../risk_score/containers';
+import { RelatedCases } from './related_cases';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -170,6 +171,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                 />
                 <EuiSpacer size="l" />
                 <Reason eventId={id} data={data} />
+                <RelatedCases eventId={id} />
                 <EuiHorizontalRule />
                 <AlertSummaryView
                   {...{
@@ -178,7 +180,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     browserFields,
                     isDraggable,
                     timelineId,
-                    title: i18n.HIGHLIGHTES_FIELDS,
+                    title: i18n.HIGHLIGHTED_FIELDS,
                   }}
                   goToTable={goToTableTab}
                 />

@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { css } from '@emotion/react';
+
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
+  EuiLink,
   EuiInMemoryTable,
   EuiPageHeader,
   EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
@@ -27,6 +26,8 @@ import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { SpacesList } from './spaces_list';
 import type { SpacesContextProps } from '../../../../../../x-pack/plugins/spaces/public';
+import { removeDataView, RemoveDataViewProps } from '../edit_index_pattern';
+import { deleteModalMsg } from './delete_modal_msg';
 
 const pagination = {
   initialPageSize: 10,
@@ -53,10 +54,6 @@ const securityDataView = i18n.translate(
 
 const securitySolution = 'security-solution';
 
-const flexItemStyles = css`
-  justify-content: center;
-`;
-
 interface Props extends RouteComponentProps {
   canSave: boolean;
   showCreateDialog?: boolean;
@@ -77,11 +74,13 @@ export const IndexPatternTable = ({
     dataViews,
     IndexPatternEditor,
     spaces,
+    overlays,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
+  const [selectedItems, setSelectedItems] = useState<IndexPatternTableItem[]>([]);
 
   const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
     if (!error) {
@@ -89,7 +88,38 @@ export const IndexPatternTable = ({
     }
   };
 
+  const renderDeleteButton = () => {
+    const clickHandler = removeDataView({
+      dataViews,
+      overlays,
+      uiSettings,
+      onDelete: () => loadDataViews(),
+    });
+    if (selectedItems.length === 0) {
+      return;
+    }
+    return (
+      <EuiButton
+        color="danger"
+        iconType="trash"
+        onClick={() => clickHandler(selectedItems, deleteModalMsg(selectedItems, !!spaces))}
+      >
+        <FormattedMessage
+          id="indexPatternManagement.dataViewTable.deleteButtonLabel"
+          defaultMessage="Delete {selectedItems, number} {selectedItems, plural,
+            one {Data View}
+            other {Data Views}
+}"
+          values={{ selectedItems: selectedItems.length }}
+        />
+      </EuiButton>
+    );
+  };
+
+  const deleteButton = renderDeleteButton();
+
   const search = {
+    toolsLeft: deleteButton && [deleteButton],
     query,
     onChange: handleOnChange,
     box: {
@@ -133,39 +163,70 @@ export const IndexPatternTable = ({
     [spaces]
   );
 
-  const columns = [
+  const removeHandler = removeDataView({
+    dataViews,
+    uiSettings,
+    overlays,
+    onDelete: () => loadDataViews(),
+  });
+
+  const alertColumn = {
+    name: 'Actions',
+    field: 'id',
+    width: '10%',
+    actions: [
+      {
+        name: i18n.translate('indexPatternManagement.dataViewTable.columnDelete', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n.translate(
+          'indexPatternManagement.dataViewTable.columnDeleteDescription',
+          {
+            defaultMessage: 'Delete this data view',
+          }
+        ),
+        icon: 'trash',
+        color: 'danger',
+        type: 'icon',
+        onClick: (dataView: RemoveDataViewProps) =>
+          removeHandler([dataView], deleteModalMsg([dataView], !!spaces)),
+        isPrimary: true,
+        'data-test-subj': 'action-delete',
+      },
+    ],
+  };
+
+  const columns: Array<EuiBasicTableColumn<IndexPatternTableItem>> = [
     {
       field: 'title',
       name: i18n.translate('indexPatternManagement.dataViewTable.nameColumn', {
         defaultMessage: 'Name',
       }),
+      width: '70%',
       render: (name: string, dataView: IndexPatternTableItem) => (
-        <>
-          <EuiFlexGroup gutterSize="s" wrap>
-            <EuiFlexItem grow={false} css={flexItemStyles}>
-              <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>
-                {name}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {dataView?.id?.indexOf(securitySolution) === 0 && (
-              <EuiFlexItem grow={false} css={flexItemStyles}>
-                <EuiBadge>{securityDataView}</EuiBadge>
-              </EuiFlexItem>
-            )}
-            {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
-              <EuiFlexItem grow={false} css={flexItemStyles} key={tagKey}>
-                <EuiBadge>{tagName}</EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </>
+        <div>
+          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>{name}</EuiLink>
+          {dataView?.id?.indexOf(securitySolution) === 0 && (
+            <>
+              &emsp;<EuiBadge>{securityDataView}</EuiBadge>
+            </>
+          )}
+          {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
+            <>
+              &emsp;<EuiBadge key={tagKey}>{tagName}</EuiBadge>
+            </>
+          ))}
+        </div>
       ),
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
     },
     {
       field: 'namespaces',
-      name: 'spaces',
+      name: i18n.translate('indexPatternManagement.dataViewTable.spacesColumn', {
+        defaultMessage: 'Spaces',
+      }),
+      width: '20%',
       render: (name: string, dataView: IndexPatternTableItem) => {
         return spaces ? (
           <SpacesList
@@ -173,7 +234,10 @@ export const IndexPatternTable = ({
             spaceIds={dataView.namespaces || []}
             id={dataView.id}
             title={dataView.title}
-            refresh={loadDataViews}
+            refresh={() => {
+              dataViews.clearCache(dataView.id);
+              loadDataViews();
+            }}
           />
         ) : (
           <></>
@@ -181,6 +245,10 @@ export const IndexPatternTable = ({
       },
     },
   ];
+
+  if (dataViews.getCanSaveSync()) {
+    columns.push(alertColumn);
+  }
 
   const createButton = canSave ? (
     <EuiButton
@@ -214,6 +282,10 @@ export const IndexPatternTable = ({
     <></>
   );
 
+  const selection = {
+    onSelectionChange: setSelectedItems,
+  };
+
   return (
     <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
       <EuiPageHeader
@@ -233,12 +305,13 @@ export const IndexPatternTable = ({
         <EuiInMemoryTable
           allowNeutralSort={false}
           itemId="id"
-          isSelectable={false}
+          isSelectable={dataViews.getCanSaveSync()}
           items={indexPatterns}
           columns={columns}
           pagination={pagination}
           sorting={sorting}
           search={search}
+          selection={selection}
         />
       </ContextWrapper>
       {displayIndexPatternEditor}

@@ -51,6 +51,10 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
     value: true,
   },
   {
+    key: 'git.autoRepositoryDetection',
+    value: false,
+  },
+  {
     key: 'typescript.tsserver.maxTsServerMemory',
     value: 4096,
   },

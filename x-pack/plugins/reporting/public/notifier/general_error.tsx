@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { ThemeServiceStart, ToastInput } from 'src/core/public';
@@ -17,7 +17,7 @@ export const getGeneralErrorToast = (
   theme: ThemeServiceStart
 ): ToastInput => ({
   text: toMountPoint(
-    <Fragment>
+    <>
       <EuiCallOut title={errorText} color="danger" iconType="alert">
         {err.toString()}
       </EuiCallOut>
@@ -28,7 +28,7 @@ export const getGeneralErrorToast = (
         id="xpack.reporting.publicNotifier.error.tryRefresh"
         defaultMessage="Try refreshing the page."
       />
-    </Fragment>,
+    </>,
     { theme$: theme.theme$ }
   ),
   iconType: undefined,

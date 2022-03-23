@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { Spaces } from '../../scenarios';
 import {
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   getEventLog,
   ESTestIndexTool,
@@ -62,7 +62,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.patternFiring',
                 schedule: { interval: '1s' },
                 throttle: null,
@@ -300,7 +300,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.multipleSearches',
                 schedule: { interval: '1s' },
                 throttle: null,
@@ -405,7 +405,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.patternFiring',
                 schedule: { interval: '1s' },
                 throttle: null,
@@ -599,7 +599,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.throw',
                 schedule: { interval: '1s' },
                 throttle: null,

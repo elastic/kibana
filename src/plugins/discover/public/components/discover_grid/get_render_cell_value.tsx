@@ -8,8 +8,7 @@
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
-
-import type { DataView, DataViewField } from 'src/plugins/data/common';
+import type { DataView, DataViewField } from 'src/plugins/data_views/public';
 import {
   EuiDataGridCellValueElementProps,
   EuiDescriptionList,

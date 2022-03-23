@@ -36,6 +36,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   }),
   URL: '/app/enterprise_search/content',
   LOGO: 'logoEnterpriseSearch',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
 export const APP_SEARCH_PLUGIN = {
@@ -88,4 +89,5 @@ export const READ_ONLY_MODE_HEADER = 'x-ent-search-read-only-mode';
 
 export const ENTERPRISE_SEARCH_KIBANA_COOKIE = '_enterprise_search';
 
-export const LOGS_SOURCE_ID = 'ent-search-logs';
+export const ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID = 'ent-search-logs';
+export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';

@@ -7,7 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from 'kibana/server';
-import { getEsErrorMessage, IAbortableEsClient } from '../../../../alerting/server';
+import type { ElasticsearchClient } from 'src/core/server';
+import { getEsErrorMessage } from '../../../../alerting/server';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 
@@ -16,14 +17,14 @@ export type { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
 
 export interface TimeSeriesQueryParameters {
   logger: Logger;
-  abortableEsClient: IAbortableEsClient;
+  esClient: ElasticsearchClient;
   query: TimeSeriesQuery;
 }
 
 export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
-  const { logger, abortableEsClient, query: queryParams } = params;
+  const { logger, esClient, query: queryParams } = params;
   const { index, timeWindowSize, timeWindowUnit, interval, timeField, dateStart, dateEnd } =
     queryParams;
 
@@ -128,7 +129,7 @@ export async function timeSeriesQuery(
 
   // console.log('time_series_query.ts request\n', JSON.stringify(esQuery, null, 4));
   try {
-    esResult = (await abortableEsClient.search(esQuery, { ignore: [404] })).body;
+    esResult = (await esClient.search(esQuery, { ignore: [404], meta: true })).body;
   } catch (err) {
     // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
     logger.warn(`${logPrefix} error: ${getEsErrorMessage(err)}`);

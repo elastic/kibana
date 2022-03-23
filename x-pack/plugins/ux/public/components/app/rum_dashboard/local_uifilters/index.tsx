@@ -110,7 +110,7 @@ function LocalUIFilters() {
               <FieldValueSuggestions
                 key={filterName}
                 sourceField={uxFiltersByName[filterName].fieldName}
-                indexPatternTitle={dataViewTitle}
+                dataViewTitle={dataViewTitle}
                 label={uxFiltersByName[filterName].title}
                 asCombobox={false}
                 selectedValue={

@@ -407,5 +407,21 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         '__internal_immutable:false',
       ]);
     });
+
+    it('8.2.0 migrates params to mapped_params for specific params properties', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:66560b6f-5ca4-41e2-a1a1-dcfd7117e124',
+        },
+        { meta: true }
+      );
+
+      expect(response.statusCode).to.equal(200);
+      expect(response.body._source?.alert?.mapped_params).to.eql({
+        risk_score: 90,
+        severity: '80-critical',
+      });
+    });
   });
 }

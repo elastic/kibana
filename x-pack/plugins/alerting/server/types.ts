@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
 import type {
   IRouter,
   RequestHandlerContext,
   SavedObjectReference,
-  ElasticsearchClient,
   IUiSettingsClient,
 } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -40,16 +38,13 @@ import {
   ActionVariable,
   SanitizedRuleConfig,
   RuleMonitoring,
+  MappedParams,
+  AlertExecutionStatusWarningReasons,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
-import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
-
+import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
-
-export interface ElasticsearchClientWithChild extends ElasticsearchClient {
-  child: Client['child'];
-}
 
 /**
  * @public
@@ -87,7 +82,6 @@ export interface AlertServices<
   };
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
-  search: IAbortableClusterClient;
 }
 
 export interface AlertExecutorOptions<
@@ -131,6 +125,7 @@ export type ExecutorType<
 export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
   validate: (object: unknown) => Params;
 }
+
 export interface RuleType<
   Params extends AlertTypeParams = never,
   ExtractedParams extends AlertTypeParams = never,
@@ -175,6 +170,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  config?: RuleTypeConfig;
 }
 export type UntypedRuleType = RuleType<
   AlertTypeParams,
@@ -204,6 +200,10 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   lastDuration?: number;
   error: null | {
     reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
+  warning: null | {
+    reason: AlertExecutionStatusWarningReasons;
     message: string;
   };
 }
@@ -236,6 +236,7 @@ export interface RawRule extends SavedObjectAttributes {
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
+  mapped_params?: MappedParams;
   scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
@@ -250,7 +251,7 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeEndTime?: string;
+  snoozeEndTime?: string | null; // Remove ? when this parameter is made available in the public API
 }
 
 export type AlertInfoParams = Pick<

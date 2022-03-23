@@ -24,6 +24,7 @@ import { useTimelineEvents } from '../../../timelines/containers';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
+import { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -33,9 +34,9 @@ jest.mock('../../../timelines/containers', () => ({
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
-const mockUseCreateFieldButton = jest.fn().mockReturnValue(<></>);
-jest.mock('../../../timelines/components/create_field_button', () => ({
-  useCreateFieldButton: (...params: unknown[]) => mockUseCreateFieldButton(...params),
+const mockUseFieldBrowserOptions = jest.fn();
+jest.mock('../../../timelines/components/fields_browser', () => ({
+  useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
 }));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
@@ -95,9 +96,9 @@ describe('StatefulEventsViewer', () => {
 
   test('it closes field editor when unmounted', async () => {
     const mockCloseEditor = jest.fn();
-    mockUseCreateFieldButton.mockImplementation((_, __, fieldEditorActionsRef) => {
-      fieldEditorActionsRef.current = { closeEditor: mockCloseEditor };
-      return <></>;
+    mockUseFieldBrowserOptions.mockImplementation(({ editorActionsRef }) => {
+      editorActionsRef.current = { closeEditor: mockCloseEditor };
+      return {};
     });
 
     const wrapper = mount(

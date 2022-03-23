@@ -17,6 +17,8 @@ import {
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { ToolbarPopover } from '../shared_components';
 import { LegendLocationSettings } from './legend_location_settings';
+import { ColumnsNumberSetting } from './columns_number_setting';
+import { LegendSizeSettings } from './legend_size_settings';
 import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 import { TooltipWrapper } from './tooltip_wrapper';
 import { useDebouncedValue } from './debounced_value';
@@ -118,6 +120,14 @@ export interface LegendSettingsPopoverProps {
    * Button group position
    */
   groupPosition?: ToolbarButtonProps['groupPosition'];
+  /**
+   * Legend size in pixels
+   */
+  legendSize?: number;
+  /**
+   * Callback on legend size change
+   */
+  onLegendSizeChange: (size?: number) => void;
 }
 
 const DEFAULT_TRUNCATE_LINES = 1;
@@ -177,6 +187,8 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   onMaxLinesChange = () => {},
   shouldTruncate,
   onTruncateLegendChange = () => {},
+  legendSize,
+  onLegendSizeChange,
 }) => {
   return (
     <ToolbarPopover
@@ -212,12 +224,24 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
         verticalAlignment={verticalAlignment}
         horizontalAlignment={horizontalAlignment}
         onAlignmentChange={onAlignmentChange}
-        floatingColumns={floatingColumns}
-        onFloatingColumnsChange={onFloatingColumnsChange}
         isDisabled={mode === 'hide'}
         position={position}
         onPositionChange={onPositionChange}
       />
+      <LegendSizeSettings
+        legendSize={legendSize}
+        onLegendSizeChange={onLegendSizeChange}
+        isVerticalLegend={!position || position === Position.Left || position === Position.Right}
+        isDisabled={mode === 'hide'}
+      />
+      {location && (
+        <ColumnsNumberSetting
+          floatingColumns={floatingColumns}
+          onFloatingColumnsChange={onFloatingColumnsChange}
+          isDisabled={mode === 'hide'}
+          isLegendOutside={location === 'outside'}
+        />
+      )}
       <EuiFormRow
         display="columnCompressedSwitch"
         label={i18n.translate('xpack.lens.shared.truncateLegend', {

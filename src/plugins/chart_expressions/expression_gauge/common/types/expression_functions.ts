@@ -45,6 +45,8 @@ export interface GaugeState {
   colorMode?: GaugeColorMode;
   palette?: PaletteOutput<CustomPaletteParams>;
   shape: GaugeShape;
+  /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
+  percentageMode?: boolean;
 }
 
 export type GaugeArguments = GaugeState & {

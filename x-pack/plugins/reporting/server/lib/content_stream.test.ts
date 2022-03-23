@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import type { Logger } from 'kibana/server';
 import { set } from 'lodash';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { createMockLevelLogger } from '../test_helpers';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { ContentStream } from './content_stream';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let logger: ReturnType<typeof createMockLevelLogger>;
+  let logger: Logger;
   let stream: ContentStream;
   let base64Stream: ContentStream;
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    logger = createMockLevelLogger();
+    logger = loggingSystemMock.createLogger();
     stream = new ContentStream(
       client,
       logger,

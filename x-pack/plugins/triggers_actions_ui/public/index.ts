@@ -8,11 +8,14 @@
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
 
+import { PluginInitializerContext } from 'kibana/server';
 import { Plugin } from './plugin';
 
 export type {
   RuleAction,
   Rule,
+  RuleType,
+  RuleTypeIndex,
   RuleTypeModel,
   ActionType,
   ActionTypeRegistryContract,
@@ -25,6 +28,7 @@ export type {
   RuleFlyoutCloseReason,
   RuleTypeParams,
   AsApiContract,
+  RuleTableItem,
 } from './types';
 
 export {
@@ -39,13 +43,20 @@ export { AlertConditions, AlertConditionsGroup } from './application/sections';
 
 export * from './common';
 
-export function plugin() {
-  return new Plugin();
+export function plugin(context: PluginInitializerContext) {
+  return new Plugin(context);
 }
 
 export { Plugin };
 export * from './plugin';
+// TODO remove this import when we expose the Rules tables as a component
+export { loadRules } from './application/lib/rule_api/rules';
+export { deleteRules } from './application/lib/rule_api/delete';
+export { enableRule } from './application/lib/rule_api/enable';
+export { disableRule } from './application/lib/rule_api/disable';
+export { muteRule } from './application/lib/rule_api/mute';
 export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
+export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
 
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 

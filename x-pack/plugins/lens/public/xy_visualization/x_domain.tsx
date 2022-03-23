@@ -10,7 +10,7 @@ import React from 'react';
 import moment from 'moment';
 import { Endzones } from '../../../../../src/plugins/charts/public';
 import type { LensMultiTable } from '../../common';
-import type { LayerArgs } from '../../common/expressions';
+import type { DataLayerArgs } from '../../common/expressions';
 import { search } from '../../../../../src/plugins/data/public';
 
 export interface XDomain {
@@ -19,7 +19,7 @@ export interface XDomain {
   minInterval?: number;
 }
 
-export const getAppliedTimeRange = (layers: LayerArgs[], data: LensMultiTable) => {
+export const getAppliedTimeRange = (layers: DataLayerArgs[], data: LensMultiTable) => {
   return Object.entries(data.tables)
     .map(([tableId, table]) => {
       const layer = layers.find((l) => l.layerId === tableId);
@@ -37,7 +37,7 @@ export const getAppliedTimeRange = (layers: LayerArgs[], data: LensMultiTable) =
 };
 
 export const getXDomain = (
-  layers: LayerArgs[],
+  layers: DataLayerArgs[],
   data: LensMultiTable,
   minInterval: number | undefined,
   isTimeViz: boolean,

@@ -12,24 +12,22 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiPopover,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
+import useObservable from 'react-use/lib/useObservable';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
 import { useMlKibana } from '../contexts/kibana';
-import { TimeBuckets } from '../util/time_buckets';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import { explorerService } from './explorer_dashboard_service';
 import { ExplorerState } from './reducers/explorer_reducer';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
@@ -41,6 +39,10 @@ import { isDefined } from '../../../common/types/guards';
 import { MlTooltipComponent } from '../components/chart_tooltip';
 import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
+import { useAnomalyExplorerContext } from './anomaly_explorer_context';
+import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
+import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
+import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -51,58 +53,89 @@ function mapSwimlaneOptionsToEuiOptions(options: string[]) {
 
 interface AnomalyTimelineProps {
   explorerState: ExplorerState;
-  setSelectedCells: (cells?: any) => void;
 }
 
 export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
-  ({ explorerState, setSelectedCells }) => {
+  ({ explorerState }) => {
     const {
       services: {
-        uiSettings,
         application: { capabilities },
       },
     } = useMlKibana();
+
+    const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
+      useAnomalyExplorerContext();
+
+    const setSelectedCells = anomalyTimelineStateService.setSelectedCells.bind(
+      anomalyTimelineStateService
+    );
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
 
     const canEditDashboards = capabilities.dashboard?.createNew ?? false;
 
-    const timeBuckets = useMemo(() => {
-      return new TimeBuckets({
-        'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-        'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-        dateFormat: uiSettings.get('dateFormat'),
-        'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-      });
-    }, [uiSettings]);
+    const timeBuckets = useTimeBuckets();
 
-    const {
-      filterActive,
-      selectedCells,
-      viewByLoadedForTimeFormatted,
-      viewBySwimlaneDataLoading,
-      viewBySwimlaneFieldName,
-      viewBySwimlaneOptions,
-      selectedJobs,
-      viewByFromPage,
-      viewByPerPage,
-      swimlaneLimit,
-      loading,
-      overallAnnotations,
-      swimLaneSeverity,
-      overallSwimlaneData,
-      viewBySwimlaneData,
-      swimlaneContainerWidth,
-    } = explorerState;
+    const { overallAnnotations } = explorerState;
 
-    const [severityUpdate, setSeverityUpdate] = useState(swimLaneSeverity);
+    const { filterActive } = useObservable(
+      anomalyExplorerCommonStateService.getFilterSettings$(),
+      anomalyExplorerCommonStateService.getFilterSettings()
+    );
+
+    const swimlaneLimit = useObservable(anomalyTimelineStateService.getSwimLaneCardinality$());
+
+    const selectedJobs = useObservable(anomalyExplorerCommonStateService.getSelectedJobs$());
+
+    const loading = useObservable(anomalyTimelineStateService.isOverallSwimLaneLoading$(), true);
+
+    const swimlaneContainerWidth = useObservable(
+      anomalyTimelineStateService.getContainerWidth$(),
+      anomalyTimelineStateService.getContainerWidth()
+    );
+    const viewBySwimlaneDataLoading = useObservable(
+      anomalyTimelineStateService.isViewBySwimLaneLoading$(),
+      true
+    );
+
+    const overallSwimlaneData = useObservable(
+      anomalyTimelineStateService.getOverallSwimLaneData$()
+    );
+
+    const viewBySwimlaneData = useObservable(anomalyTimelineStateService.getViewBySwimLaneData$());
+    const selectedCells = useObservable(anomalyTimelineStateService.getSelectedCells$());
+    const swimLaneSeverity = useObservable(anomalyTimelineStateService.getSwimLaneSeverity$());
+    const viewBySwimlaneFieldName = useObservable(
+      anomalyTimelineStateService.getViewBySwimlaneFieldName$()
+    );
+
+    const viewBySwimlaneOptions = useObservable(
+      anomalyTimelineStateService.getViewBySwimLaneOptions$(),
+      anomalyTimelineStateService.getViewBySwimLaneOptions()
+    );
+
+    const { viewByPerPage, viewByFromPage } = useObservable(
+      anomalyTimelineStateService.getSwimLanePagination$(),
+      anomalyTimelineStateService.getSwimLanePagination()
+    );
+
+    const [severityUpdate, setSeverityUpdate] = useState(
+      anomalyTimelineStateService.getSwimLaneSeverity()
+    );
+
+    const timeRange = getTimeBoundsFromSelection(selectedCells);
+
+    const viewByLoadedForTimeFormatted = timeRange
+      ? `${formatHumanReadableDateTime(timeRange.earliestMs)} - ${formatHumanReadableDateTime(
+          timeRange.latestMs
+        )}`
+      : null;
 
     useDebounce(
       () => {
         if (severityUpdate === swimLaneSeverity) return;
-
-        explorerService.setSwimLaneSeverity(severityUpdate!);
+        anomalyTimelineStateService.setSeverity(severityUpdate!);
       },
       500,
       [severityUpdate, swimLaneSeverity]
@@ -153,6 +186,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           : undefined,
       [overallSwimlaneData]
     );
+
+    const onResize = useCallback((value: number) => {
+      anomalyTimelineStateService.setContainerWidth(value);
+    }, []);
 
     return (
       <>
@@ -213,7 +250,9 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     id="selectViewBy"
                     options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
                     value={viewBySwimlaneFieldName}
-                    onChange={(e) => explorerService.setViewBySwimlaneFieldName(e.target.value)}
+                    onChange={(e) => {
+                      anomalyTimelineStateService.setViewBySwimLaneFieldName(e.target.value);
+                    }}
                   />
                 </EuiFlexItem>
               </>
@@ -255,21 +294,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 )}
               </div>
             </EuiFlexItem>
-
-            {selectedCells ? (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={setSelectedCells.bind(null, undefined)}
-                  data-test-subj="mlAnomalyTimelineClearSelection"
-                >
-                  <FormattedMessage
-                    id="xpack.ml.explorer.clearSelectionLabel"
-                    defaultMessage="Clear selection"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            ) : null}
+            <EuiFlexItem grow={false} style={{ visibility: selectedCells ? 'visible' : 'hidden' }}>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={setSelectedCells.bind(anomalyTimelineStateService, undefined)}
+                data-test-subj="mlAnomalyTimelineClearSelection"
+              >
+                <FormattedMessage
+                  id="xpack.ml.explorer.clearSelectionLabel"
+                  defaultMessage="Clear selection"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
@@ -278,7 +314,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               <MlTooltipComponent>
                 {(tooltipService) => (
                   <SwimlaneAnnotationContainer
-                    chartWidth={swimlaneContainerWidth}
+                    chartWidth={swimlaneContainerWidth!}
                     domain={annotationXDomain}
                     annotationsData={annotations}
                     tooltipService={tooltipService}
@@ -298,18 +334,14 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             swimlaneType={SWIMLANE_TYPE.OVERALL}
             selection={overallCellSelection}
             onCellsSelection={setSelectedCells}
-            onResize={explorerService.setSwimlaneContainerWidth}
+            onResize={onResize}
             isLoading={loading}
             noDataWarning={
-              <EuiEmptyPrompt
-                titleSize="xxs"
-                style={{ padding: 0 }}
-                title={
-                  <h2>
-                    <NoOverallData />
-                  </h2>
-                }
-              />
+              <EuiText textAlign={'center'}>
+                <h5>
+                  <NoOverallData />
+                </h5>
+              </EuiText>
             }
             showTimeline={false}
             showLegend={false}
@@ -327,42 +359,42 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               swimlaneType={SWIMLANE_TYPE.VIEW_BY}
               selection={selectedCells}
               onCellsSelection={setSelectedCells}
-              onResize={explorerService.setSwimlaneContainerWidth}
+              onResize={onResize}
               fromPage={viewByFromPage}
               perPage={viewByPerPage}
               swimlaneLimit={swimlaneLimit}
               onPaginationChange={({ perPage: perPageUpdate, fromPage: fromPageUpdate }) => {
                 if (perPageUpdate) {
-                  explorerService.setViewByPerPage(perPageUpdate);
+                  anomalyTimelineStateService.setSwimLanePagination({
+                    viewByPerPage: perPageUpdate,
+                  });
                 }
                 if (fromPageUpdate) {
-                  explorerService.setViewByFromPage(fromPageUpdate);
+                  anomalyTimelineStateService.setSwimLanePagination({
+                    viewByFromPage: fromPageUpdate,
+                  });
                 }
               }}
               isLoading={loading || viewBySwimlaneDataLoading}
               noDataWarning={
-                <EuiEmptyPrompt
-                  titleSize="xxs"
-                  style={{ padding: 0 }}
-                  title={
-                    <h2>
-                      {typeof viewBySwimlaneFieldName === 'string' ? (
-                        viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
-                          <FormattedMessage
-                            id="xpack.ml.explorer.noResultForSelectedJobsMessage"
-                            defaultMessage="No results found for selected {jobsCount, plural, one {job} other {jobs}}"
-                            values={{ jobsCount: selectedJobs?.length ?? 1 }}
-                          />
-                        ) : (
-                          <ExplorerNoInfluencersFound
-                            viewBySwimlaneFieldName={viewBySwimlaneFieldName}
-                            showFilterMessage={filterActive === true}
-                          />
-                        )
-                      ) : null}
-                    </h2>
-                  }
-                />
+                <EuiText textAlign={'center'}>
+                  <h5>
+                    {typeof viewBySwimlaneFieldName === 'string' ? (
+                      viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
+                        <FormattedMessage
+                          id="xpack.ml.explorer.noResultForSelectedJobsMessage"
+                          defaultMessage="No results found for selected {jobsCount, plural, one {job} other {jobs}}"
+                          values={{ jobsCount: selectedJobs?.length ?? 1 }}
+                        />
+                      ) : (
+                        <ExplorerNoInfluencersFound
+                          viewBySwimlaneFieldName={viewBySwimlaneFieldName}
+                          showFilterMessage={filterActive === true}
+                        />
+                      )
+                    ) : null}
+                  </h5>
+                </EuiText>
               }
             />
           )}

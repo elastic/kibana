@@ -7,8 +7,9 @@
 
 import type { AxisExtentConfigResult, AxisTitlesVisibilityConfigResult } from './axis_config';
 import type { FittingFunction } from './fitting_function';
+import type { EndValue } from './end_value';
 import type { GridlinesConfigResult } from './grid_lines_config';
-import type { LayerArgs } from './layer_config';
+import type { DataLayerArgs } from './layer_config';
 import type { LegendConfigResult } from './legend_config';
 import type { TickLabelsConfigResult } from './tick_labels_config';
 import type { LabelsOrientationConfigResult } from './labels_orientation_config';
@@ -27,8 +28,10 @@ export interface XYArgs {
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
   valueLabels: ValueLabelConfig;
-  layers: LayerArgs[];
+  layers: DataLayerArgs[];
   fittingFunction?: FittingFunction;
+  endValue?: EndValue;
+  emphasizeFitting?: boolean;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
   gridlinesVisibilitySettings?: GridlinesConfigResult;

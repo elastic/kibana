@@ -17,6 +17,8 @@ export function createMockDatasource(id: string): DatasourceMock {
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
     getVisualDefaults: jest.fn(),
+    getSourceId: jest.fn(),
+    getFilters: jest.fn(),
   };
 
   return {

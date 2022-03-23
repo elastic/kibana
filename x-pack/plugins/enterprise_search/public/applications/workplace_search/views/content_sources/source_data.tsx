@@ -511,7 +511,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchSharePoint,
+      documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
       applicationPortalUrl: 'https://portal.azure.com/',
     },
     objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
@@ -533,6 +533,7 @@ export const staticSourceData: SourceDataItem[] = [
     internalConnectorAvailable: true,
     externalConnectorAvailable: false,
     customConnectorAvailable: false,
+    isBeta: true,
   },
   {
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
@@ -559,14 +560,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      // helpText: i18n.translate( // TODO updatae this
-      //   'xpack.enterpriseSearch.workplaceSearch.sources.helpText.sharepointServer',
-      //   {
-      //     defaultMessage:
-      //       "Here is some help text. It should probably give the user a heads up that they're going to have to deploy some code.",
-      //   }
-      // ),
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO update this
+      documentationUrl: docLinks.workplaceSearchSharePointServer,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-sharepoint-server-connector',
     },
@@ -637,10 +631,6 @@ export const staticCustomSourceData: SourceDataItem = {
     isPublicKey: false,
     hasOauthRedirect: false,
     needsBaseUrl: false,
-    helpText: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.helpText.custom', {
-      defaultMessage:
-        'To create a Custom API Source, provide a human-readable and descriptive name. The name will appear as-is in the various search experiences and management interfaces.',
-    }),
     documentationUrl: docLinks.workplaceSearchCustomSources,
     applicationPortalUrl: '',
   },

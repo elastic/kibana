@@ -71,22 +71,39 @@ describe('SuperUser - Packs', () => {
     });
 
     it('to click the edit button and edit pack', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       findAndClickButton('Edit');
       cy.contains(`Edit ${PACK_NAME}`);
       findAndClickButton('Add query');
       cy.contains('Attach next query');
       inputQuery('select * from uptime');
+      findFormFieldByRowsLabelAndType('ID', SAVED_QUERY_ID);
+      cy.contains('ID must be unique').should('exist');
       findFormFieldByRowsLabelAndType('ID', NEW_QUERY_NAME);
+      cy.contains('ID must be unique').should('not.exist');
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.react('EuiTableRow').contains(NEW_QUERY_NAME);
       findAndClickButton('Update pack');
       cy.contains('Save and deploy changes');
       findAndClickButton('Save and deploy changes');
     });
+
+    it('should trigger validation when saved query is being chosen', () => {
+      preparePack(PACK_NAME);
+      findAndClickButton('Edit');
+      findAndClickButton('Add query');
+      cy.contains('Attach next query');
+      cy.contains('ID must be unique').should('not.exist');
+      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+        .click()
+        .type(SAVED_QUERY_ID);
+      cy.react('List').first().click();
+      cy.contains('ID must be unique').should('exist');
+      cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
+    });
     // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
     it.skip('to click the icon and visit discover', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.react('CustomItemAction', {
         props: { index: 0, item: { id: SAVED_QUERY_ID } },
       }).click();
@@ -107,7 +124,7 @@ describe('SuperUser - Packs', () => {
             lensUrl = url;
           });
       });
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.react('CustomItemAction', {
         props: { index: 1, item: { id: SAVED_QUERY_ID } },
       }).click();
@@ -137,7 +154,7 @@ describe('SuperUser - Packs', () => {
     });
 
     it('delete all queries in the pack', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.contains(/^Edit$/).click();
 
       cy.getBySel('checkboxSelectAll').click();
@@ -153,7 +170,7 @@ describe('SuperUser - Packs', () => {
     });
 
     it('enable changing saved queries and ecs_mappings', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.contains(/^Edit$/).click();
 
       findAndClickButton('Add query');
@@ -193,7 +210,7 @@ describe('SuperUser - Packs', () => {
     });
 
     it('to click delete button', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       findAndClickButton('Edit');
       deleteAndConfirm('pack');
     });

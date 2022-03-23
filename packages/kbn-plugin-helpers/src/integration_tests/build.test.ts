@@ -43,8 +43,14 @@ it('builds a generated plugin into a viable archive', async () => {
       all: true,
     }
   );
+  const filterLogs = (logs: string | undefined) => {
+    return logs
+      ?.split('\n')
+      .filter((l) => !l.includes('failed to reach ci-stats service'))
+      .join('\n');
+  };
 
-  expect(generateProc.all).toMatchInlineSnapshot(`
+  expect(filterLogs(generateProc.all)).toMatchInlineSnapshot(`
     " succ 🎉
 
           Your plugin has been created in plugins/foo_test_plugin
@@ -60,12 +66,7 @@ it('builds a generated plugin into a viable archive', async () => {
     }
   );
 
-  expect(
-    buildProc.all
-      ?.split('\n')
-      .filter((l) => !l.includes('failed to reach ci-stats service'))
-      .join('\n')
-  ).toMatchInlineSnapshot(`
+  expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
     " info deleting the build and target directories
      info running @kbn/optimizer
      │ info initialized, 0 bundles cached

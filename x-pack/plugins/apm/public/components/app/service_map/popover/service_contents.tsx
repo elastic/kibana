@@ -63,6 +63,7 @@ export function ServiceContents({
   });
 
   const serviceName = nodeData.id!;
+  const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -85,12 +86,19 @@ export function ServiceContents({
 
   const detailsUrl = apmRouter.link('/services/{serviceName}', {
     path: { serviceName },
-    query: { rangeFrom, rangeTo, environment, kuery, comparisonEnabled },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      comparisonEnabled,
+      serviceGroup,
+    },
   });
 
   const focusUrl = apmRouter.link('/services/{serviceName}/service-map', {
     path: { serviceName },
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: { rangeFrom, rangeTo, environment, kuery, serviceGroup },
   });
 
   const { serviceAnomalyStats } = nodeData;

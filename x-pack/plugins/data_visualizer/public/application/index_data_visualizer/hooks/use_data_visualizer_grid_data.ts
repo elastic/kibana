@@ -60,7 +60,7 @@ export const useDataVisualizerGridData = (
 
   const {
     currentSavedSearch,
-    currentIndexPattern,
+    currentDataView,
     currentQuery,
     currentFilters,
     visibleFieldNames,
@@ -68,7 +68,7 @@ export const useDataVisualizerGridData = (
   } = useMemo(
     () => ({
       currentSavedSearch: input?.savedSearch,
-      currentIndexPattern: input.indexPattern,
+      currentDataView: input.dataView,
       currentQuery: input?.query,
       visibleFieldNames: input?.visibleFieldNames ?? [],
       currentFilters: input?.filters,
@@ -80,7 +80,7 @@ export const useDataVisualizerGridData = (
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
     const searchData = getEsQueryFromSavedSearch({
-      indexPattern: currentIndexPattern,
+      dataView: currentDataView,
       uiSettings,
       savedSearch: currentSavedSearch,
       query: currentQuery,
@@ -107,7 +107,7 @@ export const useDataVisualizerGridData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     currentSavedSearch?.id,
-    currentIndexPattern.id,
+    currentDataView.id,
     dataVisualizerListState.searchString,
     dataVisualizerListState.searchQueryLanguage,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,7 +129,7 @@ export const useDataVisualizerGridData = (
   }, [uiSettings]);
 
   const timefilter = useTimefilter({
-    timeRangeSelector: currentIndexPattern?.timeFieldName !== undefined,
+    timeRangeSelector: currentDataView?.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
 
@@ -149,13 +149,13 @@ export const useDataVisualizerGridData = (
 
       const tf = timefilter;
 
-      if (!buckets || !tf || !currentIndexPattern) return;
+      if (!buckets || !tf || !currentDataView) return;
 
       const activeBounds = tf.getActiveBounds();
 
       let earliest: number | undefined;
       let latest: number | undefined;
-      if (activeBounds !== undefined && currentIndexPattern.timeFieldName !== undefined) {
+      if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
         earliest = activeBounds.min?.valueOf();
         latest = activeBounds.max?.valueOf();
       }
@@ -174,7 +174,7 @@ export const useDataVisualizerGridData = (
       const aggregatableFields: string[] = [];
       const nonAggregatableFields: string[] = [];
 
-      const fields = currentIndexPattern.fields;
+      const fields = currentDataView.fields;
       fields?.forEach((field) => {
         if (fieldsToFetch && !fieldsToFetch.includes(field.name)) {
           return;
@@ -196,9 +196,9 @@ export const useDataVisualizerGridData = (
         searchQuery,
         samplerShardSize,
         sessionId: searchSessionId,
-        index: currentIndexPattern.title,
-        timeFieldName: currentIndexPattern.timeFieldName,
-        runtimeFieldMap: currentIndexPattern.getRuntimeMappings(),
+        index: currentDataView.title,
+        timeFieldName: currentDataView.timeFieldName,
+        runtimeFieldMap: currentDataView.getRuntimeMappings(),
         aggregatableFields,
         nonAggregatableFields,
         fieldsToFetch,
@@ -208,7 +208,7 @@ export const useDataVisualizerGridData = (
     [
       _timeBuckets,
       timefilter,
-      currentIndexPattern.id,
+      currentDataView.id,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(searchQuery),
       samplerShardSize,
@@ -282,17 +282,14 @@ export const useDataVisualizerGridData = (
     };
   });
 
-  const indexPatternFields: DataViewField[] = useMemo(
-    () => currentIndexPattern.fields,
-    [currentIndexPattern]
-  );
+  const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
 
   const createMetricCards = useCallback(() => {
     const configs: FieldVisConfig[] = [];
     const aggregatableExistsFields: AggregatableField[] =
       overallStats.aggregatableExistsFields || [];
 
-    const allMetricFields = indexPatternFields.filter((f) => {
+    const allMetricFields = dataViewFields.filter((f) => {
       return (
         f.type === KBN_FIELD_TYPES.NUMBER &&
         f.displayName !== undefined &&
@@ -326,7 +323,7 @@ export const useDataVisualizerGridData = (
 
       const metricConfig: FieldVisConfig = {
         ...fieldData,
-        fieldFormat: currentIndexPattern.getFormatterForField(field),
+        fieldFormat: currentDataView.getFormatterForField(field),
         type: JOB_FIELD_TYPES.NUMBER,
         loading: true,
         aggregatable: true,
@@ -344,10 +341,10 @@ export const useDataVisualizerGridData = (
       visibleMetricsCount: metricFieldsToShow.length,
     });
     setMetricConfigs(configs);
-  }, [currentIndexPattern, indexPatternFields, metricsLoaded, overallStats, showEmptyFields]);
+  }, [currentDataView, dataViewFields, metricsLoaded, overallStats, showEmptyFields]);
 
   const createNonMetricCards = useCallback(() => {
-    const allNonMetricFields = indexPatternFields.filter((f) => {
+    const allNonMetricFields = dataViewFields.filter((f) => {
       return (
         f.type !== KBN_FIELD_TYPES.NUMBER &&
         f.displayName !== undefined &&
@@ -405,7 +402,7 @@ export const useDataVisualizerGridData = (
 
       const nonMetricConfig: Partial<FieldVisConfig> = {
         ...(fieldData ? fieldData : {}),
-        fieldFormat: currentIndexPattern.getFormatterForField(field),
+        fieldFormat: currentDataView.getFormatterForField(field),
         aggregatable: field.aggregatable,
         loading: fieldData?.existsInDocs ?? true,
         deletable: field.runtimeField !== undefined,
@@ -431,7 +428,7 @@ export const useDataVisualizerGridData = (
     });
 
     setNonMetricConfigs(configs);
-  }, [currentIndexPattern, indexPatternFields, nonMetricsLoaded, overallStats, showEmptyFields]);
+  }, [currentDataView, dataViewFields, nonMetricsLoaded, overallStats, showEmptyFields]);
 
   useEffect(() => {
     createMetricCards();
@@ -492,7 +489,7 @@ export const useDataVisualizerGridData = (
   // Hide the column completely if no access to any of the plugins
   const extendedColumns = useMemo(() => {
     const actions = getActions(
-      input.indexPattern,
+      input.dataView,
       services,
       {
         searchQueryLanguage,
@@ -511,7 +508,7 @@ export const useDataVisualizerGridData = (
     };
 
     return [actionColumn];
-  }, [input.indexPattern, services, searchQueryLanguage, searchString, input.allowEditDataView]);
+  }, [input.dataView, services, searchQueryLanguage, searchString, input.allowEditDataView]);
 
   return {
     progress: combinedProgress,

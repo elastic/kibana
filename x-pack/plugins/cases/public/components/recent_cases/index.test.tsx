@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { configure, render } from '@testing-library/react';
+import { configure } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RecentCases, { RecentCasesProps } from '.';
-import { TestProviders } from '../../common/mock';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesMockState } from '../../containers/mock';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
@@ -33,6 +33,7 @@ const useGetCasesMock = useGetCases as jest.Mock;
 const useCurrentUserMock = useCurrentUser as jest.Mock;
 
 describe('RecentCases', () => {
+  let appMockRender: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
     useGetCasesMock.mockImplementation(() => mockData);
@@ -41,6 +42,7 @@ describe('RecentCases', () => {
       fullName: 'Elastic',
       username: 'elastic',
     });
+    appMockRender = createAppMockRenderer();
   });
 
   it('is good at loading', () => {
@@ -48,7 +50,8 @@ describe('RecentCases', () => {
       ...mockData,
       loading: 'cases',
     }));
-    const { getAllByTestId } = render(
+
+    const { getAllByTestId } = appMockRender.render(
       <TestProviders>
         <RecentCases {...defaultProps} />
       </TestProviders>
@@ -57,7 +60,7 @@ describe('RecentCases', () => {
   });
 
   it('is good at rendering cases', () => {
-    const { getAllByTestId } = render(
+    const { getAllByTestId } = appMockRender.render(
       <TestProviders>
         <RecentCases {...defaultProps} />
       </TestProviders>
@@ -66,7 +69,7 @@ describe('RecentCases', () => {
   });
 
   it('is good at rendering max cases', () => {
-    render(
+    appMockRender.render(
       <TestProviders>
         <RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />
       </TestProviders>
@@ -77,7 +80,7 @@ describe('RecentCases', () => {
   });
 
   it('updates filters', () => {
-    const { getByTestId } = render(
+    const { getByTestId } = appMockRender.render(
       <TestProviders>
         <RecentCases {...defaultProps} />
       </TestProviders>
@@ -89,7 +92,7 @@ describe('RecentCases', () => {
   });
 
   it('it resets the reporters when changing from my recently reported cases to recent cases', () => {
-    const { getByTestId } = render(
+    const { getByTestId } = appMockRender.render(
       <TestProviders>
         <RecentCases {...defaultProps} />
       </TestProviders>

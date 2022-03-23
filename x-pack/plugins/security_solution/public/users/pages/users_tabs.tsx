@@ -18,6 +18,8 @@ import { Anomaly } from '../../common/components/ml/types';
 import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_interval_to_datetime';
 import { UpdateDateRange } from '../../common/components/charts/common';
 
+import { UserRiskScoreQueryTabBody } from './navigation/user_risk_score_tab_body';
+
 export const UsersTabs = memo<UsersTabsProps>(
   ({
     deleteQuery,
@@ -77,6 +79,9 @@ export const UsersTabs = memo<UsersTabsProps>(
         </Route>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesUserTable} />
+        </Route>
+        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.risk})`}>
+          <UserRiskScoreQueryTabBody {...tabProps} />
         </Route>
       </Switch>
     );

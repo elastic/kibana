@@ -57,6 +57,8 @@ const UserDetailsLinkComponent: React.FC<{
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
 }> = ({ children, Component, userName, isButton, onClick, title }) => {
+  const encodedUserName = encodeURIComponent(userName);
+
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
   const { navigateToApp } = useKibana().services.application;
   const goToUsersDetails = useCallback(
@@ -64,19 +66,19 @@ const UserDetailsLinkComponent: React.FC<{
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.users,
-        path: getUsersDetailsUrl(encodeURIComponent(userName), search),
+        path: getUsersDetailsUrl(encodedUserName, search),
       });
     },
-    [userName, navigateToApp, search]
+    [encodedUserName, navigateToApp, search]
   );
 
   return isButton ? (
     <GenericLinkButton
       Component={Component}
       dataTestSubj="data-grid-user-details"
-      href={formatUrl(getUsersDetailsUrl(encodeURIComponent(userName)))}
+      href={formatUrl(getUsersDetailsUrl(encodedUserName))}
       onClick={onClick ?? goToUsersDetails}
-      title={title ?? userName}
+      title={title ?? encodedUserName}
     >
       {children ? children : userName}
     </GenericLinkButton>
@@ -84,7 +86,7 @@ const UserDetailsLinkComponent: React.FC<{
     <LinkAnchor
       data-test-subj="users-link-anchor"
       onClick={onClick ?? goToUsersDetails}
-      href={formatUrl(getUsersDetailsUrl(encodeURIComponent(userName)))}
+      href={formatUrl(getUsersDetailsUrl(encodedUserName))}
     >
       {children ? children : userName}
     </LinkAnchor>
