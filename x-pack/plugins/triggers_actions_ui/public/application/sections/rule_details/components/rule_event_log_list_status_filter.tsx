@@ -23,13 +23,16 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const onFilterItemClick = useCallback((newOption: string) => () => {
-    if (selectedOptions.includes(newOption)) {
-      onChange(selectedOptions.filter((option) => option !== newOption));
-      return;
-    }
-    onChange([...selectedOptions, newOption]);
-  }, [selectedOptions, onChange]);
+  const onFilterItemClick = useCallback(
+    (newOption: string) => () => {
+      if (selectedOptions.includes(newOption)) {
+        onChange(selectedOptions.filter((option) => option !== newOption));
+        return;
+      }
+      onChange([...selectedOptions, newOption]);
+    },
+    [selectedOptions, onChange]
+  );
 
   const onClick = useCallback(() => {
     setIsPopoverOpen((prevIsOpen) => !prevIsOpen);

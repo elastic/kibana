@@ -7,7 +7,6 @@
 
 import React from 'react';
 import uuid from 'uuid';
-import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiSuperDatePicker, EuiDataGrid } from '@elastic/eui';
@@ -126,12 +125,12 @@ describe('rule_event_log_list', () => {
 
   it('renders correctly', async () => {
     const wrapper = mountWithIntl(
-      <RuleEventLogList 
+      <RuleEventLogList
         rule={mockRule}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
-    
+
     // Run the initial load fetch call
     expect(loadExecutionLogAggregationsMock).toHaveBeenCalledTimes(1);
 
@@ -144,17 +143,13 @@ describe('rule_event_log_list', () => {
         perPage: 10,
       })
     );
-    
+
     // Loading
-    expect(
-      wrapper.find(EuiSuperDatePicker).props().isLoading
-    ).toBeTruthy();
+    expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeTruthy();
 
     // Verify the initial columns are rendered
     DEFAULT_INITIAL_VISIBLE_COLUMNS.forEach((column) => {
-      expect(
-        wrapper.find(`[data-test-subj="dataGridHeaderCell-${column}"]`).exists()
-      ).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="dataGridHeaderCell-${column}"]`).exists()).toBeTruthy();
     });
 
     // No data initially
@@ -166,9 +161,7 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(
-      wrapper.find(EuiSuperDatePicker).props().isLoading
-    ).toBeFalsy();
+    expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeFalsy();
 
     expect(wrapper.find(RuleEventLogListStatusFilter).exists()).toBeTruthy();
     expect(wrapper.find('[data-gridcell-column-id="timestamp"]').length).toEqual(5);
@@ -177,7 +170,7 @@ describe('rule_event_log_list', () => {
 
   it('can sort by single and/or multiple column(s)', async () => {
     const wrapper = mountWithIntl(
-      <RuleEventLogList 
+      <RuleEventLogList
         rule={mockRule}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
@@ -204,16 +197,16 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    console.log(JSON.stringify(loadExecutionLogAggregationsMock.mock.calls, null, 2));
-    
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         id: mockRule.id,
-        sort: [{
-          timestamp: {
-            order: 'asc',
+        sort: [
+          {
+            timestamp: {
+              order: 'asc',
+            },
           },
-        }],
+        ],
         filter: [],
         page: 0,
         perPage: 10,
@@ -236,11 +229,13 @@ describe('rule_event_log_list', () => {
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         id: mockRule.id,
-        sort: [{
-          timestamp: {
-            order: 'desc',
+        sort: [
+          {
+            timestamp: {
+              order: 'desc',
+            },
           },
-        }],
+        ],
         filter: [],
         page: 0,
         perPage: 10,
@@ -248,16 +243,20 @@ describe('rule_event_log_list', () => {
     );
 
     // Find another column
-    headerCellButton = wrapper.find('[data-test-subj="dataGridHeaderCell-execution_duration"] button');
-    
+    headerCellButton = wrapper.find(
+      '[data-test-subj="dataGridHeaderCell-execution_duration"] button'
+    );
+
     // Open the popover again
     headerCellButton.simulate('click');
 
-    headerAction = wrapper.find('[data-test-subj="dataGridHeaderCellActionGroup-execution_duration"]');
-    
+    headerAction = wrapper.find(
+      '[data-test-subj="dataGridHeaderCellActionGroup-execution_duration"]'
+    );
+
     // Sort
     headerAction.find('li').at(1).find('button').simulate('click');
-    
+
     await act(async () => {
       await nextTick();
       wrapper.update();

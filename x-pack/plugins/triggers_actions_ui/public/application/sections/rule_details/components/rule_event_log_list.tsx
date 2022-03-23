@@ -209,18 +209,23 @@ const API_FAILED_MESSAGE = i18n.translate(
 
 const RULE_EVENT_LOG_LIST_STORAGE_KEY = 'xpack.triggersActionsUI.ruleEventLogList.initialColumns';
 
-export const DEFAULT_INITIAL_VISIBLE_COLUMNS = ['timestamp', 'execution_duration', 'status', 'message'];
+export const DEFAULT_INITIAL_VISIBLE_COLUMNS = [
+  'timestamp',
+  'execution_duration',
+  'status',
+  'message',
+];
 
 const PAGE_SIZE_OPTION = [10, 50, 100];
 
 export type RuleEventLogListProps = {
   rule: Rule;
-  localStorageKey?: string,
+  localStorageKey?: string;
 } & Pick<RuleApis, 'loadExecutionLogAggregations'>;
 
 export const RuleEventLogList = (props: RuleEventLogListProps) => {
-  const { 
-    rule, 
+  const {
+    rule,
     localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
     loadExecutionLogAggregations,
   } = props;
@@ -231,8 +236,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   const [logs, setLogs] = useState<IExecutionLog[]>([]);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
     return (
-      JSON.parse(localStorage.getItem(localStorageKey) ?? 'null') ||
-      DEFAULT_INITIAL_VISIBLE_COLUMNS
+      JSON.parse(localStorage.getItem(localStorageKey) ?? 'null') || DEFAULT_INITIAL_VISIBLE_COLUMNS
     );
   });
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
@@ -387,15 +391,13 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
 
   useEffect(() => {
     localStorage.setItem(localStorageKey, JSON.stringify(visibleColumns));
-  }, [visibleColumns]);
+  }, [localStorageKey, visibleColumns]);
 
   return (
     <div>
       <EuiSpacer />
       <EuiFlexGroup>
-        <EuiFlexItem grow={4}>
-          {/* KQL search bar eventually goes here */}
-        </EuiFlexItem>
+        <EuiFlexItem grow={4}>{/* KQL search bar eventually goes here */}</EuiFlexItem>
         <EuiFlexItem grow={1}>
           <RuleEventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
         </EuiFlexItem>

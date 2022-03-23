@@ -13,19 +13,15 @@ import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filte
 const onChangeMock = jest.fn();
 
 describe('rule_event_log_list_status_filter', () => {
-
   beforeEach(() => {
     onChangeMock.mockReset();
   });
 
   it('renders correctly', () => {
     const wrapper = mountWithIntl(
-      <RuleEventLogListStatusFilter 
-        selectedOptions={[]}
-        onChange={onChangeMock}
-      />
+      <RuleEventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
     );
-    
+
     expect(wrapper.find(EuiFilterSelectItem).exists()).toBeFalsy();
     expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
 
@@ -34,17 +30,14 @@ describe('rule_event_log_list_status_filter', () => {
 
   it('can open the popover correctly', () => {
     const wrapper = mountWithIntl(
-      <RuleEventLogListStatusFilter 
-        selectedOptions={[]}
-        onChange={onChangeMock}
-      />
+      <RuleEventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
     );
 
     wrapper.find(EuiFilterButton).simulate('click');
 
-    const statusItems = wrapper.find(EuiFilterSelectItem)
+    const statusItems = wrapper.find(EuiFilterSelectItem);
     expect(statusItems.length).toEqual(3);
-    
+
     statusItems.at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['success']);
 
@@ -53,16 +46,16 @@ describe('rule_event_log_list_status_filter', () => {
     });
 
     expect(wrapper.find('.euiNotificationBadge').text()).toEqual('1');
-    
+
     statusItems.at(1).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['success', 'failure']);
-    
+
     wrapper.setProps({
-      selectedOptions: ['success','failure'],
+      selectedOptions: ['success', 'failure'],
     });
 
     expect(wrapper.find('.euiNotificationBadge').text()).toEqual('2');
-    
+
     statusItems.at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['failure']);
   });
