@@ -54,7 +54,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
-  minimumScheduleInterval: '1m',
+  minimumScheduleInterval: { value: '1m', enforce: false },
 };
 
 beforeEach(() => {
@@ -64,7 +64,7 @@ beforeEach(() => {
 
 setGlobalDate();
 
-describe('update()', () => {
+describe('bulkEdit()', () => {
   let rulesClient: RulesClient;
   let actionsClient: jest.Mocked<ActionsClient>;
   const existingAlert = {
@@ -355,5 +355,45 @@ describe('update()', () => {
         },
       ]);
     });
+  });
+
+  // describe('rules', () => {
+  //   test('aggregates rules by alertTypeId and consumer', async () => {});
+
+  //   test('throws if ruleType is not enabled', async () => {});
+
+  //   test('throws if ruleType is not authorized', async () => {});
+  // });
+
+  describe('ruleTypes aggregation and validation', () => {
+    test('aggregates rules by alertTypeId and consumer', async () => {});
+
+    test('throws if number of matched rules greater than 10_000', async () => {});
+
+    test('throws aggregations result is empty', async () => {});
+
+    test('throws if ruleType is not enabled', async () => {});
+
+    test('throws if ruleType is not authorized', async () => {});
+  });
+
+  describe('apiKeys', () => {
+    test('encrypted createPointInTimeFinderAsInternalUser returns api Keys', async () => {});
+
+    test('should not call bulkApiKeys invalidate if all rules disabled', async () => {});
+
+    test('should call bulkApiKeys invalidate if at least one rule enabled', async () => {});
+
+    test('should return error in rule errors if key is not generated', async () => {});
+  });
+
+  describe('params validation', () => {
+    test('should validate params for rules', async () => {});
+
+    test('should validate mutatedParams for rules', async () => {});
+  });
+
+  describe('paramsModifier', () => {
+    test('should update index pattern params', async () => {});
   });
 });
