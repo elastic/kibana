@@ -396,7 +396,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       try {
         const { modelId } = request.params;
         const body = await mlClient.inferTrainedModelDeployment({
-          model_id: modelId + 1,
+          model_id: modelId,
           docs: request.body.docs,
           ...(request.body.timeout ? { timeout: request.body.timeout } : {}),
         });
@@ -433,7 +433,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const body = await client.asCurrentUser.ingest.simulate({
           verbose,
           body: {
-            pipeline: null,
+            pipeline,
             docs: docs as estypes.IngestSimulateDocument[],
           },
         });
