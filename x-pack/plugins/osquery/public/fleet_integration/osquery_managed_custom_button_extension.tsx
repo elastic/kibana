@@ -12,6 +12,7 @@ import { PackageCustomExtensionComponentProps } from '../../../fleet/public';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
 import { useKibana } from '../common/lib/kibana';
+import { MissingPrivileges } from '../routes/components/missing_privileges';
 
 /**
  * Exports Osquery-specific package policy instructions
@@ -19,20 +20,35 @@ import { useKibana } from '../common/lib/kibana';
  */
 export const OsqueryManagedCustomButtonExtension = React.memo<PackageCustomExtensionComponentProps>(
   () => {
-    const [disabled, setDisabled] = React.useState<boolean | null>(null);
+    const [loading, setLoading] = React.useState<boolean>(true);
+    const [disabled, setDisabled] = React.useState<boolean>(false);
+    const [permissionDenied, setPermissionDenied] = React.useState<boolean | null>(false);
     const { http } = useKibana().services;
 
     useEffect(() => {
       const fetchStatus = () => {
-        http.get<{ install_status: string }>('/internal/osquery/status').then((response) => {
-          setDisabled(response?.install_status !== 'installed');
-        });
+        http
+          .get<{ install_status: string }>('/internal/osquery/status')
+          .then((response) => {
+            setLoading(false);
+            setDisabled(response?.install_status !== 'installed');
+          })
+          .catch((err) => {
+            setLoading(false);
+            if (err.body.statusCode === 403) {
+              setPermissionDenied(true);
+            }
+          });
       };
       fetchStatus();
     }, [http]);
 
-    if (disabled === null) {
+    if (loading) {
       return <EuiLoadingContent lines={5} />;
+    }
+
+    if (permissionDenied) {
+      return <MissingPrivileges />;
     }
 
     return (
