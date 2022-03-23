@@ -32,6 +32,7 @@ const config = new Config(
     buildSha: 'abcd1234',
     buildVersion: '8.0.0',
   },
+  false,
   true
 );
 

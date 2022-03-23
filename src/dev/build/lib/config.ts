@@ -17,6 +17,7 @@ interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
   versionQualifier?: string;
+  dockerCrossCompile: boolean;
 }
 
 interface Package {
@@ -29,7 +30,12 @@ interface Package {
 }
 
 export class Config {
-  static async create({ isRelease, targetAllPlatforms, versionQualifier }: Options) {
+  static async create({
+    isRelease,
+    targetAllPlatforms,
+    versionQualifier,
+    dockerCrossCompile,
+  }: Options) {
     const pkgPath = resolve(__dirname, '../../../../package.json');
     const pkg: Package = loadJsonFile.sync(pkgPath);
 
@@ -43,6 +49,7 @@ export class Config {
         versionQualifier,
         pkg,
       }),
+      dockerCrossCompile,
       isRelease
     );
   }
@@ -53,6 +60,7 @@ export class Config {
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
+    private readonly dockerCrossCompile: boolean,
     public readonly isRelease: boolean
   ) {}
 
@@ -68,6 +76,13 @@ export class Config {
    */
   getNodeVersion() {
     return this.nodeVersion;
+  }
+
+  /**
+   * Get docker cross compile
+   */
+  getDockerCrossCompile() {
+    return this.dockerCrossCompile;
   }
 
   /**
