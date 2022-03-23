@@ -6,20 +6,20 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiIconProps } from '@elastic/eui';
+import { EuiImage, EuiIcon, EuiImageProps } from '@elastic/eui';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getAgentIcon } from './get_agent_icon';
 import { useTheme } from '../../../hooks/use_theme';
 
 interface Props {
   agentName?: AgentName;
-  size?: EuiIconProps['size'];
+  size?: EuiImageProps['size'];
 }
 
 export function AgentIcon(props: Props) {
-  const { agentName, size = 'l' } = props;
+  const { agentName, size = 24 } = props;
   const theme = useTheme();
   const icon = getAgentIcon(agentName, theme.darkMode);
 
-  return <EuiIcon type={icon} size={size} title={agentName} />;
+  return <EuiImage src={icon} size={size} alt={`${agentName} icon`} />;
 }
