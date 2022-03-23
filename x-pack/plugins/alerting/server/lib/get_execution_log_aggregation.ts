@@ -51,6 +51,11 @@ export interface IExecutionLogResult {
   data: IExecutionLog[];
 }
 
+export const EMPTY_EXECUTION_LOG_RESULT = {
+  total: 0,
+  data: [],
+};
+
 interface IAlertCounts extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: {
     activeAlerts: estypes.AggregationsSingleBucketAggregateBase;
@@ -281,10 +286,7 @@ export function formatExecutionLogResult(
   const { aggregations } = results;
 
   if (!aggregations) {
-    return {
-      total: 0,
-      data: [],
-    };
+    return EMPTY_EXECUTION_LOG_RESULT;
   }
 
   const total = (aggregations.executionUuidCardinality as estypes.AggregationsCardinalityAggregate)
