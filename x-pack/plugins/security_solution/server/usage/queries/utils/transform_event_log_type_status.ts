@@ -10,7 +10,7 @@ import type { EventLogTypeStatusAggs } from '../../types';
 import type { SingleEventLogStatusMetric } from '../../detections/rules/types';
 import { getInitialSingleEventLogUsage } from '../../detections/rules/get_initial_usage';
 import { countTotals } from './count_totals';
-import { transformSingleRuleMetric } from './transform_signle_rule_metric';
+import { transformSingleRuleMetric } from './transform_single_rule_metric';
 
 export interface TransformEventLogTypeStatusOptions {
   logger: Logger;
