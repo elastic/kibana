@@ -376,6 +376,8 @@ kibana_vars=(
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
     xpack.task_manager.version_conflict_threshold
+    xpack.task_manager.event_loop_delay.monitor
+    xpack.task_manager.event_loop_delay.warn_threshold
     xpack.uptime.index
 )
 
