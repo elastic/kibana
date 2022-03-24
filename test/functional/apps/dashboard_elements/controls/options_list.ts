@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { OPTIONS_LIST_CONTROL } from '../../../../../src/plugins/controls/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -17,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const { dashboardControls, timePicker, common, dashboard, header } = getPageObjects([
     'dashboardControls',
     'timePicker',
@@ -33,9 +35,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setDefaultDataRange();
     });
 
+    describe('Options List Control Editor selects relevant data views', async () => {
+      it('selects the default data view when the dashboard is blank', async () => {
+        expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
+          'logstash-*'
+        );
+      });
+
+      it('selects a relevant data view based on the panels on the dashboard', async () => {
+        await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
+        await dashboard.waitForRenderComplete();
+        expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
+          'animals-*'
+        );
+        await dashboardPanelActions.removePanelByTitle('Rendering Test: animal sounds pie');
+        await dashboard.waitForRenderComplete();
+        expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
+          'logstash-*'
+        );
+      });
+
+      it('selects the last used data view by default', async () => {
+        await dashboardControls.createOptionsListControl({
+          dataViewTitle: 'animals-*',
+          fieldName: 'sound.keyword',
+        });
+        expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
+          'animals-*'
+        );
+        await dashboardControls.deleteAllControls();
+      });
+    });
+
     describe('Options List Control creation and editing experience', async () => {
       it('can add a new options list control from a blank state', async () => {
-        await dashboardControls.createOptionsListControl({ fieldName: 'machine.os.raw' });
+        await dashboardControls.createOptionsListControl({
+          dataViewTitle: 'logstash-*',
+          fieldName: 'machine.os.raw',
+        });
         expect(await dashboardControls.getControlsCount()).to.be(1);
       });
 
