@@ -57,6 +57,10 @@ describe.skip('managed configuration', () => {
       unsafe: {
         exclude_task_types: [],
       },
+      event_loop_delay: {
+        monitor: true,
+        warn_threshold: 5000,
+      },
     });
     logger = context.logger.get('taskManager');
 
