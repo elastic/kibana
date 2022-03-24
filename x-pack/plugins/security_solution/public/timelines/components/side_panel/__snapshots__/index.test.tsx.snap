@@ -2668,11 +2668,12 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
                                                 type="popout"
                                               >
                                                 <span
-                                                  aria-label="External link"
                                                   className="euiLink__externalIcon"
                                                   data-euiicon-type="popout"
                                                   size="s"
-                                                />
+                                                >
+                                                  External link
+                                                </span>
                                               </EuiIcon>
                                               <EuiScreenReaderOnly>
                                                 <span
