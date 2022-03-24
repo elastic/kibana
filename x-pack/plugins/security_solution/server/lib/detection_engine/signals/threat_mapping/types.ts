@@ -200,7 +200,6 @@ export interface BuildThreatEnrichmentOptions {
   threatIndicatorPath: ThreatIndicatorPath;
   threatLanguage: ThreatLanguageOrUndefined;
   threatQuery: ThreatQuery;
-  getThreatList: (options: GetThreatListOptions) => Promise<estypes.SearchResponse<ThreatListDoc>>;
   pitId: string;
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
