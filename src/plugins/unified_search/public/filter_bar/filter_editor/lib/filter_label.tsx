@@ -23,7 +23,7 @@ export interface FilterLabelProps {
 // eslint-disable-next-line import/no-default-export
 export default function FilterLabel({ filter, valueLabel, filterLabelStatus }: FilterLabelProps) {
   const prefixText = filter.meta.negate
-    ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
+    ? ` ${i18n.translate('unifiedSearch.filter.filterBar.negatedFilterPrefix', {
         defaultMessage: 'NOT ',
       })}`
     : '';

@@ -30,14 +30,14 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
       <EuiFormRow
         fullWidth={fullWidth}
         label={intl.formatMessage({
-          id: 'data.filter.filterEditor.valuesSelectLabel',
+          id: 'unifiedSearch.filter.filterEditor.valuesSelectLabel',
           defaultMessage: 'Values',
         })}
       >
         <StringComboBox
           fullWidth={fullWidth}
           placeholder={intl.formatMessage({
-            id: 'data.filter.filterEditor.valuesSelectPlaceholder',
+            id: 'unifiedSearch.filter.filterEditor.valuesSelectPlaceholder',
             defaultMessage: 'Select values',
           })}
           options={options}

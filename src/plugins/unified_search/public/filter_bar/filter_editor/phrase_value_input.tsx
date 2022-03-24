@@ -28,7 +28,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
       <EuiFormRow
         fullWidth={this.props.fullWidth}
         label={this.props.intl.formatMessage({
-          id: 'data.filter.filterEditor.valueInputLabel',
+          id: 'unifiedSearch.filter.filterEditor.valueInputLabel',
           defaultMessage: 'Value',
         })}
       >
@@ -38,7 +38,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
           <ValueInputType
             fullWidth={this.props.fullWidth}
             placeholder={this.props.intl.formatMessage({
-              id: 'data.filter.filterEditor.valueInputPlaceholder',
+              id: 'unifiedSearch.filter.filterEditor.valueInputPlaceholder',
               defaultMessage: 'Enter a value',
             })}
             value={this.props.value}
@@ -60,7 +60,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
       <StringComboBox
         fullWidth={fullWidth}
         placeholder={intl.formatMessage({
-          id: 'data.filter.filterEditor.valueSelectPlaceholder',
+          id: 'unifiedSearch.filter.filterEditor.valueSelectPlaceholder',
           defaultMessage: 'Select a value',
         })}
         options={options}

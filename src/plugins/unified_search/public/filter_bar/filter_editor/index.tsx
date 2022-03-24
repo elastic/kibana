@@ -90,7 +90,7 @@ class FilterEditorUI extends Component<Props, State> {
           <EuiFlexGroup alignItems="baseline" responsive={false}>
             <EuiFlexItem>
               <FormattedMessage
-                id="data.filter.filterEditor.editFilterPopupTitle"
+                id="unifiedSearch.filter.filterEditor.editFilterPopupTitle"
                 defaultMessage="Edit filter"
               />
             </EuiFlexItem>
@@ -103,12 +103,12 @@ class FilterEditorUI extends Component<Props, State> {
               >
                 {this.state.isCustomEditorOpen ? (
                   <FormattedMessage
-                    id="data.filter.filterEditor.editFilterValuesButtonLabel"
+                    id="unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel"
                     defaultMessage="Edit filter values"
                   />
                 ) : (
                   <FormattedMessage
-                    id="data.filter.filterEditor.editQueryDslButtonLabel"
+                    id="unifiedSearch.filter.filterEditor.editQueryDslButtonLabel"
                     defaultMessage="Edit as Query DSL"
                   />
                 )}
@@ -129,7 +129,7 @@ class FilterEditorUI extends Component<Props, State> {
               id="filterEditorCustomLabelSwitch"
               data-test-subj="createCustomLabel"
               label={this.props.intl.formatMessage({
-                id: 'data.filter.filterEditor.createCustomLabelSwitchLabel',
+                id: 'unifiedSearch.filter.filterEditor.createCustomLabelSwitchLabel',
                 defaultMessage: 'Create custom label?',
               })}
               checked={this.state.useCustomLabel}
@@ -141,7 +141,7 @@ class FilterEditorUI extends Component<Props, State> {
                 <EuiSpacer size="m" />
                 <EuiFormRow
                   label={this.props.intl.formatMessage({
-                    id: 'data.filter.filterEditor.createCustomLabelInputLabel',
+                    id: 'unifiedSearch.filter.filterEditor.createCustomLabelInputLabel',
                     defaultMessage: 'Custom label',
                   })}
                   fullWidth
@@ -166,7 +166,7 @@ class FilterEditorUI extends Component<Props, State> {
                   data-test-subj="saveFilter"
                 >
                   <FormattedMessage
-                    id="data.filter.filterEditor.saveButtonLabel"
+                    id="unifiedSearch.filter.filterEditor.saveButtonLabel"
                     defaultMessage="Save"
                   />
                 </EuiButton>
@@ -178,7 +178,7 @@ class FilterEditorUI extends Component<Props, State> {
                   data-test-subj="cancelSaveFilter"
                 >
                   <FormattedMessage
-                    id="data.filter.filterEditor.cancelButtonLabel"
+                    id="unifiedSearch.filter.filterEditor.cancelButtonLabel"
                     defaultMessage="Cancel"
                   />
                 </EuiButtonEmpty>
@@ -212,14 +212,14 @@ class FilterEditorUI extends Component<Props, State> {
           <EuiFormRow
             fullWidth
             label={this.props.intl.formatMessage({
-              id: 'data.filter.filterEditor.indexPatternSelectLabel',
+              id: 'unifiedSearch.filter.filterEditor.indexPatternSelectLabel',
               defaultMessage: 'Index Pattern',
             })}
           >
             <IndexPatternComboBox
               fullWidth
               placeholder={this.props.intl.formatMessage({
-                id: 'data.filter.filterBar.indexPatternSelectPlaceholder',
+                id: 'unifiedSearch.filter.filterBar.indexPatternSelectPlaceholder',
                 defaultMessage: 'Select an index pattern',
               })}
               options={this.props.indexPatterns}
@@ -259,7 +259,7 @@ class FilterEditorUI extends Component<Props, State> {
       <EuiFormRow
         fullWidth
         label={this.props.intl.formatMessage({
-          id: 'data.filter.filterEditor.fieldSelectLabel',
+          id: 'unifiedSearch.filter.filterEditor.fieldSelectLabel',
           defaultMessage: 'Field',
         })}
       >
@@ -268,7 +268,7 @@ class FilterEditorUI extends Component<Props, State> {
           id="fieldInput"
           isDisabled={!selectedIndexPattern}
           placeholder={this.props.intl.formatMessage({
-            id: 'data.filter.filterEditor.fieldSelectPlaceholder',
+            id: 'unifiedSearch.filter.filterEditor.fieldSelectPlaceholder',
             defaultMessage: 'Select a field first',
           })}
           options={fields}
@@ -290,7 +290,7 @@ class FilterEditorUI extends Component<Props, State> {
       <EuiFormRow
         fullWidth
         label={this.props.intl.formatMessage({
-          id: 'data.filter.filterEditor.operatorSelectLabel',
+          id: 'unifiedSearch.filter.filterEditor.operatorSelectLabel',
           defaultMessage: 'Operator',
         })}
       >
@@ -300,11 +300,11 @@ class FilterEditorUI extends Component<Props, State> {
           placeholder={
             selectedField
               ? this.props.intl.formatMessage({
-                  id: 'data.filter.filterEditor.operatorSelectPlaceholderSelect',
+                  id: 'unifiedSearch.filter.filterEditor.operatorSelectPlaceholderSelect',
                   defaultMessage: 'Select',
                 })
               : this.props.intl.formatMessage({
-                  id: 'data.filter.filterEditor.operatorSelectPlaceholderWaiting',
+                  id: 'unifiedSearch.filter.filterEditor.operatorSelectPlaceholderWaiting',
                   defaultMessage: 'Waiting',
                 })
           }
@@ -324,7 +324,7 @@ class FilterEditorUI extends Component<Props, State> {
     return (
       <EuiFormRow
         fullWidth
-        label={i18n.translate('data.filter.filterEditor.queryDslLabel', {
+        label={i18n.translate('unifiedSearch.filter.filterEditor.queryDslLabel', {
           defaultMessage: 'Elasticsearch Query DSL',
         })}
       >
@@ -335,7 +335,7 @@ class FilterEditorUI extends Component<Props, State> {
           value={this.state.queryDsl}
           onChange={this.onQueryDslChange}
           data-test-subj="customEditorInput"
-          aria-label={i18n.translate('data.filter.filterEditor.queryDslAriaLabel', {
+          aria-label={i18n.translate('unifiedSearch.filter.filterEditor.queryDslAriaLabel', {
             defaultMessage: 'Elasticsearch Query DSL editor',
           })}
         />

@@ -62,7 +62,7 @@ function RangeValueInputUI(props: Props) {
       <EuiFormControlLayoutDelimited
         fullWidth={props.fullWidth}
         aria-label={props.intl.formatMessage({
-          id: 'data.filter.filterEditor.rangeInputLabel',
+          id: 'unifiedSearch.filter.filterEditor.rangeInputLabel',
           defaultMessage: 'Range',
         })}
         startControl={
@@ -75,7 +75,7 @@ function RangeValueInputUI(props: Props) {
               onFromChange(formatDateChange(value));
             }}
             placeholder={props.intl.formatMessage({
-              id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
+              id: 'unifiedSearch.filter.filterEditor.rangeStartInputPlaceholder',
               defaultMessage: 'Start of the range',
             })}
           />
@@ -90,7 +90,7 @@ function RangeValueInputUI(props: Props) {
               onToChange(formatDateChange(value));
             }}
             placeholder={props.intl.formatMessage({
-              id: 'data.filter.filterEditor.rangeEndInputPlaceholder',
+              id: 'unifiedSearch.filter.filterEditor.rangeEndInputPlaceholder',
               defaultMessage: 'End of the range',
             })}
           />

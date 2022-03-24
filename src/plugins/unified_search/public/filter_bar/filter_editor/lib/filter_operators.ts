@@ -29,7 +29,7 @@ export interface Operator {
 }
 
 export const isOperator = {
-  message: i18n.translate('data.filter.filterEditor.isOperatorOptionLabel', {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.isOperatorOptionLabel', {
     defaultMessage: 'is',
   }),
   type: FILTERS.PHRASE,
@@ -37,7 +37,7 @@ export const isOperator = {
 };
 
 export const isNotOperator = {
-  message: i18n.translate('data.filter.filterEditor.isNotOperatorOptionLabel', {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.isNotOperatorOptionLabel', {
     defaultMessage: 'is not',
   }),
   type: FILTERS.PHRASE,
@@ -45,7 +45,7 @@ export const isNotOperator = {
 };
 
 export const isOneOfOperator = {
-  message: i18n.translate('data.filter.filterEditor.isOneOfOperatorOptionLabel', {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.isOneOfOperatorOptionLabel', {
     defaultMessage: 'is one of',
   }),
   type: FILTERS.PHRASES,
@@ -54,7 +54,7 @@ export const isOneOfOperator = {
 };
 
 export const isNotOneOfOperator = {
-  message: i18n.translate('data.filter.filterEditor.isNotOneOfOperatorOptionLabel', {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.isNotOneOfOperatorOptionLabel', {
     defaultMessage: 'is not one of',
   }),
   type: FILTERS.PHRASES,
@@ -63,7 +63,7 @@ export const isNotOneOfOperator = {
 };
 
 export const isBetweenOperator = {
-  message: i18n.translate('data.filter.filterEditor.isBetweenOperatorOptionLabel', {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.isBetweenOperatorOptionLabel', {
     defaultMessage: 'is between',
   }),
   type: FILTERS.RANGE,
@@ -79,7 +79,7 @@ export const isBetweenOperator = {
 };
 
 export const isNotBetweenOperator = {
-  message: i18n.translate('data.filter.filterEditor.isNotBetweenOperatorOptionLabel', {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel', {
     defaultMessage: 'is not between',
   }),
   type: FILTERS.RANGE,
@@ -95,7 +95,7 @@ export const isNotBetweenOperator = {
 };
 
 export const existsOperator = {
-  message: i18n.translate('data.filter.filterEditor.existsOperatorOptionLabel', {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.existsOperatorOptionLabel', {
     defaultMessage: 'exists',
   }),
   type: FILTERS.EXISTS,
@@ -103,7 +103,7 @@ export const existsOperator = {
 };
 
 export const doesNotExistOperator = {
-  message: i18n.translate('data.filter.filterEditor.doesNotExistOperatorOptionLabel', {
+  message: i18n.translate('unifiedSearch.filter.filterEditor.doesNotExistOperatorOptionLabel', {
     defaultMessage: 'does not exist',
   }),
   type: FILTERS.EXISTS,

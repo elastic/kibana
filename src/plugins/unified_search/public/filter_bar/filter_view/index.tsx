@@ -34,18 +34,18 @@ export const FilterView: FC<Props> = ({
 
   let title =
     errorMessage ||
-    i18n.translate('data.filter.filterBar.moreFilterActionsMessage', {
+    i18n.translate('unifiedSearch.filter.filterBar.moreFilterActionsMessage', {
       defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
       values: { innerText },
     });
 
   if (isFilterPinned(filter)) {
-    title = `${i18n.translate('data.filter.filterBar.pinnedFilterPrefix', {
+    title = `${i18n.translate('unifiedSearch.filter.filterBar.pinnedFilterPrefix', {
       defaultMessage: 'Pinned',
     })} ${title}`;
   }
   if (filter.meta.disabled) {
-    title = `${i18n.translate('data.filter.filterBar.disabledFilterPrefix', {
+    title = `${i18n.translate('unifiedSearch.filter.filterBar.disabledFilterPrefix', {
       defaultMessage: 'Disabled',
     })} ${title}`;
   }
@@ -62,12 +62,12 @@ export const FilterView: FC<Props> = ({
         tabIndex: -1,
       }}
       iconOnClick={iconOnClick}
-      iconOnClickAriaLabel={i18n.translate('data.filter.filterBar.filterItemBadgeIconAriaLabel', {
+      iconOnClickAriaLabel={i18n.translate('unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel', {
         defaultMessage: 'Delete {filter}',
         values: { filter: innerText },
       })}
       onClick={onClick}
-      onClickAriaLabel={i18n.translate('data.filter.filterBar.filterItemBadgeAriaLabel', {
+      onClickAriaLabel={i18n.translate('unifiedSearch.filter.filterBar.filterItemBadgeAriaLabel', {
         defaultMessage: 'Filter actions',
       })}
       {...rest}

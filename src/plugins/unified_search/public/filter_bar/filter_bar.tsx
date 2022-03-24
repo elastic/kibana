@@ -88,7 +88,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       >
         +{' '}
         <FormattedMessage
-          id="data.filter.filterBar.addFilterButtonLabel"
+          id="unifiedSearch.filter.filterBar.addFilterButtonLabel"
           defaultMessage="Add filter"
         />
       </EuiButtonEmpty>

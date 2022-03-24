@@ -36,7 +36,7 @@ export function createFilterAction(
     order: 100,
     getIconType: () => 'filter',
     getDisplayName: () => {
-      return i18n.translate('data.filter.applyFilterActionTitle', {
+      return i18n.translate('unifiedSearch.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',
       });
     },
