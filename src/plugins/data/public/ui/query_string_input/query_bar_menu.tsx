@@ -331,7 +331,7 @@ export function QueryBarMenu({
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiText
-                color={savedQuery ? '#0071c2' : 'default'}
+                color={savedQuery ? 'primary' : 'default'}
                 size="s"
                 data-test-subj="savedQueryTitle"
               >

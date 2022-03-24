@@ -1,13 +1,16 @@
 .kbnQueryBar__wrap {
-  max-width: 100%;
+  width: 100%;
   z-index: $euiZContentMenu;
+  height: $euiFormControlHeight;
+  display: flex;
+  gap: $euiSize;
 }
 
 .kbnQueryBar__textareaWrap {
+  position: relative;
   overflow: visible !important; // Override EUI form control
   display: flex;
   flex: 1 1 100%;
-  position: relative;
   background-color: $euiFormBackgroundColor;
   border-radius: $euiFormControlBorderRadius;
 }

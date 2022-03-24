@@ -684,21 +684,25 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
-    const containerClassName = classNames(
-      'euiFormControlLayout kbnQueryBar__wrap',
-      this.props.className
-    );
+    const containerClassName = classNames('kbnQueryBar__wrap', this.props.className);
     const inputClassName = classNames('kbnQueryBar__textarea', {
       'kbnQueryBar__textarea--withIcon': this.props.iconType,
       'kbnQueryBar__textarea--isClearable': this.props.isClearable,
     });
-    const inputWrapClassName = classNames(
-      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap'
-    );
+    const inputWrapClassName = classNames('kbnQueryBar__textareaWrap');
 
     return (
       <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
         {this.props.prepend}
+        {this.props.disableLanguageSwitcher ? null : (
+          <QueryLanguageSwitcher
+            language={this.props.query.language}
+            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+            onSelectLanguage={this.onSelectLanguage}
+            nonKqlMode={this.props.nonKqlMode}
+            nonKqlModeHelpText={this.props.nonKqlModeHelpText}
+          />
+        )}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
@@ -796,15 +800,6 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-        {this.props.disableLanguageSwitcher ? null : (
-          <QueryLanguageSwitcher
-            language={this.props.query.language}
-            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-            onSelectLanguage={this.onSelectLanguage}
-            nonKqlMode={this.props.nonKqlMode}
-            nonKqlModeHelpText={this.props.nonKqlModeHelpText}
-          />
-        )}
       </div>
     );
   }
