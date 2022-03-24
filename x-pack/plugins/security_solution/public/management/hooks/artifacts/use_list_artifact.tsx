@@ -8,7 +8,12 @@ import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { HttpFetchError } from 'kibana/public';
 import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
 import { useMemo } from 'react';
-import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
+import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_DEFAULT_SORT_FIELD,
+  MANAGEMENT_DEFAULT_SORT_ORDER,
+} from '../../common/constants';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
@@ -23,6 +28,8 @@ export function useListArtifact(
     page: number;
     perPage: number;
     policies: string[];
+    sortOrder: string;
+    sortField: string;
     excludedPolicies: string[];
   }> = DEFAULT_OPTIONS,
   searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
@@ -36,6 +43,8 @@ export function useListArtifact(
     page = MANAGEMENT_DEFAULT_PAGE + 1,
     perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
     policies = [],
+    sortField = MANAGEMENT_DEFAULT_SORT_FIELD,
+    sortOrder = MANAGEMENT_DEFAULT_SORT_ORDER,
     excludedPolicies = [],
   } = options;
   const filterKuery = useMemo<string | undefined>(() => {
@@ -53,6 +62,8 @@ export function useListArtifact(
         filter: filterKuery,
         perPage,
         page,
+        sortOrder,
+        sortField,
       });
 
       return result;
