@@ -46,7 +46,7 @@ export const mockHostsState: HostsModel = {
         severitySelection: [],
       },
       [HostsTableType.sessions]: {
-        activePage: 4,
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
     },
@@ -86,7 +86,7 @@ export const mockHostsState: HostsModel = {
         severitySelection: [],
       },
       [HostsTableType.sessions]: {
-        activePage: 4,
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
     },

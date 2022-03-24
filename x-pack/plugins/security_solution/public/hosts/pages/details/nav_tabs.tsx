@@ -63,7 +63,7 @@ export const navTabsHostDetails = ({
       disabled: false,
     },
     [HostsTableType.sessions]: {
-      id: HostsTableType.risk,
+      id: HostsTableType.sessions,
       name: i18n.NAVIGATION_SESSIONS_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.sessions),
       disabled: false,

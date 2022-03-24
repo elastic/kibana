@@ -65,9 +65,9 @@ const SessionsTableComponent: React.FC<Props> = ({
   filterQuery = '',
 }) => {
   // TODO: Check for a better way to handle filterQuery, this is essentially to filter the host name when on the host details page
-  const parsedFilterQuery = useMemo(() => {
+  const parsedFilterQuery: ESBoolQuery = useMemo(() => {
     if (filterQuery && filterQuery !== '') {
-      return JSON.parse(filterQuery) as unknown as ESBoolQuery;
+      return JSON.parse(filterQuery);
     }
     return {};
   }, [filterQuery]);
