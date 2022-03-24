@@ -63,7 +63,7 @@ export class PluginsStatusService {
     this.updatePluginStatuses$
       .asObservable()
       .pipe(
-        bufferTime(50),
+        bufferTime(10),
         filter((plugins) => plugins.length > 0)
       )
       .subscribe((plugins) => {
@@ -72,7 +72,7 @@ export class PluginsStatusService {
         this.pluginStatus$.next(this.pluginStatus);
       });
 
-    this.deps.core$.pipe(debounceTime(50)).subscribe((coreStatus) => {
+    this.deps.core$.pipe(debounceTime(10)).subscribe((coreStatus) => {
       this.coreStatus = coreStatus!;
       // console.log('⚡ CORE STATUS! elastic: ', coreStatus.elasticsearch.level.toString(), '; savedObjects: ', coreStatus.savedObjects.level.toString());
       const derivedStatus = getSummaryStatus(Object.entries(this.coreStatus), {

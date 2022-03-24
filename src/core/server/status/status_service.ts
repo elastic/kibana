@@ -28,7 +28,6 @@ import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './plugins_status';
 import { getOverallStatusChanges } from './log_overall_status';
 import { CachedPluginsStatusService } from './cached_plugins_status';
-import { ServiceStatusLevels } from '..';
 
 interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
