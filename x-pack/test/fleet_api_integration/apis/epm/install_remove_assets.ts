@@ -253,6 +253,16 @@ export default function (providerContext: FtrProviderContext) {
           resIndexPattern = err;
         }
         expect(resIndexPattern.response.data.statusCode).equal(404);
+        let resOsqueryPackAsset;
+        try {
+          resOsqueryPackAsset = await kibanaServer.savedObjects.get({
+            type: 'osquery-pack-asset',
+            id: 'sample_osquery_pack_asset',
+          });
+        } catch (err) {
+          resOsqueryPackAsset = err;
+        }
+        expect(resOsqueryPackAsset.response.data.statusCode).equal(404);
       });
       it('should have removed the saved object', async function () {
         let res;
@@ -447,6 +457,11 @@ const expectAssetsInstalled = ({
       id: 'sample_security_rule',
     });
     expect(resSecurityRule.id).equal('sample_security_rule');
+    const resOsqueryPackAsset = await kibanaServer.savedObjects.get({
+      type: 'osquery-pack-asset',
+      id: 'sample_osquery_pack_asset',
+    });
+    expect(resOsqueryPackAsset.id).equal('sample_osquery_pack_asset');
     const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
       type: 'csp-rule-template',
       id: 'sample_csp_rule_template',
@@ -525,6 +540,10 @@ const expectAssetsInstalled = ({
         {
           id: 'sample_ml_module',
           type: 'ml-module',
+        },
+        {
+          id: 'sample_osquery_pack_asset',
+          type: 'osquery-pack-asset',
         },
         {
           id: 'sample_search',
@@ -685,6 +704,10 @@ const expectAssetsInstalled = ({
         },
         {
           id: '4c758d70-ecf1-56b3-b704-6d8374841b34',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '313ddb31-e70a-59e8-8287-310d4652a9b7',
           type: 'epm-packages-assets',
         },
         {

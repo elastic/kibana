@@ -63,6 +63,7 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
+import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 import {
   ActionsCompletion,
   AlertExecutionStore,
@@ -113,6 +114,7 @@ export class TaskRunner<
   >;
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  private readonly inMemoryMetrics: InMemoryMetrics;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
@@ -128,7 +130,8 @@ export class TaskRunner<
       RecoveryActionGroupId
     >,
     taskInstance: ConcreteTaskInstance,
-    context: TaskRunnerContext
+    context: TaskRunnerContext,
+    inMemoryMetrics: InMemoryMetrics
   ) {
     this.context = context;
     this.logger = context.logger;
@@ -140,6 +143,7 @@ export class TaskRunner<
     this.searchAbortController = new AbortController();
     this.cancelled = false;
     this.executionId = uuid.v4();
+    this.inMemoryMetrics = inMemoryMetrics;
   }
 
   private async getDecryptedAttributes(
@@ -805,6 +809,10 @@ export class TaskRunner<
     eventLogger.logEvent(event);
 
     if (!this.cancelled) {
+      this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+      if (executionStatus.error) {
+        this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
+      }
       this.logger.debug(
         `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
           executionStatus
@@ -927,6 +935,8 @@ export class TaskRunner<
       },
     };
     eventLogger.logEvent(event);
+
+    this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_TIMEOUTS);
 
     // Update the rule saved object with execution status
     const executionStatus: AlertExecutionStatus = {

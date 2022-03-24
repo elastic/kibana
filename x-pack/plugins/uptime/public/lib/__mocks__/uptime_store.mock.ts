@@ -77,6 +77,9 @@ export const mockState: AppState = {
       monitorList: null,
       serviceLocations: null,
     },
+    syntheticsService: {
+      loading: false,
+    },
   },
   ml: {
     mlJob: {

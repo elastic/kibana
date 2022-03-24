@@ -70,6 +70,9 @@ describe('useInlineErrorsCount', function () {
           list: { monitors: [], page: 1, perPage: 10, total: null },
           loading: { monitorList: false, serviceLocations: false },
           locations: [],
+          syntheticsService: {
+            loading: false,
+          },
         },
         1641081600000,
       ],

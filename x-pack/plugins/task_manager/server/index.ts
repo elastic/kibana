@@ -32,6 +32,10 @@ export {
 } from './task_running';
 export type { RunNowResult } from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
+export {
+  IdleTaskWithExpiredRunAt,
+  RunningOrClaimingTaskWithExpiredRetryAt,
+} from './queries/mark_available_tasks_as_claimed';
 
 export type {
   TaskManagerPlugin as TaskManager,

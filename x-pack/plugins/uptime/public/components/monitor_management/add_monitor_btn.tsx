@@ -10,15 +10,22 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { MONITOR_ADD_ROUTE } from '../../../common/constants';
+import { useSyntheticsServiceAllowed } from './hooks/use_service_allowed';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
-export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
+export const AddMonitorBtn = () => {
   const history = useHistory();
+
+  const { isAllowed, loading } = useSyntheticsServiceAllowed();
+
+  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
 
   return (
     <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false} data-test-subj="addMonitorButton">
       <EuiButton
         fill
-        isDisabled={isDisabled}
+        isLoading={loading}
+        isDisabled={!canSave || !isAllowed}
         iconType="plus"
         data-test-subj="addMonitorBtn"
         href={history.createHref({

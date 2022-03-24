@@ -201,7 +201,7 @@ export const mockEvents: ProcessEvent[] = [
       executable: '/usr/bin/vi',
       command_line: 'bash',
       interactive: true,
-      entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3727',
+      entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
       tty: {
         char_device: {
           major: 8,
@@ -299,7 +299,7 @@ export const mockEvents: ProcessEvent[] = [
         executable: '/usr/bin/vi',
         command_line: 'bash',
         interactive: true,
-        entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3727',
+        entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
         tty: {
           char_device: {
             major: 8,
@@ -1025,12 +1025,14 @@ export const mockData: ProcessEventsPage[] = [
 export const childProcessMock: Process = {
   id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bd',
   events: [],
+  alerts: [],
   children: [],
   autoExpand: false,
   searchMatched: null,
   parent: undefined,
   orphans: [],
   addEvent: (_) => undefined,
+  addAlert: (_) => undefined,
   clearSearch: () => undefined,
   getChildren: () => [],
   hasOutput: () => false,
@@ -1104,12 +1106,14 @@ export const childProcessMock: Process = {
 export const processMock: Process = {
   id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
   events: [],
+  alerts: [],
   children: [],
   autoExpand: false,
   searchMatched: null,
   parent: undefined,
   orphans: [],
   addEvent: (_) => undefined,
+  addAlert: (_) => undefined,
   clearSearch: () => undefined,
   getChildren: () => [],
   hasOutput: () => false,
@@ -1280,7 +1284,8 @@ export const sessionViewBasicProcessMock: Process = {
 
 export const sessionViewAlertProcessMock: Process = {
   ...processMock,
-  events: [...mockEvents, ...mockAlerts],
+  events: mockEvents,
+  alerts: mockAlerts,
   hasAlerts: () => true,
   getAlerts: () => mockAlerts,
   hasExec: () => true,
@@ -1292,12 +1297,14 @@ export const mockProcessMap = mockEvents.reduce(
     processMap[event.process.entity_id] = {
       id: event.process.entity_id,
       events: [event],
+      alerts: [],
       children: [],
       parent: undefined,
       autoExpand: false,
       searchMatched: null,
       orphans: [],
       addEvent: (_) => undefined,
+      addAlert: (_) => undefined,
       clearSearch: () => undefined,
       getChildren: () => [],
       hasOutput: () => false,
