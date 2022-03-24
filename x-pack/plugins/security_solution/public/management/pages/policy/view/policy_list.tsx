@@ -250,12 +250,6 @@ export const PolicyList = memo(() => {
           );
         },
       },
-      {
-        field: '-',
-        name: i18n.translate('xpack.securitySolution.policy.list.actions', {
-          defaultMessage: 'Actions',
-        }),
-      },
     ];
   }, [policyIdToEndpointCount, backLink]);
 
