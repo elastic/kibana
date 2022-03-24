@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, AppMountParameters } from 'kibana/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  AppMountParameters,
+} from 'kibana/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -77,7 +83,7 @@ export type ClientStart = void;
 export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
-  constructor() {}
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
     if (plugins.home) {
@@ -207,7 +213,7 @@ export class UptimePlugin
         const [coreStart, corePlugins] = await core.getStartServices();
 
         const { renderApp } = await import('./render_app');
-        return renderApp(coreStart, plugins, corePlugins, params);
+        return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
       },
     });
   }

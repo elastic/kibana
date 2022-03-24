@@ -23,7 +23,8 @@ export function renderApp(
   core: CoreStart,
   plugins: ClientPluginsSetup,
   startPlugins: ClientPluginsStart,
-  appMountParameters: AppMountParameters
+  appMountParameters: AppMountParameters,
+  isDev: boolean
 ) {
   const {
     application: { capabilities },
@@ -43,6 +44,7 @@ export function renderApp(
   plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
 
   const props: UptimeAppProps = {
+    isDev,
     plugins,
     canSave,
     core,

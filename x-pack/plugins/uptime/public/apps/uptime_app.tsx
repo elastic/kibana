@@ -63,6 +63,7 @@ export interface UptimeAppProps {
   commonlyUsedRanges: CommonlyUsedRange[];
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   appMountParameters: AppMountParameters;
+  isDev: boolean;
 }
 
 const Application = (props: UptimeAppProps) => {
