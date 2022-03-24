@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import '../../../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import '../../../../../../__mocks__/shallow_useeffect.mock';
+import { setMockActions, setMockValues } from '../../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
