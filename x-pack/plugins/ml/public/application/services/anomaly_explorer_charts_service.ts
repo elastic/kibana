@@ -115,9 +115,6 @@ export class AnomalyExplorerChartsService {
     severity = 0,
     maxSeries?: number
   ): Observable<ExplorerChartsData> {
-    const optimumPointSpacing = 5;
-    const optimumNumPoints = Math.ceil(chartsContainerWidth / optimumPointSpacing);
-
     const bounds = this.timeFilter.getActiveBounds();
     const boundsMin = bounds?.min ? bounds.min.valueOf() : undefined;
     const boundsMax = bounds?.max ? bounds.max.valueOf() : undefined;
@@ -131,6 +128,11 @@ export class AnomalyExplorerChartsService {
     if (maxSeries && maxSeries < chartsPerRow) {
       chartsPerRow = maxSeries;
     }
+
+    const chartWidth = Math.floor(containerWidth / chartsPerRow);
+
+    const optimumPointSpacing = 5;
+    const optimumNumPoints = Math.ceil(chartWidth / optimumPointSpacing);
 
     const maxSeriesToPlot = maxSeries ?? Math.max(chartsPerRow * 2, DEFAULT_MAX_SERIES_TO_PLOT);
 
