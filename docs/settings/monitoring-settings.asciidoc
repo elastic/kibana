@@ -51,7 +51,7 @@ cluster.
 `monitoring.ui.elasticsearch.username`::
 Specifies the username used by {kib} monitoring to establish a persistent connection
 in {kib} to the {es} monitoring cluster and to verify licensing status on the {es}
-monitoring cluster.
+monitoring cluster when using `monitoring.ui.elasticsearch.hosts`.
 +
 All other requests performed by *{stack-monitor-app}* to the monitoring {es}
 cluster uses the authenticated user's credentials, which must be the same on
@@ -62,7 +62,7 @@ If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsea
 `monitoring.ui.elasticsearch.password`::
 Specifies the password used by {kib} monitoring to establish a persistent connection
 in {kib}  to the {es} monitoring cluster and to verify licensing status on the {es}
-monitoring cluster.
+monitoring cluster when using `monitoring.ui.elasticsearch.hosts`.
 +
 All other requests performed by *{stack-monitor-app}* to the monitoring {es}
 cluster uses the authenticated user's credentials, which must be the same on
@@ -71,7 +71,7 @@ both the {es} monitoring cluster and the {es} production cluster.
 If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.password`>> setting.
 
 `monitoring.ui.elasticsearch.serviceAccountToken`::
-Specifies a {ref}/security-api-create-service-token.html[service account token] for the {es} cluster where your monitoring data is stored when using `monitoring.ui.elasticsearch.hosts`.  This setting is an alternative to `monitoring.ui.elasticsearch.username` and `monitoring.ui.elasticsearch.password`. 
+Specifies a {ref}/security-api-create-service-token.html[service account token] for the {es} cluster where your monitoring data is stored when using `monitoring.ui.elasticsearch.hosts`.  This setting is an alternative to using `monitoring.ui.elasticsearch.username` and `monitoring.ui.elasticsearch.password` and cannot be used simultaneously. 
 
 `monitoring.ui.elasticsearch.pingTimeout`::
 Specifies the time in milliseconds to wait for {es} to respond to internal
