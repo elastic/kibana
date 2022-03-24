@@ -210,7 +210,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
         delete updated[path];
         defaultValueDeserialized.current = unflattenObject<I>(updated);
       } else {
-      set(defaultValueDeserialized.current!, path, value);
+        set(defaultValueDeserialized.current!, path, value);
       }
     },
     []
