@@ -96,7 +96,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
         const actualValues = await this.getAxisLabels(testSubj, axis);
         expect(actualValues.length).to.eql(
           expectedCount,
-          `Expected swim lane ${axis} label count to be ${expectedCount}, got ${actualValues}`
+          `Expected swim lane ${axis} label count to be ${expectedCount}, got ${actualValues.length}`
         );
       });
     },

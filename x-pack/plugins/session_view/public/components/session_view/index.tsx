@@ -79,10 +79,12 @@ export const SessionView = ({
   );
 
   useEffect(() => {
-    if (fetchAlertStatus) {
+    if (newUpdatedAlertsStatus) {
       setUpdatedAlertsStatus({ ...newUpdatedAlertsStatus });
+      // clearing alertUuids fetched without triggering a re-render
+      fetchAlertStatus.shift();
     }
-  }, [fetchAlertStatus, newUpdatedAlertsStatus]);
+  }, [newUpdatedAlertsStatus, fetchAlertStatus]);
 
   const handleOnAlertDetailsClosed = useCallback((alertUuid: string) => {
     setFetchAlertStatus([alertUuid]);
