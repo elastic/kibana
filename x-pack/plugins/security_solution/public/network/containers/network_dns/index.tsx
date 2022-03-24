@@ -32,7 +32,7 @@ import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkDnsQuery';
+export const ID = 'networkDnsQuery';
 
 export interface NetworkDnsArgs {
   id: string;
@@ -206,6 +206,14 @@ export const useNetworkDns = ({
       abortCtrl.current.abort();
     };
   }, [networkDnsRequest, networkDnsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkDnsResponse];
 };

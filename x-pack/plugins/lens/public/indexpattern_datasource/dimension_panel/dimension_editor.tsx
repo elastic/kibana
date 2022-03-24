@@ -57,6 +57,7 @@ import {
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
 import { NameInput } from '../../shared_components';
+import { ParamEditorProps } from '../operations/definitions';
 
 const operationPanels = getOperationDisplay();
 
@@ -422,6 +423,28 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const FieldInputComponent = selectedOperationDefinition?.renderFieldInput || FieldInput;
 
+  const paramEditorProps: ParamEditorProps<GenericIndexPatternColumn> = {
+    layer: state.layers[layerId],
+    layerId,
+    activeData: props.activeData,
+    updateLayer: (setter) => {
+      if (temporaryQuickFunction) {
+        setTemporaryState('none');
+      }
+      setStateWrapper(setter, { forceRender: temporaryQuickFunction });
+    },
+    columnId,
+    currentColumn: state.layers[layerId].columns[columnId],
+    dateRange,
+    indexPattern: currentIndexPattern,
+    operationDefinitionMap,
+    toggleFullscreen,
+    isFullscreen,
+    setIsCloseable,
+    paramEditorCustomProps,
+    ...services,
+  };
+
   const quickFunctions = (
     <>
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
@@ -517,29 +540,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           />
         ) : null}
 
-        {shouldDisplayExtraOptions && (
-          <ParamEditor
-            layer={state.layers[layerId]}
-            layerId={layerId}
-            activeData={props.activeData}
-            updateLayer={(setter) => {
-              if (temporaryQuickFunction) {
-                setTemporaryState('none');
-              }
-              setStateWrapper(setter, { forceRender: temporaryQuickFunction });
-            }}
-            columnId={columnId}
-            currentColumn={state.layers[layerId].columns[columnId]}
-            dateRange={dateRange}
-            indexPattern={currentIndexPattern}
-            operationDefinitionMap={operationDefinitionMap}
-            toggleFullscreen={toggleFullscreen}
-            isFullscreen={isFullscreen}
-            setIsCloseable={setIsCloseable}
-            paramEditorCustomProps={paramEditorCustomProps}
-            {...services}
-          />
-        )}
+        {shouldDisplayExtraOptions && <ParamEditor {...paramEditorProps} />}
       </div>
     </>
   );
@@ -767,6 +768,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     />
                   ) : null,
               },
+              ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.(
+                paramEditorProps
+              ) || []),
             ]}
           />
         </div>

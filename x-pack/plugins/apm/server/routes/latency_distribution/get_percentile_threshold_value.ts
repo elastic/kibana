@@ -31,7 +31,7 @@ export async function getPercentileThresholdValue(
     {
       // TODO: add support for metrics
       apm: { events: [ProcessorEvent.transaction] },
-      body: transactionDurationPercentilesRequestBody,
+      body: { size: 0, ...transactionDurationPercentilesRequestBody },
     }
   )) as {
     aggregations?: {
