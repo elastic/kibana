@@ -9,7 +9,14 @@ import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'dashboard', 'header', 'discover']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'lens',
+    'dashboard',
+    'header',
+    'discover',
+    'common',
+  ]);
 
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
@@ -56,12 +63,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
       await filterBarService.addFilter('geo.src', 'is', 'AF');
-
-      await retry.waitFor('filter to be added', async () => {
-        return (await filterBarService.getFilterCount()) === 1;
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      // the filter bar seems to need a moment to settle before saving and returning
+      await PageObjects.common.sleep(1000);
 
       await PageObjects.lens.saveAndReturn();
 
