@@ -18,3 +18,13 @@ export interface ServiceListItem {
   transactionErrorRate?: number | null;
   environments?: string[];
 }
+
+export enum ServiceInventoryFieldName {
+  ServiceName = 'serviceName',
+  HealthStatus = 'healthStatus',
+  Environments = 'environments',
+  TransactionType = 'transactionType',
+  Throughput = 'throughput',
+  Latency = 'latency',
+  FailureRate = 'failureRate',
+}

@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import { orderBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
@@ -45,7 +44,13 @@ import {
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
 import { HealthBadge } from './health_badge';
-import { ServiceListItem } from '../../../../../common/service_inventory';
+import {
+  ServiceInventoryFieldName,
+  ServiceListItem,
+} from '../../../../../common/service_inventory';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { apmServiceInventoryOptimizedSorting } from '../../../../../../observability/common';
+import { orderServiceItems } from './order_service_items';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
@@ -53,13 +58,6 @@ type ServicesDetailedStatisticsAPIResponse =
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
-
-const SERVICE_HEALTH_STATUS_ORDER = [
-  ServiceHealthStatus.unknown,
-  ServiceHealthStatus.healthy,
-  ServiceHealthStatus.warning,
-  ServiceHealthStatus.critical,
-];
 
 export function getServiceColumns({
   query,
@@ -84,7 +82,7 @@ export function getServiceColumns({
     ...(showHealthStatusColumn
       ? [
           {
-            field: 'healthStatus',
+            field: ServiceInventoryFieldName.HealthStatus,
             name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
               defaultMessage: 'Health',
             }),
@@ -101,7 +99,7 @@ export function getServiceColumns({
         ]
       : []),
     {
-      field: 'serviceName',
+      field: ServiceInventoryFieldName.ServiceName,
       name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
         defaultMessage: 'Name',
       }),
@@ -123,7 +121,7 @@ export function getServiceColumns({
     ...(showWhenSmallOrGreaterThanLarge
       ? [
           {
-            field: 'environments',
+            field: ServiceInventoryFieldName.Environments,
             name: i18n.translate(
               'xpack.apm.servicesTable.environmentColumnLabel',
               {
@@ -141,7 +139,7 @@ export function getServiceColumns({
     ...(showTransactionTypeColumn && showWhenSmallOrGreaterThanXL
       ? [
           {
-            field: 'transactionType',
+            field: ServiceInventoryFieldName.TransactionType,
             name: i18n.translate(
               'xpack.apm.servicesTable.transactionColumnLabel',
               { defaultMessage: 'Transaction type' }
@@ -152,7 +150,7 @@ export function getServiceColumns({
         ]
       : []),
     {
-      field: 'latency',
+      field: ServiceInventoryFieldName.Latency,
       name: i18n.translate('xpack.apm.servicesTable.latencyAvgColumnLabel', {
         defaultMessage: 'Latency (avg.)',
       }),
@@ -179,7 +177,7 @@ export function getServiceColumns({
       align: RIGHT_ALIGNMENT,
     },
     {
-      field: 'throughput',
+      field: ServiceInventoryFieldName.Throughput,
       name: i18n.translate('xpack.apm.servicesTable.throughputColumnLabel', {
         defaultMessage: 'Throughput',
       }),
@@ -207,7 +205,7 @@ export function getServiceColumns({
       align: RIGHT_ALIGNMENT,
     },
     {
-      field: 'transactionErrorRate',
+      field: ServiceInventoryFieldName.FailureRate,
       name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),
@@ -292,8 +290,18 @@ export function ServiceList({
     ]
   );
 
-  const initialSortField = displayHealthStatus ? 'healthStatus' : 'serviceName';
-  const initialSortDirection = displayHealthStatus ? 'desc' : 'asc';
+  const tiebreakerField = useKibana().services.uiSettings?.get<boolean>(
+    apmServiceInventoryOptimizedSorting
+  )
+    ? ServiceInventoryFieldName.ServiceName
+    : ServiceInventoryFieldName.Throughput;
+
+  const initialSortField = displayHealthStatus
+    ? ServiceInventoryFieldName.HealthStatus
+    : tiebreakerField;
+
+  const initialSortDirection =
+    initialSortField === ServiceInventoryFieldName.ServiceName ? 'asc' : 'desc';
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
@@ -333,7 +341,7 @@ export function ServiceList({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ManagedTable
+        <ManagedTable<ServiceListItem>
           isLoading={isLoading}
           error={isFailure}
           columns={serviceColumns}
@@ -342,39 +350,12 @@ export function ServiceList({
           initialSortField={initialSortField}
           initialSortDirection={initialSortDirection}
           sortFn={(itemsToSort, sortField, sortDirection) => {
-            // For healthStatus, sort items by healthStatus first, then by name
-            return sortField === 'healthStatus'
-              ? orderBy(
-                  itemsToSort,
-                  [
-                    (item) => {
-                      return item.healthStatus
-                        ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
-                        : -1;
-                    },
-                    (item) => item.serviceName.toLowerCase(),
-                  ],
-                  [sortDirection, sortDirection === 'asc' ? 'desc' : 'asc']
-                )
-              : orderBy(
-                  itemsToSort,
-                  (item) => {
-                    switch (sortField) {
-                      // Use `?? -1` here so `undefined` will appear after/before `0`.
-                      // In the table this will make the "N/A" items always at the
-                      // bottom/top.
-                      case 'latency':
-                        return item.latency ?? -1;
-                      case 'throughput':
-                        return item.throughput ?? -1;
-                      case 'transactionErrorRate':
-                        return item.transactionErrorRate ?? -1;
-                      default:
-                        return item[sortField as keyof typeof item];
-                    }
-                  },
-                  sortDirection
-                );
+            return orderServiceItems({
+              items: itemsToSort,
+              primarySortField: sortField as ServiceInventoryFieldName,
+              tiebreakerField,
+              sortDirection,
+            });
           }}
         />
       </EuiFlexItem>
