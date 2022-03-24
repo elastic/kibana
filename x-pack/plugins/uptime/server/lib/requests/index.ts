@@ -30,6 +30,7 @@ import {
   getSyntheticsEnablement,
   deleteServiceApiKey,
   generateAndSaveServiceAPIKey,
+  getAPIKeyForSyntheticsService,
 } from '../synthetics_service/get_api_key';
 
 export const requests = {
@@ -55,6 +56,7 @@ export const requests = {
   getJourneyDetails,
   getNetworkEvents,
   getSyntheticsEnablement,
+  getAPIKeyForSyntheticsService,
   deleteServiceApiKey,
   generateAndSaveServiceAPIKey,
 };

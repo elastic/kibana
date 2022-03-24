@@ -113,11 +113,6 @@ export const deleteServiceApiKey = async ({
   request?: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
 }) => {
-  const { canEnable } = await getSyntheticsEnablement({ request, server });
-  if (!canEnable) {
-    throw new SyntheticsForbiddenError();
-  }
-
   await deleteSyntheticsServiceApiKey(savedObjectsClient);
 };
 
