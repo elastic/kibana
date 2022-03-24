@@ -1,0 +1,181 @@
+{
+  "attributes": {
+    "state": {
+      "datasourceStates": {
+        "indexpattern": {
+          "layers": {
+            "0385075d-0f3b-4a12-b3c0-68a95781d48d": {
+              "columnOrder": [
+                "03195b79-6315-40f7-b513-5222330367d7",
+                "2cb8226c-bfe5-4505-9c66-9f99ff6b5822"
+              ],
+              "columns": {
+                "03195b79-6315-40f7-b513-5222330367d7": {
+                  "dataType": "date",
+                  "isBucketed": true,
+                  "label": "date",
+                  "operationType": "date_histogram",
+                  "params": {
+                    "interval": "auto"
+                  },
+                  "scale": "interval",
+                  "sourceField": "date"
+                },
+                "2cb8226c-bfe5-4505-9c66-9f99ff6b5822": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "scale": "ratio",
+                  "sourceField": "Records"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "layers": [
+          {
+            "accessors": [
+              "2cb8226c-bfe5-4505-9c66-9f99ff6b5822"
+            ],
+            "layerId": "0385075d-0f3b-4a12-b3c0-68a95781d48d",
+            "layerType": "data",
+            "position": "top",
+            "seriesType": "bar_stacked",
+            "showGridlines": false,
+            "xAccessor": "03195b79-6315-40f7-b513-5222330367d7"
+          }
+        ],
+        "legend": {
+          "isVisible": true,
+          "position": "right"
+        },
+        "preferredSeriesType": "bar_stacked",
+        "title": "Empty XY chart",
+        "valueLabels": "hide"
+      }
+    },
+    "title": "distogram",
+    "visualizationType": "lnsXY"
+  },
+  "coreMigrationVersion": "7.17.2",
+  "id": "4b498150-6821-11eb-9375-4bd700f7d8d4",
+  "migrationVersion": {
+    "lens": "7.16.0"
+  },
+  "references": [
+    {
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "name": "indexpattern-datasource-layer-0385075d-0f3b-4a12-b3c0-68a95781d48d",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "updated_at": "2021-02-06T02:16:17.129Z",
+  "version": "WzgsMl0="
+}
+{
+  "attributes": {
+    "fieldAttrs": "{\"_id\":{\"count\":1},\"gender\":{\"count\":1},\"name\":{\"count\":1},\"value\":{\"count\":1},\"year\":{\"count\":1},\"years_ago\":{\"count\":1},\"date_informal\":{\"count\":1}}",
+    "fieldFormatMap": "{\"years_ago\":{\"id\":\"number\",\"params\":{\"pattern\":\"0,0.00000000000000000000\"}},\"year\":{\"id\":\"number\",\"params\":{\"pattern\":\"0\"}},\"date_informal\":{\"id\":\"date\",\"params\":{\"parsedUrl\":{\"origin\":\"http://localhost:5620\",\"pathname\":\"/app/dashboards\",\"basePath\":\"\"},\"pattern\":\"MMM Do YY\"}}}",
+    "fields": "[{\"count\":1,\"script\":\"2019 - doc['year'].value\",\"lang\":\"painless\",\"name\":\"years_ago\",\"type\":\"number\",\"scripted\":true,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"count\":1,\"script\":\"doc['date'].value\",\"lang\":\"painless\",\"name\":\"date_informal\",\"type\":\"date\",\"scripted\":true,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
+    "runtimeFieldMap": "{}",
+    "timeFieldName": "date",
+    "title": "babynames"
+  },
+  "coreMigrationVersion": "7.17.2",
+  "id": "89655130-5013-11e9-bce7-4dabcb8bef24",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2021-02-06T02:15:25.565Z",
+  "version": "WzcsMl0="
+}
+{
+  "attributes": {
+    "columns": [
+      "_id",
+      "name",
+      "gender",
+      "value",
+      "year",
+      "years_ago",
+      "date_informal"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"sort\":[{\"date\":\"desc\"}],\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"fieldsFromSource\":[\"_id\",\"_index\",\"_score\",\"_source\",\"_type\",\"date\",\"gender\",\"name\",\"percent\",\"value\",\"year\",\"years_ago\",\"date_informal\"],\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "date",
+        "desc"
+      ]
+    ],
+    "title": "namessearch",
+    "version": 1
+  },
+  "coreMigrationVersion": "7.17.2",
+  "id": "cdb908f0-6820-11eb-9375-4bd700f7d8d4",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "89655130-5013-11e9-bce7-4dabcb8bef24",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2021-02-06T02:15:31.253Z",
+  "version": "WzYsMl0="
+}
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"version\":\"7.11.0\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":13,\"i\":\"56f914c9-9597-4781-bfc6-229d40b382c7\"},\"panelIndex\":\"56f914c9-9597-4781-bfc6-229d40b382c7\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_56f914c9-9597-4781-bfc6-229d40b382c7\"},{\"version\":\"7.11.0\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":13,\"w\":48,\"h\":14,\"i\":\"f3ea512f-e441-4206-8aa7-000b1418ea2b\"},\"panelIndex\":\"f3ea512f-e441-4206-8aa7-000b1418ea2b\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_f3ea512f-e441-4206-8aa7-000b1418ea2b\"}]",
+    "timeRestore": false,
+    "title": "names dashboard",
+    "version": 1
+  },
+  "coreMigrationVersion": "7.17.2",
+  "id": "52af6d10-6821-11eb-9375-4bd700f7d8d4",
+  "migrationVersion": {
+    "dashboard": "7.17.0"
+  },
+  "references": [
+    {
+      "id": "cdb908f0-6820-11eb-9375-4bd700f7d8d4",
+      "name": "56f914c9-9597-4781-bfc6-229d40b382c7:panel_56f914c9-9597-4781-bfc6-229d40b382c7",
+      "type": "search"
+    },
+    {
+      "id": "4b498150-6821-11eb-9375-4bd700f7d8d4",
+      "name": "f3ea512f-e441-4206-8aa7-000b1418ea2b:panel_f3ea512f-e441-4206-8aa7-000b1418ea2b",
+      "type": "lens"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2021-02-06T02:16:29.540Z",
+  "version": "WzksMl0="
+}
