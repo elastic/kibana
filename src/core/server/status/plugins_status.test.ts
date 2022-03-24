@@ -10,13 +10,13 @@ import { PluginName } from '../plugins';
 import { PluginsStatusService } from './plugins_status';
 import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
 import { ServiceStatusLevels, CoreStatus, ServiceStatus } from './types';
-import { first } from 'rxjs/operators';
+import { first, skip } from 'rxjs/operators';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
 // FIXME temporarily skipping these tests to asses performance of this solution for https://github.com/elastic/kibana/issues/128061
-describe.skip('PluginStatusService', () => {
+describe('PluginStatusService', () => {
   const coreAllAvailable$: Observable<CoreStatus> = of({
     elasticsearch: { level: ServiceStatusLevels.available, summary: 'elasticsearch avail' },
     savedObjects: { level: ServiceStatusLevels.available, summary: 'savedObjects avail' },
@@ -216,7 +216,7 @@ describe.skip('PluginStatusService', () => {
       service.set('a', of({ level: ServiceStatusLevels.available, summary: 'a status' }));
 
       expect(await service.getAll$().pipe(first()).toPromise()).toEqual({
-        a: { level: ServiceStatusLevels.available, summary: 'a status' }, // a is available depsite savedObjects being degraded
+        a: { level: ServiceStatusLevels.available, summary: 'a status' }, // a is available despite savedObjects being degraded
         b: {
           level: ServiceStatusLevels.degraded,
           summary: '1 service is degraded: savedObjects',
@@ -240,6 +240,7 @@ describe.skip('PluginStatusService', () => {
       const statusUpdates: Array<Record<PluginName, ServiceStatus>> = [];
       const subscription = service
         .getAll$()
+        .pipe(skip(1)) // the first emission happens right after core services emit
         .subscribe((pluginStatuses) => statusUpdates.push(pluginStatuses));
 
       service.set('a', of({ level: ServiceStatusLevels.degraded, summary: 'a degraded' }));
@@ -262,6 +263,7 @@ describe.skip('PluginStatusService', () => {
       const statusUpdates: Array<Record<PluginName, ServiceStatus>> = [];
       const subscription = service
         .getAll$()
+        .pipe(skip(1)) // the first emission happens right after core services emit
         .subscribe((pluginStatuses) => statusUpdates.push(pluginStatuses));
 
       const aStatus$ = new BehaviorSubject<ServiceStatus>({
@@ -281,19 +283,21 @@ describe.skip('PluginStatusService', () => {
     });
 
     it('emits an unavailable status if first emission times out, then continues future emissions', async () => {
-      jest.useFakeTimers();
-      const service = new PluginsStatusService({
-        core$: coreAllAvailable$,
-        pluginDependencies: new Map([
-          ['a', []],
-          ['b', ['a']],
-        ]),
-      });
+      const service = new PluginsStatusService(
+        {
+          core$: coreAllAvailable$,
+          pluginDependencies: new Map([
+            ['a', []],
+            ['b', ['a']],
+          ]),
+        },
+        10
+      );
 
       const pluginA$ = new ReplaySubject<ServiceStatus>(1);
       service.set('a', pluginA$);
-      const firstEmission = service.getAll$().pipe(first()).toPromise();
-      jest.runAllTimers();
+      // the first emission happens right after core services emit
+      const firstEmission = service.getAll$().pipe(skip(1), first()).toPromise();
 
       expect(await firstEmission).toEqual({
         a: { level: ServiceStatusLevels.unavailable, summary: 'Status check timed out after 30s' },
@@ -309,16 +313,16 @@ describe.skip('PluginStatusService', () => {
 
       pluginA$.next({ level: ServiceStatusLevels.available, summary: 'a available' });
       const secondEmission = service.getAll$().pipe(first()).toPromise();
-      jest.runAllTimers();
       expect(await secondEmission).toEqual({
         a: { level: ServiceStatusLevels.available, summary: 'a available' },
         b: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
       });
-      jest.useRealTimers();
     });
   });
 
   describe('getDependenciesStatus$', () => {
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
     it('only includes dependencies of specified plugin', async () => {
       const service = new PluginsStatusService({
         core$: coreAllAvailable$,
@@ -358,7 +362,7 @@ describe.skip('PluginStatusService', () => {
 
     it('debounces plugins custom status registration', async () => {
       const service = new PluginsStatusService({
-        core$: coreAllAvailable$,
+        core$: coreOneCriticalOneDegraded$,
         pluginDependencies,
       });
       const available: ServiceStatus = {
@@ -375,8 +379,6 @@ describe.skip('PluginStatusService', () => {
       service.set('a', pluginA$);
 
       expect(statusUpdates).toStrictEqual([]);
-
-      const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
       // Waiting for the debounce timeout should cut a new update
       await delay(25);
@@ -405,7 +407,6 @@ describe.skip('PluginStatusService', () => {
       const subscription = service
         .getDependenciesStatus$('b')
         .subscribe((status) => statusUpdates.push(status));
-      const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
       pluginA$.next(degraded);
       pluginA$.next(available);
