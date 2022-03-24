@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { createLogViewsServiceStartMock } from './services/log_views/log_views_service.mock';
 import { InfraClientStartExports } from './types';
 
 export const createInfraPluginStartMock = () => ({
   logViews: createLogViewsServiceStartMock(),
-  ContainerMetricsTable: () => null,
-  HostMetricsTable: () => null,
-  PodMetricsTable: () => null,
+  ContainerMetricsTable: () => <div />,
+  HostMetricsTable: () => <div />,
+  PodMetricsTable: () => <div />,
 });
 
 export const _ensureTypeCompatibility = (): InfraClientStartExports => createInfraPluginStartMock();
