@@ -29,5 +29,5 @@ export const getServiceLocationsSuccess = createAction<ServiceLocations>(
 export const getServiceLocationsFailure = createAction<Error>('GET_SERVICE_LOCATIONS_LIST_FAILURE');
 
 export const getSyntheticsServiceAllowed = createAsyncAction<void, SyntheticsServiceAllowed>(
-  'GET_SYNTHETICS_SERVICE_ENABLED'
+  'GET_SYNTHETICS_SERVICE_ALLOWED'
 );
