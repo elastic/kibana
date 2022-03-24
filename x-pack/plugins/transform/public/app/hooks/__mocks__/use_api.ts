@@ -166,7 +166,7 @@ const apiFactory = () => ({
     return Promise.resolve([]);
   },
   async getHistogramsForFields(
-    indexPatternTitle: string,
+    dataViewTitle: string,
     fields: FieldHistogramRequestConfig[],
     query: string | SavedSearchQuery,
     samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE

@@ -26,7 +26,7 @@ export const useStyles = () => {
       maxWidth: 800,
       maxHeight: 378,
       overflowY: 'auto',
-      backgroundColor: 'white',
+      backgroundColor: colors.mediumShade,
     };
 
     return {

@@ -111,4 +111,32 @@ describe('StatefulEventsViewer', () => {
     wrapper.unmount();
     expect(mockCloseEditor).toHaveBeenCalled();
   });
+
+  test('renders the graph overlay when a graph event id is set', async () => {
+    const propsWithGraphId = {
+      ...testProps,
+      graphEventId: 'test',
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulEventsViewer {...propsWithGraphId} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('overlayContainer').exists()).toBe(true);
+  });
+
+  test('renders the graph overlay when a session event id is set', async () => {
+    const propsWithGraphId = {
+      ...testProps,
+      sessionViewId: 'test',
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulEventsViewer {...propsWithGraphId} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('overlayContainer').exists()).toBe(true);
+  });
 });

@@ -17,6 +17,10 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
+    const { border, colors } = euiTheme;
+
+    const thinBorder = `${border.width.thin} solid ${colors.lightShade}!important`;
+
     const processTree: CSSObject = {
       height: `${height}px`,
       position: 'relative',
@@ -24,8 +28,19 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
 
     const detailPanel: CSSObject = {
       height: `${height}px`,
+      borderLeft: thinBorder,
+      borderRight: thinBorder,
     };
 
+    const resizeHandle: CSSObject = {
+      zIndex: 2,
+    };
+
+    const nonGrowGroup: CSSObject = {
+      display: 'flex',
+      flexGrow: 0,
+      alignItems: 'stretch',
+    };
     const searchBar: CSSObject = {
       position: 'relative',
       margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
@@ -38,6 +53,8 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
     return {
       processTree,
       detailPanel,
+      nonGrowGroup,
+      resizeHandle,
       searchBar,
       buttonsEyeDetail,
     };

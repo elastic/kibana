@@ -9,7 +9,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DropType } from '../../../../types';
+import { Datasource, DropType, GetDropProps } from '../../../../types';
 
 function getPropsForDropType(type: 'swap' | 'duplicate' | 'combine') {
   switch (type) {
@@ -128,4 +128,14 @@ export const getAdditionalClassesOnDroppable = (dropType?: string) => {
   ) {
     return 'lnsDragDrop-notCompatible';
   }
+};
+
+export const getDropProps = (
+  layerDatasource: Datasource<unknown, unknown>,
+  layerDatasourceDropProps: GetDropProps
+) => {
+  if (layerDatasource) {
+    return layerDatasource.getDropProps(layerDatasourceDropProps);
+  }
+  return;
 };

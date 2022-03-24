@@ -8,7 +8,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiEmptyPrompt,
   EuiButton,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiResizableContainer,
   EuiPanel,
@@ -23,7 +22,11 @@ import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { SessionViewDisplayOptions } from '../session_view_display_options';
 import { useStyles } from './styles';
-import { useFetchAlertStatus, useFetchSessionViewProcessEvents } from './hooks';
+import {
+  useFetchAlertStatus,
+  useFetchSessionViewProcessEvents,
+  useFetchSessionViewAlerts,
+} from './hooks';
 
 /**
  * The main wrapper component for the session view.
@@ -61,8 +64,12 @@ export const SessionView = ({
     hasPreviousPage,
   } = useFetchSessionViewProcessEvents(sessionEntityId, jumpToEvent);
 
-  const hasData = data && data.pages.length > 0 && data.pages[0].events.length > 0;
-  const renderIsLoading = isFetching && !data;
+  const alertsQuery = useFetchSessionViewAlerts(sessionEntityId);
+  const { data: alerts, error: alertsError, isFetching: alertsFetching } = alertsQuery;
+
+  const hasData = alerts && data && data.pages?.[0].events.length > 0;
+  const hasError = error || alertsError;
+  const renderIsLoading = (isFetching || alertsFetching) && !data;
   const renderDetails = isDetailOpen && selectedProcess;
   const { data: newUpdatedAlertsStatus } = useFetchAlertStatus(
     updatedAlertsStatus,
@@ -82,6 +89,15 @@ export const SessionView = ({
   const toggleDetailPanel = useCallback(() => {
     setIsDetailOpen(!isDetailOpen);
   }, [isDetailOpen]);
+
+  const onShowAlertDetails = useCallback(
+    (alertUuid: string) => {
+      if (loadAlertDetails) {
+        loadAlertDetails(alertUuid, () => handleOnAlertDetailsClosed(alertUuid));
+      }
+    },
+    [loadAlertDetails, handleOnAlertDetailsClosed]
+  );
 
   const handleOptionChange = useCallback((checkedOptions: DisplayOptionsState) => {
     setDisplayOptions(checkedOptions);
@@ -114,7 +130,7 @@ export const SessionView = ({
   return (
     <>
       <EuiPanel color={'subdued'}>
-        <EuiFlexGroup>
+        <div css={styles.nonGrowGroup}>
           <EuiFlexItem
             data-test-subj="sessionView:sessionViewProcessEventsSearch"
             css={styles.searchBar}
@@ -146,7 +162,7 @@ export const SessionView = ({
               />
             </EuiButton>
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </div>
       </EuiPanel>
       <EuiResizableContainer>
         {(EuiResizablePanel, EuiResizableButton) => (
@@ -165,7 +181,7 @@ export const SessionView = ({
                 </SectionLoading>
               )}
 
-              {error && (
+              {hasError && (
                 <EuiEmptyPrompt
                   iconType="alert"
                   color="danger"
@@ -193,6 +209,7 @@ export const SessionView = ({
                   <ProcessTree
                     sessionEntityId={sessionEntityId}
                     data={data.pages}
+                    alerts={alerts}
                     searchQuery={searchQuery}
                     selectedProcess={selectedProcess}
                     onProcessSelected={onProcessSelected}
@@ -204,8 +221,7 @@ export const SessionView = ({
                     fetchPreviousPage={fetchPreviousPage}
                     setSearchResults={setSearchResults}
                     updatedAlertsStatus={updatedAlertsStatus}
-                    loadAlertDetails={loadAlertDetails}
-                    handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
+                    onShowAlertDetails={onShowAlertDetails}
                     timeStampOn={displayOptions.timestamp}
                     verboseModeOn={displayOptions.verboseMode}
                   />
@@ -215,7 +231,7 @@ export const SessionView = ({
 
             {renderDetails ? (
               <>
-                <EuiResizableButton />
+                <EuiResizableButton css={styles.resizeHandle} />
                 <EuiResizablePanel
                   id="session-detail-panel"
                   initialSize={30}
@@ -224,8 +240,11 @@ export const SessionView = ({
                   css={styles.detailPanel}
                 >
                   <SessionViewDetailPanel
+                    alerts={alerts}
+                    investigatedAlert={jumpToEvent}
                     selectedProcess={selectedProcess}
                     onProcessSelected={onProcessSelected}
+                    onShowAlertDetails={onShowAlertDetails}
                   />
                 </EuiResizablePanel>
               </>

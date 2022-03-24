@@ -181,7 +181,7 @@ const HostsComponent = () => {
 
   return (
     <>
-      {indicesExist ? (
+      {true ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
