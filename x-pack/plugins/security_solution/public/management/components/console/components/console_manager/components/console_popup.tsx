@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, ReactNode, useMemo } from 'react';
+import React, { memo, PropsWithChildren, ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiIcon,
@@ -17,21 +17,31 @@ import {
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
+import { ConfirmTerminate } from './confirm_terminate';
 
 const ConsolePopupWrapper = styled.div`
   position: fixed;
   top: 100px;
   right: 0;
   min-height: 60vh;
-  max-width: 70vw;
   min-width: 40vw;
+  max-width: 70vw;
 
   &.is-hidden {
     display: none;
   }
 
+  &.is-confirming .modal-content {
+    opacity: 0.3;
+  }
+
   .console-holder {
     height: 100%;
+  }
+
+  .terminate-confirm-panel {
+    max-width: 85%;
+    flex-grow: 0;
   }
 `;
 
@@ -44,17 +54,33 @@ type ConsolePopupProps = PropsWithChildren<{
 
 export const ConsolePopup = memo<ConsolePopupProps>(
   ({ children, isHidden, title, onTerminate, onHide }) => {
+    const [showTerminateConfirm, setShowTerminateConfirm] = useState(false);
+
     const cssClassNames = useMemo(() => {
       return classNames({
         euiModal: true,
         'euiModal--maxWidth-default': true,
         'is-hidden': isHidden,
+        'is-confirming': showTerminateConfirm,
       });
-    }, [isHidden]);
+    }, [isHidden, showTerminateConfirm]);
+
+    const handleTerminateOnClick = useCallback(() => {
+      setShowTerminateConfirm(true);
+    }, []);
+
+    const handleTerminateOnConfirm = useCallback(() => {
+      setShowTerminateConfirm(false);
+      onTerminate();
+    }, [onTerminate]);
+
+    const handleTerminateOnCancel = useCallback(() => {
+      setShowTerminateConfirm(false);
+    }, []);
 
     return (
       <ConsolePopupWrapper className={cssClassNames}>
-        <div className="euiModal__flex">
+        <div className="euiModal__flex modal-content">
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <h1>
@@ -66,7 +92,7 @@ export const ConsolePopup = memo<ConsolePopupProps>(
             <div className="console-holder">{children}</div>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton onClick={onTerminate}>
+            <EuiButton onClick={handleTerminateOnClick}>
               <FormattedMessage
                 id="xpack.securitySolution.console.manager.popup.terminateLabel"
                 defaultMessage="Terminate"
@@ -80,6 +106,12 @@ export const ConsolePopup = memo<ConsolePopupProps>(
             </EuiButton>
           </EuiModalFooter>
         </div>
+        {showTerminateConfirm && (
+          <ConfirmTerminate
+            onConfirm={handleTerminateOnConfirm}
+            onCancel={handleTerminateOnCancel}
+          />
+        )}
       </ConsolePopupWrapper>
     );
   }
