@@ -49,16 +49,15 @@ export const fromSavedSearchAttributes = (
 export const toSavedSearchAttributes = (
   savedSearch: SavedSearch,
   searchSourceJSON: string
-): SavedSearchAttributes =>
-  ({
-    kibanaSavedObjectMeta: { searchSourceJSON },
-    title: savedSearch.title ?? '',
-    sort: savedSearch.sort ?? [],
-    columns: savedSearch.columns ?? [],
-    description: savedSearch.description ?? '',
-    grid: savedSearch.grid ?? {},
-    hideChart: savedSearch.hideChart ?? false,
-    viewMode: savedSearch.viewMode,
-    hideAggregatedPreview: savedSearch.hideAggregatedPreview,
-    rowHeight: savedSearch.rowHeight,
-  } as SavedSearchAttributes);
+): SavedSearchAttributes => ({
+  kibanaSavedObjectMeta: { searchSourceJSON },
+  title: savedSearch.title ?? '',
+  sort: savedSearch.sort ?? [],
+  columns: savedSearch.columns ?? [],
+  description: savedSearch.description ?? '',
+  grid: savedSearch.grid ?? {},
+  hideChart: savedSearch.hideChart ?? false,
+  viewMode: savedSearch.viewMode,
+  hideAggregatedPreview: savedSearch.hideAggregatedPreview,
+  rowHeight: savedSearch.rowHeight,
+});

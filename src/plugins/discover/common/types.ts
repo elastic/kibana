@@ -22,7 +22,7 @@ export interface DiscoverGridSavedSearch {
 }
 
 export interface SavedSearchGridAttributes extends SavedObjectAttributes {
-  columns: {
+  columns?: {
     [key: string]: {
       width?: number;
     };
