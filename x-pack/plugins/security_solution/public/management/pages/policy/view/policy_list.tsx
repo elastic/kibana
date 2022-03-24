@@ -35,13 +35,14 @@ import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/
 import { CreatePackagePolicyRouteState } from '../../../../../../fleet/public';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { getPoliciesPath } from '../../../common/routing';
-import { useAppUrl } from '../../../../common/lib/kibana';
+import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
 import { PolicyEndpointLink } from './components/policy_endpoint_link';
 
 export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
   const { search } = useLocation();
   const { getAppUrl } = useAppUrl();
+  const toasts = useToasts();
 
   // load the list of policies
   const {
@@ -57,13 +58,31 @@ export const PolicyList = memo(() => {
   const policyIds = data?.items.map((policies) => policies.id) ?? [];
   const { data: endpointCount = { items: [] } } = useGetAgentCountForPolicy({
     policyIds,
-    customQueryOptions: { enabled: policyIds.length > 0 },
+    customQueryOptions: {
+      enabled: policyIds.length > 0,
+      onError: (err) => {
+        toasts.addDanger(
+          i18n.translate('xpack.securitySolution.policyList.endpointCountError', {
+            defaultMessage: `Error retrieving endpoint counts: ${err}`,
+          })
+        );
+      },
+    },
   });
 
   // grab endpoint version for empty page
   const { data: endpointPackageInfo, isFetching: packageIsFetching } =
     useGetEndpointSecurityPackage({
-      customQueryOptions: { enabled: policyIds.length === 0 },
+      customQueryOptions: {
+        enabled: policyIds.length === 0,
+        onError: (err) => {
+          toasts.addDanger(
+            i18n.translate('xpack.securitySolution.policyList.packageVersionError', {
+              defaultMessage: `Error retrieving the endpoint package version: ${err}`,
+            })
+          );
+        },
+      },
     });
 
   const policyIdToEndpointCount = useMemo(() => {
