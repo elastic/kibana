@@ -6,12 +6,13 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React from 'react';
-import { useAuthentications } from '../../../hosts/containers/authentications';
+import React, { useEffect, useState } from 'react';
+import { useAuthentications, ID } from '../../../hosts/containers/authentications';
 import { UsersComponentsQueryProps } from './types';
 
 import { AuthenticationTable } from '../../../hosts/components/authentications_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 
@@ -26,6 +27,11 @@ export const AllUsersQueryTabBody = ({
   docValueFields,
   deleteQuery,
 }: UsersComponentsQueryProps) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [
     loading,
     { authentications, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
@@ -34,7 +40,7 @@ export const AllUsersQueryTabBody = ({
     endDate,
     filterQuery,
     indexNames,
-    skip,
+    skip: querySkip,
     startDate,
     // TODO Fix me
     // @ts-ignore
@@ -55,6 +61,7 @@ export const AllUsersQueryTabBody = ({
       refetch={refetch}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       totalCount={totalCount}
       docValueFields={docValueFields}
       indexNames={indexNames}
