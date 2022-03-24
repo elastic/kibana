@@ -246,7 +246,7 @@ type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Par
 
 export interface BulkEditOptions<Params extends RuleTypeParams> {
   filter: string | KueryNode;
-  actions: BulkEditActionRule[];
+  editActions: BulkEditActionRule[];
   paramsModifier?: RuleParamsModifier<Params>;
 }
 
@@ -1309,7 +1309,7 @@ export class RulesClient {
 
   public async bulkEdit<Params extends RuleTypeParams>({
     filter,
-    actions,
+    editActions,
     paramsModifier,
   }: BulkEditOptions<Params>): Promise<{
     rules: Array<SanitizedRule<Params>>;
@@ -1413,13 +1413,15 @@ export class RulesClient {
                 rule.references || []
               ),
             };
-            for (const action of actions) {
-              if (action.field === 'actions') {
-                await this.validateActions(ruleType, action.value);
-                ruleActions = this.applyBulkEditAction(action, ruleActions);
+            for (const editAction of editActions) {
+              switch (editAction.field) {
+                case 'actions':
+                  await this.validateActions(ruleType, editAction.value);
+                  ruleActions = this.applyBulkEditAction(editAction, ruleActions);
+                  break;
+                default:
+                  attributes = this.applyBulkEditAction(editAction, attributes);
               }
-
-              attributes = this.applyBulkEditAction(action, attributes);
             }
 
             const ruleParams = paramsModifier
