@@ -370,24 +370,26 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       ) : null}
 
       {!permissionDenied && (
-        <NavigationButtons isDisabled={!editMode} agentPolicyId={policy?.policy_id} />
+        <>
+          <NavigationButtons isDisabled={!editMode} agentPolicyId={policy?.policy_id} />
+          <EuiSpacer size="xxl" />
+          <StyledEuiAccordion
+            id="advanced"
+            buttonContent={i18n.translate(
+              'xpack.osquery.fleetIntegration.osqueryConfig.accordionFieldLabel',
+              {
+                defaultMessage: 'Advanced',
+              }
+            )}
+          >
+            <EuiSpacer size="xs" />
+            <Form form={configForm}>
+              <CommonUseField path="config" />
+              <ConfigUploader onChange={handleConfigUpload} />
+            </Form>
+          </StyledEuiAccordion>
+        </>
       )}
-      <EuiSpacer size="xxl" />
-      <StyledEuiAccordion
-        id="advanced"
-        buttonContent={i18n.translate(
-          'xpack.osquery.fleetIntegration.osqueryConfig.accordionFieldLabel',
-          {
-            defaultMessage: 'Advanced',
-          }
-        )}
-      >
-        <EuiSpacer size="xs" />
-        <Form form={configForm}>
-          <CommonUseField path="config" />
-          <ConfigUploader onChange={handleConfigUpload} />
-        </Form>
-      </StyledEuiAccordion>
     </>
   );
 });
