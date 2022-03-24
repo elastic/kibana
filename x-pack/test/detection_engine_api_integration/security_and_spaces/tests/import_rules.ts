@@ -59,9 +59,6 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
-          exceptions_errors: [],
-          exceptions_success: true,
-          exceptions_success_count: 0,
         });
       });
       it('should successfully import rules with actions when user has "read" actions privileges', async () => {
@@ -93,9 +90,6 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
-          exceptions_errors: [],
-          exceptions_success: true,
-          exceptions_success_count: 0,
         });
       });
       it('should not import rules with actions when a user has no actions privileges', async () => {
@@ -142,9 +136,6 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_id: 'rule-1',
             },
           ],
-          exceptions_errors: [],
-          exceptions_success: true,
-          exceptions_success_count: 0,
         });
       });
     });
