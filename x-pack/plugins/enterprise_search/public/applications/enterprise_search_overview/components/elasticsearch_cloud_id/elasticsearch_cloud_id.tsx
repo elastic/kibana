@@ -25,6 +25,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { SendTelemetryHelper } from '../../../shared/telemetry/telemetry_logic';
@@ -62,6 +63,7 @@ const copyCloudIdHandler = (
 export const ElasticsearchCloudId: React.FC = () => {
   const cloud = useCloudDetails();
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
+  const { http } = useValues(HttpLogic);
 
   // hide the panel when no cloud context is available
   if (!cloud.cloudId) {
@@ -132,7 +134,7 @@ export const ElasticsearchCloudId: React.FC = () => {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiButton>
+          <EuiButton href={`${http.basePath.publicBaseUrl}/app/management/security/api_keys`}>
             {i18n.translate(
               'xpack.enterpriseSearch.overview.elasticsearchCloudId.manageApiKeysLink',
               {

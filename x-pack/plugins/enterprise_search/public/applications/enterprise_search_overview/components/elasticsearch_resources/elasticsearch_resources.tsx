@@ -21,21 +21,27 @@ export const ElasticsearchResources: React.FC = () => (
     </EuiTitle>
     <EuiSpacer size="s" />
     <EuiSpacer size="xs" />
-    <EuiLink href="#" external>
+    <EuiLink
+      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started.html"
+      external
+    >
       {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchResources.gettingStarted', {
         defaultMessage: 'Getting started with Elasticsearch',
       })}
     </EuiLink>
     <EuiSpacer size="s" />
     <EuiSpacer size="xs" />
-    <EuiLink href="#" external>
+    <EuiLink
+      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html"
+      external
+    >
       {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchResources.createIndex', {
         defaultMessage: 'Create a new index',
       })}
     </EuiLink>
     <EuiSpacer size="s" />
     <EuiSpacer size="xs" />
-    <EuiLink href="#" external>
+    <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/client/index.html" external>
       {i18n.translate(
         'xpack.enterpriseSearch.overview.elasticsearchResources.elasticsearchClients',
         { defaultMessage: 'Elasticsearch clients' }
@@ -43,7 +49,10 @@ export const ElasticsearchResources: React.FC = () => (
     </EuiLink>
     <EuiSpacer size="s" />
     <EuiSpacer size="xs" />
-    <EuiLink href="#" external>
+    <EuiLink
+      href="https://github.com/elastic/search-ui/tree/master/packages/search-ui-elasticsearch-connector"
+      external
+    >
       {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchResources.searchUi', {
         defaultMessage: 'Search UI for Elasticsearch',
       })}

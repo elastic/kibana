@@ -99,7 +99,10 @@ export const ElasticsearchGuide: React.FC = () => {
                           }
                         )}
                       </p>
-                      <EuiLink href="#" external>
+                      <EuiLink
+                        href="https://www.elastic.co/guide/en/elasticsearch/client/index.html"
+                        external
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsLink',
                           { defaultMessage: 'Learn more about Elasticsearch clients' }
@@ -150,7 +153,10 @@ export const ElasticsearchGuide: React.FC = () => {
                     <EuiFlexGroup gutterSize="l" alignItems="center">
                       <EuiFlexItem grow={false}>
                         <EuiText>
-                          <EuiLink href="#" external>
+                          <EuiLink
+                            href="https://www.elastic.co/enterprise-search/search-ui"
+                            external
+                          >
                             {i18n.translate(
                               'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIMarketingLink',
                               { defaultMessage: 'Learn more about Search UI' }
@@ -160,7 +166,7 @@ export const ElasticsearchGuide: React.FC = () => {
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText>
-                          <EuiLink href="#" external>
+                          <EuiLink href="https://github.com/elastic/search-ui" external>
                             {i18n.translate(
                               'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIGitHubLink',
                               { defaultMessage: 'Search UI on GitHub' }
