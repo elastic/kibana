@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { take, skipUntil, skipWhile, tap, first, last } from 'rxjs/operators';
+import { take, skipWhile, first } from 'rxjs/operators';
 import { TimeSliderControlEmbeddableInput } from '.';
-import { TimeSliderControlEmbeddableBuilder } from './time_slider_embeddable';
+import { TimeSliderControlEmbeddable } from './time_slider_embeddable';
 import { stubLogstashDataView } from '../../../../data_views/common/data_view.stub';
+import { pluginServices } from '../../services';
 
 describe('Time Slider Control Embeddable', () => {
-  const fetchRange = jest.fn();
-  const getDataView = jest.fn();
-  const TimeSliderControlEmbeddable = TimeSliderControlEmbeddableBuilder({
-    fetchRange,
-    getDataView,
-  });
+  const services = pluginServices.getServices();
+  const fetchRange = jest.spyOn(services.data, 'fetchFieldRange');
+  const getDataView = jest.spyOn(services.data, 'getDataView');
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -137,7 +135,7 @@ describe('Time Slider Control Embeddable', () => {
           .getOutput$()
           .pipe(
             skipWhile((v) => v.filters === undefined),
-            take(2) //initial value, and then the value after the range is fetched which is what we're interested in
+            take(2) // initial value, and then the value after the range is fetched which is what we're interested in
           )
           .toPromise();
 
@@ -171,7 +169,7 @@ describe('Time Slider Control Embeddable', () => {
           .getOutput$()
           .pipe(
             skipWhile((v) => v.filters === undefined),
-            take(1) //initial value, and then the value after the range is fetched which is what we're interested in
+            take(1) // initial value, and then the value after the range is fetched which is what we're interested in
           )
           .toPromise();
 

@@ -14,4 +14,5 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/controls',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: ['<rootDir>/src/plugins/controls/{common,public,server}/**/*.{ts,tsx}'],
+  setupFiles: ['<rootDir>/src/plugins/controls/jest_setup.ts'],
 };

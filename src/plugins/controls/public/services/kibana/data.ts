@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { AggConfig } from 'src/plugins/data/public';
+import { DataViewField } from 'src/plugins/data_views/common';
+import { get } from 'lodash';
 import { ControlsDataService } from '../data';
 import { ControlsPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
-import { DataViewField } from 'src/plugins/data_views/common';
-import { AggConfig } from 'src/plugins/data/public';
-import { isEqual, get } from 'lodash';
 
 export type DataServiceFactory = KibanaPluginServiceFactory<
   ControlsDataService,
@@ -19,8 +19,7 @@ export type DataServiceFactory = KibanaPluginServiceFactory<
 >;
 
 const minMaxAgg = (field?: DataViewField) => {
-  const aggBody: AggConfig = {};
-  //const aggBody = {};
+  const aggBody: Record<string, any> = {};
   if (field) {
     if (field.scripted) {
       aggBody.script = {
@@ -47,6 +46,7 @@ export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
     data: { query: queryPlugin, search, autocomplete },
   } = startPlugins;
   const { data } = startPlugins;
+
   return {
     fetchFieldRange: async (dataView, fieldName, input) => {
       const { ignoreParentSettings, query, timeRange } = input;

@@ -31,21 +31,7 @@ export class TimesliderEmbeddableFactory
   constructor() {}
 
   public async create(initialInput: TimeSliderControlEmbeddableInput, parent?: IContainer) {
-    if (!this.EmbeddableClass) {
-      const { TimeSliderControlEmbeddableBuilder } = await import('./time_slider_embeddable');
-      const {
-        data: { fetchFieldRange, getDataView },
-        settings: { getDateFormat, getTimezone },
-      } = pluginServices.getServices();
-      this.EmbeddableClass = TimeSliderControlEmbeddableBuilder({
-        fetchRange: fetchFieldRange,
-        getDataView,
-        getDateFormat,
-        getTimezone,
-      });
-    }
-
-    return new this.EmbeddableClass!(initialInput, {}, parent);
+    const { TimeSliderControlEmbeddable } = await import('./time_slider_embeddable');
 
     return Promise.resolve(new TimeSliderControlEmbeddable(initialInput, {}, parent));
   }
@@ -60,7 +46,7 @@ export class TimesliderEmbeddableFactory
         !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId))
     ) {
       // if the field name or data view id has changed in this editing session, selected options are invalid, so reset them.
-      //newInput.selectedOptions = [];
+      newInput.value = undefined;
     }
     return newInput;
   };

@@ -9,7 +9,7 @@
 import { of } from 'rxjs';
 import { PluginServiceFactory } from '../../../../presentation_util/public';
 import { DataPublicPluginStart } from '../../../../data/public';
-import { DataViewField } from '../../../../data_views/common';
+import { DataViewField, DataView } from '../../../../data_views/common';
 import { ControlsDataService } from '../data';
 
 let valueSuggestionMethod = ({ field, query }: { field: DataViewField; query: string }) =>
@@ -38,4 +38,6 @@ export const dataServiceFactory: DataServiceFactory = () => ({
   timefilter: {
     createFilter: () => {},
   } as unknown as DataPublicPluginStart['query']['timefilter']['timefilter'],
+  fetchFieldRange: () => Promise.resolve({ min: 0, max: 100 }),
+  getDataView: () => Promise.resolve({} as DataView),
 });

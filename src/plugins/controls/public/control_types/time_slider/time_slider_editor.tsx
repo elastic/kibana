@@ -8,7 +8,7 @@
 
 import useMount from 'react-use/lib/useMount';
 import React, { useEffect, useState } from 'react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 
 import { pluginServices } from '../../services';
 import { ControlEditorProps } from '../../types';
