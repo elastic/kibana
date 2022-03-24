@@ -478,41 +478,6 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('sets given is_managed value', async () => {
-        const {
-          body: { item: createdPolicy },
-        } = await supertest
-          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'TEST2',
-            namespace: 'default',
-            is_managed: true,
-          })
-          .expect(200);
-
-        const getRes = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
-        const json = getRes.body;
-        expect(json.item.is_managed).to.equal(true);
-
-        const {
-          body: { item: createdPolicy2 },
-        } = await supertest
-          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'TEST2',
-            namespace: 'default',
-            is_managed: false,
-          })
-          .expect(200);
-
-        const {
-          body: { item: policy2 },
-        } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy2.id}`);
-        expect(policy2.is_managed).to.equal(false);
-      });
-
       it('should return a 409 if policy already exists with name given', async () => {
         const sharedBody = {
           name: 'Initial name',
@@ -543,6 +508,71 @@ export default function (providerContext: FtrProviderContext) {
           .expect(409);
 
         expect(body.message).to.match(/already exists?/);
+      });
+
+      it('sets given is_managed value', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST2',
+            namespace: 'default',
+            is_managed: true,
+          })
+          .expect(200);
+
+        const getRes = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
+        const json = getRes.body;
+        expect(json.item.is_managed).to.equal(true);
+
+        const {
+          body: { item: createdPolicy2 },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST2',
+            namespace: 'default',
+            is_managed: false,
+            force: true,
+          })
+          .expect(200);
+
+        const {
+          body: { item: policy2 },
+        } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy2.id}`);
+        expect(policy2.is_managed).to.equal(false);
+      });
+
+      it('should return a 400 if trying to update a managed policy', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Managed policy ${Date.now()}`,
+            description: 'Initial description',
+            namespace: 'default',
+            is_managed: true,
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .put(`/api/fleet/agent_policies/${originalPolicy.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated name',
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(400);
+
+        expect(body.message).to.equal(
+          'Cannot update name in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.'
+        );
       });
     });
 
@@ -586,6 +616,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Regular policy',
             namespace: 'default',
             is_managed: false,
+            force: true,
           })
           .expect(200);
 

@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react';
+import { CaseStatuses, StatusAll } from '../../../../common';
 import { AllCasesSelectorModalProps } from '.';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { Case } from '../../../containers/types';
@@ -13,7 +14,12 @@ import { CasesContextStoreActionsList } from '../../cases_context/cases_context_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 
-export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps) => {
+type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
+  toastTitle?: string;
+  toastContent?: string;
+};
+
+export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) => {
   const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
     attachments: props.attachments,
     onClose: props.onClose,
@@ -24,6 +30,8 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
         return props.onRowClick(theCase);
       }
     },
+    toastTitle: props.toastTitle,
+    toastContent: props.toastContent,
   });
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
@@ -44,6 +52,7 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
       type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
       payload: {
         ...props,
+        hiddenStatuses: [CaseStatuses.closed, StatusAll],
         onRowClick: (theCase?: Case) => {
           // when the case is undefined in the modal
           // the user clicked "create new case"
@@ -51,7 +60,12 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
             closeModal();
             createNewCaseFlyout.open();
           } else {
-            casesToasts.showSuccessAttach(theCase);
+            casesToasts.showSuccessAttach({
+              theCase,
+              attachments: props.attachments,
+              title: props.toastTitle,
+              content: props.toastContent,
+            });
             if (props.onRowClick) {
               props.onRowClick(theCase);
             }
