@@ -7,7 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
-import { GetThreatListOptions, ThreatListCountOptions, ThreatListDoc } from './types';
+import {
+  GetThreatListOptions,
+  ThreatListCountOptions,
+  ThreatListDoc,
+  ThreatListItem,
+} from './types';
 
 /**
  * This should not exceed 10000 (10k)
@@ -87,4 +92,23 @@ export const getThreatListCount = async ({
     index,
   });
   return response.count;
+};
+
+export const getAllThreatListHits = async (
+  params: Omit<GetThreatListOptions, 'searchAfter'>
+): Promise<ThreatListItem[]> => {
+  let allThreatListHits: ThreatListItem[] = [];
+  let threatList = await getThreatList({ ...params, searchAfter: undefined });
+
+  allThreatListHits = allThreatListHits.concat(threatList.hits.hits);
+
+  while (threatList.hits.hits.length !== 0) {
+    threatList = await getThreatList({
+      ...params,
+      searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
+    });
+
+    allThreatListHits = allThreatListHits.concat(threatList.hits.hits);
+  }
+  return allThreatListHits;
 };

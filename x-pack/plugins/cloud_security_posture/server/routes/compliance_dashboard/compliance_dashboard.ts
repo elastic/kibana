@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IRouter } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
@@ -19,6 +19,7 @@ import { CspAppContext } from '../../plugin';
 import { getResourcesTypes } from './get_resources_types';
 import { getClusters } from './get_clusters';
 import { getStats } from './get_stats';
+import { CspRouter } from '../../types';
 
 export interface ClusterBucket {
   ordered_top_hits: AggregationsTopHitsAggregate;
@@ -75,7 +76,7 @@ const getLatestCyclesIds = async (esClient: ElasticsearchClient): Promise<string
 
 // TODO: Utilize ES "Point in Time" feature https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
 export const defineGetComplianceDashboardRoute = (
-  router: IRouter,
+  router: CspRouter,
   cspContext: CspAppContext
 ): void =>
   router.get(
