@@ -736,7 +736,7 @@ export class RulesClient {
             start: parsedDateStart.toISOString(),
             end: parsedDateEnd.toISOString(),
             per_page: 500,
-            filter: `event.action:execute AND event.outcome:failure`,
+            filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
             sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
           },
           rule.legacyId !== null ? [rule.legacyId] : undefined

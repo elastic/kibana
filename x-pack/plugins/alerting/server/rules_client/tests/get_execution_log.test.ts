@@ -731,7 +731,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `event.action:execute AND event.outcome:failure`,
+        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
@@ -771,7 +771,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `event.action:execute AND event.outcome:failure`,
+        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
@@ -811,7 +811,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `event.action:execute AND event.outcome:failure`,
+        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: '2019-02-12T20:16:22.479Z',
         start: '2019-02-12T20:01:22.479Z',
@@ -852,7 +852,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `event.action:execute AND event.outcome:failure`,
+        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',

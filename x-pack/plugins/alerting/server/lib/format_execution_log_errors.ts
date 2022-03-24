@@ -32,11 +32,13 @@ export const EMPTY_EXECUTION_ERRORS_RESULT = {
 };
 
 function formatEvent(event: IValidatedEvent): IExecutionErrors {
+  const message = get(event, MESSAGE_FIELD, '');
+  const errorMessage = get(event, ERROR_MESSAGE_FIELD, null);
   return {
     id: get(event, EXECUTION_UUID_FIELD, ''),
     timestamp: get(event, TIMESTAMP_FIELD, ''),
     type: get(event, PROVIDER_FIELD, ''),
-    message: `${get(event, MESSAGE_FIELD, '')} - ${get(event, ERROR_MESSAGE_FIELD, '')}`,
+    message: errorMessage ? `${message} - ${errorMessage}` : message,
   };
 }
 
