@@ -36,7 +36,7 @@ import { CreatePackagePolicyRouteState } from '../../../../../../fleet/public';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { getPoliciesPath } from '../../../common/routing';
 import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
-import { PolicyEndpointLink } from './components/policy_endpoint_link';
+import { PolicyEndpointCount } from './components/policy_endpoint_count';
 
 export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -239,14 +239,14 @@ export const PolicyList = memo(() => {
         render: (policy: PolicyData) => {
           const count = policyIdToEndpointCount.get(policy.id);
           return (
-            <PolicyEndpointLink
+            <PolicyEndpointCount
               className="eui-textTruncate"
               data-test-subj="policyEndpointCountLink"
               policyId={policy.id}
               nonLinkCondition={count === 0}
             >
               {count}
-            </PolicyEndpointLink>
+            </PolicyEndpointCount>
           );
         },
       },

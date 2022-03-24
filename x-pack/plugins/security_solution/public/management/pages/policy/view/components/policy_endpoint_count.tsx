@@ -20,7 +20,7 @@ import { APP_UI_ID } from '../../../../../../common/constants';
  *
  * Returns a link component that navigates to the endpoint list page filtered by a specific policy
  */
-export const PolicyEndpointLink = memo<
+export const PolicyEndpointCount = memo<
   Omit<EuiLinkAnchorProps, 'href'> & {
     policyId: string;
     nonLinkCondition: boolean;
@@ -69,4 +69,4 @@ export const PolicyEndpointLink = memo<
   );
 });
 
-PolicyEndpointLink.displayName = 'PolicyEndpointLink';
+PolicyEndpointCount.displayName = 'PolicyEndpointCount';
