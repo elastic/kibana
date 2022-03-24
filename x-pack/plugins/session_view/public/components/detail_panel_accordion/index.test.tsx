@@ -53,25 +53,26 @@ describe('DetailPanelAccordion component', () => {
       ).toBeVisible();
     });
 
-    it('should render acoordion with extra action', async () => {
-      const mockFn = jest.fn();
-      renderResult = mockedContext.render(
-        <DetailPanelAccordion
-          id={TEST_ID}
-          listItems={TEST_LIST_ITEM}
-          title={TEST_TITLE}
-          extraActionTitle={ACTION_TEXT}
-          onExtraActionClick={mockFn}
-        />
-      );
+    // TODO: revert back when we have jump to leaders button working
+    // it('should render acoordion with extra action', async () => {
+    //   const mockFn = jest.fn();
+    //   renderResult = mockedContext.render(
+    //     <DetailPanelAccordion
+    //       id={TEST_ID}
+    //       listItems={TEST_LIST_ITEM}
+    //       title={TEST_TITLE}
+    //       extraActionTitle={ACTION_TEXT}
+    //       onExtraActionClick={mockFn}
+    //     />
+    //   );
 
-      expect(renderResult.queryByTestId('sessionView:detail-panel-accordion')).toBeVisible();
-      const extraActionButton = renderResult.getByTestId(
-        'sessionView:detail-panel-accordion-action'
-      );
-      expect(extraActionButton).toHaveTextContent(ACTION_TEXT);
-      extraActionButton.click();
-      expect(mockFn).toHaveBeenCalledTimes(1);
-    });
+    //   expect(renderResult.queryByTestId('sessionView:detail-panel-accordion')).toBeVisible();
+    //   const extraActionButton = renderResult.getByTestId(
+    //     'sessionView:detail-panel-accordion-action'
+    //   );
+    //   expect(extraActionButton).toHaveTextContent(ACTION_TEXT);
+    //   extraActionButton.click();
+    //   expect(mockFn).toHaveBeenCalledTimes(1);
+    // });
   });
 });

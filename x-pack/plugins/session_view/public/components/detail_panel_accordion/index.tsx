@@ -55,18 +55,18 @@ export const DetailPanelAccordion = ({
           )}
         </EuiFlexGroup>
       }
-      extraAction={
-        extraActionTitle ? (
-          <EuiButtonEmpty
-            size="s"
-            color="primary"
-            onClick={onExtraActionClick}
-            data-test-subj="sessionView:detail-panel-accordion-action"
-          >
-            {extraActionTitle}
-          </EuiButtonEmpty>
-        ) : null
-      }
+      // extraAction={
+      //   extraActionTitle ? (
+      //     <EuiButtonEmpty
+      //       size="s"
+      //       color="primary"
+      //       onClick={onExtraActionClick}
+      //       data-test-subj="sessionView:detail-panel-accordion-action"
+      //     >
+      //       {extraActionTitle}
+      //     </EuiButtonEmpty>
+      //   ) : null
+      // }
       css={styles.accordion}
       data-test-subj="sessionView:detail-panel-accordion"
     >

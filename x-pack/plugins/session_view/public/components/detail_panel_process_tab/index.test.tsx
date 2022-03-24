@@ -86,10 +86,11 @@ describe('DetailPanelProcessTab component', () => {
       expect(renderResult.queryByText(TEST_PROCESS_DETAIL.pid)).toBeVisible();
 
       // Process tab accordions rendered correctly
-      expect(renderResult.queryByText('entryLeader-name')).toBeVisible();
-      expect(renderResult.queryByText('sessionLeader-name')).toBeVisible();
-      expect(renderResult.queryByText('groupLeader-name')).toBeVisible();
-      expect(renderResult.queryByText('parent-name')).toBeVisible();
+      // TODO: revert back when we have jump to leaders button working
+      // expect(renderResult.queryByText('entryLeader-name')).toBeVisible();
+      // expect(renderResult.queryByText('sessionLeader-name')).toBeVisible();
+      // expect(renderResult.queryByText('groupLeader-name')).toBeVisible();
+      // expect(renderResult.queryByText('parent-name')).toBeVisible();
     });
   });
 });
