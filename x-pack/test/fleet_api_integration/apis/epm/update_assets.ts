@@ -495,6 +495,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: 'bf3b0b65-9fdc-53c6-a9ca-e76140e56490', type: 'epm-packages-assets' },
           { id: '7f4c5aca-b4f5-5f0a-95af-051da37513fc', type: 'epm-packages-assets' },
           { id: '4281a436-45a8-54ab-9724-fda6849f789d', type: 'epm-packages-assets' },
+          { id: 'cb0bbdd7-e043-508b-91c0-09e4cc0f5a3c', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
           { id: '4035007b-9c33-5227-9803-2de8a17523b5', type: 'epm-packages-assets' },
           { id: 'e6ae7d31-6920-5408-9219-91ef1662044b', type: 'epm-packages-assets' },
