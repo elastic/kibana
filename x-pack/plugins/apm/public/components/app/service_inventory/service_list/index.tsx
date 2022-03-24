@@ -48,9 +48,6 @@ import {
   ServiceInventoryFieldName,
   ServiceListItem,
 } from '../../../../../common/service_inventory';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { apmServiceInventoryOptimizedSorting } from '../../../../../../observability/common';
-import { orderServiceItems } from './order_service_items';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
@@ -244,6 +241,14 @@ interface Props {
   noItemsMessage?: React.ReactNode;
   isLoading: boolean;
   isFailure?: boolean;
+  displayHealthStatus: boolean;
+  initialSortField: ServiceInventoryFieldName;
+  initialSortDirection: 'asc' | 'desc';
+  sortFn: (
+    sortItems: ServiceListItem[],
+    sortField: ServiceInventoryFieldName,
+    sortDirection: 'asc' | 'desc'
+  ) => ServiceListItem[];
 }
 
 export function ServiceList({
@@ -253,9 +258,12 @@ export function ServiceList({
   comparisonData,
   isLoading,
   isFailure,
+  displayHealthStatus,
+  initialSortField,
+  initialSortDirection,
+  sortFn,
 }: Props) {
   const breakpoints = useBreakpoints();
-  const displayHealthStatus = items.some((item) => 'healthStatus' in item);
 
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) =>
@@ -289,19 +297,6 @@ export function ServiceList({
       displayHealthStatus,
     ]
   );
-
-  const tiebreakerField = useKibana().services.uiSettings?.get<boolean>(
-    apmServiceInventoryOptimizedSorting
-  )
-    ? ServiceInventoryFieldName.ServiceName
-    : ServiceInventoryFieldName.Throughput;
-
-  const initialSortField = displayHealthStatus
-    ? ServiceInventoryFieldName.HealthStatus
-    : tiebreakerField;
-
-  const initialSortDirection =
-    initialSortField === ServiceInventoryFieldName.ServiceName ? 'asc' : 'desc';
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
@@ -349,14 +344,13 @@ export function ServiceList({
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
           initialSortDirection={initialSortDirection}
-          sortFn={(itemsToSort, sortField, sortDirection) => {
-            return orderServiceItems({
-              items: itemsToSort,
-              primarySortField: sortField as ServiceInventoryFieldName,
-              tiebreakerField,
-              sortDirection,
-            });
-          }}
+          sortFn={(itemsToSort, sortField, sortDirection) =>
+            sortFn(
+              itemsToSort,
+              sortField as ServiceInventoryFieldName,
+              sortDirection
+            )
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>
