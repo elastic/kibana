@@ -128,11 +128,13 @@ export const BlockListForm = memo(
 
     // select policies if editing
     useEffect(() => {
+      if (hasFormChanged) return;
       const policyIds = item.tags?.map((tag) => tag.split(':')[1]) ?? [];
       if (!policyIds.length) return;
       const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
+
       setSelectedPolicies(policiesData);
-    }, [item.tags, policies]);
+    }, [hasFormChanged, item.tags, policies]);
 
     const blocklistEntry = useMemo((): BlocklistEntry => {
       if (!item.entries.length) {
@@ -378,7 +380,10 @@ export const BlockListForm = memo(
 
         const nextItem = { ...item, tags };
 
-        setSelectedPolicies(change.selected);
+        // Preserve old selected policies when switching to global
+        if (!change.isGlobal) {
+          setSelectedPolicies(change.selected);
+        }
         validateValues(nextItem);
         onChange({
           isValid: isValid(errorsRef.current),
