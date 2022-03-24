@@ -18,7 +18,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { border, colors } = euiTheme;
+    const { border } = euiTheme;
 
     const processTree: CSSObject = {
       height: `${height}px`,
@@ -44,8 +44,8 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
     };
 
     const sessionViewerComponent: CSSObject = {
-      border: euiTheme.border.thin,
-      borderRadius: euiTheme.border.radius.medium,
+      border: border.thin,
+      borderRadius: border.radius.medium,
     };
 
     const toolBar: CSSObject = {
