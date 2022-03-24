@@ -56,11 +56,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('[SkipCloud] global dashboard read with global_upgrade_assistant_role', function () {
         this.tags('skipCloud');
-        it('should render the "Stack" section with Upgrde Assistant', async function () {
+        it('should render the "Stack" section with Upgrade Assistant', async function () {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();
-          expect(sections).to.have.length(3);
-          expect(sections[2]).to.eql({
+          expect(sections).to.have.length(5);
+          expect(sections[4]).to.eql({
             sectionId: 'stack',
             sectionLinks: ['license_management', 'upgrade_assistant'],
           });
