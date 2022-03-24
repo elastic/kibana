@@ -7,15 +7,15 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
-import { syntheticsServiceEnabledSelector } from '../../../state/selectors';
-import { getSyntheticsServiceEnabled } from '../../../state/actions';
+import { syntheticsServiceAllowedSelector } from '../../../state/selectors';
+import { getSyntheticsServiceAllowed } from '../../../state/actions';
 
-export const useServiceEnabled = () => {
+export const useSyntheticsServiceAllowed = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getSyntheticsServiceEnabled.get());
+    dispatch(getSyntheticsServiceAllowed.get());
   }, [dispatch]);
 
-  return useSelector(syntheticsServiceEnabledSelector);
+  return useSelector(syntheticsServiceAllowedSelector);
 };

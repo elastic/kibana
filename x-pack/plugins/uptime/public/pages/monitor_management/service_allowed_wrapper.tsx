@@ -8,10 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
-import { useServiceEnabled } from '../../components/monitor_management/hooks/use_service_enabled';
+import { useSyntheticsServiceAllowed } from '../../components/monitor_management/hooks/use_service_enabled';
 
-export const ServiceEnabledWrapper: React.FC = ({ children }) => {
-  const { isEnabled, loading } = useServiceEnabled();
+export const ServiceAllowedWrapper: React.FC = ({ children }) => {
+  const { isAllowed, loading } = useSyntheticsServiceAllowed();
 
   if (loading) {
     return (
@@ -23,7 +23,7 @@ export const ServiceEnabledWrapper: React.FC = ({ children }) => {
   }
 
   // checking for explicit false
-  if (isEnabled === false) {
+  if (isAllowed === false) {
     return (
       <EuiEmptyPrompt
         title={<h2>{MONITOR_MANAGEMENT_LABEL}</h2>}

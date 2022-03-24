@@ -56,9 +56,8 @@ import { UptimePageTemplateComponent } from './apps/uptime_page_template';
 import { apiService } from './state/api/utils';
 import { useInspectorContext } from '../../observability/public';
 import { AddMonitorBtn } from './components/monitor_management/add_monitor_btn';
-import { useKibana } from '../../../../src/plugins/kibana_react/public';
 import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
-import { ServiceEnabledWrapper } from './pages/monitor_management/service_enabled_wrapper';
+import { ServiceAllowedWrapper } from './pages/monitor_management/service_allowed_wrapper';
 
 type RouteProps = {
   path: string;
@@ -81,7 +80,7 @@ export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.h
   defaultMessage: 'Monitors',
 });
 
-const getRoutes = (canSave: boolean): RouteProps[] => {
+const getRoutes = (): RouteProps[] => {
   return [
     {
       title: i18n.translate('xpack.uptime.monitorRoute.title', {
@@ -193,9 +192,9 @@ const getRoutes = (canSave: boolean): RouteProps[] => {
       }),
       path: MONITOR_ADD_ROUTE,
       component: () => (
-        <ServiceEnabledWrapper>
+        <ServiceAllowedWrapper>
           <AddMonitorPage />
-        </ServiceEnabledWrapper>
+        </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'uptimeMonitorAddPage',
       telemetryId: UptimePage.MonitorAdd,
@@ -217,9 +216,9 @@ const getRoutes = (canSave: boolean): RouteProps[] => {
       }),
       path: MONITOR_EDIT_ROUTE,
       component: () => (
-        <ServiceEnabledWrapper>
+        <ServiceAllowedWrapper>
           <EditMonitorPage />
-        </ServiceEnabledWrapper>
+        </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'uptimeMonitorEditPage',
       telemetryId: UptimePage.MonitorEdit,
@@ -241,9 +240,9 @@ const getRoutes = (canSave: boolean): RouteProps[] => {
       }),
       path: MONITOR_MANAGEMENT_ROUTE + '/:type',
       component: () => (
-        <ServiceEnabledWrapper>
+        <ServiceAllowedWrapper>
           <MonitorManagementPage />
-        </ServiceEnabledWrapper>
+        </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'uptimeMonitorManagementListPage',
       telemetryId: UptimePage.MonitorManagement,
@@ -254,7 +253,7 @@ const getRoutes = (canSave: boolean): RouteProps[] => {
             defaultMessage="Manage monitors"
           />
         ),
-        rightSideItems: [<AddMonitorBtn isDisabled={!canSave} />],
+        rightSideItems: [<AddMonitorBtn />],
       },
     },
   ];
@@ -273,9 +272,7 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 };
 
 export const PageRouter: FC = () => {
-  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
-
-  const routes = getRoutes(canSave);
+  const routes = getRoutes();
   const { addInspectorRequest } = useInspectorContext();
 
   apiService.addInspectorRequest = addInspectorRequest;

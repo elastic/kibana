@@ -58,7 +58,8 @@ export function createUptimeESClient({
     baseESClient: esClient,
     async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
       params: TParams,
-      operationName?: string
+      operationName?: string,
+      index?: string
     ): Promise<{ body: ESSearchResponse<DocumentSource, TParams> }> {
       let res: any;
       let esError: any;
@@ -66,7 +67,7 @@ export function createUptimeESClient({
         savedObjectsClient!
       );
 
-      const esParams = { index: dynamicSettings!.heartbeatIndices, ...params };
+      const esParams = { index: index ?? dynamicSettings!.heartbeatIndices, ...params };
       const startTime = process.hrtime();
 
       const startTimeNow = Date.now();
@@ -82,6 +83,7 @@ export function createUptimeESClient({
       }
 
       const inspectableEsQueries = inspectableEsQueriesMap.get(request!);
+
       if (inspectableEsQueries) {
         inspectableEsQueries.push(
           getInspectResponse({

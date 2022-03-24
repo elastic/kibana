@@ -14,16 +14,17 @@ import {
   getServiceLocations,
   getServiceLocationsSuccess,
   getServiceLocationsFailure,
-  getSyntheticsServiceEnabled,
+  getSyntheticsServiceAllowed,
 } from '../actions';
 import { MonitorManagementListResult, ServiceLocations } from '../../../common/runtime_types';
+import { SyntheticsServiceAllowed } from '../../../common/types';
 
 export interface MonitorManagementList {
   error: Record<'monitorList' | 'serviceLocations', Error | null>;
   loading: Record<'monitorList' | 'serviceLocations', boolean>;
   list: MonitorManagementListResult;
   locations: ServiceLocations;
-  syntheticsService: { isEnabled?: boolean; loading: boolean };
+  syntheticsService: { isAllowed?: boolean; loading: boolean };
 }
 
 export const initialState: MonitorManagementList = {
@@ -125,34 +126,34 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
       })
     )
     .addCase(
-      String(getSyntheticsServiceEnabled.get),
+      String(getSyntheticsServiceAllowed.get),
       (state: WritableDraft<MonitorManagementList>) => ({
         ...state,
         syntheticsService: {
-          isEnabled: state.syntheticsService?.isEnabled,
+          isAllowed: state.syntheticsService?.isAllowed,
           loading: true,
         },
       })
     )
     .addCase(
-      String(getSyntheticsServiceEnabled.success),
+      String(getSyntheticsServiceAllowed.success),
       (
         state: WritableDraft<MonitorManagementList>,
-        action: PayloadAction<{ serviceEnabled: boolean }>
+        action: PayloadAction<SyntheticsServiceAllowed>
       ) => ({
         ...state,
         syntheticsService: {
-          isEnabled: action.payload.serviceEnabled,
+          isAllowed: action.payload.serviceAllowed,
           loading: false,
         },
       })
     )
     .addCase(
-      String(getSyntheticsServiceEnabled.fail),
+      String(getSyntheticsServiceAllowed.fail),
       (state: WritableDraft<MonitorManagementList>, action: PayloadAction<Error>) => ({
         ...state,
         syntheticsService: {
-          isEnabled: false,
+          isAllowed: false,
           loading: false,
         },
       })

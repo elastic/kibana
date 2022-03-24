@@ -12,6 +12,7 @@ import {
   FetchMonitorManagementListQueryArgs,
 } from '../../../common/runtime_types';
 import { createAsyncAction } from './utils';
+import { SyntheticsServiceAllowed } from '../../../common/types';
 
 export const getMonitors = createAction<FetchMonitorManagementListQueryArgs>(
   'GET_MONITOR_MANAGEMENT_LIST'
@@ -27,6 +28,6 @@ export const getServiceLocationsSuccess = createAction<ServiceLocations>(
 );
 export const getServiceLocationsFailure = createAction<Error>('GET_SERVICE_LOCATIONS_LIST_FAILURE');
 
-export const getSyntheticsServiceEnabled = createAsyncAction<void, { serviceEnabled: boolean }>(
+export const getSyntheticsServiceAllowed = createAsyncAction<void, SyntheticsServiceAllowed>(
   'GET_SYNTHETICS_SERVICE_ENABLED'
 );

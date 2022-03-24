@@ -95,5 +95,5 @@ export const syntheticsSelector = ({ synthetics }: AppState) => synthetics;
 
 export const uptimeWriteSelector = (state: AppState) => state;
 
-export const syntheticsServiceEnabledSelector = (state: AppState) =>
+export const syntheticsServiceAllowedSelector = (state: AppState) =>
   state.monitorManagementList.syntheticsService;

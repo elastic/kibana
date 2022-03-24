@@ -13,9 +13,9 @@ import {
   getServiceLocations,
   getServiceLocationsSuccess,
   getServiceLocationsFailure,
-  getSyntheticsServiceEnabled,
+  getSyntheticsServiceAllowed,
 } from '../actions';
-import { fetchMonitorManagementList, fetchServiceEnabled, fetchServiceLocations } from '../api';
+import { fetchMonitorManagementList, fetchServiceAllowed, fetchServiceLocations } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchMonitorManagementEffect() {
@@ -35,11 +35,11 @@ export function* fetchMonitorManagementEffect() {
 
 export function* fetchSyntheticsServiceEnabledEffect() {
   yield takeLeading(
-    getSyntheticsServiceEnabled.get,
+    getSyntheticsServiceAllowed.get,
     fetchEffectFactory(
-      fetchServiceEnabled,
-      getSyntheticsServiceEnabled.success,
-      getSyntheticsServiceEnabled.fail
+      fetchServiceAllowed,
+      getSyntheticsServiceAllowed.success,
+      getSyntheticsServiceAllowed.fail
     )
   );
 }

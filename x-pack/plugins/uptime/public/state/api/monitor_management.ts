@@ -15,7 +15,7 @@ import {
   ServiceLocationsApiResponseCodec,
   ServiceLocationErrors,
 } from '../../../common/runtime_types';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { SyntheticsMonitorSavedObject, SyntheticsServiceAllowed } from '../../../common/types';
 import { apiService } from './utils';
 
 export const setMonitor = async ({
@@ -79,6 +79,6 @@ export const testNowMonitor = async (configId: string): Promise<TestNowResponse 
   return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${configId}`);
 };
 
-export const fetchServiceEnabled = async (): Promise<{ serviceEnabled: boolean }> => {
-  return await apiService.get(API_URLS.SERVICE_ENABLED);
+export const fetchServiceAllowed = async (): Promise<SyntheticsServiceAllowed> => {
+  return await apiService.get(API_URLS.SERVICE_ALLOWED);
 };

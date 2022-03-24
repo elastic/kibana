@@ -28,7 +28,7 @@ describe('SyntheticsService', () => {
     const service = new SyntheticsService(logger, serverMock, {});
     service.init();
 
-    expect(service.isEnabled).toEqual(false);
+    expect(service.isAllowed).toEqual(false);
     expect(service.locations).toEqual([]);
   });
 
@@ -40,7 +40,7 @@ describe('SyntheticsService', () => {
 
     await service.init();
 
-    expect(service.isEnabled).toEqual(true);
+    expect(service.isAllowed).toEqual(true);
   });
 
   it('inits properly with locations with dev', async () => {
@@ -52,7 +52,7 @@ describe('SyntheticsService', () => {
 
     await service.init();
 
-    expect(service.isEnabled).toEqual(true);
+    expect(service.isAllowed).toEqual(true);
     expect(service.locations).toEqual([
       {
         geo: {

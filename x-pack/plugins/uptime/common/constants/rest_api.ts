@@ -42,5 +42,5 @@ export enum API_URLS {
   SYNTHETICS_MONITORS = '/internal/uptime/service/monitors',
   RUN_ONCE_MONITOR = '/internal/uptime/service/monitors/run_once',
   TRIGGER_MONITOR = '/internal/uptime/service/monitors/trigger',
-  SERVICE_ENABLED = '/internal/uptime/service/enabled',
+  SERVICE_ALLOWED = '/internal/uptime/service/allowed',
 }

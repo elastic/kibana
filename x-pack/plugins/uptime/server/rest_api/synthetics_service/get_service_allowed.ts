@@ -8,11 +8,11 @@
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 
-export const getServiceEnabledRoute: UMRestApiRouteFactory = () => ({
+export const getServiceAllowedRoute: UMRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.SERVICE_ENABLED,
+  path: API_URLS.SERVICE_ALLOWED,
   validate: {},
   handler: async ({ server }): Promise<any> => {
-    return { serviceEnabled: server.syntheticsService.isEnabled };
+    return { serviceAllowed: server.syntheticsService.isAllowed };
   },
 });

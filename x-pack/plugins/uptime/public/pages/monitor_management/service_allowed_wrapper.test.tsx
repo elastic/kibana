@@ -7,28 +7,28 @@
 
 import React from 'react';
 import { render } from '../../lib/helper/rtl_helpers';
-import { ServiceEnabledWrapper } from './service_enabled_wrapper';
 
 import * as enabledHook from '../../components/monitor_management/hooks/use_service_enabled';
+import { ServiceAllowedWrapper } from './service_allowed_wrapper';
 
-describe('ServiceEnabledWrapper', () => {
+describe('ServiceAllowedWrapper', () => {
   it('renders expected elements for valid props', async () => {
     const { findByText } = render(
-      <ServiceEnabledWrapper>
+      <ServiceAllowedWrapper>
         <div>Test text</div>
-      </ServiceEnabledWrapper>
+      </ServiceAllowedWrapper>
     );
 
     expect(await findByText('Test text')).toBeInTheDocument();
   });
 
   it('renders when enabled state is loading', async () => {
-    jest.spyOn(enabledHook, 'useServiceEnabled').mockReturnValue({ loading: true });
+    jest.spyOn(enabledHook, 'useSyntheticsServiceAllowed').mockReturnValue({ loading: true });
 
     const { findByText } = render(
-      <ServiceEnabledWrapper>
+      <ServiceAllowedWrapper>
         <div>Test text</div>
-      </ServiceEnabledWrapper>
+      </ServiceAllowedWrapper>
     );
 
     expect(await findByText('Loading monitor management')).toBeInTheDocument();
@@ -36,13 +36,13 @@ describe('ServiceEnabledWrapper', () => {
 
   it('renders when enabled state is false', async () => {
     jest
-      .spyOn(enabledHook, 'useServiceEnabled')
-      .mockReturnValue({ loading: false, isEnabled: false });
+      .spyOn(enabledHook, 'useSyntheticsServiceAllowed')
+      .mockReturnValue({ loading: false, isAllowed: false });
 
     const { findByText } = render(
-      <ServiceEnabledWrapper>
+      <ServiceAllowedWrapper>
         <div>Test text</div>
-      </ServiceEnabledWrapper>
+      </ServiceAllowedWrapper>
     );
 
     expect(await findByText('Monitor management')).toBeInTheDocument();
@@ -50,13 +50,13 @@ describe('ServiceEnabledWrapper', () => {
 
   it('renders when enabled state is true', async () => {
     jest
-      .spyOn(enabledHook, 'useServiceEnabled')
-      .mockReturnValue({ loading: false, isEnabled: true });
+      .spyOn(enabledHook, 'useSyntheticsServiceAllowed')
+      .mockReturnValue({ loading: false, isAllowed: true });
 
     const { findByText } = render(
-      <ServiceEnabledWrapper>
+      <ServiceAllowedWrapper>
         <div>Test text</div>
-      </ServiceEnabledWrapper>
+      </ServiceAllowedWrapper>
     );
 
     expect(await findByText('Test text')).toBeInTheDocument();

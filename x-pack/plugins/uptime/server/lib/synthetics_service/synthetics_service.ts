@@ -54,13 +54,13 @@ export class SyntheticsService {
   private indexTemplateExists?: boolean;
   private indexTemplateInstalling?: boolean;
 
-  public isEnabled: boolean;
+  public isAllowed: boolean;
 
   constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
     this.config = config;
-    this.isEnabled = false;
+    this.isAllowed = false;
 
     this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
 
@@ -72,7 +72,7 @@ export class SyntheticsService {
   public async init() {
     await this.registerServiceLocations();
 
-    this.isEnabled = await this.apiClient.checkIfAccountAllowed();
+    this.isAllowed = await this.apiClient.checkIfAccountAllowed();
   }
 
   private setupIndexTemplates() {
@@ -132,9 +132,9 @@ export class SyntheticsService {
 
               await service.registerServiceLocations();
 
-              service.isEnabled = await service.apiClient.checkIfAccountAllowed();
+              service.isAllowed = await service.apiClient.checkIfAccountAllowed();
 
-              if (service.isEnabled) {
+              if (service.isAllowed) {
                 service.setupIndexTemplates();
                 await service.pushConfigs();
               }
