@@ -349,21 +349,26 @@ export default function ({
     });
   }
 
+  function hasOneOf(value: unknown): value is { __one_of: ConditionalTemplateType[] } {
+    return typeof value === 'object' && value !== null && '__one_of' in value;
+  }
+
   function getConditionalTemplate(
     name: string,
     autocompleteRules: Record<string, unknown> | null | undefined
   ) {
     if (autocompleteRules && autocompleteRules[name]) {
       const currentLineNumber = editor.getCurrentPosition().lineNumber;
-      const { __one_of } = autocompleteRules[name] as {
-        __one_of: ConditionalTemplateType[];
-      };
-      const rules = __one_of ?? [];
-      const startLine = getStartLineNumber(currentLineNumber, rules);
-      const lines = editor.getLines(startLine, currentLineNumber).join('\n');
-      const match = matchCondition(rules, lines);
-      if (match && match.__template) {
-        return match.__template;
+      const value = autocompleteRules[name];
+
+      if (hasOneOf(value)) {
+        const rules = value.__one_of ?? [];
+        const startLine = getStartLineNumber(currentLineNumber, rules);
+        const lines = editor.getLines(startLine, currentLineNumber).join('\n');
+        const match = matchCondition(rules, lines);
+        if (match && match.__template) {
+          return match.__template;
+        }
       }
     }
   }
