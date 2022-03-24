@@ -41,8 +41,9 @@ export const InvalidMonitors = ({
           perPage: pageState.pageSize,
           total: invalidTotal ?? 0,
         },
-        error: { monitorList: null, serviceLocations: null },
-        loading: { monitorList: summariesLoading, serviceLocations: false },
+        enablement: null,
+        error: { monitorList: null, serviceLocations: null, enablement: null },
+        loading: { monitorList: summariesLoading, serviceLocations: false, enablement: false },
         locations: [],
       }}
       onPageStateChange={onPageStateChange}
