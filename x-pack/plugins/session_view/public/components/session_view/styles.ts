@@ -18,6 +18,10 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
+    const { border, colors } = euiTheme;
+
+    const thinBorder = `${border.width.thin} solid ${colors.lightShade}!important`;
+
     const processTree: CSSObject = {
       height: `${height}px`,
       position: 'relative',
@@ -26,6 +30,12 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
     const detailPanel: CSSObject = {
       height: `${height}px`,
       borderRightWidth: '0px',
+      borderLeft: thinBorder,
+      borderRight: thinBorder,
+    };
+
+    const resizeHandle: CSSObject = {
+      zIndex: 2,
     };
 
     const searchBar: CSSObject = {
@@ -49,6 +59,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
     return {
       processTree,
       detailPanel,
+      resizeHandle,
       searchBar,
       buttonsEyeDetail,
       sessionViewerComponent,

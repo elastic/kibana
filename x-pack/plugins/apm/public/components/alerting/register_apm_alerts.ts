@@ -7,26 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { stringify } from 'querystring';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import {
+  getAlertUrlErrorCount,
+  getAlertUrlTransaction,
+} from '../../../common/utils/formatters';
 import { AlertType } from '../../../common/alert_types';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
-
-const format = ({
-  pathname,
-  query,
-}: {
-  pathname: string;
-  query: Record<string, any>;
-}): string => {
-  return `${pathname}?${stringify(query)}`;
-};
 
 export function registerApmAlerts(
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
@@ -40,16 +32,10 @@ export function registerApmAlerts(
     format: ({ fields }) => {
       return {
         reason: fields[ALERT_REASON]!,
-        link: format({
-          pathname: `/app/apm/services/${String(
-            fields[SERVICE_NAME][0]
-          )}/errors`,
-          query: {
-            ...(fields[SERVICE_ENVIRONMENT]?.[0]
-              ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
-              : { environment: ENVIRONMENT_ALL.value }),
-          },
-        }),
+        link: getAlertUrlErrorCount(
+          String(fields[SERVICE_NAME][0]!),
+          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0])
+        ),
       };
     },
     iconClass: 'bell',
@@ -83,19 +69,16 @@ export function registerApmAlerts(
           'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ fields, formatters: { asDuration } }) => ({
-      reason: fields[ALERT_REASON]!,
-
-      link: format({
-        pathname: `/app/apm/services/${fields[SERVICE_NAME][0]!}`,
-        query: {
-          transactionType: fields[TRANSACTION_TYPE][0]!,
-          ...(fields[SERVICE_ENVIRONMENT]?.[0]
-            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
-            : { environment: ENVIRONMENT_ALL.value }),
-        },
-      }),
-    }),
+    format: ({ fields, formatters: { asDuration } }) => {
+      return {
+        reason: fields[ALERT_REASON]!,
+        link: getAlertUrlTransaction(
+          String(fields[SERVICE_NAME][0]!),
+          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
+          String(fields[TRANSACTION_TYPE][0]!)
+        ),
+      };
+    },
     iconClass: 'bell',
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
@@ -132,15 +115,11 @@ export function registerApmAlerts(
     ),
     format: ({ fields, formatters: { asPercent } }) => ({
       reason: fields[ALERT_REASON]!,
-      link: format({
-        pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0]!)}`,
-        query: {
-          transactionType: String(fields[TRANSACTION_TYPE][0]!),
-          ...(fields[SERVICE_ENVIRONMENT]?.[0]
-            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
-            : { environment: ENVIRONMENT_ALL.value }),
-        },
-      }),
+      link: getAlertUrlTransaction(
+        String(fields[SERVICE_NAME][0]!),
+        fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
+        String(fields[TRANSACTION_TYPE][0]!)
+      ),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
@@ -177,15 +156,11 @@ export function registerApmAlerts(
     ),
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
-      link: format({
-        pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0])}`,
-        query: {
-          transactionType: String(fields[TRANSACTION_TYPE][0]),
-          ...(fields[SERVICE_ENVIRONMENT]?.[0]
-            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
-            : { environment: ENVIRONMENT_ALL.value }),
-        },
-      }),
+      link: getAlertUrlTransaction(
+        String(fields[SERVICE_NAME][0]!),
+        fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
+        String(fields[TRANSACTION_TYPE][0]!)
+      ),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
