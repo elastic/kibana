@@ -11,7 +11,6 @@ import { Unit } from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
 import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getDefaultControlColumn } from '../../../../timelines/components/timeline/body/control_columns';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -33,6 +32,7 @@ import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { DetailsPanel } from '../../../../timelines/components/side_panel';
 import { PreviewRenderCellValue } from './preview_table_cell_renderer';
+import { getPreviewTableControlColumn } from './preview_table_control_columns';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -225,7 +225,7 @@ export const PreviewHistogram = ({
           start: from,
           tGridEventRenderedViewEnabled,
           type: 'embedded',
-          leadingControlColumns: getDefaultControlColumn(1),
+          leadingControlColumns: getPreviewTableControlColumn(1.5),
         })}
         <DetailsPanel
           browserFields={browserFields}
