@@ -278,7 +278,7 @@ on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
 |[[elasticsearch-service-account-token]] `elasticsearch.serviceAccountToken:`
- | beta[]. If your {es} is protected with basic authentication, this token provides the credentials
+ | If your {es} is protected with basic authentication, this token provides the credentials
 that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
