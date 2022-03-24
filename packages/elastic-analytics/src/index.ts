@@ -6,15 +6,22 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsClientInitContext } from './analytics_client';
-import { AnalyticsClient } from './analytics_client';
+import type {
+  AnalyticsClientInitContext,
+  IAnalyticsClient as AnalyticsClient,
+} from './analytics_client';
+import { AnalyticsClient as AnalyticsClientClass } from './analytics_client';
 
-export function createAnalytics(initContext: AnalyticsClientInitContext) {
-  return new AnalyticsClient(initContext);
+/**
+ * Creates an {@link AnalyticsClient}.
+ * @param initContext The initial context to create the client {@link AnalyticsClientInitContext}
+ */
+export function createAnalytics(initContext: AnalyticsClientInitContext): AnalyticsClient {
+  return new AnalyticsClientClass(initContext);
 }
 
 export type {
-  IAnalyticsClient,
+  IAnalyticsClient as AnalyticsClient,
   // Types for the constructor
   AnalyticsClientInitContext,
   // Types for the registerShipper API

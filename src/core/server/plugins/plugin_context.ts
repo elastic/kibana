@@ -108,6 +108,14 @@ export function createPluginPrebootSetupContext(
   plugin: PluginWrapper
 ): CorePreboot {
   return {
+    analytics: {
+      optIn: deps.analytics.optIn,
+      registerContextProvider: deps.analytics.registerContextProvider,
+      registerEventType: deps.analytics.registerEventType,
+      registerShipper: deps.analytics.registerShipper,
+      reportEvent: deps.analytics.reportEvent,
+      telemetryCounter$: deps.analytics.telemetryCounter$,
+    },
     elasticsearch: {
       config: deps.elasticsearch.config,
       createClient: deps.elasticsearch.createClient,
@@ -147,6 +155,14 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   const router = deps.http.createRouter('', plugin.opaqueId);
 
   return {
+    analytics: {
+      optIn: deps.analytics.optIn,
+      registerContextProvider: deps.analytics.registerContextProvider,
+      registerEventType: deps.analytics.registerEventType,
+      registerShipper: deps.analytics.registerShipper,
+      reportEvent: deps.analytics.reportEvent,
+      telemetryCounter$: deps.analytics.telemetryCounter$,
+    },
     capabilities: {
       registerProvider: deps.capabilities.registerProvider,
       registerSwitcher: deps.capabilities.registerSwitcher,
@@ -235,6 +251,14 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
   return {
+    analytics: {
+      optIn: deps.analytics.optIn,
+      registerContextProvider: deps.analytics.registerContextProvider,
+      registerEventType: deps.analytics.registerEventType,
+      registerShipper: deps.analytics.registerShipper,
+      reportEvent: deps.analytics.reportEvent,
+      telemetryCounter$: deps.analytics.telemetryCounter$,
+    },
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
