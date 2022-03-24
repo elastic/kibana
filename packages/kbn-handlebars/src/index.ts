@@ -469,7 +469,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const options: Handlebars.HelperOptions = {
       // @ts-expect-error: Name should be on there, but the offical types doesn't know this
       name: helperName,
-      hash: getHash(node),
+      hash: this.getHash(node),
     };
 
     if (isBlock(node)) {
@@ -491,6 +491,15 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     }
 
     return Object.assign(options, this.defaultHelperOptions);
+  }
+
+  private getHash(statement: { hash?: hbs.AST.Hash }) {
+    const result: { [key: string]: any } = {};
+    if (!statement.hash) return result;
+    for (const { key, value } of statement.hash.pairs) {
+      result[key] = this.resolveNodes(value)[0];
+    }
+    return result;
   }
 
   private resolveNodes(nodes: hbs.AST.Node | hbs.AST.Node[]): any[] {
@@ -521,17 +530,6 @@ function isBlock(node: hbs.AST.Node): node is hbs.AST.BlockStatement {
 
 function noop() {
   return '';
-}
-
-function getHash(statement: { hash?: hbs.AST.Hash }) {
-  const result: { [key: string]: any } = {};
-  if (!statement.hash) return result;
-  for (const { key, value } of statement.hash.pairs) {
-    result[key] = (
-      value as hbs.AST.StringLiteral | hbs.AST.BooleanLiteral | hbs.AST.NumberLiteral
-    ).value; // TODO: I'm not sure if value can be any other type
-  }
-  return result;
 }
 
 // liftet from handlebars lib/handlebars/compiler/compiler.js
