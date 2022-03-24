@@ -63,6 +63,12 @@ const boolSchema = s.object({
   }),
 });
 
+const orderSchema = s.oneOf([
+  sortOrderSchema,
+  s.recordOf(s.string(), sortOrderSchema),
+  s.arrayOf(s.recordOf(s.string(), sortOrderSchema)),
+]);
+
 const termsSchema = s.object({
   field: s.maybe(s.string()),
   collect_mode: s.maybe(s.string()),
@@ -73,13 +79,7 @@ const termsSchema = s.object({
   min_doc_count: s.maybe(s.number({ min: 1 })),
   size: s.maybe(s.number()),
   show_term_doc_count_error: s.maybe(s.boolean()),
-  order: s.maybe(
-    s.oneOf([
-      sortOrderSchema,
-      s.recordOf(s.string(), sortOrderSchema),
-      s.arrayOf(s.recordOf(s.string(), sortOrderSchema)),
-    ])
-  ),
+  order: s.maybe(orderSchema),
 });
 
 const multiTermsSchema = s.object({
@@ -90,6 +90,7 @@ const multiTermsSchema = s.object({
   min_doc_count: s.maybe(s.number()),
   shard_min_doc_count: s.maybe(s.number()),
   collect_mode: s.maybe(s.oneOf([s.literal('depth_first'), s.literal('breadth_first')])),
+  order: s.maybe(s.recordOf(s.string(), orderSchema)),
 });
 
 export const bucketAggsSchemas: Record<string, ObjectType> = {
