@@ -28,6 +28,7 @@ import {
   createLegacyRuleAction,
   getLegacyActionSO,
 } from '../../utils';
+import { RulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -118,7 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // check for legacy sidecar action
       const sidecarActionsResults = await getLegacyActionSO(es);
       expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-      expect(sidecarActionsResults.hits.hits[0]._source.references[0].id).to.eql(rule1.id);
+      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
         .send({ query: '', action: BulkAction.delete })
@@ -175,7 +176,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // check for legacy sidecar action
       const sidecarActionsResults = await getLegacyActionSO(es);
       expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-      expect(sidecarActionsResults.hits.hits[0]._source.references[0].id).to.eql(rule1.id);
+      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
         .send({ query: '', action: BulkAction.enable })
@@ -244,7 +245,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // check for legacy sidecar action
       const sidecarActionsResults = await getLegacyActionSO(es);
       expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-      expect(sidecarActionsResults.hits.hits[0]._source.references[0].id).to.eql(rule1.id);
+      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
         .send({ query: '', action: BulkAction.disable })
@@ -318,7 +319,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // check for legacy sidecar action
       const sidecarActionsResults = await getLegacyActionSO(es);
       expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-      expect(sidecarActionsResults.hits.hits[0]._source.references[0].id).to.eql(
+      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
         ruleToDuplicate.id
       );
 
@@ -343,7 +344,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(rulesResponse.total).to.eql(2);
 
-      rulesResponse.data.forEach((rule) => {
+      rulesResponse.data.forEach((rule: RulesSchema) => {
         expect(rule.actions).to.eql([
           {
             action_type_id: '.slack',
@@ -448,7 +449,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // check for legacy sidecar action
         const sidecarActionsResults = await getLegacyActionSO(es);
         expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-        expect(sidecarActionsResults.hits.hits[0]._source.references[0].id).to.eql(
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
           ruleToDuplicate.id
         );
 
