@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 import { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
@@ -18,6 +18,7 @@ import {
   useHostRiskScore,
   useHostRiskScoreKpi,
 } from '../../../risk_score/containers';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -43,15 +44,22 @@ export const HostRiskScoreQueryTabBody = ({
     [activePage, limit]
   );
 
+  const { toggleStatus } = useQueryToggle(HostRiskScoreQueryId.HOSTS_BY_RISK);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(!toggleStatus);
+  }, [toggleStatus]);
+
   const [loading, { data, totalCount, inspect, isInspected, refetch }] = useHostRiskScore({
     filterQuery,
-    skip,
+    skip: querySkip,
     pagination,
     sort,
   });
 
   const { severityCount, loading: isKpiLoading } = useHostRiskScoreKpi({
     filterQuery,
+    skip: querySkip,
   });
 
   return (
@@ -65,6 +73,7 @@ export const HostRiskScoreQueryTabBody = ({
       loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       severityCount={severityCount}
       totalCount={totalCount}
       type={type}
