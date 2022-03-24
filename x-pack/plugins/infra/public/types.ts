@@ -27,6 +27,10 @@ import type {
 } from '../../observability/public';
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '../../spaces/public';
+import type {
+  SourceProviderProps,
+  UseNodeMetricsTableOptions,
+} from './components/infrastructure_node_metrics_tables/shared';
 import { LogViewsServiceStart } from './services/log_views';
 
 // Our own setup and start contract values
@@ -34,6 +38,15 @@ export type InfraClientSetupExports = void;
 
 export interface InfraClientStartExports {
   logViews: LogViewsServiceStart;
+  ContainerMetricsTable: (
+    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
+  ) => JSX.Element;
+  HostMetricsTable: (
+    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
+  ) => JSX.Element;
+  PodMetricsTable: (
+    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
+  ) => JSX.Element;
 }
 
 export interface InfraClientSetupDeps {

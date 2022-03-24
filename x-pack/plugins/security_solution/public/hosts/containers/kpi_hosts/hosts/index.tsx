@@ -26,7 +26,7 @@ import * as i18n from './translations';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'hostsKpiHostsQuery';
+export const ID = 'hostsKpiHostsQuery';
 
 export interface HostsKpiHostsArgs extends Omit<HostsKpiHostsStrategyResponse, 'rawResponse'> {
   id: string;
@@ -154,6 +154,14 @@ export const useHostsKpiHosts = ({
       abortCtrl.current.abort();
     };
   }, [hostsKpiHostsRequest, hostsKpiHostsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, hostsKpiHostsResponse];
 };

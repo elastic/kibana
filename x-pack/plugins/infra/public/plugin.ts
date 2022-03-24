@@ -15,6 +15,10 @@ import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
+import type { CoreProvidersProps } from './apps/common_providers';
+import { createLazyContainerMetricsTable } from './components/infrastructure_node_metrics_tables/container/create_lazy_container_metrics_table';
+import { createLazyHostMetricsTable } from './components/infrastructure_node_metrics_tables/host/create_lazy_host_metrics_table';
+import { createLazyPodMetricsTable } from './components/infrastructure_node_metrics_tables/pod/create_lazy_pod_metrics_table';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
@@ -224,9 +228,20 @@ export class Plugin implements InfraClientPluginClass {
       dataViews: plugins.dataViews,
       search: plugins.data.search,
     });
+    const coreProvidersProps: CoreProvidersProps = {
+      core,
+      pluginStart: {
+        logViews,
+      },
+      plugins,
+      theme$: core.theme.theme$,
+    };
 
     return {
       logViews,
+      ContainerMetricsTable: createLazyContainerMetricsTable(coreProvidersProps),
+      HostMetricsTable: createLazyHostMetricsTable(coreProvidersProps),
+      PodMetricsTable: createLazyPodMetricsTable(coreProvidersProps),
     };
   }
 

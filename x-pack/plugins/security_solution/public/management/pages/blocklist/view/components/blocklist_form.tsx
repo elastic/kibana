@@ -21,10 +21,12 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import {
   OperatingSystem,
-  ConditionEntryField,
+  BlocklistConditionEntryField,
   isPathValid,
   hasSimpleExecutableName,
 } from '@kbn/securitysolution-utils';
@@ -49,6 +51,7 @@ import {
   SELECT_OS_LABEL,
   VALUE_LABEL,
   ERRORS,
+  VALUE_LABEL_HELPER,
 } from '../../translations';
 import {
   EffectedPolicySelect,
@@ -64,7 +67,7 @@ import { isArtifactGlobal } from '../../../../../../common/endpoint/service/arti
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 
 interface BlocklistEntry {
-  field: ConditionEntryField;
+  field: BlocklistConditionEntryField;
   operator: 'included';
   type: 'match_any';
   value: string[];
@@ -79,7 +82,7 @@ function createValidationMessage(message: string): React.ReactNode {
   return <div>{message}</div>;
 }
 
-function getDropdownDisplay(field: ConditionEntryField): React.ReactNode {
+function getDropdownDisplay(field: BlocklistConditionEntryField): React.ReactNode {
   return (
     <>
       {CONDITION_FIELD_TITLE[field]}
@@ -115,7 +118,7 @@ export const BlockListForm = memo(
     const blocklistEntry = useMemo((): BlocklistEntry => {
       if (!item.entries.length) {
         return {
-          field: ConditionEntryField.HASH,
+          field: 'file.hash.*',
           operator: 'included',
           type: 'match_any',
           value: [],
@@ -145,30 +148,41 @@ export const BlockListForm = memo(
       []
     );
 
-    const fieldOptions: Array<EuiSuperSelectOption<ConditionEntryField>> = useMemo(() => {
-      const selectableFields: Array<EuiSuperSelectOption<ConditionEntryField>> = [
-        ConditionEntryField.HASH,
-        ConditionEntryField.PATH,
-      ].map((field) => ({
+    const fieldOptions: Array<EuiSuperSelectOption<BlocklistConditionEntryField>> = useMemo(() => {
+      const selectableFields: Array<EuiSuperSelectOption<BlocklistConditionEntryField>> = (
+        ['file.hash.*', 'file.path'] as BlocklistConditionEntryField[]
+      ).map((field) => ({
         value: field,
         inputDisplay: CONDITION_FIELD_TITLE[field],
         dropdownDisplay: getDropdownDisplay(field),
       }));
       if (selectedOs === OperatingSystem.WINDOWS) {
         selectableFields.push({
-          value: ConditionEntryField.SIGNER,
-          inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER],
-          dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER),
+          value: 'file.Ext.code_signature',
+          inputDisplay: CONDITION_FIELD_TITLE['file.Ext.code_signature'],
+          dropdownDisplay: getDropdownDisplay('file.Ext.code_signature'),
         });
       }
 
       return selectableFields;
     }, [selectedOs]);
 
+    const valueLabel = useMemo(() => {
+      return (
+        <div>
+          <EuiToolTip content={VALUE_LABEL_HELPER}>
+            <>
+              {VALUE_LABEL} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+            </>
+          </EuiToolTip>
+        </div>
+      );
+    }, []);
+
     const validateValues = useCallback((nextItem: ArtifactFormComponentProps['item']) => {
       const os = ((nextItem.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
       const {
-        field = ConditionEntryField.HASH,
+        field = 'file.hash.*',
         type = 'match_any',
         value: values = [],
       } = (nextItem.entries[0] ?? {}) as BlocklistEntry;
@@ -188,20 +202,20 @@ export const BlockListForm = memo(
       }
 
       // error if invalid hash
-      if (field === ConditionEntryField.HASH && values.some((value) => !isValidHash(value))) {
+      if (field === 'file.hash.*' && values.some((value) => !isValidHash(value))) {
         newValueErrors.push(createValidationMessage(ERRORS.INVALID_HASH));
       }
 
       const isInvalidPath = values.some((value) => !isPathValid({ os, field, type, value }));
 
       // warn if invalid path
-      if (field !== ConditionEntryField.HASH && isInvalidPath) {
+      if (field !== 'file.hash.*' && isInvalidPath) {
         newValueWarnings.push(createValidationMessage(ERRORS.INVALID_PATH));
       }
 
       // warn if wildcard
       if (
-        field !== ConditionEntryField.HASH &&
+        field !== 'file.hash.*' &&
         !isInvalidPath &&
         values.some((value) => !hasSimpleExecutableName({ os, type, value }))
       ) {
@@ -260,9 +274,8 @@ export const BlockListForm = memo(
             {
               ...blocklistEntry,
               field:
-                os !== OperatingSystem.WINDOWS &&
-                blocklistEntry.field === ConditionEntryField.SIGNER
-                  ? ConditionEntryField.HASH
+                os !== OperatingSystem.WINDOWS && blocklistEntry.field === 'file.Ext.code_signature'
+                  ? 'file.hash.*'
                   : blocklistEntry.field,
             },
           ],
@@ -278,7 +291,7 @@ export const BlockListForm = memo(
     );
 
     const handleOnFieldChange = useCallback(
-      (field: ConditionEntryField) => {
+      (field: BlocklistConditionEntryField) => {
         const nextItem = {
           ...item,
           entries: [{ ...blocklistEntry, field }],
@@ -432,7 +445,7 @@ export const BlockListForm = memo(
           </EuiFlexGroup>
         </EuiFormRow>
         <EuiFormRow
-          label={VALUE_LABEL}
+          label={valueLabel}
           isInvalid={visited.value && !!errorsRef.current.value?.length}
           helpText={warningsRef.current.value}
           error={errorsRef.current.value}
