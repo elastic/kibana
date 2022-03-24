@@ -390,10 +390,6 @@ export default function (providerContext: FtrProviderContext) {
             type: 'lens',
           },
           {
-            id: 'sample_osquery_pack_asset',
-            type: 'osquery-pack-asset',
-          },
-          {
             id: 'sample_security_rule',
             type: 'security-rule',
           },
@@ -404,6 +400,10 @@ export default function (providerContext: FtrProviderContext) {
           {
             id: 'sample_tag',
             type: 'tag',
+          },
+          {
+            id: 'sample_osquery_pack_asset',
+            type: 'osquery-pack-asset',
           },
         ],
         installed_es: [
