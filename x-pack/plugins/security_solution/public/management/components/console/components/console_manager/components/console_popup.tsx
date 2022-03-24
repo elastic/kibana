@@ -29,6 +29,10 @@ const ConsolePopupWrapper = styled.div`
   &.is-hidden {
     display: none;
   }
+
+  .console-holder {
+    height: 100%;
+  }
 `;
 
 type ConsolePopupProps = PropsWithChildren<{
@@ -48,9 +52,6 @@ export const ConsolePopup = memo<ConsolePopupProps>(
       });
     }, [isHidden]);
 
-    // FIXME:PT when hidden, can the `children` just be returned for render?
-    //          Need to test this out to see if the desired outcome is achived
-
     return (
       <ConsolePopupWrapper className={cssClassNames}>
         <div className="euiModal__flex">
@@ -62,7 +63,7 @@ export const ConsolePopup = memo<ConsolePopupProps>(
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <div style={{ height: '200px' }}>{children}</div>
+            <div className="console-holder">{children}</div>
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButton onClick={onTerminate}>

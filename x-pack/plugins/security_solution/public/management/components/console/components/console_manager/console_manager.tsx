@@ -12,18 +12,35 @@ import {
   ConsoleRegistrationInterface,
   RegisteredConsoleClient,
 } from './types';
+import { Console } from '../../console';
 
 interface ManagedConsole {
   client: RegisteredConsoleClient;
   consoleProps: ConsoleRegistrationInterface['consoleProps'];
   console: JSX.Element; // actual console component
   isOpen: boolean;
+  key: symbol;
   onBeforeClose?: ConsoleRegistrationInterface['onBeforeClose'];
 }
 
 type RunningConsoleStorage = Record<string, ManagedConsole>;
 
-const ConsoleManagerContext = React.createContext<ConsoleManagerClient | undefined>(undefined);
+interface ConsoleManagerInternalClient {
+  /**
+   * Returns the managed console record for the given ConsoleProps object if its being managed
+   * @param props
+   */
+  getManagedConsole(key: ManagedConsole['key']): ManagedConsole | undefined;
+}
+
+interface ConsoleManagerContextClients {
+  client: ConsoleManagerClient;
+  internal: ConsoleManagerInternalClient;
+}
+
+const ConsoleManagerContext = React.createContext<ConsoleManagerContextClients | undefined>(
+  undefined
+);
 
 export type ConsoleManagerProps = PropsWithChildren<{
   storage?: RunningConsoleStorage;
@@ -118,8 +135,9 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
           hide: () => hide(id),
           terminate: () => terminate(id),
         },
-        console: <div>{'console component here'}</div>,
+        console: <></>, // temporary
         isOpen: false,
+        key: Symbol(id),
       };
 
       setConsoleStorage((prevState) => {
@@ -132,6 +150,10 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
           [id]: managedConsole,
         };
       });
+
+      managedConsole.console = (
+        <Console {...managedConsole.consoleProps} managedKey={managedConsole.key} />
+      );
 
       return managedConsole.client;
     },
@@ -148,6 +170,17 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       getList,
     };
   }, [getList, getOne, hide, register, show, terminate]);
+
+  const consoleManageContextClients = useMemo<ConsoleManagerContextClients>(() => {
+    return {
+      client: consoleManagerClient,
+      internal: {
+        getManagedConsole(key): ManagedConsole | undefined {
+          return Object.values(consoleStorage).find((managedConsole) => managedConsole.key === key);
+        },
+      },
+    };
+  }, [consoleManagerClient, consoleStorage]);
 
   const visibleConsole = useMemo(() => {
     return Object.values(consoleStorage).find((managedConsole) => managedConsole.isOpen);
@@ -170,7 +203,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
   }, [consoleStorage]);
 
   return (
-    <ConsoleManagerContext.Provider value={consoleManagerClient}>
+    <ConsoleManagerContext.Provider value={consoleManageContextClients}>
       {children}
 
       <ConsolePopup
@@ -187,11 +220,28 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
 ConsoleManager.displayName = 'ConsoleManager';
 
 export const useConsoleManager = (): ConsoleManagerClient => {
-  const consoleManager = useContext(ConsoleManagerContext);
+  const consoleManagerClients = useContext(ConsoleManagerContext);
 
-  if (!consoleManager) {
+  if (!consoleManagerClients) {
     throw new Error('ConsoleManagerContext not found');
   }
 
-  return consoleManager;
+  return consoleManagerClients.client;
+};
+
+/**
+ * For internal use within Console code only!
+ * Hook will return the `ManagedConsole` interface stored in the manager if it finds
+ * the `ConsoleProps` provided on input to be one that the ConsoleManager is tracking.
+ *
+ * @protected
+ */
+export const useWithManagedConsole = (
+  key: ManagedConsole['key'] | undefined
+): ManagedConsole | undefined => {
+  const consoleManagerClients = useContext(ConsoleManagerContext);
+
+  if (key && consoleManagerClients) {
+    return consoleManagerClients.internal.getManagedConsole(key);
+  }
 };

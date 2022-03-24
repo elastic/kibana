@@ -13,6 +13,7 @@ import { CommandInput, CommandInputProps } from './components/command_input';
 import { ConsoleProps } from './types';
 import { ConsoleStateProvider } from './components/console_state';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useWithManagedConsole } from './components/console_manager/console_manager';
 
 // FIXME:PT implement dark mode for the console or light mode switch
 
@@ -43,54 +44,65 @@ const ConsoleWindow = styled.div`
   }
 `;
 
-export const Console = memo<ConsoleProps>(({ prompt, commandService, ...commonProps }) => {
-  const consoleWindowRef = useRef<HTMLDivElement | null>(null);
-  const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
-  const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
+export const Console = memo<ConsoleProps>(
+  ({ prompt, commandService, managedKey, ...commonProps }) => {
+    const consoleWindowRef = useRef<HTMLDivElement | null>(null);
+    const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
+    const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
+    const managedConsole = useWithManagedConsole(managedKey);
 
-  const scrollToBottom = useCallback(() => {
-    // We need the `setTimeout` here because in some cases, the command output
-    // will take a bit of time to populate its content due to the use of Promises
-    setTimeout(() => {
-      if (consoleWindowRef.current) {
-        consoleWindowRef.current.scrollTop = consoleWindowRef.current.scrollHeight;
+    const scrollToBottom = useCallback(() => {
+      // We need the `setTimeout` here because in some cases, the command output
+      // will take a bit of time to populate its content due to the use of Promises
+      setTimeout(() => {
+        if (consoleWindowRef.current) {
+          consoleWindowRef.current.scrollTop = consoleWindowRef.current.scrollHeight;
+        }
+      }, 1);
+
+      // NOTE: its IMPORTANT that this callback does NOT have any dependencies, because
+      // it is stored in State and currently not updated if it changes
+    }, []);
+
+    const handleConsoleClick = useCallback(() => {
+      if (inputFocusRef.current) {
+        inputFocusRef.current();
       }
-    }, 1);
+    }, []);
 
-    // NOTE: its IMPORTANT that this callback does NOT have any dependencies, because
-    // it is stored in State and currently not updated if it changes
-  }, []);
-
-  const handleConsoleClick = useCallback(() => {
-    if (inputFocusRef.current) {
-      inputFocusRef.current();
-    }
-  }, []);
-
-  return (
-    <ConsoleWindow onClick={handleConsoleClick} {...commonProps}>
+    return (
       <ConsoleStateProvider
         commandService={commandService}
         scrollToBottom={scrollToBottom}
         dataTestSubj={commonProps['data-test-subj']}
       >
-        <EuiPanel
-          className="ui-panel"
-          panelRef={consoleWindowRef}
-          data-test-subj={getTestId('mainPanel')}
-        >
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={true}>
-              <HistoryOutput />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <CommandInput prompt={prompt} focusRef={inputFocusRef} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        {/*
+          If this is a managed console, then we only show its content if it is open.
+          The state provider, however, continues to be rendered so that as updates to pending
+          commands are received, those will still make it to the console's state and be
+          shown when the console is eventually opened again.
+        */}
+        {!managedConsole || managedConsole.isOpen ? (
+          <ConsoleWindow onClick={handleConsoleClick} {...commonProps}>
+            <EuiPanel
+              className="ui-panel"
+              panelRef={consoleWindowRef}
+              data-test-subj={getTestId('mainPanel')}
+            >
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem grow={true}>
+                  <HistoryOutput />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <CommandInput prompt={prompt} focusRef={inputFocusRef} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </ConsoleWindow>
+        ) : null}
       </ConsoleStateProvider>
-    </ConsoleWindow>
-  );
-});
+    );
+  }
+);
 
 Console.displayName = 'Console';

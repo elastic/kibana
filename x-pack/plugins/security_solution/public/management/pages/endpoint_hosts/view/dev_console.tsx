@@ -115,6 +115,11 @@ const RunningConsole = memo<{ registeredConsole: RegisteredConsoleClient }>(
 );
 RunningConsole.displayName = 'RunningConsole';
 
+// const getId = (() => {
+//   const ids = [Math.random().toString(36), Math.random().toString(36), Math.random().toString(36)];
+//   return () => ids[Math.floor(Math.random() * ids.length)];
+// })();
+
 // ------------------------------------------------------------
 // FOR DEV PURPOSES ONLY
 // FIXME:PT Delete once we have support via row actions menu
@@ -129,7 +134,7 @@ export const DevConsole = memo(() => {
   const handleOnClick = useCallback(() => {
     consoleManager
       .register({
-        id: Math.random().toString(36),
+        id: Math.random().toString(36), // getId(),
         title: 'Test console here',
         consoleProps: {
           prompt: '>>',

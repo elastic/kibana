@@ -67,4 +67,10 @@ export interface CommandServiceInterface {
 export interface ConsoleProps extends CommonProps {
   commandService: CommandServiceInterface;
   prompt?: string;
+  /**
+   * For internal use only!
+   * Provided by the ConsoleManager to indicate that the console is being managed by it
+   * @private
+   */
+  managedKey?: symbol;
 }
