@@ -120,7 +120,6 @@ export function DashboardTopNav({
   const [mounted, setMounted] = useState(true);
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isLabsShown, setIsLabsShown] = useState(false);
-  const [lastUsedDataViewId, setLastUsedDataViewId] = useState<string | undefined>(undefined);
 
   const lensAlias = visualizations.getAliases().find(({ name }) => name === 'lens');
   const quickButtonVisTypes = ['markdown', 'maps'];
@@ -608,12 +607,7 @@ export function DashboardTopNav({
                   onClick={addFromLibrary}
                   data-test-subj="dashboardAddPanelButton"
                 />,
-                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons({
-                  getRelevantDataViewId: () =>
-                    lastUsedDataViewId ??
-                    dashboardAppState.dashboardContainer.getRelevantDataViewId(),
-                  setLastUsedDataViewId,
-                }),
+                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(),
               ],
             }}
           </SolutionToolbar>

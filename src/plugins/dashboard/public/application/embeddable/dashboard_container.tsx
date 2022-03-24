@@ -102,7 +102,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private onDestroyControlGroup?: () => void;
   public controlGroup?: ControlGroupContainer;
   private domNode?: HTMLElement;
-  private mostRelevantDataViewId?: string;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
@@ -207,14 +206,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         this.replacePanel(placeholderPanelState, newPanelState)
       );
   }
-
-  public setRelevantDataViewId = (newMostRelevantDataView: string) => {
-    this.mostRelevantDataViewId = newMostRelevantDataView;
-  };
-
-  public getRelevantDataViewId = () => {
-    return this.mostRelevantDataViewId;
-  };
 
   public replacePanel(
     previousPanelState: DashboardPanelState<EmbeddableInput>,
