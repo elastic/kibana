@@ -59,11 +59,17 @@ describe('nodeBuilder', () => {
       expect(query).toMatchInlineSnapshot(`
         Object {
           "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
+            "filter": Array [
               Object {
-                "match": Object {
-                  "foo": "bar",
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match": Object {
+                        "foo": "bar",
+                      },
+                    },
+                  ],
                 },
               },
             ],

@@ -214,9 +214,12 @@ export const constructQueryOptions = ({
 
   const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
 
-  const filters: KqlFunctionNode[] = [statusFilter, tagsFilter, reportersFilter, ownerFilter].filter(
-    kueryNodeExists
-  );
+  const filters: KqlFunctionNode[] = [
+    statusFilter,
+    tagsFilter,
+    reportersFilter,
+    ownerFilter,
+  ].filter(kueryNodeExists);
 
   const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 
