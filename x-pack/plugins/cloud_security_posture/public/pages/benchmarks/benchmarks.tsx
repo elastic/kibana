@@ -155,7 +155,7 @@ export const Benchmarks = () => {
         pageIndex={query.page}
         pageSize={query.perPage}
         sorting={{
-          // @ts-ignore - EUI types currently do not support sorting by nested fields
+          // @ts-expect-error - EUI types currently do not support sorting by nested fields
           sort: { field: query.sortField, direction: query.sortOrder },
           allowNeutralSort: false,
         }}
@@ -165,11 +165,9 @@ export const Benchmarks = () => {
             ...current,
             page: page.index,
             perPage: page.size,
-            sortField: sort?.field
-              ? // Asserting since type inference does not support sorting of nested fields
-                (sort.field as UseCspBenchmarkIntegrationsProps['sortField'])
-              : current.sortField,
-            sortOrder: sort?.direction ? sort.direction : current.sortOrder,
+            sortField:
+              (sort?.field as UseCspBenchmarkIntegrationsProps['sortField']) || current.sortField,
+            sortOrder: sort?.direction || current.sortOrder,
           }));
         }}
         noItemsMessage={

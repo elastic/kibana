@@ -39,7 +39,7 @@ export const useCspBenchmarkIntegrations = ({
   };
 
   return useQuery(
-    [QUERY_KEY, { name, perPage, page, sortField, sortOrder }],
+    [QUERY_KEY, query],
     () => http.get<ListResult<Benchmark>>(BENCHMARKS_ROUTE_PATH, { query }),
     { keepPreviousData: true }
   );
