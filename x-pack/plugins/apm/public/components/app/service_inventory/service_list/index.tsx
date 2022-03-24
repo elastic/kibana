@@ -205,7 +205,7 @@ export function getServiceColumns({
       align: RIGHT_ALIGNMENT,
     },
     {
-      field: ServiceInventoryFieldName.FailureRate,
+      field: ServiceInventoryFieldName.TransactionErrorRate,
       name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),

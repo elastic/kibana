@@ -26,5 +26,5 @@ export enum ServiceInventoryFieldName {
   TransactionType = 'transactionType',
   Throughput = 'throughput',
   Latency = 'latency',
-  FailureRate = 'failureRate',
+  TransactionErrorRate = 'transactionErrorRate',
 }

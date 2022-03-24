@@ -33,7 +33,7 @@ const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
     item.transactionType ?? '',
   [ServiceInventoryFieldName.Latency]: (item) => item.latency ?? 0,
   [ServiceInventoryFieldName.Throughput]: (item) => item.throughput ?? 0,
-  [ServiceInventoryFieldName.FailureRate]: (item) =>
+  [ServiceInventoryFieldName.TransactionErrorRate]: (item) =>
     item.transactionErrorRate ?? 0,
 };
 
