@@ -33,7 +33,7 @@ export const ElasticsearchJava: React.FC = () => {
         </ul>
         <EuiLink
           target="_blank"
-          href="https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/8.1/introduction.html"
+          href="https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/introduction.html"
         >
           Learn more about the Elasticsearch JAVA API client
         </EuiLink>
@@ -100,7 +100,7 @@ export const ElasticsearchJava: React.FC = () => {
           <a
             target="_blank"
             rel="noopener"
-            href="https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/8.1/java-rest-low.html"
+            href="https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/java-rest-low.html"
           >
             Java Low Level REST Client
           </a>
@@ -108,7 +108,7 @@ export const ElasticsearchJava: React.FC = () => {
           <a
             target="_blank"
             rel="noopener"
-            href="https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/8.1/_basic_authentication.html"
+            href="https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/_basic_authentication.html"
           >
             its documentation
           </a>
