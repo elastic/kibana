@@ -22,6 +22,20 @@ export const enum ConditionEntryField {
   SIGNER = 'process.Ext.code_signature',
 }
 
+export const enum EntryFieldType {
+  HASH = '.hash.',
+  EXECUTABLE = '.executable.caseless',
+  PATH = '.path',
+  SIGNER = '.Ext.code_signature',
+}
+
+export type TrustedAppConditionEntryField =
+  | 'process.hash.*'
+  | 'process.executable.caseless'
+  | 'process.Ext.code_signature';
+export type BlocklistConditionEntryField = 'file.hash.*' | 'file.path' | 'file.Ext.code_signature';
+export type AllConditionEntryFields = TrustedAppConditionEntryField | BlocklistConditionEntryField;
+
 export const enum OperatingSystem {
   LINUX = 'linux',
   MAC = 'macos',
@@ -91,7 +105,7 @@ export const isPathValid = ({
   value,
 }: {
   os: OperatingSystem;
-  field: ConditionEntryField | 'file.path.text';
+  field: AllConditionEntryFields | 'file.path.text';
   type: EntryTypes;
   value: string;
 }): boolean => {
