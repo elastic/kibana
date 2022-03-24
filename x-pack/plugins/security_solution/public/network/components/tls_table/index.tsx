@@ -33,6 +33,7 @@ interface TlsTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: networkModel.NetworkType;
@@ -58,6 +59,7 @@ const TlsTableComponent: React.FC<TlsTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   showMorePagesIndicator,
   totalCount,
   type,
@@ -135,6 +137,7 @@ const TlsTableComponent: React.FC<TlsTableProps> = ({
       loadPage={loadPage}
       onChange={onChange}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       sorting={getSortField(sort)}
       totalCount={fakeTotalCount}
       updateActivePage={updateActivePage}

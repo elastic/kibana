@@ -31,7 +31,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiUniquePrivateIpsQuery';
+export const ID = 'networkKpiUniquePrivateIpsQuery';
 
 export interface NetworkKpiUniquePrivateIpsArgs {
   uniqueDestinationPrivateIps: number;
@@ -174,6 +174,14 @@ export const useNetworkKpiUniquePrivateIps = ({
       abortCtrl.current.abort();
     };
   }, [networkKpiUniquePrivateIpsRequest, networkKpiUniquePrivateIpsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkKpiUniquePrivateIpsResponse];
 };

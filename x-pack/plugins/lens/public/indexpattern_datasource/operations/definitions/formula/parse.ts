@@ -107,11 +107,14 @@ function extractColumns(
         ? indexPattern.getFieldByName(fieldName.value)!
         : documentField;
 
-      const mappedParams = mergeWithGlobalFilter(
-        nodeOperation,
-        getOperationParams(nodeOperation, namedArguments || []),
-        globalFilter
-      );
+      const mappedParams = {
+        ...mergeWithGlobalFilter(
+          nodeOperation,
+          getOperationParams(nodeOperation, namedArguments || []),
+          globalFilter
+        ),
+        usedInMath: true,
+      };
 
       const newCol = (
         nodeOperation as OperationDefinition<GenericIndexPatternColumn, 'field'>

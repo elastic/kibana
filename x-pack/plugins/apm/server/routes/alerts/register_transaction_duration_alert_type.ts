@@ -13,6 +13,7 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { take } from 'rxjs/operators';
+import { getAlertUrlTransaction } from '../../../common/utils/formatters';
 import { asDuration } from '../../../../observability/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
@@ -26,6 +27,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import {
   getEnvironmentEsField,
@@ -64,6 +66,7 @@ export function registerTransactionDurationAlertType({
   ruleDataClient,
   config$,
   logger,
+  basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     ruleDataClient,
@@ -87,6 +90,7 @@ export function registerTransactionDurationAlertType({
         apmActionVariables.triggerValue,
         apmActionVariables.interval,
         apmActionVariables.reason,
+        apmActionVariables.viewInAppUrl,
       ],
     },
     producer: APM_SERVER_FEATURE_ID,
@@ -188,6 +192,19 @@ export function registerTransactionDurationAlertType({
           windowSize: ruleParams.windowSize,
           windowUnit: ruleParams.windowUnit,
         });
+
+        const relativeViewInAppUrl = getAlertUrlTransaction(
+          ruleParams.serviceName,
+          getEnvironmentEsField(ruleParams.environment)?.[SERVICE_ENVIRONMENT],
+          ruleParams.transactionType
+        );
+
+        const viewInAppUrl = basePath.publicBaseUrl
+          ? new URL(
+              basePath.prepend(relativeViewInAppUrl),
+              basePath.publicBaseUrl
+            ).toString()
+          : relativeViewInAppUrl;
         services
           .alertWithLifecycle({
             id: `${AlertType.TransactionDuration}_${getEnvironmentLabel(
@@ -211,6 +228,7 @@ export function registerTransactionDurationAlertType({
             triggerValue: transactionDurationFormatted,
             interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
             reason: reasonMessage,
+            viewInAppUrl,
           });
       }
 

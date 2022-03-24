@@ -58,7 +58,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--logging.loggers[2].name=http.server.response',
         '--logging.loggers[2].level=all',
         `--logging.loggers[2].appenders=${JSON.stringify(['file'])}`,
-        `--xpack.alerting.minimumScheduleInterval="1s"`,
+        `--xpack.alerting.rules.minimumScheduleInterval.value="1s"`,
       ],
     },
   };

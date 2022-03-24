@@ -54,7 +54,7 @@ export const ExternalConnectorFormFields: React.FC = () => {
         label={i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.externalConnectorConfig.urlLabel',
           {
-            defaultMessage: 'URL',
+            defaultMessage: 'Connector URL',
           }
         )}
         isInvalid={!urlValid}
@@ -92,7 +92,7 @@ export const ExternalConnectorFormFields: React.FC = () => {
         label={i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.externalConnectorConfig.apiKeyLabel',
           {
-            defaultMessage: 'API key',
+            defaultMessage: 'Connector API key',
           }
         )}
       >
