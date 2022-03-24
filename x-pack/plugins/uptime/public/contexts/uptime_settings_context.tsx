@@ -21,6 +21,7 @@ export interface UptimeSettingsContextValues {
   isLogsAvailable: boolean;
   config: UptimeUiConfig;
   commonlyUsedRanges?: CommonlyUsedRange[];
+  isDev: boolean;
 }
 
 const { BASE_PATH } = CONTEXT_DEFAULTS;
@@ -39,6 +40,7 @@ const defaultContext: UptimeSettingsContextValues = {
   isInfraAvailable: true,
   isLogsAvailable: true,
   config: {},
+  isDev: false,
 };
 export const UptimeSettingsContext = createContext(defaultContext);
 
@@ -50,12 +52,14 @@ export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ childr
     isLogsAvailable,
     commonlyUsedRanges,
     config,
+    isDev,
   } = props;
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const value = useMemo(() => {
     return {
+      isDev,
       basePath,
       isApmAvailable,
       isInfraAvailable,
@@ -66,6 +70,7 @@ export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ childr
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
     };
   }, [
+    isDev,
     basePath,
     isApmAvailable,
     isInfraAvailable,

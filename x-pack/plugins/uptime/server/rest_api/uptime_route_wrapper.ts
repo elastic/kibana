@@ -46,7 +46,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
 
     server.uptimeEsClient = uptimeEsClient;
 
-    if (isInspectorEnabled) {
+    if (isInspectorEnabled || server.isDev) {
       inspectableEsQueriesMap.set(request, []);
     }
 
@@ -66,7 +66,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     return response.ok({
       body: {
         ...res,
-        ...(isInspectorEnabled && uptimeRoute.path !== API_URLS.DYNAMIC_SETTINGS
+        ...((isInspectorEnabled || server.isDev) && uptimeRoute.path !== API_URLS.DYNAMIC_SETTINGS
           ? { _inspect: inspectableEsQueriesMap.get(request) }
           : {}),
       },
