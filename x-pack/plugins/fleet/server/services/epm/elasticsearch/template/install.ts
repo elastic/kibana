@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, cloneDeep } from 'lodash';
+import { merge } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
 
