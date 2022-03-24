@@ -42,8 +42,8 @@ Object {
         ],
       },
     },
+    "size": 1,
   },
-  "size": 1,
   "terminate_after": 1,
 }
 `;
@@ -61,8 +61,8 @@ Object {
         "filter": Array [],
       },
     },
+    "size": 1,
   },
-  "size": 1,
   "terminate_after": 1,
 }
 `;

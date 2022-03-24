@@ -194,6 +194,7 @@ export interface CreateRulesOptions {
   actions: RuleAlertAction[];
   isRuleRegistryEnabled: boolean;
   namespace?: NamespaceOrUndefined;
+  id?: string;
 }
 
 export interface UpdateRulesOptions {

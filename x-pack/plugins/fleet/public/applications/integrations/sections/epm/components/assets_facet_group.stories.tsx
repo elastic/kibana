@@ -28,6 +28,7 @@ export const AssetsFacetGroup = ({ width }: Args) => {
       <Component
         assets={{
           kibana: {
+            csp_rule_template: [],
             dashboard: [],
             visualization: [],
             index_pattern: [],
