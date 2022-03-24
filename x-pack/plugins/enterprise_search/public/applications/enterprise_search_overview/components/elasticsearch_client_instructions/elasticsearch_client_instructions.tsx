@@ -15,7 +15,6 @@ import { ElasticsearchDotnet } from './elasticsearch_dotnet';
 import { ElasticsearchGo } from './elasticsearch_go';
 import { ElasticsearchJava } from './elasticsearch_java';
 import { ElasticsearchJavascript } from './elasticsearch_javascript';
-import { ElasticsearchPerl } from './elasticsearch_perl';
 import { ElasticsearchPhp } from './elasticsearch_php';
 import { ElasticsearchPython } from './elasticsearch_python';
 import { ElasticsearchRuby } from './elasticsearch_ruby';
@@ -38,8 +37,6 @@ export const ElasticsearchClientInstructions: React.FC<{ language: string }> = (
       return <ElasticsearchJava />;
     case 'javascript':
       return <ElasticsearchJavascript cloudId={cloudId} />;
-    case 'perl':
-      return <ElasticsearchPerl />;
     case 'php':
       return <ElasticsearchPhp cloudId={cloudId} />;
     case 'python':

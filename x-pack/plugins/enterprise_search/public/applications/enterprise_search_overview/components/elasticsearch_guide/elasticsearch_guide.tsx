@@ -37,7 +37,6 @@ export const ElasticsearchGuide: React.FC = () => {
     { value: 'go', text: 'Go' },
     { value: 'dotnet', text: '.Net' },
     { value: 'php', text: 'PHP' },
-    { value: 'perl', text: 'Perl' },
     { value: 'python', text: 'Python' },
     { value: 'rust', text: 'Rust' },
   ];
