@@ -6,12 +6,14 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { CoreProvidersProps } from '../../../apps/common_providers';
+import { InfraClientStartServices } from '../../../types';
 import type { SourceProviderProps, UseNodeMetricsTableOptions } from '../shared';
 
 const LazyIntegratedPodMetricsTable = lazy(() => import('./integrated_pod_metrics_table'));
 
-export function createLazyPodMetricsTable(coreProvidersProps: CoreProvidersProps) {
+export function createLazyPodMetricsTable(getStartServices: () => InfraClientStartServices) {
+  const [core, plugins, pluginStart] = getStartServices();
+
   return ({
     timerange,
     filterClauseDsl,
@@ -19,7 +21,10 @@ export function createLazyPodMetricsTable(coreProvidersProps: CoreProvidersProps
   }: UseNodeMetricsTableOptions & Partial<SourceProviderProps>) => (
     <Suspense fallback={null}>
       <LazyIntegratedPodMetricsTable
-        {...coreProvidersProps}
+        core={core}
+        plugins={plugins}
+        pluginStart={pluginStart}
+        theme$={core.theme.theme$}
         sourceId={sourceId || 'default'}
         timerange={timerange}
         filterClauseDsl={filterClauseDsl}

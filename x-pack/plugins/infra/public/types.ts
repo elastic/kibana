@@ -27,6 +27,7 @@ import type {
 } from '../../observability/public';
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '../../spaces/public';
+import { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
   UseNodeMetricsTableOptions,
@@ -81,6 +82,7 @@ export type InfraClientPluginClass = PluginClass<
   InfraClientStartDeps
 >;
 export type InfraClientStartServicesAccessor = InfraClientCoreSetup['getStartServices'];
+export type InfraClientStartServices = UnwrapPromise<ReturnType<InfraClientStartServicesAccessor>>;
 
 export interface InfraHttpError extends IHttpFetchError {
   readonly body?: {

@@ -15,7 +15,6 @@ import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
-import type { CoreProvidersProps } from './apps/common_providers';
 import { createLazyContainerMetricsTable } from './components/infrastructure_node_metrics_tables/container/create_lazy_container_metrics_table';
 import { createLazyHostMetricsTable } from './components/infrastructure_node_metrics_tables/host/create_lazy_host_metrics_table';
 import { createLazyPodMetricsTable } from './components/infrastructure_node_metrics_tables/pod/create_lazy_pod_metrics_table';
@@ -30,6 +29,8 @@ import {
   InfraClientPluginClass,
   InfraClientSetupDeps,
   InfraClientStartDeps,
+  InfraClientStartExports,
+  InfraClientStartServices,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 
@@ -223,26 +224,22 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
+    const getStartServices = (): InfraClientStartServices => [core, plugins, startContract];
+
     const logViews = this.logViews.start({
       http: core.http,
       dataViews: plugins.dataViews,
       search: plugins.data.search,
     });
-    const coreProvidersProps: CoreProvidersProps = {
-      core,
-      pluginStart: {
-        logViews,
-      },
-      plugins,
-      theme$: core.theme.theme$,
+
+    const startContract: InfraClientStartExports = {
+      logViews,
+      ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),
+      HostMetricsTable: createLazyHostMetricsTable(getStartServices),
+      PodMetricsTable: createLazyPodMetricsTable(getStartServices),
     };
 
-    return {
-      logViews,
-      ContainerMetricsTable: createLazyContainerMetricsTable(coreProvidersProps),
-      HostMetricsTable: createLazyHostMetricsTable(coreProvidersProps),
-      PodMetricsTable: createLazyPodMetricsTable(coreProvidersProps),
-    };
+    return startContract;
   }
 
   stop() {}
