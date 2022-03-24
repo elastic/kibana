@@ -46,7 +46,6 @@ export interface IEditableControlFactory<T extends ControlInput = ControlInput> 
 }
 export interface ControlEditorProps<T extends ControlInput = ControlInput> {
   initialInput?: Partial<T>;
-  setDefaultFlyoutState?: (defaultInput?: Partial<T>) => void;
   getRelevantDataViewId?: () => string | undefined;
   setLastUsedDataViewId?: (newId: string) => void;
   onChange: (partial: Partial<T>) => void;
