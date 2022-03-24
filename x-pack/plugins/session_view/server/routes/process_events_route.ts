@@ -57,7 +57,7 @@ export const doSearch = async (
         { 'process.start': forward ? 'asc' : 'desc' },
         { '@timestamp': forward ? 'asc' : 'desc' },
       ],
-      search_after: cursor ? [cursor] : undefined,
+      search_after: cursor ? [cursor, cursor] : undefined,
     },
   });
 
