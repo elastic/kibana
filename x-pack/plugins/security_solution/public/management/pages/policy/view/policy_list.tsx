@@ -314,7 +314,11 @@ export const PolicyList = memo(() => {
           />
         </>
       ) : (
-        <PolicyEmptyState loading={packageIsFetching} onActionClick={handleCreatePolicyClick} />
+        <PolicyEmptyState
+          loading={packageIsFetching}
+          onActionClick={handleCreatePolicyClick}
+          policyEntryPoint
+        />
       )}
     </AdministrationListPage>
   );
