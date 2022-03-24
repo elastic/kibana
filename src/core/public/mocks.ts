@@ -30,6 +30,7 @@ import { themeServiceMock } from './theme/theme_service.mock';
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
+export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 export { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';

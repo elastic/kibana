@@ -8,6 +8,7 @@
 import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
 
 import React from 'react';
+import { executionContextServiceMock } from '../../../../../../src/core/public/mocks';
 import { RemoteClusterEdit } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';
 import { AppRouter, registerRouter } from '../../../public/application/services';
@@ -25,7 +26,13 @@ export const REMOTE_CLUSTER_EDIT = {
 const ComponentWithContext = (props: { isCloudEnabled: boolean }) => {
   const { isCloudEnabled, ...rest } = props;
   return (
-    <AppContextProvider context={{ isCloudEnabled, cloudBaseUrl: 'test.com' }}>
+    <AppContextProvider
+      context={{
+        isCloudEnabled,
+        cloudBaseUrl: 'test.com',
+        executionContext: executionContextServiceMock.createStartContract(),
+      }}
+    >
       <RemoteClusterEdit {...rest} />
     </AppContextProvider>
   );
