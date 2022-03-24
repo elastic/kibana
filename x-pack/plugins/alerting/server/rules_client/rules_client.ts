@@ -125,6 +125,13 @@ export interface RuleAggregation {
       doc_count: number;
     }>;
   };
+  snoozed: {
+    buckets: Array<{
+      key: number;
+      key_as_string: string;
+      doc_count: number;
+    }>;
+  };
 }
 
 export interface ConstructorOptions {
@@ -191,6 +198,7 @@ export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
   ruleEnabledStatus?: { enabled: number; disabled: number };
   ruleMutedStatus?: { muted: number; unmuted: number };
+  ruleSnoozedStatus?: { snoozed: number };
 }
 
 export interface FindResult<Params extends RuleTypeParams> {
@@ -859,6 +867,7 @@ export class RulesClient {
       );
       throw error;
     }
+
     const { filter: authorizationFilter } = authorizationTuple;
     const resp = await this.unsecuredSavedObjectsClient.find<RawRule, RuleAggregation>({
       ...options,
@@ -879,6 +888,13 @@ export class RulesClient {
         muted: {
           terms: { field: 'alert.attributes.muteAll' },
         },
+        snoozed: {
+          date_range: {
+            field: 'alert.attributes.snoozeEndTime',
+            format: 'strict_date_time',
+            ranges: [{ from: 'now' }],
+          },
+        },
       },
     });
 
@@ -894,6 +910,7 @@ export class RulesClient {
           muted: 0,
           unmuted: 0,
         },
+        ruleSnoozedStatus: { snoozed: 0 },
       };
 
       for (const key of RuleExecutionStatusValues) {
@@ -933,6 +950,11 @@ export class RulesClient {
     ret.ruleMutedStatus = {
       muted: mutedBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
       unmuted: mutedBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
+    };
+
+    const snoozedBuckets = resp.aggregations.snoozed.buckets;
+    ret.ruleSnoozedStatus = {
+      snoozed: snoozedBuckets.reduce((acc, bucket) => acc + bucket.doc_count, 0),
     };
 
     return ret;
