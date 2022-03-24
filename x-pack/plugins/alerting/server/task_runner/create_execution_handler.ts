@@ -148,6 +148,8 @@ export function createExecutionHandler<
         continue;
       }
 
+      setNumberOfTriggeredActions(action.actionTypeId);
+
       if (
         !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
       ) {
@@ -189,12 +191,9 @@ export function createExecutionHandler<
           if (isEphemeralTaskRejectedDueToCapacityError(err)) {
             await actionsClient.enqueueExecution(enqueueOptions);
           }
-        } finally {
-          setNumberOfTriggeredActions(action.actionTypeId);
         }
       } else {
         await actionsClient.enqueueExecution(enqueueOptions);
-        setNumberOfTriggeredActions(action.actionTypeId);
       }
 
       const event = createAlertEventLogRecordObject({

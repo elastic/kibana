@@ -1346,7 +1346,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.execute,
         outcome: 'success',
         status: 'active',
-        numberOfTriggeredActions: 0,
+        numberOfTriggeredActions: 2,
         task: true,
       })
     );
@@ -2503,6 +2503,7 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
     expect(runnerResult.monitoring?.execution.history.length).toBe(200);
   });
+
   test('Actions circuit breaker kicked in, should set status as warning and log a message in event log', async () => {
     const actionsConfigMap = {
       default: {
@@ -2675,6 +2676,129 @@ describe('Task Runner', () => {
         task: true,
       })
     );
+  });
+
+  test('Actions circuit breaker kicked in with connectorType specific config and multiple alerts', async () => {
+    const actionsConfigMap = {
+      default: {
+        max: 30,
+      },
+      '.server-log': {
+        max: 1,
+      },
+    };
+
+    const warning = {
+      reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      message: translations.taskRunner.warning.maxExecutableActions,
+    };
+
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        executorServices.alertFactory.create('2').scheduleActions('default');
+      }
+    );
+
+    rulesClient.get.mockResolvedValue({
+      ...mockedRuleTypeSavedObject,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: '2',
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: '3',
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: '4',
+          actionTypeId: 'any-action',
+        },
+        {
+          group: 'default',
+          id: '5',
+          actionTypeId: 'any-action',
+        },
+      ],
+    } as jest.ResolvedValue<unknown>);
+
+    ruleTypeRegistry.get.mockReturnValue(ruleType);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
+
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      {
+        ...taskRunnerFactoryInitializerParams,
+        actionsConfigMap,
+      },
+      inMemoryMetrics
+    );
+
+    const runnerResult = await taskRunner.run();
+
+    // 1x(.server-log) and 2x(any-action) per alert
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(5);
+
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(...generateSavedObjectParams({ status: 'warning', warning }));
+
+    expect(runnerResult).toEqual(
+      generateRunnerResult({
+        state: true,
+        history: [true],
+        alertInstances: {
+          '1': {
+            meta: {
+              lastScheduledActions: {
+                date: new Date(DATE_1970),
+                group: 'default',
+              },
+            },
+            state: {
+              duration: 0,
+              start: '1970-01-01T00:00:00.000Z',
+            },
+          },
+          '2': {
+            meta: {
+              lastScheduledActions: {
+                date: new Date(DATE_1970),
+                group: 'default',
+              },
+            },
+            state: {
+              duration: 0,
+              start: '1970-01-01T00:00:00.000Z',
+            },
+          },
+        },
+      })
+    );
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(11);
   });
 
   test('increments monitoring metrics after execution', async () => {
