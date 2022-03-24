@@ -122,7 +122,7 @@ function getDataRequestContext(
   layerId: string,
   forceRefreshDueToDrawing: boolean,
   isForceRefresh: boolean,
-  isEditingFeatures?: boolean
+  isEditingFeatures: boolean
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState(), layerId),

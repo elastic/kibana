@@ -66,6 +66,7 @@ describe('getDataFilters', () => {
     minLon: -0.25,
   };
   const isReadOnly = false;
+  const editModeActiveForLayer = false;
 
   test('should set buffer as searchSessionMapBuffer when using searchSessionId', () => {
     const dataFilters = getDataFilters.resultFunc(
@@ -78,7 +79,8 @@ describe('getDataFilters', () => {
       filters,
       searchSessionId,
       searchSessionMapBuffer,
-      isReadOnly
+      isReadOnly,
+      editModeActiveForLayer
     );
     expect(dataFilters.buffer).toEqual(searchSessionMapBuffer);
   });
@@ -94,7 +96,8 @@ describe('getDataFilters', () => {
       filters,
       searchSessionId,
       undefined,
-      isReadOnly
+      isReadOnly,
+      editModeActiveForLayer
     );
     expect(dataFilters.buffer).toEqual(mapBuffer);
   });

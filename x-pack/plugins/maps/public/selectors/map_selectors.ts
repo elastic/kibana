@@ -237,7 +237,7 @@ export function getDataRequestDescriptor(state: MapStoreState, layerId: string, 
   });
 }
 
-const getEditModeActiveForLayer = ({ map }: MapStoreState, layerId: string) =>
+const getEditModeActiveForLayer = ({ map }: MapStoreState, layerId: string | undefined) =>
   map.mapState.editState?.layerId === layerId;
 
 export const getDataFilters = createSelector(
