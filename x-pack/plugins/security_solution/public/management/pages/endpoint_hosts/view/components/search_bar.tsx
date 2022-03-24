@@ -47,20 +47,22 @@ export const AdminSearchBar = memo(() => {
   return (
     <div>
       {searchBarIndexPatterns && searchBarIndexPatterns.length > 0 && (
-        <SearchBar
-          dataTestSubj="adminSearchBar"
-          query={searchBarQuery}
-          indexPatterns={clonedIndexPatterns}
-          timeHistory={timeHistory}
-          onQuerySubmit={onQuerySubmit}
-          fillSubmitButton={true}
-          isLoading={false}
-          iconType="search"
-          showFilterBar={false}
-          showDatePicker={false}
-          showQueryBar={true}
-          showQueryInput={true}
-        />
+        <div className="globalQueryBar">
+          <SearchBar
+            dataTestSubj="adminSearchBar"
+            query={searchBarQuery}
+            indexPatterns={clonedIndexPatterns}
+            timeHistory={timeHistory}
+            onQuerySubmit={onQuerySubmit}
+            fillSubmitButton={true}
+            isLoading={false}
+            iconType="search"
+            showFilterBar={false}
+            showDatePicker={false}
+            showQueryBar={true}
+            showQueryInput={true}
+          />
+        </div>
       )}
     </div>
   );
