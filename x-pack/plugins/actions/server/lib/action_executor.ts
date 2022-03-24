@@ -71,6 +71,7 @@ export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
   private readonly isESOCanEncrypt: boolean;
+
   private actionInfo: ActionInfo | undefined;
 
   constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
