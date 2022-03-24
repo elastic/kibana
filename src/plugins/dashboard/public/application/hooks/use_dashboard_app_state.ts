@@ -195,7 +195,9 @@ export const useDashboardAppState = ({
         ...forwardedAppState,
 
         // if we are in legacy print mode, dashboard needs to be in print viewMode
-        ...(legacyPrintLayoutDetected ? { viewMode: ViewMode.PRINT } : {}),
+        // ...(legacyPrintLayoutDetected ? { viewMode: ViewMode.PRINT } : {}),
+        // HACK: just display the dashboard in "print" view
+        ...{ viewMode: ViewMode.PRINT },
 
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),

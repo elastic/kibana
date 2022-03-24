@@ -1,97 +1,13 @@
-
-/*
-Global print styling
-*/
-$a4PageHeight: 297mm;
-$a4PageWidth: 210mm;
-$a4PageMargin: 0;
-$a4PagePadding: 0;
-$a4PageFooterHeight: 10mm;
-
-$a4PageContentHeight: $a4PageHeight - $a4PageFooterHeight;
-$a4PageContentWidth: $a4PageWidth;
-
-@page {
-  size: A4;
-  orientation: portrait;
-  margin: $a4PageMargin;
-  padding: $a4PagePadding;
-  counter-increment: page;
-}
-
-@mixin globalScreenRules {
-  @media screen, projection {
-    .printFooter {
-      bottom: 0;
-    }
-
-    .printHeader {
-      display: none;
-    }
-
-  }
-}
-
-@mixin globalPrintRules {
-  @media print {
-
-    html {
-      background-color: #FFF;
-    }
-
-    a[href]:after {
-      content: ' [' attr(href) ']';
-    }
-
-    figure {
-      break-inside: avoid;
-    }
-
-    * {
-      -webkit-print-color-adjust: exact !important;   /* Chrome, Safari, Edge */
-      color-adjust: exact !important;                 /*Firefox*/
-    }
-
-    .printHeader {
-      position: fixed;
-      top: 0;
-    }
-
-    // .printHeader:after {
-
-    // }
-
-    .printFooter {
-      display: table-footer-group;
-      position: fixed;
-      bottom: 0;
-      padding: 0 2mm 2mm 2mm;
-      > img {
-        height: 8mm;
-      }
-    }
-
-    .printFooter:after {
-      position: fixed;
-      bottom: 2mm;
-      left: 50%;
-      transform: translateX(-50%);
-      counter-increment: page;
-      content: 'Page ' counter(page);
-    }
-  }
-}
-
-@mixin globalRules {
-  @include globalScreenRules();
-  @include globalPrintRules();
-}
+@import './shared_poc_print'; // Bring in the shared print styling
 
 /*
 Dashboard styling
+
+It is up to dashboard to decide how the visualizations should look on an A4 page. The assumption
+is that we want to preserve current behaviour of 2 visualizations per page.
 */
 $visualisationsPerPage: 2;
-$visPadding: 2mm;
+$visPadding: 4mm;
 
 /*
 We set the same visual padding on the browser and print versions of the UI so that
@@ -113,7 +29,7 @@ is being formed. This can result in parts of the vis being cut out.
   }
 }
 
-@include globalRules();
+@include globalSharedRules();
 
 @media screen, projection {
   .printViewport {
@@ -136,7 +52,6 @@ is being formed. This can result in parts of the vis being cut out.
 
   .printViewport {
     &__vis {
-
       @include visualizationPadding();
 
       height: calc(#{$a4PageContentHeight} / #{$visualisationsPerPage});
