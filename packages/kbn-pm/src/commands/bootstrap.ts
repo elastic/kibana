@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { sep } from 'path';
+import { resolve, sep } from 'path';
 import { CiStatsReporter } from '@kbn/dev-utils/ci_stats_reporter';
 
 import { log } from '../utils/log';
@@ -17,7 +17,7 @@ import { ICommand } from './';
 import { readYarnLock } from '../utils/yarn_lock';
 import { sortPackageJson } from '../utils/sort_package_json';
 import { validateDependencies } from '../utils/validate_dependencies';
-import { installBazelTools, runBazel } from '../utils/bazel';
+import { installBazelTools, removeYarnIntegrityFileIfExists, runBazel } from '../utils/bazel';
 import { setupRemoteCache } from '../utils/bazel/setup_remote_cache';
 
 export const BootstrapCommand: ICommand = {
@@ -70,6 +70,7 @@ export const BootstrapCommand: ICommand = {
 
     if (forceInstall) {
       await time('force install dependencies', async () => {
+        await removeYarnIntegrityFileIfExists(resolve(kibanaProjectPath, 'node_modules'));
         await runBazel(['run', '@nodejs//:yarn'], runOffline, {
           env: {
             SASS_BINARY_SITE:
