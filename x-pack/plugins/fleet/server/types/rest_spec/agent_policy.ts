@@ -32,7 +32,9 @@ export const CreateAgentPolicyRequestSchema = {
 
 export const UpdateAgentPolicyRequestSchema = {
   ...GetOneAgentPolicyRequestSchema,
-  body: NewAgentPolicySchema,
+  body: NewAgentPolicySchema.extends({
+    force: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const CopyAgentPolicyRequestSchema = {
