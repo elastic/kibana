@@ -26,41 +26,91 @@ describe('<UseField />', () => {
     jest.useRealTimers();
   });
 
-  test('should read the default value from the prop and fallback to the config object', () => {
-    const onFormData = jest.fn();
+  describe('defaultValue', () => {
+    test('should read the default value from the prop and fallback to the config object', () => {
+      const onFormData = jest.fn();
 
-    const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
-      const { form } = useForm();
-      const { subscribe } = form;
+      const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
+        const { form } = useForm();
+        const { subscribe } = form;
 
-      useEffect(() => subscribe(onData).unsubscribe, [subscribe, onData]);
+        useEffect(() => subscribe(onData).unsubscribe, [subscribe, onData]);
 
-      return (
-        <Form form={form}>
-          <UseField path="name" config={{ defaultValue: 'John' }} />
-          <UseField
-            path="lastName"
-            defaultValue="Snow"
-            config={{ defaultValue: 'Will be Overridden' }}
-          />
-        </Form>
-      );
-    };
+        return (
+          <Form form={form}>
+            <UseField path="name" config={{ defaultValue: 'John' }} />
+            <UseField
+              path="lastName"
+              defaultValue="Snow"
+              config={{ defaultValue: 'Will be Overridden' }}
+            />
+          </Form>
+        );
+      };
 
-    const setup = registerTestBed(TestComp, {
-      defaultProps: { onData: onFormData },
-      memoryRouter: { wrapComponent: false },
+      const setup = registerTestBed(TestComp, {
+        defaultProps: { onData: onFormData },
+        memoryRouter: { wrapComponent: false },
+      });
+
+      setup();
+
+      const [{ data }] = onFormData.mock.calls[
+        onFormData.mock.calls.length - 1
+      ] as Parameters<OnUpdateHandler>;
+
+      expect(data.internal).toEqual({
+        name: 'John',
+        lastName: 'Snow',
+      });
     });
 
-    setup();
+    test('should update the form.defaultValue when a field defaultValue is provided through prop', () => {
+      let formHook: FormHook | null = null;
 
-    const [{ data }] = onFormData.mock.calls[
-      onFormData.mock.calls.length - 1
-    ] as Parameters<OnUpdateHandler>;
+      const TestComp = () => {
+        const [isFieldVisible, setIsFieldVisible] = useState(true);
+        const { form } = useForm();
+        formHook = form;
 
-    expect(data.internal).toEqual({
-      name: 'John',
-      lastName: 'Snow',
+        return (
+          <Form form={form}>
+            {isFieldVisible && (
+              <>
+                <UseField path="name" defaultValue="John" />
+                <UseField path="myArray[0].name" defaultValue="John" />
+                <UseField path="myArray[0].lastName" defaultValue="Snow" />
+                <UseField path="myArray[1].name" defaultValue="Foo" />
+                <UseField path="myArray[1].lastName" defaultValue="Bar" />
+              </>
+            )}
+            <button data-test-subj="unmountField" onClick={() => setIsFieldVisible(false)}>
+              Unmount field
+            </button>
+          </Form>
+        );
+      };
+
+      const setup = registerTestBed(TestComp, {
+        memoryRouter: { wrapComponent: false },
+      });
+
+      const { find } = setup();
+
+      expect(formHook!.__getFormDefaultValue()).toEqual({
+        name: 'John',
+        myArray: [
+          { name: 'John', lastName: 'Snow' },
+          { name: 'Foo', lastName: 'Bar' },
+        ],
+      });
+
+      // Unmounts the field and make sure the form.defaultValue has been updated
+      act(() => {
+        find('unmountField').simulate('click');
+      });
+
+      expect(formHook!.__getFormDefaultValue()).toEqual({});
     });
   });
 

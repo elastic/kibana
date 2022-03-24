@@ -8,6 +8,7 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { get } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 
 import { FormHook, FieldHook, FormData, FieldsMap, FormConfig } from '../types';
 import { mapFormFields, unflattenObject, flattenObject, Subject, Subscription } from '../lib';
@@ -36,7 +37,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   // Strip out any "undefined" value and run the deserializer
   const initDefaultValue = useCallback(
-    (_defaultValue?: Partial<T>): FormData | undefined => {
+    (_defaultValue?: Partial<T>): I | undefined => {
       if (_defaultValue === undefined || Object.keys(_defaultValue).length === 0) {
         return undefined;
       }
@@ -45,14 +46,14 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
         .filter(({ 1: value }) => value !== undefined)
         .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as T);
 
-      return flattenObject(deserializer ? deserializer(filtered) : (filtered as unknown as I));
+      return deserializer ? deserializer(filtered) : (filtered as unknown as I);
     },
     [deserializer]
   );
 
   // We create this stable reference to be able to initialize our "defaultValueDeserialized" ref below
   // as we can't initialize useRef by calling a function (e.g. useRef(initDefaultValue()))
-  const defaultValueMemoized = useMemo<FormData | undefined>(() => {
+  const defaultValueMemoized = useMemo<I | undefined>(() => {
     return initDefaultValue(defaultValue);
   }, [defaultValue, initDefaultValue]);
 
@@ -202,13 +203,14 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const updateDefaultValueAt: FormHook<T, I>['__updateDefaultValueAt'] = useCallback(
     (path, value) => {
       if (defaultValueDeserialized.current === undefined) {
-        defaultValueDeserialized.current = {};
+        defaultValueDeserialized.current = {} as I;
       }
-
       if (value === undefined) {
-        delete defaultValueDeserialized.current![path];
+        const updated = flattenObject(defaultValueDeserialized.current!);
+        delete updated[path];
+        defaultValueDeserialized.current = unflattenObject<I>(updated);
       } else {
-        defaultValueDeserialized.current![path] = value;
+      set(defaultValueDeserialized.current!, path, value);
       }
     },
     []
@@ -290,10 +292,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   );
 
   const getFormDefaultValue: FormHook<T, I>['__getFormDefaultValue'] = useCallback(
-    () =>
-      defaultValueDeserialized.current === undefined
-        ? undefined
-        : unflattenObject<I>(defaultValueDeserialized.current),
+    () => defaultValueDeserialized.current,
     []
   );
 
@@ -432,8 +431,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const getFields: FormHook<T, I>['getFields'] = useCallback(() => fieldsRefs.current, []);
 
   const getFieldDefaultValue: FormHook<T, I>['getFieldDefaultValue'] = useCallback(
-    // (fieldName) => get(defaultValueDeserialized.current ?? {}, fieldName),
-    (fieldName) => (defaultValueDeserialized.current ?? {})[fieldName],
+    (fieldName) => get(defaultValueDeserialized.current ?? {}, fieldName),
     []
   );
 
