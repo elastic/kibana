@@ -126,7 +126,7 @@ export const setupEnvironment = () => {
   };
 };
 
-export const getProcessorValue = (onUpdate: jest.Mock) => {
+export const getProcessorValue = (onUpdate: jest.Mock, type: string) => {
   const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
   const { processors } = onUpdateResult.getData();
   return processors;
