@@ -217,5 +217,13 @@ export const useAllHost = ({
     };
   }, [hostsRequest, hostsSearch]);
 
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
+
   return [loading, hostsResponse];
 };

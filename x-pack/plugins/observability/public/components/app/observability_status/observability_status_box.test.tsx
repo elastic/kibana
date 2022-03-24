@@ -24,6 +24,7 @@ describe('ObservabilityStatusBox', () => {
         learnMoreLink: 'learnMoreUrl.com',
         goToAppTitle: 'go to app title',
         goToAppLink: 'go to app link',
+        weight: 1,
       };
 
       render(
@@ -60,6 +61,7 @@ describe('ObservabilityStatusBox', () => {
         learnMoreLink: 'http://example.com',
         goToAppTitle: 'go to app title',
         goToAppLink: 'go to app link',
+        weight: 1,
       };
 
       render(

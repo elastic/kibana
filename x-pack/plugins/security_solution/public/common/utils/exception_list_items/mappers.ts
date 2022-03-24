@@ -13,7 +13,7 @@ import {
   EntryNested,
   NestedEntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ConditionEntryField, EntryTypes } from '@kbn/securitysolution-utils';
+import { AllConditionEntryFields, EntryFieldType, EntryTypes } from '@kbn/securitysolution-utils';
 
 import { ConditionEntriesMap, ConditionEntry } from '../../../../common/endpoint/types';
 
@@ -46,12 +46,12 @@ const createEntryNested = (field: string, entries: NestedEntriesArray): EntryNes
   return { field, entries, type: 'nested' };
 };
 
-function groupHashEntry(conditionEntry: ConditionEntry): EntriesArray {
+function groupHashEntry(prefix: 'process' | 'file', conditionEntry: ConditionEntry): EntriesArray {
   const entriesArray: EntriesArray = [];
 
   if (!Array.isArray(conditionEntry.value)) {
     const entry = createEntryMatch(
-      `process.hash.${hashType(conditionEntry.value)}`,
+      `${prefix}${EntryFieldType.HASH}${hashType(conditionEntry.value)}`,
       conditionEntry.value.toLowerCase()
     );
     entriesArray.push(entry);
@@ -80,7 +80,7 @@ function groupHashEntry(conditionEntry: ConditionEntry): EntriesArray {
       return;
     }
 
-    const entry = createEntryMatchAny(`process.hash.${type}`, values);
+    const entry = createEntryMatchAny(`${prefix}${EntryFieldType.HASH}${type}`, values);
     entriesArray.push(entry);
   });
 
@@ -88,6 +88,7 @@ function groupHashEntry(conditionEntry: ConditionEntry): EntriesArray {
 }
 
 function createNestedSignatureEntry(
+  field: AllConditionEntryFields,
   value: string | string[],
   isTrustedApp: boolean = false
 ): EntryNested {
@@ -97,19 +98,23 @@ function createNestedSignatureEntry(
   const nestedEntries: EntryNested['entries'] = [];
   if (isTrustedApp) nestedEntries.push(createEntryMatch('trusted', 'true'));
   nestedEntries.push(subjectNameMatch);
-  return createEntryNested('process.Ext.code_signature', nestedEntries);
+  return createEntryNested(field, nestedEntries);
 }
 
-function createWildcardPathEntry(value: string | string[]): EntryMatchWildcard | EntryMatchAny {
+function createWildcardPathEntry(
+  field: AllConditionEntryFields,
+  value: string | string[]
+): EntryMatchWildcard | EntryMatchAny {
   return Array.isArray(value)
-    ? createEntryMatchAny('process.executable.caseless', value)
-    : createEntryMatchWildcard('process.executable.caseless', value);
+    ? createEntryMatchAny(field, value)
+    : createEntryMatchWildcard(field, value);
 }
 
-function createPathEntry(value: string | string[]): EntryMatch | EntryMatchAny {
-  return Array.isArray(value)
-    ? createEntryMatchAny('process.executable.caseless', value)
-    : createEntryMatch('process.executable.caseless', value);
+function createPathEntry(
+  field: AllConditionEntryFields,
+  value: string | string[]
+): EntryMatch | EntryMatchAny {
+  return Array.isArray(value) ? createEntryMatchAny(field, value) : createEntryMatch(field, value);
 }
 
 export const conditionEntriesToEntries = (
@@ -119,19 +124,25 @@ export const conditionEntriesToEntries = (
   const entriesArray: EntriesArray = [];
 
   conditionEntries.forEach((conditionEntry) => {
-    if (conditionEntry.field === ConditionEntryField.HASH) {
-      groupHashEntry(conditionEntry).forEach((entry) => entriesArray.push(entry));
-    } else if (conditionEntry.field === ConditionEntryField.SIGNER) {
-      const entry = createNestedSignatureEntry(conditionEntry.value, isTrustedApp);
+    if (conditionEntry.field.includes(EntryFieldType.HASH)) {
+      const prefix = conditionEntry.field.split('.')[0] as 'process' | 'file';
+      groupHashEntry(prefix, conditionEntry).forEach((entry) => entriesArray.push(entry));
+    } else if (conditionEntry.field.includes(EntryFieldType.SIGNER)) {
+      const entry = createNestedSignatureEntry(
+        conditionEntry.field,
+        conditionEntry.value,
+        isTrustedApp
+      );
       entriesArray.push(entry);
     } else if (
-      conditionEntry.field === ConditionEntryField.PATH &&
+      (conditionEntry.field.includes(EntryFieldType.EXECUTABLE) ||
+        conditionEntry.field.includes(EntryFieldType.PATH)) &&
       conditionEntry.type === 'wildcard'
     ) {
-      const entry = createWildcardPathEntry(conditionEntry.value);
+      const entry = createWildcardPathEntry(conditionEntry.field, conditionEntry.value);
       entriesArray.push(entry);
     } else {
-      const entry = createPathEntry(conditionEntry.value);
+      const entry = createPathEntry(conditionEntry.field, conditionEntry.value);
       entriesArray.push(entry);
     }
   });
@@ -140,49 +151,51 @@ export const conditionEntriesToEntries = (
 };
 
 const createConditionEntry = (
-  field: ConditionEntryField,
+  field: AllConditionEntryFields,
   type: EntryTypes,
   value: string | string[]
 ): ConditionEntry => {
   return { field, value, type, operator: OPERATOR_VALUE };
 };
 
+function createWildcardHashField(
+  field: string
+): Extract<AllConditionEntryFields, 'process.hash.*' | 'file.hash.*'> {
+  const prefix = field.split('.')[0] as 'process' | 'file';
+  return `${prefix}${EntryFieldType.HASH}*`;
+}
+
 export const entriesToConditionEntriesMap = <T extends ConditionEntry = ConditionEntry>(
   entries: EntriesArray
 ): ConditionEntriesMap<T> => {
   return entries.reduce((memo: ConditionEntriesMap<T>, entry) => {
-    if (entry.field.startsWith('process.hash') && entry.type === 'match') {
+    const field = entry.field as AllConditionEntryFields;
+    if (field.includes(EntryFieldType.HASH) && entry.type === 'match') {
+      const wildcardHashField = createWildcardHashField(field);
       return {
         ...memo,
-        [ConditionEntryField.HASH]: createConditionEntry(
-          ConditionEntryField.HASH,
-          entry.type,
-          entry.value
-        ),
+        [wildcardHashField]: createConditionEntry(wildcardHashField, entry.type, entry.value),
       } as ConditionEntriesMap<T>;
-    } else if (entry.field.startsWith('process.hash') && entry.type === 'match_any') {
-      const currentValues = (memo[ConditionEntryField.HASH]?.value as string[]) ?? [];
+    } else if (field.includes(EntryFieldType.HASH) && entry.type === 'match_any') {
+      const wildcardHashField = createWildcardHashField(field);
+      const currentValues = (memo[wildcardHashField]?.value as string[]) ?? [];
 
       return {
         ...memo,
-        [ConditionEntryField.HASH]: createConditionEntry(ConditionEntryField.HASH, entry.type, [
+        [wildcardHashField]: createConditionEntry(wildcardHashField, entry.type, [
           ...currentValues,
           ...entry.value,
         ]),
       } as ConditionEntriesMap<T>;
     } else if (
-      entry.field === ConditionEntryField.PATH &&
+      (field.includes(EntryFieldType.EXECUTABLE) || field.includes(EntryFieldType.PATH)) &&
       (entry.type === 'match' || entry.type === 'match_any' || entry.type === 'wildcard')
     ) {
       return {
         ...memo,
-        [ConditionEntryField.PATH]: createConditionEntry(
-          ConditionEntryField.PATH,
-          entry.type,
-          entry.value
-        ),
+        [field]: createConditionEntry(field, entry.type, entry.value),
       } as ConditionEntriesMap<T>;
-    } else if (entry.field === ConditionEntryField.SIGNER && entry.type === 'nested') {
+    } else if (field.includes(EntryFieldType.SIGNER) && entry.type === 'nested') {
       const subjectNameCondition = entry.entries.find((subEntry): subEntry is EntryMatch => {
         return (
           subEntry.field === 'subject_name' &&
@@ -193,8 +206,8 @@ export const entriesToConditionEntriesMap = <T extends ConditionEntry = Conditio
       if (subjectNameCondition) {
         return {
           ...memo,
-          [ConditionEntryField.SIGNER]: createConditionEntry(
-            ConditionEntryField.SIGNER,
+          [field]: createConditionEntry(
+            field,
             subjectNameCondition.type,
             subjectNameCondition.value
           ),

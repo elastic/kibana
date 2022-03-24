@@ -689,7 +689,10 @@ describe('policy preconfiguration', () => {
           name: 'Renamed Test policy',
           description: 'Renamed Test policy description',
           unenroll_timeout: 999,
-        })
+        }),
+        {
+          force: true,
+        }
       );
       expect(policies.length).toEqual(1);
       expect(policies[0].id).toBe('test-id');
