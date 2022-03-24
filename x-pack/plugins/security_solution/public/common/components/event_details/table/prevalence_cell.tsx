@@ -9,12 +9,12 @@ import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { AlertSummaryRow } from '../helpers';
-import { getEmptyValue } from '../../../components/empty_value';
+import { defaultToEmptyTag } from '../../../components/empty_value';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 
 const PrevalenceCell = React.memo<AlertSummaryRow['description']>(
   ({ data, values, timelineId }) => {
-    const { loading, count, error } = useAlertPrevalence({
+    const { loading, count } = useAlertPrevalence({
       field: data.field,
       timelineId,
       value: values,
@@ -23,11 +23,9 @@ const PrevalenceCell = React.memo<AlertSummaryRow['description']>(
 
     if (loading) {
       return <EuiLoadingSpinner />;
-    } else if (error) {
-      return <>{getEmptyValue()}</>;
+    } else {
+      return defaultToEmptyTag(count);
     }
-
-    return <>{count}</>;
   }
 );
 

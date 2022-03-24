@@ -79,7 +79,7 @@ describe('PrevalenceCellRenderer', () => {
     test('it should return empty value placeholder', async () => {
       mockUseAlertPrevalence.mockImplementation(() => ({
         loading: false,
-        count: 123,
+        count: undefined,
         error: true,
       }));
       const { container } = render(
