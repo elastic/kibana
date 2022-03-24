@@ -8,9 +8,13 @@
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
-import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
+import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 
-export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
+export type ObservabilityRuleTypeFieldsOnly = (options: {
+  fields: ParsedTechnicalFields & Record<string, any>;
+}) => { reason: string; link: string };
+
+export const formatReason: ObservabilityRuleTypeFieldsOnly = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '-';
   const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
   const nodeType = fields[nodeTypeField];

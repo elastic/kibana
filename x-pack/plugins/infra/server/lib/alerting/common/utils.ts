@@ -9,8 +9,16 @@ import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { IBasePath } from 'kibana/server';
-import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
-import { AlertExecutionDetails } from '../../../../common/alerting/metrics/types';
+import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import { formatReason } from '../../../../common/alerting/metrics/rule_data_formatters';
+import {
+  ParsedTechnicalFields,
+  parseTechnicalFields,
+} from '../../../../../rule_registry/common/parse_technical_fields';
+import {
+  AlertExecutionDetails,
+  InventoryMetricConditions,
+} from '../../../../common/alerting/metrics/types';
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
@@ -78,7 +86,33 @@ export const createScopedLogger = (
   };
 };
 
-export const getViewInAppUrl = (basePath: IBasePath) =>
+export const getViewInAppUrl = (basePath: IBasePath, relativeViewInAppUrl: string) =>
   basePath.publicBaseUrl
-    ? new URL(basePath.prepend(LINK_TO_METRICS_EXPLORER), basePath.publicBaseUrl).toString()
-    : LINK_TO_METRICS_EXPLORER;
+    ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
+    : relativeViewInAppUrl;
+
+interface OptionalTechnicalFields {
+  fields: ParsedTechnicalFields & Record<string, any>;
+}
+export const getViewInAppUrlInventory = (
+  criteria: InventoryMetricConditions[],
+  nodeType: string,
+  timestamp: string,
+  basePath: IBasePath
+) => {
+  const { metric, customMetric } = criteria[0];
+  const fields = {
+    [`${ALERT_RULE_PARAMETERS}.criteria.metric`]: [metric],
+    [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`]: [customMetric?.id],
+    [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`]: [customMetric?.aggregation],
+    [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`]: [customMetric?.field],
+    [`${ALERT_RULE_PARAMETERS}.nodeType`]: [nodeType],
+    [TIMESTAMP]: timestamp,
+  };
+  const parsed = parseTechnicalFields(fields, true);
+  const optionalTechnicalFields: OptionalTechnicalFields = {
+    fields: parsed,
+  };
+  const { link: relativeViewInAppUrl } = formatReason(optionalTechnicalFields);
+  return getViewInAppUrl(basePath, relativeViewInAppUrl);
+};

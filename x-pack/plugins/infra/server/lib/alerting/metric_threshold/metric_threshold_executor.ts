@@ -28,6 +28,8 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY, getViewInAppUrl } from '../common/utils';
+import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
+
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 
@@ -100,7 +102,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           group: UNGROUPED_FACTORY_KEY,
           alertState: stateToAlertMessage[AlertStates.ERROR],
           reason,
-          viewInAppUrl: getViewInAppUrl(libs.basePath),
+          viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
           timestamp,
           value: null,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -235,7 +237,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           group,
           alertState: stateToAlertMessage[nextState],
           reason,
-          viewInAppUrl: getViewInAppUrl(libs.basePath),
+          viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
           timestamp,
           value: mapToConditionsLookup(
             alertResults,
