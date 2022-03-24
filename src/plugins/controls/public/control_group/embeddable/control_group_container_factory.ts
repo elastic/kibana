@@ -23,6 +23,7 @@ import {
   createControlGroupExtract,
   createControlGroupInject,
 } from '../../../common/control_group/control_group_persistable_state';
+import { getDefaultControlGroupInput } from '../../../common/control_group/control_group_constants';
 
 export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition {
   public readonly isContainerType = true;
@@ -42,14 +43,7 @@ export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition
   };
 
   public getDefaultInput(): Partial<ControlGroupInput> {
-    return {
-      panels: {},
-      ignoreParentSettings: {
-        ignoreFilters: false,
-        ignoreQuery: false,
-        ignoreTimerange: false,
-      },
-    };
+    return getDefaultControlGroupInput();
   }
 
   public create = async (initialInput: ControlGroupInput, parent?: Container) => {
