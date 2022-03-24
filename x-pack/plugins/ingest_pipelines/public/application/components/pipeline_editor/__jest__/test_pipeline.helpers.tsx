@@ -7,14 +7,14 @@
 
 import { act } from 'react-dom/test-utils';
 import React from 'react';
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 /* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
 import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
+import { HttpSetup } from 'src/core/public';
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
+import { httpServiceMock } from '../../../../../../../../src/core/public/mocks';
 
 /* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
 import '../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
@@ -62,6 +62,7 @@ const testBedSetup = registerTestBed<TestSubject>(
 );
 
 export interface SetupResult extends TestBed<TestSubject> {
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>;
   actions: ReturnType<typeof createActions>;
 }
 
@@ -189,29 +190,22 @@ const createActions = (testBed: TestBed<TestSubject>) => {
   };
 };
 
-export const setup = async (props: Props): Promise<SetupResult> => {
-  const testBed = await testBedSetup(props);
+export const setup = async (httpSetup: HttpSetup, props: Props): Promise<SetupResult> => {
+  // Initialize mock services
+  uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
+  // @ts-ignore
+  apiService.setup(httpSetup, uiMetricService);
+
+  const testBed = testBedSetup(props);
+
   return {
     ...testBed,
+    httpSetup,
     actions: createActions(testBed),
   };
 };
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
-export const setupEnvironment = () => {
-  // Initialize mock services
-  uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
-  // @ts-ignore
-  apiService.setup(mockHttpClient, uiMetricService);
-
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
-
-  return {
-    server,
-    httpRequestsMockHelpers,
-  };
-};
+export const setupEnvironment = initHttpRequests;
 
 type TestSubject =
   | 'addDocumentsButton'
