@@ -21,28 +21,12 @@ const serviceConfig = schema.object({
 
 const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),
-  ui: schema.maybe(
-    schema.object({
-      monitorManagement: schema.maybe(
-        schema.object({
-          enabled: schema.boolean(),
-        })
-      ),
-    })
-  ),
   service: schema.maybe(serviceConfig),
 });
 
 export const config: PluginConfigDescriptor = {
-  exposeToBrowser: {
-    ui: true,
-  },
   schema: uptimeConfig,
 };
 
 export type UptimeConfig = TypeOf<typeof uptimeConfig>;
 export type ServiceConfig = TypeOf<typeof serviceConfig>;
-
-export interface UptimeUiConfig {
-  ui?: TypeOf<typeof config.schema>['ui'];
-}
