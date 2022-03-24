@@ -25211,8 +25211,6 @@
     "xpack.securitySolution.pages.common.solutionName": "セキュリティ",
     "xpack.securitySolution.pages.common.updateAlertStatusFailed": "{ conflicts } {conflicts, plural, other  {アラート}}を更新できませんでした。",
     "xpack.securitySolution.pages.common.updateAlertStatusFailedDetailed": "{ updated } {updated, plural, other  {アラート}}が正常に更新されましたが、{ conflicts }は更新できませんでした。\n         { conflicts, plural, other  {}}すでに修正されています。",
-    "xpack.securitySolution.pages.emptyPage.beatsCard.description": "Elasticエージェントを使用して、セキュリティイベントを収集し、エンドポイントを脅威から保護してください。",
-    "xpack.securitySolution.pages.emptyPage.beatsCard.title": "セキュリティ統合を追加",
     "xpack.securitySolution.pages.fourohfour.pageNotFoundDescription": "ページが見つかりません",
     "xpack.securitySolution.paginatedTable.rowsButtonLabel": "ページごとの行数",
     "xpack.securitySolution.paginatedTable.showingSubtitle": "表示中",
