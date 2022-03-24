@@ -79,6 +79,7 @@ export const deleteAlertsAndRules = () => {
       query: '',
       action: 'delete',
     },
+    failOnStatusCode: false,
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
   });
 
