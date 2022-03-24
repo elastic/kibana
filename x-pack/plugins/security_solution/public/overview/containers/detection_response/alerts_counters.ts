@@ -11,19 +11,15 @@ import { GenericBuckets } from '../../../../common/search_strategy';
 import { inputsModel } from '../../../common/store';
 import { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { InspectResponse } from '../../../types';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 const ID = 'alertCountersByStatusAndSeverityQuery';
 const ALERT_BY_STATUS_AGG = 'alertsByStatus';
 const STATUS_BY_SEVERITY_AGG = 'statusBySeverity';
 
-interface UseStatusSeverityAlertTimeRange {
+interface UseStatusSeverityAlertCountersProps {
   from: string;
   to: string;
-}
-
-interface UseStatusSeverityAlertCountersProps extends UseStatusSeverityAlertTimeRange {
-  indexName: string | null;
 }
 
 interface AlertSeverityCount {
@@ -52,25 +48,33 @@ interface AlertCountersByStatusAndSeverityAggregation {
   };
 }
 
-export interface AlertsCounterResult {
-  counters: AlertCountersStatusBySeverity;
+interface AlertsCounterResult {
+  counters: Partial<AlertCountersStatusBySeverity>;
   id: string;
   inspect: { dsl: string; response: string };
   isInspected: boolean;
-  //   refetch: inputsModel.Refetch; what is this used for
+}
+
+interface UseStatusSeverityAlertCountersReturnType {
+  isLoading: boolean;
+  data: AlertsCounterResult;
+  refetch: (() => Promise<void>) | null;
 }
 
 export const useStatusSeverityAlertCounters = ({
   from,
   to,
-  indexName,
-}: UseStatusSeverityAlertCountersProps): [boolean, AlertsCounterResult] => {
-  const { setQuery, loading, ...result } = useQueryAlerts<
-    {},
-    AlertCountersByStatusAndSeverityAggregation
-  >({
+}: UseStatusSeverityAlertCountersProps): UseStatusSeverityAlertCountersReturnType => {
+  const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+
+  const {
+    setQuery,
+    loading: isLoadingData,
+    refetch,
+    ...result
+  } = useQueryAlerts<{}, AlertCountersByStatusAndSeverityAggregation>({
     query: buildAlertAggregationQuery({ from, to }),
-    indexName,
+    indexName: signalIndexName,
   });
 
   const transformedResponse = useMemo(
@@ -90,7 +94,9 @@ export const useStatusSeverityAlertCounters = ({
     setQuery(buildAlertAggregationQuery({ from, to }));
   }, [setQuery, from, to]);
 
-  return [loading, transformedResponse];
+  const isLoading = isLoadingData && isSignalIndexLoading;
+
+  return { isLoading, data: transformedResponse, refetch };
 };
 
 const buildAlertAggregationQuery = ({ from, to }: UseStatusSeverityAlertTimeRange) => ({
@@ -125,44 +131,28 @@ const buildAlertAggregationQuery = ({ from, to }: UseStatusSeverityAlertTimeRang
   size: 0,
 });
 
-type AlertStatus = 'open' | 'closed' | 'acknowledged'; // can import from somewhere?
+type AlertStatus = 'open' | 'closed' | 'acknowledged';
 function pickOffCounters(
   rawAlertResponse: AlertSearchResponse<{}, AlertCountersByStatusAndSeverityAggregation> | null
-): AlertCountersStatusBySeverity {
-  if (!rawAlertResponse?.aggregations) {
-    return defaultCounters;
-  } else {
-    return rawAlertResponse.aggregations[ALERT_BY_STATUS_AGG].buckets.reduce(
-      (accumalatedAlertsByStatus, currentStatus) => {
-        return {
-          ...accumalatedAlertsByStatus,
-          [currentStatus.key]: {
-            ...accumalatedAlertsByStatus[currentStatus.key as AlertStatus],
-            count: currentStatus.doc_count,
-            ...currentStatus[STATUS_BY_SEVERITY_AGG].buckets.reduce((acc, severity) => {
-              return {
-                ...acc,
-                [severity.key]: severity.doc_count,
-              };
-            }, {}),
-          },
-        };
-      },
-      defaultCounters
-    );
-  }
+): Partial<AlertCountersStatusBySeverity> {
+  const buckets = rawAlertResponse?.aggregations?.[ALERT_BY_STATUS_AGG].buckets ?? [];
+
+  return buckets.reduce<Partial<AlertCountersStatusBySeverity>>(
+    (accumalatedAlertsByStatus, currentStatus) => {
+      return {
+        ...accumalatedAlertsByStatus,
+        [currentStatus.key]: {
+          ...accumalatedAlertsByStatus[currentStatus.key as AlertStatus],
+          count: currentStatus.doc_count,
+          ...currentStatus[STATUS_BY_SEVERITY_AGG].buckets.reduce((acc, severity) => {
+            return {
+              ...acc,
+              [severity.key]: severity.doc_count,
+            };
+          }, {}),
+        },
+      };
+    },
+    {}
+  );
 }
-
-const defaultShape = {
-  count: 0,
-  low: 0,
-  medium: 0,
-  high: 0,
-  critical: 0,
-};
-
-const defaultCounters = {
-  open: defaultShape,
-  acknowledged: defaultShape,
-  closed: defaultShape,
-};

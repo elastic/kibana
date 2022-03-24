@@ -28,7 +28,7 @@ const DetectionResponseComponent = () => {
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   // TODO: link queries with global time queries
-  const { to, from } = useGlobalTime();
+  const { to, from, setQuery } = useGlobalTime();
 
   const queriesLoading: boolean = useShallowEqualSelector(
     (state) => !!getGlobalQuery(state).find((query) => query.loading)
@@ -46,11 +46,6 @@ const DetectionResponseComponent = () => {
   );
 
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-  const [loading, data] = useStatusSeverityAlertCounters({
-    from,
-    to,
-    indexName: '*',
-  });
 
   console.log({ loading, data });
 
@@ -108,3 +103,22 @@ const DetectionResponseComponent = () => {
 };
 
 export const DetectionResponse = React.memo(DetectionResponseComponent);
+
+const AlertsCounterUser = () => {
+  const { to, from, setQuery } = useGlobalTime();
+
+  const { isLoading, data, refetch } = useStatusSeverityAlertCounters({
+    from,
+    to,
+  });
+
+  // we have some type mismatches for refetch and the shape of inspect. further investigation needed as to whether useAlertsQuery is correct or needs to be changed
+  setQuery({
+    id: 'nameOfComponent',
+    loading: isLoading,
+    refetch,
+    inspect: data.inspect,
+  });
+
+  return <div>{data.counters}</div>;
+};

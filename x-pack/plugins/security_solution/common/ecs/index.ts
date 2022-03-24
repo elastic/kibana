@@ -73,6 +73,6 @@ export interface Ecs {
   Memory_protection?: MemoryProtection;
   Target?: Target;
   dll?: DllEcs;
-  'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed'; // should remove inprogress?
+  'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed';
   'kibana.alert.rule.parameters'?: { index: string[] };
 }
