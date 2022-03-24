@@ -4,7 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { httpServiceMock, loggingSystemMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import {
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from 'src/core/server/mocks';
+import {
+  ElasticsearchClientMock,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from 'src/core/server/elasticsearch/client/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaRequest } from 'src/core/server/http/router/request';
 import {
   defineGetBenchmarksRoute,
   benchmarksInputSchema,
@@ -14,6 +25,7 @@ import {
   getAgentPolicies,
   createBenchmarkEntry,
 } from './benchmarks';
+
 import { SavedObjectsClientContract } from 'src/core/server';
 import {
   createMockAgentPolicyService,
@@ -24,6 +36,17 @@ import { AgentPolicy } from '../../../../fleet/common';
 
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
+
+export const getMockCspContext = (mockEsClient: ElasticsearchClientMock): KibanaRequest => {
+  return {
+    core: {
+      elasticsearch: {
+        client: { asCurrentUser: mockEsClient },
+      },
+    },
+    fleet: { authz: { fleet: { all: false } } },
+  } as unknown as KibanaRequest;
+};
 
 function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
   return {
@@ -64,6 +87,54 @@ describe('benchmarks API', () => {
     const [config, _] = router.get.mock.calls[0];
 
     expect(config.path).toEqual('/api/csp/benchmarks');
+  });
+
+  it('should accept to a user with fleet.all privilege', async () => {
+    const router = httpServiceMock.createRouter();
+    const cspAppContextService = new CspAppService();
+
+    const cspContext: CspAppContext = {
+      logger,
+      service: cspAppContextService,
+    };
+    defineGetBenchmarksRoute(router, cspContext);
+    const [_, handler] = router.get.mock.calls[0];
+
+    const mockContext = {
+      fleet: { authz: { fleet: { all: true } } },
+    } as unknown as KibanaRequest;
+
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const [context, req, res] = [mockContext, mockRequest, mockResponse];
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledTimes(0);
+  });
+
+  it('should reject to a user without fleet.all privilege', async () => {
+    const router = httpServiceMock.createRouter();
+    const cspAppContextService = new CspAppService();
+
+    const cspContext: CspAppContext = {
+      logger,
+      service: cspAppContextService,
+    };
+    defineGetBenchmarksRoute(router, cspContext);
+    const [_, handler] = router.get.mock.calls[0];
+
+    const mockContext = {
+      fleet: { authz: { fleet: { all: false } } },
+    } as unknown as KibanaRequest;
+
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const [context, req, res] = [mockContext, mockRequest, mockResponse];
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledTimes(1);
   });
 
   describe('test input schema', () => {

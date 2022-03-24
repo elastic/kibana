@@ -88,7 +88,7 @@ export function initMVTRoutes({
           geometryFieldName: schema.string(),
           requestBody: schema.string(),
           index: schema.string(),
-          requestType: schema.string(),
+          renderAs: schema.string(),
           token: schema.maybe(schema.string()),
           gridPrecision: schema.number(),
         }),
@@ -114,7 +114,7 @@ export function initMVTRoutes({
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
         requestBody: decodeMvtResponseBody(query.requestBody as string) as any,
-        requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
+        renderAs: query.renderAs as RENDER_AS,
         gridPrecision: parseInt(query.gridPrecision, 10),
         abortController,
       });

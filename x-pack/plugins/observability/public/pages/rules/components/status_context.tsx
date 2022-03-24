@@ -18,19 +18,26 @@ import { statusMap } from '../config';
 
 export function StatusContext({
   item,
+  disabled = false,
   onStatusChanged,
   enableRule,
   disableRule,
   muteRule,
+  unMuteRule,
 }: StatusContextProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
 
-  const currentStatus = item.enabled ? RuleStatus.enabled : RuleStatus.disabled;
+  let currentStatus: RuleStatus;
+  if (item.enabled) {
+    currentStatus = item.muteAll ? RuleStatus.snoozed : RuleStatus.enabled;
+  } else {
+    currentStatus = RuleStatus.disabled;
+  }
   const popOverButton = useMemo(
-    () => <Status type={currentStatus} onClick={togglePopover} />,
-    [currentStatus, togglePopover]
+    () => <Status disabled={disabled} type={currentStatus} onClick={togglePopover} />,
+    [disabled, currentStatus, togglePopover]
   );
 
   const onContextMenuItemClick = useCallback(
@@ -41,15 +48,30 @@ export function StatusContext({
 
         if (status === RuleStatus.enabled) {
           await enableRule({ ...item, enabled: true });
+          if (item.muteAll) {
+            await unMuteRule({ ...item, muteAll: false });
+          }
         } else if (status === RuleStatus.disabled) {
           await disableRule({ ...item, enabled: false });
+        } else if (status === RuleStatus.snoozed) {
+          await muteRule({ ...item, muteAll: true });
         }
         setIsUpdating(false);
         onStatusChanged(status);
       }
     },
-    [item, togglePopover, enableRule, disableRule, currentStatus, onStatusChanged]
+    [
+      item,
+      togglePopover,
+      enableRule,
+      disableRule,
+      muteRule,
+      unMuteRule,
+      currentStatus,
+      onStatusChanged,
+    ]
   );
+
   const panelItems = useMemo(
     () =>
       Object.values(RuleStatus).map((status: RuleStatus) => (
@@ -57,6 +79,7 @@ export function StatusContext({
           icon={status === currentStatus ? 'check' : 'empty'}
           key={status}
           onClick={() => onContextMenuItemClick(status)}
+          disabled={status === RuleStatus.snoozed && currentStatus === RuleStatus.disabled}
         >
           {statusMap[status].label}
         </EuiContextMenuItem>
