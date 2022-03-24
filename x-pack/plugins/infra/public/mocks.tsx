@@ -10,6 +10,9 @@ import { InfraClientStartExports } from './types';
 
 export const createInfraPluginStartMock = () => ({
   logViews: createLogViewsServiceStartMock(),
+  ContainerMetricsTable: () => null,
+  HostMetricsTable: () => null,
+  PodMetricsTable: () => null,
 });
 
 export const _ensureTypeCompatibility = (): InfraClientStartExports => createInfraPluginStartMock();
