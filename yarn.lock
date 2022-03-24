@@ -12802,9 +12802,10 @@ elastic-apm-http-client@11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-"elastic-apm-node@https://github.com/elastic/apm-agent-nodejs.git#19e3ae30077337a6660328b578360b8ecec0fc79":
-  version "3.30.0"
-  resolved "https://github.com/elastic/apm-agent-nodejs.git#19e3ae30077337a6660328b578360b8ecec0fc79"
+elastic-apm-node@^3.31.0:
+  version "3.31.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.31.0.tgz#6e0bf622d922c95ff0127a263babcdeaeea71457"
+  integrity sha512-0OulazfhkXYbOaGkHncqjwOfxtcvzsDyzUKr6Y1k95HwKrjf1Vi+xPutZv4p/WfDdO+JadphI0U2Uu5ncGB2iA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
