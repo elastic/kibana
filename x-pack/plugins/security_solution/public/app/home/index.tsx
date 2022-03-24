@@ -22,7 +22,7 @@ import {
 import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
-import { ConsoleManager } from '../../management/components/console_manager';
+import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
 interface HomePageProps {
   children: React.ReactNode;

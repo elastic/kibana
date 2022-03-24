@@ -6,5 +6,6 @@
  */
 
 export { Console } from './console';
+export { ConsoleManager, useConsoleManager } from './components/console_manager';
 export type { ConsoleProps } from './console';
 export type { CommandServiceInterface, CommandDefinition, Command } from './types';

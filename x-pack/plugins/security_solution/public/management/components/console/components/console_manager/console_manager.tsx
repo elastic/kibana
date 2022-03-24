@@ -14,7 +14,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { Immutable } from '../../../../common/endpoint/types';
+import { Immutable } from '../../../../../../common/endpoint/types';
 import { ConsolePopup } from './components/console_popup';
 
 interface ConsoleRegistrationInterface {
