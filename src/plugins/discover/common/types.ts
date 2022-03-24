@@ -11,10 +11,6 @@ import type { ISearchSource } from '../../data/common';
 import { SavedObjectAttributes } from '../../../core/types';
 import { VIEW_MODE } from './constants';
 
-import type { ISearchSource } from '../../../../data/public';
-import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
-import { VIEW_MODE } from '../../components/view_mode_toggle';
-
 export interface DiscoverGridSettingsColumn {
   width?: number;
 }
@@ -33,11 +29,11 @@ export interface SavedSearchGridAttributes extends SavedObjectAttributes {
   };
 }
 
-
 /** @internal **/
 export interface SavedSearchAttributes extends SavedObjectAttributes {
   title: string;
-  sort: string[];
+  // @ts-expect-error
+  sort: SortOrder[];
   columns: string[];
   description: string;
   grid?: SavedSearchGridAttributes;
@@ -61,9 +57,7 @@ export interface SavedSearch {
   sort?: SortOrder[];
   columns?: string[];
   description?: string;
-  grid?: {
-    columns?: Record<string, DiscoverGridSettingsColumn>;
-  };
+  grid?: SavedSearchGridAttributes;
   hideChart?: boolean;
   sharingSavedObjectProps?: {
     outcome?: SavedObjectsResolveResponse['outcome'];

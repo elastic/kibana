@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { SavedSearchAttributes, SavedSearch, SortOrder } from '../../../common/types';
-import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
-import { SavedSearchGridAttributes } from '../../../common/types';
+import type { SavedSearchAttributes, SavedSearch } from '../../../common/types';
 
 export const getSavedSearchUrl = (id?: string) => (id ? `#/view/${encodeURIComponent(id)}` : '#/');
 
@@ -38,10 +36,10 @@ export const fromSavedSearchAttributes = (
   searchSource,
   sharingSavedObjectProps,
   title: attributes.title,
-  sort: attributes.sort as unknown as SortOrder[],
+  sort: attributes.sort,
   columns: attributes.columns,
   description: attributes.description,
-  grid: attributes.grid as unknown as Record<string, DiscoverGridSettingsColumn>,
+  grid: attributes.grid,
   hideChart: attributes.hideChart,
   viewMode: attributes.viewMode,
   hideAggregatedPreview: attributes.hideAggregatedPreview,
@@ -51,15 +49,16 @@ export const fromSavedSearchAttributes = (
 export const toSavedSearchAttributes = (
   savedSearch: SavedSearch,
   searchSourceJSON: string
-): SavedSearchAttributes => ({
-  kibanaSavedObjectMeta: { searchSourceJSON },
-  title: savedSearch.title ?? '',
-  sort: (savedSearch.sort as unknown as string[]) ?? [],
-  columns: savedSearch.columns ?? [],
-  description: savedSearch.description ?? '',
-  grid: (savedSearch.grid as SavedSearchGridAttributes) ?? {},
-  hideChart: savedSearch.hideChart ?? false,
-  viewMode: savedSearch.viewMode,
-  hideAggregatedPreview: savedSearch.hideAggregatedPreview,
-  rowHeight: savedSearch.rowHeight,
-});
+): SavedSearchAttributes =>
+  ({
+    kibanaSavedObjectMeta: { searchSourceJSON },
+    title: savedSearch.title ?? '',
+    sort: savedSearch.sort ?? [],
+    columns: savedSearch.columns ?? [],
+    description: savedSearch.description ?? '',
+    grid: savedSearch.grid ?? {},
+    hideChart: savedSearch.hideChart ?? false,
+    viewMode: savedSearch.viewMode,
+    hideAggregatedPreview: savedSearch.hideAggregatedPreview,
+    rowHeight: savedSearch.rowHeight,
+  } as SavedSearchAttributes);

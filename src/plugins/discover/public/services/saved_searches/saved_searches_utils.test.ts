@@ -42,7 +42,7 @@ describe('saved_searches_utils', () => {
       const attributes: SavedSearchAttributes = {
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         title: 'saved search',
-        sort: [] as string[],
+        sort: [],
         columns: ['a', 'b'],
         description: 'foo',
         grid: {} as SavedSearchGridAttributes,
