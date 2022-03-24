@@ -17,6 +17,8 @@ export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores
 
 export const CSP_FINDINGS_INDEX_NAME = 'findings';
 export const CIS_KUBERNETES_PACKAGE_NAME = 'cis_kubernetes_benchmark';
+export const LATEST_FINDINGS_INDEX_NAME = 'cloud_security_posture.findings_latest';
+export const BENCHMARK_SCORE_INDEX_NAME = 'cloud_security_posture.scores';
 
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
