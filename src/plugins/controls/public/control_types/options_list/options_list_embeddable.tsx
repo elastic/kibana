@@ -56,6 +56,7 @@ interface OptionsListDataFetchProps {
   search?: string;
   fieldName: string;
   dataViewId: string;
+  validate?: boolean;
   query?: ControlInput['query'];
   filters?: ControlInput['filters'];
 }
@@ -115,6 +116,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private setupSubscriptions = () => {
     const dataFetchPipe = this.getInput$().pipe(
       map((newInput) => ({
+        validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
@@ -218,12 +220,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       await this.optionsListService.runOptionsListRequest(
         {
           field,
+          query,
+          filters,
           dataView,
+          timeRange,
           selectedOptions,
           searchString: this.searchString,
-          ...(ignoreParentSettings?.ignoreQuery ? {} : { query }),
-          ...(ignoreParentSettings?.ignoreFilters ? {} : { filters }),
-          ...(ignoreParentSettings?.ignoreTimerange ? {} : { timeRange }),
         },
         this.abortController.signal
       );

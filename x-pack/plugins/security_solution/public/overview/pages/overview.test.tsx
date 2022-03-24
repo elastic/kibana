@@ -27,8 +27,30 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 import { EndpointPrivileges } from '../../../common/endpoint/types';
 import { useHostRiskScore } from '../../risk_score/containers';
+import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
+import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_overview';
+import { mockCasesContract } from '../../../../cases/public/mocks';
 
-jest.mock('../../common/lib/kibana');
+const mockNavigateToApp = jest.fn();
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          ...original.useKibana().services.application,
+          navigateToApp: mockNavigateToApp,
+        },
+        cases: {
+          ...mockCasesContract(),
+        },
+      },
+    }),
+  };
+});
 jest.mock('../../common/containers/source');
 jest.mock('../../common/containers/sourcerer');
 jest.mock('../../common/containers/use_global_time', () => ({
@@ -129,6 +151,9 @@ describe('Overview', () => {
   });
 
   describe('rendering', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
     test('it DOES NOT render the Getting started text when an index is available', () => {
       mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
@@ -146,7 +171,7 @@ describe('Overview', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
       wrapper.unmount();
     });
 
@@ -279,14 +304,18 @@ describe('Overview', () => {
       });
 
       it('renders the Setup Instructions text', () => {
-        const wrapper = mount(
+        mount(
           <TestProviders>
             <MemoryRouter>
               <Overview />
             </MemoryRouter>
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
+
+        expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
+          deepLinkId: SecurityPageName.landing,
+          path: getAppLandingUrl(),
+        });
       });
     });
   });

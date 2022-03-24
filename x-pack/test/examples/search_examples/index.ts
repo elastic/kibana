@@ -33,5 +33,6 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
     loadTestFile(require.resolve('./search_example'));
     loadTestFile(require.resolve('./search_sessions_cache'));
     loadTestFile(require.resolve('./partial_results_example'));
+    loadTestFile(require.resolve('./sql_search_example'));
   });
 }
