@@ -151,6 +151,16 @@ Object {
                 'logs.alert.document.count': 1675765,
                 'document.test.': 17687687,
               },
+              ruleTypesEsSearchDuration: {
+                '.index-threshold': 23,
+                'logs.alert.document.count': 526,
+                'document.test.': 534,
+              },
+              ruleTypesTotalSearchDuration: {
+                '.index-threshold': 62,
+                'logs.alert.document.count': 588,
+                'document.test.': 637,
+              },
             },
           },
           failuresByReason: {
@@ -165,6 +175,12 @@ Object {
             },
           },
           avgDuration: { value: 10 },
+          avgEsSearchDuration: {
+            value: 25.785714285714285,
+          },
+          avgTotalSearchDuration: {
+            value: 30.642857142857142,
+          },
         },
         hits: {
           hits: [],
@@ -177,11 +193,23 @@ Object {
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
     expect(telemetry).toStrictEqual({
+      avgEsSearchDuration: 26,
+      avgEsSearchDurationByType: {
+        '__index-threshold': 12,
+        document__test__: 534,
+        logs__alert__document__count: 526,
+      },
       avgExecutionTime: 0,
       avgExecutionTimeByType: {
         '__index-threshold': 1043934,
         document__test__: 17687687,
         logs__alert__document__count: 1675765,
+      },
+      avgTotalSearchDuration: 31,
+      avgTotalSearchDurationByType: {
+        '__index-threshold': 31,
+        document__test__: 637,
+        logs__alert__document__count: 588,
       },
       countByType: {
         '__index-threshold': 2,
