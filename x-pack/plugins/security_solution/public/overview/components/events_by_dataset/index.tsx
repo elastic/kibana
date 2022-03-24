@@ -22,10 +22,12 @@ import {
   MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
-import { eventsStackByOptions } from '../../../hosts/pages/navigation';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
-import { histogramConfigs } from '../../../hosts/pages/navigation/events_query_tab_body';
+import {
+  eventsStackByOptions,
+  histogramConfigs,
+} from '../../../common/components/events_tab/events_query_tab_body';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { HostsTableType } from '../../../hosts/store/model';
 import { InputsModelId } from '../../../common/store/inputs/constants';

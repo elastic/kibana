@@ -62,6 +62,7 @@ export interface UptimeServerSetup {
   telemetry: TelemetryEventsSender;
   uptimeEsClient: UptimeESClient;
   basePath: IBasePath;
+  isDev?: boolean;
 }
 
 export interface UptimeCorePluginsSetup {
