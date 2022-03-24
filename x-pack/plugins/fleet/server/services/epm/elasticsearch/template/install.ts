@@ -29,8 +29,7 @@ import { getAsset, getPathParts } from '../../archive';
 import { removeAssetTypesFromInstalledEs, saveInstalledEsRefs } from '../../packages/install';
 import {
   FLEET_COMPONENT_TEMPLATES,
-  MAPPINGS_TEMPLATE_SUFFIX,
-  SETTINGS_TEMPLATE_SUFFIX,
+  PACKAGE_TEMPLATE_SUFFIX,
   USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../../constants';
 
@@ -245,45 +244,32 @@ function buildComponentTemplates(params: {
   defaultSettings: IndexTemplate['template']['settings'];
 }) {
   const { templateName, registryElasticsearch, packageName, defaultSettings, mappings } = params;
-  const mappingsTemplateName = `${templateName}${MAPPINGS_TEMPLATE_SUFFIX}`;
-  const settingsTemplateName = `${templateName}${SETTINGS_TEMPLATE_SUFFIX}`;
+  const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
 
   const templatesMap: TemplateMap = {};
   const _meta = getESAssetMetadata({ packageName });
 
   const indexTemplateSettings = registryElasticsearch?.['index_template.settings'] ?? {};
-  // @ts-expect-error no property .mapping (yes there is)
-  const indexTemplateMappingSettings = indexTemplateSettings?.index?.mapping;
-  const indexTemplateSettingsForTemplate = cloneDeep(indexTemplateSettings);
 
-  // index.mapping settings must go on the mapping component template otherwise
-  // the template may be rejected e.g if nested_fields.limit has been increased
-  if (indexTemplateMappingSettings) {
-    // @ts-expect-error no property .mapping
-    delete indexTemplateSettingsForTemplate.index.mapping;
-  }
+  const templateSettings = merge(defaultSettings, indexTemplateSettings);
 
-  templatesMap[mappingsTemplateName] = {
+  templatesMap[packageTemplateName] = {
     template: {
       settings: {
+        ...templateSettings,
         index: {
+          ...templateSettings.index,
           mapping: {
+            ...templateSettings?.mapping,
             total_fields: {
+              ...templateSettings?.mapping?.total_fields,
               limit: '10000',
             },
-            ...indexTemplateMappingSettings,
           },
         },
       },
       mappings: merge(mappings, registryElasticsearch?.['index_template.mappings'] ?? {}),
-    },
-    _meta,
-  };
-
-  templatesMap[settingsTemplateName] = {
-    template: {
-      settings: merge(defaultSettings, indexTemplateSettingsForTemplate),
     },
     _meta,
   };
