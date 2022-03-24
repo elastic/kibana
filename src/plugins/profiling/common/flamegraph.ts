@@ -125,7 +125,7 @@ export class FlameGraph {
 
     for (const trace of this.stacktraces.values()) {
       const path = ['root'];
-      for (let i = trace.FrameID.length - 1; i >= 0; i--) {
+      for (let i = 0; i < trace.FrameID.length; i++) {
         const label = this.getLabel(
           this.stackframes.get(trace.FrameID[i]),
           this.executables.get(trace.FileID[i]),
@@ -139,7 +139,7 @@ export class FlameGraph {
         }
       }
       const leaf = {
-        id: path[path.length - 1],
+        id: path[0],
         value: 1,
         depth: trace.FrameID.length,
         pathFromRoot: Object.fromEntries(path.map((item, i) => [i, item])),
