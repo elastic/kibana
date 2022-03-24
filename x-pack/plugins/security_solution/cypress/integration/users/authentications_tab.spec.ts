@@ -7,6 +7,7 @@
 
 import {
   AUTHENTICATIONS_TAB,
+  AUTHENTICATIONS_TABLE,
   HEADER_SUBTITLE,
   USER_NAME_CELL,
 } from '../../screens/users/user_authentications';
@@ -29,7 +30,9 @@ describe('Authentications stats and tables', () => {
 
     cy.get(AUTHENTICATIONS_TAB).click();
 
-    cy.get(HEADER_SUBTITLE).should('have.text', `Showing: ${totalUsers} users`);
+    cy.get(AUTHENTICATIONS_TABLE)
+      .find(HEADER_SUBTITLE)
+      .should('have.text', `Showing: ${totalUsers} users`);
     cy.get(USER_NAME_CELL).should('have.length', usersPerPage);
   });
 });
