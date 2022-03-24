@@ -14,7 +14,6 @@ import {
   EuiFlyoutBody,
   EuiTab,
   EuiTabs,
-  EuiTextColor,
   EuiTitle,
   EuiDescriptionList,
   EuiFlexItem,
@@ -31,9 +30,13 @@ interface RuleFlyoutProps {
   rule: RuleSavedObject;
 }
 
-const tabs = ['overview', 'remediation', 'rego code'] as const;
+const tabs = [
+  { label: TEXT.OVERVIEW, id: 'overview', disabled: false },
+  { label: TEXT.REMEDIATION, id: 'remediation', disabled: false },
+  { label: TEXT.REGO_CODE, id: 'rego', disabled: true },
+] as const;
 
-type RuleTab = typeof tabs[number];
+type RuleTab = typeof tabs[number]['id'];
 
 const getOverviewCard = (rule: RuleSavedObject): EuiDescriptionListProps['listItems'] => [
   {
@@ -109,21 +112,18 @@ export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
     <EuiFlyout ownFocus={false} onClose={onClose} outsideClickCloses>
       <EuiFlyoutHeader>
         <EuiTitle size="l">
-          <EuiTextColor color="primary">
-            <h2>{rule.attributes.name}</h2>
-          </EuiTextColor>
+          <h2>{rule.attributes.name}</h2>
         </EuiTitle>
         <EuiSpacer />
         <EuiTabs>
-          {tabs.map((tabName) => (
+          {tabs.map((item) => (
             <EuiTab
-              key={tabName}
-              isSelected={tab === tabName}
-              onClick={() => setTab(tabName)}
-              style={{ textTransform: 'capitalize' }}
-              disabled={tabName === 'rego code'}
+              key={item.id}
+              isSelected={tab === item.id}
+              onClick={() => setTab(item.id)}
+              disabled={item.disabled}
             >
-              {tabName}
+              {item.label}
             </EuiTab>
           ))}
         </EuiTabs>
@@ -131,12 +131,7 @@ export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
       <EuiFlyoutBody>
         {tab === 'overview' && <RuleOverviewTab rule={rule} toggleRule={() => toggleRule(rule)} />}
         {tab === 'remediation' && (
-          <EuiDescriptionList
-            compressed={false}
-            type="column" // TODO: fix?
-            listItems={getRemediationCard(rule)}
-            style={{ flexDirection: 'column' }}
-          />
+          <EuiDescriptionList compressed={false} listItems={getRemediationCard(rule)} />
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
@@ -157,12 +152,7 @@ const RuleOverviewTab = ({ rule, toggleRule }: { rule: RuleSavedObject; toggleRu
       </span>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiDescriptionList
-        compressed={false}
-        type="column" // TODO: fix?
-        listItems={getOverviewCard(rule)}
-        style={{ flexDirection: 'column' }}
-      />
+      <EuiDescriptionList compressed={false} listItems={getOverviewCard(rule)} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

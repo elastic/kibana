@@ -75,3 +75,15 @@ export const MISSING_RULES = i18n.translate('xpack.csp.rules.missingRulesMessage
 export const UPDATE_FAILED = i18n.translate('xpack.csp.rules.updateFailedMessage', {
   defaultMessage: 'Update failed',
 });
+
+export const OVERVIEW = i18n.translate('xpack.csp.rules.ruleFlyout.tabs.overviewTabLabel', {
+  defaultMessage: 'Overview',
+});
+
+export const REGO_CODE = i18n.translate('xpack.csp.rules.ruleFlyout.tabs.overviewTabLabel', {
+  defaultMessage: 'Rego Code',
+});
+
+export const REMEDIATION = i18n.translate('xpack.csp.rules.ruleFlyout.tabs.remediationTabLabel', {
+  defaultMessage: 'Remediation',
+});

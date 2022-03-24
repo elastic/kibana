@@ -18,12 +18,9 @@ interface RulesBottomBarProps {
 export const RulesBottomBar = ({ onSave, onCancel, isLoading }: RulesBottomBarProps) => (
   <EuiBottomBar
     style={{
-      // same as .euiFlyout
-      zIndex: 1000,
+      // .euiFlyout + 1
+      zIndex: 1001,
     }}
-    usePortal
-    position="fixed"
-    affordForDisplacement={false}
   >
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
