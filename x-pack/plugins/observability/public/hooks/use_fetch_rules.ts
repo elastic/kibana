@@ -62,7 +62,11 @@ export function useFetchRules({
       if (!response.data?.length && page.index > 0) {
         setPage({ ...page, index: 0 });
       }
-      const isFilterApplied = !(isEmpty(searchText) && isEmpty(ruleLastResponseFilter));
+      const isFilterApplied = !(
+        isEmpty(searchText) &&
+        isEmpty(ruleLastResponseFilter) &&
+        isEmpty(typesFilter)
+      );
 
       setNoData(response.data.length === 0 && !isFilterApplied);
     } catch (_e) {
