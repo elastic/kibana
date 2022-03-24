@@ -64,16 +64,6 @@ export function createExecutionHandler<
     ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
 
-  const hasReachedTheNumberOfExecutableActions = ({
-    numberOfTriggeredActions,
-    actionTypeId,
-  }: {
-    numberOfTriggeredActions: number;
-    actionTypeId: string;
-  }): boolean =>
-    numberOfTriggeredActions >=
-    (actionsConfigMap[actionTypeId]?.max || actionsConfigMap.default.max);
-
   return async ({
     actionGroup,
     actionSubgroup,
@@ -82,6 +72,25 @@ export function createExecutionHandler<
     alertExecutionStore,
     alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
+    const hasReachedTheExecutableActionsLimit = (): boolean =>
+      alertExecutionStore.numberOfTriggeredActions >= actionsConfigMap.default.max;
+
+    const hasReachedTheExecutableActionsLimitByConnectorType = (actionTypeId: string): boolean => {
+      const numberOfTriggeredActionsByConnectorType =
+        alertExecutionStore.numberOfTriggeredActionsByConnectorType[actionTypeId] || 0;
+      const executableActionsLimitByConnectorType =
+        actionsConfigMap[actionTypeId]?.max || actionsConfigMap.default.max;
+
+      return numberOfTriggeredActionsByConnectorType >= executableActionsLimitByConnectorType;
+    };
+
+    const setNumberOfTriggeredActions = (actionTypeId: string) => {
+      alertExecutionStore.numberOfTriggeredActions++;
+
+      alertExecutionStore.numberOfTriggeredActionsByConnectorType[actionTypeId] =
+        (alertExecutionStore.numberOfTriggeredActionsByConnectorType[actionTypeId] || 0) + 1;
+    };
+
     if (!ruleTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
       return;
@@ -129,14 +138,14 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (
-        hasReachedTheNumberOfExecutableActions({
-          numberOfTriggeredActions: alertExecutionStore.numberOfTriggeredActions,
-          actionTypeId: action.actionTypeId,
-        })
-      ) {
+      if (hasReachedTheExecutableActionsLimit()) {
         alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
         break;
+      }
+
+      if (hasReachedTheExecutableActionsLimitByConnectorType(action.actionTypeId)) {
+        alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
+        continue;
       }
 
       if (
@@ -181,11 +190,11 @@ export function createExecutionHandler<
             await actionsClient.enqueueExecution(enqueueOptions);
           }
         } finally {
-          alertExecutionStore.numberOfTriggeredActions++;
+          setNumberOfTriggeredActions(action.actionTypeId);
         }
       } else {
         await actionsClient.enqueueExecution(enqueueOptions);
-        alertExecutionStore.numberOfTriggeredActions++;
+        setNumberOfTriggeredActions(action.actionTypeId);
       }
 
       const event = createAlertEventLogRecordObject({

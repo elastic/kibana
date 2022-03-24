@@ -474,6 +474,7 @@ export class TaskRunner<
 
     const alertExecutionStore: AlertExecutionStore = {
       numberOfTriggeredActions: 0,
+      numberOfTriggeredActionsByConnectorType: {},
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 

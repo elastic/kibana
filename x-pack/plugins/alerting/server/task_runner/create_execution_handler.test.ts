@@ -126,6 +126,7 @@ describe('Create Execution Handler', () => {
     );
     alertExecutionStore = {
       numberOfTriggeredActions: 0,
+      numberOfTriggeredActionsByConnectorType: {},
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
   });
@@ -499,6 +500,7 @@ describe('Create Execution Handler', () => {
 
     alertExecutionStore = {
       numberOfTriggeredActions: 0,
+      numberOfTriggeredActionsByConnectorType: {},
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
@@ -515,12 +517,12 @@ describe('Create Execution Handler', () => {
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
   });
 
-  test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions for the specific action type', async () => {
+  test('Skips triggering actions for a specific action type when it reaches the limit for that specific action type', async () => {
     const executionHandler = createExecutionHandler({
       ...createExecutionHandlerParams,
       actionsConfigMap: {
         default: {
-          max: 2,
+          max: 4,
         },
         'test-action-type-id': {
           max: 1,
@@ -548,11 +550,32 @@ describe('Create Execution Handler', () => {
             stateVal: '{{state.value}} goes here',
           },
         },
+        {
+          id: '4',
+          group: 'default',
+          actionTypeId: 'another-action-type-id',
+          params: {
+            foo: true,
+            contextVal: '{{context.value}} goes here',
+            stateVal: '{{state.value}} goes here',
+          },
+        },
+        {
+          id: '5',
+          group: 'default',
+          actionTypeId: 'another-action-type-id',
+          params: {
+            foo: true,
+            contextVal: '{{context.value}} goes here',
+            stateVal: '{{state.value}} goes here',
+          },
+        },
       ],
     });
 
     alertExecutionStore = {
       numberOfTriggeredActions: 0,
+      numberOfTriggeredActionsByConnectorType: {},
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
@@ -564,8 +587,15 @@ describe('Create Execution Handler', () => {
       alertExecutionStore,
     });
 
-    expect(alertExecutionStore.numberOfTriggeredActions).toBe(1);
+    expect(alertExecutionStore.numberOfTriggeredActions).toBe(4);
+    expect(alertExecutionStore.numberOfTriggeredActionsByConnectorType.test).toBe(1);
+    expect(alertExecutionStore.numberOfTriggeredActionsByConnectorType['test-action-type-id']).toBe(
+      1
+    );
+    expect(
+      alertExecutionStore.numberOfTriggeredActionsByConnectorType['another-action-type-id']
+    ).toBe(2);
     expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.PARTIAL);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(4);
   });
 });

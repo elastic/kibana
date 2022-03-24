@@ -164,4 +164,7 @@ export enum ActionsCompletion {
 export interface AlertExecutionStore {
   numberOfTriggeredActions: number;
   triggeredActionsStatus: ActionsCompletion;
+  numberOfTriggeredActionsByConnectorType: {
+    [key: string]: number;
+  };
 }

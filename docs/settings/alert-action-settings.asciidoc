@@ -209,7 +209,7 @@ Specifies the behavior when a new or changed rule has a schedule interval less t
 Specifies the maximum number of actions that a rule can trigger each time detection checks run.
 
 `xpack.alerting.rules.execution.actions.connectorTypeOverrides`::
-Overrides the configs under `xpack.alerting.rules.execution.actions` for the connector type with the given ID. The value is array of objects consists of the key(s) that are wanted to be overridden under actions object and the id of the specific connector type that is wanted to be modified.
+Overrides the configs under `xpack.alerting.rules.execution.actions` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
 +
 For example:
 ```
