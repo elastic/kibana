@@ -157,9 +157,9 @@ export class FlameGraph {
   }
 
   toPixi(): PixiFlameGraph {
-    let rootFrame = buildStackFrameMetadata();
-    let metadataForTraces = new Map<StackTraceID, StackFrameMetadata[]>();
-    let diagram = buildCallerCalleeIntermediateRoot(rootFrame, this.events, metadataForTraces);
+    const rootFrame = buildStackFrameMetadata();
+    const metadataForTraces = new Map<StackTraceID, StackFrameMetadata[]>();
+    const diagram = buildCallerCalleeIntermediateRoot(rootFrame, this.events, metadataForTraces);
     return {
       ...fromCallerCalleeIntermediateNode(diagram),
       TotalTraces: this.totalCount,
