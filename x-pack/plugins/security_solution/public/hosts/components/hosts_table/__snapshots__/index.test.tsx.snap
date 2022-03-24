@@ -36,6 +36,7 @@ exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
+  setQuerySkip={[MockFunction]}
   showMorePagesIndicator={false}
   totalCount={-1}
   type="page"
