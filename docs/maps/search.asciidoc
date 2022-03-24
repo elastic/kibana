@@ -133,7 +133,7 @@ If the map is a dashboard panel with drilldowns, you can apply a phrase filter t
 You can apply a search request to individual layers by setting `Filters` in the layer details panel.
 Click the *Add filter* button to add a filter to a layer.
 
-NOTE: Layer filters are not applied to the right side of *term joins*. You can apply a search request to the right side of *term joins* by setting the *where* clause in the join definition. For example, a layer with a term join where the left side is roads and the right side is traffic volumn measurements, a layer filter of `roadType is "highway"` would only be applied to roads index and not applied to the traffic volumn measurements index.
+NOTE: Layer filters are not applied to the right side of *term joins*. You can apply a search request to the right side of *term joins* by setting the *where* clause in the join definition. For example, a layer with a term join where the left side is roads and the right side is traffic volumn measurements, a layer filter of `roadType is "highway"` is only be applied to roads index and not applied to the traffic volumn measurements index.
 
 [role="screenshot"]
 image::maps/images/layer_search.png[]
