@@ -85,7 +85,11 @@ export const ElasticsearchJavascript: React.FC<{ cloudId?: string }> = ({ cloudI
             <p>
               There are several ways to connect and authenticate to Elasticsearch running outside of
               Cloud, including API keys, bearer tokens, and basic authentication.{' '}
-              <a href="https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-connecting.html">
+              <a
+                target="_blank"
+                rel="noopener"
+                href="https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-connecting.html"
+              >
                 Visit the client’s documentation to learn more
               </a>
               .
