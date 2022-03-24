@@ -337,7 +337,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(1);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
-        'Top values of geo.dest'
+        'Top 5 values of geo.dest'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
@@ -413,6 +413,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
+        disableEmptyRows: true,
       });
 
       await PageObjects.lens.configureDimension({
@@ -507,6 +508,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsDatatable_rows > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
+        disableEmptyRows: true,
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',

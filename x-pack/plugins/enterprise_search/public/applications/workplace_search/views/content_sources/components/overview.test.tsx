@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiConfirmModal, EuiEmptyPrompt, EuiPanel, EuiTable } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiEmptyPrompt, EuiPanel, EuiTable } from '@elastic/eui';
 
 import { ComponentLoader } from '../../../components/shared/component_loader';
 
@@ -119,6 +119,22 @@ describe('Overview', () => {
     const wrapper = shallow(<Overview />);
 
     expect(wrapper.find('[data-test-subj="DocumentPermissionsDisabled"]')).toHaveLength(1);
+  });
+
+  it('renders feedback callout for external sources', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...fullContentSources[1],
+        serviceTypeSupportsPermissions: true,
+        custom: false,
+        serviceType: 'external',
+      },
+    });
+
+    const wrapper = shallow(<Overview />);
+
+    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
   });
 
   it('handles confirmModal submission', () => {

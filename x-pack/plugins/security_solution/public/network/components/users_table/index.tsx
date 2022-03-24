@@ -38,6 +38,7 @@ interface UsersTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: networkModel.NetworkType;
@@ -64,6 +65,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   showMorePagesIndicator,
   totalCount,
   type,
@@ -141,6 +143,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
       loadPage={loadPage}
       onChange={onChange}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       sorting={getSortField(sort)}
       totalCount={fakeTotalCount}
       updateActivePage={updateActivePage}
