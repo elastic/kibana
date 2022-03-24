@@ -1374,7 +1374,7 @@ export class RulesClient {
       await this.authorization.ensureAuthorized({
         ruleTypeId: ruleType,
         consumer,
-        operation: WriteOperations.Update,
+        operation: WriteOperations.BulkEdit,
         entity: AlertingAuthorizationEntity.Rule,
       });
     });

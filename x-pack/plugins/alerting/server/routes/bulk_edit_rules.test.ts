@@ -62,7 +62,7 @@ describe('bulkEditInternalRulesRoute', () => {
   const mockedAlerts: Array<SanitizedAlert<{}>> = [mockedAlert];
   const bulkEditRequest = {
     filter: '',
-    actions: [
+    editActions: [
       {
         action: 'add',
         field: 'tags',
