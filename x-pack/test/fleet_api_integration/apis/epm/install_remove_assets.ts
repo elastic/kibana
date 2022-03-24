@@ -253,6 +253,16 @@ export default function (providerContext: FtrProviderContext) {
           resIndexPattern = err;
         }
         expect(resIndexPattern.response.data.statusCode).equal(404);
+        let resOsqueryPackAsset;
+        try {
+          resOsqueryPackAsset = await kibanaServer.savedObjects.get({
+            type: 'osquery-pack-asset',
+            id: 'sample_osquery_pack_asset',
+          });
+        } catch (err) {
+          resOsqueryPackAsset = err;
+        }
+        expect(resOsqueryPackAsset.response.data.statusCode).equal(404);
       });
       it('should have removed the saved object', async function () {
         let res;
