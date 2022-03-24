@@ -57,6 +57,7 @@ interface UserRiskScoreTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   severityCount: SeverityCount;
   totalCount: number;
   type: usersModel.UsersType;
@@ -74,6 +75,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   severityCount,
   totalCount,
   type,
@@ -118,6 +120,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
           dispatch(
             usersActions.updateTableSorting({
               sort: newSort as RiskScoreSortField,
+              tableType,
             })
           );
         }
@@ -210,6 +213,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
       loadPage={loadPage}
       onChange={onSort}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={false}
       sorting={sort}
       split={true}
