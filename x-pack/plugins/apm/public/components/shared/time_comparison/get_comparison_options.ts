@@ -15,6 +15,11 @@ export enum TimeRangeComparisonEnum {
   PeriodBefore = 'period',
 }
 
+export const dayAndWeekBeforeToOffsetMap = {
+  [TimeRangeComparisonEnum.DayBefore]: '1d',
+  [TimeRangeComparisonEnum.WeekBefore]: '1w',
+} as const;
+
 const twentyFiveHoursInMs = moment.duration(25, 'h').asMilliseconds();
 const eightDaysInMs = moment.duration(8, 'd').asMilliseconds();
 
@@ -36,7 +41,7 @@ function formatDate({
   )} - ${previousPeriodEnd.format(dateFormat)}`;
 }
 
-export function getSelectOptions({
+function getSelectOptions({
   comparisonTypes,
   start,
   end,
@@ -51,7 +56,7 @@ export function getSelectOptions({
     switch (value) {
       case TimeRangeComparisonEnum.DayBefore: {
         return {
-          value: '1d',
+          value: dayAndWeekBeforeToOffsetMap[TimeRangeComparisonEnum.DayBefore],
           text: i18n.translate('xpack.apm.timeComparison.select.dayBefore', {
             defaultMessage: 'Day before',
           }),
@@ -59,7 +64,8 @@ export function getSelectOptions({
       }
       case TimeRangeComparisonEnum.WeekBefore: {
         return {
-          value: '1w',
+          value:
+            dayAndWeekBeforeToOffsetMap[TimeRangeComparisonEnum.WeekBefore],
           text: i18n.translate('xpack.apm.timeComparison.select.weekBefore', {
             defaultMessage: 'Week before',
           }),
