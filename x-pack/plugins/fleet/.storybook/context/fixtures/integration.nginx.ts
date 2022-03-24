@@ -254,6 +254,7 @@ export const item: GetInfoResponse['item'] = {
       security_rule: [],
       csp_rule_template: [],
       tag: [],
+      osquery_pack_asset: [],
     },
     elasticsearch: {
       ingest_pipeline: [
