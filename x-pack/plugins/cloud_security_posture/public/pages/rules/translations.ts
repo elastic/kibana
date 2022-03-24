@@ -80,7 +80,7 @@ export const OVERVIEW = i18n.translate('xpack.csp.rules.ruleFlyout.tabs.overview
   defaultMessage: 'Overview',
 });
 
-export const REGO_CODE = i18n.translate('xpack.csp.rules.ruleFlyout.tabs.overviewTabLabel', {
+export const REGO_CODE = i18n.translate('xpack.csp.rules.ruleFlyout.tabs.regoCodeTabLabel', {
   defaultMessage: 'Rego Code',
 });
 
