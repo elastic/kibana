@@ -225,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
             body.os_types = ['windows'];
             body.entries = [
               {
-                field: 'file.executable.caseless',
+                field: 'file.path',
                 value: ['C:\\some\\path', 'C:\\some\\other\\path', 'C:\\yet\\another\\path'],
                 type: 'match_any',
                 operator: 'included',

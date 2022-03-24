@@ -256,7 +256,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     const os = this.randomOSFamily() as ExceptionListItemSchema['os_types'][number];
     const entriesList: CreateExceptionListItemSchema['entries'] = [
       {
-        field: 'file.executable.caseless',
+        field: 'file.path',
         value:
           os === 'windows'
             ? ['C:\\some\\path', 'C:\\some\\other\\path', 'C:\\yet\\another\\path']

@@ -24,7 +24,7 @@ const FileHashField = schema.oneOf(
   allowedHashes.map((hash) => schema.literal(hash)) as [Type<string>]
 );
 
-const FileExecutablePath = schema.literal('file.executable.caseless');
+const FilePath = schema.literal('file.path');
 const FileCodeSigner = schema.literal('file.Ext.code_signature');
 
 const ConditionEntryTypeSchema = schema.literal('match_any');
@@ -32,7 +32,7 @@ const ConditionEntryOperatorSchema = schema.literal('included');
 
 type ConditionEntryFieldAllowedType =
   | TypeOf<typeof FileHashField>
-  | TypeOf<typeof FileExecutablePath>
+  | TypeOf<typeof FilePath>
   | TypeOf<typeof FileCodeSigner>;
 
 type BlocklistConditionEntry =
@@ -48,7 +48,7 @@ type BlocklistConditionEntry =
  * A generic Entry schema to be used for a specific entry schema depending on the OS
  */
 const CommonEntrySchema = {
-  field: schema.oneOf([FileHashField, FileExecutablePath]),
+  field: schema.oneOf([FileHashField, FilePath]),
   type: ConditionEntryTypeSchema,
   operator: ConditionEntryOperatorSchema,
   // If field === HASH then validate hash with custom method, else validate string with minLength = 1
@@ -64,7 +64,7 @@ const CommonEntrySchema = {
     ),
     schema.conditional(
       schema.siblingRef('field'),
-      FileExecutablePath,
+      FilePath,
       schema.arrayOf(
         schema.string({
           validate: (pathValue: string) =>
@@ -103,7 +103,7 @@ const WindowsEntrySchema = schema.oneOf([
   WindowsSignerEntrySchema,
   schema.object({
     ...CommonEntrySchema,
-    field: schema.oneOf([FileHashField, FileExecutablePath]),
+    field: schema.oneOf([FileHashField, FilePath]),
   }),
 ]);
 
