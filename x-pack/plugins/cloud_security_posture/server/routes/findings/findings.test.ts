@@ -27,6 +27,7 @@ export const getMockCspContext = (mockEsClient: ElasticsearchClientMock): Kibana
         client: { asCurrentUser: mockEsClient },
       },
     },
+    fleet: { authz: { fleet: { all: true } } },
   } as unknown as KibanaRequest;
 };
 
@@ -54,6 +55,54 @@ describe('findings API', () => {
     const [config, _] = router.get.mock.calls[0];
 
     expect(config.path).toEqual('/api/csp/findings');
+  });
+
+  it('should accept to a user with fleet.all privilege', async () => {
+    const router = httpServiceMock.createRouter();
+    const cspAppContextService = new CspAppService();
+
+    const cspContext: CspAppContext = {
+      logger,
+      service: cspAppContextService,
+    };
+    defineFindingsIndexRoute(router, cspContext);
+    const [_, handler] = router.get.mock.calls[0];
+
+    const mockContext = {
+      fleet: { authz: { fleet: { all: true } } },
+    } as unknown as KibanaRequest;
+
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const [context, req, res] = [mockContext, mockRequest, mockResponse];
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledTimes(0);
+  });
+
+  it('should reject to a user without fleet.all privilege', async () => {
+    const router = httpServiceMock.createRouter();
+    const cspAppContextService = new CspAppService();
+
+    const cspContext: CspAppContext = {
+      logger,
+      service: cspAppContextService,
+    };
+    defineFindingsIndexRoute(router, cspContext);
+    const [_, handler] = router.get.mock.calls[0];
+
+    const mockContext = {
+      fleet: { authz: { fleet: { all: false } } },
+    } as unknown as KibanaRequest;
+
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const [context, req, res] = [mockContext, mockRequest, mockResponse];
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledTimes(1);
   });
 
   describe('test input schema', () => {

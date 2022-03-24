@@ -215,7 +215,14 @@ export class UptimePlugin
         const [coreStart, corePlugins] = await core.getStartServices();
 
         const { renderApp } = await import('./render_app');
-        return renderApp(coreStart, plugins, corePlugins, params, config);
+        return renderApp(
+          coreStart,
+          plugins,
+          corePlugins,
+          params,
+          config,
+          this.initContext.env.mode.dev
+        );
       },
     });
   }
