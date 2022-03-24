@@ -85,6 +85,7 @@
   "updated_at": "2021-02-06T02:16:17.129Z",
   "version": "WzgsMl0="
 }
+
 {
   "attributes": {
     "fieldAttrs": "{\"_id\":{\"count\":1},\"gender\":{\"count\":1},\"name\":{\"count\":1},\"value\":{\"count\":1},\"year\":{\"count\":1},\"years_ago\":{\"count\":1},\"date_informal\":{\"count\":1}}",
@@ -104,6 +105,7 @@
   "updated_at": "2021-02-06T02:15:25.565Z",
   "version": "WzcsMl0="
 }
+
 {
   "attributes": {
     "columns": [
@@ -145,6 +147,7 @@
   "updated_at": "2021-02-06T02:15:31.253Z",
   "version": "WzYsMl0="
 }
+
 {
   "attributes": {
     "description": "",
