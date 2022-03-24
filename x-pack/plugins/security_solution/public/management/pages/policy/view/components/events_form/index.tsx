@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiCheckbox,
@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { ThemeContext } from 'styled-components';
 import { PolicyOperatingSystem, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ConfigForm, ConfigFormHeading } from '../../components/config_form';
 
@@ -77,72 +78,79 @@ export const EventsForm = <T extends OperatingSystem>({
   selection,
   onValueSelection,
   supplementalOptions,
-}: EventsFormProps<T>) => (
-  <ConfigForm
-    type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
-      defaultMessage: 'Event collection',
-    })}
-    supportedOss={[os]}
-    rightCorner={
-      <EuiText size="s" color="subdued">
-        {i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled', {
-          defaultMessage: '{selected} / {total} event collections enabled',
-          values: {
-            selected: countSelected(selection, supplementalOptions),
-            total: options.length,
-          },
-        })}
-      </EuiText>
-    }
-  >
-    <ConfigFormHeading>
-      {i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.eventingEvents', {
-        defaultMessage: 'Events',
+}: EventsFormProps<T>) => {
+  const theme = useContext(ThemeContext);
+  return (
+    <ConfigForm
+      type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
+        defaultMessage: 'Event collection',
       })}
-    </ConfigFormHeading>
-    <EuiSpacer size="s" />
-    {options.map(({ name, protectionField }) => {
-      return (
-        <EuiCheckbox
-          key={String(protectionField)}
-          id={htmlIdGenerator()()}
-          label={name}
-          data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
-          checked={selection[protectionField]}
-          onChange={(event) => onValueSelection(protectionField, event.target.checked)}
-        />
-      );
-    })}
-    {supplementalOptions &&
-      supplementalOptions.map(({ name, protectionField, tooltipText, beta }) => {
+      supportedOss={[os]}
+      rightCorner={
+        <EuiText size="s" color="subdued">
+          {i18n.translate(
+            'xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled',
+            {
+              defaultMessage: '{selected} / {total} event collections enabled',
+              values: {
+                selected: countSelected(selection, supplementalOptions),
+                total: options.length,
+              },
+            }
+          )}
+        </EuiText>
+      }
+    >
+      <ConfigFormHeading>
+        {i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.eventingEvents', {
+          defaultMessage: 'Events',
+        })}
+      </ConfigFormHeading>
+      <EuiSpacer size="s" />
+      {options.map(({ name, protectionField }) => {
         return (
-          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="s" />
-              <EuiSwitch
-                key={String(protectionField)}
-                id={htmlIdGenerator()()}
-                label={name}
-                data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
-                checked={selection[protectionField]}
-                onChange={(event) => onValueSelection(protectionField, event.target.checked)}
-              />
-            </EuiFlexItem>
-            {tooltipText && (
-              <EuiFlexItem grow={false}>
-                <EuiIconTip position="right" content={tooltipText} />
-              </EuiFlexItem>
-            )}
-            {beta && (
-              <EuiFlexItem grow={false}>
-                <EuiSpacer size="s" />
-                <EuiBetaBadge label="beta" size="s" />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiCheckbox
+            key={String(protectionField)}
+            id={htmlIdGenerator()()}
+            label={name}
+            data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
+            checked={selection[protectionField]}
+            onChange={(event) => onValueSelection(protectionField, event.target.checked)}
+          />
         );
       })}
-  </ConfigForm>
-);
+      {supplementalOptions &&
+        supplementalOptions.map(({ name, protectionField, tooltipText, beta }) => {
+          return (
+            <div style={{ paddingLeft: theme.eui.paddingSizes.s }}>
+              <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiSpacer size="s" />
+                  <EuiSwitch
+                    key={String(protectionField)}
+                    id={htmlIdGenerator()()}
+                    label={name}
+                    data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
+                    checked={selection[protectionField]}
+                    onChange={(event) => onValueSelection(protectionField, event.target.checked)}
+                  />
+                </EuiFlexItem>
+                {tooltipText && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip position="right" content={tooltipText} />
+                  </EuiFlexItem>
+                )}
+                {beta && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge label="beta" size="s" />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </div>
+          );
+        })}
+    </ConfigForm>
+  );
+};
 
 EventsForm.displayName = 'EventsForm';

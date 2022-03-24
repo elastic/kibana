@@ -27,21 +27,21 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
   },
   {
     name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.process',
-      {
-        defaultMessage: 'Process',
-      }
-    ),
-    protectionField: 'process',
-  },
-  {
-    name: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.network',
       {
         defaultMessage: 'Network',
       }
     ),
     protectionField: 'network',
+  },
+  {
+    name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.process',
+      {
+        defaultMessage: 'Process',
+      }
+    ),
+    protectionField: 'process',
   },
 ];
 
@@ -58,7 +58,7 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
       'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data.tooltip',
       {
         defaultMessage:
-          'Capture the extended process event data required for Session View. Session View helps you investigate process, user, and service activity on your Linux infrastructure by showing you time-ordered series of process executions, organized in a tree according to the Linux process model. NOTE: Capturing extended process events substantially increases data usage.',
+          'Capture the extended process event data required for Session View. Session View helps you investigate process, user, and service activity on your Linux infrastructure by displaying session and process execution data organized in a tree according to the Linux process model. NOTE: Capturing extended process events substantially increases data usage.',
       }
     ),
     beta: true,
