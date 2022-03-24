@@ -11925,7 +11925,6 @@
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.phaseDefinitionTitle": "Définition de la phase",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton": "Afficher la définition",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionDescriptionTitle": "Définition de la phase",
-    "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton": "Trace de la pile",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage": "Erreur de cycle de vie des index",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle": "Gestion du cycle de vie des index",
     "xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.addPolicyButtonText": "Ajouter une stratégie",
