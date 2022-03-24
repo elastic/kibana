@@ -124,14 +124,15 @@ function getClassLabel(className: string) {
   }
 }
 
+// TODO, these colors should be imported from EUI
 function getClassColor(className: string, border: boolean = false) {
   switch (className) {
     case 'PER':
-      return border ? '#D6BF57' : '#F1D86F';
+      return border ? '#D6BF57' : '#F1D86F'; // $euiColorVis5 or $euiColorVis5_behindText
     case 'LOC':
-      return border ? '#6092C0' : '#79AAD9';
+      return border ? '#6092C0' : '#79AAD9'; // $euiColorVis1 or $euiColorVis1_behindText
 
     default:
-      return border ? '#D6BF57' : '#F1D86F';
+      return border ? '#D6BF57' : '#F1D86F'; // $euiColorVis5 or $euiColorVis5_behindText
   }
 }
