@@ -562,7 +562,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // pressing Enter at this point may lead to auto-complete the queryInput with random stuff from the
       // dropdown which was not intended originally.
       // To close the Filter popover we need to move to the label input and then press Enter:
-      // solution is to press Tab 3 twice (first Tab will close the dropdown) instead of Enter to avoid
+      // solution is to press Tab 3 tims (first Tab will close the dropdown) instead of Enter to avoid
       // race condition with the dropdown
       await PageObjects.common.pressTabKey();
       await PageObjects.common.pressTabKey();

@@ -220,7 +220,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Vega extension functions', () => {
       beforeEach(async () => {
-        await filterBar.removeAllFilters();
+        const filtersCount = await filterBar.getFilterCount();
+        if (filtersCount > 0) {
+          await filterBar.removeAllFilters();
+        }
       });
 
       const fillSpecAndGo = async (newSpec: string) => {

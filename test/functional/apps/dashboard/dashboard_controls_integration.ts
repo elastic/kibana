@@ -326,7 +326,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         after(async () => {
-          await filterBar.removeAllFilters();
+          const filtersCount = await filterBar.getFilterCount();
+          if (filtersCount > 0) {
+            await filterBar.removeAllFilters();
+          }
         });
       });
 
@@ -467,7 +470,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await filterBar.removeAllFilters();
+        const filtersCount = await filterBar.getFilterCount();
+        if (filtersCount > 0) {
+          await filterBar.removeAllFilters();
+        }
         await clearAllControls();
       });
     });
