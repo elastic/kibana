@@ -20,6 +20,7 @@ export function getDimensions(
     from: dateMath.parse(from),
     to: dateMath.parse(to, { roundUp: true }),
   };
+
   const bounds = agg.params.timeRange
     ? (data.query.timefilter.timefilter.calculateBounds(
         agg.params.timeRange
@@ -58,13 +59,13 @@ export function getDimensionsRandomSampling(
   data: DataPublicPluginStart
 ): Dimensions | undefined {
   const [metric, agg] = aggs.aggs;
-  // console.log('aggs', aggs);
 
   const { from, to } = data.query.timefilter.timefilter.getTime();
   agg.params.timeRange = {
     from: dateMath.parse(from),
     to: dateMath.parse(to, { roundUp: true }),
   };
+
   const bounds = agg.params.timeRange
     ? (data.query.timefilter.timefilter.calculateBounds(
         agg.params.timeRange
@@ -75,6 +76,7 @@ export function getDimensionsRandomSampling(
   if (!buckets || !bounds) {
     return;
   }
+  buckets.setBounds(bounds);
 
   const { esUnit, esValue } = buckets.getInterval();
   return {

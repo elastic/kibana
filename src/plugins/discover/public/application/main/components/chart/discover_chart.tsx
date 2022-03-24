@@ -73,6 +73,10 @@ export function DiscoverChart({
     element: null,
     moveFocus: false,
   });
+  const chartRefRandom = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
+    element: null,
+    moveFocus: false,
+  });
 
   const timeField =
     indexPattern.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
@@ -104,11 +108,16 @@ export function DiscoverChart({
     if (chartRef.current.moveFocus && chartRef.current.element) {
       chartRef.current.element.focus();
     }
+    if (chartRefRandom.current.moveFocus && chartRefRandom.current.element) {
+      chartRefRandom.current.element.focus();
+    }
   }, [hideChart]);
 
   const toggleHideChart = useCallback(() => {
     const newHideChart = !hideChart;
     chartRef.current.moveFocus = !newHideChart;
+    chartRefRandom.current.moveFocus = !newHideChart;
+
     storage.set(CHART_HIDDEN_KEY, newHideChart);
     stateContainer.setAppState({ hideChart: newHideChart });
   }, [hideChart, stateContainer, storage]);
@@ -210,6 +219,26 @@ export function DiscoverChart({
       </EuiFlexItem>
       {isTimeBased && !hideChart && (
         <EuiFlexItem grow={false}>
+          <div>Random sampler</div>
+          <section
+            ref={(element) => (chartRefRandom.current.element = element)}
+            tabIndex={-1}
+            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
+              defaultMessage: '[Random] Histogram of found documents',
+            })}
+            className="dscTimechart"
+          >
+            <DiscoverHistogramMemoized
+              savedSearchData$={savedSearchRandomSamplingCharts$}
+              timefilterUpdateHandler={timefilterUpdateHandler}
+            />
+          </section>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+      )}
+
+      {isTimeBased && !hideChart && (
+        <EuiFlexItem grow={false}>
           <section
             ref={(element) => (chartRef.current.element = element)}
             tabIndex={-1}
@@ -220,24 +249,6 @@ export function DiscoverChart({
           >
             <DiscoverHistogramMemoized
               savedSearchData$={savedSearchDataChart$}
-              timefilterUpdateHandler={timefilterUpdateHandler}
-            />
-          </section>
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
-      )}
-      {isTimeBased && !hideChart && (
-        <EuiFlexItem grow={false}>
-          <section
-            ref={(element) => (chartRef.current.element = element)}
-            tabIndex={-1}
-            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
-              defaultMessage: '[Random] Histogram of found documents',
-            })}
-            className="dscTimechart"
-          >
-            <DiscoverHistogramMemoized
-              savedSearchData$={savedSearchRandomSamplingCharts$}
               timefilterUpdateHandler={timefilterUpdateHandler}
             />
           </section>

@@ -76,6 +76,7 @@ export function fetchChart(
           ? bucketAggConfig?.buckets?.getInterval()
           : undefined;
         const chartData = buildPointSeriesData(tabifiedData, dimensions!);
+
         return {
           chartData,
           bucketInterval,

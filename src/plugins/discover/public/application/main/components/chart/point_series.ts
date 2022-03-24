@@ -99,7 +99,6 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions): Char
       y: row[yAccessor] as number,
     }));
 
-  console.log('nonsampling', chart);
   return chart;
 };
 
@@ -116,7 +115,7 @@ export const buildPointSeriesDataRandomSampling = (table: Table, dimensions: Dim
       pattern: 'YYYY-MM-DD HH:mm',
     },
   };
-  chart.xAxisLabel = table.columns[x.accessor].name;
+  chart.xAxisLabel = 'Count';
   chart.yAxisFormat = y.format;
   const { intervalESUnit, intervalESValue, interval, bounds } = x.params;
   chart.ordered = {
@@ -136,8 +135,6 @@ export const buildPointSeriesDataRandomSampling = (table: Table, dimensions: Dim
       x: row[xAccessor] as number,
       y: row[yAccessor] as number,
     }));
-
-  console.log('sampling', chart);
 
   return chart;
 };
