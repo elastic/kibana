@@ -7,9 +7,10 @@
 
 import { startTaskTimer, startTaskTimerWithEventLoopMonitoring } from './task_events';
 
+const TimingSlop = 10; // to account for math/timer rounding errors
 const DelayIterations = 4;
 const DelayMillis = 250;
-const DelayTotal = DelayIterations * DelayMillis;
+const DelayTotal = DelayIterations * DelayMillis - TimingSlop;
 
 async function nonBlockingDelay(millis: number) {
   await new Promise((resolve) => setTimeout(resolve, millis));
@@ -46,7 +47,7 @@ describe('task_events', () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/128441
-  describe.skip('startTaskTimerWithEventLoopMonitoring', () => {
+  describe('startTaskTimerWithEventLoopMonitoring', () => {
     test('non-blocking', async () => {
       const stopTaskTimer = startTaskTimerWithEventLoopMonitoring({
         monitor: true,
