@@ -229,6 +229,14 @@ export const useMatrixHistogram = ({
     };
   }, [matrixHistogramRequest, hostsSearch, skip]);
 
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
+
   const runMatrixHistogramSearch = useCallback(
     (to: string, from: string) => {
       hostsSearch({

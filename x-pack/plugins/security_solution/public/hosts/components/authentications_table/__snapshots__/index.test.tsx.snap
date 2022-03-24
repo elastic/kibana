@@ -105,6 +105,7 @@ exports[`Authentication Table Component rendering it renders the authentication 
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
+  setQuerySkip={[MockFunction]}
   showMorePagesIndicator={true}
   totalCount={54}
   type="page"
