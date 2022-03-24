@@ -698,7 +698,7 @@ describe('embeddable', () => {
       expect.objectContaining({
         timeRange,
         query: [query, savedVis.state.query],
-        filters: mockInjectFilterReferences(filters, []),
+        filters,
       })
     );
 
@@ -765,8 +765,10 @@ describe('embeddable', () => {
 
   it('should merge external context with query and filters of the saved object', async () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
-    const query: Query = { language: 'kquery', query: 'external filter' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
+    const query: Query = { language: 'kquery', query: 'external query' };
+    const filters: Filter[] = [
+      { meta: { alias: 'external filter', negate: false, disabled: false } },
+    ];
 
     const newSavedVis = {
       ...savedVis,
@@ -817,18 +819,16 @@ describe('embeddable', () => {
     await embeddable.initializeSavedVis(input);
     embeddable.render(mountpoint);
 
-    expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
-      timeRange,
-      query: [query, { language: 'kquery', query: 'saved filter' }],
-      // actual index pattern id gets injected
-      filters: mockInjectFilterReferences(
-        [
-          filters[0],
-          { meta: { alias: 'test', negate: false, disabled: false, index: 'injected!' } },
-        ],
-        []
-      ),
-    });
+    const expectedFilters = [
+      ...input.filters!,
+      ...mockInjectFilterReferences(newSavedVis.state.filters, []),
+    ];
+    expect(expressionRenderer.mock.calls[0][0].searchContext?.timeRange).toEqual(timeRange);
+    expect(expressionRenderer.mock.calls[0][0].searchContext?.filters).toEqual(expectedFilters);
+    expect(expressionRenderer.mock.calls[0][0].searchContext?.query).toEqual([
+      query,
+      { language: 'kquery', query: 'saved filter' },
+    ]);
   });
 
   it('should execute trigger on event from expression renderer', async () => {

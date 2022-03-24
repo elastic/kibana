@@ -570,22 +570,25 @@ export class Embeddable
     if (!this.savedVis) {
       throw new Error('savedVis is required for getMergedSearchContext');
     }
-    const output: ExecutionContextSearch = {
+
+    const context: ExecutionContextSearch = {
       timeRange: this.externalSearchContext.timeRange,
+      query: [this.savedVis.state.query],
+      filters: this.deps.injectFilterReferences(
+        this.savedVis.state.filters,
+        this.savedVis.references
+      ),
     };
+
     if (this.externalSearchContext.query) {
-      output.query = [this.externalSearchContext.query, this.savedVis.state.query];
-    } else {
-      output.query = [this.savedVis.state.query];
-    }
-    if (this.externalSearchContext.filters?.length) {
-      output.filters = [...this.externalSearchContext.filters, ...this.savedVis.state.filters];
-    } else {
-      output.filters = [...this.savedVis.state.filters];
+      context.query = [this.externalSearchContext.query, ...(context.query as Query[])];
     }
 
-    output.filters = this.deps.injectFilterReferences(output.filters, this.savedVis.references);
-    return output;
+    if (this.externalSearchContext.filters?.length) {
+      context.filters = [...this.externalSearchContext.filters, ...(context.filters as Filter[])];
+    }
+
+    return context;
   }
 
   private get onEditAction(): Visualization['onEditAction'] {
