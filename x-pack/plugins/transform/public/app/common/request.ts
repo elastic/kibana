@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { HttpFetchError } from '../../../../../../src/core/public';
-import { DataView } from '../../../../../../src/plugins/data_views/public';
+import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
 import type {
   PivotTransformPreviewRequestSchema,

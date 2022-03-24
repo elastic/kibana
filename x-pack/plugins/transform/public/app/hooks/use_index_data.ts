@@ -91,9 +91,9 @@ export const useIndexData = (
 
     // Get all field names for each returned doc and flatten it
     // to a list of unique field names used across all docs.
-    const allKibanaDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
+    const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
     const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
-      .filter((d) => allKibanaDataViewFields.includes(d))
+      .filter((d) => allDataViewFields.includes(d))
       .sort();
 
     setCcsWarning(isCrossClusterSearch && isMissingFields);
