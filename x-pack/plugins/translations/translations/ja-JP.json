@@ -11428,7 +11428,6 @@
     "xpack.enterpriseSearch.workplaceSearch.sources.learnCustom.features.button": "プラチナ機能の詳細",
     "xpack.enterpriseSearch.workplaceSearch.sources.learnMore.link": "詳細",
     "xpack.enterpriseSearch.workplaceSearch.sources.learnMore.text": "アクセス権については、{learnMoreLink}",
-    "xpack.enterpriseSearch.workplaceSearch.sources.learnMoreCustom.text": "カスタムソースについては、{learnMoreLink}。",
     "xpack.enterpriseSearch.workplaceSearch.sources.licenseCallout.description": "詳細については、検索エクスペリエンス管理者に問い合わせてください。",
     "xpack.enterpriseSearch.workplaceSearch.sources.licenseCallout.title": "非公開ソースは使用できません",
     "xpack.enterpriseSearch.workplaceSearch.sources.nextSyncRunningMessage": "現在実行中のジョブが完了したらすぐに実行",

@@ -425,7 +425,7 @@ export const Overview: React.FC = () => {
     <>
       <EuiTitle size="xs">
         <h6>
-          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.credentials.title', {
+          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.deployment.title', {
             defaultMessage: 'Deployment',
           })}
         </h6>
