@@ -740,6 +740,18 @@ export interface NavigateToAppOptions {
    * if true, will open the app in new tab, will share session information via window.open if base
    */
   openInNewTab?: boolean;
+
+  /**
+   * if true, will bypass the default onAppLeave behavior
+   */
+  skipAppLeave?: boolean;
+}
+
+export interface NavigateToUrlOptions {
+  /**
+   * if true, will bypass the default onAppLeave behavior
+   */
+  skipAppLeave?: boolean;
 }
 
 /** @public */
@@ -802,8 +814,13 @@ export interface ApplicationStart {
    *
    * @param url - an absolute URL, an absolute path or a relative path, to navigate to.
    */
-  navigateToUrl(url: string): Promise<void>;
-
+  navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
+  /**
+   * Navigate to a given url
+   *
+   * The method removes the eventListener and assigns the window location to the url provided
+   */
+  navigateToUrlSkipUnload(url: string): void;
   /**
    * Returns the absolute path (or URL) to a given app, including the global base path.
    *

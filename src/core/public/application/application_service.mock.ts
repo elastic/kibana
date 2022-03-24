@@ -43,6 +43,7 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
     navigateToApp: jest.fn(),
     navigateToUrl: jest.fn(),
     getUrlForApp: jest.fn(),
+    navigateToUrlSkipUnload: jest.fn(),
   };
 };
 
@@ -80,6 +81,7 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
     getUrlForApp: jest.fn(),
     navigateToApp: jest.fn().mockImplementation((appId) => currentAppId$.next(appId)),
     navigateToUrl: jest.fn(),
+    navigateToUrlSkipUnload: jest.fn(),
     history: createHistoryMock(),
   };
 };

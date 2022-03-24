@@ -31,6 +31,7 @@ import {
   InternalApplicationStart,
   Mounter,
   NavigateToAppOptions,
+  NavigateToUrlOptions,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
@@ -234,13 +235,20 @@ export class ApplicationService {
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
-      { deepLinkId, path, state, replace = false, openInNewTab = false }: NavigateToAppOptions = {}
+      {
+        deepLinkId,
+        path,
+        state,
+        replace = false,
+        openInNewTab = false,
+        skipAppLeave,
+      }: NavigateToAppOptions = {}
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
       const shouldNavigate = navigatingToSameApp
         ? true
-        : await this.shouldNavigate(overlays, appId);
+        : await this.shouldNavigate(overlays, appId, !!skipAppLeave);
 
       const targetApp = applications$.value.get(appId);
 
@@ -304,13 +312,17 @@ export class ApplicationService {
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
       navigateToApp,
-      navigateToUrl: async (url) => {
+      navigateToUrl: async (url: string, { skipAppLeave }: NavigateToUrlOptions = {}) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);
         if (appInfo) {
-          return navigateToApp(appInfo.app, { path: appInfo.path });
+          return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave });
         } else {
           return this.redirectTo!(url);
         }
+      },
+      navigateToUrlSkipUnload: (url: string) => {
+        window.removeEventListener('beforeunload', this.onBeforeUnload);
+        return this.redirectTo!(url);
       },
       getComponent: () => {
         if (!this.history) {
@@ -352,9 +364,16 @@ export class ApplicationService {
     this.currentActionMenu$.next(currentActionMenu);
   };
 
-  private async shouldNavigate(overlays: OverlayStart, nextAppId: string): Promise<boolean> {
+  private async shouldNavigate(
+    overlays: OverlayStart,
+    nextAppId: string,
+    skipAppLeave: boolean
+  ): Promise<boolean> {
     const currentAppId = this.currentAppId$.value;
     if (currentAppId === undefined) {
+      return true;
+    }
+    if (skipAppLeave === true) {
       return true;
     }
     const action = getLeaveAction(

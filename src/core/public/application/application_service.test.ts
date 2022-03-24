@@ -898,15 +898,22 @@ describe('#start()', () => {
 
     it('should call private function shouldNavigate with overlays and the nextAppId', async () => {
       service.setup(setupDeps);
+
       const shouldNavigateSpy = jest.spyOn(service as any, 'shouldNavigate');
-
       const { navigateToApp } = await service.start(startDeps);
-
       await navigateToApp('myTestApp');
-      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myTestApp');
+      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myTestApp', false);
 
       await navigateToApp('myOtherApp');
-      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myOtherApp');
+      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myOtherApp', false);
+    });
+
+    it('should call private function shouldNavigate with overlays, nextAppId and skipAppLeave', async () => {
+      service.setup(setupDeps);
+      const shouldNavigateSpy = jest.spyOn(service as any, 'shouldNavigate');
+      const { navigateToApp } = await service.start(startDeps);
+      await navigateToApp('myTestApp', { skipAppLeave: true });
+      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myTestApp', true);
     });
 
     describe('when `replace` option is true', () => {
@@ -1116,6 +1123,45 @@ describe('#start()', () => {
 
       expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', undefined);
       expect(setupDeps.redirectTo).not.toHaveBeenCalled();
+    });
+
+    it('calls `navigateToApp` with `skipAppLeave` option', async () => {
+      parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
+      service.setup(setupDeps);
+      const { navigateToUrl } = await service.start(startDeps);
+
+      await navigateToUrl('/an-app-path', { skipAppLeave: true });
+
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', undefined);
+      expect(setupDeps.redirectTo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('navigateToUrlSkipUnload', () => {
+    let addListenerSpy: jest.SpyInstance;
+    let removeListenerSpy: jest.SpyInstance;
+    beforeEach(() => {
+      addListenerSpy = jest.spyOn(window, 'addEventListener');
+      removeListenerSpy = jest.spyOn(window, 'removeEventListener');
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('removes the beforeunload listener and calls `redirectTo` with the given url', async () => {
+      service.setup(setupDeps);
+
+      const { navigateToUrlSkipUnload } = await service.start(startDeps);
+      expect(addListenerSpy).toHaveBeenCalledTimes(1);
+      expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+      const handler = addListenerSpy.mock.calls[0][1];
+
+      await navigateToUrlSkipUnload('test-url');
+      expect(removeListenerSpy).toHaveBeenCalledTimes(1);
+      expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
+      expect(MockHistory.push).not.toHaveBeenCalled();
+      expect(setupDeps.redirectTo).toHaveBeenCalledWith('test-url');
     });
   });
 });
