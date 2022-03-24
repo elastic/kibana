@@ -8,6 +8,7 @@
 
 import { PANEL_TYPES } from '../enums';
 import type { TimeseriesUIRestrictions } from '../ui_restrictions';
+import type { MultiFieldKey } from '../../../../data/common/search/aggs/buckets/multi_field_key';
 
 export type TimeseriesVisData = SeriesData | TableData;
 
@@ -52,6 +53,7 @@ export interface PanelData {
   seriesId: string;
   splitByLabel: string;
   isSplitByTerms: boolean;
+  termsSplitValue?: string | MultiFieldKey;
   error?: string;
 }
 

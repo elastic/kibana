@@ -121,7 +121,7 @@ function TimeseriesVisualization({
 
       if (!tables) return;
 
-      const data = getClickFilterData(points, tables, model, indexPattern?.fieldFormatMap);
+      const data = getClickFilterData(points, tables, model);
 
       const event = {
         name: 'filterBucket',

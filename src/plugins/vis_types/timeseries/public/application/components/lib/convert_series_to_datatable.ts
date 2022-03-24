@@ -43,9 +43,8 @@ export const addMetaToColumns = (
     let params: unknown = {
       field: field?.spec.name,
     };
-    if (column.type === BUCKET_TYPES.TERMS && column.fields?.length) {
+    if (column.type === BUCKET_TYPES.MULTI_TERMS) {
       params = {
-        type: 'multi_terms',
         fields: column.fields,
         otherBucket: true,
       };
@@ -143,7 +142,7 @@ export const convertSeriesToDataTable = async (
           name: getMultiFieldLabel(fieldsForTerms),
           fields: fieldsForTerms,
           isMetric: false,
-          type: BUCKET_TYPES.TERMS,
+          type: fieldsForTerms.length > 1 ? BUCKET_TYPES.MULTI_TERMS : BUCKET_TYPES.TERMS,
         });
       } else if (isGroupedByFilters) {
         id++;
@@ -160,15 +159,18 @@ export const convertSeriesToDataTable = async (
     const filtersColumn = columns.find((col) => col.type === BUCKET_TYPES.FILTERS);
     let rows: DatatableRow[] = [];
     for (let j = 0; j < seriesPerLayer.length; j++) {
-      const data = seriesPerLayer[j].data.map((rowData) => {
-        const row: DatatableRow = [rowData[0], rowData[1]];
-        // If the layer is split by terms aggregation, the data array should also contain the split value.
-        if (isGroupedByTerms || filtersColumn) {
-          row.push([seriesPerLayer[j].label].flat()[0]);
-        }
-        return row;
+      const { data, label, isSplitByTerms, termsSplitValue } = seriesPerLayer[j];
+      const seriesData = data.map((rowData) => {
+        let rowId = 0;
+        const rowsData = {
+          [rowId++]: rowData[0],
+          [rowId++]: rowData[1],
+        };
+        return isGroupedByTerms || filtersColumn
+          ? { ...rowsData, [rowId]: isSplitByTerms ? termsSplitValue : [label].flat()[0] }
+          : rowsData;
       });
-      rows = [...rows, ...data];
+      rows = [...rows, ...seriesData];
     }
     tables[layer.id] = {
       type: 'datatable',
