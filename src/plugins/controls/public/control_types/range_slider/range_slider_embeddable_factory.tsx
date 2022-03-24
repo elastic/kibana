@@ -39,7 +39,7 @@ export class RangeSliderEmbeddableFactory
       (!deepEqual(newInput.fieldName, embeddable.getInput().fieldName) ||
         !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId))
     ) {
-      // if the field name or data view id has changed in this editing session, selected options are invalid, so reset them.
+      // if the field name or data view id has changed in this editing session, selected values are invalid, so reset them.
       newInput.value = ['', ''];
     }
     return newInput;

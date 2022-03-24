@@ -126,7 +126,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       distinctUntilChanged(diffDataFetchProps)
     );
 
-    // fetch available min/max when input changes or when search string has changed
+    // fetch available min/max when input changes
     this.subscriptions.add(dataFetchPipe.subscribe(this.fetchMinMax));
 
     // build filters when value change
