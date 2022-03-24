@@ -147,13 +147,11 @@ export function registerApmAlerts(
   });
 
   observabilityRuleTypeRegistry.register({
-    id: AlertType.TransactionDurationAnomaly,
-    description: i18n.translate(
-      'xpack.apm.alertTypes.transactionDurationAnomaly.description',
-      {
-        defaultMessage: 'Alert when the latency of a service is abnormal.',
-      }
-    ),
+    id: AlertType.Anomaly,
+    description: i18n.translate('xpack.apm.alertTypes.anomaly.description', {
+      defaultMessage:
+        'Alert when either the latency, throughput, or failed transaction rate of a service is anomalous.',
+    }),
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
