@@ -11,7 +11,7 @@ import React from 'react';
 import { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { PluginServiceRegistry } from '../../presentation_util/public';
+import { PluginServiceRegistry } from '../public/services/create';
 
 import { pluginServices } from '../public/services';
 import { CustomIntegrationsServices } from '../public/services';

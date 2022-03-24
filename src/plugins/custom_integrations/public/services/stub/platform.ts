@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../../../../presentation_util/public';
+import { PluginServiceFactory } from '../create';
 
 import type { CustomIntegrationsPlatformService } from '../platform';
 

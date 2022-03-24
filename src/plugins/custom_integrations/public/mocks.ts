@@ -7,7 +7,7 @@
  */
 
 import { pluginServices } from './services';
-import { PluginServiceRegistry } from '../../presentation_util/public';
+import { PluginServiceRegistry } from './services/create';
 import { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
 import { CustomIntegrationsServices } from './services';
 import { providers } from './services/stub';

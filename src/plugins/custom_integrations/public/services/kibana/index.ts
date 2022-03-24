@@ -11,7 +11,7 @@ import {
   PluginServiceProvider,
   PluginServiceRegistry,
   KibanaPluginServiceParams,
-} from '../../../../presentation_util/public';
+} from '../create';
 
 import { CustomIntegrationsServices } from '..';
 import { CustomIntegrationsStartDependencies } from '../../types';

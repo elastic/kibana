@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  PluginServiceProviders,
-  PluginServiceProvider,
-  PluginServiceRegistry,
-} from '../../../../presentation_util/public';
+import { PluginServiceProviders, PluginServiceProvider, PluginServiceRegistry } from '../create';
 
 import { CustomIntegrationsServices } from '..';
 import { findServiceFactory } from '../stub/find';

@@ -11,7 +11,7 @@ import {
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
 } from '../../../common';
-import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
+import { KibanaPluginServiceFactory } from '../create';
 
 import { CustomIntegrationsStartDependencies } from '../../types';
 import { CustomIntegrationsFindService, filterCustomIntegrations } from '../find';
