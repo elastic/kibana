@@ -162,10 +162,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('disableButton');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
-        'enableSwitch',
-        'true'
+        'statusDropdown',
+        'disabled'
       );
     });
 
@@ -181,10 +181,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('disableButton');
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
-        'enableSwitch',
-        'false'
+        'statusDropdown',
+        'enabled'
       );
     });
 
@@ -201,9 +201,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('muteButton');
 
       await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-        const muteBadge = await testSubjects.find('mutedActionsBadge');
-        expect(await muteBadge.isDisplayed()).to.eql(true);
+        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+          createdAlert.name,
+          'statusDropdown',
+          'snoozed'
+        );
       });
     });
 
@@ -221,9 +223,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('muteButton');
 
       await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-        const muteBadge = await testSubjects.find('mutedActionsBadge');
-        expect(await muteBadge.isDisplayed()).to.eql(true);
+        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+          createdAlert.name,
+          'statusDropdown',
+          'snoozed'
+        );
       });
     });
 
@@ -241,8 +245,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('muteButton');
       await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-        await testSubjects.missingOrFail('mutedActionsBadge');
+        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+          createdAlert.name,
+          'statusDropdown',
+          'enabled'
+        );
       });
     });
 
@@ -289,9 +296,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-        const muteBadge = await testSubjects.find('mutedActionsBadge');
-        expect(await muteBadge.isDisplayed()).to.eql(true);
+        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+          createdAlert.name,
+          'statusDropdown',
+          'snoozed'
+        );
       });
     });
 
@@ -312,8 +321,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('muteAll');
 
       await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-        await testSubjects.missingOrFail('mutedActionsBadge');
+        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+          createdAlert.name,
+          'statusDropdown',
+          'enabled'
+        );
       });
     });
 
@@ -331,10 +343,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Enable all button shows after clicking disable all
       await testSubjects.existOrFail('enableAll');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
-        'enableSwitch',
-        'false'
+        'statusDropdown',
+        'disabled'
       );
     });
 
@@ -354,10 +366,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Disable all button shows after clicking enable all
       await testSubjects.existOrFail('disableAll');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
-        'enableSwitch',
-        'true'
+        'statusDropdown',
+        'enabled'
       );
     });
 
