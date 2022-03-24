@@ -7,6 +7,7 @@
 
 import { of, throwError } from 'rxjs';
 import type { Logger } from 'src/core/server';
+import { httpServiceMock } from 'src/core/server/mocks';
 import type { ConfigType } from '../config';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
@@ -22,6 +23,7 @@ import { Screenshots, ScreenshotOptions } from '.';
 describe('Screenshot Observable Pipeline', () => {
   let driver: ReturnType<typeof createMockBrowserDriver>;
   let driverFactory: jest.Mocked<HeadlessChromiumDriverFactory>;
+  let http: ReturnType<typeof httpServiceMock.createSetupContract>;
   let layout: ReturnType<typeof createMockLayout>;
   let logger: jest.Mocked<Logger>;
   let options: ScreenshotOptions;
@@ -30,6 +32,7 @@ describe('Screenshot Observable Pipeline', () => {
   beforeEach(async () => {
     driver = createMockBrowserDriver();
     driverFactory = createMockBrowserDriverFactory(driver);
+    http = httpServiceMock.createSetupContract();
     layout = createMockLayout();
     logger = {
       debug: jest.fn(),
@@ -48,7 +51,7 @@ describe('Screenshot Observable Pipeline', () => {
       },
       urls: ['/welcome/home/start/index.htm'],
     } as unknown as typeof options;
-    screenshots = new Screenshots(driverFactory, logger, { poolSize: 1 } as ConfigType);
+    screenshots = new Screenshots(driverFactory, logger, http, { poolSize: 1 } as ConfigType);
 
     jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);
 

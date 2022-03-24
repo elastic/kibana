@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { ExpressionRendererParams } from 'src/plugins/expressions/public';
 import { useExpressionRenderer } from '../../../../../src/plugins/expressions/public';
+import { SCREENSHOTTING_EXPRESSION, SCREENSHOTTING_EXPRESSION_INPUT } from '../../common';
 import { ScreenshotModeContext } from './screenshot_mode_context';
 
 export function App() {
@@ -24,11 +25,15 @@ export function App() {
   const screenshotMode = useContext(ScreenshotModeContext);
   const expression = useMemo(
     () =>
-      screenshotMode?.getScreenshotContext<ExpressionRendererParams['expression']>('expression') ??
-      '',
+      screenshotMode?.getScreenshotContext<ExpressionRendererParams['expression']>(
+        SCREENSHOTTING_EXPRESSION
+      ) ?? '',
     [screenshotMode]
   );
-  const context = useMemo(() => screenshotMode?.getScreenshotContext('context'), [screenshotMode]);
+  const context = useMemo(
+    () => screenshotMode?.getScreenshotContext(SCREENSHOTTING_EXPRESSION_INPUT),
+    [screenshotMode]
+  );
   const { error, isEmpty } = useExpressionRenderer(elementRef, {
     expression,
     context,

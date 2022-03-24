@@ -11,6 +11,7 @@ import type { AppMountParameters, CoreSetup, Plugin } from 'src/core/public';
 import type { ExpressionsSetup } from 'src/plugins/expressions/public';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { AppNavLinkStatus } from '../../../../src/core/public';
+import { SCREENSHOTTING_APP_ID } from '../common';
 import { App, ScreenshotModeContext } from './app';
 
 interface SetupDeps {
@@ -25,7 +26,7 @@ export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
     }
 
     application.register({
-      id: 'screenshotting',
+      id: SCREENSHOTTING_APP_ID,
       title: 'Screenshotting Expressions Renderer',
       navLinkStatus: AppNavLinkStatus.hidden,
       chromeless: true,
