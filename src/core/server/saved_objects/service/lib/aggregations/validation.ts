@@ -185,13 +185,12 @@ const recursiveRewrite = (
     let newValue = value;
     if (rewriteValue) {
       newValue = validateAndRewriteAttributePath(value, nestedContext);
-    } else {
-      if (isArray(value)) {
-        newValue = value.map((v) => recursiveRewrite(v, nestedContext, parents));
-      }
-      if (isPlainObject(value)) {
-        newValue = recursiveRewrite(value, nestedContext, [...parents, key]);
-      }
+    } else if (isArray(value)) {
+      newValue = value.map((v) =>
+        isPlainObject(v) ? recursiveRewrite(v, nestedContext, parents) : v
+      );
+    } else if (isPlainObject(value)) {
+      newValue = recursiveRewrite(value, nestedContext, [...parents, key]);
     }
 
     return {
