@@ -7,9 +7,15 @@
 
 import React from 'react';
 import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
-import { OVERVIEW_PATH, DETECTION_RESPONSE_PATH, SecurityPageName } from '../../common/constants';
+import {
+  LANDING_PATH,
+  OVERVIEW_PATH,
+  DETECTION_RESPONSE_PATH,
+  SecurityPageName,
+} from '../../common/constants';
 import { SecuritySubPluginRoutes } from '../app/types';
 
+import { LandingPage } from './pages/landing';
 import { StatefulOverview } from './pages/overview';
 import { DetectionResponse } from './pages/detection_response';
 
@@ -24,6 +30,11 @@ const DetectionResponseRoutes = () => (
     <DetectionResponse />
   </TrackApplicationView>
 );
+const LandingRoutes = () => (
+  <TrackApplicationView viewId={SecurityPageName.landing}>
+    <LandingPage />
+  </TrackApplicationView>
+);
 
 export const routes: SecuritySubPluginRoutes = [
   {
@@ -33,5 +44,9 @@ export const routes: SecuritySubPluginRoutes = [
   {
     path: DETECTION_RESPONSE_PATH,
     render: DetectionResponseRoutes,
+  },
+  {
+    path: LANDING_PATH,
+    render: LandingRoutes,
   },
 ];

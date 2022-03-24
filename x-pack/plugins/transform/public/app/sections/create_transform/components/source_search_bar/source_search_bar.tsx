@@ -18,10 +18,10 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 import { StepDefineFormHook, QUERY_LANGUAGE_KUERY } from '../step_define';
 
 interface SourceSearchBarProps {
-  indexPattern: SearchItems['indexPattern'];
+  dataView: SearchItems['dataView'];
   searchBar: StepDefineFormHook['searchBar'];
 }
-export const SourceSearchBar: FC<SourceSearchBarProps> = ({ indexPattern, searchBar }) => {
+export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar }) => {
   const {
     actions: { searchChangeHandler, searchSubmitHandler, setErrorMessage },
     state: { errorMessage, searchInput },
@@ -35,7 +35,7 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ indexPattern, search
         <QueryStringInput
           bubbleSubmitEvent={true}
           query={searchInput}
-          indexPatterns={[indexPattern]}
+          indexPatterns={[dataView]}
           onChange={searchChangeHandler}
           onSubmit={searchSubmitHandler}
           placeholder={

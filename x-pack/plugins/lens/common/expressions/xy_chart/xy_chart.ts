@@ -10,6 +10,7 @@ import type { ExpressionValueSearchContext } from '../../../../../../src/plugins
 import type { LensMultiTable } from '../../types';
 import type { XYArgs } from './xy_args';
 import { fittingFunctionDefinitions } from './fitting_function';
+import { endValueDefinitions } from './end_value';
 import { logDataTable } from '../expressions_utils';
 
 export interface XYChartProps {
@@ -87,6 +88,16 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how missing values are treated',
       }),
     },
+    endValue: {
+      types: ['string'],
+      options: [...endValueDefinitions.map(({ id }) => id)],
+      help: '',
+    },
+    emphasizeFitting: {
+      types: ['boolean'],
+      default: false,
+      help: '',
+    },
     valueLabels: {
       types: ['string'],
       options: ['hide', 'inside'],
@@ -117,8 +128,12 @@ export const xyChart: ExpressionFunctionDefinition<
       }),
     },
     layers: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      types: ['lens_xy_data_layer', 'lens_xy_referenceLine_layer'] as any,
+      types: [
+        'lens_xy_data_layer',
+        'lens_xy_referenceLine_layer',
+        'lens_xy_annotation_layer',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any,
       help: 'Layers of visual series',
       multi: true,
     },

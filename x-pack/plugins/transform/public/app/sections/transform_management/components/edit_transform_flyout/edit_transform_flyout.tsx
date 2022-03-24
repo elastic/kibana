@@ -44,13 +44,13 @@ import { isManagedTransform } from '../../../../common/managed_transforms_utils'
 interface EditTransformFlyoutProps {
   closeFlyout: () => void;
   config: TransformConfigUnion;
-  indexPatternId?: string;
+  dataViewId?: string;
 }
 
 export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
   closeFlyout,
   config,
-  indexPatternId,
+  dataViewId,
 }) => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
@@ -110,10 +110,7 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
         />
       ) : null}
       <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
-        <EditTransformFlyoutForm
-          editTransformFlyout={[state, dispatch]}
-          indexPatternId={indexPatternId}
-        />
+        <EditTransformFlyoutForm editTransformFlyout={[state, dispatch]} dataViewId={dataViewId} />
         {errorMessage !== undefined && (
           <>
             <EuiSpacer size="m" />
