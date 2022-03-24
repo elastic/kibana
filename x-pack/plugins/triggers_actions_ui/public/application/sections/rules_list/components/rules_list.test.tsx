@@ -169,7 +169,7 @@ describe('rules_list component with items', () => {
       tags: ['tag1'],
       enabled: true,
       ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
+      schedule: { interval: '1s' },
       actions: [],
       params: { name: 'test rule type name' },
       scheduledTaskId: null,
@@ -475,6 +475,19 @@ describe('rules_list component with items', () => {
     expect(
       wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-interval"]').length
     ).toEqual(mockedRulesData.length);
+
+    // Schedule interval tooltip
+    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOver');
+
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+
+    wrapper.update();
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+      'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
+    );
+
+    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOut');
 
     // Duration column
     expect(

@@ -21,17 +21,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AppLogic } from '../../../../app_logic';
+import { AppLogic } from '../../../../../app_logic';
 import {
   PersonalDashboardLayout,
   WorkplaceSearchPageTemplate,
-} from '../../../../components/layout';
-import { NAV, REMOVE_BUTTON } from '../../../../constants';
-import { SourceDataItem } from '../../../../types';
+} from '../../../../../components/layout';
+import { NAV, REMOVE_BUTTON } from '../../../../../constants';
+import { SourceDataItem } from '../../../../../types';
 
-import { AddSourceHeader } from './add_source_header';
-import { ConfigDocsLinks } from './config_docs_links';
-import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from './constants';
+import { staticExternalSourceData } from '../../../source_data';
+
+import { AddSourceHeader } from './../add_source_header';
+import { ConfigDocsLinks } from './../config_docs_links';
+import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from './../constants';
+import { ExternalConnectorDocumentation } from './external_connector_documentation';
 import { ExternalConnectorFormFields } from './external_connector_form_fields';
 import { ExternalConnectorLogic } from './external_connector_logic';
 
@@ -69,9 +72,13 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
 
   const { name, categories } = sourceConfigData;
   const {
-    configuration: { documentationUrl, applicationLinkTitle, applicationPortalUrl },
+    configuration: { applicationLinkTitle, applicationPortalUrl },
   } = sourceData;
   const { isOrganization } = useValues(AppLogic);
+
+  const {
+    configuration: { documentationUrl },
+  } = staticExternalSourceData;
 
   const saveButton = (
     <EuiButton color="primary" fill isLoading={buttonLoading} disabled={formDisabled} type="submit">
@@ -134,6 +141,8 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={false}>
       {header}
+      <EuiSpacer size="l" />
+      <ExternalConnectorDocumentation name={name} documentationUrl={documentationUrl} />
       <EuiSpacer size="l" />
       <form onSubmit={handleFormSubmission}>
         <EuiSteps steps={configSteps} />
