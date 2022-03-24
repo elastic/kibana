@@ -12,18 +12,18 @@ import {
   buildFiltersFromCriteria,
   getUngroupedESQuery,
   getGroupedESQuery,
-  processUngroupedResults,
-  processGroupByResults,
+  // processUngroupedResults,
+  // processGroupByResults,
 } from './log_threshold_executor';
 import {
   Comparator,
-  AlertStates,
+  // AlertStates,
   RuleParams,
   Criterion,
-  UngroupedSearchQueryResponse,
-  GroupedSearchQueryResponse,
+  // UngroupedSearchQueryResponse,
+  // GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold';
-import { alertsMock } from '../../../../../alerting/server/mocks';
+// import { alertsMock } from '../../../../../alerting/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 // Mocks //
