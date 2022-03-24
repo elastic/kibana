@@ -16,7 +16,7 @@ import {
 export const addIntegration = (agentPolicy = 'Default Fleet Server policy') => {
   cy.getBySel(ADD_POLICY_BTN).click();
   cy.getBySel(DATA_COLLECTION_SETUP_STEP).find('.euiLoadingSpinner').should('not.exist');
-  cy.getBySel('agentPolicySelect').select(agentPolicy);
+  cy.getBySel('agentPolicySelect').should('have.text', agentPolicy);
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
   closeModalIfVisible();

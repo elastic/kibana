@@ -7,57 +7,68 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { ControlGroupInput } from '../../../controls/common';
-import { ControlStyle } from '../../../controls/common/types';
+import { ControlGroupInput, getDefaultControlGroupInput } from '../../../controls/common';
 import { RawControlGroupAttributes } from '../types';
+
+export const getDefaultDashboardControlGroupInput = getDefaultControlGroupInput;
 
 export const controlGroupInputToRawAttributes = (
   controlGroupInput: Omit<ControlGroupInput, 'id'>
-): Omit<RawControlGroupAttributes, 'id'> => {
+): RawControlGroupAttributes => {
   return {
     controlStyle: controlGroupInput.controlStyle,
+    chainingSystem: controlGroupInput.chainingSystem,
     panelsJSON: JSON.stringify(controlGroupInput.panels),
+    ignoreParentSettingsJSON: JSON.stringify(controlGroupInput.ignoreParentSettings),
   };
 };
 
-export const getDefaultDashboardControlGroupInput = () => ({
-  controlStyle: 'oneLine' as ControlGroupInput['controlStyle'],
-  panels: {},
-});
+const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
+  if (!jsonString && typeof jsonString !== 'string') return;
+  try {
+    return JSON.parse(jsonString) as OutType;
+  } catch {
+    return;
+  }
+};
 
 export const rawAttributesToControlGroupInput = (
-  rawControlGroupAttributes: Omit<RawControlGroupAttributes, 'id'>
+  rawControlGroupAttributes: RawControlGroupAttributes
 ): Omit<ControlGroupInput, 'id'> | undefined => {
-  const defaultControlGroupInput = getDefaultDashboardControlGroupInput();
+  const defaultControlGroupInput = getDefaultControlGroupInput();
+  const { chainingSystem, controlStyle, ignoreParentSettingsJSON, panelsJSON } =
+    rawControlGroupAttributes;
+  const panels = safeJSONParse<ControlGroupInput['panels']>(panelsJSON);
+  const ignoreParentSettings =
+    safeJSONParse<ControlGroupInput['ignoreParentSettings']>(ignoreParentSettingsJSON);
   return {
-    controlStyle: rawControlGroupAttributes?.controlStyle ?? defaultControlGroupInput.controlStyle,
-    panels:
-      rawControlGroupAttributes?.panelsJSON &&
-      typeof rawControlGroupAttributes?.panelsJSON === 'string'
-        ? JSON.parse(rawControlGroupAttributes?.panelsJSON)
-        : defaultControlGroupInput.panels,
+    ...defaultControlGroupInput,
+    ...(chainingSystem ? { chainingSystem } : {}),
+    ...(controlStyle ? { controlStyle } : {}),
+    ...(ignoreParentSettings ? { ignoreParentSettings } : {}),
+    ...(panels ? { panels } : {}),
   };
 };
 
 export const rawAttributesToSerializable = (
   rawControlGroupAttributes: Omit<RawControlGroupAttributes, 'id'>
 ): SerializableRecord => {
-  const defaultControlGroupInput = getDefaultDashboardControlGroupInput();
+  const defaultControlGroupInput = getDefaultControlGroupInput();
   return {
+    chainingSystem: rawControlGroupAttributes?.chainingSystem,
     controlStyle: rawControlGroupAttributes?.controlStyle ?? defaultControlGroupInput.controlStyle,
-    panels:
-      rawControlGroupAttributes?.panelsJSON &&
-      typeof rawControlGroupAttributes?.panelsJSON === 'string'
-        ? (JSON.parse(rawControlGroupAttributes?.panelsJSON) as SerializableRecord)
-        : defaultControlGroupInput.panels,
+    ignoreParentSettings: safeJSONParse(rawControlGroupAttributes?.ignoreParentSettingsJSON) ?? {},
+    panels: safeJSONParse(rawControlGroupAttributes?.panelsJSON) ?? {},
   };
 };
 
 export const serializableToRawAttributes = (
-  controlGroupInput: SerializableRecord
-): Omit<RawControlGroupAttributes, 'id'> => {
+  serializable: SerializableRecord
+): Omit<RawControlGroupAttributes, 'id' | 'type'> => {
   return {
-    controlStyle: controlGroupInput.controlStyle as ControlStyle,
-    panelsJSON: JSON.stringify(controlGroupInput.panels),
+    controlStyle: serializable.controlStyle as RawControlGroupAttributes['controlStyle'],
+    chainingSystem: serializable.chainingSystem as RawControlGroupAttributes['chainingSystem'],
+    ignoreParentSettingsJSON: JSON.stringify(serializable.ignoreParentSettings),
+    panelsJSON: JSON.stringify(serializable.panels),
   };
 };

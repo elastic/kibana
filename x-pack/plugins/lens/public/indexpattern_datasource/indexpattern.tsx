@@ -230,7 +230,7 @@ export function getIndexPatternDatasource({
       });
     },
 
-    initializeDimension(state, layerId, { columnId, groupId, label, dataType, staticValue }) {
+    initializeDimension(state, layerId, { columnId, groupId, staticValue }) {
       const indexPattern = state.indexPatterns[state.layers[layerId]?.indexPatternId];
       if (staticValue == null) {
         return state;

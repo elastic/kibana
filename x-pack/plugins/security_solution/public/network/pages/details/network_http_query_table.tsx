@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { OwnProps } from './types';
-import { useNetworkHttp } from '../../containers/network_http';
+import { useNetworkHttp, ID } from '../../containers/network_http';
 import { NetworkHttpTable } from '../../components/network_http_table';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
 
@@ -24,6 +25,11 @@ export const NetworkHttpQueryTable = ({
   startDate,
   type,
 }: OwnProps) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [
     loading,
     { id, inspect, isInspected, loadPage, networkHttp, pageInfo, refetch, totalCount },
@@ -32,7 +38,7 @@ export const NetworkHttpQueryTable = ({
     filterQuery,
     indexNames,
     ip,
-    skip,
+    skip: querySkip,
     startDate,
     type,
   });
@@ -48,6 +54,7 @@ export const NetworkHttpQueryTable = ({
       loadPage={loadPage}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}

@@ -341,7 +341,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   getGeoFieldName(): string {
     if (!this._descriptor.geoField) {
-      throw new Error('Should not call');
+      throw new Error(`Required field 'geoField' not provided in '_descriptor'`);
     }
     return this._descriptor.geoField;
   }

@@ -222,7 +222,9 @@ export const SyntheticsMonitorWithIdCodec = t.intersection([
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
 
 export const MonitorManagementListResultCodec = t.type({
-  monitors: t.array(t.interface({ id: t.string, attributes: SyntheticsMonitorCodec })),
+  monitors: t.array(
+    t.interface({ id: t.string, attributes: SyntheticsMonitorCodec, updated_at: t.string })
+  ),
   page: t.number,
   perPage: t.number,
   total: t.union([t.number, t.null]),
