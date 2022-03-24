@@ -26,18 +26,28 @@ import {
   logsOnlySpacesAll,
 } from '../../../common/lib/authentication/users';
 
+type RuleRegistrySearchResponseWithErrors = RuleRegistrySearchResponse & {
+  statusCode: number;
+  message: string;
+};
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  // const bsearch = getService('bsearch');
   const secureBsearch = getService('secureBsearch');
   const log = getService('log');
+  const kbnClient = getService('kibanaServer');
 
   const SPACE1 = 'space1';
 
   describe('ruleRegistryAlertsSearchStrategy', () => {
+    let kibanaVersion: string;
+    before(async () => {
+      kibanaVersion = await kbnClient.version.get();
+    });
+
     describe('logs', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -53,10 +63,12 @@ export default ({ getService }: FtrProviderContext) => {
             username: logsOnlySpacesAll.username,
             password: logsOnlySpacesAll.password,
           },
+          referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [AlertConsumers.LOGS],
           },
-          strategy: 'ruleRegistryAlertsSearchStrategy',
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
         expect(result.rawResponse.hits.total).to.eql(5);
         const consumers = result.rawResponse.hits.hits.map((hit) => {
@@ -72,6 +84,8 @@ export default ({ getService }: FtrProviderContext) => {
             username: logsOnlySpacesAll.username,
             password: logsOnlySpacesAll.password,
           },
+          referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [AlertConsumers.LOGS],
             pagination: {
@@ -86,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           },
-          strategy: 'ruleRegistryAlertsSearchStrategy',
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
         expect(result.rawResponse.hits.total).to.eql(5);
         expect(result.rawResponse.hits.hits.length).to.eql(2);
@@ -94,9 +108,26 @@ export default ({ getService }: FtrProviderContext) => {
         const second = result.rawResponse.hits.hits[1].fields?.['kibana.alert.evaluation.value'];
         expect(first > second).to.be(true);
       });
+
+      it('should reject public requests', async () => {
+        const result = await secureBsearch.send<RuleRegistrySearchResponseWithErrors>({
+          supertestWithoutAuth,
+          auth: {
+            username: logsOnlySpacesAll.username,
+            password: logsOnlySpacesAll.password,
+          },
+          options: {
+            featureIds: [AlertConsumers.LOGS],
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+        });
+        expect(result.statusCode).to.be(500);
+        expect(result.message).to.be(
+          `The privateRuleRegistryAlertsSearchStrategy search strategy is currently only available for internal use.`
+        );
+      });
     });
 
-    // TODO: need xavier's help here
     describe('siem', () => {
       before(async () => {
         await createSignalsIndex(supertest, log);
@@ -126,10 +157,12 @@ export default ({ getService }: FtrProviderContext) => {
             username: obsOnlySpacesAllEsRead.username,
             password: obsOnlySpacesAllEsRead.password,
           },
+          referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [AlertConsumers.SIEM],
           },
-          strategy: 'ruleRegistryAlertsSearchStrategy',
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
         expect(result.rawResponse.hits.total).to.eql(1);
         const consumers = result.rawResponse.hits.hits.map(
@@ -139,24 +172,22 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should throw an error when trying to to search for more than just siem', async () => {
-        type RuleRegistrySearchResponseWithErrors = RuleRegistrySearchResponse & {
-          statusCode: number;
-          message: string;
-        };
         const result = await secureBsearch.send<RuleRegistrySearchResponseWithErrors>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAllEsRead.username,
             password: obsOnlySpacesAllEsRead.password,
           },
+          referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
           },
-          strategy: 'ruleRegistryAlertsSearchStrategy',
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
         expect(result.statusCode).to.be(500);
         expect(result.message).to.be(
-          `The ruleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
+          `The privateRuleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
         );
       });
     });
@@ -176,10 +207,12 @@ export default ({ getService }: FtrProviderContext) => {
             username: obsOnlySpacesAll.username,
             password: obsOnlySpacesAll.password,
           },
+          referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [AlertConsumers.APM],
           },
-          strategy: 'ruleRegistryAlertsSearchStrategy',
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
           space: SPACE1,
         });
         expect(result.rawResponse.hits.total).to.eql(2);
@@ -198,10 +231,12 @@ export default ({ getService }: FtrProviderContext) => {
             username: obsOnlySpacesAll.username,
             password: obsOnlySpacesAll.password,
           },
+          referer: 'test',
+          kibanaVersion,
           options: {
             featureIds: [],
           },
-          strategy: 'ruleRegistryAlertsSearchStrategy',
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
         expect(result.rawResponse).to.eql({});
       });

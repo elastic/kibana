@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { AppMount } from 'src/core/public';
+import { Observable } from 'rxjs';
+import { RouteComponentProps } from 'react-router-dom';
+
+import { AppUnmount, CoreTheme } from 'src/core/public';
 
 /**
  * Descriptor for a dev tool. A dev tool works similar to an application
@@ -15,6 +18,12 @@ import { AppMount } from 'src/core/public';
 export type CreateDevToolArgs = Omit<DevToolApp, 'enable' | 'disable' | 'isDisabled'> & {
   disabled?: boolean;
 };
+
+interface DevToolMountParams {
+  element: HTMLDivElement;
+  location: RouteComponentProps['location'];
+  theme$: Observable<CoreTheme>;
+}
 
 export class DevToolApp {
   /**
@@ -29,7 +38,7 @@ export class DevToolApp {
    * May also be a ReactNode.
    */
   public readonly title: string;
-  public readonly mount: AppMount;
+  public readonly mount: (params: DevToolMountParams) => AppUnmount | Promise<AppUnmount>;
 
   /**
    * Mark the navigation tab as beta.
@@ -62,7 +71,7 @@ export class DevToolApp {
   constructor(
     id: string,
     title: string,
-    mount: AppMount,
+    mount: (params: DevToolMountParams) => AppUnmount | Promise<AppUnmount>,
     enableRouting: boolean,
     order: number,
     toolTipContent = '',
