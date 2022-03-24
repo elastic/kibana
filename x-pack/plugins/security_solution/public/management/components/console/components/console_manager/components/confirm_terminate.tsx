@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -26,14 +27,25 @@ export const ConfirmTerminate = memo<ConfirmTerminateProps>(({ onConfirm, onCanc
   return (
     <div className="euiOverlayMask" style={{ position: 'absolute' }}>
       <EuiPanel className="terminate-confirm-panel">
-        <EuiText>
-          <p>
+        <EuiCallOut
+          color="primary"
+          iconType="iInCircle"
+          title={
             <FormattedMessage
-              id="xpack.securitySolution.console.popup.terminateMessage"
-              defaultMessage="This will end your console session. Do you wish to continue?"
+              id="xpack.securitySolution.console.popup.confirmTitle"
+              defaultMessage="Terminate this session"
             />
-          </p>
-        </EuiText>
+          }
+        >
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.console.popup.terminateMessage"
+                defaultMessage="This will end your console session. Do you wish to continue?"
+              />
+            </p>
+          </EuiText>
+        </EuiCallOut>
 
         <EuiSpacer />
 
