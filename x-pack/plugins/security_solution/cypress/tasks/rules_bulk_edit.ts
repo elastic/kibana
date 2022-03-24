@@ -74,7 +74,7 @@ export const confirmBulkEditForm = () => cy.get(RULES_BULK_EDIT_FORM_CONFIRM_BTN
 
 export const waitForBulkEditActionToFinish = ({ rulesCount }: { rulesCount: number }) => {
   cy.get(BULK_ACTIONS_PROGRESS_BTN).should('be.disabled');
-  cy.contains(TOASTER_BODY, `You’ve successfully updated ${rulesCount} rule`);
+  cy.contains(TOASTER_BODY, `You've successfully updated ${rulesCount} rule`);
 };
 
 export const waitForElasticRulesBulkEditModal = (rulesCount: number) => {
@@ -99,6 +99,6 @@ export const waitForMixedRulesBulkEditModal = (
 
   cy.get(MODAL_CONFIRMATION_BODY).should(
     'have.text',
-    `The update action will only be applied to ${customRulesCount} Custom rules you’ve selected.`
+    `The update action will only be applied to ${customRulesCount} Custom rules you've selected.`
   );
 };
