@@ -161,6 +161,7 @@ export const RangeSliderPopover: FC<Props> = ({
       panelPaddingSize="s"
       className="rangeSlider__popoverOverride"
       anchorClassName="rangeSlider__anchorOverride"
+      panelClassName="rangeSlider__panelOverride"
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downCenter"
       initialFocus={false}

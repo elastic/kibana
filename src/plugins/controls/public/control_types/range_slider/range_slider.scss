@@ -4,6 +4,18 @@
   width: 100%;
 }
 
+@include euiBreakpoint('m', 'l', 'xl') {
+  .rangeSlider__panelOverride {
+    min-width: $euiSizeXXL * 12;
+  }
+}
+
+.rangeSlider__anchorOverride {
+  >div {
+    height: 100%;
+  }
+}
+
 .rangeSliderAnchor__button {
   display: flex;
   align-items: center;
