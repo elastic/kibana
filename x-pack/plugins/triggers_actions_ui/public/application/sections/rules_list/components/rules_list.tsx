@@ -48,6 +48,7 @@ import {
   RuleTypeIndex,
   Pagination,
   Percentiles,
+  TriggersActionsUiConfig,
 } from '../../../../types';
 import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -75,6 +76,7 @@ import {
   ALERTS_FEATURE_ID,
   AlertExecutionStatusErrorReasons,
   formatDuration,
+  parseDuration,
   MONITORING_HISTORY_LIMIT,
 } from '../../../../../../alerting/common';
 import { rulesStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
@@ -89,6 +91,7 @@ import { PercentileSelectablePopover } from './percentile_selectable_popover';
 import { RuleDurationFormat } from './rule_duration_format';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
+import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 
 const ENTER_KEY = 13;
 
@@ -135,6 +138,7 @@ export const RulesList: React.FunctionComponent = () => {
 
   const [initialLoad, setInitialLoad] = useState<boolean>(true);
   const [noData, setNoData] = useState<boolean>(true);
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -149,6 +153,12 @@ export const RulesList: React.FunctionComponent = () => {
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
+
+  useEffect(() => {
+    (async () => {
+      setConfig(await triggersActionsUiConfig({ http }));
+    })();
+  }, [http]);
 
   const [percentileOptions, setPercentileOptions] =
     useState<EuiSelectableOption[]>(initialPercentileOptions);
@@ -609,7 +619,59 @@ export const RulesList: React.FunctionComponent = () => {
         sortable: false,
         truncateText: false,
         'data-test-subj': 'rulesTableCell-interval',
-        render: (interval: string) => formatDuration(interval),
+        render: (interval: string, item: RuleTableItem) => {
+          const durationString = formatDuration(interval);
+          return (
+            <>
+              <EuiFlexGroup direction="row" gutterSize="xs">
+                <EuiFlexItem grow={false}>{durationString}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {item.showIntervalWarning && (
+                    <EuiToolTip
+                      data-test-subj={`ruleInterval-config-tooltip-${item.index}`}
+                      title={i18n.translate(
+                        'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalTooltipTitle',
+                        {
+                          defaultMessage: 'Below configured minimum interval',
+                        }
+                      )}
+                      content={i18n.translate(
+                        'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalTooltipText',
+                        {
+                          defaultMessage:
+                            'Rule interval of {interval} is below the minimum configured interval of {minimumInterval}. This may impact alerting performance.',
+                          values: {
+                            minimumInterval: formatDuration(
+                              config.minimumScheduleInterval!.value,
+                              true
+                            ),
+                            interval: formatDuration(interval, true),
+                          },
+                        }
+                      )}
+                      position="top"
+                    >
+                      <EuiButtonIcon
+                        color="text"
+                        data-test-subj={`ruleInterval-config-icon-${item.index}`}
+                        onClick={() => {
+                          if (item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)) {
+                            onRuleEdit(item);
+                          }
+                        }}
+                        iconType="flag"
+                        aria-label={i18n.translate(
+                          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalIconAriaLabel',
+                          { defaultMessage: 'Below configured minimum interval' }
+                        )}
+                      />
+                    </EuiToolTip>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          );
+        },
       },
       {
         field: 'executionStatus.lastDuration',
@@ -850,11 +912,12 @@ export const RulesList: React.FunctionComponent = () => {
           <EuiFlexItem grow={false}>
             <BulkOperationPopover>
               <RuleQuickEditButtons
-                selectedItems={convertRulesToTableItems(
-                  filterRulesById(rulesState.data, selectedIds),
-                  ruleTypesState.data,
-                  canExecuteActions
-                )}
+                selectedItems={convertRulesToTableItems({
+                  rules: filterRulesById(rulesState.data, selectedIds),
+                  ruleTypeIndex: ruleTypesState.data,
+                  canExecuteActions,
+                  config,
+                })}
                 onPerformingAction={() => setIsPerformingAction(true)}
                 onActionPerformed={() => {
                   loadRulesData();
@@ -1037,7 +1100,12 @@ export const RulesList: React.FunctionComponent = () => {
         items={
           ruleTypesState.isInitialized === false
             ? []
-            : convertRulesToTableItems(rulesState.data, ruleTypesState.data, canExecuteActions)
+            : convertRulesToTableItems({
+                rules: rulesState.data,
+                ruleTypeIndex: ruleTypesState.data,
+                canExecuteActions,
+                config,
+              })
         }
         itemId="id"
         columns={getRulesTableColumns()}
@@ -1202,19 +1270,29 @@ function filterRulesById(rules: Rule[], ids: string[]): Rule[] {
   return rules.filter((rule) => ids.includes(rule.id));
 }
 
-function convertRulesToTableItems(
-  rules: Rule[],
-  ruleTypeIndex: RuleTypeIndex,
-  canExecuteActions: boolean
-) {
-  return rules.map((rule, index: number) => ({
-    ...rule,
-    index,
-    actionsCount: rule.actions.length,
-    ruleType: ruleTypeIndex.get(rule.ruleTypeId)?.name ?? rule.ruleTypeId,
-    isEditable:
-      hasAllPrivilege(rule, ruleTypeIndex.get(rule.ruleTypeId)) &&
-      (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
-    enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
-  }));
+interface ConvertRulesToTableItemsOpts {
+  rules: Rule[];
+  ruleTypeIndex: RuleTypeIndex;
+  canExecuteActions: boolean;
+  config: TriggersActionsUiConfig;
+}
+
+function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): RuleTableItem[] {
+  const { rules, ruleTypeIndex, canExecuteActions, config } = opts;
+  const minimumDuration = config.minimumScheduleInterval
+    ? parseDuration(config.minimumScheduleInterval.value)
+    : 0;
+  return rules.map((rule, index: number) => {
+    return {
+      ...rule,
+      index,
+      actionsCount: rule.actions.length,
+      ruleType: ruleTypeIndex.get(rule.ruleTypeId)?.name ?? rule.ruleTypeId,
+      isEditable:
+        hasAllPrivilege(rule, ruleTypeIndex.get(rule.ruleTypeId)) &&
+        (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
+      enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
+      showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
+    };
+  });
 }
