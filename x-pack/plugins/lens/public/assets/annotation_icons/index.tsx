@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export * from './dns';
-export * from './network_events';
-export * from './tls_handshakes';
-export * from './unique_flows';
-export * from './unique_private_ips';
+export { IconCircle } from './circle';
+export { IconTriangle } from './triangle';

@@ -36,21 +36,24 @@ describe('Uncommon Process Table Component', () => {
   const loadPage = jest.fn();
   const mount = useMountAppended();
 
+  const defaultProps = {
+    data: mockData.edges,
+    fakeTotalCount: getOr(50, 'fakeTotalCount', mockData.pageInfo),
+    id: 'uncommonProcess',
+    isInspect: false,
+    loading: false,
+    loadPage,
+    setQuerySkip: jest.fn(),
+    showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockData.pageInfo),
+    totalCount: mockData.totalCount,
+    type: hostsModel.HostsType.page,
+  };
+
   describe('rendering', () => {
     test('it renders the default Uncommon process table', () => {
       const wrapper = shallow(
         <TestProviders>
-          <UncommonProcessTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="uncommonProcess"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={hostsModel.HostsType.page}
-          />
+          <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
 
@@ -60,17 +63,7 @@ describe('Uncommon Process Table Component', () => {
     test('it has a double dash (empty value) without any hosts at all', () => {
       const wrapper = mount(
         <TestProviders>
-          <UncommonProcessTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="uncommonProcess"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={hostsModel.HostsType.page}
-          />
+          <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
       expect(wrapper.find('.euiTableRow').at(0).find('.euiTableRowCell').at(3).text()).toBe(
@@ -81,17 +74,7 @@ describe('Uncommon Process Table Component', () => {
     test('it has a single host without any extra comma when the number of hosts is exactly 1', () => {
       const wrapper = mount(
         <TestProviders>
-          <UncommonProcessTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="uncommonProcess"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={hostsModel.HostsType.page}
-          />
+          <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
 
@@ -103,17 +86,7 @@ describe('Uncommon Process Table Component', () => {
     test('it has a single link when the number of hosts is exactly 1', () => {
       const wrapper = mount(
         <TestProviders>
-          <UncommonProcessTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="uncommonProcess"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={hostsModel.HostsType.page}
-          />
+          <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
 
@@ -125,17 +98,7 @@ describe('Uncommon Process Table Component', () => {
     test('it has a comma separated list of hosts when the number of hosts is greater than 1', () => {
       const wrapper = mount(
         <TestProviders>
-          <UncommonProcessTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="uncommonProcess"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={hostsModel.HostsType.page}
-          />
+          <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
 
@@ -147,17 +110,7 @@ describe('Uncommon Process Table Component', () => {
     test('it has 2 links when the number of hosts is equal to 2', () => {
       const wrapper = mount(
         <TestProviders>
-          <UncommonProcessTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="uncommonProcess"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={hostsModel.HostsType.page}
-          />
+          <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
 
@@ -169,17 +122,7 @@ describe('Uncommon Process Table Component', () => {
     test('it is empty when all hosts are invalid because they do not contain an id and a name', () => {
       const wrapper = mount(
         <TestProviders>
-          <UncommonProcessTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="uncommonProcess"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={hostsModel.HostsType.page}
-          />
+          <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
       expect(wrapper.find('.euiTableRow').at(3).find('.euiTableRowCell').at(3).text()).toBe(
@@ -190,17 +133,7 @@ describe('Uncommon Process Table Component', () => {
     test('it has no link when all hosts are invalid because they do not contain an id and a name', () => {
       const wrapper = mount(
         <TestProviders>
-          <UncommonProcessTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="uncommonProcess"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={hostsModel.HostsType.page}
-          />
+          <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
       expect(
@@ -211,17 +144,7 @@ describe('Uncommon Process Table Component', () => {
     test('it is returns two hosts when others are invalid because they do not contain an id and a name', () => {
       const wrapper = mount(
         <TestProviders>
-          <UncommonProcessTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="uncommonProcess"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={hostsModel.HostsType.page}
-          />
+          <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
       expect(wrapper.find('.euiTableRow').at(4).find('.euiTableRowCell').at(3).text()).toBe(
