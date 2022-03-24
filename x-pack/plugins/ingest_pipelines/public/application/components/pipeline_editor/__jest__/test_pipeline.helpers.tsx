@@ -14,7 +14,6 @@ import { HttpSetup } from 'src/core/public';
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
-import { httpServiceMock } from '../../../../../../../../src/core/public/mocks';
 
 /* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
 import '../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
@@ -62,7 +61,7 @@ const testBedSetup = registerTestBed<TestSubject>(
 );
 
 export interface SetupResult extends TestBed<TestSubject> {
-  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>;
+  httpSetup: HttpSetup;
   actions: ReturnType<typeof createActions>;
 }
 

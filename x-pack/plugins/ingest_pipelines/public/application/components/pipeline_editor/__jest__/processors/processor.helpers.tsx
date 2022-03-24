@@ -104,7 +104,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 };
 
 export const setup = async (props: Props): Promise<SetupResult> => {
-  const testBed = await testBedSetup(props);
+  const testBed = testBedSetup(props);
   return {
     ...testBed,
     actions: createActions(testBed),
@@ -119,15 +119,14 @@ export const setupEnvironment = () => {
   // @ts-ignore
   apiService.setup(mockHttpClient, uiMetricService);
 
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
+  const { httpRequestsMockHelpers } = initHttpRequests();
 
   return {
-    server,
     httpRequestsMockHelpers,
   };
 };
 
-export const getProcessorValue = (onUpdate: jest.Mock, type: string) => {
+export const getProcessorValue = (onUpdate: jest.Mock) => {
   const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
   const { processors } = onUpdateResult.getData();
   return processors;
