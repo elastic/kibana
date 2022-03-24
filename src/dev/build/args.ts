@@ -22,6 +22,7 @@ export function readCliArgs(argv: string[]) {
       'skip-os-packages',
       'rpm',
       'deb',
+      'docker-cross-compile',
       'docker-images',
       'docker-push',
       'skip-docker-contexts',
@@ -52,6 +53,7 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       'docker-images': null,
+      'docker-cross-compile': false,
       'docker-push': false,
       'docker-tag-qualifier': null,
       'version-qualifier': '',
@@ -112,6 +114,7 @@ export function readCliArgs(argv: string[]) {
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
+    dockerCrossCompile: Boolean(flags['docker-cross-compile']),
     dockerPush: Boolean(flags['docker-push']),
     dockerTagQualifier: flags['docker-tag-qualifier'],
     initialize: !Boolean(flags['skip-initialize']),
