@@ -33,9 +33,11 @@ export function TestResultHeader({ doc, title, summaryDocs, journeyStarted, isCo
   let duration = 0;
   if (summaryDocs && summaryDocs.length > 0) {
     summaryDocs.forEach((sDoc) => {
-      duration += sDoc.monitor.duration!.us;
+      duration += sDoc.monitor.duration?.us ?? 0;
     });
   }
+
+  const summaryDoc = summaryDocs?.[0] as Ping;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -48,7 +50,9 @@ export function TestResultHeader({ doc, title, summaryDocs, journeyStarted, isCo
         {isCompleted ? (
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiBadge color="success">{COMPLETED_LABEL}</EuiBadge>
+              <EuiBadge color={summaryDoc?.summary?.down! > 0 ? 'danger' : 'success'}>
+                {summaryDoc?.summary?.down! > 0 ? FAILED_LABEL : COMPLETED_LABEL}
+              </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">
@@ -96,6 +100,10 @@ const TEST_RESULT = i18n.translate('xpack.uptime.monitorManagement.testResult', 
 
 const COMPLETED_LABEL = i18n.translate('xpack.uptime.monitorManagement.completed', {
   defaultMessage: 'COMPLETED',
+});
+
+const FAILED_LABEL = i18n.translate('xpack.uptime.monitorManagement.failed', {
+  defaultMessage: 'FAILED',
 });
 
 export const IN_PROGRESS_LABEL = i18n.translate('xpack.uptime.monitorManagement.inProgress', {
