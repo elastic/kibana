@@ -61,6 +61,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return (await filterBarService.getFilterCount()) === 1;
       });
 
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
       await PageObjects.lens.saveAndReturn();
 
       await queryBar.switchQueryLanguage('kql');
