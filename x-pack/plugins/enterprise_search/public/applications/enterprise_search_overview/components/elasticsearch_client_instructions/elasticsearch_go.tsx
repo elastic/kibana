@@ -48,7 +48,7 @@ export const ElasticsearchGo: React.FC<{ cloudId?: string }> = ({ cloudId }) => 
         <p>Add the package to your go.mod file:</p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable>
+      <EuiCodeBlock fontSize="m" isCopyable language="go-module">
         {dedent`
           require github.com/elastic/go-elasticsearch/v8 main
         `}
@@ -69,7 +69,7 @@ export const ElasticsearchGo: React.FC<{ cloudId?: string }> = ({ cloudId }) => 
         </p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable>
+      <EuiCodeBlock fontSize="m" isCopyable language="go">
         {dedent`
           es, err := elasticsearch.NewDefaultClient()
           if err != nil {
@@ -99,7 +99,7 @@ export const ElasticsearchGo: React.FC<{ cloudId?: string }> = ({ cloudId }) => 
             </p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiCodeBlock fontSize="m" isCopyable>
+          <EuiCodeBlock fontSize="m" isCopyable language="go">
             {dedent`
               cfg := elasticsearch.Config{
                 CloudID: "${cloudId}",
@@ -120,7 +120,7 @@ export const ElasticsearchGo: React.FC<{ cloudId?: string }> = ({ cloudId }) => 
             </p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiCodeBlock fontSize="m" isCopyable>
+          <EuiCodeBlock fontSize="m" isCopyable language="go">
             {dedent`
               cfg := elasticsearch.Config{
                 Addresses: []string{

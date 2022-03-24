@@ -59,7 +59,7 @@ export const ElasticsearchDotnet: React.FC = () => {
         <p>You can install Elasticsearch.Net or NEST from the package manager console:</p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable>
+      <EuiCodeBlock fontSize="m" isCopyable language="shell">
         {dedent`
           PM> Install-Package Elasticsearch.Net
           PM> Install-Package NEST

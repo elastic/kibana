@@ -47,7 +47,7 @@ export const ElasticsearchJavascript: React.FC<{ cloudId?: string }> = ({ cloudI
         <p>To install the latest version of the client, run the following command:</p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable>
+      <EuiCodeBlock fontSize="m" isCopyable language="shell">
         npm install @elastic/elasticsearch
       </EuiCodeBlock>
 
@@ -64,7 +64,7 @@ export const ElasticsearchJavascript: React.FC<{ cloudId?: string }> = ({ cloudI
             </p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiCodeBlock fontSize="m" isCopyable>
+          <EuiCodeBlock fontSize="m" isCopyable language="javascript">
             {dedent`
               const { Client } = require('@elastic/elasticsearch')
               const client = new Client({

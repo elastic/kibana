@@ -92,7 +92,7 @@ export const ElasticsearchRuby: React.FC<{ cloudId?: string }> = ({ cloudId }) =
         </p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable>
+      <EuiCodeBlock fontSize="m" isCopyable language="shell">
         {dedent`
           $ gem install elasticsearch
         `}
@@ -127,7 +127,7 @@ export const ElasticsearchRuby: React.FC<{ cloudId?: string }> = ({ cloudId }) =
             </p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiCodeBlock fontSize="m" isCopyable>
+          <EuiCodeBlock fontSize="m" isCopyable language="ruby">
             {dedent`
               require 'elasticsearch'
 

@@ -82,7 +82,7 @@ export const ElasticsearchPhp: React.FC<{ cloudId?: string }> = ({ cloudId }) =>
             </p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiCodeBlock fontSize="m" isCopyable>
+          <EuiCodeBlock fontSize="m" isCopyable language="php">
             {dedent`
               // Connect via basic authentication
               $client = ClientBuilder::create()

@@ -79,7 +79,7 @@ export const ElasticsearchJava: React.FC = () => {
         <p>The code snippet below creates and wires these three components together:</p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable>
+      <EuiCodeBlock fontSize="m" isCopyable language="java">
         {dedent`
           // Create the low-level client
           RestClient restClient = RestClient.builder(

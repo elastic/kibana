@@ -49,7 +49,7 @@ export const ElasticsearchPython: React.FC<{ cloudId?: string }> = ({ cloudId })
         </p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable>
+      <EuiCodeBlock fontSize="m" isCopyable language="shell">
         {dedent`
           $ python -m pip install elasticsearch
         `}
@@ -64,7 +64,7 @@ export const ElasticsearchPython: React.FC<{ cloudId?: string }> = ({ cloudId })
         </p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable>
+      <EuiCodeBlock fontSize="m" isCopyable language="shell">
         {dedent`
           $ python -m pip install elasticsearch[async]
         `}
@@ -98,7 +98,7 @@ export const ElasticsearchPython: React.FC<{ cloudId?: string }> = ({ cloudId })
             </p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiCodeBlock fontSize="m" isCopyable>
+          <EuiCodeBlock fontSize="m" isCopyable language="python">
             {dedent`
               from elasticsearch import Elasticsearch
 
@@ -122,7 +122,7 @@ export const ElasticsearchPython: React.FC<{ cloudId?: string }> = ({ cloudId })
             </p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiCodeBlock fontSize="m" isCopyable>
+          <EuiCodeBlock fontSize="m" isCopyable language="python">
             {dedent`
               from elasticsearch import Elasticsearch
 
