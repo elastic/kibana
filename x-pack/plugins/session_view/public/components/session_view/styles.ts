@@ -20,8 +20,6 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
   const cached = useMemo(() => {
     const { border, colors } = euiTheme;
 
-    const thinBorder = `${border.width.thin} solid ${colors.lightShade}!important`;
-
     const processTree: CSSObject = {
       height: `${height}px`,
       position: 'relative',
