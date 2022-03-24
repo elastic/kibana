@@ -7,45 +7,45 @@
 
 import { buildEsQuery } from '@kbn/es-query';
 import { SavedObjectsClientContract, SimpleSavedObject, IUiSettingsClient } from 'src/core/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/public';
 import {
-  IndexPattern,
-  getEsQueryConfig,
-  IndexPatternsContract,
-  IndexPatternAttributes,
-} from '../../../../../../../src/plugins/data/public';
+  DataView,
+  DataViewAttributes,
+  DataViewsContract,
+} from '../../../../../../../src/plugins/data_views/public';
 
 import { matchAllQuery } from '../../common';
 
-import { isIndexPattern } from '../../../../common/types/index_pattern';
+import { isDataView } from '../../../../common/types/data_view';
 
 export type SavedSearchQuery = object;
 
-type IndexPatternId = string;
+type DataViewId = string;
 
-let indexPatternCache: Array<SimpleSavedObject<Record<string, any>>> = [];
-let fullIndexPatterns;
-let currentIndexPattern = null;
+let dataViewCache: Array<SimpleSavedObject<Record<string, any>>> = [];
+let fullDataViews;
+let currentDataView = null;
 
-export let refreshIndexPatterns: () => Promise<unknown>;
+export let refreshDataViews: () => Promise<unknown>;
 
-export function loadIndexPatterns(
+export function loadDataViews(
   savedObjectsClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatternsContract
+  dataViews: DataViewsContract
 ) {
-  fullIndexPatterns = indexPatterns;
+  fullDataViews = dataViews;
   return savedObjectsClient
-    .find<IndexPatternAttributes>({
+    .find<DataViewAttributes>({
       type: 'index-pattern',
       fields: ['id', 'title', 'type', 'fields'],
       perPage: 10000,
     })
     .then((response) => {
-      indexPatternCache = response.savedObjects;
+      dataViewCache = response.savedObjects;
 
-      if (refreshIndexPatterns === null) {
-        refreshIndexPatterns = () => {
+      if (refreshDataViews === null) {
+        refreshDataViews = () => {
           return new Promise((resolve, reject) => {
-            loadIndexPatterns(savedObjectsClient, indexPatterns)
+            loadDataViews(savedObjectsClient, dataViews)
               .then((resp) => {
                 resolve(resp);
               })
@@ -56,27 +56,24 @@ export function loadIndexPatterns(
         };
       }
 
-      return indexPatternCache;
+      return dataViewCache;
     });
 }
 
-export function getIndexPatternIdByTitle(indexPatternTitle: string): string | undefined {
-  return indexPatternCache.find((d) => d?.attributes?.title === indexPatternTitle)?.id;
+export function getDataViewIdByTitle(dataViewTitle: string): string | undefined {
+  return dataViewCache.find((d) => d?.attributes?.title === dataViewTitle)?.id;
 }
 
 type CombinedQuery = Record<'bool', any> | object;
 
-export function loadCurrentIndexPattern(
-  indexPatterns: IndexPatternsContract,
-  indexPatternId: IndexPatternId
-) {
-  fullIndexPatterns = indexPatterns;
-  currentIndexPattern = fullIndexPatterns.get(indexPatternId);
-  return currentIndexPattern;
+export function loadCurrentDataView(dataViews: DataViewsContract, dataViewId: DataViewId) {
+  fullDataViews = dataViews;
+  currentDataView = fullDataViews.get(dataViewId);
+  return currentDataView;
 }
 
 export interface SearchItems {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   savedSearch: any;
   query: any;
   combinedQuery: CombinedQuery;
@@ -84,7 +81,7 @@ export interface SearchItems {
 
 // Helper for creating the items used for searching and job creation.
 export function createSearchItems(
-  indexPattern: IndexPattern | undefined,
+  dataView: DataView | undefined,
   savedSearch: any,
   config: IUiSettingsClient
 ): SearchItems {
@@ -103,9 +100,9 @@ export function createSearchItems(
     },
   };
 
-  if (!isIndexPattern(indexPattern) && savedSearch !== null && savedSearch.id !== undefined) {
+  if (!isDataView(dataView) && savedSearch !== null && savedSearch.id !== undefined) {
     const searchSource = savedSearch.searchSource;
-    indexPattern = searchSource.getField('index') as IndexPattern;
+    dataView = searchSource.getField('index') as DataView;
 
     query = searchSource.getField('query');
     const fs = searchSource.getField('filter');
@@ -113,15 +110,15 @@ export function createSearchItems(
     const filters = fs.length ? fs : [];
 
     const esQueryConfigs = getEsQueryConfig(config);
-    combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+    combinedQuery = buildEsQuery(dataView, [query], filters, esQueryConfigs);
   }
 
-  if (!isIndexPattern(indexPattern)) {
+  if (!isDataView(dataView)) {
     throw new Error('Data view is not defined.');
   }
 
   return {
-    indexPattern,
+    dataView,
     savedSearch,
     query,
     combinedQuery,
