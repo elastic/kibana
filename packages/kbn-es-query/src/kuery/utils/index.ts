@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { SolutionToolbar } from './solution_toolbar';
-/** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-components */
-export * from './items';
+export { escapeKuery } from './escape_kuery';
