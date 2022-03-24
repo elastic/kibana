@@ -49,7 +49,7 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
         styleName="icon"
         svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
 <svg version=\\"1.1\\" id=\\"circle-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
-  <path d=\\"M14,7.5c0,3.5899-2.9101,6.5-6.5,6.5S1,11.0899,1,7.5S3.9101,1,7.5,1S14,3.9101,14,7.5z\\"/>
+  <path d=\\"M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z\\"/>
 </svg>"
         symbolId="circle"
       />
@@ -65,7 +65,7 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
         styleName="icon"
         svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
 <svg version=\\"1.1\\" id=\\"marker-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
-  <path id=\\"path4133\\" d=\\"M7.5,0C5.0676,0,2.2297,1.4865,2.2297,5.2703&#xA;&#x9;C2.2297,7.8378,6.2838,13.5135,7.5,15c1.0811-1.4865,5.2703-7.027,5.2703-9.7297C12.7703,1.4865,9.9324,0,7.5,0z\\"/>
+  <path d=\\"M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z\\"/>
 </svg>"
         symbolId="marker"
       />
@@ -143,12 +143,10 @@ exports[`renderLegendDetailRow Should render categorical legend with custom icon
         isPointsOnly={true}
         label="MX_format"
         styleName="icon"
-        svg="<svg width=\\"24\\" height=\\"24\\" stroke-width=\\"1.5\\" viewBox=\\"0 0 24 24\\" fill=\\"none\\" xmlns=\\"http://www.w3.org/2000/svg\\">
-<rect x=\\"9\\" y=\\"2\\" width=\\"6\\" height=\\"12\\" rx=\\"3\\" stroke=\\"currentColor\\" stroke-width=\\"1.5\\"/>
-<path d=\\"M5 10V11C5 14.866 8.13401 18 12 18V18V18C15.866 18 19 14.866 19 11V10\\" stroke=\\"currentColor\\" stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\"/>
-<path d=\\"M12 18V22M12 22H9M12 22H15\\" stroke=\\"currentColor\\" stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\"/>
-</svg>
-"
+        svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"marker-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path d=\\"M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z\\"/>
+</svg>"
         symbolId="marker"
       />
     </EuiFlexItem>
@@ -167,7 +165,10 @@ exports[`renderLegendDetailRow Should render categorical legend with custom icon
           </EuiTextColor>
         }
         styleName="icon"
-        svg="<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>"
+        svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"kbn__custom_icon_sdf__foobar-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path d=\\"M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z\\"/>
+</svg>"
         symbolId="kbn__custom_icon_sdf__foobar"
       />
     </EuiFlexItem>

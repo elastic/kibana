@@ -224,6 +224,11 @@ export const CUSTOM_ICON_PREFIX_SDF = '__kbn__custom_icon_sdf__';
 export const MAKI_ICON_SIZE = 16;
 export const HALF_MAKI_ICON_SIZE = MAKI_ICON_SIZE / 2;
 
+export enum ICON_SOURCE {
+  CUSTOM = 'CUSTOM',
+  MAKI = 'MAKI',
+}
+
 export enum VECTOR_STYLES {
   SYMBOLIZE_AS = 'symbolizeAs',
   FILL_COLOR = 'fillColor',

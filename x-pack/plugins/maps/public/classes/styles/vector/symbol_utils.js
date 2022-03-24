@@ -143,9 +143,9 @@ const ICON_PALETTES = [
 // PREFERRED_ICONS is used to provide less random default icon values for forms that need default icon values
 export const PREFERRED_ICONS = [];
 ICON_PALETTES.forEach((iconPalette) => {
-  iconPalette.icons.forEach((iconId) => {
-    if (!PREFERRED_ICONS.includes(iconId)) {
-      PREFERRED_ICONS.push(iconId);
+  iconPalette.icons.forEach((icon) => {
+    if (!PREFERRED_ICONS.includes(icon)) {
+      PREFERRED_ICONS.push(icon);
     }
   });
 });
@@ -181,12 +181,5 @@ export function getIconPaletteOptions() {
 
 export function getIconPalette(paletteId) {
   const palette = ICON_PALETTES.find(({ id }) => id === paletteId);
-  return palette
-    ? palette.icons.map((value) => {
-        return {
-          value,
-          ...getMakiSymbol(value),
-        };
-      })
-    : [];
+  return palette ? [...palette.icons] : [];
 }

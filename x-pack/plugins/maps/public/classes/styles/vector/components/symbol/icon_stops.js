@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CUSTOM_ICON_PREFIX_SDF, DEFAULT_ICON } from '../../../../../../common/constants';
+import { DEFAULT_ICON, ICON_SOURCE } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getOtherCategoryLabel } from '../../style_util';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
@@ -51,17 +51,14 @@ export function IconStops({
   onCustomIconsChange,
   customIcons,
 }) {
-  return iconStops.map(({ stop, value }, index) => {
-    const { svg, label } = value.startsWith(CUSTOM_ICON_PREFIX_SDF)
-      ? customIcons[value]
-      : getMakiSymbol(value);
+  return iconStops.map(({ stop, icon, iconSource }, index) => {
+    const { svg, label } =
+      iconSource === ICON_SOURCE.CUSTOM ? customIcons[icon] : getMakiSymbol(icon);
     const onIconSelect = ({ selectedIconId }) => {
       const newIconStops = [...iconStops];
       newIconStops[index] = {
         ...iconStops[index],
-        value: selectedIconId,
-        svg,
-        label,
+        icon: selectedIconId,
       };
       onChange({ customStops: newIconStops });
     };
@@ -70,8 +67,6 @@ export function IconStops({
       newIconStops[index] = {
         ...iconStops[index],
         stop: newStopValue,
-        svg,
-        label,
       };
       onChange({
         customStops: newIconStops,
@@ -84,9 +79,7 @@ export function IconStops({
           ...iconStops.slice(0, index + 1),
           {
             stop: '',
-            value: getFirstUnusedSymbol(iconStops),
-            svg,
-            label,
+            icon: getFirstUnusedSymbol(iconStops),
           },
           ...iconStops.slice(index + 1),
         ],
@@ -166,7 +159,7 @@ export function IconStops({
               onCustomIconsChange={onCustomIconsChange}
               customIcons={customIcons}
               onChange={onIconSelect}
-              icon={{ value, svg, label }}
+              icon={{ value: icon, svg, label }}
               append={iconStopButtons}
             />
           </EuiFlexItem>

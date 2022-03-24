@@ -10,13 +10,14 @@ import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
+import { IVectorStyle } from '../vector_style';
 import {
   getIconPalette,
   getMakiSymbolAnchor,
   // @ts-expect-error
 } from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
-import { getOtherCategoryLabel, assignCategoriesToIcons } from '../style_util';
+import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
 import { LegendProps } from './style_property';
 import { IconDynamicOptions } from '../../../../../common/descriptor_types';
 
@@ -46,57 +47,65 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
 
   _getPaletteStops() {
     if (this._options.useCustomIconMap && this._options.customIconStops) {
-      const stops = this._options.customIconStops.slice(1);
+      const stops = [];
+      for (let i = 1; i < this._options.customIconStops.length; i++) {
+        const { stop, icon, iconSource } = this._options.customIconStops[i];
+        stops.push({
+          stop,
+          style: icon,
+          iconSource,
+        });
+      }
 
       return {
-        fallbackSymbol:
-          this._options.customIconStops.length > 0 ? this._options.customIconStops[0] : null,
+        fallbackSymbolId:
+          this._options.customIconStops.length > 0 ? this._options.customIconStops[0].icon : null,
         stops,
       };
     }
 
-    return assignCategoriesToIcons({
+    return assignCategoriesToPalette({
       categories: this.getCategoryFieldMeta(),
-      icons: getIconPalette(this._options.iconPaletteId),
+      paletteValues: getIconPalette(this._options.iconPaletteId),
     });
   }
 
   _getMbIconImageExpression() {
-    const { stops, fallbackSymbol } = this._getPaletteStops();
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
 
-    if (stops.length < 1 || !fallbackSymbol) {
+    if (stops.length < 1 || !fallbackSymbolId) {
       // occurs when no data
       return null;
     }
 
     const mbStops = [];
-    stops.forEach(({ stop, value }) => {
+    stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      mbStops.push(`${value}`);
+      mbStops.push(`${style}`);
     });
 
-    if (fallbackSymbol && 'value' in fallbackSymbol) {
-      mbStops.push(fallbackSymbol.value); // last item is fallback style for anything that does not match provided stops
+    if (fallbackSymbolId) {
+      mbStops.push(fallbackSymbolId); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
   _getMbIconAnchorExpression() {
-    const { stops, fallbackSymbol } = this._getPaletteStops();
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
 
-    if (stops.length < 1 || !fallbackSymbol) {
+    if (stops.length < 1 || !fallbackSymbolId) {
       // occurs when no data
       return null;
     }
 
     const mbStops = [];
-    stops.forEach(({ stop, value }) => {
+    stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      mbStops.push(getMakiSymbolAnchor(value));
+      mbStops.push(getMakiSymbolAnchor(style));
     });
 
-    if (fallbackSymbol && 'value' in fallbackSymbol) {
-      mbStops.push(getMakiSymbolAnchor(fallbackSymbol.value)); // last item is fallback style for anything that does not match provided stops
+    if (fallbackSymbolId) {
+      mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
@@ -106,25 +115,27 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
   }
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly }: LegendProps) {
-    const { stops, fallbackSymbol } = this._getPaletteStops();
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
     const breaks = [];
-    stops.forEach(({ stop, value, svg }) => {
+    const layerStyle = this._layer.getCurrentStyle() as IVectorStyle;
+    stops.forEach(({ stop, style }) => {
       if (stop) {
+        const { svg } = layerStyle.getIconMeta(style);
         breaks.push({
           color: 'grey',
           label: this.formatField(stop),
-          symbolId: value,
+          symbolId: style,
           svg,
         });
       }
     });
 
-    if (fallbackSymbol && 'value' in fallbackSymbol) {
-      const { value, svg } = fallbackSymbol;
+    if (fallbackSymbolId) {
+      const { svg } = layerStyle.getIconMeta(fallbackSymbolId);
       breaks.push({
         color: 'grey',
         label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,
-        symbolId: value,
+        symbolId: fallbackSymbolId,
         svg,
       });
     }

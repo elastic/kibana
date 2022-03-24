@@ -12,15 +12,21 @@ import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { IconStops } from './icon_stops';
 // @ts-expect-error
-import { getIconPaletteOptions } from '../../symbol_utils';
+import { getIconPaletteOptions, PREFERRED_ICONS } from '../../symbol_utils';
 import {
   CustomIcon,
   IconDynamicOptions,
   IconStop,
 } from '../../../../../../common/descriptor_types';
+import { ICON_SOURCE } from '../../../../../../common/constants';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 const CUSTOM_MAP_ID = 'CUSTOM_MAP_ID';
+
+const DEFAULT_ICON_STOPS: IconStop[] = [
+  { stop: null, icon: PREFERRED_ICONS[0], iconSource: ICON_SOURCE.MAKI }, // first stop is the "other" category
+  { stop: '', icon: PREFERRED_ICONS[1], iconSource: ICON_SOURCE.MAKI },
+];
 
 interface StyleOptionChanges {
   customIconStops?: IconStop[];
@@ -29,7 +35,7 @@ interface StyleOptionChanges {
 }
 
 interface Props {
-  customIconStops: IconStop[];
+  customIconStops?: IconStop[];
   iconPaletteId: string | null;
   customIcons?: Record<string, CustomIcon>;
   onCustomIconsChange?: (customIcons: CustomIcon[]) => void;
@@ -45,7 +51,7 @@ interface State {
 
 export class IconMapSelect extends Component<Props, State> {
   state = {
-    customIconStops: this.props.customIconStops,
+    customIconStops: this.props.customIconStops ? this.props.customIconStops : DEFAULT_ICON_STOPS,
   };
 
   _onMapSelect = (selectedValue: string) => {
@@ -54,6 +60,11 @@ export class IconMapSelect extends Component<Props, State> {
       iconPaletteId: useCustomIconMap ? null : selectedValue,
       useCustomIconMap,
     };
+    // edge case when custom palette is first enabled
+    // customIconStops is undefined so need to update custom stops with default so icons are rendered.
+    if (!this.props.customIconStops) {
+      changes.customIconStops = DEFAULT_ICON_STOPS;
+    }
     this.props.onChange(changes);
   };
 

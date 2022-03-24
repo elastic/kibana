@@ -17,10 +17,10 @@ import {
   POLYGON_STYLES,
 } from './vector_style_defaults';
 import {
-  CUSTOM_ICON_PREFIX_SDF,
   DEFAULT_ICON,
   FIELD_ORIGIN,
   GEO_JSON_TYPE,
+  ICON_SOURCE,
   KBN_IS_CENTROID_FEATURE,
   LAYER_STYLE_TYPE,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
@@ -103,6 +103,7 @@ export interface IVectorStyle extends IStyle {
   isTimeAware(): boolean;
   getPrimaryColor(): string;
   getIcon(showIncompleteIndicator: boolean): ReactElement;
+  getIconMeta(symbolId: string): { svg: string; label: string; iconSource: ICON_SOURCE };
   getCustomIconIdsInUse(): string[];
   hasLegendDetails: () => Promise<boolean>;
   renderLegendDetails: () => ReactElement;
@@ -716,19 +717,13 @@ export class VectorStyle implements IVectorStyle {
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  _getIconMeta(symbolId: string | undefined) {
+  getIconMeta(symbolId: string | undefined) {
     if (!symbolId) return;
-    let meta;
-    if (
-      symbolId.startsWith(CUSTOM_ICON_PREFIX_SDF) &&
-      typeof this._customIcons === 'object' &&
-      `${symbolId}` in this._customIcons
-    ) {
-      meta = this._customIcons[symbolId];
-    } else {
-      meta = getMakiSymbol(symbolId);
+    if (this._customIcons && this._customIcons[symbolId]) {
+      return { ...this._customIcons[symbolId], iconSource: ICON_SOURCE.CUSTOM };
     }
-    return meta;
+    const symbol = getMakiSymbol(symbolId);
+    return symbol ? { ...symbol, iconSource: ICON_SOURCE.MAKI } : {};
   }
 
   getPrimaryColor() {
@@ -777,7 +772,7 @@ export class VectorStyle implements IVectorStyle {
         strokeColor={strokeColor}
         fillColor={fillColor}
         symbolId={this._getSymbolId()}
-        svg={this._getIconMeta(this._getSymbolId())?.svg}
+        svg={this.getIconMeta(this._getSymbolId())?.svg}
       />
     );
   }
@@ -787,12 +782,12 @@ export class VectorStyle implements IVectorStyle {
       const { customIconStops } = this._iconStyleProperty.getOptions() as IconDynamicOptions;
       return customIconStops
         ? customIconStops
-            .map(({ value }) => value)
-            .filter((value) => value.startsWith(CUSTOM_ICON_PREFIX_SDF))
+            .filter(({ iconSource }) => iconSource === ICON_SOURCE.CUSTOM)
+            .map(({ icon }) => icon)
         : [];
     }
-    const { value } = this._iconStyleProperty.getOptions() as IconStaticOptions;
-    return value.startsWith(CUSTOM_ICON_PREFIX_SDF) ? [value] : [];
+    const { value, iconSource } = this._iconStyleProperty.getOptions() as IconStaticOptions;
+    return iconSource === ICON_SOURCE.CUSTOM ? [value] : [];
   }
 
   _getLegendDetailStyleProperties = () => {
@@ -832,7 +827,7 @@ export class VectorStyle implements IVectorStyle {
         isPointsOnly={this.getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
         symbolId={symbolId}
-        svg={this._getIconMeta(symbolId)?.svg}
+        svg={this.getIconMeta(symbolId)?.svg}
       />
     );
   }
@@ -1085,20 +1080,16 @@ export class VectorStyle implements IVectorStyle {
       return new StaticIconProperty({ value: DEFAULT_ICON }, VECTOR_STYLES.ICON);
     } else if (descriptor.type === StaticStyleProperty.type) {
       const { value } = { ...descriptor.options } as IconStaticOptions;
-      const { svg, label } = this._getIconMeta(value);
-      return new StaticIconProperty({ value, svg, label } as IconStaticOptions, VECTOR_STYLES.ICON);
+      const { svg, label, iconSource } = this.getIconMeta(value);
+      return new StaticIconProperty(
+        { value, svg, label, iconSource } as IconStaticOptions,
+        VECTOR_STYLES.ICON
+      );
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const options = { ...descriptor.options } as IconDynamicOptions;
-      if (!options.customIconStops) {
-        options.customIconStops = [
-          { stop: null, value: PREFERRED_ICONS[0], ...this._getIconMeta(PREFERRED_ICONS[0]) }, // first stop is the "other" category
-          { stop: '', value: PREFERRED_ICONS[1], ...this._getIconMeta(PREFERRED_ICONS[1]) },
-        ];
-      } else {
+      if (options.customIconStops) {
         options.customIconStops.forEach((iconStop) => {
-          const { svg, label } = this._getIconMeta(iconStop.value);
-          iconStop.svg = svg;
-          iconStop.label = label;
+          iconStop.iconSource = this.getIconMeta(iconStop.icon).iconSource;
         });
       }
       const field = this._makeField(options.field);

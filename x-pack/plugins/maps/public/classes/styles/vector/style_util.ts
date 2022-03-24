@@ -6,8 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MB_LOOKUP_FUNCTION, VECTOR_SHAPE_TYPE, VECTOR_STYLES } from '../../../../common/constants';
-import { Category, IconStop } from '../../../../common/descriptor_types';
+import {
+  ICON_SOURCE,
+  MB_LOOKUP_FUNCTION,
+  VECTOR_SHAPE_TYPE,
+  VECTOR_STYLES,
+} from '../../../../common/constants';
+import { Category } from '../../../../common/descriptor_types';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
 
@@ -57,30 +62,31 @@ export function dynamicRound(value: number | string) {
   return precision === 0 ? Math.round(value) : parseFloat(value.toFixed(precision + 1));
 }
 
-export function assignCategoriesToIcons({
+export function assignCategoriesToPalette({
   categories,
-  icons,
+  paletteValues,
 }: {
   categories: Category[];
-  icons: Array<{ value: string; label: string; svg: string }>;
+  paletteValues: string[];
 }) {
-  const stops: IconStop[] = [];
-  let fallbackSymbol: IconStop | null = null;
+  const stops = [];
+  let fallbackSymbolId = null;
 
-  if (categories.length && icons.length) {
-    const maxLength = Math.min(icons.length, categories.length + 1);
-    fallbackSymbol = { ...icons[maxLength - 1], stop: null };
+  if (categories.length && paletteValues.length) {
+    const maxLength = Math.min(paletteValues.length, categories.length + 1);
+    fallbackSymbolId = paletteValues[maxLength - 1];
     for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
         stop: categories[i].key,
-        ...icons[i],
+        style: paletteValues[i],
+        iconSource: ICON_SOURCE.MAKI,
       });
     }
   }
 
   return {
     stops,
-    fallbackSymbol,
+    fallbackSymbolId,
   };
 }
 
