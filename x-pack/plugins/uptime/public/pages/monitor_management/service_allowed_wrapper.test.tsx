@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '../../lib/helper/rtl_helpers';
 
-import * as enabledHook from '../../components/monitor_management/hooks/use_service_enabled';
+import * as allowedHook from '../../components/monitor_management/hooks/use_service_allowed';
 import { ServiceAllowedWrapper } from './service_allowed_wrapper';
 
 describe('ServiceAllowedWrapper', () => {
@@ -23,7 +23,7 @@ describe('ServiceAllowedWrapper', () => {
   });
 
   it('renders when enabled state is loading', async () => {
-    jest.spyOn(enabledHook, 'useSyntheticsServiceAllowed').mockReturnValue({ loading: true });
+    jest.spyOn(allowedHook, 'useSyntheticsServiceAllowed').mockReturnValue({ loading: true });
 
     const { findByText } = render(
       <ServiceAllowedWrapper>
@@ -36,7 +36,7 @@ describe('ServiceAllowedWrapper', () => {
 
   it('renders when enabled state is false', async () => {
     jest
-      .spyOn(enabledHook, 'useSyntheticsServiceAllowed')
+      .spyOn(allowedHook, 'useSyntheticsServiceAllowed')
       .mockReturnValue({ loading: false, isAllowed: false });
 
     const { findByText } = render(
@@ -50,7 +50,7 @@ describe('ServiceAllowedWrapper', () => {
 
   it('renders when enabled state is true', async () => {
     jest
-      .spyOn(enabledHook, 'useSyntheticsServiceAllowed')
+      .spyOn(allowedHook, 'useSyntheticsServiceAllowed')
       .mockReturnValue({ loading: false, isAllowed: true });
 
     const { findByText } = render(

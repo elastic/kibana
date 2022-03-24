@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
-import { useSyntheticsServiceAllowed } from '../../components/monitor_management/hooks/use_service_enabled';
+import { useSyntheticsServiceAllowed } from '../../components/monitor_management/hooks/use_service_allowed';
 
 export const ServiceAllowedWrapper: React.FC = ({ children }) => {
   const { isAllowed, loading } = useSyntheticsServiceAllowed();
