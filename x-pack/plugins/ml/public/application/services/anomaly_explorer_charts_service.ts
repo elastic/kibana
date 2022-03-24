@@ -23,6 +23,7 @@ import type { SeriesConfigWithMetadata } from '../../../common/types/results';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/swimlane_container';
 
 const MAX_CHARTS_PER_ROW = 4;
+const OPTIMAL_CHART_WIDTH = 550;
 
 export const isSeriesConfigWithMetadata = (arg: unknown): arg is SeriesConfigWithMetadata => {
   return isPopulatedObject(arg, ['bucketSpanSeconds', 'detectorLabel']);
@@ -122,7 +123,10 @@ export class AnomalyExplorerChartsService {
     const containerWidth = chartsContainerWidth + SWIM_LANE_LABEL_WIDTH;
 
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
-    let chartsPerRow = Math.min(Math.max(Math.floor(containerWidth / 550), 1), MAX_CHARTS_PER_ROW);
+    let chartsPerRow = Math.min(
+      Math.max(Math.floor(containerWidth / OPTIMAL_CHART_WIDTH), 1),
+      MAX_CHARTS_PER_ROW
+    );
 
     // Expand the charts to not have blank space in the row if necessary
     if (maxSeries && maxSeries < chartsPerRow) {
