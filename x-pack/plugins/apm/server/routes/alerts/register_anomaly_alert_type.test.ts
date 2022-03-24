@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
+import { registerAnomalyAlertType } from './register_anomaly_alert_type';
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
 import { MlPluginSetup } from '../../../../ml/server';
 import * as GetServiceAnomalies from '../service_map/get_service_anomalies';
@@ -19,7 +19,7 @@ describe('Transaction duration anomaly alert', () => {
     it('ml is not defined', async () => {
       const { services, dependencies, executor } = createRuleTypeMocks();
 
-      registerTransactionDurationAnomalyAlertType({
+      registerAnomalyAlertType({
         ...dependencies,
         ml: undefined,
       });
@@ -47,7 +47,7 @@ describe('Transaction duration anomaly alert', () => {
         anomalyDetectorsProvider: jest.fn(),
       } as unknown as MlPluginSetup;
 
-      registerTransactionDurationAnomalyAlertType({
+      registerAnomalyAlertType({
         ...dependencies,
         ml,
       });
@@ -98,7 +98,7 @@ describe('Transaction duration anomaly alert', () => {
         anomalyDetectorsProvider: jest.fn(),
       } as unknown as MlPluginSetup;
 
-      registerTransactionDurationAnomalyAlertType({
+      registerAnomalyAlertType({
         ...dependencies,
         ml,
       });
@@ -174,7 +174,7 @@ describe('Transaction duration anomaly alert', () => {
         anomalyDetectorsProvider: jest.fn(),
       } as unknown as MlPluginSetup;
 
-      registerTransactionDurationAnomalyAlertType({
+      registerAnomalyAlertType({
         ...dependencies,
         ml,
       });
@@ -190,7 +190,7 @@ describe('Transaction duration anomaly alert', () => {
       expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
       expect(services.alertFactory.create).toHaveBeenCalledWith(
-        'apm.transaction_duration_anomaly_foo_development_type-foo'
+        'apm.anomaly_foo_development_type-foo'
       );
 
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {

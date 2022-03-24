@@ -9,7 +9,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { login } from '../../tasks/login';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
-describe('SuperUser - Delete ECS Mappings', () => {
+describe('ALL - Delete ECS Mappings', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
 
   before(() => {

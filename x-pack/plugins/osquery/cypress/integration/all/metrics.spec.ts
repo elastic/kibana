@@ -10,7 +10,7 @@ import { login } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
-describe('Super User - Metrics', () => {
+describe('ALL - Metrics', () => {
   beforeEach(() => {
     login();
     navigateTo('/app/osquery');

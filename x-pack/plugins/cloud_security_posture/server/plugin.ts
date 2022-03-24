@@ -18,6 +18,7 @@ import type {
   CspServerPluginStart,
   CspServerPluginSetupDeps,
   CspServerPluginStartDeps,
+  CspRequestHandlerContext,
 } from './types';
 import { defineRoutes } from './routes';
 import { cspRuleAssetType } from './saved_objects/cis_1_4_1/csp_rule_type';
@@ -55,7 +56,7 @@ export class CspPlugin
 
     core.savedObjects.registerType(cspRuleAssetType);
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<CspRequestHandlerContext>();
 
     // Register server side APIs
     defineRoutes(router, cspAppContext);

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { navigateTo } from '../../tasks/navigation';
-import { RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { RESULTS_TABLE_BUTTON } from '../screens/live_query';
 import {
   checkResults,
   BIG_QUERY,
@@ -15,18 +14,9 @@ import {
   inputQuery,
   selectAllAgents,
   submitQuery,
-} from '../../tasks/live_query';
-import { login } from '../../tasks/login';
+} from './live_query';
 
-describe('Super User - Saved queries', () => {
-  const SAVED_QUERY_ID = 'Saved-Query-Id';
-  const SAVED_QUERY_DESCRIPTION = 'Saved Query Description';
-
-  beforeEach(() => {
-    login();
-    navigateTo('/app/osquery');
-  });
-
+export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescription: string) =>
   it(
     'should create a new query and verify: \n ' +
       '- hidden columns, full screen and sorting \n' +
@@ -78,8 +68,8 @@ describe('Super User - Saved queries', () => {
       cy.contains('Exit full screen').should('not.exist');
       cy.contains('Save for later').click();
       cy.contains('Save query');
-      findFormFieldByRowsLabelAndType('ID', SAVED_QUERY_ID);
-      findFormFieldByRowsLabelAndType('Description (optional)', SAVED_QUERY_DESCRIPTION);
+      findFormFieldByRowsLabelAndType('ID', savedQueryId);
+      findFormFieldByRowsLabelAndType('Description (optional)', savedQueryDescription);
       cy.react('EuiButtonDisplay').contains('Save').click();
 
       // visit Status results
@@ -89,31 +79,30 @@ describe('Super User - Saved queries', () => {
 
       // play saved query
       cy.contains('Saved queries').click();
-      cy.contains(SAVED_QUERY_ID);
+      cy.contains(savedQueryId);
       cy.react('PlayButtonComponent', {
-        props: { savedQuery: { attributes: { id: SAVED_QUERY_ID } } },
+        props: { savedQuery: { attributes: { id: savedQueryId } } },
       }).click();
       selectAllAgents();
       submitQuery();
 
       // edit saved query
       cy.contains('Saved queries').click();
-      cy.contains(SAVED_QUERY_ID);
+      cy.contains(savedQueryId);
       cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
+        props: { index: 1, item: { attributes: { id: savedQueryId } } },
       }).click();
       findFormFieldByRowsLabelAndType('Description (optional)', ' Edited');
       cy.react('EuiButton').contains('Update query').click();
-      cy.contains(`${SAVED_QUERY_DESCRIPTION} Edited`);
+      cy.contains(`${savedQueryDescription} Edited`);
 
       // delete saved query
-      cy.contains(SAVED_QUERY_ID);
+      cy.contains(savedQueryId);
       cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
+        props: { index: 1, item: { attributes: { id: savedQueryId } } },
       }).click();
       deleteAndConfirm('query');
-      cy.contains(SAVED_QUERY_ID).should('exist');
-      cy.contains(SAVED_QUERY_ID).should('not.exist');
+      cy.contains(savedQueryId).should('exist');
+      cy.contains(savedQueryId).should('not.exist');
     }
   );
-});
