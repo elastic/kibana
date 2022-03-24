@@ -6,8 +6,8 @@
  */
 
 import type { ISavedObjectsRepository } from 'src/core/server';
-import { CIS_BENCHMARK_1_4_1_RULES } from './rules';
-import { cspRuleAssetSavedObjectType } from '../../../common/schemas/csp_rule';
+import { CIS_BENCHMARK_1_4_1_RULES } from './cis_1_4_1/rules';
+import { cspRuleAssetSavedObjectType } from '../../common/schemas/csp_rule';
 
 export const initializeCspRules = async (client: ISavedObjectsRepository) => {
   const existingRules = await client.find({ type: cspRuleAssetSavedObjectType, perPage: 1 });
