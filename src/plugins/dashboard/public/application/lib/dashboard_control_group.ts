@@ -11,7 +11,8 @@ import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 
-import { DashboardContainer } from '..';
+import { pick } from 'lodash';
+import { DashboardContainer, DashboardContainerControlGroupInput } from '..';
 import { DashboardState } from '../../types';
 import { DashboardContainerInput, DashboardSavedObject } from '../..';
 import { ControlGroupContainer, ControlGroupInput } from '../../../../controls/public';
@@ -20,13 +21,6 @@ import {
   getDefaultDashboardControlGroupInput,
   rawAttributesToControlGroupInput,
 } from '../../../common';
-
-// only part of the control group input should be stored in dashboard state. The rest is passed down from the dashboard.
-export interface DashboardControlGroupInput {
-  panels: ControlGroupInput['panels'];
-  controlStyle: ControlGroupInput['controlStyle'];
-}
-
 interface DiffChecks {
   [key: string]: (a?: unknown, b?: unknown) => boolean;
 }
@@ -60,6 +54,8 @@ export const syncDashboardControlGroup = async ({
   const controlGroupDiff: DiffChecks = {
     panels: deepEqual,
     controlStyle: deepEqual,
+    chainingSystem: deepEqual,
+    ignoreParentSettings: deepEqual,
   };
 
   subscriptions.add(
@@ -71,9 +67,12 @@ export const syncDashboardControlGroup = async ({
         )
       )
       .subscribe(() => {
-        const { panels, controlStyle } = controlGroup.getInput();
+        const { panels, controlStyle, chainingSystem, ignoreParentSettings } =
+          controlGroup.getInput();
         if (!isControlGroupInputEqual()) {
-          dashboardContainer.updateInput({ controlGroupInput: { panels, controlStyle } });
+          dashboardContainer.updateInput({
+            controlGroupInput: { panels, controlStyle, chainingSystem, ignoreParentSettings },
+          });
         }
       })
   );
@@ -154,17 +153,17 @@ export const syncDashboardControlGroup = async ({
 };
 
 export const controlGroupInputIsEqual = (
-  a: DashboardControlGroupInput | undefined,
-  b: DashboardControlGroupInput | undefined
+  a: DashboardContainerControlGroupInput | undefined,
+  b: DashboardContainerControlGroupInput | undefined
 ) => {
   const defaultInput = getDefaultDashboardControlGroupInput();
   const inputA = {
-    panels: a?.panels ?? defaultInput.panels,
-    controlStyle: a?.controlStyle ?? defaultInput.controlStyle,
+    ...defaultInput,
+    ...pick(a, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
   };
   const inputB = {
-    panels: b?.panels ?? defaultInput.panels,
-    controlStyle: b?.controlStyle ?? defaultInput.controlStyle,
+    ...defaultInput,
+    ...pick(b, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
   };
   if (deepEqual(inputA, inputB)) return true;
   return false;
@@ -175,7 +174,12 @@ export const serializeControlGroupToDashboardSavedObject = (
   dashboardState: DashboardState
 ) => {
   // only save to saved object if control group is not default
-  if (controlGroupInputIsEqual(dashboardState.controlGroupInput, {} as ControlGroupInput)) {
+  if (
+    controlGroupInputIsEqual(
+      dashboardState.controlGroupInput,
+      getDefaultDashboardControlGroupInput()
+    )
+  ) {
     dashboardSavedObject.controlGroupInput = undefined;
     return;
   }

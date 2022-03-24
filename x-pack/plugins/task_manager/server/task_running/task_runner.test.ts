@@ -1528,7 +1528,11 @@ describe('TaskManagerRunner', () => {
   function withAnyTiming(taskRun: TaskRun) {
     return {
       ...taskRun,
-      timing: { start: expect.any(Number), stop: expect.any(Number) },
+      timing: {
+        start: expect.any(Number),
+        stop: expect.any(Number),
+        eventLoopBlockMs: expect.any(Number),
+      },
     };
   }
 
@@ -1590,6 +1594,10 @@ describe('TaskManagerRunner', () => {
       onTaskEvent: opts.onTaskEvent,
       executionContext,
       usageCounter,
+      eventLoopDelayConfig: {
+        monitor: true,
+        warn_threshold: 5000,
+      },
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {
