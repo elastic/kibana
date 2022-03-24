@@ -110,7 +110,7 @@ export const ElasticsearchRuby: React.FC<{ cloudId?: string }> = ({ cloudId }) =
 
       <EuiSpacer />
 
-      {!cloudId ? (
+      {cloudId ? (
         <>
           <EuiText>
             <h4>Connecting to Elastic Cloud</h4>
