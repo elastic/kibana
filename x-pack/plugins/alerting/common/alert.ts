@@ -22,7 +22,14 @@ export interface IntervalSchedule extends SavedObjectAttributes {
 
 // for the `typeof ThingValues[number]` types below, become string types that
 // only accept the values in the associated string arrays
-export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'pending', 'unknown'] as const;
+export const AlertExecutionStatusValues = [
+  'ok',
+  'active',
+  'error',
+  'pending',
+  'unknown',
+  'warning',
+] as const;
 export type AlertExecutionStatuses = typeof AlertExecutionStatusValues[number];
 
 export enum AlertExecutionStatusErrorReasons {
@@ -35,6 +42,10 @@ export enum AlertExecutionStatusErrorReasons {
   Disabled = 'disabled',
 }
 
+export enum AlertExecutionStatusWarningReasons {
+  MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
+}
+
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   numberOfTriggeredActions?: number;
@@ -43,6 +54,10 @@ export interface AlertExecutionStatus {
   lastDuration?: number;
   error?: {
     reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
+  warning?: {
+    reason: AlertExecutionStatusWarningReasons;
     message: string;
   };
 }
@@ -61,6 +76,7 @@ export interface AlertAggregations {
   alertExecutionStatus: { [status: string]: number };
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
+  ruleSnoozedStatus: { snoozed: number };
 }
 
 export interface MappedParamsProperties {
@@ -94,6 +110,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
   monitoring?: RuleMonitoring;
+  snoozeEndTime?: Date | null; // Remove ? when this parameter is made available in the public API
 }
 
 export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;

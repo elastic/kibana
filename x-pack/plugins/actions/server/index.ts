@@ -22,6 +22,7 @@ export type {
   ActionType,
   PreConfiguredAction,
   ActionsApiRequestHandlerContext,
+  FindActionResult,
 } from './types';
 
 export type {

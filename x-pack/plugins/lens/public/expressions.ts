@@ -17,6 +17,7 @@ import { labelsOrientationConfig } from '../common/expressions/xy_chart/labels_o
 import {
   dataLayerConfig,
   referenceLineLayerConfig,
+  annotationLayerConfig,
 } from '../common/expressions/xy_chart/layer_config';
 import { legendConfig } from '../common/expressions/xy_chart/legend_config';
 import { tickLabelsConfig } from '../common/expressions/xy_chart/tick_labels_config';
@@ -46,6 +47,7 @@ export const setupExpressions = (
     yAxisConfig,
     dataLayerConfig,
     referenceLineLayerConfig,
+    annotationLayerConfig,
     formatColumn,
     legendConfig,
     renameColumns,

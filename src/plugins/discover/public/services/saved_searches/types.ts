@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsResolveResponse } from 'src/core/public';
 import type { ISearchSource } from '../../../../data/public';
 import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
 import { VIEW_MODE } from '../../components/view_mode_toggle';
@@ -44,8 +45,9 @@ export interface SavedSearch {
   };
   hideChart?: boolean;
   sharingSavedObjectProps?: {
-    outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-    aliasTargetId?: string;
+    outcome?: SavedObjectsResolveResponse['outcome'];
+    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
     errorJSON?: string;
   };
   viewMode?: VIEW_MODE;

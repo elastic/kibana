@@ -16,6 +16,11 @@ import {
 } from '../page_template/solution_nav';
 import { KibanaPageTemplateProps } from '../page_template';
 
+// https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging
+function getDisplayName(Component: ComponentType<any>) {
+  return Component.displayName || Component.name || 'UnnamedComponent';
+}
+
 type SolutionNavProps = KibanaPageTemplateProps & {
   solutionNav: KibanaPageTemplateSolutionNavProps;
 };
@@ -70,6 +75,6 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
       </WrappedComponent>
     );
   };
-  WithSolutionNav.displayName = `WithSolutionNavBar${WrappedComponent}`;
+  WithSolutionNav.displayName = `WithSolutionNavBar(${getDisplayName(WrappedComponent)})`;
   return WithSolutionNav;
 };
