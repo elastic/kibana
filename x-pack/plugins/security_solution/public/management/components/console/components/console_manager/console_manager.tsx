@@ -28,7 +28,7 @@ type RunningConsoleStorage = Record<string, ManagedConsole>;
 interface ConsoleManagerInternalClient {
   /**
    * Returns the managed console record for the given ConsoleProps object if its being managed
-   * @param props
+   * @param key
    */
   getManagedConsole(key: ManagedConsole['key']): ManagedConsole | undefined;
 }
