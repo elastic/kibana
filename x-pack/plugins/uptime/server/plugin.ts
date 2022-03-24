@@ -81,6 +81,7 @@ export class Plugin implements PluginType {
       basePath: core.http.basePath,
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
+      isDev: this.initContext.env.mode.dev,
     } as UptimeServerSetup;
 
     if (this.isServiceEnabled && this.server.config.service) {

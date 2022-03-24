@@ -230,7 +230,7 @@ export class TrustedAppValidator extends BaseValidator {
 
     await this.validateByPolicyItem(updatedItem);
 
-    return updatedItem as UpdateExceptionListItemOptions;
+    return _updatedItem;
   }
 
   private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {

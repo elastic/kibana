@@ -13,14 +13,14 @@ import {
   flashAPIErrors,
   flashSuccessToast,
   clearFlashMessages,
-} from '../../../../../shared/flash_messages';
-import { HttpLogic } from '../../../../../shared/http';
-import { KibanaLogic } from '../../../../../shared/kibana';
-import { AppLogic } from '../../../../app_logic';
+} from '../../../../../../shared/flash_messages';
+import { HttpLogic } from '../../../../../../shared/http';
+import { KibanaLogic } from '../../../../../../shared/kibana';
+import { AppLogic } from '../../../../../app_logic';
 
-import { getAddPath, getSourcesPath } from '../../../../routes';
+import { getAddPath, getSourcesPath } from '../../../../../routes';
 
-import { AddSourceLogic, SourceConfigData } from './add_source_logic';
+import { AddSourceLogic, SourceConfigData } from '../add_source_logic';
 
 export interface ExternalConnectorActions {
   fetchExternalSource: () => true;
