@@ -11,6 +11,7 @@ import {
   TrustedAppValidator,
   HostIsolationExceptionsValidator,
   EventFilterValidator,
+  BlocklistValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreMultiListFindServerExtension['callback'];
@@ -21,6 +22,7 @@ export const getExceptionsPreMultiListFindHandler = (
     if (!data.namespaceType.includes('agnostic')) {
       return data;
     }
+
     // validate Trusted application
     if (data.listId.some((id) => TrustedAppValidator.isTrustedApp({ listId: id }))) {
       await new TrustedAppValidator(endpointAppContextService, request).validatePreMultiListFind();
@@ -43,6 +45,12 @@ export const getExceptionsPreMultiListFindHandler = (
     // Event Filters Exceptions
     if (data.listId.some((listId) => EventFilterValidator.isEventFilter({ listId }))) {
       await new EventFilterValidator(endpointAppContextService, request).validatePreMultiListFind();
+      return data;
+    }
+
+    // validate Blocklist
+    if (data.listId.some((id) => BlocklistValidator.isBlocklist({ listId: id }))) {
+      await new BlocklistValidator(endpointAppContextService, request).validatePreMultiListFind();
       return data;
     }
 

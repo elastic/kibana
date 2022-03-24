@@ -5,52 +5,42 @@
  * 2.0.
  */
 
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { OperatingSystem, TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { BaseValidator } from './base_validator';
 import { ExceptionItemLikeOptions } from '../types';
 import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
-import { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
-import {
-  getDuplicateFields,
-  isValidHash,
-} from '../../../../common/endpoint/service/trusted_apps/validations';
+import { isValidHash } from '../../../../common/endpoint/service/trusted_apps/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
-const ProcessHashField = schema.oneOf([
-  schema.literal('process.hash.md5'),
-  schema.literal('process.hash.sha1'),
-  schema.literal('process.hash.sha256'),
-]);
-const ProcessExecutablePath = schema.literal('process.executable.caseless');
-const ProcessCodeSigner = schema.literal('process.Ext.code_signature');
+const allowedHashes: Readonly<string[]> = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
 
-const ConditionEntryTypeSchema = schema.conditional(
-  schema.siblingRef('field'),
-  ProcessExecutablePath,
-  schema.oneOf([schema.literal('match'), schema.literal('wildcard')]),
-  schema.literal('match')
+const FileHashField = schema.oneOf(
+  allowedHashes.map((hash) => schema.literal(hash)) as [Type<string>]
 );
+
+const FilePath = schema.literal('file.path');
+const FileCodeSigner = schema.literal('file.Ext.code_signature');
+
+const ConditionEntryTypeSchema = schema.literal('match_any');
 const ConditionEntryOperatorSchema = schema.literal('included');
 
 type ConditionEntryFieldAllowedType =
-  | TypeOf<typeof ProcessHashField>
-  | TypeOf<typeof ProcessExecutablePath>
-  | TypeOf<typeof ProcessCodeSigner>;
+  | TypeOf<typeof FileHashField>
+  | TypeOf<typeof FilePath>
+  | TypeOf<typeof FileCodeSigner>;
 
-type TrustedAppConditionEntry<
-  T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType
-> =
+type BlocklistConditionEntry =
   | {
-      field: T;
-      type: TrustedAppEntryTypes;
+      field: ConditionEntryFieldAllowedType;
+      type: 'match_any';
       operator: 'included';
-      value: string;
+      value: string[];
     }
   | TypeOf<typeof WindowsSignerEntrySchema>;
 
@@ -58,27 +48,37 @@ type TrustedAppConditionEntry<
  * A generic Entry schema to be used for a specific entry schema depending on the OS
  */
 const CommonEntrySchema = {
-  field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),
+  field: schema.oneOf([FileHashField, FilePath]),
   type: ConditionEntryTypeSchema,
   operator: ConditionEntryOperatorSchema,
   // If field === HASH then validate hash with custom method, else validate string with minLength = 1
   value: schema.conditional(
     schema.siblingRef('field'),
-    ProcessHashField,
-    schema.string({
-      validate: (hash: string) => (isValidHash(hash) ? undefined : `invalid hash value [${hash}]`),
-    }),
+    FileHashField,
+    schema.arrayOf(
+      schema.string({
+        validate: (hash: string) =>
+          isValidHash(hash) ? undefined : `invalid hash value [${hash}]`,
+      }),
+      { minSize: 1 }
+    ),
     schema.conditional(
       schema.siblingRef('field'),
-      ProcessExecutablePath,
-      schema.string({
-        validate: (pathValue: string) =>
-          pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
-      }),
-      schema.string({
-        validate: (signerValue: string) =>
-          signerValue.length > 0 ? undefined : `invalid signer value [${signerValue}]`,
-      })
+      FilePath,
+      schema.arrayOf(
+        schema.string({
+          validate: (pathValue: string) =>
+            pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
+        }),
+        { minSize: 1 }
+      ),
+      schema.arrayOf(
+        schema.string({
+          validate: (signerValue: string) =>
+            signerValue.length > 0 ? undefined : `invalid signer value [${signerValue}]`,
+        }),
+        { minSize: 1 }
+      )
     )
   ),
 };
@@ -87,23 +87,15 @@ const CommonEntrySchema = {
 // that the certificate is trusted
 const WindowsSignerEntrySchema = schema.object({
   type: schema.literal('nested'),
-  field: ProcessCodeSigner,
+  field: FileCodeSigner,
   entries: schema.arrayOf(
-    schema.oneOf([
-      schema.object({
-        field: schema.literal('trusted'),
-        value: schema.literal('true'),
-        type: schema.literal('match'),
-        operator: schema.literal('included'),
-      }),
-      schema.object({
-        field: schema.literal('subject_name'),
-        value: schema.string({ minLength: 1 }),
-        type: schema.literal('match'),
-        operator: schema.literal('included'),
-      }),
-    ]),
-    { minSize: 2, maxSize: 2 }
+    schema.object({
+      field: schema.literal('subject_name'),
+      value: schema.arrayOf(schema.string({ minLength: 1 })),
+      type: schema.literal('match_any'),
+      operator: schema.literal('included'),
+    }),
+    { minSize: 1 }
   ),
 });
 
@@ -111,7 +103,7 @@ const WindowsEntrySchema = schema.oneOf([
   WindowsSignerEntrySchema,
   schema.object({
     ...CommonEntrySchema,
-    field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),
+    field: schema.oneOf([FileHashField, FilePath]),
   }),
 ]);
 
@@ -123,11 +115,53 @@ const MacEntrySchema = schema.object({
   ...CommonEntrySchema,
 });
 
+// Hash entries validator method.
+const hashEntriesValidation = (entries: BlocklistConditionEntry[]) => {
+  const currentHashes = entries.map((entry) => entry.field);
+  // If there are more hashes than allowed (three) then return an error
+  if (currentHashes.length > allowedHashes.length) {
+    const allowedHashesMessage = allowedHashes
+      .map((hash) => hash.replace('file.hash.', ''))
+      .join(',');
+    return `There are more hash types than allowed [${allowedHashesMessage}]`;
+  }
+
+  const hashesCount: { [key: string]: boolean } = {};
+  const duplicatedHashes: string[] = [];
+  const invalidHash: string[] = [];
+
+  // Check hash entries individually
+  currentHashes.forEach((hash) => {
+    if (!allowedHashes.includes(hash)) invalidHash.push(hash);
+    if (hashesCount[hash]) {
+      duplicatedHashes.push(hash);
+    } else {
+      hashesCount[hash] = true;
+    }
+  });
+
+  // There is more than one entry with the same hash type
+  if (duplicatedHashes.length) {
+    return `There are some duplicated hashes: ${duplicatedHashes.join(',')}`;
+  }
+
+  // There is an entry with an invalid hash type
+  if (invalidHash.length) {
+    return `There are some invalid fields for hash type: ${invalidHash.join(',')}`;
+  }
+};
+
+// Validate there is only one entry when signer or path and the allowed entries for hashes
 const entriesSchemaOptions = {
   minSize: 1,
-  validate(entries: TrustedAppConditionEntry[]) {
-    const dups = getDuplicateFields(entries as ConditionEntry[]);
-    return dups.map((field) => `Duplicated entry: ${field}`).join(', ') || undefined;
+  validate(entries: BlocklistConditionEntry[]) {
+    if (allowedHashes.includes(entries[0].field)) {
+      return hashEntriesValidation(entries);
+    } else {
+      if (entries.length > 1) {
+        return 'Only one entry is allowed when no using hash field type';
+      }
+    }
   },
 };
 
@@ -137,7 +171,7 @@ const entriesSchemaOptions = {
  * else if OS === LINUX then use Linux schema,
  * else use Mac schema
  *
- * The validate function checks there is no duplicated entry inside the array
+ * The validate function checks there is only one item for entries excepts for hash
  */
 const EntriesSchema = schema.conditional(
   schema.contextRef('os'),
@@ -152,14 +186,14 @@ const EntriesSchema = schema.conditional(
 );
 
 /**
- * Schema to validate Trusted Apps data for create and update.
+ * Schema to validate Blocklist data for create and update.
  * When called, it must be given an `context` with a `os` property set
  *
  * @example
  *
- * TrustedAppDataSchema.validate(item, { os: 'windows' });
+ * BlocklistDataSchema.validate(item, { os: 'windows' });
  */
-const TrustedAppDataSchema = schema.object(
+const BlocklistDataSchema = schema.object(
   {
     entries: EntriesSchema,
   },
@@ -168,16 +202,16 @@ const TrustedAppDataSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
-export class TrustedAppValidator extends BaseValidator {
-  static isTrustedApp(item: { listId: string }): boolean {
-    return item.listId === ENDPOINT_TRUSTED_APPS_LIST_ID;
+export class BlocklistValidator extends BaseValidator {
+  static isBlocklist(item: { listId: string }): boolean {
+    return item.listId === ENDPOINT_BLOCKLISTS_LIST_ID;
   }
 
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
     await this.validateCanManageEndpointArtifacts();
-    await this.validateTrustedAppData(item);
+    await this.validateBlocklistData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
 
@@ -215,7 +249,7 @@ export class TrustedAppValidator extends BaseValidator {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
     await this.validateCanManageEndpointArtifacts();
-    await this.validateTrustedAppData(updatedItem);
+    await this.validateBlocklistData(updatedItem);
 
     try {
       await this.validateCanCreateByPolicyArtifacts(updatedItem);
@@ -233,11 +267,11 @@ export class TrustedAppValidator extends BaseValidator {
     return _updatedItem;
   }
 
-  private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {
+  private async validateBlocklistData(item: ExceptionItemLikeOptions): Promise<void> {
     await this.validateBasicData(item);
 
     try {
-      TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
+      BlocklistDataSchema.validate(item, { os: item.osTypes[0] });
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
     }
