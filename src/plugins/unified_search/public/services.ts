@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ThemeServiceStart } from 'src/core/public';
+import { ThemeServiceStart, CoreStart } from 'src/core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataViewsContract } from '../../data_views/public';
 
@@ -14,3 +14,5 @@ export const [getIndexPatterns, setIndexPatterns] =
   createGetterSetter<DataViewsContract>('IndexPatterns');
 
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
+
+export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays']>('Overlays');

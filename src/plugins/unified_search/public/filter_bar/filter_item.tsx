@@ -20,8 +20,8 @@ import React, { MouseEvent, useState, useEffect } from 'react';
 import { IUiSettingsClient } from '../../../../core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { IIndexPattern } from '../../common';
-import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '../query';
+import { IIndexPattern } from '../../../data/common';
+import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '../../../data/public';
 import { getIndexPatterns } from '../services';
 
 type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';

@@ -9,7 +9,7 @@
 import React from 'react';
 import FilterLabel from './filter_label';
 import { render } from '@testing-library/react';
-import { phraseFilter } from '../../../stubs';
+import { phraseFilter } from '../../../../../data/common/stubs';
 
 test('alias', () => {
   const filter = {

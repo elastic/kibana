@@ -61,8 +61,6 @@ import {
   convertRangeFilterToTimeRangeString as oldConvertRangeFilterToTimeRangeString,
 } from './query';
 
-import { FilterLabel, FilterItem, FilterBar } from './filter_bar';
-
 /**
  * @deprecated  This import will be removed.
  * @removeBy 8.1
@@ -90,10 +88,6 @@ const convertRangeFilterToTimeRangeString = oldConvertRangeFilterToTimeRangeStri
  * @removeBy 8.1
  */
 export const esFilters = {
-  FilterLabel,
-  FilterItem,
-  FilterBar,
-
   FILTERS,
   FilterStateStore,
 

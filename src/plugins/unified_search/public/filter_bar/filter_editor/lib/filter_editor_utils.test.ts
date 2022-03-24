@@ -13,8 +13,8 @@ import {
   rangeFilter,
   stubIndexPattern,
   stubFields,
-} from '../../../stubs';
-import { toggleFilterNegated } from '../../../../common';
+} from '../../../../../data/common/stubs';
+import { toggleFilterNegated } from '../../../../../data/common';
 import {
   getFieldFromFilter,
   getFilterableFields,

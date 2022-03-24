@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import { getDisplayValueFromFilter, mapAndFlattenFilters } from '../query';
+import { getDisplayValueFromFilter, mapAndFlattenFilters } from '../../../data/public';
 import { FilterLabel } from '../filter_bar';
-import { Filter, IIndexPattern } from '../../common';
+import { Filter, IIndexPattern } from '../../../data/common';
 
 interface Props {
   filters: Filter[];

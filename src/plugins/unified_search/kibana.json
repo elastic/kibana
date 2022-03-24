@@ -9,6 +9,6 @@
   },
   "server": false,
   "ui": true,
-  "requiredPlugins": ["dataViews", "data"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+  "requiredPlugins": ["dataViews", "data", "uiActions"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "data"]
 }

@@ -11,7 +11,7 @@ import { Filter, FieldFilter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
-import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../common';
+import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../../data/common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
   return indexPattern.fields.find((field) => field.name === filter.meta.key);

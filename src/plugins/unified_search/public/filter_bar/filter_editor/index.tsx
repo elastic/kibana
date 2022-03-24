@@ -44,8 +44,8 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
-import { IIndexPattern, IFieldType } from '../../../common';
-import { getIndexPatternFromFilter } from '../../query';
+import { IIndexPattern, IFieldType } from '../../../../data/common';
+import { getIndexPatternFromFilter } from '../../../../data/public';
 import { CodeEditor } from '../../../../kibana_react/public';
 
 export interface Props {

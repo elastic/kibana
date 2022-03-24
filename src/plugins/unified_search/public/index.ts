@@ -18,6 +18,7 @@ export type { SearchBarProps, StatefulSearchBarProps } from './search_bar';
 export { SearchBar } from './search_bar';
 export { SuggestionsComponent } from './typeahead';
 export type { UnifiedSearchPublicPluginStart } from './types';
+export { FilterLabel, FilterItem } from './filter_bar';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.

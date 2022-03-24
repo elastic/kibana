@@ -16,7 +16,8 @@ import type { UsageCollectionSetup } from '../../usage_collection/public';
 import { createSearchBar } from './search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
 import { UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart } from './types';
-import type { UnifiedSearchStartDependencies } from './types';
+import type { UnifiedSearchStartDependencies, UnifiedSearchSetupDependencies } from './types';
+import { createFilterAction } from './actions/apply_filter_action';
 
 export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
@@ -28,7 +29,15 @@ export class UnifiedSearchPublicPlugin
     this.storage = new Storage(window.localStorage);
   }
 
-  public setup(core: CoreSetup): UnifiedSearchPluginSetup {
+  public setup(
+    core: CoreSetup,
+    { uiActions, data }: UnifiedSearchSetupDependencies
+  ): UnifiedSearchPluginSetup {
+    const { query } = data;
+    uiActions.registerAction(
+      createFilterAction(query.filterManager, query.timefilter.timefilter, core.theme)
+    );
+
     return {};
   }
 

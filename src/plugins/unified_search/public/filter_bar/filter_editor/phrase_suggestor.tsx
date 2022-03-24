@@ -10,8 +10,8 @@ import React from 'react';
 import { debounce } from 'lodash';
 
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
-import { IIndexPattern, IFieldType, UI_SETTINGS } from '../../../common';
-import { IDataPluginServices } from '../../types';
+import { IIndexPattern, IFieldType, UI_SETTINGS } from '../../../../data/common';
+import { IDataPluginServices } from '../../../../data/public';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;

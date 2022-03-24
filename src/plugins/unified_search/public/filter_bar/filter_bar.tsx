@@ -26,8 +26,8 @@ import { FilterEditor } from './filter_editor';
 import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
 import { useKibana } from '../../../kibana_react/public';
-import { IIndexPattern, UI_SETTINGS } from '../../common';
-import { IDataPluginServices } from '../types';
+import { IIndexPattern, UI_SETTINGS } from '../../../data/common';
+import { IDataPluginServices } from '../../../data/public';
 
 export interface Props {
   filters: Filter[];

@@ -30,7 +30,6 @@ import {
 } from './services';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
-  createFilterAction,
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
   createValueClickAction,
@@ -94,9 +93,6 @@ export class DataPublicPlugin
     });
 
     uiActions.registerTrigger(applyFilterTrigger);
-    uiActions.registerAction(
-      createFilterAction(queryService.filterManager, queryService.timefilter.timefilter, core.theme)
-    );
 
     inspector.registerView(
       getTableViewDescription(() => ({

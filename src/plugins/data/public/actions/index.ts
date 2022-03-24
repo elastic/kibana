@@ -7,7 +7,7 @@
  */
 
 export type { ApplyGlobalFilterActionContext } from './apply_filter_action';
-export { ACTION_GLOBAL_APPLY_FILTER, createFilterAction } from './apply_filter_action';
+export { ACTION_GLOBAL_APPLY_FILTER } from './apply_filter_action';
 export { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 export { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
 export * from './select_range_action';

@@ -20,7 +20,6 @@ export * from './deprecated';
 
 export { getEsQueryConfig, FilterStateStore } from '../common';
 export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
-export { FilterLabel, FilterItem } from './filter_bar';
 
 /**
  * Exporters (CSV)
@@ -268,6 +267,8 @@ export {
   FilterManager,
   TimeHistory,
   getQueryLog,
+  mapAndFlattenFilters,
+  getIndexPatternFromFilter,
 } from './query';
 
 export type {
@@ -282,6 +283,7 @@ export type {
   AutoRefreshDoneFn,
   PersistedLog,
   QueryStringContract,
+  QuerySetup,
 } from './query';
 
 export type { AggsStart } from './search/aggs';

@@ -9,6 +9,12 @@ import type { DataViewsPublicPluginStart } from '../../data_views/public';
 import type { FieldFormatsStart } from '../../field_formats/public';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './index';
 import type { DataPublicPluginStart } from '../../data/public';
+import type { UiActionsSetup } from '../../ui_actions/public';
+
+export interface UnifiedSearchSetupDependencies {
+  uiActions: UiActionsSetup;
+  data: DataPublicPluginStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedSearchPluginSetup {}
