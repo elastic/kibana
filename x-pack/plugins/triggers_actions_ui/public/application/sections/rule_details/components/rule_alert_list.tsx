@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import moment, { Duration } from 'moment';
-import { padStart } from 'lodash';
+import { padStart, chunk } from 'lodash';
 import { EuiHealth, EuiBasicTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
+import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { Pagination } from '../../../../types';
 import { AlertListItemStatus, AlertListItem } from './types';
 import { AlertMutedSwitch } from './alert_muted_switch';
@@ -107,11 +108,8 @@ const alertsTableColumns = (
 
 interface RuleAlertListProps {
   items: AlertListItem[];
-  pagination: Pagination;
-  paginationItemCount: number;
   readOnly: boolean;
   onMuteAction: (alert: AlertListItem) => Promise<void>;
-  onPaginate: (pagination: Pagination) => void;
 }
 
 const getRowProps = () => ({
@@ -122,27 +120,38 @@ const getCellProps = () => ({
   'data-test-subj': 'cell',
 });
 
+function getPage<T>(items: T[], pagination: Pagination) {
+  return chunk(items, pagination.size)[pagination.index] || [];
+}
+
 export const RuleAlertList = (props: RuleAlertListProps) => {
-  const { items, pagination, paginationItemCount, readOnly, onMuteAction, onPaginate } = props;
+  const { items, readOnly, onMuteAction } = props;
+
+  const [pagination, setPagination] = useState<Pagination>({
+    index: 0,
+    size: DEFAULT_SEARCH_PAGE_SIZE,
+  });
+
+  const pageOfAlerts = getPage<AlertListItem>(items, pagination);
 
   const paginationOptions = useMemo(() => {
     return {
       pageIndex: pagination.index,
       pageSize: pagination.size,
-      totalItemCount: paginationItemCount,
+      totalItemCount: items.length,
     };
-  }, [pagination, paginationItemCount]);
+  }, [pagination, items]);
 
   const onChange = useCallback(
     ({ page: changedPage }: { page: Pagination }) => {
-      onPaginate(changedPage);
+      setPagination(changedPage);
     },
-    [onPaginate]
+    [setPagination]
   );
 
   return (
     <EuiBasicTable<AlertListItem>
-      items={items}
+      items={pageOfAlerts}
       pagination={paginationOptions}
       onChange={onChange}
       rowProps={getRowProps}

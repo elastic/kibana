@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+export const executionLogSortableColumns = [
+  'timestamp',
+  'execution_duration',
+  'total_search_duration',
+  'es_search_duration',
+  'schedule_delay',
+  'num_triggered_actions',
+] as const;
+
+export type ExecutionLogSortFields = typeof executionLogSortableColumns[number];
+
 export interface IExecutionLog {
   id: string;
   timestamp: string;

@@ -13,7 +13,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 import { EuiSuperDatePicker, EuiDataGrid } from '@elastic/eui';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
-import { RuleEventLogList, DEFAULT_INITIAL_VISIBLE_COLUMNS } from './rule_event_log_list';
+import { RuleEventLogList } from './rule_event_log_list';
+import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
 import { Rule } from '../../../../types';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -162,7 +163,7 @@ describe('rule_event_log_list', () => {
     expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeTruthy();
 
     // Verify the initial columns are rendered
-    DEFAULT_INITIAL_VISIBLE_COLUMNS.forEach((column) => {
+    RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS.forEach((column) => {
       expect(wrapper.find(`[data-test-subj="dataGridHeaderCell-${column}"]`).exists()).toBeTruthy();
     });
 
@@ -479,7 +480,7 @@ describe('rule_event_log_list', () => {
       JSON.parse(
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
-    ).toEqual(DEFAULT_INITIAL_VISIBLE_COLUMNS);
+    ).toEqual(RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS);
 
     wrapper.find('[data-test-subj="dataGridColumnSelectorButton"] button').simulate('click');
 
@@ -498,6 +499,6 @@ describe('rule_event_log_list', () => {
       JSON.parse(
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
-    ).toEqual([...DEFAULT_INITIAL_VISIBLE_COLUMNS, 'num_active_alerts']);
+    ).toEqual([...RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS, 'num_active_alerts']);
   });
 });

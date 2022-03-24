@@ -31,9 +31,11 @@ const STATUS_TO_COLOR: Record<EcsEventOutcome, string> = {
 
 export const RuleEventLogListStatus = (props: RuleEventLogListStatusProps) => {
   const { status } = props;
+  const color = STATUS_TO_COLOR[status] || 'gray';
+
   return (
     <div style={statusContainerStyles}>
-      <EuiIcon type="dot" color={STATUS_TO_COLOR[status]} style={iconStyles} />
+      <EuiIcon type="dot" color={color} style={iconStyles} />
       {status}
     </div>
   );

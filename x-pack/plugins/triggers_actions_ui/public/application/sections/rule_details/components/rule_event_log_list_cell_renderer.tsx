@@ -10,22 +10,23 @@ import moment from 'moment';
 import { EcsEventOutcome } from 'kibana/server';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../../sections/rules_list/components/rule_duration_format';
+import {
+  RULE_EXECUTION_LOG_COLUMN_IDS,
+  RULE_EXECUTION_LOG_DURATION_COLUMNS,
+} from '../../../constants';
 
-const DURATION_COLUMNS = [
-  'execution_duration',
-  'total_search_duration',
-  'es_search_duration',
-  'schedule_delay',
-];
+export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+
+export type ColumnId = typeof RULE_EXECUTION_LOG_COLUMN_IDS[number];
 
 interface RuleEventLogListCellRendererProps {
-  columnId: string;
+  columnId: ColumnId;
   value?: string;
   dateFormat?: string;
 }
 
 export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRendererProps) => {
-  const { columnId, value, dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS' } = props;
+  const { columnId, value, dateFormat = DEFAULT_DATE_FORMAT } = props;
 
   if (typeof value === 'undefined') {
     return null;
@@ -39,7 +40,7 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
     return <>{moment(value).format(dateFormat)}</>;
   }
 
-  if (DURATION_COLUMNS.includes(columnId)) {
+  if (RULE_EXECUTION_LOG_DURATION_COLUMNS.includes(columnId)) {
     return <RuleDurationFormat duration={parseInt(value, 10)} />;
   }
 

@@ -8,8 +8,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { HttpSetup } from 'kibana/public';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { IExecutionLogResult, IExecutionLog } from '../../../../../alerting/common';
+
+import {
+  IExecutionLogResult,
+  IExecutionLog,
+  ExecutionLogSortFields,
+} from '../../../../../alerting/common';
 import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 
 const getRenamedLog = (data: IExecutionLog) => {
@@ -42,18 +48,8 @@ const getFilter = (filter: string[] | undefined) => {
   return filter.join(' OR ');
 };
 
-export type SortFields =
-  | 'timestamp'
-  | 'execution_duration'
-  | 'total_search_duration'
-  | 'es_search_duration'
-  | 'schedule_delay'
-  | 'num_triggered_actions';
-
-export type SortOrder = 'asc' | 'desc';
-
 export type SortField = Record<
-  SortFields,
+  ExecutionLogSortFields,
   {
     order: SortOrder;
   }
@@ -89,6 +85,8 @@ export const loadExecutionLogAggregations = async ({
         date_end: dateEnd,
         filter: getFilter(filter),
         per_page: perPage,
+        // Need to add the + 1 for pages because APIs are 1 indexed,
+        // whereas data grid sorts are 0 indexed.
         page: page + 1,
         sort: sortField.length ? JSON.stringify(sortField) : undefined,
       },

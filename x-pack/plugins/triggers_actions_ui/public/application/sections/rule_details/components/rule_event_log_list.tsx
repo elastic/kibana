@@ -12,6 +12,7 @@ import {
   EuiDataGrid,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiProgress,
   EuiSpacer,
   EuiDataGridSorting,
   Pagination,
@@ -20,12 +21,17 @@ import {
   OnTimeChangeProps,
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
+import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
-import { RuleEventLogListCellRenderer } from './rule_event_log_list_cell_renderer';
+import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_cell_renderer';
 
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { Rule } from '../../../../types';
-import { IExecutionLog } from '../../../../../../alerting/common';
+import {
+  IExecutionLog,
+  executionLogSortableColumns,
+  ExecutionLogSortFields,
+} from '../../../../../../alerting/common';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -38,14 +44,9 @@ const getParsedDate = (date: string) => {
   return date;
 };
 
-const SORTABLE_COLUMNS = [
-  'timestamp',
-  'execution_duration',
-  'total_search_duration',
-  'es_search_duration',
-  'schedule_delay',
-  'num_triggered_actions',
-];
+const getIsColumnSortable = (columnId: string) => {
+  return executionLogSortableColumns.includes(columnId as ExecutionLogSortFields);
+};
 
 const columns = [
   {
@@ -56,7 +57,7 @@ const columns = [
         defaultMessage: 'Id',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('id'),
+    isSortable: getIsColumnSortable('id'),
   },
   {
     id: 'timestamp',
@@ -66,7 +67,7 @@ const columns = [
         defaultMessage: 'Timestamp',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('timestamp'),
+    isSortable: getIsColumnSortable('timestamp'),
   },
   {
     id: 'execution_duration',
@@ -76,7 +77,7 @@ const columns = [
         defaultMessage: 'Duration',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('execution_duration'),
+    isSortable: getIsColumnSortable('execution_duration'),
   },
   {
     id: 'status',
@@ -86,7 +87,8 @@ const columns = [
         defaultMessage: 'Status',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('status'),
+    isSortable: getIsColumnSortable('status'),
+    initialWidth: 100,
   },
   {
     id: 'message',
@@ -96,7 +98,8 @@ const columns = [
         defaultMessage: 'Message',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('message'),
+    isSortable: getIsColumnSortable('message'),
+    initialWidth: 400,
   },
   {
     id: 'num_active_alerts',
@@ -106,7 +109,7 @@ const columns = [
         defaultMessage: 'Active alerts',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('num_active_alerts'),
+    isSortable: getIsColumnSortable('num_active_alerts'),
   },
   {
     id: 'num_new_alerts',
@@ -116,7 +119,7 @@ const columns = [
         defaultMessage: 'New alerts',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('num_new_alerts'),
+    isSortable: getIsColumnSortable('num_new_alerts'),
   },
   {
     id: 'num_recovered_alerts',
@@ -126,7 +129,7 @@ const columns = [
         defaultMessage: 'Recovered alerts',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('num_recovered_alerts'),
+    isSortable: getIsColumnSortable('num_recovered_alerts'),
   },
   {
     id: 'num_triggered_actions',
@@ -136,7 +139,7 @@ const columns = [
         defaultMessage: 'Triggered actions',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('num_triggered_actions'),
+    isSortable: getIsColumnSortable('num_triggered_actions'),
   },
   {
     id: 'num_succeeded_actions',
@@ -146,7 +149,7 @@ const columns = [
         defaultMessage: 'Succeeded actions',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('num_succeeded_actions'),
+    isSortable: getIsColumnSortable('num_succeeded_actions'),
   },
   {
     id: 'num_errored_actions',
@@ -156,7 +159,7 @@ const columns = [
         defaultMessage: 'Errored actions',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('num_errored_actions'),
+    isSortable: getIsColumnSortable('num_errored_actions'),
   },
   {
     id: 'total_search_duration',
@@ -166,7 +169,7 @@ const columns = [
         defaultMessage: 'Total search duration',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('total_search_duration'),
+    isSortable: getIsColumnSortable('total_search_duration'),
   },
   {
     id: 'es_search_duration',
@@ -176,7 +179,7 @@ const columns = [
         defaultMessage: 'ES search duration',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('es_search_duration'),
+    isSortable: getIsColumnSortable('es_search_duration'),
   },
   {
     id: 'schedule_delay',
@@ -186,7 +189,7 @@ const columns = [
         defaultMessage: 'Schedule delay',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('schedule_delay'),
+    isSortable: getIsColumnSortable('schedule_delay'),
   },
   {
     id: 'timed_out',
@@ -196,7 +199,7 @@ const columns = [
         defaultMessage: 'Timed out',
       }
     ),
-    isSortable: SORTABLE_COLUMNS.includes('timed_out'),
+    isSortable: getIsColumnSortable('timed_out'),
   },
 ];
 
@@ -209,14 +212,12 @@ const API_FAILED_MESSAGE = i18n.translate(
 
 const RULE_EVENT_LOG_LIST_STORAGE_KEY = 'xpack.triggersActionsUI.ruleEventLogList.initialColumns';
 
-export const DEFAULT_INITIAL_VISIBLE_COLUMNS = [
-  'timestamp',
-  'execution_duration',
-  'status',
-  'message',
-];
-
 const PAGE_SIZE_OPTION = [10, 50, 100];
+
+const updateButtonProps = {
+  iconOnly: true,
+  fill: false,
+};
 
 export type RuleEventLogListProps = {
   rule: Rule;
@@ -236,7 +237,8 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   const [logs, setLogs] = useState<IExecutionLog[]>([]);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
     return (
-      JSON.parse(localStorage.getItem(localStorageKey) ?? 'null') || DEFAULT_INITIAL_VISIBLE_COLUMNS
+      JSON.parse(localStorage.getItem(localStorageKey) ?? 'null') ||
+      RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS
     );
   });
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
@@ -268,10 +270,14 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   const renderCell = ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
     const { pageIndex, pageSize } = pagination;
     const pagedRowIndex = rowIndex - pageIndex * pageSize;
-    const value = logs?.[pagedRowIndex]?.[columnId as keyof IExecutionLog] as string;
 
+    const value = logs?.[pagedRowIndex]?.[columnId as keyof IExecutionLog] as string;
     return (
-      <RuleEventLogListCellRenderer columnId={columnId} value={value} dateFormat={dateFormat} />
+      <RuleEventLogListCellRenderer
+        columnId={columnId as ColumnId}
+        value={value}
+        dateFormat={dateFormat}
+      />
     );
   };
 
@@ -397,13 +403,12 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     <div>
       <EuiSpacer />
       <EuiFlexGroup>
-        <EuiFlexItem grow={4}>{/* KQL search bar eventually goes here */}</EuiFlexItem>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={false}>
           <RuleEventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
         </EuiFlexItem>
-        <EuiFlexItem grow={5}>
+        <EuiFlexItem grow={false}>
           <EuiSuperDatePicker
-            width="full"
+            width="auto"
             isLoading={isLoading}
             start={dateStart}
             end={dateEnd}
@@ -411,12 +416,17 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
             onRefresh={onRefresh}
             dateFormat={dateFormat}
             commonlyUsedRanges={commonlyUsedRanges}
+            updateButtonProps={updateButtonProps}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
+      {isLoading && (
+        <EuiProgress size="xs" color="accent" data-test-subj="ruleEventLogListProgressBar" />
+      )}
       <EuiDataGrid
-        aria-label="rule execution log"
+        aria-label="rule event log"
+        data-test-subj="ruleEventLogList"
         columns={columns}
         rowCount={pagination.totalItemCount}
         renderCellValue={renderCell}

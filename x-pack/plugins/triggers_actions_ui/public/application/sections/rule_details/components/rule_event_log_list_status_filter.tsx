@@ -59,7 +59,7 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
           </EuiFilterButton>
         }
       >
-        <React.Fragment>
+        <>
           {statusFilters.map((status) => {
             return (
               <EuiFilterSelectItem
@@ -72,7 +72,7 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
               </EuiFilterSelectItem>
             );
           })}
-        </React.Fragment>
+        </>
       </EuiPopover>
     </EuiFilterGroup>
   );

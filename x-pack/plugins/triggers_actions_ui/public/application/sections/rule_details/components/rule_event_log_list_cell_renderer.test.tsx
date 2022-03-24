@@ -6,20 +6,25 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import { RuleEventLogListCellRenderer } from './rule_event_log_list_cell_renderer';
+import moment from 'moment';
+import { EuiIcon } from '@elastic/eui';
+import { shallow, mount } from 'enzyme';
+import {
+  RuleEventLogListCellRenderer,
+  DEFAULT_DATE_FORMAT,
+} from './rule_event_log_list_cell_renderer';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../../sections/rules_list/components/rule_duration_format';
 
 describe('rule_event_log_list_cell_renderer', () => {
   it('renders primitive values correctly', () => {
-    const wrapper = shallow(<RuleEventLogListCellRenderer columnId="test_column" value="test" />);
+    const wrapper = shallow(<RuleEventLogListCellRenderer columnId="message" value="test" />);
 
     expect(wrapper.text()).toEqual('test');
   });
 
   it('renders undefined correctly', () => {
-    const wrapper = shallow(<RuleEventLogListCellRenderer columnId="test_column" />);
+    const wrapper = shallow(<RuleEventLogListCellRenderer columnId="message" />);
 
     expect(wrapper.text()).toBeFalsy();
   });
@@ -34,11 +39,10 @@ describe('rule_event_log_list_cell_renderer', () => {
   });
 
   it('renders timestamps correctly', () => {
-    const wrapper = shallow(
-      <RuleEventLogListCellRenderer columnId="timestamp" value="2022-03-20T07:40:44-07:00" />
-    );
+    const time = '2022-03-20T07:40:44-07:00';
+    const wrapper = shallow(<RuleEventLogListCellRenderer columnId="timestamp" value={time} />);
 
-    expect(wrapper.text()).toEqual('Mar 20, 2022 @ 07:40:44.000');
+    expect(wrapper.text()).toEqual(moment(time).format(DEFAULT_DATE_FORMAT));
   });
 
   it('renders alert status correctly', () => {
@@ -46,5 +50,13 @@ describe('rule_event_log_list_cell_renderer', () => {
 
     expect(wrapper.find(RuleEventLogListStatus).exists()).toBeTruthy();
     expect(wrapper.find(RuleEventLogListStatus).props().status).toEqual('success');
+  });
+
+  it('unaccounted status will still render, but with the unknown color', () => {
+    const wrapper = mount(<RuleEventLogListCellRenderer columnId="status" value="newOutcome" />);
+
+    expect(wrapper.find(RuleEventLogListStatus).exists()).toBeTruthy();
+    expect(wrapper.find(RuleEventLogListStatus).text()).toEqual('newOutcome');
+    expect(wrapper.find(EuiIcon).props().color).toEqual('gray');
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiHealth,
@@ -20,18 +20,16 @@ import {
 } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { chunk } from 'lodash';
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
   AlertStatusValues,
 } from '../../../../../../alerting/common';
-import { Rule, RuleSummary, AlertStatus, RuleType, Pagination } from '../../../../types';
+import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
-import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import './rule.scss';
 import { getHealthColor } from '../../rules_list/components/rule_status_filter';
 import {
@@ -76,16 +74,9 @@ export function RuleComponent({
   durationEpoch = Date.now(),
   isLoadingChart,
 }: RuleProps) {
-  const [pagination, setPagination] = useState<Pagination>({
-    index: 0,
-    size: DEFAULT_SEARCH_PAGE_SIZE,
-  });
-
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, ruleType, alertId, alert))
     .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
-
-  const pageOfAlerts = getPage<AlertListItem>(alerts, pagination);
 
   const onMuteAction = async (alert: AlertListItem) => {
     await (alert.isMuted
@@ -107,16 +98,7 @@ export function RuleComponent({
     : rulesStatusesTranslationsMapping[rule.executionStatus.status];
 
   const renderRuleAlertList = () => {
-    return (
-      <RuleAlertList
-        items={pageOfAlerts}
-        pagination={pagination}
-        paginationItemCount={alerts.length}
-        readOnly={readOnly}
-        onMuteAction={onMuteAction}
-        onPaginate={setPagination}
-      />
-    );
+    return <RuleAlertList items={alerts} readOnly={readOnly} onMuteAction={onMuteAction} />;
   };
 
   const tabs = [
@@ -139,7 +121,7 @@ export function RuleComponent({
   ];
 
   const renderTabs = () => {
-    const isEnabled = getIsExperimentalFeatureEnabled('rulesListDatagrid');
+    const isEnabled = getIsExperimentalFeatureEnabled('rulesDetailLogs');
     if (isEnabled) {
       return <EuiTabbedContent data-test-subj="ruleDetailsTabbedContent" tabs={tabs} />;
     }
@@ -236,10 +218,6 @@ export function RuleComponent({
   );
 }
 export const RuleWithApi = withBulkRuleOperations(RuleComponent);
-
-function getPage<T>(items: T[], pagination: Pagination) {
-  return chunk(items, pagination.size)[pagination.index] || [];
-}
 
 const ACTIVE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active',
