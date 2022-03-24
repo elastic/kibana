@@ -29,6 +29,7 @@ export { fromKueryExpression } from './ast';
 export { KQLSyntaxError } from './kuery_syntax_error';
 export { nodeTypes, nodeBuilder } from './node_types';
 export { functions } from './functions';
+export { escapeKuery } from './utils';
 
 /**
  * @params {String} indexPattern

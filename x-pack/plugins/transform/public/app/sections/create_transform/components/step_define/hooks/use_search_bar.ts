@@ -23,7 +23,7 @@ import { StepDefineFormProps } from '../step_define_form';
 
 export const useSearchBar = (
   defaults: StepDefineExposedState,
-  indexPattern: StepDefineFormProps['searchItems']['indexPattern']
+  dataView: StepDefineFormProps['searchItems']['dataView']
 ) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
@@ -51,7 +51,7 @@ export const useSearchBar = (
     try {
       switch (query.language) {
         case QUERY_LANGUAGE_KUERY:
-          setSearchQuery(toElasticsearchQuery(fromKueryExpression(query.query), indexPattern));
+          setSearchQuery(toElasticsearchQuery(fromKueryExpression(query.query), dataView));
           return;
         case QUERY_LANGUAGE_LUCENE:
           setSearchQuery(luceneStringToDsl(query.query));

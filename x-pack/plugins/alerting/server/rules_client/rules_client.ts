@@ -125,6 +125,13 @@ export interface RuleAggregation {
       doc_count: number;
     }>;
   };
+  snoozed: {
+    buckets: Array<{
+      key: number;
+      key_as_string: string;
+      doc_count: number;
+    }>;
+  };
 }
 
 export interface ConstructorOptions {
@@ -191,6 +198,7 @@ export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
   ruleEnabledStatus?: { enabled: number; disabled: number };
   ruleMutedStatus?: { muted: number; unmuted: number };
+  ruleSnoozedStatus?: { snoozed: number };
 }
 
 export interface FindResult<Params extends RuleTypeParams> {
@@ -249,6 +257,14 @@ export interface GetExecutionLogByIdParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+}
+
+interface ScheduleRuleOptions {
+  id: string;
+  consumer: string;
+  ruleTypeId: string;
+  schedule: IntervalSchedule;
+  throwOnConflict: boolean; // whether to throw conflict errors or swallow them
 }
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
@@ -368,19 +384,12 @@ export class RulesClient {
 
     await this.validateActions(ruleType, data.actions);
 
-    // Validate that schedule interval is not less than configured minimum
+    // Throw error if schedule interval is less than the minimum and we are enforcing it
     const intervalInMs = parseDuration(data.schedule.interval);
-    if (intervalInMs < this.minimumScheduleIntervalInMs) {
-      if (this.minimumScheduleInterval.enforce) {
-        throw Boom.badRequest(
-          `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
-        );
-      } else {
-        // just log warning but allow rule to be created
-        this.logger.warn(
-          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
-        );
-      }
+    if (intervalInMs < this.minimumScheduleIntervalInMs && this.minimumScheduleInterval.enforce) {
+      throw Boom.badRequest(
+        `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+      );
     }
 
     // Extract saved object references for this rule
@@ -449,12 +458,13 @@ export class RulesClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleRule(
-          createdAlert.id,
-          rawRule.alertTypeId,
-          data.schedule,
-          true
-        );
+        scheduledTask = await this.scheduleRule({
+          id: createdAlert.id,
+          consumer: data.consumer,
+          ruleTypeId: rawRule.alertTypeId,
+          schedule: data.schedule,
+          throwOnConflict: true,
+        });
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
         try {
@@ -472,6 +482,14 @@ export class RulesClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
+
+    // Log warning if schedule interval is less than the minimum but we're not enforcing it
+    if (intervalInMs < this.minimumScheduleIntervalInMs && !this.minimumScheduleInterval.enforce) {
+      this.logger.warn(
+        `Rule schedule interval (${data.schedule.interval}) for "${createdAlert.attributes.alertTypeId}" rule type with ID "${createdAlert.id}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+      );
+    }
+
     return this.getAlertFromRaw<Params>(
       createdAlert.id,
       createdAlert.attributes.alertTypeId,
@@ -860,6 +878,7 @@ export class RulesClient {
       );
       throw error;
     }
+
     const { filter: authorizationFilter } = authorizationTuple;
     const resp = await this.unsecuredSavedObjectsClient.find<RawRule, RuleAggregation>({
       ...options,
@@ -880,6 +899,13 @@ export class RulesClient {
         muted: {
           terms: { field: 'alert.attributes.muteAll' },
         },
+        snoozed: {
+          date_range: {
+            field: 'alert.attributes.snoozeEndTime',
+            format: 'strict_date_time',
+            ranges: [{ from: 'now' }],
+          },
+        },
       },
     });
 
@@ -895,6 +921,7 @@ export class RulesClient {
           muted: 0,
           unmuted: 0,
         },
+        ruleSnoozedStatus: { snoozed: 0 },
       };
 
       for (const key of RuleExecutionStatusValues) {
@@ -934,6 +961,11 @@ export class RulesClient {
     ret.ruleMutedStatus = {
       muted: mutedBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
       unmuted: mutedBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
+    };
+
+    const snoozedBuckets = resp.aggregations.snoozed.buckets;
+    ret.ruleSnoozedStatus = {
+      snoozed: snoozedBuckets.reduce((acc, bucket) => acc + bucket.doc_count, 0),
     };
 
     return ret;
@@ -1119,19 +1151,12 @@ export class RulesClient {
     const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
     await this.validateActions(ruleType, data.actions);
 
-    // Validate that schedule interval is not less than configured minimum
+    // Throw error if schedule interval is less than the minimum and we are enforcing it
     const intervalInMs = parseDuration(data.schedule.interval);
-    if (intervalInMs < this.minimumScheduleIntervalInMs) {
-      if (this.minimumScheduleInterval.enforce) {
-        throw Boom.badRequest(
-          `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
-        );
-      } else {
-        // just log warning but allow rule to be updated
-        this.logger.warn(
-          `Rule schedule interval (${data.schedule.interval}) is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
-        );
-      }
+    if (intervalInMs < this.minimumScheduleIntervalInMs && this.minimumScheduleInterval.enforce) {
+      throw Boom.badRequest(
+        `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+      );
     }
 
     // Extract saved object references for this rule
@@ -1192,6 +1217,13 @@ export class RulesClient {
         this.unsecuredSavedObjectsClient
       );
       throw e;
+    }
+
+    // Log warning if schedule interval is less than the minimum but we're not enforcing it
+    if (intervalInMs < this.minimumScheduleIntervalInMs && !this.minimumScheduleInterval.enforce) {
+      this.logger.warn(
+        `Rule schedule interval (${data.schedule.interval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+      );
     }
 
     return this.getPartialRuleFromRaw(
@@ -1424,12 +1456,13 @@ export class RulesClient {
         );
         throw e;
       }
-      const scheduledTask = await this.scheduleRule(
+      const scheduledTask = await this.scheduleRule({
         id,
-        attributes.alertTypeId,
-        attributes.schedule as IntervalSchedule,
-        false
-      );
+        consumer: attributes.consumer,
+        ruleTypeId: attributes.alertTypeId,
+        schedule: attributes.schedule as IntervalSchedule,
+        throwOnConflict: false,
+      });
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
       });
@@ -1498,6 +1531,7 @@ export class RulesClient {
             ruleId: id,
             ruleName: attributes.name,
             ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
+            consumer: attributes.consumer,
             instanceId,
             action: EVENT_LOG_ACTIONS.recoveredInstance,
             message,
@@ -1505,6 +1539,7 @@ export class RulesClient {
             group: actionGroup,
             subgroup: actionSubgroup,
             namespace: this.namespace,
+            spaceId: this.spaceId,
             savedObjects: [
               {
                 id,
@@ -1648,6 +1683,68 @@ export class RulesClient {
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    );
+  }
+
+  public async unsnooze({ id }: { id: string }): Promise<void> {
+    return await retryIfConflicts(
+      this.logger,
+      `rulesClient.unsnooze('${id}')`,
+      async () => await this.unsnoozeWithOCC({ id })
+    );
+  }
+
+  private async unsnoozeWithOCC({ id }: { id: string }) {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: attributes.alertTypeId,
+        consumer: attributes.consumer,
+        operation: WriteOperations.Unsnooze,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.UNSNOOZE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.UNSNOOZE,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    const updateAttributes = this.updateMeta({
+      snoozeEndTime: null,
+      muteAll: false,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1927,12 +2024,8 @@ export class RulesClient {
     return this.spaceId;
   }
 
-  private async scheduleRule(
-    id: string,
-    ruleTypeId: string,
-    schedule: IntervalSchedule,
-    throwOnConflict: boolean // whether to throw conflict errors or swallow them
-  ) {
+  private async scheduleRule(opts: ScheduleRuleOptions) {
+    const { id, consumer, ruleTypeId, schedule, throwOnConflict } = opts;
     const taskInstance = {
       id, // use the same ID for task document as the rule
       taskType: `alerting:${ruleTypeId}`,
@@ -1940,6 +2033,7 @@ export class RulesClient {
       params: {
         alertId: id,
         spaceId: this.spaceId,
+        consumer,
       },
       state: {
         previousStartedAt: null,

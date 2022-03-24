@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, escapeKuery } from '@kbn/es-query';
 import { getErrorMessage as getEsErrorMessage } from '../../../../elasticsearch';
 import type { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 import type { IndexMapping } from '../../../mappings';
@@ -61,10 +61,6 @@ export async function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParam
     return;
   }
 
-  const match1 = nodeBuilder.is(`${LEGACY_URL_ALIAS_TYPE}.targetType`, type);
-  const match2 = nodeBuilder.is(`${LEGACY_URL_ALIAS_TYPE}.targetId`, id);
-  const kueryNode = nodeBuilder.and([match1, match2]);
-
   try {
     await client.updateByQuery(
       {
@@ -73,7 +69,7 @@ export async function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParam
         body: {
           ...getSearchDsl(mappings, registry, {
             type: LEGACY_URL_ALIAS_TYPE,
-            kueryNode,
+            kueryNode: createKueryNode(type, id),
           }),
           script: {
             // Intentionally use one script source with variable params to take advantage of ES script caching
@@ -104,4 +100,17 @@ export async function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParam
 
 function throwError(type: string, id: string, message: string) {
   throw new Error(`Failed to delete legacy URL aliases for ${type}/${id}: ${message}`);
+}
+
+function getKueryKey(attribute: string) {
+  // Note: these node keys do NOT include '.attributes' for type-level fields because we are using the query in the ES client (instead of the SO client)
+  return `${LEGACY_URL_ALIAS_TYPE}.${attribute}`;
+}
+
+export function createKueryNode(type: string, id: string) {
+  // Escape Kuery values to prevent parsing errors and unintended behavior (object types/IDs can contain KQL special characters/operators)
+  const match1 = nodeBuilder.is(getKueryKey('targetType'), escapeKuery(type));
+  const match2 = nodeBuilder.is(getKueryKey('targetId'), escapeKuery(id));
+  const kueryNode = nodeBuilder.and([match1, match2]);
+  return kueryNode;
 }

@@ -114,6 +114,7 @@ export {
   nodeBuilder,
   nodeTypes,
   toElasticsearchQuery,
+  escapeKuery,
 } from './kuery';
 
 export {
