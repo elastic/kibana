@@ -309,6 +309,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.data_output_id && validation.data_output_id)}
         >
           <EuiSuperSelect
+            disabled={agentPolicy.is_managed === true}
             valueOfSelected={agentPolicy.data_output_id || DEFAULT_OUTPUT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
@@ -347,6 +348,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.monitoring_output_id && validation.monitoring_output_id)}
         >
           <EuiSuperSelect
+            disabled={agentPolicy.is_managed === true}
             valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_OUTPUT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}

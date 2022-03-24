@@ -31,7 +31,7 @@ import { InspectResponse } from '../../../types';
 import { PageInfoPaginated } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkUsersQuery';
+export const ID = 'networkUsersQuery';
 
 export interface NetworkUsersArgs {
   id: string;
@@ -194,6 +194,14 @@ export const useNetworkUsers = ({
       abortCtrl.current.abort();
     };
   }, [networkUsersRequest, networkUsersSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkUsersResponse];
 };

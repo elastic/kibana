@@ -125,12 +125,12 @@ const SavedQueriesPageComponent = () => {
   );
 
   const renderPlayAction = useCallback(
-    (item: SavedQuerySO) => (
-      <PlayButton
-        savedQuery={item}
-        disabled={!(permissions.runSavedQueries || permissions.writeLiveQueries)}
-      />
-    ),
+    (item: SavedQuerySO) =>
+      permissions.runSavedQueries || permissions.writeLiveQueries ? (
+        <PlayButton savedQuery={item} disabled={false} />
+      ) : (
+        <></>
+      ),
     [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
