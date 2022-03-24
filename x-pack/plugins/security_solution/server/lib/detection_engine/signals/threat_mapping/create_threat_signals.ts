@@ -8,7 +8,7 @@
 import chunk from 'lodash/fp/chunk';
 import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { getThreatListFunc, getThreatListCount } from './get_threat_list';
+import { getThreatList, getThreatListCount } from './get_threat_list';
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
@@ -85,14 +85,15 @@ export const createThreatSignals = async ({
     return results;
   }
 
-  const pitId: OpenPointInTimeResponse['id'] = (
+  let pitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
       index: threatIndex,
       keep_alive: THREAT_PIT_KEEP_ALIVE,
     })
   ).id;
-
-  const getThreatList = getThreatListFunc(pitId);
+  const reassignPitId = (newPitId: OpenPointInTimeResponse['id'] | undefined) => {
+    if (newPitId) pitId = newPitId;
+  };
 
   let threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
@@ -121,6 +122,8 @@ export const createThreatSignals = async ({
     logger,
     buildRuleMessage,
     threatListConfig,
+    pitId,
+    reassignPitId,
   });
 
   const threatEnrichment = buildThreatEnrichment({
@@ -134,6 +137,8 @@ export const createThreatSignals = async ({
     threatLanguage,
     threatQuery,
     getThreatList,
+    pitId,
+    reassignPitId,
   });
 
   while (threatList.hits.hits.length !== 0) {
@@ -200,6 +205,8 @@ export const createThreatSignals = async ({
       buildRuleMessage,
       logger,
       threatListConfig,
+      pitId,
+      reassignPitId,
     });
   }
 

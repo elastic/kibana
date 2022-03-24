@@ -18,6 +18,7 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ListClient } from '../../../../../../lists/server';
 import {
   AlertInstanceContext,
@@ -147,6 +148,8 @@ export interface GetThreatListOptions {
   searchAfter: estypes.SortResults | undefined;
   threatFilters: unknown[];
   threatListConfig: ThreatListConfig;
+  pitId: OpenPointInTimeResponse['id'];
+  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
 
 export interface ThreatListCountOptions {
@@ -198,6 +201,8 @@ export interface BuildThreatEnrichmentOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   threatQuery: ThreatQuery;
   getThreatList: (options: GetThreatListOptions) => Promise<estypes.SearchResponse<ThreatListDoc>>;
+  pitId: string;
+  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
 
 export interface EventCountOptions {

@@ -14,64 +14,54 @@ import { GetThreatListOptions, ThreatListCountOptions, ThreatListDoc } from './t
  */
 export const INDICATOR_PER_PAGE = 1000;
 
-export const getThreatListFunc = (initialPitId: string) => {
-  let pitId = initialPitId;
-
-  const getThreatList = async ({
-    esClient,
+export const getThreatList = async ({
+  esClient,
+  query,
+  language,
+  index,
+  searchAfter,
+  exceptionItems,
+  threatFilters,
+  buildRuleMessage,
+  logger,
+  threatListConfig,
+  pitId,
+  reassignPitId,
+}: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
+  const queryFilter = getQueryFilter(
     query,
-    language,
-    index,
-    searchAfter,
-    exceptionItems,
+    language ?? 'kuery',
     threatFilters,
-    buildRuleMessage,
-    logger,
-    threatListConfig,
-  }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
-    const queryFilter = getQueryFilter(
-      query,
-      language ?? 'kuery',
-      threatFilters,
-      index,
-      exceptionItems
-    );
+    index,
+    exceptionItems
+  );
 
-    logger.debug(
-      buildRuleMessage(
-        `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${INDICATOR_PER_PAGE} indicator items`
-      )
-    );
+  logger.debug(
+    buildRuleMessage(
+      `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${INDICATOR_PER_PAGE} indicator items`
+    )
+  );
 
-    const response = await esClient.search<
-      ThreatListDoc,
-      Record<string, estypes.AggregationsAggregate>
-    >({
-      body: {
-        ...threatListConfig,
-        query: queryFilter,
-        search_after: searchAfter,
-        sort: ['_shard_doc', { '@timestamp': 'asc' }],
-      },
-      track_total_hits: false,
-      size: INDICATOR_PER_PAGE,
-      pit: { id: pitId },
-    });
+  const response = await esClient.search<
+    ThreatListDoc,
+    Record<string, estypes.AggregationsAggregate>
+  >({
+    body: {
+      ...threatListConfig,
+      query: queryFilter,
+      search_after: searchAfter,
+      sort: ['_shard_doc', { '@timestamp': 'asc' }],
+    },
+    track_total_hits: false,
+    size: INDICATOR_PER_PAGE,
+    pit: { id: pitId },
+  });
 
-    logger.debug(
-      buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`)
-    );
+  logger.debug(buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`));
 
-    if (response.pit_id) {
-      // there are no concurrent getThreatList requests, so this should be OK
-      // eslint-disable-next-line require-atomic-updates
-      pitId = response.pit_id;
-    }
+  reassignPitId(response.pit_id);
 
-    return response;
-  };
-
-  return getThreatList;
+  return response;
 };
 
 export const getThreatListCount = async ({
