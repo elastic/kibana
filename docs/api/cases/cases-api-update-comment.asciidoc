@@ -14,13 +14,10 @@ Updates a comment in a case.
 
 === Prerequisite
 
-////
-//TBD, for example
-You must have `read` privileges for the *Cases* feature in the *Management*,
+You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
-`owner` of the cases you're seeking.
-////
+`owner` of the case you're updating.
 
 === Path parameters
 
@@ -29,27 +26,48 @@ The identifier for the case. To retrieve case IDs, use
 <<cases-api-find-cases>>.
 
 `<space_id>`::
-(Optional, string) An identifier for the space. If it is not specified, the default space is used.
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
 
 === Request body
 
 `alertId`::
-(Required*, string) The identifier for the alert. It is required only when `type` is `alert`.
+(Required*, string) The identifier for the alert. It is required only when
+`type` is `alert`.
 
 `comment`::
-(Required*, string) The updated comment. It is required only when `type` is `user`.
+(Required*, string) The updated comment. It is required only when `type` is
+`user`.
 
 `id`::
-(Required, string) The identifier for the comment. To retrieve comment IDs, use <<cases-api-get-all-case-comments>>.
+(Required, string) The identifier for the comment.
+//To retrieve comment IDs, use <<cases-api-get-all-case-comments>>.
 
 `index`::
-(Required*, string) The updated alert index. It is required only when `type` is `alert`.
+(Required*, string) The alert index. It is required only when `type` is `alert`.
 
 `owner`::
 (Required, string) The application that owns the case. It can be `cases`,
-`observability`, or `securitySolution`.
+`observability`, or `securitySolution`. It is required only when `type` is
+`alert`.
 +
 NOTE: You cannot change the owner of a comment.
+
+`rule`::
+(Required*, object) The rule that is associated with the alert. It is required
+only when `type` is `alert`.
++
+.Properties of `rule`
+[%collapsible%open]
+====
+`id`::
+(Required, string) The rule identifier.
+//TBD: Is there an API to retrieve this value for an alert?
+
+`name`::
+(Required, string) The rule name.
+//TBD: Ditto
+====
 
 `type`::
 (Required, string) The comment type, which can be `user` or `alert`.
@@ -57,7 +75,8 @@ NOTE: You cannot change the owner of a comment.
 NOTE: You cannot change the comment type.
 
 `version`::
-(Required, string) The current comment version. To retrieve version values, use <<cases-api-get-all-case-comments>>.
+(Required, string) The current comment version.
+//To retrieve version values, use <<cases-api-get-all-case-comments>>.
 
 === Response code
 
@@ -74,69 +93,86 @@ ID `293f1bc0-74f6-11ea-b83a-553aecdb28b6`):
 PATCH api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/comments
 {
   "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
+  "version": "Wzk1LDFd",
   "type": "user",
-  "comment": "That is nothing - Ethan Hunt answered a targeted social
-  media campaign promoting phishy pension schemes to IMF operatives.
-  Even worse, he likes baked beans.",
-  "owner": "securitySolution",
-  "version": "Wzk1LDFd"
+  "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives. Even worse, he likes baked beans."
 }
 --------------------------------------------------
 // KIBANA
 
-The API returns the updated JSON case object with the updated comment, the user who updated the
-comment, and the comment's ID, version, and update time. For example: 
+The API returns details about the case and its comments. For example:
 
 [source,json]
 --------------------------------------------------
 {
-  "id": "293f1bc0-74f6-11ea-b83a-553aecdb28b6",
-  "version": "WzIwNjM2LDFd",
-  "comments": [
-    {
-      "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
-      "version": "WzIwNjM3LDFd",
-      "type": "user",
-      "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives.",
-      "created_at": "2020-04-02T15:28:03.034Z",
-      "created_by": {
+  "comments":[{
+    "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
+    "version": "WzIwNjM3LDFd",
+    "comment":"That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives. Even worse, he likes baked beans.",
+    "type":"user",
+    "owner":"cases",
+    "created_at":"2022-03-24T00:37:10.832Z",
+    "created_by": {
         "email": "moneypenny@hms.gov.uk",
         "full_name": "Ms Moneypenny",
         "username": "moneypenny"
-      },
-      "pushed_at": null,
-      "pushed_by": null,
-      "updated_at": "2020-04-02T15:34:01.118Z",
-      "updated_by": {
+    },
+    "pushed_at":null,
+    "pushed_by":null,
+    "updated_at":"2022-03-24T01:27:06.210Z",
+    "updated_by": {
         "email": "jbond@hms.gov.uk",
         "full_name": "James Bond",
         "username": "_007"
       }
     }
   ],
+  "totalAlerts":0,
+  "id": "293f1bc0-74f6-11ea-b83a-553aecdb28b6",
+  "version": "WzIwNjM2LDFd",
   "totalComment": 1,
   "title": "This case will self-destruct in 5 seconds",
-  "tags": [
-    "phishing",
-    "social engineering"
-  ],
+   "tags": ["phishing","social engineering"],
   "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants.",
-  "closed_at": null,
+  "settings": {"syncAlerts":false},
+  "owner": "cases","
+  closed_at": null,
   "closed_by": null,
-  "created_at": "2020-04-02T15:25:19.088Z",
+  "created_at": "2022-03-24T00:37:03.906Z",
   "created_by": {
     "email": "ahunley@imf.usa.gov",
     "full_name": "Alan Hunley",
     "username": "ahunley"
   },
-  "external_service": null,
-  "owner": "securitySolution",
   "status": "open",
-  "updated_at": "2020-04-02T15:34:01.118Z",
+  "updated_at": "2022-03-24T01:27:06.210Z",
   "updated_by": {
     "email": "jbond@hms.gov.uk",
     "full_name": "James Bond",
     "username": "_007"
+  },
+  "connector": {"id":"none","name":"none","type":".none","fields":null},
+  "external_service": null
+}
+--------------------------------------------------
+
+Update an alert in the case:
+
+[source,sh]
+--------------------------------------------------
+PATCH api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/comments
+{
+"id": "73362370-ab1a-11ec-985f-97e55adae8b9",
+"version": "WzMwNDgsMV0=",
+"type": "alert",
+"owner": "cases",
+"alertId": "c8789278659fdf88b7bf7709b90a082be070d0ba4c23c9c4b552e476c2a667c4",
+"index": ".internal.alerts-security.alerts-default-000001",
+"rule":
+{
+  "id":"94d80550-aaf4-11ec-985f-97e55adae8b9",
+  "name":"security_rule"
   }
 }
 --------------------------------------------------
+// KIBANA
