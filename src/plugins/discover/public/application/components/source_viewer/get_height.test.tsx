@@ -10,7 +10,7 @@ import { monaco } from '@kbn/monaco';
 import { getHeight } from './get_height';
 
 describe('getHeight', () => {
-  window.innerHeight = 500;
+  global.innerHeight = 500;
   const getMonacoMock = (lineCount: number) => {
     return {
       getDomNode: jest.fn(() => {
