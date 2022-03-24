@@ -114,7 +114,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
           return {
             ...rowItem,
             status: $(row)
-              .findTestSubject('rulesTableCell-status')
+              .findTestSubject('rulesTableCell-lastResponse')
               .find('.euiTableCellContent')
               .text(),
           };
@@ -189,16 +189,16 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
       await testSubjects.click('confirmModalConfirmButton');
     },
-    async ensureRuleActionToggleApplied(
+    async ensureRuleActionStatusApplied(
       ruleName: string,
-      switchName: string,
-      shouldBeCheckedAsString: string
+      controlName: string,
+      expectedStatus: string
     ) {
       await retry.tryForTime(30000, async () => {
         await this.searchAlerts(ruleName);
-        const switchControl = await testSubjects.find(switchName);
-        const isChecked = await switchControl.getAttribute('aria-checked');
-        expect(isChecked).to.eql(shouldBeCheckedAsString);
+        const statusControl = await testSubjects.find(controlName);
+        const title = await statusControl.getAttribute('title');
+        expect(title.toLowerCase()).to.eql(expectedStatus.toLowerCase());
       });
     },
   };

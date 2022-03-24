@@ -17,7 +17,7 @@ describe('ProcessTreeAlerts component', () => {
   const props: ProcessTreeAlertsDeps = {
     alerts: mockAlerts,
     onAlertSelected: jest.fn(),
-    handleOnAlertDetailsClosed: jest.fn(),
+    onShowAlertDetails: jest.fn(),
   };
 
   beforeEach(() => {
