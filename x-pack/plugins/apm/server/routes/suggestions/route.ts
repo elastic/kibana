@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { maxSuggestions } from '../../../../observability/common';
 import { getSuggestions } from '../suggestions/get_suggestions';
-import { getSuggestionsByServiceName } from '../suggestions/get_suggestions_by_service_name';
+import { getSuggestionsWithTermsAggregation } from '../suggestions/get_suggestions_with_terms';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -23,13 +23,14 @@ const suggestionsRoute = createApmServerRoute({
         fieldValue: t.string,
       }),
       t.partial(rangeRt.props),
+      t.partial({ serviceName: t.string }),
     ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ terms: string[] }> => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
-    const { fieldName, fieldValue, start, end } = params.query;
+    const { fieldName, fieldValue, serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
@@ -39,51 +40,25 @@ const suggestionsRoute = createApmServerRoute({
       maxSuggestions
     );
 
-    const suggestions = await getSuggestions({
-      fieldName,
-      fieldValue,
-      searchAggregatedTransactions,
-      setup,
-      size,
-      start,
-      end,
-    });
-
-    return suggestions;
-  },
-});
-
-const suggestionsWithTermsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/suggestions_by_service_name',
-  params: t.type({
-    query: t.intersection([
-      t.type({
-        fieldName: t.string,
-        fieldValue: t.string,
-        serviceName: t.string,
-      }),
-      t.partial(rangeRt.props),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<{ terms: string[] }> => {
-    const setup = await setupRequest(resources);
-    const { context, params } = resources;
-    const { fieldName, fieldValue, serviceName, start, end } = params.query;
-
-    const size = await context.core.uiSettings.client.get<number>(
-      maxSuggestions
-    );
-
-    const suggestions = await getSuggestionsByServiceName({
-      fieldName,
-      fieldValue,
-      serviceName,
-      setup,
-      size,
-      start,
-      end,
-    });
+    const suggestions = serviceName
+      ? await getSuggestionsWithTermsAggregation({
+          fieldName,
+          fieldValue,
+          serviceName,
+          setup,
+          size,
+          start,
+          end,
+        })
+      : await getSuggestions({
+          fieldName,
+          fieldValue,
+          searchAggregatedTransactions,
+          setup,
+          size,
+          start,
+          end,
+        });
 
     return suggestions;
   },
@@ -91,5 +66,4 @@ const suggestionsWithTermsRoute = createApmServerRoute({
 
 export const suggestionsRouteRepository = {
   ...suggestionsRoute,
-  ...suggestionsWithTermsRoute,
 };
