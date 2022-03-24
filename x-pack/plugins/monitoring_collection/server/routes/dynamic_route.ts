@@ -27,7 +27,7 @@ export function registerDynamicRoute({
       port: number;
     };
   };
-  getStatus: () => ServiceStatus<unknown>;
+  getStatus: () => ServiceStatus<unknown> | undefined;
   getMetric: (
     type: string
   ) => Promise<Array<MetricResult<JsonObject>> | MetricResult<JsonObject> | undefined>;
