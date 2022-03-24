@@ -10,7 +10,6 @@ import {
   GetPackagePoliciesRequest,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../../fleet/common';
-import { INGEST_API_PACKAGE_POLICIES } from '../../pages/policy/store/services/ingest';
 import { GetPolicyListResponse } from '../../pages/policy/types';
 
 /**

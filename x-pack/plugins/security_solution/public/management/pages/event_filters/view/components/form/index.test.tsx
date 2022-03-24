@@ -20,7 +20,7 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { EventFiltersListPageState } from '../../../types';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utils';
 import { GetPolicyListResponse } from '../../../../policy/types';
 import userEvent from '@testing-library/user-event';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';

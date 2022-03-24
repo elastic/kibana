@@ -61,10 +61,13 @@ export const PolicyList = memo(() => {
   });
 
   // grab endpoint version for empty page
-  const { data: endpointPackageInfo, isFetching: packageIsFetching } =
-    useGetEndpointSecurityPackage({
-      customQueryOptions: { enabled: policyIds.length === 0 },
-    });
+  const {
+    data: endpointPackageInfo,
+    isFetching: packageIsFetching,
+    error: versionError,
+  } = useGetEndpointSecurityPackage({
+    customQueryOptions: { enabled: policyIds.length === 0 },
+  });
 
   const policyIdToEndpointCount = useMemo(() => {
     const map = new Map<AgentPolicy['package_policies'][number], number>();
