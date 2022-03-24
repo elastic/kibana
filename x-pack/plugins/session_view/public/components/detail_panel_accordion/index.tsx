@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { ReactNode } from 'react';
-import { EuiAccordion, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { useStyles } from './styles';
 import { DetailPanelDescriptionList } from '../detail_panel_description_list';
 

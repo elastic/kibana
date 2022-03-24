@@ -17,7 +17,7 @@ const TEST_LIST_ITEM = [
   },
 ];
 const TEST_TITLE = 'accordion title';
-const ACTION_TEXT = 'extra action';
+// const ACTION_TEXT = 'extra action';
 
 describe('DetailPanelAccordion component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
