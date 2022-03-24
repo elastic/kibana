@@ -53,8 +53,7 @@ describe('ALL - Packs', () => {
       cy.react('List').first().click();
       findAndClickButton('Add query');
       cy.contains('Attach next query');
-      getSavedQueriesDropdown().click().type(SAVED_QUERY_ID);
-      cy.react('List').first().click();
+      getSavedQueriesDropdown().click().type(`${SAVED_QUERY_ID}{downArrow}{enter}`);
       cy.react('EuiFormRow', { props: { label: 'Interval (s)' } })
         .click()
         .clear()
@@ -91,8 +90,7 @@ describe('ALL - Packs', () => {
       findAndClickButton('Add query');
       cy.contains('Attach next query');
       cy.contains('ID must be unique').should('not.exist');
-      getSavedQueriesDropdown().click().type(SAVED_QUERY_ID);
-      cy.react('List').first().click();
+      getSavedQueriesDropdown().click().type(`${SAVED_QUERY_ID}{downArrow}{enter}`);
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
