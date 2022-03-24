@@ -138,14 +138,19 @@ $kbnTypeaheadTypes: (
 }
 
 .kbnSuggestionItem__text {
-  flex-grow: 0; /* 2 */
-  flex-basis: auto; /* 2 */
   font-family: $euiCodeFontFamily;
-  width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
   padding: $euiSizeXS $euiSizeS;
   color: $euiTextColor;
+}
+
+.kbnSuggestionItem--withDescription {
+  .kbnSuggestionItem__text {
+    flex-grow: 0;
+    flex-basis: auto;
+    width: 250px;
+  }
 }
 
 .kbnSuggestionItem__description {
