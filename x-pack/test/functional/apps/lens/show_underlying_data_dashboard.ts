@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe.only('lens show underlying data from dashboard', () => {
+  describe('lens show underlying data from dashboard', () => {
     it('should show the open button for a compatible saved visualization', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -38,21 +38,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         exitFromEditMode: true,
       });
 
-      // await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.openContextMenu();
 
-      // await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+      await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
 
-      // const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
-      // await browser.switchToWindow(discoverWindowHandle);
+      const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
 
-      // await PageObjects.header.waitUntilLoadingHasFinished();
-      // await testSubjects.existOrFail('discoverChart');
-      // // check the table columns
-      // const columns = await PageObjects.discover.getColumnHeaders();
-      // expect(columns).to.eql(['ip', '@timestamp', 'bytes']);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('discoverChart');
+      // check the table columns
+      const columns = await PageObjects.discover.getColumnHeaders();
+      expect(columns).to.eql(['ip', '@timestamp', 'bytes']);
 
-      // await browser.closeCurrentWindow();
-      // await browser.switchToWindow(dashboardWindowHandle);
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(dashboardWindowHandle);
     });
 
     it('should bring both dashboard context and visualization context to discover', async () => {
