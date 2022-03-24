@@ -189,8 +189,13 @@ export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
 
 export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
 
-export const getCustomIcons = ({ map }: MapStoreState): CustomIcon[] | undefined =>
-  map.settings.customIcons;
+export const getCustomIcons = ({ map }: MapStoreState): CustomIcon[] => {
+  return (
+    map.settings.customIcons.map((icon) => {
+      return { ...icon, svg: Buffer.from(icon.svg, 'base64').toString('utf-8') };
+    }) ?? []
+  );
+};
 
 export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapState.query;
 

@@ -23,7 +23,7 @@ import { NavigationPanel } from './navigation_panel';
 import { SpatialFiltersPanel } from './spatial_filters_panel';
 import { DisplayPanel } from './display_panel';
 import { CustomIconsPanel } from './custom_icons_panel';
-import { MapCenter } from '../../../common/descriptor_types';
+import { CustomIcon, MapCenter } from '../../../common/descriptor_types';
 
 export interface Props {
   cancelChanges: () => void;
@@ -31,7 +31,9 @@ export interface Props {
   hasMapSettingsChanges: boolean;
   keepChanges: () => void;
   settings: MapSettings;
+  customIcons: CustomIcon[],
   updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => void;
+  updateCustomIcons: (customIcons: CustomIcon[]) => void;
   deleteCustomIcon: (symbolId: string) => void;
   zoom: number;
 }
@@ -42,7 +44,9 @@ export function MapSettingsPanel({
   hasMapSettingsChanges,
   keepChanges,
   settings,
+  customIcons,
   updateMapSetting,
+  updateCustomIcons,
   deleteCustomIcon,
   zoom,
 }: Props) {
@@ -82,8 +86,8 @@ export function MapSettingsPanel({
           <SpatialFiltersPanel settings={settings} updateMapSetting={updateMapSetting} />
           <EuiSpacer size="s" />
           <CustomIconsPanel
-            settings={settings}
-            updateMapSetting={updateMapSetting}
+            customIcons={customIcons}
+            updateCustomIcons={updateCustomIcons}
             deleteCustomIcon={deleteCustomIcon}
           />
         </div>

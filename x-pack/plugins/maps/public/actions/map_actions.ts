@@ -61,7 +61,13 @@ import {
 } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
-import { DrawState, MapCenterAndZoom, MapExtent, Timeslice } from '../../common/descriptor_types';
+import {
+  CustomIcon,
+  DrawState,
+  MapCenterAndZoom,
+  MapExtent,
+  Timeslice,
+} from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
 import { updateTooltipStateForLayer } from './tooltip_actions';
 import { isVectorLayer, IVectorLayer } from '../classes/layers/vector_layer';
@@ -106,6 +112,19 @@ export function updateMapSetting(
     if (settingKey === 'autoFitToDataBounds' && settingValue === true) {
       dispatch(autoFitToBounds());
     }
+  };
+}
+
+export function updateCustomIcons(customIcons: CustomIcon[]) {
+  const encodedIcons = customIcons.map((icon) => {
+    return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
+  });
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    dispatch({
+      type: UPDATE_MAP_SETTING,
+      settingKey: 'customIcons',
+      settingValue: encodedIcons,
+    });
   };
 }
 

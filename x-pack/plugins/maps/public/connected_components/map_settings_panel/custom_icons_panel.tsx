@@ -19,7 +19,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_CUSTOM_ICON_CUTOFF, DEFAULT_CUSTOM_ICON_RADIUS } from '../../../common/constants';
 import { getIsDarkMode } from '../../kibana_services';
-import { MapSettings } from '../../reducers/map';
 // @ts-expect-error
 import { getCustomIconId } from '../../classes/styles/vector/symbol_utils';
 import { SymbolIcon } from '../../classes/styles/vector/components/legend/symbol_icon';
@@ -27,8 +26,8 @@ import { CustomIconModal } from '../../classes/styles/vector/components/symbol/c
 import { CustomIcon } from '../../../common/descriptor_types';
 
 interface Props {
-  settings: MapSettings;
-  updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => void;
+  customIcons: CustomIcon[];
+  updateCustomIcons: (customIcons: CustomIcon[]) => void;
   deleteCustomIcon: (symbolId: string) => void;
 }
 
@@ -94,7 +93,7 @@ export class CustomIconsPanel extends Component<Props, State> {
     const { symbolId, label, svg, cutoff, radius } = icon;
 
     const icons = [
-      ...this.props.settings.customIcons.filter((i) => {
+      ...this.props.customIcons.filter((i) => {
         return i.symbolId !== symbolId;
       }),
       {
@@ -105,7 +104,7 @@ export class CustomIconsPanel extends Component<Props, State> {
         radius,
       },
     ];
-    this.props.updateMapSetting('customIcons', icons);
+    this.props.updateCustomIcons(icons);
     this._hideModal();
   };
 
@@ -132,7 +131,7 @@ export class CustomIconsPanel extends Component<Props, State> {
         </EuiTextAlign>
       </Fragment>
     );
-    if (!this.props.settings.customIcons.length) {
+    if (!this.props.customIcons.length) {
       return (
         <Fragment>
           <EuiText size="s" textAlign="center">
@@ -150,7 +149,7 @@ export class CustomIconsPanel extends Component<Props, State> {
       );
     }
 
-    const customIconsList = this.props.settings.customIcons.map((icon) => {
+    const customIconsList = this.props.customIcons.map((icon) => {
       const { symbolId, label, svg } = icon;
       return {
         label,

@@ -11,13 +11,16 @@ import { ThunkDispatch } from 'redux-thunk';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapStoreState } from '../../reducers/store';
 import { MapSettingsPanel } from './map_settings_panel';
+import { CustomIcon } from '../../../common/descriptor_types';
 import {
   deleteCustomIcon,
   rollbackMapSettings,
+  updateCustomIcons,
   updateMapSetting,
   updateFlyout,
 } from '../../actions';
 import {
+  getCustomIcons,
   getMapCenter,
   getMapSettings,
   getMapZoom,
@@ -27,6 +30,7 @@ import {
 function mapStateToProps(state: MapStoreState) {
   return {
     center: getMapCenter(state),
+    customIcons: getCustomIcons(state),
     hasMapSettingsChanges: hasMapSettingsChanges(state),
     settings: getMapSettings(state),
     zoom: getMapZoom(state),
@@ -44,6 +48,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => {
       dispatch(updateMapSetting(settingKey, settingValue));
+    },
+    updateCustomIcons: (customIcons: CustomIcon[]) => {
+      dispatch(updateCustomIcons(customIcons));
     },
     deleteCustomIcon: (symbolId: string) => {
       dispatch(deleteCustomIcon(symbolId));

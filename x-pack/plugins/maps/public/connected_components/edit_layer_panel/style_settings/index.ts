@@ -9,19 +9,15 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { StyleSettings } from './style_settings';
-import { getMapSettings, getSelectedLayer } from '../../../selectors/map_selectors';
-import {
-  deleteCustomIcon,
-  updateMapSetting,
-  updateLayerStyleForSelectedLayer,
-} from '../../../actions';
+import { getCustomIcons, getSelectedLayer } from '../../../selectors/map_selectors';
+import { updateCustomIcons, updateLayerStyleForSelectedLayer } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { CustomIcon, StyleDescriptor } from '../../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     layer: getSelectedLayer(state)!,
-    customIcons: getMapSettings(state).customIcons,
+    customIcons: getCustomIcons(state),
   };
 }
 
@@ -32,7 +28,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     updateCustomIcons: (customIcons: Record<string, CustomIcon>) => {
       const customIconArray = Object.values(customIcons);
-      dispatch(updateMapSetting('customIcons', customIconArray));
+      dispatch(updateCustomIcons(customIconArray));
     },
   };
 }

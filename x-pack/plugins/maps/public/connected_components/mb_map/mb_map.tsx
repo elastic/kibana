@@ -52,6 +52,7 @@ import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
 export interface Props {
   isMapReady: boolean;
   settings: MapSettings;
+  customIcons: CustomIcon[];
   layerList: ILayer[];
   spatialFiltersLayer: ILayer;
   goto?: Goto | null;
@@ -399,11 +400,11 @@ export class MbMap extends Component<Props, State> {
 
     if (
       this._prevCustomIcons === undefined ||
-      !_.isEqual(this._prevCustomIcons, this.props.settings.customIcons)
+      !_.isEqual(this._prevCustomIcons, this.props.customIcons)
     ) {
-      this._prevCustomIcons = this.props.settings.customIcons;
+      this._prevCustomIcons = this.props.customIcons;
       const mbMap = this.state.mbMap;
-      for (const { symbolId, svg, cutoff, radius } of this.props.settings.customIcons) {
+      for (const { symbolId, svg, cutoff, radius } of this.props.customIcons) {
         createSdfIcon({ svg, renderSize: CUSTOM_ICON_SIZE, cutoff, radius }).then(
           (imageData: ImageData) => {
             // @ts-expect-error MapboxMap type is missing updateImage method
