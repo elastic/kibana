@@ -19,8 +19,13 @@ export function getContentType(body: unknown) {
   return 'application/json';
 }
 
+let _http: HttpSetup;
+
+export const initHttp = (http: HttpSetup) => {
+  _http = http;
+};
+
 interface SendProps {
-  http: HttpSetup;
   method: string;
   path: string;
   data?: string;
@@ -30,7 +35,6 @@ interface SendProps {
 }
 
 export async function send({
-  http,
   method,
   path,
   data,
@@ -45,7 +49,7 @@ export async function send({
     asResponse,
     asSystemRequest,
   };
-  return await http.post<HttpResponse<unknown>>('../api/console/proxy', options);
+  return await _http.post<HttpResponse<unknown>>('../api/console/proxy', options);
 }
 
 export function constructESUrl(baseUri: string, path: string) {

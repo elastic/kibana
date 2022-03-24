@@ -38,12 +38,11 @@ export function expandAliases(indicesOrAliases) {
   });
   let ret = [].concat.apply([], indicesOrAliases);
   ret.sort();
-  let last;
-  ret = ret.reduce((result, value) => {
+  ret = ret.reduce((result, value, index, array) => {
+    const last = array[index - 1];
     if (last !== value) {
       result.push(value);
     }
-    last = value;
     return result;
   }, []);
 
@@ -83,7 +82,7 @@ export function getFields(indices, types) {
     } else {
       // filter what we need
       Object.entries(typeDict).forEach(([type, fields]) => {
-        if (!types || types.length === 0 || types.findIndex((t) => t === type) !== -1) {
+        if (!types || types.length === 0 || types.includes(type)) {
           ret.push(fields);
         }
       });
@@ -93,7 +92,7 @@ export function getFields(indices, types) {
   } else {
     // multi index mode.
     Object.keys(perIndexTypes).forEach((index) => {
-      if (!indices || indices.length === 0 || indices.findIndex((i) => i === index) !== -1) {
+      if (!indices || indices.length === 0 || indices.includes(index)) {
         ret.push(getFields(index, types));
       }
     });
@@ -128,7 +127,7 @@ export function getTypes(indices) {
   } else {
     // multi index mode.
     Object.keys(perIndexTypes).forEach((index) => {
-      if (!indices || indices.findIndex((i) => i === index) !== -1) {
+      if (!indices || indices.includes(index)) {
         ret.push(getTypes(index));
       }
     });
@@ -278,16 +277,15 @@ export function clear() {
   componentTemplates = [];
 }
 
-const settingKeyToPathMap = {
-  fields: '_mapping',
-  indices: '_aliases',
-  legacyTemplates: '_template',
-  indexTemplates: '_index_template',
-  componentTemplates: '_component_template',
-  dataStreams: '_data_stream',
-};
-
-function retrieveSettings(http, settingsKey, settingsToRetrieve) {
+function retrieveSettings(settingsKey, settingsToRetrieve) {
+  const settingKeyToPathMap = {
+    fields: '_mapping',
+    indices: '_aliases',
+    legacyTemplates: '_template',
+    indexTemplates: '_index_template',
+    componentTemplates: '_component_template',
+    dataStreams: '_data_stream',
+  };
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (settingsToRetrieve[settingsKey] === true) {
     // Use pretty=false in these request in order to compress the response by removing whitespace
@@ -296,7 +294,7 @@ function retrieveSettings(http, settingsKey, settingsToRetrieve) {
     const asSystemRequest = true;
     const withProductOrigin = true;
 
-    return es.send({ http, method, path, asSystemRequest, withProductOrigin });
+    return es.send({ method, path, asSystemRequest, withProductOrigin });
   } else {
     if (settingsToRetrieve[settingsKey] === false) {
       // If the user doesn't want autocomplete suggestions, then clear any that exist
@@ -326,12 +324,65 @@ export function clearSubscriptions() {
   }
 }
 
+const retrieveMappings = async (settingsToRetrieve) => {
+  const mappings = await retrieveSettings('fields', settingsToRetrieve);
+
+  if (mappings) {
+    const maxMappingSize = Object.keys(mappings).length > 10 * 1024 * 1024;
+    let mappingsResponse;
+    if (maxMappingSize) {
+      console.warn(
+        `Mapping size is larger than 10MB (${
+          Object.keys(mappings).length / 1024 / 1024
+        } MB). Ignoring...`
+      );
+      mappingsResponse = '{}';
+    } else {
+      mappingsResponse = mappings;
+    }
+    loadMappings(mappingsResponse);
+  }
+};
+
+const retrieveAliases = async (settingsToRetrieve) => {
+  const aliases = await retrieveSettings('indices', settingsToRetrieve);
+
+  if (aliases) {
+    loadAliases(aliases);
+  }
+};
+
+const retrieveTemplates = async (settingsToRetrieve) => {
+  const legacyTemplates = await retrieveSettings('legacyTemplates', settingsToRetrieve);
+  const indexTemplates = await retrieveSettings('indexTemplates', settingsToRetrieve);
+  const componentTemplates = await retrieveSettings('componentTemplates', settingsToRetrieve);
+
+  if (legacyTemplates) {
+    loadLegacyTemplates(legacyTemplates);
+  }
+
+  if (indexTemplates) {
+    loadIndexTemplates(indexTemplates);
+  }
+
+  if (componentTemplates) {
+    loadComponentTemplates(componentTemplates);
+  }
+};
+
+const retrieveDataStreams = async (settingsToRetrieve) => {
+  const dataStreams = await retrieveSettings('dataStreams', settingsToRetrieve);
+
+  if (dataStreams) {
+    loadDataStreams(dataStreams);
+  }
+};
 /**
  *
  * @param settings Settings A way to retrieve the current settings
  * @param settingsToRetrieve any
  */
-export function retrieveAutoCompleteInfo(http, settings, settingsToRetrieve) {
+export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
   clearSubscriptions();
 
   const templatesSettingToRetrieve = {
@@ -341,64 +392,19 @@ export function retrieveAutoCompleteInfo(http, settings, settingsToRetrieve) {
     componentTemplates: settingsToRetrieve.templates,
   };
 
-  const promises = Object.keys(settingKeyToPathMap).map((settingKey) => {
-    if (settingKey.toLowerCase().includes('template')) {
-      return retrieveSettings(http, settingKey, templatesSettingToRetrieve);
-    }
-    return retrieveSettings(http, settingKey, settingsToRetrieve);
-  });
-
-  Promise.all([...promises]).then(
-    ([mappings, aliases, legacyTemplates, indexTemplates, componentTemplates, dataStreams]) => {
-      let mappingsResponse;
-
-      try {
-        if (mappings) {
-          const maxMappingSize = Object.keys(mappings).length > 10 * 1024 * 1024;
-          if (maxMappingSize) {
-            console.warn(
-              `Mapping size is larger than 10MB (${
-                Object.keys(mappings).length / 1024 / 1024
-              } MB). Ignoring...`
-            );
-            mappingsResponse = '{}';
-          } else {
-            mappingsResponse = mappings;
-          }
-          loadMappings(mappingsResponse);
-        }
-
-        if (aliases) {
-          loadAliases(aliases);
-        }
-
-        if (legacyTemplates) {
-          loadLegacyTemplates(legacyTemplates);
-        }
-
-        if (indexTemplates) {
-          loadIndexTemplates(indexTemplates);
-        }
-
-        if (componentTemplates) {
-          loadComponentTemplates(componentTemplates);
-        }
-
-        if (dataStreams) {
-          loadDataStreams(dataStreams);
-        }
-      } catch (error) {
-        console.error(error);
+  Promise.allSettled([
+    retrieveMappings(settingsToRetrieve),
+    retrieveAliases(settingsToRetrieve),
+    retrieveTemplates(templatesSettingToRetrieve),
+    retrieveDataStreams(settingsToRetrieve),
+  ]).then(() => {
+    // Schedule next request.
+    pollTimeoutId = setTimeout(() => {
+      // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
+      // a scheduled request if the user turns off polling.
+      if (settings.getPolling()) {
+        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
       }
-
-      // Schedule next request.
-      pollTimeoutId = setTimeout(() => {
-        // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
-        // a scheduled request if the user turns off polling.
-        if (settings.getPolling()) {
-          retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete());
-        }
-      }, settings.getPollInterval());
-    }
-  );
+    }, settings.getPollInterval());
+  });
 }

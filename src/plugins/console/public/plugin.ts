@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../home/public';
+import { initHttp } from './lib/es/es';
 import {
   AppSetupUIPluginDependencies,
   ClientConfigType,
@@ -61,6 +62,8 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           } = core;
 
           const { renderApp } = await import('./application');
+
+          initHttp(http);
 
           return renderApp({
             http,

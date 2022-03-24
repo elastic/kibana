@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from 'kibana/public';
-import _ from 'lodash';
 import { extractWarningMessages } from '../../../lib/utils';
 import { XJson } from '../../../../../es_ui_shared/public';
 // @ts-ignore
@@ -17,7 +15,6 @@ import { BaseResponseType } from '../../../types';
 const { collapseLiteralStrings } = XJson;
 
 export interface EsRequestArgs {
-  http: HttpSetup;
   requests: Array<{ url: string; method: string; data: string[] }>;
 }
 
@@ -71,7 +68,6 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
       try {
         const { response, body } = await es.send({
-          http: args.http,
           method: esMethod,
           path: esPath,
           data: esData,
@@ -122,7 +118,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
       } catch (error) {
         let value;
         let contentType = '';
-        if (_.isUndefined(error)) {
+        if (!error) {
           value =
             "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
         }
