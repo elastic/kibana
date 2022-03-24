@@ -1,0 +1,124 @@
+[[cases-api-add-comment]]
+== Add comment to case API
+++++
+<titleabbrev>Add comment</titleabbrev>
+++++
+
+Adds a comment to a case.
+
+=== Request
+
+`POST <kibana host>:<port>/api/cases/<case_id>/comments`
+
+`POST <kibana host>:<port>/s/<space_id>/api/cases/<case_id>/comments`
+
+=== Prerequisite
+
+////
+//TBD, for example
+You must have `read` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases you're seeking.
+////
+
+=== Path parameters
+
+`<case_id>`::
+(Required,string) The identifier for the case. To retrieve case IDs, use
+<<cases-api-find-cases>>.
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the default space is used.
+
+=== Request body
+
+`alertId`::
+(Required*, string) The alert identifier. It is required only when `type` is `alert`.
+//NOTE: Only alerts (signals) of {es-sec} are supported.
+//TBD: Is that note still valid?
+
+`comment`::
+(Required*, string) The new comment. It is required only when `type` is `user`.
+
+`index`::
+(Required*, string) The alert index. It is required only only when `type` is `alert`.
+
+`type`::
+(Required, string) The comment type, which can be `user` or `alert`.
+
+=== Response code
+
+`200`::
+   Indicates a successful call.
+
+=== Example
+
+Adds a comment to case ID `293f1bc0-74f6-11ea-b83a-553aecdb28b6`:
+
+[source,sh]
+--------------------------------------------------
+POST api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/comments
+{
+  "type": "user",
+  "comment": "That is nothing - Ethan Hunt answered a targeted social
+  media campaign promoting phishy pension schemes to IMF operatives.",
+  "owner": "securitySolution"
+}
+--------------------------------------------------
+// KIBANA
+
+
+The API returns the updated JSON case object with the new comment, the user who
+created the comment, and the comment's ID, version, and creation time. For
+example:
+
+[source,json]
+--------------------------------------------------
+
+  "id": "293f1bc0-74f6-11ea-b83a-553aecdb28b6",
+  "version": "WzIwNDMyLDFd",
+  "comments": [
+    {
+      "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
+      "version": "WzIwNDMxLDFd",
+      "type": "user",
+      "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives.",
+      "created_at": "2020-04-02T15:28:03.034Z",
+      "created_by": {
+        "email": "moneypenny@hms.gov.uk",
+        "full_name": "Ms Moneypenny",
+        "username": "moneypenny"
+      },
+      "pushed_at": null,
+      "pushed_by": null,
+      "updated_at": null,
+      "updated_by": null
+    }
+  ],
+  "totalComment": 1,
+  "title": "This case will self-destruct in 5 seconds",
+  "tags": [
+    "phishing",
+    "social engineering"
+  ],
+  "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants.",
+  "closed_at": null,
+  "closed_by": null,
+  "created_at": "2020-04-02T15:25:19.088Z",
+  "created_by": {
+    "email": "ahunley@imf.usa.gov",
+    "full_name": "Alan Hunley",
+    "username": "ahunley"
+  },
+  "external_service": null,
+  "owner": "securitySolution",
+  "status": "open",
+  "updated_at": "2020-04-02T15:28:03.034Z",
+  "updated_by": {
+    "email": "moneypenny@hms.gov.uk",
+    "full_name": "Ms Moneypenny",
+    "username": "moneypenny"
+  }
+}
+--------------------------------------------------
