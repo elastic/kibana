@@ -14,7 +14,6 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { useEnvironmentsFetcher } from '../../hooks/use_environments_fetcher';
 
 export const EnvironmentsContext = React.createContext<{
-  setFieldValue: (fieldValue: string) => void;
   environment: Environment;
   environments: string[];
   environmentOptions: Array<EuiComboBoxOptionOption<string>>;
@@ -27,7 +26,6 @@ export const EnvironmentsContext = React.createContext<{
   environments: [],
   environmentOptions: [],
   status: FETCH_STATUS.NOT_INITIATED,
-  setFieldValue: () => null,
 });
 
 export function EnvironmentsContextProvider({
@@ -35,8 +33,6 @@ export function EnvironmentsContextProvider({
 }: {
   children: React.ReactElement;
 }) {
-  const [fieldValue, setFieldValue] = useState('');
-
   const { path, query } = useApmParams('/*');
 
   const serviceName = 'serviceName' in path ? path.serviceName : undefined;
@@ -53,13 +49,11 @@ export function EnvironmentsContextProvider({
     serviceName,
     start,
     end,
-    fieldValue,
   });
 
   return (
     <EnvironmentsContext.Provider
       value={{
-        setFieldValue,
         environments,
         environmentOptions,
         status,
