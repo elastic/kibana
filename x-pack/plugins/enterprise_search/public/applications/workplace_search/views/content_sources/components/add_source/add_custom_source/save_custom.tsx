@@ -27,7 +27,7 @@ import { EuiButtonTo, EuiLinkTo } from '../../../../../../shared/react_router_he
 import { AppLogic } from '../../../../../app_logic';
 import { SOURCES_PATH, getSourcesPath } from '../../../../../routes';
 
-import { CustomSourceCredentials } from '../../custom_source_credentials';
+import { CustomSourceDeployment } from '../../custom_source_deployment';
 
 import { AddSourceHeader } from '../add_source_header';
 import { SAVE_CUSTOM_BODY1 as READY_TO_ACCEPT_REQUESTS_LABEL } from '../constants';
@@ -91,7 +91,7 @@ export const SaveCustom: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <CustomSourceCredentials source={newCustomSource} sourceData={sourceData} />
+          <CustomSourceDeployment source={newCustomSource} sourceData={sourceData} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {serviceType !== 'custom' && (

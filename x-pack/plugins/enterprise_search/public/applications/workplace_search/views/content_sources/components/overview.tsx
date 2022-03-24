@@ -84,7 +84,7 @@ import {
 import { getSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
-import { CustomSourceCredentials } from './custom_source_credentials';
+import { CustomSourceDeployment } from './custom_source_deployment';
 import { SourceLayout } from './source_layout';
 
 export const Overview: React.FC = () => {
@@ -362,27 +362,27 @@ export const Overview: React.FC = () => {
   );
 
   const sourceStatus = (
-    <EuiPanel hasShadow={false} color="subdued">
-      <EuiText size="s">
-        <h6>
-          <EuiTextColor color="subdued">{STATUS_HEADER}</EuiTextColor>
-        </h6>
-      </EuiText>
+    <>
+      <EuiTitle size="xs">
+        <h6>{STATUS_HEADER}</h6>
+      </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon size="l" type="checkInCircleFilled" color="success" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <strong>{STATUS_HEADING}</strong>
-          </EuiText>
-          <EuiText size="s">
-            <p>{STATUS_TEXT}</p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+      <EuiPanel hasShadow={false} color="subdued">
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon size="l" type="checkInCircleFilled" color="success" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <strong>{STATUS_HEADING}</strong>
+            </EuiText>
+            <EuiText size="s">
+              <p>{STATUS_TEXT}</p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </>
   );
 
   const permissionsStatus = (
@@ -421,23 +421,45 @@ export const Overview: React.FC = () => {
     </EuiPanel>
   );
 
-  const documentPermssionsLicenseLocked = (
-    <EuiPanel hasShadow={false} color="subdued">
-      <LicenseBadge />
-      <EuiSpacer size="s" />
+  const customSourceDeployment = (
+    <>
       <EuiTitle size="xs">
-        <span>{DOCUMENT_PERMISSIONS_TITLE}</span>
+        <h6>
+          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.credentials.title', {
+            defaultMessage: 'Deployment',
+          })}
+        </h6>
       </EuiTitle>
-      <EuiText size="s">
-        <p>{DOC_PERMISSIONS_DESCRIPTION}</p>
-      </EuiText>
       <EuiSpacer size="s" />
-      <EuiText size="s">
-        <EuiLink target="_blank" href={docLinks.licenseManagement}>
-          {LEARN_CUSTOM_FEATURES_BUTTON}
-        </EuiLink>
-      </EuiText>
-    </EuiPanel>
+      <CustomSourceDeployment source={contentSource} sourceData={sourceData} small />
+    </>
+  );
+
+  const documentPermssionsLicenseLocked = (
+    <>
+      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <span>{DOCUMENT_PERMISSIONS_TITLE}</span>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LicenseBadge />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiPanel hasShadow={false} color="subdued">
+        <EuiText size="s">
+          <p>{DOC_PERMISSIONS_DESCRIPTION}</p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiText size="s">
+          <EuiLink target="_blank" href={docLinks.licenseManagement}>
+            {LEARN_CUSTOM_FEATURES_BUTTON}
+          </EuiLink>
+        </EuiText>
+      </EuiPanel>
+    </>
   );
 
   const syncTriggerCallout = (
@@ -523,28 +545,7 @@ export const Overview: React.FC = () => {
             {custom && (
               <>
                 <EuiFlexItem>{sourceStatus}</EuiFlexItem>
-                <EuiFlexItem>
-                  <CustomSourceCredentials
-                    source={contentSource}
-                    sourceData={sourceData}
-                    title={
-                      <EuiText size="s">
-                        <h6>
-                          <EuiTextColor color="subdued">
-                            {i18n.translate(
-                              'xpack.enterpriseSearch.workplaceSearch.gettingStarted.title',
-                              {
-                                defaultMessage: 'Getting started?',
-                              }
-                            )}
-                          </EuiTextColor>
-                        </h6>
-                      </EuiText>
-                    }
-                    small
-                  />
-                </EuiFlexItem>
-
+                <EuiFlexItem>{customSourceDeployment}</EuiFlexItem>
                 {!licenseSupportsPermissions && (
                   <EuiFlexItem>{documentPermssionsLicenseLocked}</EuiFlexItem>
                 )}

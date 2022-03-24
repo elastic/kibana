@@ -22,38 +22,26 @@ interface Props {
   source: ContentSource | CustomSource;
   sourceData: SourceDataItem;
   small?: boolean;
-  title?: React.ReactNode;
 }
-export const CustomSourceCredentials: React.FC<Props> = ({
-  source,
-  sourceData,
-  small = false,
-  title,
-}) => {
+export const CustomSourceDeployment: React.FC<Props> = ({ source, sourceData, small = false }) => {
   const { name, id } = source;
   const {
     configuration: { documentationUrl, githubRepository },
   } = sourceData;
   return (
     <EuiPanel paddingSize={small ? 'm' : 'l'} hasShadow={false} color="subdued">
-      {title && (
-        <>
-          {title}
-          <EuiSpacer size="s" />
-        </>
-      )}
       <EuiText size={small ? 's' : 'm'}>
         {githubRepository ? (
           <>
             <FormattedMessage
               data-test-subj="GithubRepositoryLink"
-              id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.repositoryInstructions"
+              id="xpack.enterpriseSearch.workplaceSearch.customSourceDeployment.preconfiguredRepositoryInstructions"
               defaultMessage="Set up your connector by cloning the {githubRepositoryLink}"
               values={{
                 githubRepositoryLink: (
                   <EuiLink target="_blank" href={`https://github.com/${githubRepository}`}>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.repositoryLinkLabel"
+                      id="xpack.enterpriseSearch.workplaceSearch.customSourceDeployment.repositoryLinkLabel"
                       defaultMessage="{name} connector repository"
                       values={{ name }}
                     />
@@ -64,13 +52,13 @@ export const CustomSourceCredentials: React.FC<Props> = ({
             <EuiSpacer size="s" />
             <FormattedMessage
               data-test-subj="PreconfiguredDocumentationLink"
-              id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.deploymentInstructions"
+              id="xpack.enterpriseSearch.workplaceSearch.customSourceDeployment.preconfiguredDocumentationHelpText"
               defaultMessage="Review the {documentationLink} and deploy the connector package to be self managed on the infrastructure of your choice."
               values={{
                 documentationLink: (
                   <EuiLink target="_blank" href={documentationUrl}>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.documentationLinkLabel"
+                      id="xpack.enterpriseSearch.workplaceSearch.customSourceDeployment.documentationLinkLabel"
                       defaultMessage="{name} connector documentation"
                       values={{ name }}
                     />
@@ -82,13 +70,13 @@ export const CustomSourceCredentials: React.FC<Props> = ({
         ) : (
           <FormattedMessage
             data-test-subj="GenericDocumentationLink"
-            id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.documentationHelpText"
+            id="xpack.enterpriseSearch.workplaceSearch.customSourceDeployment.genericDocumentationHelpText"
             defaultMessage="Review the {documentationLink} to learn how to build and deploy your own connector on the self managed infrastructure of your choice."
             values={{
               documentationLink: (
                 <EuiLink target="_blank" href={documentationUrl}>
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.customAPISourceDocumentationLabel"
+                    id="xpack.enterpriseSearch.workplaceSearch.customSourceDeployment.genericDocumentationLabel"
                     defaultMessage="Custom API source documentation"
                   />
                 </EuiLink>
@@ -98,7 +86,7 @@ export const CustomSourceCredentials: React.FC<Props> = ({
         )}
         <EuiSpacer size="s" />
         <FormattedMessage
-          id="xpack.enterpriseSearch.workplaceSearch.sources.saveCustom.sourceIdentifierHelpText"
+          id="xpack.enterpriseSearch.workplaceSearch.customSourceDeployment.sourceIdentifierHelpText"
           defaultMessage="Specify the following Source Identifier along with an {apiKeyLink} in the deployed connector's config file to sync documents."
           values={{
             apiKeyLink: (
