@@ -154,10 +154,7 @@ export class AnomalyExplorerChartsService {
       )
       .pipe(
         mapObservable((data) => {
-          // Expand the chart to full size if there's only one viewable chart
-          if (data.seriesToPlot.length === 1 || maxSeries === 1) {
-            chartsPerRow = 1;
-          }
+          chartsPerRow = Math.min(data.seriesToPlot.length, chartsPerRow);
 
           data.chartsPerRow = chartsPerRow;
 
