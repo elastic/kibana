@@ -16,7 +16,7 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   return {
-    async createCaseWithData(overwrites: { title?: string } = {}) {
+    async createCaseWithData(overwrites: Partial<CasePostRequest> = {}) {
       const caseData = {
         ...generateRandomCaseWithoutConnector(),
         ...overwrites,

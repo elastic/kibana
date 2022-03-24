@@ -8,9 +8,11 @@
 import expect from '@kbn/expect';
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import uuid from 'uuid';
+import { CaseStatuses } from '../../../../plugins/cases/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function CasesCommonServiceProvider({ getService, getPageObject }: FtrProviderContext) {
+  const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
@@ -77,46 +79,11 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await testSubjects.existOrFail('case-view-title');
     },
 
-    /**
-     * Marks a case in progress via the status dropdown
-     */
-    async markCaseInProgressViaDropdown() {
-      await this.openCaseSetStatusDropdown();
-
-      await testSubjects.click('case-view-status-dropdown-in-progress');
-
-      // wait for backend response
-      await testSubjects.existOrFail('header-page-supplements > status-badge-in-progress', {
-        timeout: 5000,
-      });
-    },
-
-    /**
-     * Marks a case closed via the status dropdown
-     */
-    async markCaseClosedViaDropdown() {
+    async changeCaseStatusAndVerify(status: CaseStatuses) {
       this.openCaseSetStatusDropdown();
-
-      await testSubjects.click('case-view-status-dropdown-closed');
-
-      // wait for backend response
-      await testSubjects.existOrFail('header-page-supplements > status-badge-closed', {
-        timeout: 5000,
-      });
-    },
-
-    /**
-     * Marks a case open via the status dropdown
-     */
-    async markCaseOpenViaDropdown() {
-      this.openCaseSetStatusDropdown();
-
-      await testSubjects.click('case-view-status-dropdown-open');
-
-      // wait for backend response
-      await testSubjects.existOrFail('header-page-supplements > status-badge-open', {
-        timeout: 5000,
-      });
+      await testSubjects.click(`case-view-status-dropdown-${status}`);
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail(`status-badge-${status}`);
     },
 
     async bulkDeleteAllCases() {
@@ -178,9 +145,38 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
 
     async waitForCasesToBeListed() {
       await retry.waitFor('cases to appear on the all cases table', async () => {
-        await testSubjects.click('all-cases-refresh');
+        this.refreshTable();
         return await testSubjects.exists('case-details-link');
       });
+    },
+
+    async getCaseFromTable(index: number) {
+      const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
+
+      if (index > rows.length) {
+        throw new Error('Cannot get case from table. Index is greater than the length of all rows');
+      }
+
+      return rows[index] ?? null;
+    },
+
+    async filterByTag(tag: string) {
+      await common.clickAndValidate(
+        'options-filter-popover-button-Tags',
+        `options-filter-popover-item-${tag}`
+      );
+
+      await testSubjects.click(`options-filter-popover-item-${tag}`);
+    },
+
+    async filterByStatus(status: CaseStatuses) {
+      await common.clickAndValidate('case-status-filter', `status-badge-${status}`);
+
+      await testSubjects.click(`status-badge-${status}`);
+    },
+
+    async refreshTable() {
+      await testSubjects.click('all-cases-refresh');
     },
   };
 }

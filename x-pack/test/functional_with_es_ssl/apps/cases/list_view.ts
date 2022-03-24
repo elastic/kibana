@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { CaseStatuses } from '../../../../plugins/cases/common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
@@ -74,13 +76,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('filtering', () => {
-      const NUMBER_CASES = 5;
+      const NUMBER_CASES = 2;
       const id = uuid.v4();
       const caseTitle = 'matchme-' + id;
 
       before(async () => {
         await cases.api.createNthRandomCases(NUMBER_CASES);
-        await cases.api.createCaseWithData({ title: caseTitle });
+        await cases.api.createCaseWithData({ title: caseTitle, tags: ['one'] });
+        await cases.api.createCaseWithData({ tags: ['two'] });
         await header.waitUntilLoadingHasFinished();
         await cases.common.waitForCasesToBeListed();
       });
@@ -103,6 +106,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('clearSearchButton');
         await cases.common.validateCasesTableHasNthRows(NUMBER_CASES);
+      });
+
+      it('filters cases by tags', async () => {
+        await cases.common.filterByTag('one');
+        await cases.common.refreshTable();
+        await cases.common.validateCasesTableHasNthRows(1);
+        const row = await cases.common.getCaseFromTable(0);
+        const tags = await row.findByCssSelector('[data-test-subj="case-table-column-tags-one"]');
+        expect(await tags.getVisibleText()).to.be('one');
+      });
+
+      it('filters cases by status', async () => {
+        await cases.common.changeCaseStatusAndVerify(CaseStatuses['in-progress']);
+        await cases.common.filterByStatus(CaseStatuses['in-progress']);
+        await cases.common.validateCasesTableHasNthRows(1);
       });
     });
 
@@ -142,24 +160,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('to in progress', async () => {
-        await cases.common.openCaseSetStatusDropdown();
-        await testSubjects.click('case-view-status-dropdown-in-progress');
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('status-badge-in-progress');
+        await cases.common.changeCaseStatusAndVerify(CaseStatuses['in-progress']);
       });
 
       it('to closed', async () => {
-        await cases.common.openCaseSetStatusDropdown();
-        await testSubjects.click('case-view-status-dropdown-closed');
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('status-badge-closed');
+        await cases.common.changeCaseStatusAndVerify(CaseStatuses.closed);
       });
 
       it('to open', async () => {
-        await cases.common.openCaseSetStatusDropdown();
-        await testSubjects.click('case-view-status-dropdown-open');
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('status-badge-open');
+        await cases.common.changeCaseStatusAndVerify(CaseStatuses.open);
       });
     });
   });
