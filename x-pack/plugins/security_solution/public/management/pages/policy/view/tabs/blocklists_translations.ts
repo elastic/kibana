@@ -12,20 +12,20 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
   deleteModalTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklists.list.removeDialog.title',
     {
-      defaultMessage: 'Remove blocklist from policy',
+      defaultMessage: 'Remove blocklist entry from policy',
     }
   ),
   deleteModalImpactInfo: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklists.list.removeDialog.messageCallout',
     {
       defaultMessage:
-        'This blocklist will be removed only from this policy and can still be found and managed from the artifact page.',
+        'This blocklist entry will be removed only from this policy and can still be found and managed from the artifact page.',
     }
   ),
   deleteModalErrorMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklists.list.removeDialog.errorToastTitle',
     {
-      defaultMessage: 'Error while attempting to remove blocklist',
+      defaultMessage: 'Error while attempting to remove blocklist entry',
     }
   ),
   flyoutWarningCalloutMessage: (maxNumber: number) =>
@@ -63,7 +63,7 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
   flyoutErrorMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklists.layout.flyout.toastError.text',
     {
-      defaultMessage: `An error occurred updating blocklist`,
+      defaultMessage: `An error occurred updating blocklist entry`,
     }
   ),
   flyoutSuccessMessageText: (updatedExceptions: ExceptionListItemSchema[]): string =>
@@ -78,7 +78,7 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
       : i18n.translate(
           'xpack.securitySolution.endpoint.policy.blocklists.layout.flyout.toastSuccess.textSingle',
           {
-            defaultMessage: '"{name}" has been added to your blocklist list.',
+            defaultMessage: '"{name}" blocklist has been added to your list.',
             values: { name: updatedExceptions[0].name },
           }
         ),
@@ -95,13 +95,13 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
   emptyUnassignedPrimaryActionButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklists.empty.unassigned.primaryAction',
     {
-      defaultMessage: 'Assign blocklist',
+      defaultMessage: 'Assign blocklist entry',
     }
   ),
   emptyUnassignedSecondaryActionButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklists.empty.unassigned.secondaryAction',
     {
-      defaultMessage: 'Manage blocklist',
+      defaultMessage: 'Manage blocklist entries',
     }
   ),
   emptyUnexistingTitle: i18n.translate(
@@ -116,7 +116,7 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
   ),
   emptyUnexistingPrimaryActionButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklists.empty.unexisting.action',
-    { defaultMessage: 'Add blocklists' }
+    { defaultMessage: 'Add blocklist entry' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate('xpack.securitySolution.endpoint.policy.blocklists.list.totalItemCount', {
