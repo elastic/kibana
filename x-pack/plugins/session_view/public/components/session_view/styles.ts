@@ -30,8 +30,6 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
     const detailPanel: CSSObject = {
       height: `${height}px`,
       borderRightWidth: '0px',
-      borderLeft: thinBorder,
-      borderRight: thinBorder,
     };
 
     const resizeHandle: CSSObject = {

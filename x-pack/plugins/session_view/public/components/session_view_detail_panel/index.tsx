@@ -16,7 +16,6 @@ import { useStyles } from './styles';
 import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
-
 interface SessionViewDetailPanelDeps {
   selectedProcess: Process;
   alerts?: ProcessEvent[];

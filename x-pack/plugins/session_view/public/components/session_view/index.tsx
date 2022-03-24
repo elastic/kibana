@@ -186,26 +186,26 @@ export const SessionView = ({
                   </SectionLoading>
                 )}
 
-               {hasError && (
-                <EuiEmptyPrompt
-                  iconType="alert"
-                  color="danger"
-                  title={
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.sessionView.errorHeading"
-                        defaultMessage="Error loading Session View"
-                      />
-                    </h2>
-                  }
-                  body={
-                    <p>
-                      <FormattedMessage
-                        id="xpack.sessionView.errorMessage"
-                        defaultMessage="There was an error loading the Session View."
-                      />
-                    </p>
-                  }
+                {hasError && (
+                  <EuiEmptyPrompt
+                    iconType="alert"
+                    color="danger"
+                    title={
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.sessionView.errorHeading"
+                          defaultMessage="Error loading Session View"
+                        />
+                      </h2>
+                    }
+                    body={
+                      <p>
+                        <FormattedMessage
+                          id="xpack.sessionView.errorMessage"
+                          defaultMessage="There was an error loading the Session View."
+                        />
+                      </p>
+                    }
                   />
                 )}
 
@@ -214,6 +214,7 @@ export const SessionView = ({
                     <ProcessTree
                       sessionEntityId={sessionEntityId}
                       data={data.pages}
+                      alerts={alerts}
                       searchQuery={searchQuery}
                       selectedProcess={selectedProcess}
                       onProcessSelected={onProcessSelected}
@@ -224,6 +225,8 @@ export const SessionView = ({
                       fetchNextPage={fetchNextPage}
                       fetchPreviousPage={fetchPreviousPage}
                       setSearchResults={setSearchResults}
+                      updatedAlertsStatus={updatedAlertsStatus}
+                      onShowAlertDetails={onShowAlertDetails}
                       timeStampOn={displayOptions.timestamp}
                       verboseModeOn={displayOptions.verboseMode}
                     />
@@ -236,8 +239,8 @@ export const SessionView = ({
                   <EuiResizableButton css={styles.resizeHandle} />
                   <EuiResizablePanel
                     id="session-detail-panel"
-                    initialSize={30}
-                    minSize="200px"
+                    initialSize={25}
+                    minSize="320px"
                     paddingSize="none"
                     css={styles.detailPanel}
                   >
