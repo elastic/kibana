@@ -41,7 +41,12 @@ describe('AnomalyExplorerChartsService', () => {
 
     mlApiServicesMock.jobs.jobForCloning.mockImplementation(() => Promise.resolve({}));
 
-    mlApiServicesMock.results.getAnomalyCharts$.mockReturnValue(of(getDefaultChartsData()));
+    mlApiServicesMock.results.getAnomalyCharts$.mockReturnValue(
+      of({
+        ...getDefaultChartsData(),
+        seriesToPlot: [{}],
+      })
+    );
 
     timefilterMock = createTimefilterMock();
     timefilterMock.getActiveBounds.mockReturnValue({
@@ -77,13 +82,13 @@ describe('AnomalyExplorerChartsService', () => {
       1486670399999,
       { max: 1486670399999, min: 1486656000000 },
       6,
-      200,
+      119,
       undefined
     );
     expect(result).toEqual({
-      chartsPerRow: 2,
+      chartsPerRow: 1,
       errorMessages: undefined,
-      seriesToPlot: [],
+      seriesToPlot: [{}],
       // default values, will update on every re-render
       tooManyBuckets: false,
       timeFieldName: 'timestamp',
