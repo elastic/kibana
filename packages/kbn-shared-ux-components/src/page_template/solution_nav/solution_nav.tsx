@@ -19,21 +19,18 @@ import {
 } from '@elastic/eui';
 
 import classNames from 'classnames';
-import {
-  KibanaPageTemplateSolutionNavAvatar,
-  KibanaPageTemplateSolutionNavAvatarProps,
-} from '../solution_nav_avatar';
+import { KibanaSolutionAvatar, KibanaSolutionAvatarProps } from '../../solution_avatar';
 import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
 
 export type KibanaPageTemplateSolutionNavProps = EuiSideNavProps<{}> & {
   /**
    * Name of the solution, i.e. "Observability"
    */
-  name: KibanaPageTemplateSolutionNavAvatarProps['name'];
+  name: KibanaSolutionAvatarProps['name'];
   /**
    * Solution logo, i.e. "logoObservability"
    */
-  icon?: KibanaPageTemplateSolutionNavAvatarProps['iconType'];
+  icon?: KibanaSolutionAvatarProps['iconType'];
   /**
    * Control the collapsed state
    */
@@ -78,9 +75,7 @@ export const KibanaPageTemplateSolutionNav = ({
   /**
    * Create the avatar
    */
-  const solutionAvatar = icon ? (
-    <KibanaPageTemplateSolutionNavAvatar iconType={icon} name={name} />
-  ) : null;
+  const solutionAvatar = icon ? <KibanaSolutionAvatar iconType={icon} name={name} /> : null;
 
   /**
    * Create the titles
