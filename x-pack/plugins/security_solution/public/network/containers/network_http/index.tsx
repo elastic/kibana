@@ -31,7 +31,7 @@ import { InspectResponse } from '../../../types';
 import { getInspectResponse } from '../../../helpers';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkHttpQuery';
+export const ID = 'networkHttpQuery';
 
 export interface NetworkHttpArgs {
   id: string;
@@ -94,7 +94,7 @@ export const useNetworkHttp = ({
 
   const [networkHttpResponse, setNetworkHttpResponse] = useState<NetworkHttpArgs>({
     networkHttp: [],
-    id: ID,
+    id,
     inspect: {
       dsl: [],
       response: [],
@@ -116,11 +116,9 @@ export const useNetworkHttp = ({
       if (request == null || skip) {
         return;
       }
-
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-
         searchSubscription$.current = data.search
           .search<NetworkHttpRequestOptions, NetworkHttpStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
@@ -192,6 +190,14 @@ export const useNetworkHttp = ({
       abortCtrl.current.abort();
     };
   }, [networkHttpRequest, networkHttpSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkHttpResponse];
 };
