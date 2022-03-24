@@ -41,6 +41,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     const uptimeEsClient = createUptimeESClient({
       request,
       savedObjectsClient,
+      isInspectorEnabled,
       esClient: esClient.asCurrentUser,
     });
 
