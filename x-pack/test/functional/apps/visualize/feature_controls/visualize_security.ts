@@ -167,6 +167,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('allow saving currently loaded query as a copy', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'ok2',
           'description',

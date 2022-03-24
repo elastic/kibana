@@ -61,6 +61,7 @@ interface Props {
   onClearSavedQuery?: () => void;
   showSavedQueryManagement?: boolean;
   showFilterSetManagement?: boolean;
+  showSaveQuery?: boolean;
 }
 
 export function QueryBarMenu({
@@ -85,6 +86,7 @@ export function QueryBarMenu({
   onClearSavedQuery,
   showSavedQueryManagement,
   showFilterSetManagement,
+  showSaveQuery,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [hasFiltersOrQuery, setHasFiltersOrQuery] = useState(false);
@@ -299,7 +301,8 @@ export function QueryBarMenu({
             defaultMessage: 'Save filter set',
           }),
       icon: 'save',
-      disabled: !hasFiltersOrQuery || (savedQuery && !savedQueryHasChanged),
+      disabled:
+        !Boolean(showSaveQuery) || !hasFiltersOrQuery || (savedQuery && !savedQueryHasChanged),
       panel: 1,
       'data-test-subj': 'saved-query-management-save-button',
     },
@@ -317,9 +320,9 @@ export function QueryBarMenu({
     items.push({
       name: `Language: ${language === 'kuery' ? kqlLabel : luceneLabel}`,
       panel: 3,
+      'data-test-subj': 'switchQueryLanguageButton',
     });
   }
-
   const panels = [
     {
       id: 0,
@@ -335,7 +338,7 @@ export function QueryBarMenu({
                 <strong>{savedQuery ? savedQuery.attributes.title : 'Filter set'}</strong>
               </EuiText>
             </EuiFlexItem>
-            {savedQuery && savedQueryHasChanged && (
+            {savedQuery && savedQueryHasChanged && Boolean(showSaveQuery) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup
                   direction="row"
@@ -400,6 +403,7 @@ export function QueryBarMenu({
       title: i18n.translate('data.filter.options.saveCurrentFilterSetLabel', {
         defaultMessage: 'Save current filter set',
       }),
+      disabled: !Boolean(showSaveQuery),
       content: <div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>,
     },
     {

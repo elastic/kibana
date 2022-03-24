@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('response:400');
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'OkResponseCopy',
-          '200-400 responses',
+          '400 responses',
           false,
           false
         );

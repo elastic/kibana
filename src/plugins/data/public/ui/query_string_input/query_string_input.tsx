@@ -685,15 +685,17 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
     const containerClassName = classNames(
-      'euiFormControlLayout kbnQueryBar__wrap',
+      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
       this.props.className
     );
     const inputClassName = classNames('kbnQueryBar__textarea', {
       'kbnQueryBar__textarea--withIcon': this.props.iconType,
       'kbnQueryBar__textarea--isClearable': this.props.isClearable,
+      'kbnQueryBar__textarea--hasAppend': !Boolean(this.props.disableLanguageSwitcher),
     });
     const inputWrapClassName = classNames(
-      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap'
+      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap',
+      !Boolean(this.props.disableLanguageSwitcher) ? 'kbnQueryBar__textareaWrap--hasAppend' : null
     );
 
     return (

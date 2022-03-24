@@ -487,7 +487,7 @@ export function DashboardTopNav({
     const showDatePicker = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
-    const showSearchBar = showQueryBar || showFilterBar || showFilterBar;
+    const showSearchBar = showQueryBar || showFilterBar;
     const screenTitle = dashboardState.title;
 
     const topNav = getTopNavConfig(

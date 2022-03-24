@@ -20,5 +20,7 @@ export const navigateFromHeaderTo = (page: string) => {
 };
 
 export const refreshPage = () => {
-  cy.get(REFRESH_BUTTON).click({ force: true }).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON)
+    .click({ force: true })
+    .should('not.have.attr', 'aria-label', 'Update query');
 };

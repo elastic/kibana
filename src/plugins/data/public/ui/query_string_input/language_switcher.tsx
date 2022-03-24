@@ -87,6 +87,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       <EuiContextMenuItem
         key="KQL"
         icon={language === 'kuery' ? 'check' : 'empty'}
+        data-test-subj="kqlLanguageMenuItem"
         onClick={() => {
           onSelectLanguage('kuery');
         }}
@@ -96,6 +97,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       <EuiContextMenuItem
         key={nonKqlMode}
         icon={language === 'kuery' ? 'empty' : 'check'}
+        data-test-subj="luceneLanguageMenuItem"
         onClick={() => {
           onSelectLanguage(nonKqlMode);
         }}

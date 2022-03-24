@@ -386,6 +386,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onClearSavedQuery={this.props.onClearSavedQuery}
         showSavedQueryManagement={this.props.showQueryInput}
         showFilterSetManagement={this.props.showFilterBar}
+        showSaveQuery={this.props.showSaveQuery}
         manageFilterSetComponent={
           this.props.showFilterBar && this.state.query
             ? this.renderSavedQueryManagement(

@@ -53,7 +53,12 @@ export class SavedQueryManagementComponentService extends FtrService {
       return saveQueryFormSaveButtonStatus === false;
     });
 
-    await this.testSubjects.click('savedQueryFormCancelButton');
+    const contextMenuPanelTitleButton = await this.testSubjects.exists(
+      'contextMenuPanelTitleButton'
+    );
+    if (contextMenuPanelTitleButton) {
+      await this.testSubjects.click('contextMenuPanelTitleButton');
+    }
   }
 
   public async saveCurrentlyLoadedAsNewQuery(
@@ -92,6 +97,12 @@ export class SavedQueryManagementComponentService extends FtrService {
 
   public async deleteSavedQuery(title: string) {
     await this.openSavedQueryManagementComponent();
+    const shouldClickLoadMenu = await this.testSubjects.exists(
+      'saved-query-management-load-button'
+    );
+    if (shouldClickLoadMenu) {
+      await this.testSubjects.click('saved-query-management-load-button');
+    }
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.retry.waitFor('delete saved query', async () => {
       await this.testSubjects.click(`delete-saved-query-${title}-button`);
@@ -142,6 +153,7 @@ export class SavedQueryManagementComponentService extends FtrService {
 
   async savedQueryExist(title: string) {
     await this.openSavedQueryManagementComponent();
+    await this.testSubjects.click('saved-query-management-load-button');
     const exists = await this.testSubjects.exists(`~load-saved-query-${title}-button`);
     await this.closeSavedQueryManagementComponent();
     return exists;
@@ -197,7 +209,9 @@ export class SavedQueryManagementComponentService extends FtrService {
 
   async saveNewQueryMissingOrFail() {
     await this.openSavedQueryManagementComponent();
-    await this.testSubjects.missingOrFail('saved-query-management-save-button');
+    const saveFilterSetBtn = await this.testSubjects.find('saved-query-management-save-button');
+    const isDisabled = await saveFilterSetBtn.getAttribute('disabled');
+    expect(isDisabled).to.equal('true');
   }
 
   async updateCurrentlyLoadedQueryMissingOrFail() {

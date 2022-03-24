@@ -45,7 +45,7 @@ export const opensInspectQueryModal = () => {
 
 export const waitsForEventsToBeLoaded = () => {
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Update query');
   cy.get(EVENTS_VIEWER_PAGINATION).should('exist');
 };
 
