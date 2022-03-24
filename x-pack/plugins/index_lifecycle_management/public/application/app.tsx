@@ -9,9 +9,8 @@ import React, { useEffect } from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useExecutionContext } from 'src/plugins/kibana_react/public';
 
-import { useKibana } from '../shared_imports';
+import { useKibana, useExecutionContext } from '../shared_imports';
 import { UIM_APP_LOAD } from './constants';
 import { EditPolicy } from './sections/edit_policy';
 import { PolicyList } from './sections/policy_list';

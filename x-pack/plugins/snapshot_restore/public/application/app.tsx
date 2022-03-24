@@ -10,7 +10,6 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useExecutionContext } from 'src/plugins/kibana_react/public';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 
 import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common';
@@ -19,6 +18,7 @@ import {
   PageError,
   WithPrivileges,
   NotAuthorizedSection,
+  useExecutionContext,
 } from '../shared_imports';
 import { PageLoading } from './components';
 import { DEFAULT_SECTION, Section } from './constants';
