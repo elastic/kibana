@@ -252,6 +252,7 @@ export const item: GetInfoResponse['item'] = {
       lens: [],
       map: [],
       security_rule: [],
+      csp_rule_template: [],
       tag: [],
       osquery_pack_asset: [],
     },

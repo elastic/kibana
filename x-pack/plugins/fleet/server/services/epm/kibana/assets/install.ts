@@ -52,6 +52,8 @@ const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectTyp
   [KibanaAssetType.lens]: KibanaSavedObjectType.lens,
   [KibanaAssetType.mlModule]: KibanaSavedObjectType.mlModule,
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
+  [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
+    KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
 };
