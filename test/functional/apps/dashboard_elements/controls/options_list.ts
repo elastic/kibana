@@ -64,8 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.editExistingControl(firstId);
 
-        await dashboardControls.optionsListEditorSetDataView('animals-*');
-        await dashboardControls.optionsListEditorSetfield('animal.keyword');
+        await dashboardControls.controlsEditorSetDataView('animals-*');
+        await dashboardControls.controlsEditorSetfield('animal.keyword');
         await dashboardControls.controlEditorSave();
 
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
