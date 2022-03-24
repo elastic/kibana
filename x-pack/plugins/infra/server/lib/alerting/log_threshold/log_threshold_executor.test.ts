@@ -404,7 +404,7 @@ describe('Log threshold executor', () => {
     });
   });
 
-  // TODO: alertUpdater doesn't exists anymore, but we should keep and update the tests.
+  // TODO: alertUpdater doesn't exists anymore, but we should keep and update the tests.https://github.com/elastic/kibana/issues/128452
 
   // describe('Results processors', () => {
   //   describe('Can process ungrouped results', () => {
