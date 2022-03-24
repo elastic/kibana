@@ -265,6 +265,10 @@ describe('<AgentEnrollmentFlyout />', () => {
         expect(exists('agentEnrollmentFlyout')).toBe(true);
         actions.goToStandaloneTab();
 
+        // TODO: Determine why this forced re-render is necessary. The component is stale and doesn't
+        // actually reflect navigation to the standalone tab without this.
+        testBed.component.update();
+
         expect(exists('agent-policy-selection-step')).toBe(false);
         expect(exists('agent-enrollment-key-selection-step')).toBe(false);
       });

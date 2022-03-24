@@ -59,12 +59,19 @@ jest.mock('./steps', () => {
     ...module,
     AgentPolicySelectionStep: jest.fn().mockReturnValue({
       'data-test-subj': 'agent-policy-selection-step',
+      title: 'agent-policy-selection-step',
     }),
     AgentEnrollmentKeySelectionStep: jest.fn().mockReturnValue({
       'data-test-subj': 'agent-enrollment-key-selection-step',
+      title: 'agent-enrollment-key-selection-step',
     }),
-    ViewDataStep: jest.fn().mockReturnValue({ 'data-test-subj': 'view-data-step' }),
-    DownloadStep: jest.fn().mockReturnValue({ 'data-test-subj': 'download-step' }),
+    ViewDataStep: jest.fn().mockReturnValue({
+      'data-test-subj': 'view-data-step',
+      title: 'view-data-step',
+    }),
+    DownloadStep: jest
+      .fn()
+      .mockReturnValue({ 'data-test-subj': 'download-step', title: 'download-step' }),
   };
 });
 
