@@ -46,7 +46,7 @@ export const HIGHLIGHTED_FIELDS_VALUE = i18n.translate(
 export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalence',
   {
-    defaultMessage: 'Alert Prevalence',
+    defaultMessage: 'Alert prevalence',
   }
 );
 
@@ -116,6 +116,13 @@ export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.al
 export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
   defaultMessage: 'Rule type',
 });
+
+export const SOURCE_EVENT_ID = i18n.translate(
+  'xpack.securitySolution.detections.alerts.sourceEventId',
+  {
+    defaultMessage: 'Source event id',
+  }
+);
 
 export const MULTI_FIELD_TOOLTIP = i18n.translate(
   'xpack.securitySolution.eventDetails.multiFieldTooltipContent',

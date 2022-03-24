@@ -59,6 +59,7 @@ const groupVisibleConfigsByInterval = (
 ) => {
   return layers
     .flatMap(({ annotations }) => annotations.filter((a) => !a.isHidden))
+    .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf())
     .reduce<Record<string, EventAnnotationArgs[]>>((acc, current) => {
       const roundedTimestamp = getRoundedTimestamp(
         moment(current.time).valueOf(),
