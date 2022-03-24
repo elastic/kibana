@@ -456,6 +456,7 @@ describe('create()', () => {
                                                                             "id": "1",
                                                                             "params": Object {
                                                                               "alertId": "1",
+                                                                              "consumer": "bar",
                                                                               "spaceId": "default",
                                                                             },
                                                                             "schedule": Object {
