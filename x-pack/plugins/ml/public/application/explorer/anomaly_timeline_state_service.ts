@@ -65,7 +65,9 @@ export class AnomalyTimelineStateService extends StateService {
   >(null);
 
   private _containerWidth$ = new BehaviorSubject<number>(0);
-  private _selectedCells$ = new BehaviorSubject<AppStateSelectedCells | undefined>(undefined);
+  private _selectedCells$ = new BehaviorSubject<AppStateSelectedCells | undefined | null>(
+    undefined
+  );
   private _swimLaneSeverity$ = new BehaviorSubject<number>(0);
   private _swimLanePaginations$ = new BehaviorSubject<SwimLanePagination>({
     viewByFromPage: 1,
@@ -370,7 +372,7 @@ export class AnomalyTimelineStateService extends StateService {
       .pipe(
         map(([viewByFieldName, swimLaneUrlState, swimLaneBucketInterval]) => {
           if (!swimLaneUrlState?.selectedType) {
-            return;
+            return null;
           }
 
           let times: AnomalyExplorerSwimLaneUrlState['selectedTimes'] =
@@ -388,7 +390,7 @@ export class AnomalyTimelineStateService extends StateService {
           times = this._getAdjustedTimeSelection(times, this.timefilter.getBounds());
 
           if (!times) {
-            return;
+            return null;
           }
 
           return {
@@ -455,7 +457,7 @@ export class AnomalyTimelineStateService extends StateService {
     filterActive: boolean,
     filteredFields: string[],
     isAndOperator: boolean,
-    selectedCells: AppStateSelectedCells | undefined,
+    selectedCells: AppStateSelectedCells | undefined | null,
     selectedJobs: ExplorerJob[] | undefined
   ) {
     const selectedJobIds = selectedJobs?.map((d) => d.id) ?? [];
@@ -597,8 +599,12 @@ export class AnomalyTimelineStateService extends StateService {
   /**
    * Provides updates for swim lanes cells selection.
    */
-  public getSelectedCells$(): Observable<AppStateSelectedCells | undefined> {
+  public getSelectedCells$(): Observable<AppStateSelectedCells | undefined | null> {
     return this._selectedCells$.asObservable();
+  }
+
+  public getSelectedCells(): AppStateSelectedCells | undefined | null {
+    return this._selectedCells$.getValue();
   }
 
   public getSwimLaneSeverity$(): Observable<number | undefined> {

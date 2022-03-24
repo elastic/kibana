@@ -67,7 +67,7 @@ export interface LoadExplorerDataConfig {
   influencersFilterQuery: InfluencersFilterQuery;
   lastRefresh: number;
   noInfluencersConfigured: boolean;
-  selectedCells: AppStateSelectedCells | undefined;
+  selectedCells: AppStateSelectedCells | undefined | null;
   selectedJobs: ExplorerJob[];
   swimlaneBucketInterval: TimeBucketsInterval;
   swimlaneLimit: number;

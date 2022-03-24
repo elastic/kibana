@@ -191,7 +191,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   );
 
   const selectedCells = useObservable(
-    anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells$()
+    anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells$(),
+    anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells()
   );
 
   const viewByFieldName = useObservable(
@@ -231,6 +232,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   );
 
   useEffect(() => {
+    if (!loadExplorerDataConfig || loadExplorerDataConfig?.selectedCells === undefined) return;
     loadExplorerData(loadExplorerDataConfig);
   }, [JSON.stringify(loadExplorerDataConfig)]);
 

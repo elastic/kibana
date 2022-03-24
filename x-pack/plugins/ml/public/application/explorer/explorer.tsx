@@ -131,7 +131,7 @@ interface ExplorerUIProps {
   timefilter: TimefilterContract;
   // TODO Remove
   timeBuckets: TimeBuckets;
-  selectedCells: AppStateSelectedCells | undefined;
+  selectedCells: AppStateSelectedCells | undefined | null;
   swimLaneSeverity?: number;
 }
 

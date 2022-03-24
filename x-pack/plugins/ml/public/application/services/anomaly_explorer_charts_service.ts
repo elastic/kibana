@@ -71,14 +71,10 @@ export class AnomalyExplorerChartsService {
     earliestMs: number,
     latestMs: number,
     influencers: EntityField[] = [],
-    selectedCells: AppStateSelectedCells | undefined,
+    selectedCells: AppStateSelectedCells | undefined | null,
     influencersFilterQuery: InfluencersFilterQuery
   ): Observable<RecordForInfluencer[]> {
-    if (
-      selectedCells === undefined &&
-      influencers.length === 0 &&
-      influencersFilterQuery === undefined
-    ) {
+    if (!selectedCells && influencers.length === 0 && influencersFilterQuery === undefined) {
       of([]);
     }
 
@@ -94,10 +90,7 @@ export class AnomalyExplorerChartsService {
       )
       .pipe(
         mapObservable((resp): RecordForInfluencer[] => {
-          if (
-            (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
-            influencersFilterQuery !== undefined
-          ) {
+          if (isPopulatedObject(selectedCells) || influencersFilterQuery !== undefined) {
             return resp.records;
           }
 
