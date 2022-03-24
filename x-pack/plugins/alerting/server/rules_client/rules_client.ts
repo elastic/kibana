@@ -24,7 +24,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { withSpan } from '@kbn/apm-utils';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -1101,10 +1100,7 @@ export class RulesClient {
     return await retryIfConflicts(
       this.logger,
       `rulesClient.update('${id}')`,
-      async () =>
-        await withSpan({ type: 'sec_sol', name: 'updateWithOCC' }, () =>
-          this.updateWithOCC<Params>({ id, data })
-        )
+      async () => await this.updateWithOCC<Params>({ id, data })
     );
   }
 
@@ -1159,9 +1155,7 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
-    const updateResult = await withSpan({ type: 'sec_sol', name: 'updateAlert' }, () =>
-      this.updateAlert<Params>({ id, data }, alertSavedObject)
-    );
+    const updateResult = await this.updateAlert<Params>({ id, data }, alertSavedObject);
 
     await Promise.all([
       alertSavedObject.attributes.apiKey
