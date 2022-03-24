@@ -31,13 +31,13 @@ import { ElasticsearchResources } from '../elasticsearch_resources';
 
 export const ElasticsearchGuide: React.FC = () => {
   const languages = [
+    { value: 'dotnet', text: '.Net' },
+    { value: 'go', text: 'Go' },
     { value: 'java', text: 'Java' },
     { value: 'javascript', text: 'JavaScript' },
-    { value: 'ruby', text: 'Ruby' },
-    { value: 'go', text: 'Go' },
-    { value: 'dotnet', text: '.Net' },
     { value: 'php', text: 'PHP' },
     { value: 'python', text: 'Python' },
+    { value: 'ruby', text: 'Ruby' },
     { value: 'rust', text: 'Rust' },
   ];
 
