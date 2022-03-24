@@ -96,6 +96,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   factoryQueryType,
   initialResult,
   errorMessage,
+  skip = false,
 }: {
   factoryQueryType: QueryType;
   /**
@@ -106,6 +107,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
    * Message displayed to the user on a Toast when an erro happens.
    */
   errorMessage?: string;
+  skip?: boolean;
 }) => {
   const abortCtrl = useRef(new AbortController());
   const { getTransformChangesIfTheyExist } = useTransforms();
@@ -153,6 +155,12 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
       abortCtrl.current.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (skip) {
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   const [formatedResult, inspect] = useMemo(
     () => [

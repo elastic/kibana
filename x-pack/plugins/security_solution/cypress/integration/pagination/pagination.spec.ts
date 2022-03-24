@@ -12,8 +12,8 @@ import {
 import { FIRST_PAGE_SELECTOR, THIRD_PAGE_SELECTOR } from '../../screens/pagination';
 import { cleanKibana } from '../../tasks/common';
 
-import { waitForAuthenticationsToBeLoaded } from '../../tasks/hosts/authentications';
-import { openAuthentications, openUncommonProcesses } from '../../tasks/hosts/main';
+import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
+import { openEvents, openUncommonProcesses } from '../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../tasks/hosts/uncommon_processes';
 import { loginAndWaitForPage } from '../../tasks/login';
 import { goToFirstPage, goToThirdPage } from '../../tasks/pagination';
@@ -73,8 +73,8 @@ describe('Pagination', () => {
       .first()
       .invoke('text')
       .then((expectedThirdPageResult) => {
-        openAuthentications();
-        waitForAuthenticationsToBeLoaded();
+        openEvents();
+        waitsForEventsToBeLoaded();
         cy.get(FIRST_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
         openUncommonProcesses();
         waitForUncommonProcessesToBeLoaded();

@@ -7,14 +7,14 @@
 
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiInMemoryTable, EuiText } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
-import * as i18n from './translations';
 import { getColumnHeader, getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 import { tGridActions } from '../../../../store/t_grid';
 import type { GetFieldTableColumns } from '../../../../../common/types/fields_browser';
+import { FieldTableHeader } from './field_table_header';
 
 export interface FieldTableProps {
   timelineId: string;
@@ -25,6 +25,9 @@ export interface FieldTableProps {
    * the filter input (as a substring).
    */
   filteredBrowserFields: BrowserFields;
+  /** when true, show only the the selected field */
+  filterSelectedEnabled: boolean;
+  onFilterSelectedChange: (enabled: boolean) => void;
   /**
    * Optional function to customize field table columns
    */
@@ -58,9 +61,11 @@ Count.displayName = 'Count';
 const FieldTableComponent: React.FC<FieldTableProps> = ({
   columnHeaders,
   filteredBrowserFields,
+  filterSelectedEnabled,
   getFieldTableColumns,
   searchInput,
   selectedCategoryIds,
+  onFilterSelectedChange,
   timelineId,
   onHide,
 }) => {
@@ -106,13 +111,13 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
 
   return (
     <>
-      <EuiText data-test-subj="fields-showing" size="xs">
-        {i18n.FIELDS_SHOWING}
-        <Count data-test-subj="fields-count"> {fieldItems.length} </Count>
-        {i18n.FIELDS_COUNT(fieldItems.length)}
-      </EuiText>
+      <FieldTableHeader
+        fieldCount={fieldItems.length}
+        filterSelectedEnabled={filterSelectedEnabled}
+        onFilterSelectedChange={onFilterSelectedChange}
+      />
 
-      <TableContainer className="euiTable--compressed" height={TABLE_HEIGHT}>
+      <TableContainer height={TABLE_HEIGHT}>
         <EuiInMemoryTable
           data-test-subj="field-table"
           className={`${CATEGORY_TABLE_CLASS_NAME} eui-yScroll`}
@@ -122,6 +127,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
           pagination={true}
           sorting={true}
           hasActions={hasActions}
+          compressed
         />
       </TableContainer>
     </>

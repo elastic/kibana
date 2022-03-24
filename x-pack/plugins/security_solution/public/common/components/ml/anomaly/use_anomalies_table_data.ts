@@ -80,7 +80,9 @@ export const useAnomaliesTableData = ({
       earliestMs: number,
       latestMs: number
     ) {
-      if (isMlUser && !skip && jobIds.length > 0) {
+      if (skip) {
+        setLoading(false);
+      } else if (isMlUser && !skip && jobIds.length > 0) {
         try {
           const data = await anomaliesTableData(
             {
