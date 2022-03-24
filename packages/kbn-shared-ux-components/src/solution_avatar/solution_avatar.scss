@@ -7,7 +7,7 @@
     line-height: 100px;
     border-radius: 100px;
     display: inline-block;
-    background: $euiColorEmptyShade url('assets/texture.svg') no-repeat;
+    background: $euiColorEmptyShade url('./assets/texture.svg') no-repeat;
     background-size: cover, 125%;
     text-align: center;
   }
