@@ -45,6 +45,7 @@ export const LegendDisplay = {
 export const layerTypes = {
   DATA: 'data',
   REFERENCELINE: 'referenceLine',
+  ANNOTATIONS: 'annotations',
 } as const;
 
 // might collide with user-supplied field names, try to make as unique as possible

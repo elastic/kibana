@@ -9,6 +9,7 @@
 import expect from '@kbn/expect';
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { OPTIONS_LIST_CONTROL, ControlWidth } from '../../../src/plugins/controls/common';
+import { ControlGroupChainingSystem } from '../../../src/plugins/controls/common/control_group/types';
 
 import { FtrService } from '../ftr_provider_context';
 
@@ -61,6 +62,13 @@ export class DashboardPageControls extends FtrService {
   public async getControlsCount() {
     const allTitles = await this.getAllControlTitles();
     return allTitles.length;
+  }
+
+  public async clearAllControls() {
+    const controlIds = await this.getAllControlIds();
+    for (const controlId of controlIds) {
+      await this.removeExistingControl(controlId);
+    }
   }
 
   public async openCreateControlFlyout(type: string) {
@@ -116,6 +124,85 @@ export class DashboardPageControls extends FtrService {
       const checkbox = await this.find.byXPath('//label[@for="editControls_setAllSizesCheckbox"]');
       await checkbox.click();
     }
+    await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async updateChainingSystem(chainingSystem: ControlGroupChainingSystem) {
+    this.log.debug(`Update control group chaining system to ${chainingSystem}`);
+    await this.openControlGroupSettingsFlyout();
+    await this.testSubjects.existOrFail('control-group-chaining');
+    // currently there are only two chaining systems, so a switch is used.
+    const switchStateToChainingSystem: { [key: string]: ControlGroupChainingSystem } = {
+      true: 'HIERARCHICAL',
+      false: 'NONE',
+    };
+
+    const switchState = await this.testSubjects.getAttribute('control-group-chaining', 'checked');
+    if (chainingSystem !== switchStateToChainingSystem[switchState]) {
+      await this.testSubjects.click('control-group-chaining');
+    }
+    await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async setSwitchState(goalState: boolean, subject: string) {
+    await this.testSubjects.existOrFail(subject);
+    const currentStateIsChecked =
+      (await this.testSubjects.getAttribute(subject, 'aria-checked')) === 'true';
+    if (currentStateIsChecked !== goalState) {
+      await this.testSubjects.click(subject);
+    }
+    await this.retry.try(async () => {
+      const stateIsChecked = (await this.testSubjects.getAttribute(subject, 'checked')) === 'true';
+      expect(stateIsChecked).to.be(goalState);
+    });
+  }
+
+  public async updateValidationSetting(validate: boolean) {
+    this.log.debug(`Update control group validation setting to ${validate}`);
+    await this.openControlGroupSettingsFlyout();
+    await this.setSwitchState(validate, 'control-group-validate-selections');
+    await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async updateAllQuerySyncSettings(querySync: boolean) {
+    this.log.debug(`Update all control group query sync settings to ${querySync}`);
+    await this.openControlGroupSettingsFlyout();
+    await this.setSwitchState(querySync, 'control-group-query-sync');
+    await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async ensureAdvancedQuerySyncIsOpened() {
+    const advancedAccordion = await this.testSubjects.find(`control-group-query-sync-advanced`);
+    const opened = await advancedAccordion.elementHasClass('euiAccordion-isOpen');
+    if (!opened) {
+      await this.testSubjects.click(`control-group-query-sync-advanced`);
+      await this.retry.try(async () => {
+        expect(await advancedAccordion.elementHasClass('euiAccordion-isOpen')).to.be(true);
+      });
+    }
+  }
+
+  public async updateSyncTimeRangeAdvancedSetting(syncTimeRange: boolean) {
+    this.log.debug(`Update filter sync advanced setting to ${syncTimeRange}`);
+    await this.openControlGroupSettingsFlyout();
+    await this.ensureAdvancedQuerySyncIsOpened();
+    await this.setSwitchState(syncTimeRange, 'control-group-query-sync-time-range');
+    await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async updateSyncQueryAdvancedSetting(syncQuery: boolean) {
+    this.log.debug(`Update filter sync advanced setting to ${syncQuery}`);
+    await this.openControlGroupSettingsFlyout();
+    await this.ensureAdvancedQuerySyncIsOpened();
+    await this.setSwitchState(syncQuery, 'control-group-query-sync-query');
+    await this.testSubjects.click('control-group-editor-save');
+  }
+
+  public async updateSyncFilterAdvancedSetting(syncFilters: boolean) {
+    this.log.debug(`Update filter sync advanced setting to ${syncFilters}`);
+    await this.openControlGroupSettingsFlyout();
+    await this.ensureAdvancedQuerySyncIsOpened();
+    await this.setSwitchState(syncFilters, 'control-group-query-sync-filters');
     await this.testSubjects.click('control-group-editor-save');
   }
 
