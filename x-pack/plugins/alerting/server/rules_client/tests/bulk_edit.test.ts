@@ -102,45 +102,10 @@ describe('bulkEdit()', () => {
 
   beforeEach(async () => {
     rulesClient = new RulesClient(rulesClientParams);
-    // actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
-    // actionsClient.getBulk.mockReset();
-    // actionsClient.getBulk.mockResolvedValue([
-    //   {
-    //     id: '1',
-    //     actionTypeId: 'test',
-    //     config: {
-    //       from: 'me@me.com',
-    //       hasAuth: false,
-    //       host: 'hello',
-    //       port: 22,
-    //       secure: null,
-    //       service: null,
-    //     },
-    //     isMissingSecrets: false,
-    //     name: 'email connector',
-    //     isPreconfigured: false,
-    //   },
-    // ]);
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
     });
-
-    //  encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
-    // ruleTypeRegistry.get.mockReturnValue({
-    //   id: 'myType',
-    //   name: 'Test',
-    //   actionGroups: [
-    //     { id: 'default', name: 'Default' },
-    //     { id: 'custom', name: 'Not the Default' },
-    //   ],
-    //   defaultActionGroupId: 'default',
-    //   minimumLicenseRequired: 'basic',
-    //   isExportable: true,
-    //   recoveryActionGroup: RecoveredActionGroup,
-    //   async executor() {},
-    //   producer: 'alerts',
-    // });
 
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       aggregations: {
