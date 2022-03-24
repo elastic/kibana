@@ -37,15 +37,24 @@ export const RelevanceTuning: React.FC = () => {
     initializeRelevanceTuning();
   }, []);
 
+  const APP_SEARCH_MANAGED_DESCRIPTION = i18n.translate(
+    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
+    { defaultMessage: 'Manage precision and relevance settings for your engine' }
+  );
+
+  const ELASTICSEARCH_MANAGED_DESCRIPTION = i18n.translate(
+    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.elasticsearch.description',
+    { defaultMessage: 'Manage relevance settings for your engine' }
+  );
+
   return (
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([RELEVANCE_TUNING_TITLE])}
       pageHeader={{
         pageTitle: RELEVANCE_TUNING_TITLE,
-        description: i18n.translate(
-          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
-          { defaultMessage: 'Manage precision and relevance settings for your engine' }
-        ),
+        description: isElasticsearchEngine
+          ? ELASTICSEARCH_MANAGED_DESCRIPTION
+          : APP_SEARCH_MANAGED_DESCRIPTION,
         rightSideItems: engineHasSchemaFields
           ? [
               <EuiButton
