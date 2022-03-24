@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
+import { isEmpty } from 'lodash';
 import { loadRules, Rule } from '../../../triggers_actions_ui/public';
 import { RULES_LOAD_ERROR } from '../pages/rules/translations';
 import { FetchRulesProps } from '../pages/rules/types';
@@ -23,6 +24,7 @@ export function useFetchRules({
   searchText,
   ruleLastResponseFilter,
   typesFilter,
+  setPage,
   page,
   sort,
 }: FetchRulesProps) {
@@ -34,6 +36,9 @@ export function useFetchRules({
     error: null,
     totalItemCount: 0,
   });
+
+  const [noData, setNoData] = useState<boolean>(true);
+  const [initialLoad, setInitialLoad] = useState<boolean>(true);
 
   const fetchRules = useCallback(async () => {
     setRulesState((oldState) => ({ ...oldState, isLoading: true }));
@@ -53,10 +58,18 @@ export function useFetchRules({
         data: response.data,
         totalItemCount: response.total,
       }));
+
+      if (!response.data?.length && page.index > 0) {
+        setPage({ ...page, index: 0 });
+      }
+      const isFilterApplied = !(isEmpty(searchText) && isEmpty(ruleLastResponseFilter));
+
+      setNoData(response.data.length === 0 && !isFilterApplied);
     } catch (_e) {
       setRulesState((oldState) => ({ ...oldState, isLoading: false, error: RULES_LOAD_ERROR }));
     }
-  }, [http, page, searchText, ruleLastResponseFilter, typesFilter, sort]);
+    setInitialLoad(false);
+  }, [http, page, setPage, searchText, ruleLastResponseFilter, typesFilter, sort]);
   useEffect(() => {
     fetchRules();
   }, [fetchRules]);
@@ -65,5 +78,7 @@ export function useFetchRules({
     rulesState,
     reload: fetchRules,
     setRulesState,
+    noData,
+    initialLoad,
   };
 }
