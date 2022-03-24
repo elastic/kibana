@@ -12,7 +12,9 @@ import { ChartPointerEventContextProvider } from '../../../../context/chart_poin
 import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
 import { LatencyChart } from '../latency_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
-import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
+import { TransactionColdstartRateChart } from '../transaction_coldstart_rate_chart';
+import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
+import { TimeRangeComparisonType } from '../../../../../common/runtime_types/comparison_type_rt';
 
 export function TransactionCharts({
   kuery,
@@ -20,12 +22,18 @@ export function TransactionCharts({
   start,
   end,
   transactionName,
+  isServerlessContext,
+  comparisonEnabled,
+  comparisonType,
 }: {
   kuery: string;
   environment: string;
   start: string;
   end: string;
   transactionName?: string;
+  isServerlessContext?: boolean;
+  comparisonEnabled?: boolean;
+  comparisonType?: TimeRangeComparisonType;
 }) {
   return (
     <>
@@ -38,13 +46,12 @@ export function TransactionCharts({
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem data-cy={`transaction-duration-charts`}>
               <EuiPanel hasBorder={true}>
-                <LatencyChart kuery={kuery} environment={environment} />
+                <LatencyChart kuery={kuery} />
               </EuiPanel>
             </EuiFlexItem>
 
             <EuiFlexItem style={{ flexShrink: 1 }}>
               <ServiceOverviewThroughputChart
-                environment={environment}
                 kuery={kuery}
                 transactionName={transactionName}
               />
@@ -55,17 +62,26 @@ export function TransactionCharts({
 
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
-              <TransactionErrorRateChart
-                kuery={kuery}
-                environment={environment}
-              />
+              <FailedTransactionRateChart kuery={kuery} />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <TransactionBreakdownChart
-                kuery={kuery}
-                environment={environment}
-              />
-            </EuiFlexItem>
+            {isServerlessContext ? (
+              <EuiFlexItem>
+                <TransactionColdstartRateChart
+                  kuery={kuery}
+                  transactionName={transactionName}
+                  environment={environment}
+                  comparisonEnabled={comparisonEnabled}
+                  comparisonType={comparisonType}
+                />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem>
+                <TransactionBreakdownChart
+                  kuery={kuery}
+                  environment={environment}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGrid>
         </ChartPointerEventContextProvider>
       </AnnotationsContextProvider>

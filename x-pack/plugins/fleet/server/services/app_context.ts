@@ -33,6 +33,7 @@ import type {
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { CloudSetup } from '../../../cloud/server';
+import type { TelemetryEventsSender } from '../telemetry/sender';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
@@ -51,6 +52,7 @@ class AppContextService {
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
+  private telemetryEventsSender: TelemetryEventsSender | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -66,6 +68,7 @@ class AppContextService {
     this.kibanaVersion = appContext.kibanaVersion;
     this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
+    this.telemetryEventsSender = appContext.telemetryEventsSender;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -94,21 +97,11 @@ class AppContextService {
   }
 
   public getSecurity() {
-    if (!this.hasSecurity()) {
-      throw new Error('Security service not set.');
-    }
     return this.securityStart!;
   }
 
   public getSecurityLicense() {
-    if (!this.hasSecurity()) {
-      throw new Error('Security service not set.');
-    }
     return this.securitySetup!.license;
-  }
-
-  public hasSecurity() {
-    return !!this.securitySetup && !!this.securityStart;
   }
 
   public getCloud() {
@@ -202,6 +195,10 @@ class AppContextService {
           : PutPackagePolicyUpdateCallback
       >;
     }
+  }
+
+  public getTelemetryEventsSender() {
+    return this.telemetryEventsSender;
   }
 }
 

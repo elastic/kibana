@@ -7,7 +7,8 @@
  */
 
 const path = require('path');
-const KIBANA_ROOT = path.resolve(__dirname, '../../..');
+const findKibanaRoot = require('../helpers/find_kibana_root');
+const KIBANA_ROOT = findKibanaRoot();
 
 function checkModuleNameNode(context, mappings, node, desc = 'Imported') {
   const mapping = mappings.find(

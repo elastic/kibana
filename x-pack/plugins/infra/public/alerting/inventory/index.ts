@@ -7,23 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import {
   InventoryMetricConditions,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../server/lib/alerting/inventory_metric_threshold/types';
-
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
-
-import { AlertTypeParams } from '../../../../alerting/common';
+} from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
 import { formatReason } from './rule_data_formatters';
 
-interface InventoryMetricAlertTypeParams extends AlertTypeParams {
+interface InventoryMetricRuleTypeParams extends RuleTypeParams {
   criteria: InventoryMetricConditions[];
 }
 
-export function createInventoryMetricAlertType(): ObservabilityRuleTypeModel<InventoryMetricAlertTypeParams> {
+export function createInventoryMetricRuleType(): ObservabilityRuleTypeModel<InventoryMetricRuleTypeParams> {
   return {
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertDescription', {
@@ -33,7 +30,7 @@ export function createInventoryMetricAlertType(): ObservabilityRuleTypeModel<Inv
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.infrastructureThreshold}`;
     },
-    alertParamsExpression: React.lazy(() => import('./components/expression')),
+    ruleParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.inventory.threshold.defaultActionMessage',

@@ -7,37 +7,22 @@
 
 import React from 'react';
 import { ThreatIntelLinkPanelProps } from '.';
-import { useCtiEventCounts } from '../../containers/overview_cti_links/use_cti_event_counts';
-import { CtiNoEvents } from './cti_no_events';
-import { CtiWithEvents } from './cti_with_events';
+import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
+import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
+import { ThreatIntelPanelView } from './threat_intel_panel_view';
 
-export type CtiEnabledModuleProps = Omit<ThreatIntelLinkPanelProps, 'isThreatIntelModuleEnabled'>;
+export const CtiEnabledModuleComponent: React.FC<ThreatIntelLinkPanelProps> = (props) => {
+  const { to, from, allTiDataSources, setQuery, deleteQuery } = props;
+  const { tiDataSources, totalCount } = useTiDataSources({
+    to,
+    from,
+    allTiDataSources,
+    setQuery,
+    deleteQuery,
+  });
+  const { listItems } = useCtiDashboardLinks({ to, from, tiDataSources });
 
-export const CtiEnabledModuleComponent: React.FC<CtiEnabledModuleProps> = (props) => {
-  const { eventCountsByDataset, totalCount } = useCtiEventCounts(props);
-  const { to, from } = props;
-
-  switch (totalCount) {
-    case -1:
-      return null;
-    case 0:
-      return (
-        <div data-test-subj="cti-with-no-events">
-          <CtiNoEvents to={to} from={from} />
-        </div>
-      );
-    default:
-      return (
-        <div data-test-subj="cti-with-events">
-          <CtiWithEvents
-            eventCountsByDataset={eventCountsByDataset}
-            totalCount={totalCount}
-            to={to}
-            from={from}
-          />
-        </div>
-      );
-  }
+  return <ThreatIntelPanelView listItems={listItems} totalCount={totalCount} />;
 };
 
 export const CtiEnabledModule = React.memo(CtiEnabledModuleComponent);

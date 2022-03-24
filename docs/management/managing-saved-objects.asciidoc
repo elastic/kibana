@@ -2,10 +2,10 @@
 == Saved Objects
 
 The *Saved Objects* UI helps you keep track of and manage your saved objects. These objects
-store data for later use, including dashboards, visualizations, maps, index patterns,
+store data for later use, including dashboards, visualizations, maps, data views,
 Canvas workpads, and more.
 
-To get started, open the main menu, then click *Stack Management > Saved Objects*. 
+To get started, open the main menu, then click *Stack Management > Saved Objects*.
 
 [role="screenshot"]
 image::images/management-saved-objects.png[Saved Objects]
@@ -85,7 +85,7 @@ You have two options for exporting saved objects.
 * Click *Export x objects*, and export objects by type.
 
 This action creates an NDJSON with all your saved objects. By default, the NDJSON includes child objects that are related to the saved
-objects. Exported dashboards include their associated index patterns.
+objects. Exported dashboards include their associated data views.
 
 NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
 limits the number of saved objects which may be exported.
@@ -120,9 +120,11 @@ If you access an object whose index has been deleted, you can:
 * Recreate the index so you can continue using the object.
 * Delete the object and recreate it using a different index.
 * Change the index name in the object's `reference` array to point to an existing
-index pattern. This is useful if the index you were working with has been renamed.
+data view. This is useful if the index you were working with has been renamed.
 
 WARNING: Validation is not performed for object properties. Submitting an invalid
 change will render the object unusable. A more failsafe approach is to use
 *Discover* or *Dashboard* to create new objects instead of
 directly editing an existing one.
+
+include::saved-objects/saved-object-ids.asciidoc[]

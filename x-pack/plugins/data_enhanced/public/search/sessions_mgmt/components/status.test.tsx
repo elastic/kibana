@@ -82,7 +82,7 @@ describe('Background Search Session management status labels', () => {
       const label = statusIndicator
         .find(`[data-test-subj="sessionManagementStatusLabel"][data-test-status="complete"]`)
         .first();
-      expect((label.props() as EuiTextProps).color).toBe('secondary');
+      expect((label.props() as EuiTextProps).color).toBe('success');
       expect(label.text()).toBe('Complete');
     });
 

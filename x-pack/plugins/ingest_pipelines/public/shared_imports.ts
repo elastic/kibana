@@ -10,50 +10,57 @@ import { AppServices } from './application';
 
 export { CodeEditor };
 
+export type {
+  Error,
+  SendRequestConfig,
+  SendRequestResponse,
+  UseRequestConfig,
+  OnJsonEditorUpdateHandler,
+} from '../../../../src/plugins/es_ui_shared/public/';
+
 export {
   AuthorizationProvider,
-  Error,
   NotAuthorizedSection,
   SectionError,
   SectionLoading,
   sendRequest,
-  SendRequestConfig,
-  SendRequestResponse,
   useAuthorizationContext,
   useRequest,
-  UseRequestConfig,
   WithPrivileges,
   XJson,
   JsonEditor,
-  OnJsonEditorUpdateHandler,
   attemptToURIDecode,
+  ViewApiRequestFlyout,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
-export {
+export type {
   FormSchema,
-  FIELD_TYPES,
   FormConfig,
-  useForm,
-  Form,
-  getUseField,
   ValidationFuncArg,
   FormData,
-  UseField,
-  UseArray,
   ArrayItem,
   FormHook,
-  useFormContext,
-  UseMultiFields,
-  FormDataProvider,
   OnFormUpdateArg,
   FieldConfig,
   FieldHook,
-  getFieldValidityAndErrorMessage,
   ValidationFunc,
   ValidationConfig,
-  useFormData,
   FormOptions,
   SerializerFunc,
+} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+
+export {
+  FIELD_TYPES,
+  useForm,
+  Form,
+  getUseField,
+  UseField,
+  UseArray,
+  useFormContext,
+  UseMultiFields,
+  FormDataProvider,
+  getFieldValidityAndErrorMessage,
+  useFormData,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
@@ -80,6 +87,9 @@ export {
   isEmptyString,
 } from '../../../../src/plugins/es_ui_shared/static/validators/string';
 
-export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+export {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../src/plugins/kibana_react/public';
 
 export const useKibana = () => _useKibana<AppServices>();

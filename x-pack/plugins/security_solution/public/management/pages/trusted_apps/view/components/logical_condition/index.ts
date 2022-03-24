@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition_builder';
+export type { LogicalConditionBuilderProps } from './logical_condition_builder';
+export { LogicalConditionBuilder } from './logical_condition_builder';

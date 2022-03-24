@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { useUiTracker } from '../../../../../observability/public';
 import {
@@ -13,7 +15,6 @@ import {
   logIndexPatternReferenceRT,
   LogIndexReference,
 } from '../../../../common/log_sources';
-import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { FormElement, isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
 import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';
@@ -23,55 +24,108 @@ export const IndicesConfigurationPanel = React.memo<{
   isLoading: boolean;
   isReadOnly: boolean;
   indicesFormElement: FormElement<LogIndexReference | undefined, FormValidationError>;
-  tiebreakerFieldFormElement: FormElement<string, FormValidationError>;
-  timestampFieldFormElement: FormElement<string, FormValidationError>;
-}>(
-  ({
-    isLoading,
-    isReadOnly,
-    indicesFormElement,
-    tiebreakerFieldFormElement,
-    timestampFieldFormElement,
-  }) => {
-    const trackSwitchToIndexPatternReference = useUiTracker({ app: 'infra_logs' });
+}>(({ isLoading, isReadOnly, indicesFormElement }) => {
+  const trackChangeIndexSourceType = useUiTracker({ app: 'infra_logs' });
 
-    const switchToIndexPatternReference = useCallback(() => {
+  const changeToIndexPatternType = useCallback(() => {
+    if (indicesFormElement.initialValue?.type === 'index_pattern') {
+      indicesFormElement.updateValue(() => indicesFormElement.initialValue);
+    } else {
       indicesFormElement.updateValue(() => undefined);
-      trackSwitchToIndexPatternReference({
-        metric: 'configuration_switch_to_index_pattern_reference',
-      });
-    }, [indicesFormElement, trackSwitchToIndexPatternReference]);
+    }
 
-    if (isIndexPatternFormElement(indicesFormElement)) {
-      return (
-        <IndexPatternConfigurationPanel
-          isLoading={isLoading}
-          isReadOnly={isReadOnly}
-          indexPatternFormElement={indicesFormElement}
-        />
-      );
-    } else if (isIndexNamesFormElement(indicesFormElement)) {
-      return (
-        <>
+    trackChangeIndexSourceType({
+      metric: 'configuration_switch_to_index_pattern_reference',
+    });
+  }, [indicesFormElement, trackChangeIndexSourceType]);
+
+  const changeToIndexNameType = useCallback(() => {
+    if (indicesFormElement.initialValue?.type === 'index_name') {
+      indicesFormElement.updateValue(() => indicesFormElement.initialValue);
+    } else {
+      indicesFormElement.updateValue(() => ({
+        type: 'index_name',
+        indexName: '',
+      }));
+    }
+
+    trackChangeIndexSourceType({
+      metric: 'configuration_switch_to_index_names_reference',
+    });
+  }, [indicesFormElement, trackChangeIndexSourceType]);
+
+  return (
+    <EuiFormFieldset
+      legend={{
+        children: (
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.infra.logSourceConfiguration.logSourcesTitle"
+                defaultMessage="Log sources"
+              />
+            </h3>
+          </EuiTitle>
+        ),
+      }}
+    >
+      <EuiCheckableCard
+        id="dataView"
+        label={
+          <EuiTitle size="xs">
+            <h2>
+              <FormattedMessage
+                id="xpack.infra.logSourceConfiguration.dataViewSectionTitle"
+                defaultMessage="Data view (recommended)"
+              />
+            </h2>
+          </EuiTitle>
+        }
+        name="dataView"
+        value="dataView"
+        checked={isIndexPatternFormElement(indicesFormElement)}
+        onChange={changeToIndexPatternType}
+        disabled={isReadOnly}
+      >
+        {isIndexPatternFormElement(indicesFormElement) && (
+          <IndexPatternConfigurationPanel
+            isLoading={isLoading}
+            isReadOnly={isReadOnly}
+            indexPatternFormElement={indicesFormElement}
+          />
+        )}
+      </EuiCheckableCard>
+      <EuiSpacer size="m" />
+
+      <EuiCheckableCard
+        id="indexNames"
+        label={
+          <EuiTitle size="xs">
+            <h2>
+              <FormattedMessage
+                id="xpack.infra.sourceConfiguration.indicesSectionTitle"
+                defaultMessage="Indices"
+              />
+            </h2>
+          </EuiTitle>
+        }
+        name="indexNames"
+        value="indexNames"
+        checked={isIndexNamesFormElement(indicesFormElement)}
+        onChange={changeToIndexNameType}
+        disabled={isReadOnly}
+      >
+        {isIndexNamesFormElement(indicesFormElement) && (
           <IndexNamesConfigurationPanel
             isLoading={isLoading}
             isReadOnly={isReadOnly}
             indexNamesFormElement={indicesFormElement}
-            onSwitchToIndexPatternReference={switchToIndexPatternReference}
           />
-          <FieldsConfigurationPanel
-            isLoading={isLoading}
-            isReadOnly={isReadOnly}
-            tiebreakerFieldFormElement={tiebreakerFieldFormElement}
-            timestampFieldFormElement={timestampFieldFormElement}
-          />
-        </>
-      );
-    } else {
-      return null;
-    }
-  }
-);
+        )}
+      </EuiCheckableCard>
+    </EuiFormFieldset>
+  );
+});
 
 const isIndexPatternFormElement = isFormElementForType(
   (value): value is LogIndexPatternReference | undefined =>

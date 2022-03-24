@@ -6,45 +6,49 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { IBrowserSimpleFields, ConfigKeys, DataStream } from '../types';
+import { BrowserSimpleFields, ConfigKey, DataStream } from '../types';
 import { defaultValues as commonDefaultValues } from '../common/default_values';
-import { defaultValues as tlsDefaultValues } from '../tls/default_values';
 
-interface IBrowserSimpleFieldsContext {
-  setFields: React.Dispatch<React.SetStateAction<IBrowserSimpleFields>>;
-  fields: IBrowserSimpleFields;
-  defaultValues: IBrowserSimpleFields;
+interface BrowserSimpleFieldsContext {
+  setFields: React.Dispatch<React.SetStateAction<BrowserSimpleFields>>;
+  fields: BrowserSimpleFields;
+  defaultValues: BrowserSimpleFields;
 }
 
-interface IBrowserSimpleFieldsContextProvider {
+interface BrowserSimpleFieldsContextProvider {
   children: React.ReactNode;
-  defaultValues?: IBrowserSimpleFields;
+  defaultValues?: BrowserSimpleFields;
 }
 
-export const initialValues: IBrowserSimpleFields = {
+export const initialValues: BrowserSimpleFields = {
   ...commonDefaultValues,
-  [ConfigKeys.METADATA]: {
+  [ConfigKey.METADATA]: {
+    script_source: {
+      is_generated_script: false,
+      file_name: '',
+    },
     is_zip_url_tls_enabled: false,
   },
-  [ConfigKeys.MONITOR_TYPE]: DataStream.BROWSER,
-  [ConfigKeys.SOURCE_ZIP_URL]: '',
-  [ConfigKeys.SOURCE_ZIP_USERNAME]: '',
-  [ConfigKeys.SOURCE_ZIP_PASSWORD]: '',
-  [ConfigKeys.SOURCE_ZIP_FOLDER]: '',
-  [ConfigKeys.SOURCE_ZIP_PROXY_URL]: '',
-  [ConfigKeys.SOURCE_INLINE]: '',
-  [ConfigKeys.PARAMS]: '',
-  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]:
-    tlsDefaultValues[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
-  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE]: tlsDefaultValues[ConfigKeys.TLS_CERTIFICATE],
-  [ConfigKeys.ZIP_URL_TLS_KEY]: tlsDefaultValues[ConfigKeys.TLS_KEY],
-  [ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]: tlsDefaultValues[ConfigKeys.TLS_KEY_PASSPHRASE],
-  [ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]: tlsDefaultValues[ConfigKeys.TLS_VERIFICATION_MODE],
-  [ConfigKeys.ZIP_URL_TLS_VERSION]: tlsDefaultValues[ConfigKeys.TLS_VERSION],
+  [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+  [ConfigKey.SOURCE_ZIP_URL]: '',
+  [ConfigKey.SOURCE_ZIP_USERNAME]: '',
+  [ConfigKey.SOURCE_ZIP_PASSWORD]: '',
+  [ConfigKey.SOURCE_ZIP_FOLDER]: '',
+  [ConfigKey.SOURCE_ZIP_PROXY_URL]: '',
+  [ConfigKey.SOURCE_INLINE]: '',
+  [ConfigKey.PARAMS]: '',
+  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: undefined,
+  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: undefined,
+  [ConfigKey.ZIP_URL_TLS_KEY]: undefined,
+  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: undefined,
+  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: undefined,
+  [ConfigKey.ZIP_URL_TLS_VERSION]: undefined,
+  [ConfigKey.URLS]: undefined,
+  [ConfigKey.PORT]: undefined,
 };
 
-const defaultContext: IBrowserSimpleFieldsContext = {
-  setFields: (_fields: React.SetStateAction<IBrowserSimpleFields>) => {
+const defaultContext: BrowserSimpleFieldsContext = {
+  setFields: (_fields: React.SetStateAction<BrowserSimpleFields>) => {
     throw new Error(
       'setFields was not initialized for Browser Simple Fields, set it when you invoke the context'
     );
@@ -58,8 +62,8 @@ export const BrowserSimpleFieldsContext = createContext(defaultContext);
 export const BrowserSimpleFieldsContextProvider = ({
   children,
   defaultValues = initialValues,
-}: IBrowserSimpleFieldsContextProvider) => {
-  const [fields, setFields] = useState<IBrowserSimpleFields>(defaultValues);
+}: BrowserSimpleFieldsContextProvider) => {
+  const [fields, setFields] = useState<BrowserSimpleFields>(defaultValues);
 
   const value = useMemo(() => {
     return { fields, setFields, defaultValues };

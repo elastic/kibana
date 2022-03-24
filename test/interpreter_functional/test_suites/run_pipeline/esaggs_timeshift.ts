@@ -12,6 +12,10 @@ import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 function getCell(esaggsResult: any, row: number, column: number): unknown | undefined {
+  if (esaggsResult && !esaggsResult.columns) {
+    throw new Error(`Unexpected esaggs result: ${JSON.stringify(esaggsResult, undefined, ' ')}`);
+  }
+
   const columnId = esaggsResult?.columns[column]?.id;
   if (!columnId) {
     return;
@@ -22,6 +26,15 @@ function getCell(esaggsResult: any, row: number, column: number): unknown | unde
 function checkShift(rows: Datatable['rows'], columns: Datatable['columns'], metricIndex = 1) {
   rows.shift();
   rows.pop();
+  function getValue(row: number, column: number) {
+    return getCell({ rows, columns }, row, column);
+  }
+  // check whether there is actual data in the table
+  if (
+    rows.every((_, index) => !getValue(index, metricIndex) && !getValue(index, metricIndex + 1))
+  ) {
+    throw new Error('all cell contents falsy');
+  }
   rows.forEach((_, index) => {
     if (index < rows.length - 1) {
       expect(getCell({ rows, columns }, index, metricIndex + 1)).to.be(
@@ -37,8 +50,7 @@ export default function ({
 }: FtrProviderContext & { updateBaselines: boolean }) {
   let expectExpression: ExpectExpression;
 
-  // FLAKY https://github.com/elastic/kibana/issues/107028
-  describe.skip('esaggs timeshift tests', () => {
+  describe('esaggs timeshift tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
@@ -98,6 +110,7 @@ export default function ({
         'esaggs_shift_single_percentile',
         expression
       ).getResponse();
+
       // percentile is not stable
       expect(getCell(result, 0, 0)).to.be.within(10000, 20000);
       expect(getCell(result, 0, 1)).to.be.within(10000, 20000);
@@ -128,6 +141,22 @@ export default function ({
           aggs={aggDateHistogram id="1" enabled=true schema="bucket" field="@timestamp" interval="1h"}
           aggs={aggAvg id="2" field="bytes" enabled=true schema="metric" timeShift="1h"}
           aggs={aggAvg id="3" field="bytes" enabled=true schema="metric"}
+        `;
+      const result: Datatable = await expectExpression(
+        'esaggs_shift_date_histogram',
+        expression
+      ).getResponse();
+      expect(result.rows.length).to.be(25);
+      checkShift(result.rows, result.columns);
+    });
+
+    it('shifts correctly even if one id is the prefix of another', async () => {
+      const expression = `
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
+          | esaggs index={indexPatternLoad id='logstash-*'}
+          aggs={aggDateHistogram id="prefix" enabled=true schema="bucket" field="@timestamp" interval="1h"}
+          aggs={aggAvg id="prefix-prefix" field="bytes" enabled=true schema="metric" timeShift="1h"}
+          aggs={aggAvg id="prefix-prefix-prefix" field="bytes" enabled=true schema="metric"}
         `;
       const result: Datatable = await expectExpression(
         'esaggs_shift_date_histogram',

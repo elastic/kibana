@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ScriptBasedSortClause,
   ScriptClause,
@@ -102,44 +102,60 @@ if (doc['task.runAt'].size()!=0) {
     },
   },
 };
-export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as unknown as Record<
-  string,
-  estypes.SearchSort
->;
+export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as estypes.SortCombinations;
 
-export const updateFieldsAndMarkAsFailed = (
+export interface UpdateFieldsAndMarkAsFailedOpts {
   fieldUpdates: {
     [field: string]: string | number | Date;
-  },
-  claimTasksById: string[],
-  claimableTaskTypes: string[],
-  skippedTaskTypes: string[],
-  taskMaxAttempts: { [field: string]: number }
-): ScriptClause => {
+  };
+  claimTasksById: string[];
+  claimableTaskTypes: string[];
+  skippedTaskTypes: string[];
+  unusedTaskTypes: string[];
+  taskMaxAttempts: { [field: string]: number };
+}
+
+export const updateFieldsAndMarkAsFailed = ({
+  fieldUpdates,
+  claimTasksById,
+  claimableTaskTypes,
+  skippedTaskTypes,
+  unusedTaskTypes,
+  taskMaxAttempts,
+}: UpdateFieldsAndMarkAsFailedOpts): ScriptClause => {
+  const setScheduledAtScript = `if(ctx._source.task.retryAt != null && ZonedDateTime.parse(ctx._source.task.retryAt).toInstant().toEpochMilli() < params.now) {
+    ctx._source.task.scheduledAt=ctx._source.task.retryAt;
+  } else {
+    ctx._source.task.scheduledAt=ctx._source.task.runAt;
+  }`;
   const markAsClaimingScript = `ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
     .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
     .join(' ')}`;
+  const setScheduledAtAndMarkAsClaimed = `${setScheduledAtScript}
+    ${markAsClaimingScript}`;
   return {
     source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
       if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-        ${markAsClaimingScript}
+        ${setScheduledAtAndMarkAsClaimed}
       } else {
         ctx._source.task.status = "failed";
       }
     } else if (params.skippedTaskTypes.contains(ctx._source.task.taskType) && params.claimTasksById.contains(ctx._id)) {
-      ${markAsClaimingScript}
-    } else if (!params.skippedTaskTypes.contains(ctx._source.task.taskType)) {
+      ${setScheduledAtAndMarkAsClaimed}
+    } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
     } else {
       ctx.op = "noop";
     }`,
     lang: 'painless',
     params: {
+      now: new Date().getTime(),
       fieldUpdates,
       claimTasksById,
       claimableTaskTypes,
       skippedTaskTypes,
+      unusedTaskTypes,
       taskMaxAttempts,
     },
   };

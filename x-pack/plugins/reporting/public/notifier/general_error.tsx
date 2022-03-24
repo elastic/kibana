@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { ToastInput } from 'src/core/public';
+import { ThemeServiceStart, ToastInput } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
-export const getGeneralErrorToast = (errorText: string, err: Error): ToastInput => ({
+export const getGeneralErrorToast = (
+  errorText: string,
+  err: Error,
+  theme: ThemeServiceStart
+): ToastInput => ({
   text: toMountPoint(
-    <Fragment>
+    <>
       <EuiCallOut title={errorText} color="danger" iconType="alert">
         {err.toString()}
       </EuiCallOut>
@@ -24,7 +28,8 @@ export const getGeneralErrorToast = (errorText: string, err: Error): ToastInput 
         id="xpack.reporting.publicNotifier.error.tryRefresh"
         defaultMessage="Try refreshing the page."
       />
-    </Fragment>
+    </>,
+    { theme$: theme.theme$ }
   ),
   iconType: undefined,
 });

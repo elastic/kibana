@@ -12,8 +12,9 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiBasicTable, EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
 
+import { DEFAULT_META } from '../../../../shared/constants';
 import { mountWithIntl } from '../../../../test_helpers';
 
 import { CrawlerDomain } from '../types';
@@ -51,15 +52,19 @@ const domains: CrawlerDomain[] = [
 const values = {
   // EngineLogic
   engineName: 'some-engine',
-  // CrawlerOverviewLogic
+  // CrawlerDomainsLogic
   domains,
+  meta: DEFAULT_META,
+  dataLoading: false,
   // AppLogic
   myRole: { canManageEngineCrawler: false },
 };
 
 const actions = {
-  // CrawlerOverviewLogic
+  // CrawlerDomainsLogic
   deleteDomain: jest.fn(),
+  fetchCrawlerDomainsData: jest.fn(),
+  onPaginate: jest.fn(),
 };
 
 describe('DomainsTable', () => {
@@ -69,22 +74,45 @@ describe('DomainsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
   beforeAll(() => {
     setMockValues(values);
     setMockActions(actions);
     wrapper = shallow(<DomainsTable />);
     tableContent = mountWithIntl(<DomainsTable />)
-      .find(EuiInMemoryTable)
+      .find(EuiBasicTable)
       .text();
   });
 
   it('renders', () => {
-    expect(wrapper.find(EuiInMemoryTable)).toHaveLength(1);
+    expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
+
+    expect(wrapper.find(EuiBasicTable).prop('pagination')).toEqual({
+      showPerPageOptions: false,
+      pageIndex: 0,
+      pageSize: 10,
+      totalItemCount: 0,
+    });
+
+    wrapper.find(EuiBasicTable).simulate('change', { page: { index: 2 } });
+    expect(actions.onPaginate).toHaveBeenCalledWith(3);
   });
 
   describe('columns', () => {
     it('renders a url column', () => {
       expect(tableContent).toContain('elastic.co');
+    });
+
+    it('renders a clickable domain url', () => {
+      const basicTable = wrapper.find(EuiBasicTable).dive();
+      const link = basicTable.find('[data-test-subj="CrawlerDomainURL"]').at(0);
+
+      expect(link.dive().text()).toContain('elastic.co');
+      expect(link.props()).toEqual(
+        expect.objectContaining({
+          to: '/engines/some-engine/crawler/domains/1234',
+        })
+      );
     });
 
     it('renders a last crawled column', () => {
@@ -98,7 +126,7 @@ describe('DomainsTable', () => {
     });
 
     describe('actions column', () => {
-      const getTable = () => wrapper.find(EuiInMemoryTable).dive().find(EuiBasicTable).dive();
+      const getTable = () => wrapper.find(EuiBasicTable).dive();
       const getActions = () => getTable().find('ExpandedItemActions');
       const getActionItems = () => getActions().first().dive().find('DefaultItemAction');
 

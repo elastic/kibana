@@ -25,6 +25,7 @@ export const XYAxis: FC<XYAxisPros> = ({
   domain,
   style,
   integersOnly,
+  timeAxisLayerCount,
 }) => (
   <Axis
     id={`${id}__axis`}
@@ -40,5 +41,6 @@ export const XYAxis: FC<XYAxisPros> = ({
     labelFormat={ticks?.labelFormatter}
     showOverlappingLabels={ticks?.showOverlappingLabels}
     showDuplicatedTicks={ticks?.showDuplicates}
+    timeAxisLayerCount={timeAxisLayerCount}
   />
 );

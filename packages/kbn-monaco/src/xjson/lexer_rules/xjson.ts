@@ -103,6 +103,7 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
 
     string_literal: [
       [/"""/, { token: 'punctuation.end_triple_quote', next: '@pop' }],
+      [/\\""""/, { token: 'punctuation.end_triple_quote', next: '@pop' }],
       [/./, { token: 'multi_string' }],
     ],
   },

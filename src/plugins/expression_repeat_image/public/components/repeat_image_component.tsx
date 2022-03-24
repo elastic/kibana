@@ -46,8 +46,10 @@ function setImageSize(img: HTMLImageElement, size: number) {
 }
 
 function createImageJSX(img: HTMLImageElement | null) {
-  if (!img) return null;
-  const params = img.width > img.height ? { heigth: img.height } : { width: img.width };
+  if (!img) {
+    return null;
+  }
+  const params = img.width > img.height ? { height: img.height } : { width: img.width };
   return <img src={img.src} {...params} alt="" />;
 }
 
@@ -80,12 +82,14 @@ function RepeatImageComponent({
 
   if (image) {
     setImageSize(image, size);
-    times(count, () => imagesToRender.push(createImageJSX(image)));
+    const imgJSX = createImageJSX(image);
+    times(count, () => imagesToRender.push(imgJSX));
   }
 
   if (emptyImage) {
     setImageSize(emptyImage, size);
-    times(max - count, () => imagesToRender.push(createImageJSX(emptyImage)));
+    const imgJSX = createImageJSX(emptyImage);
+    times(max - count, () => imagesToRender.push(imgJSX));
   }
 
   return (

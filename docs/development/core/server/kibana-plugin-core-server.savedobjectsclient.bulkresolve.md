@@ -16,12 +16,12 @@ bulkResolve<T = unknown>(objects: SavedObjectsBulkResolveObject[], options?: Sav
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>SavedObjectsBulkResolveObject[]</code> | an array of objects containing id, type |
-|  options | <code>SavedObjectsBaseOptions</code> |  |
+|  objects | SavedObjectsBulkResolveObject\[\] | an array of objects containing id, type |
+|  options | SavedObjectsBaseOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsBulkResolveResponse<T>>`
+Promise&lt;SavedObjectsBulkResolveResponse&lt;T&gt;&gt;
 
 ## Example
 

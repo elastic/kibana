@@ -27,10 +27,12 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./builtin_action_types/server_log'));
     loadTestFile(require.resolve('./builtin_action_types/servicenow_itsm'));
     loadTestFile(require.resolve('./builtin_action_types/servicenow_sir'));
+    loadTestFile(require.resolve('./builtin_action_types/servicenow_itom'));
     loadTestFile(require.resolve('./builtin_action_types/jira'));
     loadTestFile(require.resolve('./builtin_action_types/resilient'));
     loadTestFile(require.resolve('./builtin_action_types/slack'));
     loadTestFile(require.resolve('./builtin_action_types/webhook'));
+    loadTestFile(require.resolve('./builtin_action_types/xmatters'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));

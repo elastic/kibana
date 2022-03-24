@@ -14,6 +14,26 @@ interface Arguments {
   exclude: string;
 }
 
+const prepareFields = (fields: string) => fields.split(',').map((field) => field.trim());
+
+const getFieldsIds = (cols: DatatableColumn[]) => cols.map((col) => col.id ?? col.name);
+
+const splitColumnsByFields = (
+  cols: DatatableColumn[],
+  fields: string[],
+  saveOther: boolean = false
+) =>
+  cols.reduce<{ matched: DatatableColumn[]; other: DatatableColumn[] }>(
+    (splitColumns, col) => {
+      if (fields.includes(col.id) || fields.includes(col.name)) {
+        return { ...splitColumns, matched: [...splitColumns.matched, col] };
+      }
+
+      return saveOther ? { ...splitColumns, other: [...splitColumns.other, col] } : splitColumns;
+    },
+    { matched: [], other: [] }
+  );
+
 export function columns(): ExpressionFunctionDefinition<
   'columns',
   Datatable,
@@ -44,27 +64,25 @@ export function columns(): ExpressionFunctionDefinition<
       let result = { ...input };
 
       if (exclude) {
-        const fields = exclude.split(',').map((field) => field.trim());
-        const cols = contextColumns.filter((col) => !fields.includes(col.name));
-        const rows = cols.length > 0 ? contextRows.map((row) => omit(row, fields)) : [];
-
-        result = { rows, columns: cols, ...rest };
+        const fields = prepareFields(exclude);
+        const { matched: excluded, other } = splitColumnsByFields(result.columns, fields, true);
+        const fieldsIds = getFieldsIds(excluded);
+        const rows = excluded.length ? result.rows.map((row) => omit(row, fieldsIds)) : result.rows;
+        result = { rows, columns: other, ...rest };
       }
 
       if (include) {
-        const fields = include.split(',').map((field) => field.trim());
-        // const columns = result.columns.filter(col => fields.includes(col.name));
+        const fields = prepareFields(include);
+        const { matched: included } = splitColumnsByFields(result.columns, fields);
+        const fieldsIds = getFieldsIds(included);
 
         // Include columns in the order the user specified
-        const cols: DatatableColumn[] = [];
+        const cols = fields.reduce<DatatableColumn[]>((includedCols, field) => {
+          const column = find(included, (col) => col.id === field || col.name === field);
+          return column ? [...includedCols, column] : includedCols;
+        }, []);
 
-        fields.forEach((field) => {
-          const column = find(result.columns, { name: field });
-          if (column) {
-            cols.push(column);
-          }
-        });
-        const rows = cols.length > 0 ? result.rows.map((row) => pick(row, fields)) : [];
+        const rows = cols.length ? result.rows.map((row) => pick(row, fieldsIds)) : [];
         result = { rows, columns: cols, ...rest };
       }
 

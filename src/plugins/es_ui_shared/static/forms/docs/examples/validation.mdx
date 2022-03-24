@@ -334,7 +334,7 @@ const MyForm = () => {
 
 Great. Now let's imagine that you want to add a validation to the `indexName` field and mark it as invalid if it does not match at least one index in the cluster. For that you need to provide dynamic data (the list of indices fetched) which is not immediately accesible when the field value changes (and the validation kicks in). We need to ask the validation to **wait** until we have fetched the indices and then have access to the dynamic data.
 
-For that we will use the `validationData$` Observable that you can pass to the field. Whenever a value is sent to the observable (**after** the field value has changed, important!), it will be available in the validator through the `customData.provider()` handler.
+For that we will use the `validationDataProvider` prop that you can pass to the field. This data provider will be available in the validator through the `customData.provider()` handler.
 
 ```js
 // form.schema.ts
@@ -357,15 +357,37 @@ const schema = {
 }
 
 // myform.tsx
+import { firstValueFrom } from '@kbn/std';
+
 const MyForm = () => {
-  ...
+  const { form } = useForm();
   const [indices, setIndices] = useState([]);
-  const [indices$, nextIndices] = useAsyncValidationData(); // Use the provided hook to create the Observable
+  const [indices$, nextIndices] = useBehaviorSubject(null); // Use the provided util hook to create an observable
+
+  const onIndexNameChange = useCallback(({ indexName }) => {
+    // Whenever the indexName changes reset the subject to not send stale data to the validator
+    nextIndices(null);
+  }, []);
+
+  const [{ indexName }] = useFormData({
+    form,
+    watch: 'indexName',
+    onChange: onIndexNameChange, // React to changes before any validation is executed
+  });
+
+  const indicesProvider = useCallback(() => {
+    // Wait until we have fetched the indices.
+    // The result will then be sent to the field validator(s) (when calling await provider(););
+    return await firstValueFrom(indices$.pipe(first((data) => data !== null)));
+  }, [indices$, nextIndices]);
 
   const fetchIndices = useCallback(async () => {
     const result = await httpClient.get(`/api/search/${indexName}`);
+    // update the component state
     setIndices(result);
-    nextIndices(result); // Send the indices to your validator "provider()"
+
+    // Send the indices to the BehaviorSubject to resolve the "indicesProvider()" promise
+    nextIndices(result);
   }, [indexName]);
 
   // Whenever the indexName changes we fetch the indices
@@ -377,7 +399,7 @@ const MyForm = () => {
     <>
       <Form form={form}>
         /* Pass the Observable to your field */
-        <UseField path="indexName" validationData$={indices$} />
+        <UseField path="indexName" validationDataProvider={indicesProvider} />
       </Form>
 
       ...
@@ -387,23 +409,3 @@ const MyForm = () => {
 ```
 
 Et voilà! We have provided dynamic data asynchronously to our validator.
-
-The above example could be simplified a bit by using the optional `state` argument of the `useAsyncValidationData(/* state */)` hook.
-
-```js
-const MyForm = () => {
-  ...
-  const [indices, setIndices] = useState([]);
-  // We don't need the second element of the array (the "nextIndices()" handler)
-  // as whenever the "indices" state changes the "indices$" Observable will receive its value
-  const [indices$] = useAsyncValidationData(indices);
-  
-  ...
- 
-  const fetchIndices = useCallback(async () => {
-    const result = await httpClient.get(`/api/search/${indexName}`);
-    setIndices(result); // This will also update the Observable
-  }, [indexName]);
-
-  ...
-```

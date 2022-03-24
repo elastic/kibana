@@ -5,19 +5,31 @@
  * 2.0.
  */
 
+import type { SavedObjectsResolveResponse } from 'src/core/public';
 import {
-  AssociationType,
   CaseAttributes,
   CaseConnector,
   CasePatchRequest,
   CaseStatuses,
-  CaseType,
-  CommentRequest,
   User,
-  UserAction,
-  UserActionField,
   ActionConnector,
+  CaseExternalServiceBasic,
+  CaseUserActionResponse,
+  CaseMetricsResponse,
+  CommentResponse,
 } from '../api';
+import { SnakeToCamelCase } from '../types';
+
+type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
+
+export interface CasesContextFeatures {
+  alerts: { sync?: boolean; enabled?: boolean };
+  metrics: CaseMetricsFeature[];
+}
+
+export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
+
+export type CasesFeatures = Partial<CasesContextFeatures>;
 
 export interface CasesUiConfigType {
   markdownPlugins: {
@@ -39,48 +51,14 @@ export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
  */
 export type CaseViewRefreshPropInterface = null | {
   /**
-   * Refreshes the all of the user actions/comments in the view's timeline
-   * (note: this also triggers a silent `refreshCase()`)
+   * Refreshes the case its metrics and user actions/comments in the view's timeline
    */
-  refreshUserActionsAndComments: () => Promise<void>;
-  /** Refreshes the Case information only */
   refreshCase: () => Promise<void>;
 };
 
-export type Comment = CommentRequest & {
-  associationType: AssociationType;
-  id: string;
-  createdAt: string;
-  createdBy: ElasticUser;
-  pushedAt: string | null;
-  pushedBy: string | null;
-  updatedAt: string | null;
-  updatedBy: ElasticUser | null;
-  version: string;
-};
-export interface CaseUserActions {
-  actionId: string;
-  actionField: UserActionField;
-  action: UserAction;
-  actionAt: string;
-  actionBy: ElasticUser;
-  caseId: string;
-  commentId: string | null;
-  newValue: string | null;
-  newValConnectorId: string | null;
-  oldValue: string | null;
-  oldValConnectorId: string | null;
-}
-
-export interface CaseExternalService {
-  pushedAt: string;
-  pushedBy: ElasticUser;
-  connectorId: string;
-  connectorName: string;
-  externalId: string;
-  externalTitle: string;
-  externalUrl: string;
-}
+export type Comment = SnakeToCamelCase<CommentResponse>;
+export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
+export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 
 interface BasicCase {
   id: string;
@@ -99,26 +77,19 @@ interface BasicCase {
   version: string;
 }
 
-export interface SubCase extends BasicCase {
-  associationType: AssociationType;
-  caseParentId: string;
-}
-
 export interface Case extends BasicCase {
   connector: CaseConnector;
   description: string;
   externalService: CaseExternalService | null;
-  subCases?: SubCase[] | null;
-  subCaseIds: string[];
   settings: CaseAttributes['settings'];
   tags: string[];
-  type: CaseType;
 }
 
 export interface ResolvedCase {
   case: Case;
-  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-  aliasTargetId?: string;
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export interface QueryParams {
@@ -133,7 +104,7 @@ export interface FilterOptions {
   status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
-  onlyCollectionType?: boolean;
+  owner: string[];
 }
 
 export interface CasesStatus {
@@ -148,6 +119,15 @@ export interface AllCases extends CasesStatus {
   perPage: number;
   total: number;
 }
+
+export type CaseMetrics = CaseMetricsResponse;
+export type CaseMetricsFeature =
+  | 'alerts.count'
+  | 'alerts.users'
+  | 'alerts.hosts'
+  | 'actions.isolateHost'
+  | 'connectors'
+  | 'lifespan';
 
 export enum SortFieldCase {
   createdAt = 'createdAt',
@@ -184,7 +164,6 @@ export interface ActionLicense {
 
 export interface DeleteCase {
   id: string;
-  type: CaseType | null;
   title: string;
 }
 
@@ -201,7 +180,7 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
+  fetchCaseUserActions?: (caseId: string, caseConnectorId: string) => void;
   updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;
@@ -212,7 +191,7 @@ export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
   name?: string[];
-  false_positives: string[];
+  false_positives?: string[];
   saved_id?: string[];
   timeline_id?: string[];
   timeline_title?: string[];
@@ -255,10 +234,21 @@ export interface SignalEcs {
   threshold_result?: unknown;
 }
 
+export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
+  rule?: Exclude<RuleEcs, 'id'> & { parameters: Record<string, unknown>; uuid: string[] };
+  building_block_type?: string[];
+  workflow_status?: string[];
+};
+
 export interface Ecs {
   _id: string;
   _index?: string;
   signal?: SignalEcs;
+  kibana?: {
+    alert: SignalEcsAAD;
+  };
 }
 
 export type CaseActionConnector = ActionConnector;
+
+export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];

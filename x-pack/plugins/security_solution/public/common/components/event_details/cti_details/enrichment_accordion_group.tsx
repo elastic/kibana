@@ -17,14 +17,19 @@ import {
 } from '@elastic/eui';
 
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
-import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment, getFirstSeen } from './helpers';
+import {
+  getEnrichmentIdentifiers,
+  isInvestigationTimeEnrichment,
+  getFirstSeen,
+  ThreatDetailsRow,
+} from './helpers';
 import { EnrichmentButtonContent } from './enrichment_button_content';
+import { ThreatSummaryTitle } from './threat_summary_title';
 import { InspectButton } from '../../inspect';
 import { QUERY_ID } from '../../../containers/cti/event_enrichment';
 import * as i18n from './translations';
-import { StyledEuiInMemoryTable } from '../summary_view';
+import { ThreatSummaryTable } from './threat_summary_table';
 import { REFERENCE } from '../../../../../common/cti/constants';
-import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 
@@ -65,7 +70,21 @@ const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
   );
 };
 
-const columns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(ThreatDetailsDescription);
+const columns: Array<EuiBasicTableColumn<ThreatDetailsRow>> = [
+  {
+    field: 'title',
+    truncateText: false,
+    render: ThreatSummaryTitle,
+    width: '220px',
+    name: '',
+  },
+  {
+    field: 'description',
+    truncateText: false,
+    render: ThreatDetailsDescription,
+    name: '',
+  },
+];
 
 const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
   Object.keys(enrichment)
@@ -87,7 +106,7 @@ const EnrichmentAccordion: React.FC<{
   const {
     id = `threat-details-item`,
     field,
-    provider,
+    feedName,
     type,
     value,
   } = getEnrichmentIdentifiers(enrichment);
@@ -98,7 +117,7 @@ const EnrichmentAccordion: React.FC<{
       key={accordionId}
       initialIsOpen={true}
       arrowDisplay="right"
-      buttonContent={<EnrichmentButtonContent field={field} provider={provider} value={value} />}
+      buttonContent={<EnrichmentButtonContent field={field} feedName={feedName} value={value} />}
       extraAction={
         isInvestigationTimeEnrichment(type) && (
           <EuiFlexItem grow={false}>
@@ -107,7 +126,7 @@ const EnrichmentAccordion: React.FC<{
         )
       }
     >
-      <StyledEuiInMemoryTable
+      <ThreatSummaryTable
         columns={columns}
         compressed
         data-test-subj={`threat-details-view-${index}`}

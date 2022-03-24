@@ -64,33 +64,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Add data page meets a11y requirements ', async () => {
-      await home.clickGoHome();
-      await testSubjects.click('homeAddData');
-      await a11y.testAppSnapshot();
-    });
-
-    it('Sample data page meets a11y requirements ', async () => {
-      await testSubjects.click('homeTab-sampleData');
-      await a11y.testAppSnapshot();
-    });
-
-    it('click on Add logs panel to open all log examples page meets a11y requirements ', async () => {
-      await testSubjects.click('sampleDataSetCardlogs');
-      await a11y.testAppSnapshot();
-    });
-
-    it('click on ActiveMQ logs panel to open tutorial meets a11y requirements', async () => {
-      await testSubjects.click('homeTab-all');
-      await testSubjects.click('homeSynopsisLinkactivemqlogs');
-      await a11y.testAppSnapshot();
-    });
-
-    it('click on cloud tutorial meets a11y requirements', async () => {
-      await testSubjects.click('onCloudTutorial');
-      await a11y.testAppSnapshot();
-    });
-
     it('passes with searchbox open', async () => {
       await testSubjects.click('nav-search-popover');
       await a11y.testAppSnapshot();

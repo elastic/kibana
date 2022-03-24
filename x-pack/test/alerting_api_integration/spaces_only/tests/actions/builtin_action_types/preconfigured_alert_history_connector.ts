@@ -6,9 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getTestAlertData, ObjectRemover } from '../../../../common/lib';
+import { getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { AlertHistoryDefaultIndexName } from '../../../../../../plugins/actions/common';
 
 const ALERT_HISTORY_OVERRIDE_INDEX = 'kibana-alert-history-not-the-default';
@@ -28,7 +27,7 @@ export default function preconfiguredAlertHistoryConnectorTests({
     const alertId = 'instance';
 
     function getTestData(params = {}) {
-      return getTestAlertData({
+      return getTestRuleData({
         rule_type_id: ruleTypeId,
         schedule: { interval: '1s' },
         params: {
@@ -66,10 +65,10 @@ export default function preconfiguredAlertHistoryConnectorTests({
       await waitForStatus(response.body.id, new Set(['active']));
 
       await retry.try(async () => {
-        const result: ApiResponse<estypes.SearchResponse<any>> = await es.search({
+        const result = await es.search<any>({
           index: AlertHistoryDefaultIndexName,
         });
-        const indexedItems = result.body.hits.hits;
+        const indexedItems = result.hits.hits;
         expect(indexedItems.length).to.eql(1);
 
         const indexedDoc = indexedItems[0]._source;
@@ -104,10 +103,10 @@ export default function preconfiguredAlertHistoryConnectorTests({
       await waitForStatus(response.body.id, new Set(['active']));
 
       await retry.try(async () => {
-        const result: ApiResponse<estypes.SearchResponse<any>> = await es.search({
+        const result = await es.search<any>({
           index: ALERT_HISTORY_OVERRIDE_INDEX,
         });
-        const indexedItems = result.body.hits.hits;
+        const indexedItems = result.hits.hits;
         expect(indexedItems.length).to.eql(1);
 
         const indexedDoc = indexedItems[0]._source;

@@ -9,7 +9,7 @@ import { Router } from 'react-router-dom';
 import React, { useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { TimelinesUIStart } from '../../../../../../../plugins/timelines/public';
@@ -65,15 +65,11 @@ const AppRoot = React.memo(
               {(timelinesPluginSetup &&
                 timelinesPluginSetup.getTGrid &&
                 timelinesPluginSetup.getTGrid<'standalone'>({
-                  appId: 'securitySolution',
                   type: 'standalone',
-                  casePermissions: {
-                    read: true,
-                    crud: true,
-                  },
                   columns: [],
                   indexNames: [],
                   deletedEventIds: [],
+                  disabledCellActions: [],
                   end: '',
                   footerText: 'Events',
                   filters: [],
@@ -91,6 +87,7 @@ const AppRoot = React.memo(
                   setRefetch,
                   start: '',
                   rowRenderers: [],
+                  runtimeMappings: {},
                   filterStatus: 'open',
                   unit: (n: number) => `${n}`,
                 })) ??

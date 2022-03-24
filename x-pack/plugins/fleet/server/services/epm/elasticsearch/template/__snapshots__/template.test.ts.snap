@@ -2,613 +2,550 @@
 
 exports[`EPM template tests loading base.yml: base.yml 1`] = `
 {
-  "priority": 200,
-  "index_patterns": [
-    "foo-*"
-  ],
-  "template": {
-    "settings": {
-      "index": {}
-    },
-    "mappings": {
-      "dynamic_templates": [
-        {
-          "strings_as_keyword": {
-            "mapping": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
-            "match_mapping_type": "string"
-          }
-        }
-      ],
-      "date_detection": false,
+  "properties": {
+    "user": {
       "properties": {
-        "user": {
-          "properties": {
-            "auid": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
-            "euid": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            }
-          }
+        "auid": {
+          "ignore_above": 1024,
+          "type": "keyword"
         },
-        "long": {
-          "properties": {
-            "nested": {
-              "properties": {
-                "foo": {
-                  "type": "text"
-                },
-                "bar": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
+        "euid": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        }
+      }
+    },
+    "long": {
+      "properties": {
         "nested": {
           "properties": {
-            "bar": {
-              "ignore_above": 1024,
-              "type": "keyword"
+            "foo": {
+              "type": "text"
             },
-            "baz": {
-              "ignore_above": 1024,
-              "type": "keyword"
+            "bar": {
+              "type": "long"
             }
           }
-        },
-        "myalias": {
-          "type": "alias",
-          "path": "user.euid"
-        },
-        "validarray": {
-          "type": "integer"
-        },
-        "cycle_type": {
-          "type": "constant_keyword",
-          "value": "bicycle"
         }
-      },
-      "_meta": {
-        "package": {
-          "name": "nginx"
-        },
-        "managed_by": "ingest-manager",
-        "managed": true
       }
-    }
-  },
-  "data_stream": {},
-  "composed_of": [
-    ".fleet_component_template-1"
-  ],
-  "_meta": {
-    "package": {
-      "name": "nginx"
     },
-    "managed_by": "ingest-manager",
-    "managed": true
+    "nested": {
+      "properties": {
+        "bar": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        },
+        "baz": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        }
+      }
+    },
+    "myalias": {
+      "type": "alias",
+      "path": "user.euid"
+    },
+    "validarray": {
+      "type": "integer"
+    },
+    "cycle_type": {
+      "type": "constant_keyword",
+      "value": "bicycle"
+    }
   }
 }
 `;
 
 exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
 {
-  "priority": 200,
-  "index_patterns": [
-    "foo-*"
-  ],
-  "template": {
-    "settings": {
-      "index": {}
-    },
-    "mappings": {
-      "dynamic_templates": [
-        {
-          "strings_as_keyword": {
-            "mapping": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            },
-            "match_mapping_type": "string"
-          }
-        }
-      ],
-      "date_detection": false,
+  "properties": {
+    "coredns": {
       "properties": {
-        "coredns": {
+        "id": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        },
+        "query": {
           "properties": {
-            "id": {
+            "size": {
+              "type": "long"
+            },
+            "class": {
               "ignore_above": 1024,
               "type": "keyword"
             },
-            "query": {
-              "properties": {
-                "size": {
-                  "type": "long"
-                },
-                "class": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "name": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "type": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
             },
-            "response": {
-              "properties": {
-                "code": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "flags": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "size": {
-                  "type": "long"
-                }
-              }
-            },
-            "dnssec_ok": {
-              "type": "boolean"
+            "type": {
+              "ignore_above": 1024,
+              "type": "keyword"
             }
           }
-        }
-      },
-      "_meta": {
-        "package": {
-          "name": "coredns"
         },
-        "managed_by": "ingest-manager",
-        "managed": true
+        "response": {
+          "properties": {
+            "code": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "flags": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "size": {
+              "type": "long"
+            }
+          }
+        },
+        "dnssec_ok": {
+          "type": "boolean"
+        }
       }
     }
-  },
-  "data_stream": {},
-  "composed_of": [
-    ".fleet_component_template-1"
-  ],
-  "_meta": {
-    "package": {
-      "name": "coredns"
-    },
-    "managed_by": "ingest-manager",
-    "managed": true
   }
 }
 `;
 
 exports[`EPM template tests loading system.yml: system.yml 1`] = `
 {
-  "priority": 200,
-  "index_patterns": [
-    "whatsthis-*"
-  ],
-  "template": {
-    "settings": {
-      "index": {}
-    },
-    "mappings": {
-      "dynamic_templates": [
-        {
-          "strings_as_keyword": {
-            "mapping": {
+  "properties": {
+    "system": {
+      "properties": {
+        "core": {
+          "properties": {
+            "id": {
+              "type": "long"
+            },
+            "user": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "system": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "nice": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "idle": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "iowait": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "irq": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "softirq": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "steal": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "cpu": {
+          "properties": {
+            "cores": {
+              "type": "long"
+            },
+            "user": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "norm": {
+                  "properties": {
+                    "pct": {
+                      "type": "scaled_float",
+                      "scaling_factor": 1000
+                    }
+                  }
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "system": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "norm": {
+                  "properties": {
+                    "pct": {
+                      "type": "scaled_float",
+                      "scaling_factor": 1000
+                    }
+                  }
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "nice": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "norm": {
+                  "properties": {
+                    "pct": {
+                      "type": "scaled_float",
+                      "scaling_factor": 1000
+                    }
+                  }
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "idle": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "norm": {
+                  "properties": {
+                    "pct": {
+                      "type": "scaled_float",
+                      "scaling_factor": 1000
+                    }
+                  }
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "iowait": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "norm": {
+                  "properties": {
+                    "pct": {
+                      "type": "scaled_float",
+                      "scaling_factor": 1000
+                    }
+                  }
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "irq": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "norm": {
+                  "properties": {
+                    "pct": {
+                      "type": "scaled_float",
+                      "scaling_factor": 1000
+                    }
+                  }
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "softirq": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "norm": {
+                  "properties": {
+                    "pct": {
+                      "type": "scaled_float",
+                      "scaling_factor": 1000
+                    }
+                  }
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "steal": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "norm": {
+                  "properties": {
+                    "pct": {
+                      "type": "scaled_float",
+                      "scaling_factor": 1000
+                    }
+                  }
+                },
+                "ticks": {
+                  "type": "long"
+                }
+              }
+            },
+            "total": {
+              "properties": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                },
+                "norm": {
+                  "properties": {
+                    "pct": {
+                      "type": "scaled_float",
+                      "scaling_factor": 1000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "diskio": {
+          "properties": {
+            "name": {
               "ignore_above": 1024,
               "type": "keyword"
             },
-            "match_mapping_type": "string"
-          }
-        }
-      ],
-      "date_detection": false,
-      "properties": {
-        "system": {
-          "properties": {
-            "core": {
+            "serial_number": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "read": {
               "properties": {
-                "id": {
+                "count": {
                   "type": "long"
                 },
-                "user": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
+                "bytes": {
+                  "type": "long"
                 },
-                "system": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "nice": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "idle": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "iowait": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "irq": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "softirq": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "steal": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
+                "time": {
+                  "type": "long"
                 }
               }
             },
-            "cpu": {
+            "write": {
               "properties": {
-                "cores": {
+                "count": {
                   "type": "long"
                 },
-                "user": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "norm": {
-                      "properties": {
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
+                "bytes": {
+                  "type": "long"
                 },
-                "system": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "norm": {
-                      "properties": {
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "nice": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "norm": {
-                      "properties": {
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "idle": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "norm": {
-                      "properties": {
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "iowait": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "norm": {
-                      "properties": {
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "irq": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "norm": {
-                      "properties": {
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "softirq": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "norm": {
-                      "properties": {
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "steal": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "norm": {
-                      "properties": {
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    },
-                    "ticks": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "total": {
-                  "properties": {
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    },
-                    "norm": {
-                      "properties": {
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    }
-                  }
+                "time": {
+                  "type": "long"
                 }
               }
             },
-            "diskio": {
+            "io": {
               "properties": {
-                "name": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "serial_number": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
+                "time": {
+                  "type": "long"
+                }
+              }
+            },
+            "iostat": {
+              "properties": {
                 "read": {
                   "properties": {
-                    "count": {
-                      "type": "long"
-                    },
-                    "bytes": {
-                      "type": "long"
-                    },
-                    "time": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "write": {
-                  "properties": {
-                    "count": {
-                      "type": "long"
-                    },
-                    "bytes": {
-                      "type": "long"
-                    },
-                    "time": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "io": {
-                  "properties": {
-                    "time": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "iostat": {
-                  "properties": {
-                    "read": {
-                      "properties": {
-                        "request": {
-                          "properties": {
-                            "merges_per_sec": {
-                              "type": "float"
-                            },
-                            "per_sec": {
-                              "type": "float"
-                            }
-                          }
-                        },
-                        "per_sec": {
-                          "properties": {
-                            "bytes": {
-                              "type": "float"
-                            }
-                          }
-                        },
-                        "await": {
-                          "type": "float"
-                        }
-                      }
-                    },
-                    "write": {
-                      "properties": {
-                        "request": {
-                          "properties": {
-                            "merges_per_sec": {
-                              "type": "float"
-                            },
-                            "per_sec": {
-                              "type": "float"
-                            }
-                          }
-                        },
-                        "per_sec": {
-                          "properties": {
-                            "bytes": {
-                              "type": "float"
-                            }
-                          }
-                        },
-                        "await": {
-                          "type": "float"
-                        }
-                      }
-                    },
                     "request": {
                       "properties": {
-                        "avg_size": {
+                        "merges_per_sec": {
+                          "type": "float"
+                        },
+                        "per_sec": {
                           "type": "float"
                         }
                       }
                     },
-                    "queue": {
+                    "per_sec": {
                       "properties": {
-                        "avg_size": {
+                        "bytes": {
                           "type": "float"
                         }
                       }
                     },
                     "await": {
                       "type": "float"
+                    }
+                  }
+                },
+                "write": {
+                  "properties": {
+                    "request": {
+                      "properties": {
+                        "merges_per_sec": {
+                          "type": "float"
+                        },
+                        "per_sec": {
+                          "type": "float"
+                        }
+                      }
                     },
-                    "service_time": {
-                      "type": "float"
+                    "per_sec": {
+                      "properties": {
+                        "bytes": {
+                          "type": "float"
+                        }
+                      }
                     },
-                    "busy": {
+                    "await": {
                       "type": "float"
                     }
                   }
+                },
+                "request": {
+                  "properties": {
+                    "avg_size": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "queue": {
+                  "properties": {
+                    "avg_size": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "await": {
+                  "type": "float"
+                },
+                "service_time": {
+                  "type": "float"
+                },
+                "busy": {
+                  "type": "float"
                 }
               }
+            }
+          }
+        },
+        "entropy": {
+          "properties": {
+            "available_bits": {
+              "type": "long"
             },
-            "entropy": {
+            "pct": {
+              "type": "scaled_float",
+              "scaling_factor": 1000
+            }
+          }
+        },
+        "filesystem": {
+          "properties": {
+            "available": {
+              "type": "long"
+            },
+            "device_name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "type": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "mount_point": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "files": {
+              "type": "long"
+            },
+            "free": {
+              "type": "long"
+            },
+            "free_files": {
+              "type": "long"
+            },
+            "total": {
+              "type": "long"
+            },
+            "used": {
               "properties": {
-                "available_bits": {
+                "bytes": {
                   "type": "long"
                 },
                 "pct": {
@@ -616,73 +553,47 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                   "scaling_factor": 1000
                 }
               }
+            }
+          }
+        },
+        "fsstat": {
+          "properties": {
+            "count": {
+              "type": "long"
             },
-            "filesystem": {
+            "total_files": {
+              "type": "long"
+            },
+            "total_size": {
               "properties": {
-                "available": {
-                  "type": "long"
-                },
-                "device_name": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "type": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "mount_point": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "files": {
-                  "type": "long"
-                },
                 "free": {
                   "type": "long"
                 },
-                "free_files": {
+                "used": {
                   "type": "long"
                 },
                 "total": {
                   "type": "long"
-                },
-                "used": {
-                  "properties": {
-                    "bytes": {
-                      "type": "long"
-                    },
-                    "pct": {
-                      "type": "scaled_float",
-                      "scaling_factor": 1000
-                    }
-                  }
                 }
               }
+            }
+          }
+        },
+        "load": {
+          "properties": {
+            "1": {
+              "type": "scaled_float",
+              "scaling_factor": 100
             },
-            "fsstat": {
-              "properties": {
-                "count": {
-                  "type": "long"
-                },
-                "total_files": {
-                  "type": "long"
-                },
-                "total_size": {
-                  "properties": {
-                    "free": {
-                      "type": "long"
-                    },
-                    "used": {
-                      "type": "long"
-                    },
-                    "total": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
+            "5": {
+              "type": "scaled_float",
+              "scaling_factor": 100
             },
-            "load": {
+            "15": {
+              "type": "scaled_float",
+              "scaling_factor": 100
+            },
+            "norm": {
               "properties": {
                 "1": {
                   "type": "scaled_float",
@@ -695,29 +606,52 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                 "15": {
                   "type": "scaled_float",
                   "scaling_factor": 100
+                }
+              }
+            },
+            "cores": {
+              "type": "long"
+            }
+          }
+        },
+        "memory": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "used": {
+              "properties": {
+                "bytes": {
+                  "type": "long"
                 },
-                "norm": {
+                "pct": {
+                  "type": "scaled_float",
+                  "scaling_factor": 1000
+                }
+              }
+            },
+            "free": {
+              "type": "long"
+            },
+            "actual": {
+              "properties": {
+                "used": {
                   "properties": {
-                    "1": {
-                      "type": "scaled_float",
-                      "scaling_factor": 100
+                    "bytes": {
+                      "type": "long"
                     },
-                    "5": {
+                    "pct": {
                       "type": "scaled_float",
-                      "scaling_factor": 100
-                    },
-                    "15": {
-                      "type": "scaled_float",
-                      "scaling_factor": 100
+                      "scaling_factor": 1000
                     }
                   }
                 },
-                "cores": {
+                "free": {
                   "type": "long"
                 }
               }
             },
-            "memory": {
+            "swap": {
               "properties": {
                 "total": {
                   "type": "long"
@@ -736,288 +670,261 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                 "free": {
                   "type": "long"
                 },
-                "actual": {
-                  "properties": {
-                    "used": {
-                      "properties": {
-                        "bytes": {
-                          "type": "long"
-                        },
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    },
-                    "free": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "swap": {
-                  "properties": {
-                    "total": {
-                      "type": "long"
-                    },
-                    "used": {
-                      "properties": {
-                        "bytes": {
-                          "type": "long"
-                        },
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    },
-                    "free": {
-                      "type": "long"
-                    },
-                    "out": {
-                      "properties": {
-                        "pages": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "in": {
-                      "properties": {
-                        "pages": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "readahead": {
-                      "properties": {
-                        "pages": {
-                          "type": "long"
-                        },
-                        "cached": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "hugepages": {
-                  "properties": {
-                    "total": {
-                      "type": "long"
-                    },
-                    "used": {
-                      "properties": {
-                        "bytes": {
-                          "type": "long"
-                        },
-                        "pct": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "free": {
-                      "type": "long"
-                    },
-                    "reserved": {
-                      "type": "long"
-                    },
-                    "surplus": {
-                      "type": "long"
-                    },
-                    "default_size": {
-                      "type": "long"
-                    },
-                    "swap": {
-                      "properties": {
-                        "out": {
-                          "properties": {
-                            "pages": {
-                              "type": "long"
-                            },
-                            "fallback": {
-                              "type": "long"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "network": {
-              "properties": {
-                "name": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
                 "out": {
                   "properties": {
-                    "bytes": {
-                      "type": "long"
-                    },
-                    "packets": {
-                      "type": "long"
-                    },
-                    "errors": {
-                      "type": "long"
-                    },
-                    "dropped": {
+                    "pages": {
                       "type": "long"
                     }
                   }
                 },
                 "in": {
                   "properties": {
+                    "pages": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "readahead": {
+                  "properties": {
+                    "pages": {
+                      "type": "long"
+                    },
+                    "cached": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "hugepages": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "used": {
+                  "properties": {
                     "bytes": {
                       "type": "long"
                     },
-                    "packets": {
+                    "pct": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "free": {
+                  "type": "long"
+                },
+                "reserved": {
+                  "type": "long"
+                },
+                "surplus": {
+                  "type": "long"
+                },
+                "default_size": {
+                  "type": "long"
+                },
+                "swap": {
+                  "properties": {
+                    "out": {
+                      "properties": {
+                        "pages": {
+                          "type": "long"
+                        },
+                        "fallback": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "network": {
+          "properties": {
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "out": {
+              "properties": {
+                "bytes": {
+                  "type": "long"
+                },
+                "packets": {
+                  "type": "long"
+                },
+                "errors": {
+                  "type": "long"
+                },
+                "dropped": {
+                  "type": "long"
+                }
+              }
+            },
+            "in": {
+              "properties": {
+                "bytes": {
+                  "type": "long"
+                },
+                "packets": {
+                  "type": "long"
+                },
+                "errors": {
+                  "type": "long"
+                },
+                "dropped": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "network_summary": {
+          "properties": {
+            "ip": {
+              "properties": {
+                "*": {
+                  "type": "object"
+                }
+              }
+            },
+            "tcp": {
+              "properties": {
+                "*": {
+                  "type": "object"
+                }
+              }
+            },
+            "udp": {
+              "properties": {
+                "*": {
+                  "type": "object"
+                }
+              }
+            },
+            "udp_lite": {
+              "properties": {
+                "*": {
+                  "type": "object"
+                }
+              }
+            },
+            "icmp": {
+              "properties": {
+                "*": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "process": {
+          "properties": {
+            "state": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "cmdline": {
+              "ignore_above": 2048,
+              "type": "keyword"
+            },
+            "env": {
+              "type": "object"
+            },
+            "cpu": {
+              "properties": {
+                "user": {
+                  "properties": {
+                    "ticks": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "total": {
+                  "properties": {
+                    "value": {
                       "type": "long"
                     },
-                    "errors": {
+                    "pct": {
+                      "type": "scaled_float",
+                      "scaling_factor": 1000
+                    },
+                    "norm": {
+                      "properties": {
+                        "pct": {
+                          "type": "scaled_float",
+                          "scaling_factor": 1000
+                        }
+                      }
+                    },
+                    "ticks": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "system": {
+                  "properties": {
+                    "ticks": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "start_time": {
+                  "type": "date"
+                }
+              }
+            },
+            "memory": {
+              "properties": {
+                "size": {
+                  "type": "long"
+                },
+                "rss": {
+                  "properties": {
+                    "bytes": {
                       "type": "long"
                     },
-                    "dropped": {
+                    "pct": {
+                      "type": "scaled_float",
+                      "scaling_factor": 1000
+                    }
+                  }
+                },
+                "share": {
+                  "type": "long"
+                }
+              }
+            },
+            "fd": {
+              "properties": {
+                "open": {
+                  "type": "long"
+                },
+                "limit": {
+                  "properties": {
+                    "soft": {
+                      "type": "long"
+                    },
+                    "hard": {
                       "type": "long"
                     }
                   }
                 }
               }
             },
-            "network_summary": {
+            "cgroup": {
               "properties": {
-                "ip": {
-                  "properties": {
-                    "*": {
-                      "type": "object"
-                    }
-                  }
-                },
-                "tcp": {
-                  "properties": {
-                    "*": {
-                      "type": "object"
-                    }
-                  }
-                },
-                "udp": {
-                  "properties": {
-                    "*": {
-                      "type": "object"
-                    }
-                  }
-                },
-                "udp_lite": {
-                  "properties": {
-                    "*": {
-                      "type": "object"
-                    }
-                  }
-                },
-                "icmp": {
-                  "properties": {
-                    "*": {
-                      "type": "object"
-                    }
-                  }
-                }
-              }
-            },
-            "process": {
-              "properties": {
-                "state": {
+                "id": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "cmdline": {
-                  "ignore_above": 2048,
+                "path": {
+                  "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "env": {
-                  "type": "object"
-                },
                 "cpu": {
-                  "properties": {
-                    "user": {
-                      "properties": {
-                        "ticks": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "total": {
-                      "properties": {
-                        "value": {
-                          "type": "long"
-                        },
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        },
-                        "norm": {
-                          "properties": {
-                            "pct": {
-                              "type": "scaled_float",
-                              "scaling_factor": 1000
-                            }
-                          }
-                        },
-                        "ticks": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "system": {
-                      "properties": {
-                        "ticks": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "start_time": {
-                      "type": "date"
-                    }
-                  }
-                },
-                "memory": {
-                  "properties": {
-                    "size": {
-                      "type": "long"
-                    },
-                    "rss": {
-                      "properties": {
-                        "bytes": {
-                          "type": "long"
-                        },
-                        "pct": {
-                          "type": "scaled_float",
-                          "scaling_factor": 1000
-                        }
-                      }
-                    },
-                    "share": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "fd": {
-                  "properties": {
-                    "open": {
-                      "type": "long"
-                    },
-                    "limit": {
-                      "properties": {
-                        "soft": {
-                          "type": "long"
-                        },
-                        "hard": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "cgroup": {
                   "properties": {
                     "id": {
                       "ignore_above": 1024,
@@ -1027,354 +934,320 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                       "ignore_above": 1024,
                       "type": "keyword"
                     },
-                    "cpu": {
+                    "cfs": {
                       "properties": {
-                        "id": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "path": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "cfs": {
+                        "period": {
                           "properties": {
-                            "period": {
-                              "properties": {
-                                "us": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "quota": {
-                              "properties": {
-                                "us": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "shares": {
+                            "us": {
                               "type": "long"
                             }
                           }
                         },
-                        "rt": {
+                        "quota": {
                           "properties": {
-                            "period": {
-                              "properties": {
-                                "us": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "runtime": {
-                              "properties": {
-                                "us": {
-                                  "type": "long"
-                                }
-                              }
+                            "us": {
+                              "type": "long"
                             }
                           }
                         },
-                        "stats": {
+                        "shares": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "rt": {
+                      "properties": {
+                        "period": {
                           "properties": {
-                            "periods": {
+                            "us": {
                               "type": "long"
-                            },
-                            "throttled": {
-                              "properties": {
-                                "periods": {
-                                  "type": "long"
-                                },
-                                "ns": {
-                                  "type": "long"
-                                }
-                              }
+                            }
+                          }
+                        },
+                        "runtime": {
+                          "properties": {
+                            "us": {
+                              "type": "long"
                             }
                           }
                         }
                       }
                     },
-                    "cpuacct": {
+                    "stats": {
                       "properties": {
-                        "id": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
+                        "periods": {
+                          "type": "long"
                         },
-                        "path": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "total": {
+                        "throttled": {
+                          "properties": {
+                            "periods": {
+                              "type": "long"
+                            },
+                            "ns": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "cpuacct": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "path": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "total": {
+                      "properties": {
+                        "ns": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "stats": {
+                      "properties": {
+                        "user": {
                           "properties": {
                             "ns": {
                               "type": "long"
                             }
                           }
                         },
-                        "stats": {
+                        "system": {
                           "properties": {
-                            "user": {
-                              "properties": {
-                                "ns": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "system": {
-                              "properties": {
-                                "ns": {
-                                  "type": "long"
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "percpu": {
-                          "type": "object"
-                        }
-                      }
-                    },
-                    "memory": {
-                      "properties": {
-                        "id": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "path": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "mem": {
-                          "properties": {
-                            "usage": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                },
-                                "max": {
-                                  "properties": {
-                                    "bytes": {
-                                      "type": "long"
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "limit": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "failures": {
+                            "ns": {
                               "type": "long"
-                            }
-                          }
-                        },
-                        "memsw": {
-                          "properties": {
-                            "usage": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                },
-                                "max": {
-                                  "properties": {
-                                    "bytes": {
-                                      "type": "long"
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "limit": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "failures": {
-                              "type": "long"
-                            }
-                          }
-                        },
-                        "kmem": {
-                          "properties": {
-                            "usage": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                },
-                                "max": {
-                                  "properties": {
-                                    "bytes": {
-                                      "type": "long"
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "limit": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "failures": {
-                              "type": "long"
-                            }
-                          }
-                        },
-                        "kmem_tcp": {
-                          "properties": {
-                            "usage": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                },
-                                "max": {
-                                  "properties": {
-                                    "bytes": {
-                                      "type": "long"
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "limit": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "failures": {
-                              "type": "long"
-                            }
-                          }
-                        },
-                        "stats": {
-                          "properties": {
-                            "active_anon": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "active_file": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "cache": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "hierarchical_memory_limit": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "hierarchical_memsw_limit": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "inactive_anon": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "inactive_file": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "mapped_file": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "page_faults": {
-                              "type": "long"
-                            },
-                            "major_page_faults": {
-                              "type": "long"
-                            },
-                            "pages_in": {
-                              "type": "long"
-                            },
-                            "pages_out": {
-                              "type": "long"
-                            },
-                            "rss": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "rss_huge": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "swap": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "unevictable": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
                             }
                           }
                         }
                       }
                     },
-                    "blkio": {
+                    "percpu": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "memory": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "path": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "mem": {
                       "properties": {
-                        "id": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "path": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        },
-                        "total": {
+                        "usage": {
                           "properties": {
                             "bytes": {
                               "type": "long"
                             },
-                            "ios": {
+                            "max": {
+                              "properties": {
+                                "bytes": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "limit": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "failures": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "memsw": {
+                      "properties": {
+                        "usage": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "properties": {
+                                "bytes": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "limit": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "failures": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "kmem": {
+                      "properties": {
+                        "usage": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "properties": {
+                                "bytes": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "limit": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "failures": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "kmem_tcp": {
+                      "properties": {
+                        "usage": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "properties": {
+                                "bytes": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "limit": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "failures": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "stats": {
+                      "properties": {
+                        "active_anon": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "active_file": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "cache": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "hierarchical_memory_limit": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "hierarchical_memsw_limit": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "inactive_anon": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "inactive_file": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "mapped_file": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "page_faults": {
+                          "type": "long"
+                        },
+                        "major_page_faults": {
+                          "type": "long"
+                        },
+                        "pages_in": {
+                          "type": "long"
+                        },
+                        "pages_out": {
+                          "type": "long"
+                        },
+                        "rss": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "rss_huge": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "swap": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "unevictable": {
+                          "properties": {
+                            "bytes": {
                               "type": "long"
                             }
                           }
@@ -1383,286 +1256,290 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                     }
                   }
                 },
-                "summary": {
+                "blkio": {
                   "properties": {
-                    "total": {
-                      "type": "long"
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
-                    "running": {
-                      "type": "long"
-                    },
-                    "idle": {
-                      "type": "long"
-                    },
-                    "sleeping": {
-                      "type": "long"
-                    },
-                    "stopped": {
-                      "type": "long"
-                    },
-                    "zombie": {
-                      "type": "long"
-                    },
-                    "dead": {
-                      "type": "long"
-                    },
-                    "unknown": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "raid": {
-              "properties": {
-                "name": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "status": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "level": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "sync_action": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "disks": {
-                  "properties": {
-                    "active": {
-                      "type": "long"
+                    "path": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     },
                     "total": {
-                      "type": "long"
-                    },
-                    "spare": {
-                      "type": "long"
-                    },
-                    "failed": {
-                      "type": "long"
-                    },
-                    "states": {
                       "properties": {
-                        "*": {
-                          "type": "object"
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "ios": {
+                          "type": "long"
                         }
                       }
                     }
                   }
+                }
+              }
+            },
+            "summary": {
+              "properties": {
+                "total": {
+                  "type": "long"
                 },
-                "blocks": {
+                "running": {
+                  "type": "long"
+                },
+                "idle": {
+                  "type": "long"
+                },
+                "sleeping": {
+                  "type": "long"
+                },
+                "stopped": {
+                  "type": "long"
+                },
+                "zombie": {
+                  "type": "long"
+                },
+                "dead": {
+                  "type": "long"
+                },
+                "unknown": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "raid": {
+          "properties": {
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "status": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "level": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "sync_action": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "disks": {
+              "properties": {
+                "active": {
+                  "type": "long"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "spare": {
+                  "type": "long"
+                },
+                "failed": {
+                  "type": "long"
+                },
+                "states": {
                   "properties": {
-                    "total": {
-                      "type": "long"
-                    },
-                    "synced": {
-                      "type": "long"
+                    "*": {
+                      "type": "object"
                     }
                   }
                 }
               }
             },
-            "socket": {
+            "blocks": {
               "properties": {
-                "local": {
+                "total": {
+                  "type": "long"
+                },
+                "synced": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "socket": {
+          "properties": {
+            "local": {
+              "properties": {
+                "ip": {
+                  "type": "ip"
+                },
+                "port": {
+                  "type": "long"
+                }
+              }
+            },
+            "remote": {
+              "properties": {
+                "ip": {
+                  "type": "ip"
+                },
+                "port": {
+                  "type": "long"
+                },
+                "host": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "etld_plus_one": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "host_error": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "process": {
+              "properties": {
+                "cmdline": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "user": {
+              "properties": {}
+            },
+            "summary": {
+              "properties": {
+                "all": {
                   "properties": {
-                    "ip": {
-                      "type": "ip"
+                    "count": {
+                      "type": "long"
                     },
-                    "port": {
+                    "listening": {
                       "type": "long"
                     }
                   }
                 },
-                "remote": {
+                "tcp": {
                   "properties": {
-                    "ip": {
-                      "type": "ip"
-                    },
-                    "port": {
+                    "memory": {
                       "type": "long"
                     },
-                    "host": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "etld_plus_one": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    },
-                    "host_error": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "process": {
-                  "properties": {
-                    "cmdline": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "user": {
-                  "properties": {}
-                },
-                "summary": {
-                  "properties": {
                     "all": {
                       "properties": {
+                        "orphan": {
+                          "type": "long"
+                        },
                         "count": {
                           "type": "long"
                         },
                         "listening": {
                           "type": "long"
-                        }
-                      }
-                    },
-                    "tcp": {
-                      "properties": {
-                        "memory": {
+                        },
+                        "established": {
                           "type": "long"
                         },
-                        "all": {
-                          "properties": {
-                            "orphan": {
-                              "type": "long"
-                            },
-                            "count": {
-                              "type": "long"
-                            },
-                            "listening": {
-                              "type": "long"
-                            },
-                            "established": {
-                              "type": "long"
-                            },
-                            "close_wait": {
-                              "type": "long"
-                            },
-                            "time_wait": {
-                              "type": "long"
-                            },
-                            "syn_sent": {
-                              "type": "long"
-                            },
-                            "syn_recv": {
-                              "type": "long"
-                            },
-                            "fin_wait1": {
-                              "type": "long"
-                            },
-                            "fin_wait2": {
-                              "type": "long"
-                            },
-                            "last_ack": {
-                              "type": "long"
-                            },
-                            "closing": {
-                              "type": "long"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "udp": {
-                      "properties": {
-                        "memory": {
+                        "close_wait": {
                           "type": "long"
                         },
-                        "all": {
-                          "properties": {
-                            "count": {
-                              "type": "long"
-                            }
-                          }
+                        "time_wait": {
+                          "type": "long"
+                        },
+                        "syn_sent": {
+                          "type": "long"
+                        },
+                        "syn_recv": {
+                          "type": "long"
+                        },
+                        "fin_wait1": {
+                          "type": "long"
+                        },
+                        "fin_wait2": {
+                          "type": "long"
+                        },
+                        "last_ack": {
+                          "type": "long"
+                        },
+                        "closing": {
+                          "type": "long"
                         }
                       }
                     }
                   }
-                }
-              }
-            },
-            "uptime": {
-              "properties": {
-                "duration": {
+                },
+                "udp": {
                   "properties": {
-                    "ms": {
+                    "memory": {
                       "type": "long"
+                    },
+                    "all": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
-                }
-              }
-            },
-            "users": {
-              "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "seat": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "path": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "type": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "service": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "remote": {
-                  "type": "boolean"
-                },
-                "state": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "scope": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "leader": {
-                  "type": "long"
-                },
-                "remote_host": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
                 }
               }
             }
           }
-        }
-      },
-      "_meta": {
-        "package": {
-          "name": "system"
         },
-        "managed_by": "ingest-manager",
-        "managed": true
+        "uptime": {
+          "properties": {
+            "duration": {
+              "properties": {
+                "ms": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "users": {
+          "properties": {
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "seat": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "path": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "type": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "service": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "remote": {
+              "type": "boolean"
+            },
+            "state": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "scope": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "leader": {
+              "type": "long"
+            },
+            "remote_host": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
       }
     }
-  },
-  "data_stream": {},
-  "composed_of": [
-    ".fleet_component_template-1"
-  ],
-  "_meta": {
-    "package": {
-      "name": "system"
-    },
-    "managed_by": "ingest-manager",
-    "managed": true
   }
 }
 `;

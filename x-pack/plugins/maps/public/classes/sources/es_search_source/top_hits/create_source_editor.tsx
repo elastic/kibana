@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import type { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
+import type { DataView, DataViewField } from 'src/plugins/data/common';
 import { SCALING_TYPES } from '../../../../../common/constants';
 import { GeoFieldSelect } from '../../../../components/geo_field_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
@@ -23,13 +23,13 @@ interface Props {
 }
 
 interface State {
-  indexPattern: IndexPattern | null;
-  geoFields: IndexPatternField[];
+  indexPattern: DataView | null;
+  geoFields: DataViewField[];
   geoFieldName: string | null;
   sortField: string | null;
-  sortFields: IndexPatternField[];
+  sortFields: DataViewField[];
   sortOrder: SortDirection;
-  termFields: IndexPatternField[];
+  termFields: DataViewField[];
   topHitsSplitField: string | null;
   topHitsSize: number;
 }
@@ -47,7 +47,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     topHitsSize: 1,
   };
 
-  _onIndexPatternSelect = (indexPattern: IndexPattern) => {
+  _onIndexPatternSelect = (indexPattern: DataView) => {
     const geoFields = getGeoFields(indexPattern.fields);
 
     this.setState(

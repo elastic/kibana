@@ -25,6 +25,7 @@ export function DimensionButton({
   onRemoveClick,
   accessorConfig,
   label,
+  invalid,
 }: {
   group: VisualizationDimensionGroupConfig;
   children: React.ReactElement;
@@ -32,6 +33,7 @@ export function DimensionButton({
   onRemoveClick: (id: string) => void;
   accessorConfig: AccessorConfig;
   label: string;
+  invalid?: boolean;
 }) {
   return (
     <>
@@ -41,6 +43,7 @@ export function DimensionButton({
         onClick={() => onClick(accessorConfig.columnId)}
         aria-label={triggerLinkA11yText(label)}
         title={triggerLinkA11yText(label)}
+        color={invalid || group.invalid ? 'danger' : undefined}
       >
         <ColorIndicator accessorConfig={accessorConfig}>{children}</ColorIndicator>
       </EuiLink>

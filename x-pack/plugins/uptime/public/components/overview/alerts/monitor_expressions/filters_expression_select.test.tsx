@@ -21,10 +21,10 @@ describe('FiltersExpressionSelect', () => {
   it('is empty when no filters available', async () => {
     const { queryByLabelText } = render(
       <FiltersExpressionsSelect
-        alertParams={{}}
+        ruleParams={{}}
         newFilters={[]}
         onRemoveFilter={jest.fn()}
-        setAlertParams={jest.fn()}
+        setRuleParams={jest.fn()}
         shouldUpdateUrl={false}
       />
     );
@@ -52,10 +52,10 @@ describe('FiltersExpressionSelect', () => {
   ])('contains provided new filter values', async (newFilters, expectedLabels, absentLabels) => {
     const { getByLabelText, queryByLabelText } = render(
       <FiltersExpressionsSelect
-        alertParams={{}}
+        ruleParams={{}}
         newFilters={newFilters}
         onRemoveFilter={jest.fn()}
-        setAlertParams={jest.fn()}
+        setRuleParams={jest.fn()}
         shouldUpdateUrl={false}
       />
     );
@@ -75,10 +75,10 @@ describe('FiltersExpressionSelect', () => {
     const setAlertParamsMock = jest.fn();
     const { getByLabelText } = render(
       <FiltersExpressionsSelect
-        alertParams={{}}
+        ruleParams={{}}
         newFilters={[LOCATION_FIELD_NAME, SCHEME_FIELD_NAME, PORT_FIELD_NAME, TAG_FIELD_NAME]}
         onRemoveFilter={onRemoveFilterMock}
-        setAlertParams={setAlertParamsMock}
+        setRuleParams={setAlertParamsMock}
         shouldUpdateUrl={false}
       />
     );
@@ -115,10 +115,10 @@ describe('FiltersExpressionSelect', () => {
       spy.mockReturnValue({ loading: false, values: [{ label: 'test-label', count: 3 }] });
       const { getByLabelText, getByText } = render(
         <FiltersExpressionsSelect
-          alertParams={{}}
+          ruleParams={{}}
           newFilters={newFilters}
           onRemoveFilter={jest.fn()}
-          setAlertParams={jest.fn()}
+          setRuleParams={jest.fn()}
           shouldUpdateUrl={false}
         />
       );

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaFeature } from '../../../../features/common';
 import {
   GLOBAL_RESOURCE,
   RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
@@ -25,15 +26,16 @@ export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_meta
 };
 
 export function transformElasticsearchRoleToRole(
+  features: KibanaFeature[],
   elasticsearchRole: Omit<ElasticsearchRole, 'name'>,
   name: string,
   application: string
 ): Role {
   const kibanaTransformResult = transformRoleApplicationsToKibanaPrivileges(
+    features,
     elasticsearchRole.applications,
     application
   );
-
   return {
     name,
     metadata: elasticsearchRole.metadata,
@@ -53,6 +55,7 @@ export function transformElasticsearchRoleToRole(
 }
 
 function transformRoleApplicationsToKibanaPrivileges(
+  features: KibanaFeature[],
   roleApplications: ElasticsearchRole['applications'],
   application: string
 ) {
@@ -179,6 +182,44 @@ function transformRoleApplicationsToKibanaPrivileges(
 
   // if we have resources duplicated in entries, we won't transform these
   if (allResources.length !== getUniqueList(allResources).length) {
+    return {
+      success: false,
+    };
+  }
+
+  // if a feature privilege requires all spaces, but is assigned to other spaces, we won't transform these
+  if (
+    roleKibanaApplications.some(
+      (entry) =>
+        !entry.resources.includes(GLOBAL_RESOURCE) &&
+        features.some((f) =>
+          Object.entries(f.privileges ?? {}).some(
+            ([privName, featurePrivilege]) =>
+              featurePrivilege.requireAllSpaces &&
+              entry.privileges.includes(
+                PrivilegeSerializer.serializeFeaturePrivilege(f.id, privName)
+              )
+          )
+        )
+    )
+  ) {
+    return {
+      success: false,
+    };
+  }
+
+  // if a feature privilege has been disabled we won't transform these
+  if (
+    roleKibanaApplications.some((entry) =>
+      features.some((f) =>
+        Object.entries(f.privileges ?? {}).some(
+          ([privName, featurePrivilege]) =>
+            featurePrivilege.disabled &&
+            entry.privileges.includes(PrivilegeSerializer.serializeFeaturePrivilege(f.id, privName))
+        )
+      )
+    )
+  ) {
     return {
       success: false,
     };

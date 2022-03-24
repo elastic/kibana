@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const EDIT_EXCEPTIONS_BTN = '[data-test-subj="exceptionsViewerEditBtn"]';
+
 export const ADD_EXCEPTIONS_BTN = '[data-test-subj="exceptionsHeaderAddExceptionBtn"]';
 
 export const CLOSE_ALERTS_CHECKBOX =
@@ -34,7 +36,7 @@ export const ENTRY_DELETE_BTN = '[data-test-subj="builderItemEntryDeleteButton"]
 
 export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
 
-export const BUILDER_MODAL_BODY = '[data-test-subj="exceptionsBuilderWrapper"]';
+export const BUILDER_FLYOUT_BODY = '[data-test-subj="exceptionsBuilderWrapper"]';
 
 export const EXCEPTIONS_TABLE = '[data-test-subj="exceptions-table"]';
 
@@ -56,3 +58,15 @@ export const EXCEPTIONS_TABLE_MODAL = '[data-test-subj="referenceErrorModal"]';
 export const EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
 export const EXCEPTION_ITEM_CONTAINER = '[data-test-subj="exceptionEntriesContainer"]';
+
+export const EXCEPTION_FIELD_LIST =
+  '[data-test-subj="comboBoxOptionsList fieldAutocompleteComboBox-optionsList"]';
+
+export const EXCEPTION_FLYOUT_TITLE = '[data-test-subj="exception-flyout-title"]';
+
+export const EXCEPTION_EDIT_FLYOUT_SAVE_BTN = '[data-test-subj="edit-exception-confirm-button"]';
+
+export const EXCEPTION_FLYOUT_VERSION_CONFLICT =
+  '[data-test-subj="exceptionsFlyoutVersionConflict"]';
+
+export const EXCEPTION_FLYOUT_LIST_DELETED_ERROR = '[data-test-subj="errorCalloutContainer"]';

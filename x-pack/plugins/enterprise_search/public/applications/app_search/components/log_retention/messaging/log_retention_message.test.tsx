@@ -21,7 +21,7 @@ describe('LogRetentionMessage', () => {
   const analytics = LogRetentionOptions.Analytics;
   const api = LogRetentionOptions.API;
 
-  const setLogRetention = (logRetention: object, ilmEnabled: boolean = true) => {
+  const setLogRetention = (logRetention: object) => {
     const logRetentionSettings = {
       disabledAt: null,
       enabled: true,
@@ -30,7 +30,6 @@ describe('LogRetentionMessage', () => {
     };
 
     setMockValues({
-      ilmEnabled,
       logRetention: {
         [LogRetentionOptions.API]: logRetentionSettings,
         [LogRetentionOptions.Analytics]: logRetentionSettings,
@@ -152,24 +151,6 @@ describe('LogRetentionMessage', () => {
             'API logging has been disabled for all engines. The last date API logs were collected was November 5, 2020.'
           );
         });
-      });
-    });
-  });
-
-  describe('when ILM is disabled entirely', () => {
-    describe('an ILM disabled message renders', () => {
-      beforeEach(() => {
-        setLogRetention({}, false);
-      });
-
-      it('for analytics', () => {
-        const wrapper = mountWithIntl(<LogRetentionMessage type={analytics} />);
-        expect(wrapper.text()).toEqual("App Search isn't managing analytics log retention.");
-      });
-
-      it('for api', () => {
-        const wrapper = mountWithIntl(<LogRetentionMessage type={api} />);
-        expect(wrapper.text()).toEqual("App Search isn't managing API log retention.");
       });
     });
   });

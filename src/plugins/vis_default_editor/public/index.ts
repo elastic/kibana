@@ -17,7 +17,8 @@ export { DefaultEditorController };
 export { useValidation } from './components/controls/utils';
 export { PalettePicker } from './components/controls/palette_picker';
 export * from './components/options';
-export { RangesParamEditor, RangeValues } from './components/controls/ranges';
+export type { RangeValues } from './components/controls/ranges';
+export { RangesParamEditor } from './components/controls/ranges';
 export * from './editor_size';
 export * from './utils';
 

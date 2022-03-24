@@ -7,7 +7,7 @@
  */
 
 import { FtrService } from '../ftr_provider_context';
-import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
+import { VisualizeConstants } from '../../../src/plugins/visualizations/common/constants';
 import { FORMATS_UI_SETTINGS } from '../../../src/plugins/field_formats/common';
 
 // TODO: Remove & Refactor to use the TTV page objects
@@ -57,6 +57,7 @@ export class VisualizePageObject extends FtrService {
       defaultIndex: 'logstash-*',
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
+      'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
     });
   }
 
@@ -315,7 +316,10 @@ export class VisualizePageObject extends FtrService {
 
   public async openSavedVisualization(vizName: string) {
     const dataTestSubj = `visListingTitleLink-${vizName.split(' ').join('-')}`;
-    await this.testSubjects.click(dataTestSubj, 20000);
+    await this.retry.try(async () => {
+      await this.testSubjects.click(dataTestSubj, 20000);
+      await this.notOnLandingPageOrFail();
+    });
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -335,6 +339,11 @@ export class VisualizePageObject extends FtrService {
   public async onLandingPage() {
     this.log.debug(`VisualizePage.onLandingPage`);
     return await this.testSubjects.exists('visualizationLandingPage');
+  }
+
+  public async notOnLandingPageOrFail() {
+    this.log.debug(`VisualizePage.notOnLandingPageOrFail`);
+    return await this.testSubjects.missingOrFail('visualizationLandingPage');
   }
 
   public async gotoLandingPage() {

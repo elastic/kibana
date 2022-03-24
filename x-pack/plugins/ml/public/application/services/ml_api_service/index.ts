@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable } from 'rxjs';
 import type { HttpStart } from 'kibana/public';
 import { HttpService } from '../http_service';
@@ -43,6 +43,7 @@ import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_bas
 import type { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
 import type { RuntimeMappings } from '../../../../common/types/fields';
+import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -98,6 +99,9 @@ const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
     try {
       return getHttp()[prop];
     } catch (e) {
+      if (prop === 'getLoadingCount$') {
+        return () => {};
+      }
       // eslint-disable-next-line no-console
       console.error(e);
     }
@@ -194,7 +198,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     validateJob(payload: {
-      job: Job;
+      job: CombinedJob;
       duration: {
         start?: number;
         end?: number;
@@ -204,6 +208,15 @@ export function mlApiServicesProvider(httpService: HttpService) {
       const body = JSON.stringify(payload);
       return httpService.http<any>({
         path: `${basePath()}/validate/job`,
+        method: 'POST',
+        body,
+      });
+    },
+
+    validateDatafeedPreview(payload: { job: CombinedJob }) {
+      const body = JSON.stringify(payload);
+      return httpService.http<DatafeedValidationResponse>({
+        path: `${basePath()}/validate/datafeed_preview`,
         method: 'POST',
         body,
       });
@@ -474,13 +487,13 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     getVisualizerFieldHistograms({
-      indexPatternTitle,
+      indexPattern,
       query,
       fields,
       samplerShardSize,
       runtimeMappings,
     }: {
-      indexPatternTitle: string;
+      indexPattern: string;
       query: any;
       fields: FieldHistogramRequestConfig[];
       samplerShardSize?: number;
@@ -494,7 +507,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
 
       return httpService.http<any>({
-        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPatternTitle}`,
+        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPattern}`,
         method: 'POST',
         body,
       });

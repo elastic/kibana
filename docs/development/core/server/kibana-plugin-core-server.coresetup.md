@@ -16,17 +16,18 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [capabilities](./kibana-plugin-core-server.coresetup.capabilities.md) | <code>CapabilitiesSetup</code> | [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
-|  [context](./kibana-plugin-core-server.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-core-server.contextsetup.md) |
-|  [deprecations](./kibana-plugin-core-server.coresetup.deprecations.md) | <code>DeprecationsServiceSetup</code> | [DeprecationsServiceSetup](./kibana-plugin-core-server.deprecationsservicesetup.md) |
-|  [elasticsearch](./kibana-plugin-core-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |
-|  [executionContext](./kibana-plugin-core-server.coresetup.executioncontext.md) | <code>ExecutionContextSetup</code> | [ExecutionContextSetup](./kibana-plugin-core-server.executioncontextsetup.md) |
-|  [getStartServices](./kibana-plugin-core-server.coresetup.getstartservices.md) | <code>StartServicesAccessor&lt;TPluginsStart, TStart&gt;</code> | [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) |
-|  [http](./kibana-plugin-core-server.coresetup.http.md) | <code>HttpServiceSetup &amp; {</code><br/><code>        resources: HttpResources;</code><br/><code>    }</code> | [HttpServiceSetup](./kibana-plugin-core-server.httpservicesetup.md) |
-|  [i18n](./kibana-plugin-core-server.coresetup.i18n.md) | <code>I18nServiceSetup</code> | [I18nServiceSetup](./kibana-plugin-core-server.i18nservicesetup.md) |
-|  [logging](./kibana-plugin-core-server.coresetup.logging.md) | <code>LoggingServiceSetup</code> | [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) |
-|  [metrics](./kibana-plugin-core-server.coresetup.metrics.md) | <code>MetricsServiceSetup</code> | [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) |
-|  [savedObjects](./kibana-plugin-core-server.coresetup.savedobjects.md) | <code>SavedObjectsServiceSetup</code> | [SavedObjectsServiceSetup](./kibana-plugin-core-server.savedobjectsservicesetup.md) |
-|  [status](./kibana-plugin-core-server.coresetup.status.md) | <code>StatusServiceSetup</code> | [StatusServiceSetup](./kibana-plugin-core-server.statusservicesetup.md) |
-|  [uiSettings](./kibana-plugin-core-server.coresetup.uisettings.md) | <code>UiSettingsServiceSetup</code> | [UiSettingsServiceSetup](./kibana-plugin-core-server.uisettingsservicesetup.md) |
+|  [capabilities](./kibana-plugin-core-server.coresetup.capabilities.md) | CapabilitiesSetup | [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
+|  [context](./kibana-plugin-core-server.coresetup.context.md) | ContextSetup | [ContextSetup](./kibana-plugin-core-server.contextsetup.md) |
+|  [deprecations](./kibana-plugin-core-server.coresetup.deprecations.md) | DeprecationsServiceSetup | [DeprecationsServiceSetup](./kibana-plugin-core-server.deprecationsservicesetup.md) |
+|  [docLinks](./kibana-plugin-core-server.coresetup.doclinks.md) | DocLinksServiceSetup | [DocLinksServiceSetup](./kibana-plugin-core-server.doclinksservicesetup.md) |
+|  [elasticsearch](./kibana-plugin-core-server.coresetup.elasticsearch.md) | ElasticsearchServiceSetup | [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |
+|  [executionContext](./kibana-plugin-core-server.coresetup.executioncontext.md) | ExecutionContextSetup | [ExecutionContextSetup](./kibana-plugin-core-server.executioncontextsetup.md) |
+|  [getStartServices](./kibana-plugin-core-server.coresetup.getstartservices.md) | StartServicesAccessor&lt;TPluginsStart, TStart&gt; | [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) |
+|  [http](./kibana-plugin-core-server.coresetup.http.md) | HttpServiceSetup &amp; { resources: HttpResources; } | [HttpServiceSetup](./kibana-plugin-core-server.httpservicesetup.md) |
+|  [i18n](./kibana-plugin-core-server.coresetup.i18n.md) | I18nServiceSetup | [I18nServiceSetup](./kibana-plugin-core-server.i18nservicesetup.md) |
+|  [logging](./kibana-plugin-core-server.coresetup.logging.md) | LoggingServiceSetup | [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) |
+|  [metrics](./kibana-plugin-core-server.coresetup.metrics.md) | MetricsServiceSetup | [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) |
+|  [savedObjects](./kibana-plugin-core-server.coresetup.savedobjects.md) | SavedObjectsServiceSetup | [SavedObjectsServiceSetup](./kibana-plugin-core-server.savedobjectsservicesetup.md) |
+|  [status](./kibana-plugin-core-server.coresetup.status.md) | StatusServiceSetup | [StatusServiceSetup](./kibana-plugin-core-server.statusservicesetup.md) |
+|  [uiSettings](./kibana-plugin-core-server.coresetup.uisettings.md) | UiSettingsServiceSetup | [UiSettingsServiceSetup](./kibana-plugin-core-server.uisettingsservicesetup.md) |
 

@@ -16,10 +16,9 @@ export interface SavedObjectsImportFailure
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [error](./kibana-plugin-core-server.savedobjectsimportfailure.error.md) | <code>SavedObjectsImportConflictError &#124; SavedObjectsImportAmbiguousConflictError &#124; SavedObjectsImportUnsupportedTypeError &#124; SavedObjectsImportMissingReferencesError &#124; SavedObjectsImportUnknownError</code> |  |
-|  [id](./kibana-plugin-core-server.savedobjectsimportfailure.id.md) | <code>string</code> |  |
-|  [meta](./kibana-plugin-core-server.savedobjectsimportfailure.meta.md) | <code>{</code><br/><code>        title?: string;</code><br/><code>        icon?: string;</code><br/><code>    }</code> |  |
-|  [overwrite](./kibana-plugin-core-server.savedobjectsimportfailure.overwrite.md) | <code>boolean</code> | If <code>overwrite</code> is specified, an attempt was made to overwrite an existing object. |
-|  [title](./kibana-plugin-core-server.savedobjectsimportfailure.title.md) | <code>string</code> |  |
-|  [type](./kibana-plugin-core-server.savedobjectsimportfailure.type.md) | <code>string</code> |  |
+|  [error](./kibana-plugin-core-server.savedobjectsimportfailure.error.md) | SavedObjectsImportConflictError \| SavedObjectsImportAmbiguousConflictError \| SavedObjectsImportUnsupportedTypeError \| SavedObjectsImportMissingReferencesError \| SavedObjectsImportUnknownError |  |
+|  [id](./kibana-plugin-core-server.savedobjectsimportfailure.id.md) | string |  |
+|  [meta](./kibana-plugin-core-server.savedobjectsimportfailure.meta.md) | { title?: string; icon?: string; } |  |
+|  [overwrite?](./kibana-plugin-core-server.savedobjectsimportfailure.overwrite.md) | boolean | <i>(Optional)</i> If <code>overwrite</code> is specified, an attempt was made to overwrite an existing object. |
+|  [type](./kibana-plugin-core-server.savedobjectsimportfailure.type.md) | string |  |
 

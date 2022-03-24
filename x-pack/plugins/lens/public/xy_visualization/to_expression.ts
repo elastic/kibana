@@ -5,18 +5,28 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
+import type {
+  ValidLayer,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  YConfig,
+} from '../../common/expressions';
 import { layerTypes } from '../../common';
-import { hasIcon } from './xy_config_panel/reference_line_panel';
+import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
+import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
+import { isDataLayer } from './visualization_helpers';
 
-export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
+export const getSortedAccessors = (
+  datasource: DatasourcePublicAPI,
+  layer: XYDataLayerConfig | XYReferenceLineLayerConfig
+) => {
   const originalOrder = datasource
     .getTableSpec()
     .map(({ columnId }: { columnId: string }) => columnId)
@@ -57,7 +67,7 @@ export function toPreviewExpression(
     {
       ...state,
       layers: state.layers.map((layer) =>
-        layer.layerType === layerTypes.DATA
+        isDataLayer(layer)
           ? { ...layer, hide: true }
           : // cap the reference line to 1px
             {
@@ -161,6 +171,7 @@ export const buildExpression = (
                       : [],
                     position: [state.legend.position],
                     isInside: state.legend.isInside ? [state.legend.isInside] : [],
+                    legendSize: state.legend.legendSize ? [state.legend.legendSize] : [],
                     horizontalAlignment: state.legend.horizontalAlignment
                       ? [state.legend.horizontalAlignment]
                       : [],
@@ -173,13 +184,18 @@ export const buildExpression = (
                       ? [Math.min(5, state.legend.floatingColumns)]
                       : [],
                     maxLines: state.legend.maxLines ? [state.legend.maxLines] : [],
-                    shouldTruncate: [state.legend.shouldTruncate ?? true],
+                    shouldTruncate: [
+                      state.legend.shouldTruncate ??
+                        getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
+                    ],
                   },
                 },
               ],
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
+          endValue: [state.endValue || 'None'],
+          emphasizeFitting: [state.emphasizeFitting || false],
           curveType: [state.curveType || 'LINEAR'],
           fillOpacity: [state.fillOpacity || 0.3],
           yLeftExtent: [
@@ -294,101 +310,140 @@ export const buildExpression = (
           hideEndzones: [state?.hideEndzones || false],
           valuesInLegend: [state?.valuesInLegend || false],
           layers: validLayers.map((layer) => {
-            const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layer.layerId]);
-
-            const xAxisOperation =
-              datasourceLayers &&
-              datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
-
-            const isHistogramDimension = Boolean(
-              xAxisOperation &&
-                xAxisOperation.isBucketed &&
-                xAxisOperation.scale &&
-                xAxisOperation.scale !== 'ordinal'
+            if (isDataLayer(layer)) {
+              return dataLayerToExpression(
+                layer,
+                datasourceLayers[layer.layerId],
+                metadata,
+                paletteService
+              );
+            }
+            return referenceLineLayerToExpression(
+              layer,
+              datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId]
             );
-
-            return {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_xy_layer',
-                  arguments: {
-                    layerId: [layer.layerId],
-
-                    hide: [Boolean(layer.hide)],
-
-                    xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
-                    yScaleType: [
-                      getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
-                    ],
-                    xScaleType: [
-                      getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear),
-                    ],
-                    isHistogram: [isHistogramDimension],
-                    splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
-                    yConfig: layer.yConfig
-                      ? layer.yConfig.map((yConfig) => ({
-                          type: 'expression',
-                          chain: [
-                            {
-                              type: 'function',
-                              function: 'lens_xy_yConfig',
-                              arguments: {
-                                forAccessor: [yConfig.forAccessor],
-                                axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
-                                color:
-                                  layer.layerType === layerTypes.REFERENCELINE
-                                    ? [yConfig.color || defaultReferenceLineColor]
-                                    : yConfig.color
-                                    ? [yConfig.color]
-                                    : [],
-                                lineStyle: [yConfig.lineStyle || 'solid'],
-                                lineWidth: [yConfig.lineWidth || 1],
-                                fill: [yConfig.fill || 'none'],
-                                icon: hasIcon(yConfig.icon) ? [yConfig.icon] : [],
-                                iconPosition:
-                                  hasIcon(yConfig.icon) || yConfig.textVisibility
-                                    ? [yConfig.iconPosition || 'auto']
-                                    : ['auto'],
-                                textVisibility: [yConfig.textVisibility || false],
-                              },
-                            },
-                          ],
-                        }))
-                      : [],
-                    seriesType: [layer.seriesType],
-                    layerType: [layer.layerType || layerTypes.DATA],
-                    accessors: layer.accessors,
-                    columnToLabel: [JSON.stringify(columnToLabel)],
-                    ...(layer.palette
-                      ? {
-                          palette: [
-                            {
-                              type: 'expression',
-                              chain: [
-                                {
-                                  type: 'function',
-                                  function: 'theme',
-                                  arguments: {
-                                    variable: ['palette'],
-                                    default: [
-                                      paletteService
-                                        .get(layer.palette.name)
-                                        .toExpression(layer.palette.params),
-                                    ],
-                                  },
-                                },
-                              ],
-                            },
-                          ],
-                        }
-                      : {}),
-                  },
-                },
-              ],
-            };
           }),
+        },
+      },
+    ],
+  };
+};
+
+const referenceLineLayerToExpression = (
+  layer: XYReferenceLineLayerConfig,
+  datasourceLayer: DatasourcePublicAPI
+): Ast => {
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'lens_xy_referenceLine_layer',
+        arguments: {
+          layerId: [layer.layerId],
+          yConfig: layer.yConfig
+            ? layer.yConfig.map((yConfig) =>
+                yConfigToExpression(yConfig, defaultReferenceLineColor)
+              )
+            : [],
+          layerType: [layerTypes.REFERENCELINE],
+          accessors: layer.accessors,
+          columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
+        },
+      },
+    ],
+  };
+};
+
+const dataLayerToExpression = (
+  layer: ValidLayer,
+  datasourceLayer: DatasourcePublicAPI,
+  metadata: Record<string, Record<string, OperationMetadata | null>>,
+  paletteService: PaletteRegistry
+): Ast => {
+  const columnToLabel = getColumnToLabelMap(layer, datasourceLayer);
+
+  const xAxisOperation = datasourceLayer?.getOperationForColumnId(layer.xAccessor);
+
+  const isHistogramDimension = Boolean(
+    xAxisOperation &&
+      xAxisOperation.isBucketed &&
+      xAxisOperation.scale &&
+      xAxisOperation.scale !== 'ordinal'
+  );
+
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'lens_xy_data_layer',
+        arguments: {
+          layerId: [layer.layerId],
+          hide: [Boolean(layer.hide)],
+          xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
+          yScaleType: [
+            getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
+          ],
+          xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)],
+          isHistogram: [isHistogramDimension],
+          splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
+          yConfig: layer.yConfig
+            ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig))
+            : [],
+          seriesType: [layer.seriesType],
+          layerType: [layerTypes.DATA],
+          accessors: layer.accessors,
+          columnToLabel: [JSON.stringify(columnToLabel)],
+          ...(layer.palette
+            ? {
+                palette: [
+                  {
+                    type: 'expression',
+                    chain: [
+                      {
+                        type: 'function',
+                        function: 'theme',
+                        arguments: {
+                          variable: ['palette'],
+                          default: [
+                            paletteService
+                              .get(layer.palette.name)
+                              .toExpression(layer.palette.params),
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                ],
+              }
+            : {}),
+        },
+      },
+    ],
+  };
+};
+
+const yConfigToExpression = (yConfig: YConfig, defaultColor?: string): Ast => {
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'lens_xy_yConfig',
+        arguments: {
+          forAccessor: [yConfig.forAccessor],
+          axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
+          color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
+          lineStyle: [yConfig.lineStyle || 'solid'],
+          lineWidth: [yConfig.lineWidth || 1],
+          fill: [yConfig.fill || 'none'],
+          icon: hasIcon(yConfig.icon) ? [yConfig.icon] : [],
+          iconPosition:
+            hasIcon(yConfig.icon) || yConfig.textVisibility
+              ? [yConfig.iconPosition || 'auto']
+              : ['auto'],
+          textVisibility: [yConfig.textVisibility || false],
         },
       },
     ],

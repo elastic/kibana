@@ -19,6 +19,8 @@ import {
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
+import { useNavigateToPath } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 import {
   DataFrameAnalyticsListColumn,
@@ -32,13 +34,13 @@ import { ExpandedRow } from './expanded_row';
 import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
-import { SourceSelection } from '../source_selection';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
-import { AnalyticsEmptyPrompt } from './empty_prompt';
+import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { useRefresh } from '../../../../../routing/use_refresh';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -98,6 +100,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   pageState,
   updatePageState,
 }) => {
+  const navigateToPath = useNavigateToPath();
+
   const searchQueryText = pageState.queryText ?? '';
   const setSearchQueryText = useCallback(
     (value) => {
@@ -105,9 +109,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     },
     [updatePageState]
   );
-
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [filteredAnalytics, setFilteredAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [searchError, setSearchError] = useState<string | undefined>();
@@ -118,6 +121,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameAnalyticsId[]>([]);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
+
+  const refreshObs = useRefresh();
 
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
@@ -174,6 +179,13 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isManagementTable
   );
 
+  useEffect(
+    function updateOnTimerRefresh() {
+      getAnalyticsCallback();
+    },
+    [refreshObs]
+  );
+
   const { columns, modals } = useColumns(
     expandedRowItemIds,
     setExpandedRowItemIds,
@@ -188,6 +200,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     pageState,
     updatePageState
   );
+
+  const navigateToSourceSelection = useCallback(async () => {
+    await navigateToPath(ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION);
+  }, []);
 
   const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
     if (search.error !== null) {
@@ -219,17 +235,11 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     );
   }
 
-  if (analytics.length === 0) {
+  if (analytics.length === 0 && !isManagementTable) {
     return (
       <div data-test-subj="mlAnalyticsJobList">
-        <AnalyticsEmptyPrompt
-          isManagementTable={isManagementTable}
-          disabled={disabled}
-          onCreateFirstJobClick={() => setIsSourceIndexModalVisible(true)}
-        />
-        {isSourceIndexModalVisible === true && (
-          <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
-        )}
+        <EuiSpacer size="m" />
+        <AnalyticsEmptyPrompt />
       </div>
     );
   }
@@ -265,7 +275,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   return (
     <div data-test-subj="mlAnalyticsJobList">
       {modals}
-      {!isManagementTable && <EuiSpacer size="m" />}
       <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
       <EuiFlexGroup justifyContent="spaceBetween">
         {!isManagementTable && stats}
@@ -276,7 +285,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <CreateAnalyticsButton
                   isDisabled={disabled}
-                  setIsSourceIndexModalVisible={setIsSourceIndexModalVisible}
+                  navigateToSourceSelection={navigateToSourceSelection}
                 />
               </EuiFlexItem>
             )}
@@ -306,10 +315,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           error={searchError}
         />
       </div>
-
-      {isSourceIndexModalVisible === true && (
-        <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
-      )}
     </div>
   );
 };

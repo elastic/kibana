@@ -46,15 +46,15 @@ export const getIndexPatternLoadMeta = (): Omit<
   name,
   type,
   inputTypes: ['null'],
-  help: i18n.translate('dataViews.indexPatternLoad.help', {
-    defaultMessage: 'Loads an index pattern',
+  help: i18n.translate('dataViews.functions.dataViewLoad.help', {
+    defaultMessage: 'Loads a data view',
   }),
   args: {
     id: {
       types: ['string'],
       required: true,
-      help: i18n.translate('dataViews.functions.indexPatternLoad.id.help', {
-        defaultMessage: 'index pattern id to load',
+      help: i18n.translate('dataViews.functions.dataViewLoad.id.help', {
+        defaultMessage: 'data view id to load',
       }),
     },
   },

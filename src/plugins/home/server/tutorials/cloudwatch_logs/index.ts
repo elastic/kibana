@@ -23,12 +23,12 @@ export function cloudwatchLogsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'cloudwatchLogs',
     name: i18n.translate('home.tutorials.cloudwatchLogs.nameTitle', {
-      defaultMessage: 'AWS Cloudwatch logs',
+      defaultMessage: 'AWS Cloudwatch Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.cloudwatchLogs.shortDescription', {
-      defaultMessage: 'Collect Cloudwatch logs with Functionbeat.',
+      defaultMessage: 'Collect and parse logs from AWS Cloudwatch with Functionbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.cloudwatchLogs.longDescription', {
       defaultMessage:
@@ -51,8 +51,8 @@ export function cloudwatchLogsSpecProvider(context: TutorialContext): TutorialSc
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions([], context),
-    elasticCloud: cloudInstructions(),
-    onPremElasticCloud: onPremCloudInstructions(),
+    elasticCloud: cloudInstructions(context),
+    onPremElasticCloud: onPremCloudInstructions(context),
     integrationBrowserCategories: ['aws', 'cloud', 'datastore', 'security', 'network'],
   };
 }

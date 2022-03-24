@@ -15,5 +15,5 @@ export interface SavedObjectsBulkUpdateOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [namespace](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.namespace.md) | <code>string</code> |  |
+|  [namespace?](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.namespace.md) | string | <i>(Optional)</i> |
 

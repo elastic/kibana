@@ -24,19 +24,20 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 import type { DiscoverStart } from '../../../../src/plugins/discover/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type {
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
-import { CasesUiStart } from '../../cases/public';
+import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '../../cases/public';
 import type { LensPublicStart } from '../../lens/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { observabilityAppId, observabilityFeatureId } from '../common';
+import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
@@ -45,6 +46,7 @@ import { createNavigationRegistry, NavigationEntry } from './services/navigation
 import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+import { createUseRulesLink } from './hooks/create_use_rules_link';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -60,6 +62,7 @@ export interface ObservabilityPublicPluginsStart {
   home?: HomePublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   discover: DiscoverStart;
 }
@@ -91,14 +94,31 @@ export class Plugin
       navLinkStatus: AppNavLinkStatus.hidden,
     },
     {
-      id: 'cases',
-      title: i18n.translate('xpack.observability.casesLinkTitle', {
-        defaultMessage: 'Cases',
+      id: 'rules',
+      title: i18n.translate('xpack.observability.rulesLinkTitle', {
+        defaultMessage: 'Rules',
       }),
       order: 8002,
-      path: '/cases',
+      path: '/rules',
       navLinkStatus: AppNavLinkStatus.hidden,
     },
+    getCasesDeepLinks({
+      basePath: casesPath,
+      extend: {
+        [CasesDeepLinkId.cases]: {
+          order: 8003,
+          navLinkStatus: AppNavLinkStatus.hidden,
+        },
+        [CasesDeepLinkId.casesCreate]: {
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: false,
+        },
+        [CasesDeepLinkId.casesConfigure]: {
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: false,
+        },
+      },
+    }),
   ];
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -232,6 +252,7 @@ export class Plugin
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
+      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
     };
   }
 
@@ -260,6 +281,7 @@ export class Plugin
       },
       createExploratoryViewUrl,
       ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
+      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
     };
   }
 }

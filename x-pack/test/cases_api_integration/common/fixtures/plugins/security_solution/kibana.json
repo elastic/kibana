@@ -1,0 +1,13 @@
+{
+  "id": "securitySolutionFixtures",
+  "owner": {
+    "githubTeam": "response-ops",
+    "name": "ResponseOps"
+  },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": ["features", "cases"],
+  "optionalPlugins": ["security", "spaces"],
+  "server": true,
+  "ui": false
+}

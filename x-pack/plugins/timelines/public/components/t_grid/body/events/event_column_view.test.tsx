@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
+import { getActionsColumnWidth } from '../column_headers/helpers';
 
 import { EventColumnView } from './event_column_view';
 import { TestCellRenderer } from '../../../../mock/cell_renderer';
@@ -23,10 +23,11 @@ jest.mock('../../../../hooks/use_selector', () => ({
 }));
 
 describe('EventColumnView', () => {
+  const ACTION_BUTTON_COUNT = 4;
   const props = {
     ariaRowindex: 2,
     id: 'event-id',
-    actionsColumnWidth: DEFAULT_ACTIONS_COLUMN_WIDTH,
+    actionsColumnWidth: getActionsColumnWidth(ACTION_BUTTON_COUNT),
     associateNote: jest.fn(),
     columnHeaders: [],
     columnRenderers: [],

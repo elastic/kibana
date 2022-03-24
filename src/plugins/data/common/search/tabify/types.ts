@@ -22,7 +22,6 @@ export interface TimeRangeInformation {
   timeFields: string[];
 }
 
-/** @internal **/
 export interface TabbedResponseWriterOptions {
   metricsAtAllLevels: boolean;
   partialRows: boolean;
@@ -41,6 +40,7 @@ export interface TabbedAggColumn {
   aggConfig: IAggConfig;
   id: string;
   name: string;
+  hasPrecisionError?: boolean;
 }
 
 /** @public **/

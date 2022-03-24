@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { AdvancedDetectorModal, ModalPayload } from './advanced_detector_modal';
+export type { ModalPayload } from './advanced_detector_modal';
+export { AdvancedDetectorModal } from './advanced_detector_modal';

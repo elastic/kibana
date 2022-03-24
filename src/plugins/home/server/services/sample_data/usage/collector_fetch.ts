@@ -35,7 +35,7 @@ type ESResponse = SearchResponse<SearchHit>;
 
 export function fetchProvider(index: string) {
   return async ({ esClient }: CollectorFetchContext) => {
-    const { body: response } = await esClient.search<ESResponse>(
+    const response = await esClient.search<ESResponse>(
       {
         index,
         body: {

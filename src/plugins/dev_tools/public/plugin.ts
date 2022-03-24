@@ -15,6 +15,7 @@ import { sortBy } from 'lodash';
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
+import { DocTitleService, BreadcrumbService } from './services';
 
 import './index.scss';
 
@@ -36,6 +37,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
   private readonly devTools = new Map<string, DevToolApp>();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
+  private breadcrumbService = new BreadcrumbService();
+  private docTitleService = new DocTitleService();
+
   private getSortedDevTools(): readonly DevToolApp[] {
     return sortBy([...this.devTools.values()], 'order');
   }
@@ -53,14 +57,31 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       order: 9010,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
-        const { element, history } = params;
+        const { element, history, theme$ } = params;
         element.classList.add('devAppWrapper');
 
         const [core] = await getStartServices();
-        const { application, chrome } = core;
+        const { application, chrome, executionContext } = core;
+
+        this.docTitleService.setup(chrome.docTitle.change);
+        this.breadcrumbService.setup(chrome.setBreadcrumbs);
+
+        const appServices = {
+          breadcrumbService: this.breadcrumbService,
+          docTitleService: this.docTitleService,
+          executionContext,
+        };
 
         const { renderApp } = await import('./application');
-        return renderApp(element, application, chrome, history, this.getSortedDevTools());
+        return renderApp(
+          element,
+          application,
+          chrome,
+          history,
+          theme$,
+          this.getSortedDevTools(),
+          appServices
+        );
       },
     });
 

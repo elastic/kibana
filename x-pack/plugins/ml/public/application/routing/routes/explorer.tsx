@@ -10,6 +10,8 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NavigateToPath } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
@@ -19,7 +21,6 @@ import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { Explorer } from '../../explorer';
-import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
@@ -31,18 +32,29 @@ import { useTableSeverity } from '../../components/controls/select_severity';
 import { useUrlState } from '../../util/url_state';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
-import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
 import { JOB_ID } from '../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';
 import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
+import { MlPageHeader } from '../../components/page_header';
+import { AnomalyResultsViewSelector } from '../../components/anomaly_results_view_selector';
+import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state';
+import {
+  AnomalyExplorerContext,
+  useAnomalyExplorerContextValue,
+} from '../../explorer/anomaly_explorer_context';
+import type { AnomalyExplorerSwimLaneUrlState } from '../../../../common/types/locator';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'explorer',
   path: '/explorer',
+  title: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorer.docTitle', {
+    defaultMessage: 'Anomaly Explorer',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -51,17 +63,24 @@ export const explorerRouteFactory = (
       text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
         defaultMessage: 'Anomaly Explorer',
       }),
-      href: '',
     },
   ],
+  enableDatePicker: true,
+  'data-test-subj': 'mlPageAnomalyExplorer',
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context, results } = useResolver(undefined, undefined, deps.config, {
-    ...basicResolvers(deps),
-    jobs: mlJobService.loadJobsWrapper,
-    jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
-  });
+  const { context, results } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    {
+      ...basicResolvers(deps),
+      jobs: mlJobService.loadJobsWrapper,
+      jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
+    }
+  );
   const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
 
   return (
@@ -78,10 +97,11 @@ interface ExplorerUrlStateManagerProps {
 }
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
-  const [explorerUrlState, setExplorerUrlState] = useExplorerUrlState();
+  const [explorerUrlState, setExplorerUrlState, explorerUrlStateService] = useExplorerUrlState();
 
-  const [globalState, setGlobalState] = useUrlState('_g');
-  const [lastRefresh, setLastRefresh] = useState(0);
+  const anomalyExplorerContext = useAnomalyExplorerContextValue(explorerUrlStateService);
+
+  const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
@@ -93,25 +113,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     (job) => jobIds.includes(job.id) && job.isRunning === true
   );
 
-  const explorerAppState = useObservable(explorerService.appState$);
   const explorerState = useObservable(explorerService.state$);
 
   const refresh = useRefresh();
-
-  useEffect(() => {
-    if (refresh !== undefined && lastRefresh !== refresh.lastRefresh) {
-      setLastRefresh(refresh?.lastRefresh);
-
-      if (refresh.timeRange !== undefined) {
-        const { start, end } = refresh.timeRange;
-        setGlobalState('time', {
-          from: start,
-          to: end,
-          ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
-        });
-      }
-    }
-  }, [refresh?.lastRefresh, lastRefresh, setLastRefresh, setGlobalState]);
+  const lastRefresh = refresh?.lastRefresh ?? 0;
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.
@@ -122,10 +127,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       if (globalState.time.mode === 'invalid') {
         setInValidTimeRangeError(true);
       }
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
     }
   }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
@@ -150,14 +151,41 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, []);
 
-  useEffect(() => {
-    if (jobIds.length > 0) {
-      explorerService.updateJobSelection(jobIds);
-      getJobsWithStoppedPartitions(jobIds);
-    } else {
-      explorerService.clearJobs();
-    }
-  }, [JSON.stringify(jobIds)]);
+  const updateSwimLaneUrlState = useCallback(
+    (update: AnomalyExplorerSwimLaneUrlState | undefined, replaceState = false) => {
+      const ccc = explorerUrlState?.mlExplorerSwimlane;
+      const resultUpdate = replaceState ? update : { ...ccc, ...update };
+      return setExplorerUrlState({
+        ...explorerUrlState,
+        mlExplorerSwimlane: resultUpdate,
+      });
+    },
+    [explorerUrlState, setExplorerUrlState]
+  );
+
+  useEffect(
+    // TODO URL state service should provide observable with updates
+    // and immutable method for updates
+    function updateAnomalyTimelineStateFromUrl() {
+      const { anomalyTimelineStateService } = anomalyExplorerContext;
+
+      anomalyTimelineStateService.updateSetStateCallback(updateSwimLaneUrlState);
+      anomalyTimelineStateService.updateFromUrlState(explorerUrlState?.mlExplorerSwimlane);
+    },
+    [explorerUrlState?.mlExplorerSwimlane, updateSwimLaneUrlState]
+  );
+
+  useEffect(
+    function handleJobSelection() {
+      if (jobIds.length > 0) {
+        explorerService.updateJobSelection(jobIds);
+        getJobsWithStoppedPartitions(jobIds);
+      } else {
+        explorerService.clearJobs();
+      }
+    },
+    [JSON.stringify(jobIds)]
+  );
 
   useEffect(() => {
     return () => {
@@ -166,48 +194,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       explorerService.clearExplorerData();
     };
   }, []);
-
-  /**
-   * TODO get rid of the intermediate state in explorerService.
-   * URL state should be the only source of truth for related props.
-   */
-  useEffect(() => {
-    const filterData = explorerUrlState?.mlExplorerFilter;
-    if (filterData !== undefined) {
-      explorerService.setFilterData(filterData);
-    }
-
-    const { viewByFieldName, viewByFromPage, viewByPerPage, severity } =
-      explorerUrlState?.mlExplorerSwimlane ?? {};
-
-    if (viewByFieldName !== undefined) {
-      explorerService.setViewBySwimlaneFieldName(viewByFieldName);
-    }
-
-    if (viewByPerPage !== undefined) {
-      explorerService.setViewByPerPage(viewByPerPage);
-    }
-
-    if (viewByFromPage !== undefined) {
-      explorerService.setViewByFromPage(viewByFromPage);
-    }
-
-    if (severity !== undefined) {
-      explorerService.setSwimLaneSeverity(severity);
-    }
-
-    if (explorerUrlState.mlShowCharts !== undefined) {
-      explorerService.setShowCharts(explorerUrlState.mlShowCharts);
-    }
-  }, []);
-
-  /** Sync URL state with {@link explorerService} state */
-  useEffect(() => {
-    const replaceState = explorerUrlState?.mlExplorerSwimlane?.viewByFieldName === undefined;
-    if (explorerAppState?.mlExplorerSwimlane?.viewByFieldName !== undefined) {
-      setExplorerUrlState(explorerAppState, replaceState);
-    }
-  }, [explorerAppState]);
 
   const [explorerData, loadExplorerData] = useExplorerData();
 
@@ -220,78 +206,111 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
 
-  const [selectedCells, setSelectedCells] = useSelectedCells(
-    explorerUrlState,
-    setExplorerUrlState,
-    explorerState?.swimlaneBucketInterval?.asSeconds()
+  const showCharts = useObservable(
+    anomalyExplorerContext.anomalyExplorerCommonStateService.getShowCharts$(),
+    anomalyExplorerContext.anomalyExplorerCommonStateService.getShowCharts()
   );
 
-  useEffect(() => {
-    explorerService.setSelectedCells(selectedCells);
-  }, [JSON.stringify(selectedCells)]);
+  const selectedCells = useObservable(
+    anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells$()
+  );
+
+  const swimlaneContainerWidth = useObservable(
+    anomalyExplorerContext.anomalyTimelineStateService.getContainerWidth$(),
+    anomalyExplorerContext.anomalyTimelineStateService.getContainerWidth()
+  );
+
+  const viewByFieldName = useObservable(
+    anomalyExplorerContext.anomalyTimelineStateService.getViewBySwimlaneFieldName$()
+  );
+
+  const swimLaneSeverity = useObservable(
+    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity$(),
+    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity()
+  );
+
+  const swimLaneBucketInterval = useObservable(
+    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneBucketInterval$(),
+    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneBucketInterval()
+  );
+
+  const influencersFilterQuery = useObservable(
+    anomalyExplorerContext.anomalyExplorerCommonStateService.getInfluencerFilterQuery$()
+  );
 
   const loadExplorerDataConfig =
     explorerState !== undefined
       ? {
           lastRefresh,
-          influencersFilterQuery: explorerState.influencersFilterQuery,
+          influencersFilterQuery,
           noInfluencersConfigured: explorerState.noInfluencersConfigured,
           selectedCells,
           selectedJobs: explorerState.selectedJobs,
-          swimlaneBucketInterval: explorerState.swimlaneBucketInterval,
+          swimlaneBucketInterval: swimLaneBucketInterval,
           tableInterval: tableInterval.val,
           tableSeverity: tableSeverity.val,
-          viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
-          swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
-          viewByPerPage: explorerState.viewByPerPage,
-          viewByFromPage: explorerState.viewByFromPage,
-          swimLaneSeverity: explorerState.swimLaneSeverity,
+          viewBySwimlaneFieldName: viewByFieldName,
+          swimlaneContainerWidth,
         }
       : undefined;
 
+  useEffect(
+    function updateAnomalyExplorerCommonState() {
+      anomalyExplorerContext.anomalyExplorerCommonStateService.setSelectedJobs(
+        loadExplorerDataConfig?.selectedJobs!
+      );
+    },
+    [loadExplorerDataConfig]
+  );
+
   useEffect(() => {
-    /**
-     * For the "View by" swim lane the limit is the cardinality of the influencer values,
-     * which is known after the initial fetch.
-     * When looking up for top influencers for selected range in Overall swim lane
-     * the result is filtered by top influencers values, hence there is no need to set the limit.
-     */
-    const swimlaneLimit =
-      isViewBySwimLaneData(explorerState?.viewBySwimlaneData) && !selectedCells?.showTopFieldValues
-        ? explorerState?.viewBySwimlaneData.cardinality
-        : undefined;
-
-    if (explorerState && explorerState.swimlaneContainerWidth > 0) {
-      loadExplorerData({
-        ...loadExplorerDataConfig,
-        swimlaneLimit,
-      });
+    if (explorerState && loadExplorerDataConfig?.swimlaneContainerWidth! > 0) {
+      loadExplorerData(loadExplorerDataConfig);
     }
-  }, [JSON.stringify(loadExplorerDataConfig), selectedCells?.showTopFieldValues]);
+  }, [JSON.stringify(loadExplorerDataConfig)]);
 
-  if (
-    explorerState === undefined ||
-    refresh === undefined ||
-    explorerAppState?.mlShowCharts === undefined
-  ) {
+  const overallSwimlaneData = useObservable(
+    anomalyExplorerContext.anomalyTimelineStateService.getOverallSwimLaneData$(),
+    null
+  );
+
+  if (explorerState === undefined || refresh === undefined) {
     return null;
   }
 
   return (
     <div className="ml-explorer">
-      <Explorer
-        {...{
-          explorerState,
-          setSelectedCells,
-          showCharts: explorerState.showCharts,
-          severity: tableSeverity.val,
-          stoppedPartitions,
-          invalidTimeRangeError,
-          selectedJobsRunning,
-          timeBuckets,
-          timefilter,
-        }}
-      />
+      <MlPageHeader>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <AnomalyResultsViewSelector viewId="explorer" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </MlPageHeader>
+      <AnomalyExplorerContext.Provider value={anomalyExplorerContext}>
+        {jobsWithTimeRange.length === 0 ? (
+          <AnomalyDetectionEmptyState />
+        ) : (
+          <Explorer
+            {...{
+              explorerState,
+              overallSwimlaneData,
+              showCharts,
+              severity: tableSeverity.val,
+              stoppedPartitions,
+              invalidTimeRangeError,
+              selectedJobsRunning,
+              timeBuckets,
+              timefilter,
+              selectedCells,
+              swimLaneSeverity,
+            }}
+          />
+        )}
+      </AnomalyExplorerContext.Provider>
     </div>
   );
 };

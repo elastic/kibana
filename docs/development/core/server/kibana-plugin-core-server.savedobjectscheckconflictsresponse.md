@@ -15,5 +15,5 @@ export interface SavedObjectsCheckConflictsResponse
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [errors](./kibana-plugin-core-server.savedobjectscheckconflictsresponse.errors.md) | <code>Array&lt;{</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>        error: SavedObjectError;</code><br/><code>    }&gt;</code> |  |
+|  [errors](./kibana-plugin-core-server.savedobjectscheckconflictsresponse.errors.md) | Array&lt;{ id: string; type: string; error: SavedObjectError; }&gt; |  |
 

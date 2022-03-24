@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-export function getCcsIndexPattern(indexPattern: string, remotes: string[]): string {
-  if (remotes.length === 0) {
+export function getCcsIndexPattern(indexPattern: string, availableCcs: boolean): string {
+  if (!availableCcs) {
     return indexPattern;
   }
   const patternsToAdd = [];
   for (const index of indexPattern.split(',')) {
-    for (const remote of remotes) {
-      patternsToAdd.push(`${remote}:${index}`);
-    }
+    patternsToAdd.push(`*:${index}`);
   }
   return [...indexPattern.split(','), ...patternsToAdd].join(',');
 }

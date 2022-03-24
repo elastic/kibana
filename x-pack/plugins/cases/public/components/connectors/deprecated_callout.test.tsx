@@ -12,20 +12,16 @@ import { DeprecatedCallout } from './deprecated_callout';
 describe('DeprecatedCallout', () => {
   test('it renders correctly', () => {
     render(<DeprecatedCallout />);
-    expect(screen.getByText('Deprecated connector type')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'This connector type is deprecated. Create a new connector or update this connector'
-      )
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('legacy-connector-warning-callout')).toHaveClass(
+    expect(screen.getByText('This connector type is deprecated')).toBeInTheDocument();
+    expect(screen.getByText('Update this connector, or create a new one.')).toBeInTheDocument();
+    expect(screen.getByTestId('deprecated-connector-warning-callout')).toHaveClass(
       'euiCallOut euiCallOut--warning'
     );
   });
 
   test('it renders a danger flyout correctly', () => {
     render(<DeprecatedCallout type="danger" />);
-    expect(screen.getByTestId('legacy-connector-warning-callout')).toHaveClass(
+    expect(screen.getByTestId('deprecated-connector-warning-callout')).toHaveClass(
       'euiCallOut euiCallOut--danger'
     );
   });

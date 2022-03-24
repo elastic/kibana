@@ -281,6 +281,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           rowProps={onSetRowProps}
           search={search}
           sorting={false}
+          data-test-subj="event-fields-browser"
         />
       </TableWrapper>
     );

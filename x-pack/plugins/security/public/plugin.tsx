@@ -55,17 +55,20 @@ export class SecurityPlugin
       PluginStartDependencies
     >
 {
-  private readonly config = this.initializerContext.config.get<ConfigType>();
+  private readonly config: ConfigType;
   private sessionTimeout!: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();
   private readonly navControlService = new SecurityNavControlService();
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly managementService = new ManagementService();
-  private readonly securityCheckupService = new SecurityCheckupService(this.config, localStorage);
+  private readonly securityCheckupService: SecurityCheckupService;
   private readonly anonymousAccessService = new AnonymousAccessService();
   private authc!: AuthenticationServiceSetup;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<ConfigType>();
+    this.securityCheckupService = new SecurityCheckupService(this.config, localStorage);
+  }
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,

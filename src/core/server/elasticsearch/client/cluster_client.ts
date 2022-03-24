@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
-import { GetAuthHeaders, Headers, isKibanaRequest, isRealRequest } from '../../http';
+import { IAuthHeadersStorage, Headers, isKibanaRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
 import { ScopeableRequest } from '../types';
 import { ElasticsearchClient } from './types';
@@ -16,6 +16,12 @@ import { configureClient } from './configure_client';
 import { ElasticsearchClientConfig } from './client_config';
 import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
 import { DEFAULT_HEADERS } from '../default_headers';
+import {
+  UnauthorizedErrorHandler,
+  createInternalErrorHandler,
+  InternalUnauthorizedErrorHandler,
+} from './retry_unauthorized';
+import { createTransport } from './create_transport';
 
 const noop = () => undefined;
 
@@ -52,19 +58,35 @@ export interface ICustomClusterClient extends IClusterClient {
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
-  public readonly asInternalUser: Client;
+  private readonly config: ElasticsearchClientConfig;
+  private readonly authHeaders?: IAuthHeadersStorage;
   private readonly rootScopedClient: Client;
-  private readonly allowListHeaders: string[];
-
+  private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
+  private readonly getExecutionContext: () => string | undefined;
   private isClosed = false;
 
-  constructor(
-    private readonly config: ElasticsearchClientConfig,
-    logger: Logger,
-    type: string,
-    private readonly getAuthHeaders: GetAuthHeaders = noop,
-    getExecutionContext: () => string | undefined = noop
-  ) {
+  public readonly asInternalUser: Client;
+
+  constructor({
+    config,
+    logger,
+    type,
+    authHeaders,
+    getExecutionContext = noop,
+    getUnauthorizedErrorHandler = noop,
+  }: {
+    config: ElasticsearchClientConfig;
+    logger: Logger;
+    type: string;
+    authHeaders?: IAuthHeadersStorage;
+    getExecutionContext?: () => string | undefined;
+    getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
+  }) {
+    this.config = config;
+    this.authHeaders = authHeaders;
+    this.getExecutionContext = getExecutionContext;
+    this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
+
     this.asInternalUser = configureClient(config, { logger, type, getExecutionContext });
     this.rootScopedClient = configureClient(config, {
       logger,
@@ -72,14 +94,19 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       scoped: true,
     });
-
-    this.allowListHeaders = ['x-opaque-id', ...this.config.requestHeadersWhitelist];
   }
 
   asScoped(request: ScopeableRequest) {
     const scopedHeaders = this.getScopedHeaders(request);
+
+    const transportClass = createTransport({
+      getExecutionContext: this.getExecutionContext,
+      getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
+    });
+
     const scopedClient = this.rootScopedClient.child({
       headers: scopedHeaders,
+      Transport: transportClass,
     });
     return new ScopedClusterClient(this.asInternalUser, scopedClient);
   }
@@ -92,17 +119,32 @@ export class ClusterClient implements ICustomClusterClient {
     await Promise.all([this.asInternalUser.close(), this.rootScopedClient.close()]);
   }
 
+  private createInternalErrorHandlerAccessor = (
+    request: ScopeableRequest
+  ): (() => InternalUnauthorizedErrorHandler) | undefined => {
+    if (!this.authHeaders) {
+      return undefined;
+    }
+    return () =>
+      createInternalErrorHandler({
+        request,
+        getHandler: this.getUnauthorizedErrorHandler,
+        setAuthHeaders: this.authHeaders!.set,
+      });
+  };
+
   private getScopedHeaders(request: ScopeableRequest): Headers {
     let scopedHeaders: Headers;
     if (isRealRequest(request)) {
-      const requestHeaders = ensureRawRequest(request).headers;
+      const requestHeaders = ensureRawRequest(request).headers ?? {};
       const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
-      const authHeaders = this.getAuthHeaders(request);
+      const authHeaders = this.authHeaders ? this.authHeaders.get(request) : {};
 
-      scopedHeaders = filterHeaders(
-        { ...requestHeaders, ...requestIdHeaders, ...authHeaders },
-        this.allowListHeaders
-      );
+      scopedHeaders = {
+        ...filterHeaders(requestHeaders, this.config.requestHeadersWhitelist),
+        ...requestIdHeaders,
+        ...authHeaders,
+      };
     } else {
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }

@@ -93,7 +93,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def corsTestServerPort = "64${parallelId}3"
   // needed for https://github.com/elastic/kibana/issues/107246
   def proxyTestServerPort = "64${parallelId}4"
-  def apmActive = githubPr.isPr() ? "false" : "true"
+  def contextPropagationOnly = githubPr.isPr() ? "true" : "false"
 
   withEnv([
     "CI_GROUP=${parallelId}",
@@ -109,7 +109,8 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "KBN_NP_PLUGINS_BUILT=true",
     "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
     "ALERTING_PROXY_PORT=${alertingProxyPort}",
-    "ELASTIC_APM_ACTIVE=${apmActive}",
+    "ELASTIC_APM_ACTIVE=true",
+    "ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=${contextPropagationOnly}",
     "ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1",
   ] + additionalEnvs) {
     closure()
@@ -175,18 +176,6 @@ def uploadGcsArtifact(uploadPrefix, pattern) {
   )
 }
 
-def downloadCoverageArtifacts() {
-  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/"
-  def targetLocation = "/tmp/downloaded_coverage"
-
-  sh "mkdir -p '${targetLocation}' && gsutil -m cp -r '${storageLocation}' '${targetLocation}'"
-}
-
-def uploadCoverageArtifacts(prefix, pattern) {
-  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${prefix}"
-  uploadGcsArtifact(uploadPrefix, pattern)
-}
-
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
@@ -226,11 +215,6 @@ def withGcsArtifactUpload(workerName, closure) {
       }
     }
   })
-
-  if (env.CODE_COVERAGE) {
-    sh 'tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*'
-    uploadGcsArtifact("kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${workerName}", 'kibana-coverage.tar.gz')
-  }
 }
 
 def publishJunit() {

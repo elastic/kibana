@@ -12,7 +12,7 @@ import {
   ExplorerSwimlaneContainerProps,
 } from './embeddable_swim_lane_container';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { CoreStart } from 'kibana/public';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';

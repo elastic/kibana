@@ -202,7 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
           }));
 
@@ -220,7 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
             expect(resp.body.saved_objects[1].meta).to.eql({
               icon: 'visualizeApp',
@@ -230,7 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
           }));
 
@@ -244,13 +244,12 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'indexPatternApp',
               title: 'saved_objects*',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+              editUrl: '/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                path: '/app/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple',
             });
           }));
     });

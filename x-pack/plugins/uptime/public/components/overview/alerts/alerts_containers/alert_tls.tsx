@@ -6,10 +6,11 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { AlertTlsComponent } from '../alert_tls';
 import { setAlertFlyoutVisible } from '../../../../state/actions';
 import { selectDynamicSettings } from '../../../../state/selectors';
+import { getDynamicSettings } from '../../../../state/actions/dynamic_settings';
 
 export const AlertTls: React.FC<{}> = () => {
   const dispatch = useDispatch();
@@ -18,6 +19,13 @@ export const AlertTls: React.FC<{}> = () => {
     [dispatch]
   );
   const { settings } = useSelector(selectDynamicSettings);
+
+  useEffect(() => {
+    if (typeof settings === 'undefined') {
+      dispatch(getDynamicSettings());
+    }
+  }, [dispatch, settings]);
+
   return (
     <AlertTlsComponent
       ageThreshold={settings?.certAgeThreshold}

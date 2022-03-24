@@ -14,7 +14,7 @@ import { IndexPatternsContract } from '../../common';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { ISessionsClient, ISessionService } from './session';
 
-export { ISearchStartSearchSource, SearchUsageCollector };
+export type { ISearchStartSearchSource, SearchUsageCollector };
 
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension

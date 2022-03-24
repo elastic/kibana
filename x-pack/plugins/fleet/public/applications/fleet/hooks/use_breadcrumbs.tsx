@@ -108,7 +108,7 @@ const breadcrumbGetters: {
       text: policyName,
     },
     {
-      text: i18n.translate('xpack.fleet.breadcrumbs.upgradePacagePolicyPageTitle', {
+      text: i18n.translate('xpack.fleet.breadcrumbs.upgradePackagePolicyPageTitle', {
         defaultMessage: 'Upgrade integration ',
       }),
     },
@@ -144,6 +144,14 @@ const breadcrumbGetters: {
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.datastreamsPageTitle', {
         defaultMessage: 'Data streams',
+      }),
+    },
+  ],
+  settings: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.settingsPageTitle', {
+        defaultMessage: 'Settings',
       }),
     },
   ],

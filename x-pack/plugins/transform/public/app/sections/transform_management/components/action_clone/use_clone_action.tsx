@@ -33,17 +33,17 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
     async (item: TransformListRow) => {
       try {
         await loadIndexPatterns(savedObjectsClient, indexPatterns);
-        const indexPatternTitle = Array.isArray(item.config.source.index)
+        const dataViewTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
-        const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
+        const indexPatternId = getIndexPatternIdByTitle(dataViewTitle);
 
         if (indexPatternId === undefined) {
           toastNotifications.addDanger(
-            i18n.translate('xpack.transform.clone.noIndexPatternErrorPromptText', {
+            i18n.translate('xpack.transform.clone.noDataViewErrorPromptText', {
               defaultMessage:
-                'Unable to clone the transform {transformId}. No index pattern exists for {indexPattern}.',
-              values: { indexPattern: indexPatternTitle, transformId: item.id },
+                'Unable to clone the transform {transformId}. No data view exists for {dataViewTitle}.',
+              values: { dataViewTitle, transformId: item.id },
             })
           );
         } else {
@@ -54,7 +54,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
       } catch (e) {
         toastNotifications.addError(e, {
           title: i18n.translate('xpack.transform.clone.errorPromptText', {
-            defaultMessage: 'An error occurred checking if source index pattern exists',
+            defaultMessage: 'An error occurred checking if source data view exists',
           }),
         });
       }

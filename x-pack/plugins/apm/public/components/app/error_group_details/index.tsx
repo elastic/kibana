@@ -20,14 +20,15 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { DetailView } from './detail_view';
-import { ErrorDistribution } from './Distribution';
+import { ErrorDistribution } from './distribution';
 
 const Titles = euiStyled.div`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
@@ -49,6 +50,15 @@ const Message = euiStyled.div`
 const Culprit = euiStyled.div`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 `;
+
+type ErrorDistributionAPIResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
+
+const emptyState: ErrorDistributionAPIResponse = {
+  currentPeriod: [],
+  previousPeriod: [],
+  bucketSize: 0,
+};
 
 function getShortGroupId(errorGroupId?: string) {
   if (!errorGroupId) {
@@ -94,7 +104,7 @@ function ErrorGroupHeader({
 }
 
 export function ErrorGroupDetails() {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
 
   const { serviceName } = useApmServiceContext();
 
@@ -102,7 +112,7 @@ export function ErrorGroupDetails() {
 
   const {
     path: { groupId },
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: { rangeFrom, rangeTo, environment, kuery, serviceGroup },
   } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -119,6 +129,7 @@ export function ErrorGroupDetails() {
         rangeTo,
         environment,
         kuery,
+        serviceGroup,
       },
     }),
   });
@@ -126,27 +137,29 @@ export function ErrorGroupDetails() {
   const { data: errorGroupData } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
-          params: {
-            path: {
-              serviceName,
-              groupId,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/{groupId}',
+          {
+            params: {
+              path: {
+                serviceName,
+                groupId,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-            },
-          },
-        });
+          }
+        );
       }
     },
     [environment, kuery, serviceName, start, end, groupId]
   );
 
-  const { errorDistributionData } = useErrorGroupDistributionFetcher({
+  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId,
     environment,
@@ -209,7 +222,8 @@ export function ErrorGroupDetails() {
           </Titles>
         )}
         <ErrorDistribution
-          distribution={errorDistributionData}
+          fetchStatus={status}
+          distribution={showDetails ? errorDistributionData : emptyState}
           title={i18n.translate(
             'xpack.apm.errorGroupDetails.occurrencesChartLabel',
             {

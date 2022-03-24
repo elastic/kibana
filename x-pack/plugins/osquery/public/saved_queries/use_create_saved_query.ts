@@ -9,7 +9,6 @@ import { useMutation, useQueryClient } from 'react-query';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';
-import { savedQuerySavedObjectType } from '../../common/types';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { SAVED_QUERIES_ID } from './constants';
@@ -23,48 +22,23 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
   const queryClient = useQueryClient();
   const {
     application: { navigateToApp },
-    savedObjects,
-    security,
+    http,
     notifications: { toasts },
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useMutation(
-    async (payload) => {
-      const currentUser = await security.authc.getCurrentUser();
-
-      if (!currentUser) {
-        throw new Error('CurrentUser is missing');
-      }
-      // @ts-expect-error update types
-      const payloadId = payload.id;
-      const conflictingEntries = await savedObjects.client.find({
-        type: savedQuerySavedObjectType,
-        search: payloadId,
-        searchFields: ['id'],
-      });
-      if (conflictingEntries.savedObjects.length) {
-        throw new Error(`Saved query with id ${payloadId} already exists.`);
-      }
-      return savedObjects.client.create(savedQuerySavedObjectType, {
-        // @ts-expect-error update types
-        ...payload,
-        created_by: currentUser.username,
-        created_at: new Date(Date.now()).toISOString(),
-        updated_by: currentUser.username,
-        updated_at: new Date(Date.now()).toISOString(),
-      });
-    },
+    (payload) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      http.post<any>('/internal/osquery/saved_query', {
+        body: JSON.stringify(payload),
+      }),
     {
-      onError: (error) => {
-        if (error instanceof Error) {
-          return setErrorToast(error, {
-            title: 'Saved query creation error',
-            toastMessage: error.message,
-          });
-        }
-        // @ts-expect-error update types
-        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
+      onError: (error: { body: { error: string; message: string } }) => {
+        setErrorToast(error, {
+          title: error.body.error,
+          toastMessage: error.body.message,
+        });
       },
       onSuccess: (payload) => {
         queryClient.invalidateQueries(SAVED_QUERIES_ID);

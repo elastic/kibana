@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
@@ -13,9 +14,11 @@ const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
-  describe('Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/106650
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
@@ -44,15 +47,96 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
       );
 
+      it('renders an empty data prompt for dates with no data', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
+        await pageObjects.infraHome.getNoMetricsDataPrompt();
+      });
+
       it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.getWaffleMapTooltips();
       });
 
-      it('renders an empty data prompt for dates with no data', async () => {
-        await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
-        await pageObjects.infraHome.getNoMetricsDataPrompt();
+      it('sort nodes by descending value', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.sortNodesBy('value');
+        await retry.try(async () => {
+          const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
+          expect(nodesWithValue).to.eql([
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
+            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
+            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
+            { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
+            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
+          ]);
+        });
+      });
+
+      it('sort nodes by ascending value', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.sortNodesBy('value');
+        await pageObjects.infraHome.toggleReverseSort();
+        await retry.try(async () => {
+          const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
+          expect(nodesWithValue).to.eql([
+            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
+            { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
+            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
+            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
+            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+          ]);
+        });
+      });
+
+      it('group nodes by custom field', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
+        await retry.try(async () => {
+          const groups = await pageObjects.infraHome.groupByCustomField('host.os.platform');
+          expect(groups).to.eql(['ubuntu']);
+        });
+      });
+
+      it('filter nodes by search term', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.enterSearchTerm('host.name: "demo-stack-apache-01"');
+        await retry.try(async () => {
+          const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
+          expect(nodesWithValue).to.eql([
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+          ]);
+        });
+        await pageObjects.infraHome.clearSearchTerm();
+      });
+
+      it('change color palette', async () => {
+        await pageObjects.infraHome.openLegendControls();
+        await pageObjects.infraHome.changePalette('temperature');
+        await pageObjects.infraHome.applyLegendControls();
+        await retry.try(async () => {
+          const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
+          expect(nodesWithValue).to.eql([
+            { name: 'demo-stack-client-01', value: 0.6, color: '#6092c0' },
+            { name: 'demo-stack-haproxy-01', value: 0.8, color: '#b5c9df' },
+            { name: 'demo-stack-redis-01', value: 1, color: '#f1d9b9' },
+            { name: 'demo-stack-nginx-01', value: 1.1, color: '#eec096' },
+            { name: 'demo-stack-mysql-01', value: 1.2, color: '#eba47a' },
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#e7664c' },
+          ]);
+        });
+      });
+
+      it('toggle the timeline', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
+        await pageObjects.infraHome.openTimeline();
+        await pageObjects.infraHome.closeTimeline();
       });
     });
 
@@ -86,8 +170,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/106650
-    describe.skip('Saved Views', () => {
+    describe('Saved Views', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       it('should have save and load controls', async () => {

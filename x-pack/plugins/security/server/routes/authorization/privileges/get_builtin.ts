@@ -11,7 +11,7 @@ export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionPara
   router.get(
     { path: '/internal/security/esPrivileges/builtin', validate: false },
     async (context, request, response) => {
-      const { body: privileges } =
+      const privileges =
         await context.core.elasticsearch.client.asCurrentUser.security.getBuiltinPrivileges();
 
       // Exclude the `none` privilege, as it doesn't make sense as an option within the Kibana UI

@@ -15,13 +15,10 @@ import { i18n } from '@kbn/i18n';
 import * as jsts from 'jsts';
 import { MapMouseEvent } from '@kbn/mapbox-gl';
 import { getToasts } from '../../../../kibana_services';
-import { DrawControl } from '../';
+import { DrawControl } from '../draw_control';
 import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common/constants';
 import { ILayer } from '../../../../classes/layers/layer';
-import {
-  EXCLUDE_CENTROID_FEATURES,
-  EXCLUDE_TOO_MANY_FEATURES_BOX,
-} from '../../../../classes/util/mb_filter_expressions';
+import { EXCLUDE_CENTROID_FEATURES } from '../../../../classes/util/mb_filter_expressions';
 
 const geoJSONReader = new jsts.io.GeoJSONReader();
 
@@ -32,9 +29,8 @@ export interface ReduxStateProps {
 }
 
 export interface ReduxDispatchProps {
-  addNewFeatureToIndex: (geometry: Geometry | Position[]) => void;
+  addNewFeatureToIndex: (geometries: Array<Geometry | Position[]>) => void;
   deleteFeatureFromIndex: (featureId: string) => void;
-  disableDrawState: () => void;
 }
 
 export interface OwnProps {
@@ -46,6 +42,7 @@ type Props = ReduxStateProps & ReduxDispatchProps & OwnProps;
 export class DrawFeatureControl extends Component<Props, {}> {
   _onDraw = async (e: { features: Feature[] }, mbDrawControl: MapboxDraw) => {
     try {
+      const geometries: Array<Geometry | Position[]> = [];
       e.features.forEach((feature: Feature) => {
         const { geometry } = geoJSONReader.read(feature);
         if (!geometry.isSimple() || !geometry.isValid()) {
@@ -61,9 +58,13 @@ export class DrawFeatureControl extends Component<Props, {}> {
             this.props.drawMode === DRAW_MODE.DRAW_POINTS
               ? feature.geometry.coordinates
               : feature.geometry;
-          this.props.addNewFeatureToIndex(featureGeom);
+          geometries.push(featureGeom);
         }
       });
+
+      if (geometries.length) {
+        this.props.addNewFeatureToIndex(geometries);
+      }
     } catch (error) {
       getToasts().addWarning(
         i18n.translate('xpack.maps.drawFeatureControl.unableToCreateFeature', {
@@ -74,7 +75,6 @@ export class DrawFeatureControl extends Component<Props, {}> {
         })
       );
     } finally {
-      this.props.disableDrawState();
       try {
         mbDrawControl.deleteAll();
       } catch (_e) {
@@ -89,6 +89,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
     if (!this.props.editLayer || this.props.drawShape !== DRAW_SHAPE.DELETE) {
       return;
     }
+
     const mbEditLayerIds = this.props.editLayer
       .getMbLayerIds()
       .filter((mbLayerId) => !!this.props.mbMap.getLayer(mbLayerId));
@@ -105,7 +106,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
     ] as [MbPoint, MbPoint];
     const selectedFeatures = this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbEditLayerIds,
-      filter: ['all', EXCLUDE_TOO_MANY_FEATURES_BOX, EXCLUDE_CENTROID_FEATURES],
+      filter: ['all', EXCLUDE_CENTROID_FEATURES],
     });
     if (!selectedFeatures.length) {
       return;

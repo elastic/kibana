@@ -10,10 +10,11 @@
 ```typescript
 export interface AuthRedirected extends AuthRedirectedParams 
 ```
+<b>Extends:</b> AuthRedirectedParams
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [type](./kibana-plugin-core-server.authredirected.type.md) | <code>AuthResultType.redirected</code> |  |
+|  [type](./kibana-plugin-core-server.authredirected.type.md) | AuthResultType.redirected |  |
 

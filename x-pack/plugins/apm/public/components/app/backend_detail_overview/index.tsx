@@ -11,7 +11,6 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ApmBackendContextProvider } from '../../../context/apm_backend/apm_backend_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -31,8 +30,8 @@ import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 export function BackendDetailOverview() {
   const {
-    path: { backendName },
     query: {
+      backendName,
       rangeFrom,
       rangeTo,
       refreshInterval,
@@ -40,7 +39,7 @@ export function BackendDetailOverview() {
       environment,
       kuery,
     },
-  } = useApmParams('/backends/{backendName}/overview');
+  } = useApmParams('/backends/overview');
 
   const apmRouter = useApmRouter();
 
@@ -60,9 +59,9 @@ export function BackendDetailOverview() {
     },
     {
       title: backendName,
-      href: apmRouter.link('/backends/{backendName}/overview', {
-        path: { backendName },
+      href: apmRouter.link('/backends/overview', {
         query: {
+          backendName,
           rangeFrom,
           rangeTo,
           refreshInterval,
@@ -82,62 +81,59 @@ export function BackendDetailOverview() {
   const largeScreenOrSmaller = useBreakpoints().isLarge;
 
   return (
-    <ApmBackendContextProvider>
-      <BackendDetailTemplate title={backendName}>
-        <SearchBar
-          showTimeComparison
-          kueryBarPlaceholder={kueryBarPlaceholder}
-          kueryBarBoolFilter={kueryBarBoolFilter}
-        />
-        <ChartPointerEventContextProvider>
-          <EuiFlexGroup
-            direction={largeScreenOrSmaller ? 'column' : 'row'}
-            gutterSize="s"
-          >
-            <EuiFlexItem>
-              <EuiPanel hasBorder={true}>
-                <EuiTitle size="xs">
-                  <h2>
-                    {i18n.translate(
-                      'xpack.apm.backendDetailLatencyChartTitle',
-                      { defaultMessage: 'Latency' }
-                    )}
-                  </h2>
-                </EuiTitle>
-                <BackendLatencyChart height={200} />
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel hasBorder={true}>
-                <EuiTitle size="xs">
-                  <h2>
-                    {i18n.translate(
-                      'xpack.apm.backendDetailThroughputChartTitle',
-                      { defaultMessage: 'Throughput' }
-                    )}
-                  </h2>
-                </EuiTitle>
-                <BackendThroughputChart height={200} />
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel hasBorder={true}>
-                <EuiTitle size="xs">
-                  <h2>
-                    {i18n.translate(
-                      'xpack.apm.backendDetailFailedTransactionRateChartTitle',
-                      { defaultMessage: 'Failed transaction rate' }
-                    )}
-                  </h2>
-                </EuiTitle>
-                <BackendFailedTransactionRateChart height={200} />
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </ChartPointerEventContextProvider>
-        <EuiSpacer size="l" />
-        <BackendDetailDependenciesTable />
-      </BackendDetailTemplate>
-    </ApmBackendContextProvider>
+    <BackendDetailTemplate title={backendName}>
+      <SearchBar
+        showTimeComparison
+        kueryBarPlaceholder={kueryBarPlaceholder}
+        kueryBarBoolFilter={kueryBarBoolFilter}
+      />
+      <ChartPointerEventContextProvider>
+        <EuiFlexGroup
+          direction={largeScreenOrSmaller ? 'column' : 'row'}
+          gutterSize="s"
+        >
+          <EuiFlexItem>
+            <EuiPanel hasBorder={true}>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.apm.backendDetailLatencyChartTitle', {
+                    defaultMessage: 'Latency',
+                  })}
+                </h2>
+              </EuiTitle>
+              <BackendLatencyChart height={200} />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel hasBorder={true}>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate(
+                    'xpack.apm.backendDetailThroughputChartTitle',
+                    { defaultMessage: 'Throughput' }
+                  )}
+                </h2>
+              </EuiTitle>
+              <BackendThroughputChart height={200} />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel hasBorder={true}>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate(
+                    'xpack.apm.backendDetailFailedTransactionRateChartTitle',
+                    { defaultMessage: 'Failed transaction rate' }
+                  )}
+                </h2>
+              </EuiTitle>
+              <BackendFailedTransactionRateChart height={200} />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </ChartPointerEventContextProvider>
+      <EuiSpacer size="l" />
+      <BackendDetailDependenciesTable />
+    </BackendDetailTemplate>
   );
 }

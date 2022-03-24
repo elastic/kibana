@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CaseConnector, CaseType, ConnectorTypes } from '../../common/api';
+import { CaseConnector, ConnectorTypes } from '../../common/api';
 import { newCase } from '../routes/api/__mocks__/request_responses';
-import { transformNewCase } from '../common';
+import { transformNewCase } from '../common/utils';
 import { sortToSnake } from './utils';
 
 describe('utils', () => {
@@ -38,6 +38,15 @@ describe('utils', () => {
   });
 
   describe('transformNewCase', () => {
+    beforeAll(() => {
+      jest.useFakeTimers('modern');
+      jest.setSystemTime(new Date('2020-04-09T09:43:51.778Z'));
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
     const connector: CaseConnector = {
       id: '123',
       name: 'My connector',
@@ -46,12 +55,12 @@ describe('utils', () => {
     };
     it('transform correctly', () => {
       const myCase = {
-        newCase: { ...newCase, type: CaseType.individual },
-        connector,
-        createdDate: '2020-04-09T09:43:51.778Z',
-        email: 'elastic@elastic.co',
-        full_name: 'Elastic',
-        username: 'elastic',
+        newCase: { ...newCase, connector },
+        user: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic',
+          username: 'elastic',
+        },
       };
 
       const res = transformNewCase(myCase);
@@ -88,106 +97,6 @@ describe('utils', () => {
             "case",
           ],
           "title": "My new case",
-          "type": "individual",
-          "updated_at": null,
-          "updated_by": null,
-        }
-      `);
-    });
-
-    it('transform correctly without optional fields', () => {
-      const myCase = {
-        newCase: { ...newCase, type: CaseType.individual },
-        connector,
-        createdDate: '2020-04-09T09:43:51.778Z',
-      };
-
-      const res = transformNewCase(myCase);
-
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "closed_at": null,
-          "closed_by": null,
-          "connector": Object {
-            "fields": Object {
-              "issueType": "Task",
-              "parent": null,
-              "priority": "High",
-            },
-            "id": "123",
-            "name": "My connector",
-            "type": ".jira",
-          },
-          "created_at": "2020-04-09T09:43:51.778Z",
-          "created_by": Object {
-            "email": undefined,
-            "full_name": undefined,
-            "username": undefined,
-          },
-          "description": "A description",
-          "external_service": null,
-          "owner": "securitySolution",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "tags": Array [
-            "new",
-            "case",
-          ],
-          "title": "My new case",
-          "type": "individual",
-          "updated_at": null,
-          "updated_by": null,
-        }
-      `);
-    });
-
-    it('transform correctly with optional fields as null', () => {
-      const myCase = {
-        newCase: { ...newCase, type: CaseType.individual },
-        connector,
-        createdDate: '2020-04-09T09:43:51.778Z',
-        email: null,
-        full_name: null,
-        username: null,
-      };
-
-      const res = transformNewCase(myCase);
-
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "closed_at": null,
-          "closed_by": null,
-          "connector": Object {
-            "fields": Object {
-              "issueType": "Task",
-              "parent": null,
-              "priority": "High",
-            },
-            "id": "123",
-            "name": "My connector",
-            "type": ".jira",
-          },
-          "created_at": "2020-04-09T09:43:51.778Z",
-          "created_by": Object {
-            "email": null,
-            "full_name": null,
-            "username": null,
-          },
-          "description": "A description",
-          "external_service": null,
-          "owner": "securitySolution",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "tags": Array [
-            "new",
-            "case",
-          ],
-          "title": "My new case",
-          "type": "individual",
           "updated_at": null,
           "updated_by": null,
         }

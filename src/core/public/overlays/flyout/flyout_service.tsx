@@ -8,14 +8,15 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { EuiFlyout, EuiFlyoutSize } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutSize, EuiOverlayMaskProps } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
+import { ThemeServiceStart } from '../../theme';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
-import { MountWrapper } from '../../utils';
+import { MountWrapper, CoreContextProvider } from '../../utils';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
@@ -86,6 +87,7 @@ export interface OverlayFlyoutOpenOptions {
   size?: EuiFlyoutSize;
   maxWidth?: boolean | number | string;
   hideCloseButton?: boolean;
+  maskProps?: EuiOverlayMaskProps;
   /**
    * EuiFlyout onClose handler.
    * If provided the consumer is responsible for calling flyout.close() to close the flyout;
@@ -95,6 +97,7 @@ export interface OverlayFlyoutOpenOptions {
 
 interface StartDeps {
   i18n: I18nStart;
+  theme: ThemeServiceStart;
   targetDomElement: Element;
 }
 
@@ -103,7 +106,7 @@ export class FlyoutService {
   private activeFlyout: FlyoutRef | null = null;
   private targetDomElement: Element | null = null;
 
-  public start({ i18n, targetDomElement }: StartDeps): OverlayFlyoutStart {
+  public start({ i18n, theme, targetDomElement }: StartDeps): OverlayFlyoutStart {
     this.targetDomElement = targetDomElement;
 
     return {
@@ -134,11 +137,11 @@ export class FlyoutService {
         };
 
         render(
-          <i18n.Context>
+          <CoreContextProvider i18n={i18n} theme={theme}>
             <EuiFlyout {...options} onClose={onCloseFlyout}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiFlyout>
-          </i18n.Context>,
+          </CoreContextProvider>,
           this.targetDomElement
         );
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, MakeLogicType, isBreakpoint } from 'kea';
+import type { BreakPointFunction } from 'kea';
 import { cloneDeep, findIndex } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
@@ -61,6 +62,7 @@ export interface ISourcesValues {
   permissionsModal: IPermissionsModalProps | null;
   dataLoading: boolean;
   serverStatuses: ServerStatuses | null;
+  externalConfigured: boolean;
 }
 
 interface ISourcesServerResponse {
@@ -148,6 +150,11 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       () => [selectors.sourceData],
       (sourceData: SourceDataItem[]) => sourceData.filter(({ configured }) => configured),
     ],
+    externalConfigured: [
+      () => [selectors.configuredSources],
+      (configuredSources: SourceDataItem[]) =>
+        !!configuredSources.find((item) => item.serviceType === 'external'),
+    ],
     sourceData: [
       () => [selectors.serviceTypes, selectors.contentSources],
       (serviceTypes, contentSources) =>
@@ -155,36 +162,41 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeSources: async () => {
+    initializeSources: async (_, breakpoint) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? '/internal/workplace_search/org/sources'
         : '/internal/workplace_search/account/sources';
 
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get<ISourcesServerResponse>(route);
+        breakpoint(); // Prevents errors if logic unmounts while fetching
         actions.pollForSourceStatusChanges();
         actions.onInitializeSources(response);
       } catch (e) {
-        flashAPIErrors(e);
+        if (isBreakpoint(e)) {
+          return; // do not continue if logic is unmounted
+        } else {
+          flashAPIErrors(e);
+        }
       }
 
       if (isOrganization && !values.serverStatuses) {
         // We want to get the initial statuses from the server to compare our polling results to.
-        const sourceStatuses = await fetchSourceStatuses(isOrganization);
-        actions.setServerSourceStatuses(sourceStatuses);
+        const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
+        actions.setServerSourceStatuses(sourceStatuses ?? []);
       }
     },
     // We poll the server and if the status update, we trigger a new fetch of the sources.
-    pollForSourceStatusChanges: () => {
+    pollForSourceStatusChanges: (_, breakpoint) => {
       const { isOrganization } = AppLogic.values;
       if (!isOrganization) return;
       const serverStatuses = values.serverStatuses;
 
       pollingInterval = window.setInterval(async () => {
-        const sourceStatuses = await fetchSourceStatuses(isOrganization);
+        const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
 
-        sourceStatuses.some((source: ContentSourceStatus) => {
+        (sourceStatuses ?? []).some((source: ContentSourceStatus) => {
           if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
             return actions.initializeSources();
           }
@@ -240,17 +252,25 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   }),
 });
 
-export const fetchSourceStatuses = async (isOrganization: boolean) => {
+export const fetchSourceStatuses = async (
+  isOrganization: boolean,
+  breakpoint: BreakPointFunction
+): Promise<ContentSourceStatus[] | undefined> => {
   const route = isOrganization
     ? '/internal/workplace_search/org/sources/status'
     : '/internal/workplace_search/account/sources/status';
   let response;
 
   try {
-    response = await HttpLogic.values.http.get(route);
+    response = await HttpLogic.values.http.get<ContentSourceStatus[]>(route);
+    breakpoint();
     SourcesLogic.actions.setServerSourceStatuses(response);
   } catch (e) {
-    flashAPIErrors(e);
+    if (isBreakpoint(e)) {
+      // Do nothing, silence the error
+    } else {
+      flashAPIErrors(e);
+    }
   }
 
   return response;
@@ -278,7 +298,7 @@ const updateSourcesOnToggle = (
  * The second is the base list of available sources that the server sends back in the collection,
  * `availableTypes` that is the source of truth for the name and whether the source has been configured.
  *
- * Fnally, also in the collection response is the current set of connected sources. We check for the
+ * Finally, also in the collection response is the current set of connected sources. We check for the
  * existence of a `connectedSource` of the type in the loop and set `connected` to true so that the UI
  * can diplay "Add New" instead of "Connect", the latter of which is displated only when a connector
  * has been configured but there are no connected sources yet.
@@ -289,13 +309,13 @@ export const mergeServerAndStaticData = (
   contentSources: ContentSourceDetails[]
 ) => {
   const combined = [] as CombinedDataItem[];
-  serverData.forEach((serverItem) => {
-    const type = serverItem.serviceType;
-    const staticItem = staticData.find(({ serviceType }) => serviceType === type);
+  staticData.forEach((staticItem) => {
+    const type = staticItem.serviceType;
+    const serverItem = serverData.find(({ serviceType }) => serviceType === type);
     const connectedSource = contentSources.find(({ serviceType }) => serviceType === type);
     combined.push({
-      ...serverItem,
       ...staticItem,
+      ...serverItem,
       connected: !!connectedSource,
     } as CombinedDataItem);
   });

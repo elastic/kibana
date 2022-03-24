@@ -23,10 +23,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
 import { first, last } from 'lodash';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InfraWaffleMapBounds, InventoryColorPalette, PALETTES } from '../../../../../lib/lib';
 import { WaffleLegendOptions } from '../../hooks/use_waffle_options';
 import { getColorPalette } from '../../lib/get_color_palette';
@@ -78,12 +77,15 @@ export const LegendControls = ({
 
   const buttonComponent = (
     <EuiButtonIcon
-      iconType="controlsHorizontal"
+      iconType="color"
       color="text"
+      display="base"
+      size="s"
       aria-label={i18n.translate('xpack.infra.legendControls.buttonLabel', {
         defaultMessage: 'configure legend',
       })}
       onClick={() => setPopoverState(true)}
+      data-test-subj="openLegendControlsButton"
     />
   );
 
@@ -131,6 +133,7 @@ export const LegendControls = ({
       bounds: { min: draftBounds.min / 100, max: draftBounds.max / 100 },
       legend: draftLegend,
     });
+    setPopoverState(false);
   }, [onChange, draftAuto, draftBounds, draftLegend]);
 
   const handleCancelClick = useCallback(() => {
@@ -179,182 +182,177 @@ export const LegendControls = ({
     : [];
 
   return (
-    <ControlContainer>
-      <EuiPopover
-        isOpen={isPopoverOpen}
-        closePopover={handleCancelClick}
-        id="legendControls"
-        button={buttonComponent}
-      >
-        <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
-        <EuiForm style={{ minWidth: 400 }}>
-          <EuiFormRow
-            display="columnCompressed"
-            label={i18n.translate('xpack.infra.legendControls.colorPaletteLabel', {
-              defaultMessage: 'Color palette',
-            })}
-          >
-            <>
-              <EuiSelect
-                options={PALETTE_OPTIONS}
-                value={draftLegend.palette}
-                id="palette"
-                onChange={handlePaletteChange}
-                compressed
-              />
-              <EuiSpacer size="m" />
-              <PalettePreview
-                palette={draftLegend.palette}
-                steps={draftLegend.steps}
-                reverse={draftLegend.reverseColors}
-              />
-            </>
-          </EuiFormRow>
-          <EuiFormRow
-            display="columnCompressed"
-            label={i18n.translate('xpack.infra.legendControls.stepsLabel', {
-              defaultMessage: 'Number of colors',
-            })}
-          >
-            <EuiRange
-              id="steps"
-              min={2}
-              max={18}
+    <EuiPopover
+      isOpen={isPopoverOpen}
+      closePopover={handleCancelClick}
+      id="legendControls"
+      button={buttonComponent}
+      anchorPosition="leftCenter"
+      data-test-subj="legendControls"
+    >
+      <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
+      <EuiForm style={{ minWidth: 400 }}>
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.infra.legendControls.colorPaletteLabel', {
+            defaultMessage: 'Color palette',
+          })}
+        >
+          <>
+            <EuiSelect
+              options={PALETTE_OPTIONS}
+              value={draftLegend.palette}
+              id="palette"
+              onChange={handlePaletteChange}
+              compressed
+              data-test-subj="legendControlsPalette"
+            />
+            <EuiSpacer size="m" />
+            <PalettePreview
+              palette={draftLegend.palette}
+              steps={draftLegend.steps}
+              reverse={draftLegend.reverseColors}
+            />
+          </>
+        </EuiFormRow>
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.infra.legendControls.stepsLabel', {
+            defaultMessage: 'Number of colors',
+          })}
+        >
+          <EuiRange
+            id="steps"
+            min={2}
+            max={18}
+            step={1}
+            value={draftLegend.steps}
+            onChange={handleStepsChange}
+            showValue
+            fullWidth
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          display="columnCompressed"
+          label={i18n.translate('xpack.infra.legendControls.reverseDirectionLabel', {
+            defaultMessage: 'Reverse direction',
+          })}
+        >
+          <EuiSwitch
+            showLabel={false}
+            name="reverseColors"
+            label="reverseColors"
+            checked={draftLegend.reverseColors}
+            onChange={handleReverseColors}
+            compressed
+            style={{
+              position: 'relative',
+              top: '8px',
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          display="columnCompressed"
+          label={i18n.translate('xpack.infra.legendControls.switchLabel', {
+            defaultMessage: 'Auto calculate range',
+          })}
+        >
+          <EuiSwitch
+            showLabel={false}
+            name="bounds"
+            label="bounds"
+            checked={draftAuto}
+            onChange={handleAutoChange}
+            compressed
+            style={{
+              position: 'relative',
+              top: '8px',
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          label={
+            <SwatchLabel
+              color={first(paletteColors)!}
+              label={i18n.translate('xpack.infra.legendControls.minLabel', {
+                defaultMessage: 'Minimum',
+              })}
+            />
+          }
+          isInvalid={!boundsValidRange}
+          display="columnCompressed"
+          error={errors}
+        >
+          <div style={{ maxWidth: 150 }}>
+            <EuiFieldNumber
+              disabled={draftAuto}
               step={1}
-              value={draftLegend.steps}
-              onChange={handleStepsChange}
-              showValue
-              fullWidth
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            display="columnCompressed"
-            label={i18n.translate('xpack.infra.legendControls.reverseDirectionLabel', {
-              defaultMessage: 'Reverse direction',
-            })}
-          >
-            <EuiSwitch
-              showLabel={false}
-              name="reverseColors"
-              label="reverseColors"
-              checked={draftLegend.reverseColors}
-              onChange={handleReverseColors}
+              value={isNaN(draftBounds.min) ? '' : draftBounds.min}
+              isInvalid={!boundsValidRange}
+              name="legendMin"
+              onChange={handleMinBounds}
+              append="%"
               compressed
-              style={{
-                position: 'relative',
-                top: '8px',
-              }}
             />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            display="columnCompressed"
-            label={i18n.translate('xpack.infra.legendControls.switchLabel', {
-              defaultMessage: 'Auto calculate range',
-            })}
-          >
-            <EuiSwitch
-              showLabel={false}
-              name="bounds"
-              label="bounds"
-              checked={draftAuto}
-              onChange={handleAutoChange}
+          </div>
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          display="columnCompressed"
+          label={
+            <SwatchLabel
+              color={last(paletteColors)!}
+              label={i18n.translate('xpack.infra.legendControls.maxLabel', {
+                defaultMessage: 'Maxium',
+              })}
+            />
+          }
+          isInvalid={!boundsValidRange}
+          error={errors}
+        >
+          <div style={{ maxWidth: 150 }}>
+            <EuiFieldNumber
+              disabled={draftAuto}
+              step={1}
+              isInvalid={!boundsValidRange}
+              value={isNaN(draftBounds.max) ? '' : draftBounds.max}
+              name="legendMax"
+              onChange={handleMaxBounds}
+              append="%"
               compressed
-              style={{
-                position: 'relative',
-                top: '8px',
-              }}
             />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            label={
-              <SwatchLabel
-                color={first(paletteColors)!}
-                label={i18n.translate('xpack.infra.legendControls.minLabel', {
-                  defaultMessage: 'Minimum',
-                })}
+          </div>
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty type="submit" size="s" onClick={handleCancelClick}>
+              <FormattedMessage
+                id="xpack.infra.legendControls.cancelButton"
+                defaultMessage="Cancel"
               />
-            }
-            isInvalid={!boundsValidRange}
-            display="columnCompressed"
-            error={errors}
-          >
-            <div style={{ maxWidth: 150 }}>
-              <EuiFieldNumber
-                disabled={draftAuto}
-                step={1}
-                value={isNaN(draftBounds.min) ? '' : draftBounds.min}
-                isInvalid={!boundsValidRange}
-                name="legendMin"
-                onChange={handleMinBounds}
-                append="%"
-                compressed
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              type="submit"
+              size="s"
+              fill
+              disabled={commited || !boundsValidRange}
+              onClick={handleApplyClick}
+              data-test-subj="applyLegendControlsButton"
+            >
+              <FormattedMessage
+                id="xpack.infra.legendControls.applyButton"
+                defaultMessage="Apply"
               />
-            </div>
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            display="columnCompressed"
-            label={
-              <SwatchLabel
-                color={last(paletteColors)!}
-                label={i18n.translate('xpack.infra.legendControls.maxLabel', {
-                  defaultMessage: 'Maxium',
-                })}
-              />
-            }
-            isInvalid={!boundsValidRange}
-            error={errors}
-          >
-            <div style={{ maxWidth: 150 }}>
-              <EuiFieldNumber
-                disabled={draftAuto}
-                step={1}
-                isInvalid={!boundsValidRange}
-                value={isNaN(draftBounds.max) ? '' : draftBounds.max}
-                name="legendMax"
-                onChange={handleMaxBounds}
-                append="%"
-                compressed
-              />
-            </div>
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty type="submit" size="s" onClick={handleCancelClick}>
-                <FormattedMessage
-                  id="xpack.infra.legendControls.cancelButton"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                type="submit"
-                size="s"
-                fill
-                disabled={commited || !boundsValidRange}
-                onClick={handleApplyClick}
-              >
-                <FormattedMessage
-                  id="xpack.infra.legendControls.applyButton"
-                  defaultMessage="Apply"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiForm>
-      </EuiPopover>
-    </ControlContainer>
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiForm>
+    </EuiPopover>
   );
 };
-
-const ControlContainer = euiStyled.div`
-  position: absolute;
-  top: -20px;
-  right: 6px;
-  bottom: 0;
-`;

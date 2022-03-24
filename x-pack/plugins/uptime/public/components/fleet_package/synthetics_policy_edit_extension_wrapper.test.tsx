@@ -12,13 +12,19 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { NewPackagePolicy } from '../../../../fleet/public';
 import { SyntheticsPolicyEditExtensionWrapper } from './synthetics_policy_edit_extension_wrapper';
-import { ConfigKeys, DataStream, ScheduleUnit } from './types';
+import { ConfigKey, DataStream, ScheduleUnit } from './types';
 import { defaultConfig } from './synthetics_policy_create_extension';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
+
+// ensures that fields appropriately match to their label
+jest.mock('@elastic/eui/lib/services/accessibility', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility'),
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
 jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
@@ -370,25 +376,23 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const verificationMode = getByLabelText('Verification mode') as HTMLInputElement;
     const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
     expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultHTTPConfig[ConfigKeys.URLS]);
+    expect(url.value).toEqual(defaultHTTPConfig[ConfigKey.URLS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKey.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKey.APM_SERVICE_NAME]);
     expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKeys.MAX_REDIRECTS]}`);
+    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKey.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKey.TIMEOUT]}`);
     // expect TLS settings to be in the document when at least one tls key is populated
     expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('true');
     expect(verificationMode).toBeInTheDocument();
-    expect(verificationMode.value).toEqual(
-      `${defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]}`
-    );
+    expect(verificationMode.value).toEqual(`${defaultHTTPConfig[ConfigKey.TLS_VERIFICATION_MODE]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
@@ -535,7 +539,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     fireEvent.change(timeout, { target: { value: '-1' } });
 
     const urlError = getByText('URL is required');
-    const monitorIntervalError = getByText('Monitor interval is required');
+    const monitorIntervalError = getByText('Monitor frequency is required');
     const maxRedirectsError = getByText('Max redirects must be 0 or greater');
     const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
@@ -562,7 +566,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     // expect onChange to be called with isValid true
     await waitFor(() => {
       expect(queryByText('URL is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -573,16 +577,43 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     });
   });
 
-  it('shows tls fields when metadata.is_tls_enabled is true', async () => {
-    const { getByLabelText } = render(<WrappedComponent />);
-    const verificationMode = getByLabelText('Verification mode') as HTMLInputElement;
-    const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
-    expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('true');
-    expect(verificationMode).toBeInTheDocument();
-    expect(verificationMode.value).toEqual(
-      `${defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]}`
-    );
-  });
+  it.each([[true], [false]])(
+    'shows tls fields when metadata.is_tls_enabled is or verification mode is truthy true',
+    async (isTLSEnabledInUIMetadataKey) => {
+      const currentPolicy = {
+        ...defaultCurrentPolicy,
+        inputs: [
+          {
+            ...defaultNewPolicy.inputs[0],
+            enabled: true,
+            streams: [
+              {
+                ...defaultNewPolicy.inputs[0].streams[0],
+                vars: {
+                  ...defaultNewPolicy.inputs[0].streams[0].vars,
+                  __ui: {
+                    type: 'yaml',
+                    value: JSON.stringify({
+                      is_tls_enabled: isTLSEnabledInUIMetadataKey,
+                    }),
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { getByLabelText } = render(<WrappedComponent policy={currentPolicy} />);
+      const verificationMode = getByLabelText('Verification mode') as HTMLInputElement;
+      const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
+      expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('true');
+      expect(verificationMode).toBeInTheDocument();
+      expect(verificationMode.value).toEqual(
+        `${defaultHTTPConfig[ConfigKey.TLS_VERIFICATION_MODE]}`
+      );
+    }
+  );
 
   it('handles browser validation', async () => {
     const currentPolicy = {
@@ -612,21 +643,17 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     const zipUrl = getByRole('textbox', { name: 'Zip URL' }) as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(zipUrl, { target: { value: '' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
-    fireEvent.change(timeout, { target: { value: '-1' } });
 
     await waitFor(() => {
       const hostError = getByText('Zip URL is required');
-      const monitorIntervalError = getByText('Monitor interval is required');
-      const timeoutError = getByText('Timeout must be greater than or equal to 0');
+      const monitorIntervalError = getByText('Monitor frequency is required');
 
       expect(hostError).toBeInTheDocument();
       expect(monitorIntervalError).toBeInTheDocument();
-      expect(timeoutError).toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: false,
@@ -637,12 +664,10 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     await waitFor(() => {
       fireEvent.change(zipUrl, { target: { value: 'http://github.com/tests.zip' } });
       fireEvent.change(monitorIntervalNumber, { target: { value: '2' } });
-      fireEvent.change(timeout, { target: { value: '1' } });
       expect(zipUrl.value).toEqual('http://github.com/tests.zip');
       expect(monitorIntervalNumber.value).toEqual('2');
-      expect(timeout.value).toEqual('1');
       expect(queryByText('Zip URL is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
@@ -691,7 +716,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     await waitFor(() => {
       const hostError = getByText('Host and port are required');
-      const monitorIntervalError = getByText('Monitor interval is required');
+      const monitorIntervalError = getByText('Monitor frequency is required');
       const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
       expect(hostError).toBeInTheDocument();
@@ -711,7 +736,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     await waitFor(() => {
       expect(queryByText('Host is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
@@ -757,7 +782,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     await waitFor(() => {
       const hostError = getByText('Host is required');
-      const monitorIntervalError = getByText('Monitor interval is required');
+      const monitorIntervalError = getByText('Monitor frequency is required');
       const timeoutError = getByText('Timeout must be greater than or equal to 0');
       const waitError = getByText('Wait must be 0 or greater');
 
@@ -780,7 +805,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     await waitFor(() => {
       expect(queryByText('Host is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(queryByText('Wait must be 0 or greater')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -812,7 +837,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
                   };
                   return acc;
                 }, {}),
-                [ConfigKeys.MONITOR_TYPE]: {
+                [ConfigKey.MONITOR_TYPE]: {
                   value: 'http',
                   type: 'text',
                 },
@@ -838,19 +863,19 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
 
     expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultHTTPConfig[ConfigKeys.URLS]);
+    expect(url.value).toEqual(defaultHTTPConfig[ConfigKey.URLS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKey.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKey.APM_SERVICE_NAME]);
     expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKeys.MAX_REDIRECTS]}`);
+    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKey.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKey.TIMEOUT]}`);
 
     /* expect TLS settings not to be in the document when and Enable TLS settings not to be checked
      * when all TLS values are falsey */
@@ -867,7 +892,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     await waitFor(() => {
       const requestMethod = getByLabelText('Request method') as HTMLInputElement;
       expect(requestMethod).toBeInTheDocument();
-      expect(requestMethod.value).toEqual(`${defaultHTTPConfig[ConfigKeys.REQUEST_METHOD_CHECK]}`);
+      expect(requestMethod.value).toEqual(`${defaultHTTPConfig[ConfigKey.REQUEST_METHOD_CHECK]}`);
     });
   });
 
@@ -896,7 +921,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
                   };
                   return acc;
                 }, {}),
-                [ConfigKeys.MONITOR_TYPE]: {
+                [ConfigKey.MONITOR_TYPE]: {
                   value: DataStream.TCP,
                   type: 'text',
                 },
@@ -917,17 +942,17 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(host).toBeInTheDocument();
-    expect(host.value).toEqual(defaultTCPConfig[ConfigKeys.HOSTS]);
+    expect(host.value).toEqual(defaultTCPConfig[ConfigKey.HOSTS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultTCPConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultTCPConfig[ConfigKey.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultTCPConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultTCPConfig[ConfigKey.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultTCPConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultTCPConfig[ConfigKey.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultTCPConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultTCPConfig[ConfigKey.APM_SERVICE_NAME]);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultTCPConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultTCPConfig[ConfigKey.TIMEOUT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Url')).not.toBeInTheDocument();
@@ -970,7 +995,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
                   };
                   return acc;
                 }, {}),
-                [ConfigKeys.MONITOR_TYPE]: {
+                [ConfigKey.MONITOR_TYPE]: {
                   value: DataStream.ICMP,
                   type: 'text',
                 },
@@ -990,17 +1015,17 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     const wait = getByLabelText('Wait in seconds') as HTMLInputElement;
     expect(host).toBeInTheDocument();
-    expect(host.value).toEqual(defaultICMPConfig[ConfigKeys.HOSTS]);
+    expect(host.value).toEqual(defaultICMPConfig[ConfigKey.HOSTS]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultICMPConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultICMPConfig[ConfigKey.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultICMPConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultICMPConfig[ConfigKey.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultICMPConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultICMPConfig[ConfigKey.APM_SERVICE_NAME]);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultICMPConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultICMPConfig[ConfigKey.TIMEOUT]}`);
     expect(wait).toBeInTheDocument();
-    expect(wait.value).toEqual(`${defaultICMPConfig[ConfigKeys.WAIT]}`);
+    expect(wait.value).toEqual(`${defaultICMPConfig[ConfigKey.WAIT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Url')).not.toBeInTheDocument();
@@ -1040,7 +1065,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
                   };
                   return acc;
                 }, {}),
-                [ConfigKeys.MONITOR_TYPE]: {
+                [ConfigKey.MONITOR_TYPE]: {
                   value: DataStream.BROWSER,
                   type: 'text',
                 },
@@ -1057,23 +1082,74 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(zipUrl).toBeInTheDocument();
-    expect(zipUrl.value).toEqual(defaultBrowserConfig[ConfigKeys.SOURCE_ZIP_URL]);
+    expect(zipUrl.value).toEqual(defaultBrowserConfig[ConfigKey.SOURCE_ZIP_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultBrowserConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultBrowserConfig[ConfigKey.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultBrowserConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultBrowserConfig[ConfigKey.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultBrowserConfig[ConfigKeys.APM_SERVICE_NAME]);
-    expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultBrowserConfig[ConfigKeys.TIMEOUT]}`);
+    expect(apmServiceName.value).toEqual(defaultBrowserConfig[ConfigKey.APM_SERVICE_NAME]);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Url')).not.toBeInTheDocument();
     expect(queryByLabelText('Proxy URL')).not.toBeInTheDocument();
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
   });
+
+  it.each([
+    [true, 'Testing script'],
+    [false, 'Inline script'],
+  ])(
+    'browser monitors - auto selects the right tab depending on source metadata',
+    async (isGeneratedScript, text) => {
+      const currentPolicy = {
+        ...defaultCurrentPolicy,
+        inputs: [
+          {
+            ...defaultNewPolicy.inputs[0],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[1],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[2],
+            enabled: false,
+          },
+          {
+            ...defaultNewPolicy.inputs[3],
+            enabled: true,
+            streams: [
+              {
+                ...defaultNewPolicy.inputs[3].streams[0],
+                vars: {
+                  ...defaultNewPolicy.inputs[3].streams[0].vars,
+                  'source.inline.script': {
+                    type: 'yaml',
+                    value: JSON.stringify('step(() => {})'),
+                  },
+                  __ui: {
+                    type: 'yaml',
+                    value: JSON.stringify({
+                      script_source: {
+                        is_generated_script: isGeneratedScript,
+                      },
+                    }),
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { getByText } = render(<WrappedComponent policy={currentPolicy} />);
+
+      expect(getByText(text)).toBeInTheDocument();
+    }
+  );
 
   it('hides tls fields when metadata.is_tls_enabled is false', async () => {
     const { getByLabelText, queryByLabelText } = render(
@@ -1095,6 +1171,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
         }}
       />
     );
+
     const verificationMode = queryByLabelText('Verification mode');
     const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
     expect(enableTLSConfig.getAttribute('aria-checked')).toEqual('false');

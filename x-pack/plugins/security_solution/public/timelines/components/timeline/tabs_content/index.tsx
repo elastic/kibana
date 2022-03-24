@@ -201,7 +201,7 @@ const CountBadge = styled(EuiBadge)`
 `;
 
 const StyledEuiTab = styled(EuiTab)`
-  > span {
+  .euiTab__content {
     display: flex;
     flex-direction: row;
     white-space: pre;

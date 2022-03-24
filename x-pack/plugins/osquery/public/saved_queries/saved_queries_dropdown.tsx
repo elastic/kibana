@@ -7,25 +7,15 @@
 
 import { find } from 'lodash/fp';
 import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiTextColor } from '@elastic/eui';
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SimpleSavedObject } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import { useSavedQueries } from './use_saved_queries';
-
-export interface SavedQueriesDropdownRef {
-  clearSelection: () => void;
-}
+import { useFormData } from '../shared_imports';
 
 const TextTruncate = styled.div`
   overflow: hidden;
@@ -51,28 +41,33 @@ interface SavedQueriesDropdownProps {
   ) => void;
 }
 
-const SavedQueriesDropdownComponent = forwardRef<
-  SavedQueriesDropdownRef,
-  SavedQueriesDropdownProps
->(({ disabled, onChange }, ref) => {
-  const { replace } = useHistory();
-  const location = useLocation();
+const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
+  disabled,
+  onChange,
+}) => {
   const [selectedOptions, setSelectedOptions] = useState([]);
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const [{ query, ecs_mapping, savedQueryId }] = useFormData({
+    watch: ['ecs_mapping', 'query', 'savedQueryId'],
+  });
 
   const { data } = useSavedQueries({});
 
   const queryOptions = useMemo(
     () =>
-      data?.savedObjects?.map((savedQuery) => ({
+      // @ts-expect-error update types
+      data?.saved_objects?.map((savedQuery) => ({
         label: savedQuery.attributes.id ?? '',
         value: {
-          savedObjectId: savedQuery.id,
+          savedQueryId: savedQuery.id,
           id: savedQuery.attributes.id,
           description: savedQuery.attributes.description,
           query: savedQuery.attributes.query,
+          ecs_mapping: savedQuery.attributes.ecs_mapping,
         },
       })) ?? [],
-    [data?.savedObjects]
+    [data?.saved_objects]
   );
 
   const handleSavedQueryChange = useCallback(
@@ -85,15 +80,16 @@ const SavedQueriesDropdownComponent = forwardRef<
 
       const selectedSavedQuery = find(
         ['attributes.id', newSelectedOptions[0].value.id],
-        data?.savedObjects
+        data?.saved_objects
       );
 
       if (selectedSavedQuery) {
-        onChange(selectedSavedQuery.attributes);
+        onChange({ ...selectedSavedQuery.attributes, savedQueryId: selectedSavedQuery.id });
       }
+
       setSelectedOptions(newSelectedOptions);
     },
-    [data?.savedObjects, onChange]
+    [data?.saved_objects, onChange]
   );
 
   const renderOption = useCallback(
@@ -111,29 +107,29 @@ const SavedQueriesDropdownComponent = forwardRef<
     []
   );
 
-  const clearSelection = useCallback(() => setSelectedOptions([]), []);
-
   useEffect(() => {
-    const savedQueryId = location.state?.form?.savedQueryId;
-
     if (savedQueryId) {
-      const savedQueryOption = find(['value.savedObjectId', savedQueryId], queryOptions);
+      const savedQueryOption = find(['value.savedQueryId', savedQueryId], queryOptions);
 
       if (savedQueryOption) {
         handleSavedQueryChange([savedQueryOption]);
       }
-
-      replace({ state: null });
     }
-  }, [handleSavedQueryChange, replace, location.state, queryOptions]);
+  }, [savedQueryId, handleSavedQueryChange, queryOptions]);
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      clearSelection,
-    }),
-    [clearSelection]
-  );
+  useEffect(() => {
+    if (
+      selectedOptions.length &&
+      // @ts-expect-error update types
+      (selectedOptions[0].value.savedQueryId !== savedQueryId ||
+        // @ts-expect-error update types
+        selectedOptions[0].value.query !== query ||
+        // @ts-expect-error update types
+        !deepEqual(selectedOptions[0].value.ecs_mapping, ecs_mapping))
+    ) {
+      setSelectedOptions([]);
+    }
+  }, [ecs_mapping, query, savedQueryId, selectedOptions]);
 
   return (
     <EuiFormRow
@@ -161,6 +157,6 @@ const SavedQueriesDropdownComponent = forwardRef<
       />
     </EuiFormRow>
   );
-});
+};
 
 export const SavedQueriesDropdown = React.memo(SavedQueriesDropdownComponent);

@@ -16,18 +16,15 @@ jest.mock('./generate_csv/generate_csv', () => ({
   },
 }));
 
-import { Writable } from 'stream';
 import nodeCrypto from '@elastic/node-crypto';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { Writable } from 'stream';
 import { ReportingCore } from '../../';
-import { CancellationToken } from '../../../common';
-import {
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { CancellationToken } from '../../../common/cancellation_token';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { runTaskFnFactory } from './execute_job';
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 const encryptionKey = 'tetkey';
 const headers = { sid: 'cooltestheaders' };
 let encryptedHeaders: string;

@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { Observable } from 'rxjs';
+import { SavedObjectsClientContract, CoreTheme } from 'kibana/public';
 
+import { KibanaThemeProvider } from './shared_imports';
 import { App, AppDeps } from './app';
 import { setHttpClient, setSavedObjectsClient } from './lib/api';
 
@@ -16,17 +18,20 @@ interface BootDeps extends AppDeps {
   element: HTMLElement;
   savedObjects: SavedObjectsClientContract;
   I18nContext: any;
+  theme$: Observable<CoreTheme>;
 }
 
 export const renderApp = (bootDeps: BootDeps) => {
-  const { I18nContext, element, savedObjects, ...appDeps } = bootDeps;
+  const { I18nContext, element, savedObjects, theme$, ...appDeps } = bootDeps;
 
   setHttpClient(appDeps.http);
   setSavedObjectsClient(savedObjects);
 
   render(
     <I18nContext>
-      <App {...appDeps} />
+      <KibanaThemeProvider theme$={theme$}>
+        <App {...appDeps} />
+      </KibanaThemeProvider>
     </I18nContext>,
     element
   );

@@ -16,9 +16,9 @@ export interface ServiceStatus<Meta extends Record<string, any> | unknown = unkn
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [detail](./kibana-plugin-core-server.servicestatus.detail.md) | <code>string</code> | A more detailed description of the service status. |
-|  [documentationUrl](./kibana-plugin-core-server.servicestatus.documentationurl.md) | <code>string</code> | A URL to open in a new tab about how to resolve or troubleshoot the problem. |
-|  [level](./kibana-plugin-core-server.servicestatus.level.md) | <code>ServiceStatusLevel</code> | The current availability level of the service. |
-|  [meta](./kibana-plugin-core-server.servicestatus.meta.md) | <code>Meta</code> | Any JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained, machine-readable information about the service status. May include status information for underlying features. |
-|  [summary](./kibana-plugin-core-server.servicestatus.summary.md) | <code>string</code> | A high-level summary of the service status. |
+|  [detail?](./kibana-plugin-core-server.servicestatus.detail.md) | string | <i>(Optional)</i> A more detailed description of the service status. |
+|  [documentationUrl?](./kibana-plugin-core-server.servicestatus.documentationurl.md) | string | <i>(Optional)</i> A URL to open in a new tab about how to resolve or troubleshoot the problem. |
+|  [level](./kibana-plugin-core-server.servicestatus.level.md) | ServiceStatusLevel | The current availability level of the service. |
+|  [meta?](./kibana-plugin-core-server.servicestatus.meta.md) | Meta | <i>(Optional)</i> Any JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained, machine-readable information about the service status. May include status information for underlying features. |
+|  [summary](./kibana-plugin-core-server.servicestatus.summary.md) | string | A high-level summary of the service status. |
 

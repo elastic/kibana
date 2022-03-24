@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject, Observable, Subject, Subscription, asyncScheduler, identity } from 'rxjs';
-import { filter, map, delay, throttleTime } from 'rxjs/operators';
+import { filter, map, delay, shareReplay, throttleTime } from 'rxjs/operators';
 import { defaults } from 'lodash';
 import { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
 import { Adapters } from '../../inspector/public';
@@ -48,6 +48,7 @@ export class ExpressionLoader {
     // as loading$ could emit straight away in the constructor
     // and we want to notify subscribers about it, but all subscriptions will happen later
     this.loading$ = this.loadingSubject.asObservable().pipe(
+      shareReplay(1),
       filter((_) => _ === true),
       map(() => void 0)
     );
@@ -194,10 +195,10 @@ export class ExpressionLoader {
 
 export type IExpressionLoader = (
   element: HTMLElement,
-  expression: string | ExpressionAstExpression,
-  params: IExpressionLoaderParams
-) => ExpressionLoader;
+  expression?: string | ExpressionAstExpression,
+  params?: IExpressionLoaderParams
+) => Promise<ExpressionLoader>;
 
-export const loader: IExpressionLoader = (element, expression, params) => {
+export const loader: IExpressionLoader = async (element, expression?, params?) => {
   return new ExpressionLoader(element, expression, params);
 };

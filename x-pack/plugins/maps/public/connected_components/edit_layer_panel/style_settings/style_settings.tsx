@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { StyleDescriptor } from '../../../../common/descriptor_types';
 import { ILayer } from '../../../classes/layers/layer';
 

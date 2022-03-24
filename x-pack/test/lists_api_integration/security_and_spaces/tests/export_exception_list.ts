@@ -22,12 +22,12 @@ import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const log = getService('log');
 
   describe('export_exception_list_route', () => {
     describe('exporting exception lists', () => {
       afterEach(async () => {
-        await deleteAllExceptions(es);
+        await deleteAllExceptions(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
 
         expect(exportBody).to.eql({
-          message: 'exception list with list_id: not_exist does not exist',
+          message: 'exception list with list_id: not_exist or id: not_exist does not exist',
           status_code: 400,
         });
       });

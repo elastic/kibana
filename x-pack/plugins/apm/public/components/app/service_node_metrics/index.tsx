@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
@@ -83,18 +83,19 @@ export function ServiceNodeMetrics() {
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
-          params: {
-            path: { serviceName, serviceNodeName },
-            query: {
-              kuery,
-              start,
-              end,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+          {
+            params: {
+              path: { serviceName, serviceNodeName },
+              query: {
+                kuery,
+                start,
+                end,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [kuery, serviceName, serviceNodeName, start, end]

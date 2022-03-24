@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -17,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
 
   async function getAlertsByName(name: string) {
     const {
@@ -39,7 +41,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function defineEsQueryAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('alertNameInput', alertName);
+    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click(`.es-query-SelectOption`);
     await testSubjects.click('selectIndexExpression');
     const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
@@ -55,13 +57,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     await testSubjects.click('closePopover');
     // need this two out of popup clicks to close them
-    const nameInput = await testSubjects.find('alertNameInput');
+    const nameInput = await testSubjects.find('ruleNameInput');
     await nameInput.click();
   }
 
   async function defineIndexThresholdAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('alertNameInput', alertName);
+    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click(`.index-threshold-SelectOption`);
     await testSubjects.click('selectIndexExpression');
     const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
@@ -77,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     await testSubjects.click('closePopover');
     // need this two out of popup clicks to close them
-    const nameInput = await testSubjects.find('alertNameInput');
+    const nameInput = await testSubjects.find('ruleNameInput');
     await nameInput.click();
 
     await testSubjects.click('whenExpression');
@@ -99,14 +101,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function defineAlwaysFiringAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('alertNameInput', alertName);
+    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  // FLAKY https://github.com/elastic/kibana/issues/112749
+  // FLAKY: https://github.com/elastic/kibana/issues/126873
   describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
+      await testSubjects.click('rulesTab');
+    });
+
+    afterEach(async () => {
+      // Reset the Rules tab without reloading the entire page
+      // This is safer than trying to close the alert flyout, which may or may not be open at the end of a test
+      await testSubjects.click('connectorsTab');
       await testSubjects.click('rulesTab');
     });
 
@@ -149,19 +158,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'test message {{alert.actionGroup}} some additional text {{rule.id}}'
       );
 
-      await testSubjects.click('saveAlertButton');
+      await testSubjects.click('saveRuleButton');
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Index threshold',
-          interval: '1m',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Index threshold`,
+        tags: '',
+        interval: '1 min',
+      });
+      expect(searchResultAfterSave.duration).to.match(/\d{2,}:\d{2}/);
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
@@ -200,19 +208,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorActionGroup-1');
       await testSubjects.click('addNewActionConnectorActionGroup-1-option-other');
 
-      await testSubjects.click('saveAlertButton');
+      await testSubjects.click('saveRuleButton');
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Always Firing',
-          interval: '1m',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Always Firing`,
+        tags: '',
+        interval: '1 min',
+      });
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
@@ -223,30 +229,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineAlwaysFiringAlert(alertName);
 
-      await testSubjects.click('saveAlertButton');
-      await testSubjects.existOrFail('confirmAlertSaveModal');
-      await testSubjects.click('confirmAlertSaveModal > confirmModalCancelButton');
-      await testSubjects.missingOrFail('confirmAlertSaveModal');
-      await find.existsByCssSelector('[data-test-subj="saveAlertButton"]:not(disabled)');
+      await testSubjects.click('saveRuleButton');
+      await testSubjects.existOrFail('confirmRuleSaveModal');
+      await testSubjects.click('confirmRuleSaveModal > confirmModalCancelButton');
+      await testSubjects.missingOrFail('confirmRuleSaveModal');
+      await find.existsByCssSelector('[data-test-subj="saveRuleButton"]:not(disabled)');
 
-      await testSubjects.click('saveAlertButton');
-      await testSubjects.existOrFail('confirmAlertSaveModal');
-      await testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('confirmAlertSaveModal');
+      await testSubjects.click('saveRuleButton');
+      await testSubjects.existOrFail('confirmRuleSaveModal');
+      await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('confirmRuleSaveModal');
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Always Firing',
-          interval: '1m',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Always Firing`,
+        tags: '',
+        interval: '1 min',
+      });
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
@@ -255,15 +259,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show discard confirmation before closing flyout without saving', async () => {
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.click('cancelSaveAlertButton');
-      await testSubjects.missingOrFail('confirmAlertCloseModal');
+      await testSubjects.click('cancelSaveRuleButton');
+      await testSubjects.missingOrFail('confirmRuleCloseModal');
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
       await testSubjects.setValue('intervalInput', '10');
-      await testSubjects.click('cancelSaveAlertButton');
-      await testSubjects.existOrFail('confirmAlertCloseModal');
-      await testSubjects.click('confirmAlertCloseModal > confirmModalCancelButton');
-      await testSubjects.missingOrFail('confirmAlertCloseModal');
+      await testSubjects.click('cancelSaveRuleButton');
+      await testSubjects.existOrFail('confirmRuleCloseModal');
+      await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');
+      await testSubjects.missingOrFail('confirmRuleCloseModal');
     });
 
     it('should successfully test valid es_query alert', async () => {
@@ -278,6 +282,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
+      await testSubjects.click('cancelSaveRuleButton');
+      await testSubjects.existOrFail('confirmRuleCloseModal');
+      await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
+    });
+
+    it('should show error when es_query is invalid', async () => {
+      const alertName = generateUniqueKey();
+      await defineEsQueryAlert(alertName);
+
       // Invalid query
       await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
         clearWithKeyboard: true,
@@ -285,6 +298,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.missingOrFail('testQuerySuccess');
       await testSubjects.existOrFail('testQueryError');
+    });
+
+    it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.setValue('ruleNameInput', 'alertName');
+      const ruleTypeSearchBox = await find.byCssSelector('[data-test-subj="ruleSearchField"]');
+      await ruleTypeSearchBox.type('notexisting rule type');
+      await ruleTypeSearchBox.pressKeys(browser.keys.ENTER);
+
+      const ruleTypes = await find.allByCssSelector('.triggersActionsUI__ruleTypeNodeHeading');
+      expect(ruleTypes).to.have.length(0);
+
+      const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
+      await searchClearButton.click();
+
+      const ruleTypesClearFilter = await find.allByCssSelector(
+        '.triggersActionsUI__ruleTypeNodeHeading'
+      );
+      expect(ruleTypesClearFilter.length).to.above(0);
     });
   });
 };

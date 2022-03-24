@@ -7,7 +7,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { injectI18n, InjectedIntlProps } from '@kbn/i18n/react';
+import { injectI18n, InjectedIntlProps } from '@kbn/i18n-react';
 import { EuiFormRow } from '@elastic/eui';
 import { IndexPatternSelectProps } from 'src/plugins/data/public';
 

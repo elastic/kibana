@@ -15,6 +15,5 @@ export interface NodeProps {
   alerts: unknown;
   nodeId: unknown;
   clusterUuid: unknown;
-  scope: unknown;
   [key: string]: any;
 }

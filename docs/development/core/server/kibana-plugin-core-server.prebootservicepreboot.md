@@ -22,7 +22,6 @@ core.preboot.holdSetupUntilResolved('Just waiting for 5 seconds',
     setTimeout(resolve, 5000);
   })
 );
-
 ```
 If the supplied `Promise` resolves to an object with the `shouldReloadConfig` property set to `true`<!-- -->, Kibana will also reload its configuration from disk.
 
@@ -33,13 +32,12 @@ core.preboot.holdSetupUntilResolved('Just waiting for 5 seconds before reloading
     setTimeout(() => resolve({ shouldReloadConfig: true }), 5000);
   })
 );
-
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [holdSetupUntilResolved](./kibana-plugin-core-server.prebootservicepreboot.holdsetupuntilresolved.md) | <code>(reason: string, promise: Promise&lt;{</code><br/><code>        shouldReloadConfig: boolean;</code><br/><code>    } &#124; undefined&gt;) =&gt; void</code> | Registers a <code>Promise</code> as a precondition before Kibana can proceed to <code>setup</code>. This method can be invoked multiple times and from multiple <code>preboot</code> plugins. Kibana will proceed to <code>setup</code> only when all registered <code>Promises</code> instances are resolved, or it will shut down if any of them is rejected. |
-|  [isSetupOnHold](./kibana-plugin-core-server.prebootservicepreboot.issetuponhold.md) | <code>() =&gt; boolean</code> | Indicates whether Kibana is currently on hold and cannot proceed to <code>setup</code> yet. |
+|  [holdSetupUntilResolved](./kibana-plugin-core-server.prebootservicepreboot.holdsetupuntilresolved.md) | (reason: string, promise: Promise&lt;{ shouldReloadConfig: boolean; } \| undefined&gt;) =&gt; void | Registers a <code>Promise</code> as a precondition before Kibana can proceed to <code>setup</code>. This method can be invoked multiple times and from multiple <code>preboot</code> plugins. Kibana will proceed to <code>setup</code> only when all registered <code>Promises</code> instances are resolved, or it will shut down if any of them is rejected. |
+|  [isSetupOnHold](./kibana-plugin-core-server.prebootservicepreboot.issetuponhold.md) | () =&gt; boolean | Indicates whether Kibana is currently on hold and cannot proceed to <code>setup</code> yet. |
 

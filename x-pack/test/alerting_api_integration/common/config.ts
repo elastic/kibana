@@ -35,10 +35,12 @@ const enabledActionTypes = [
   '.server-log',
   '.servicenow',
   '.servicenow-sir',
+  '.servicenow-itom',
   '.jira',
   '.resilient',
   '.slack',
   '.webhook',
+  '.xmatters',
   'test.authorization',
   'test.failing',
   'test.index-record',
@@ -160,6 +162,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',
+          '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,
@@ -241,7 +244,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               },
             },
           })}`,
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
           ...plugins.map(
             (pluginDir) =>
               `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`

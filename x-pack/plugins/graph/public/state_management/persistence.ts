@@ -25,6 +25,7 @@ import { updateMetaData, metaDataSelector } from './meta_data';
 import { openSaveModal, SaveWorkspaceHandler } from '../services/save_modal';
 import { getEditPath } from '../services/url';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
+import type { IndexPattern } from '../../../../../src/plugins/data/public';
 
 export interface LoadSavedWorkspacePayload {
   indexPatterns: IndexPatternSavedObject[];
@@ -49,13 +50,13 @@ export const loadingSaga = ({
   notifications,
   indexPatternProvider,
 }: GraphStoreDependencies) => {
-  function* deserializeWorkspace(action: Action<LoadSavedWorkspacePayload>) {
+  function* deserializeWorkspace(action: Action<LoadSavedWorkspacePayload>): Generator {
     const { indexPatterns, savedWorkspace, urlQuery } = action.payload;
     const migrationStatus = migrateLegacyIndexPatternRef(savedWorkspace, indexPatterns);
     if (!migrationStatus.success) {
       notifications.toasts.addDanger(
-        i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Index pattern "{name}" not found',
+        i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
+          defaultMessage: 'Data view "{name}" not found',
           values: {
             name: migrationStatus.missingIndexPattern,
           },
@@ -65,8 +66,21 @@ export const loadingSaga = ({
     }
 
     const selectedIndexPatternId = lookupIndexPatternId(savedWorkspace);
-    const indexPattern = yield call(indexPatternProvider.get, selectedIndexPatternId);
-    const initialSettings = settingsSelector(yield select());
+    let indexPattern;
+    try {
+      indexPattern = (yield call(indexPatternProvider.get, selectedIndexPatternId)) as IndexPattern;
+    } catch (e) {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
+          defaultMessage: 'Data view "{name}" not found',
+          values: {
+            name: selectedIndexPatternId,
+          },
+        })
+      );
+      return;
+    }
+    const initialSettings = settingsSelector((yield select()) as GraphState);
 
     const createdWorkspace = createWorkspace(indexPattern.title, initialSettings);
 
@@ -87,7 +101,7 @@ export const loadingSaga = ({
     yield put(
       setDatasource({
         type: 'indexpattern',
-        id: indexPattern.id,
+        id: indexPattern.id!,
         title: indexPattern.title,
       })
     );
@@ -122,13 +136,13 @@ export const savingSaga = (deps: GraphStoreDependencies) => {
       return;
     }
 
-    const savedObjectId = yield cps(showModal, {
+    const savedObjectId = (yield cps(showModal, {
       deps,
       workspace,
       savedWorkspace,
       state,
       selectedDatasource,
-    });
+    })) as string;
     if (savedObjectId) {
       yield put(updateMetaData({ savedObjectId }));
     }

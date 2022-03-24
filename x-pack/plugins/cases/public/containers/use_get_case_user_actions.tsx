@@ -9,18 +9,16 @@ import { isEmpty, uniqBy } from 'lodash/fp';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import {
-  CaseFullExternalService,
-  CaseConnector,
-  CaseExternalService,
-  CaseUserActions,
-  ElasticUser,
-} from '../../common';
-import { getCaseUserActions, getSubCaseUserActions } from './api';
+import { ElasticUser, CaseUserActions, CaseExternalService } from '../../common/ui/types';
+import { ActionTypes, CaseConnector, NONE_CONNECTOR_ID } from '../../common/api';
+import { getCaseUserActions } from './api';
 import * as i18n from './translations';
-import { convertToCamelCase } from './utils';
-import { parseStringAsConnector, parseStringAsExternalService } from '../common/user_actions';
 import { useToasts } from '../common/lib/kibana';
+import {
+  isPushedUserAction,
+  isConnectorUserAction,
+  isCreateCaseUserAction,
+} from '../../common/utils/user_actions';
 
 export interface CaseService extends CaseExternalService {
   firstPushIndex: number;
@@ -52,62 +50,26 @@ export const initialData: CaseUserActionsState = {
 };
 
 export interface UseGetCaseUserActions extends CaseUserActionsState {
-  fetchCaseUserActions: (
-    caseId: string,
-    caseConnectorId: string,
-    subCaseId?: string
-  ) => Promise<void>;
+  fetchCaseUserActions: (caseId: string, caseConnectorId: string) => Promise<void>;
 }
-
-const unknownExternalServiceConnectorId = 'unknown';
-
-const getExternalService = (
-  connectorId: string | null,
-  encodedValue: string | null
-): CaseExternalService | null => {
-  const decodedValue = parseStringAsExternalService(connectorId, encodedValue);
-
-  if (decodedValue == null) {
-    return null;
-  }
-  return {
-    ...convertToCamelCase<CaseFullExternalService, CaseExternalService>(decodedValue),
-    // if in the rare case that the connector id is null we'll set it to unknown if we need to reference it in the UI
-    // anywhere. The id would only ever be null if a migration failed or some logic error within the backend occurred
-    connectorId: connectorId ?? unknownExternalServiceConnectorId,
-  };
-};
 
 const groupConnectorFields = (
   userActions: CaseUserActions[]
 ): Record<string, Array<CaseConnector['fields']>> =>
   userActions.reduce((acc, mua) => {
-    if (mua.actionField[0] !== 'connector') {
-      return acc;
+    if (
+      (isConnectorUserAction(mua) || isCreateCaseUserAction(mua)) &&
+      mua.payload?.connector?.id !== NONE_CONNECTOR_ID
+    ) {
+      const connector = mua.payload.connector;
+
+      return {
+        ...acc,
+        [connector.id]: [...(acc[connector.id] || []), connector.fields],
+      };
     }
 
-    const oldConnector = parseStringAsConnector(mua.oldValConnectorId, mua.oldValue);
-    const newConnector = parseStringAsConnector(mua.newValConnectorId, mua.newValue);
-
-    if (!oldConnector || !newConnector) {
-      return acc;
-    }
-
-    return {
-      ...acc,
-      [oldConnector.id]: [
-        ...(acc[oldConnector.id] || []),
-        ...(oldConnector.id === newConnector.id
-          ? [oldConnector.fields, newConnector.fields]
-          : [oldConnector.fields]),
-      ],
-      [newConnector.id]: [
-        ...(acc[newConnector.id] || []),
-        ...(oldConnector.id === newConnector.id
-          ? [oldConnector.fields, newConnector.fields]
-          : [newConnector.fields]),
-      ],
-    };
+    return acc;
   }, {} as Record<string, Array<CaseConnector['fields']>>);
 
 const connectorHasChangedFields = ({
@@ -158,7 +120,9 @@ export const getPushedInfo = (
   const hasDataToPushForConnector = (connectorId: string): boolean => {
     const caseUserActionsReversed = [...caseUserActions].reverse();
     const lastPushOfConnectorReversedIndex = caseUserActionsReversed.findIndex(
-      (mua) => mua.action === 'push-to-service' && mua.newValConnectorId === connectorId
+      (mua) =>
+        isPushedUserAction<'camelCase'>(mua) &&
+        mua.payload.externalService.connectorId === connectorId
     );
 
     if (lastPushOfConnectorReversedIndex === -1) {
@@ -185,14 +149,14 @@ export const getPushedInfo = (
 
     return (
       actionsAfterPush.some(
-        (mua) => mua.actionField[0] !== 'connector' && mua.action !== 'push-to-service'
+        (mua) => mua.type !== ActionTypes.connector && mua.type !== ActionTypes.pushed
       ) || connectorHasChanged
     );
   };
 
   const commentsAndIndex = caseUserActions.reduce<CommentsAndIndex[]>(
     (bacc, mua, index) =>
-      mua.actionField[0] === 'comment' && mua.commentId != null
+      mua.type === ActionTypes.comment && mua.commentId != null
         ? [
             ...bacc,
             {
@@ -205,11 +169,11 @@ export const getPushedInfo = (
   );
 
   let caseServices = caseUserActions.reduce<CaseServices>((acc, cua, i) => {
-    if (cua.action !== 'push-to-service') {
+    if (!isPushedUserAction<'camelCase'>(cua)) {
       return acc;
     }
 
-    const externalService = getExternalService(cua.newValConnectorId, cua.newValue);
+    const externalService = cua.payload.externalService;
     if (externalService === null) {
       return acc;
     }
@@ -266,8 +230,7 @@ export const getPushedInfo = (
 
 export const useGetCaseUserActions = (
   caseId: string,
-  caseConnectorId: string,
-  subCaseId?: string
+  caseConnectorId: string
 ): UseGetCaseUserActions => {
   const [caseUserActionsState, setCaseUserActionsState] =
     useState<CaseUserActionsState>(initialData);
@@ -276,7 +239,7 @@ export const useGetCaseUserActions = (
   const toasts = useToasts();
 
   const fetchCaseUserActions = useCallback(
-    async (thisCaseId: string, thisCaseConnectorId: string, thisSubCaseId?: string) => {
+    async (thisCaseId: string, thisCaseConnectorId: string) => {
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
@@ -286,23 +249,14 @@ export const useGetCaseUserActions = (
           isLoading: true,
         });
 
-        const response = await (thisSubCaseId
-          ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrlRef.current.signal)
-          : getCaseUserActions(thisCaseId, abortCtrlRef.current.signal));
+        const response = await getCaseUserActions(thisCaseId, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
-          // Attention Future developer
-          // We are removing the first item because it will always be the creation of the case
-          // and we do not want it to simplify our life
           const participants = !isEmpty(response)
-            ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
+            ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
             : [];
 
-          const caseUserActions = !isEmpty(response)
-            ? thisSubCaseId
-              ? response
-              : response.slice(1)
-            : [];
+          const caseUserActions = !isEmpty(response) ? response : [];
 
           setCaseUserActionsState({
             caseUserActions,
@@ -338,7 +292,7 @@ export const useGetCaseUserActions = (
 
   useEffect(() => {
     if (!isEmpty(caseId)) {
-      fetchCaseUserActions(caseId, caseConnectorId, subCaseId);
+      fetchCaseUserActions(caseId, caseConnectorId);
     }
 
     return () => {
@@ -346,6 +300,6 @@ export const useGetCaseUserActions = (
       abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, subCaseId]);
+  }, [caseId]);
   return { ...caseUserActionsState, fetchCaseUserActions };
 };

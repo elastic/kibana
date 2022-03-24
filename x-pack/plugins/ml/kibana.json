@@ -7,42 +7,45 @@
     "ml"
   ],
   "requiredPlugins": [
+    "cloud",
     "data",
     "dataViews",
-    "cloud",
-    "features",
     "dataVisualizer",
+    "discover",
+    "embeddable",
+    "features",
+    "fieldFormats",
     "licensing",
     "share",
-    "embeddable",
-    "uiActions",
-    "kibanaLegacy",
-    "discover",
+    "taskManager",
     "triggersActionsUi",
-    "fieldFormats"
+    "uiActions"
   ],
   "optionalPlugins": [
     "alerting",
+    "charts",
+    "dashboard",
     "home",
+    "licenseManagement",
+    "management",
+    "maps",
     "security",
     "spaces",
-    "management",
-    "licenseManagement",
-    "maps",
     "usageCollection"
   ],
   "server": true,
   "ui": true,
   "requiredBundles": [
-    "esUiShared",
-    "kibanaUtils",
-    "kibanaReact",
+    "charts",
     "dashboard",
-    "savedObjects",
+    "esUiShared",
+    "fieldFormats",
     "home",
+    "kibanaReact",
+    "kibanaUtils",
     "maps",
-    "usageCollection",
-    "fieldFormats"
+    "savedObjects",
+    "usageCollection"
   ],
   "extraPublicDirs": [
     "common"

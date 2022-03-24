@@ -10,7 +10,7 @@ import React, { ReactElement, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   menuItems: ReactElement[];

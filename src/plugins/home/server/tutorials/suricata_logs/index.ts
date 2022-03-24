@@ -24,12 +24,12 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'suricataLogs',
     name: i18n.translate('home.tutorials.suricataLogs.nameTitle', {
-      defaultMessage: 'Suricata logs',
+      defaultMessage: 'Suricata Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.suricataLogs.shortDescription', {
-      defaultMessage: 'Collect Suricata IDS/IPS/NSM logs.',
+      defaultMessage: 'Collect and parse logs from Suricata IDS/IPS/NSM with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.suricataLogs.longDescription', {
       defaultMessage:
@@ -58,8 +58,8 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/suricata_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['network', 'security'],
   };
 }

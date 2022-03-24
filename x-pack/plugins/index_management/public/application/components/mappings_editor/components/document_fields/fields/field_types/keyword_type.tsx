@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 
 import { documentationService } from '../../../../../../services/documentation';

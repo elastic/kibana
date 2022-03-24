@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { mockHttpRequest, pageHelpers } from './helpers';
+
+import { act } from 'react-dom/test-utils';
 import { getRouter, setHttp, init as initDocumentation } from '../../crud_app/services';
-import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
 import { JOBS } from './helpers/constants';
 import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
 
@@ -36,17 +38,23 @@ describe('<JobList />', () => {
     let startMock;
 
     beforeAll(() => {
+      jest.useFakeTimers();
       startMock = coreMock.createStart();
       setHttp(startMock.http);
       initDocumentation(docLinksServiceMock.createStartContract());
     });
 
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
     beforeEach(async () => {
       mockHttpRequest(startMock.http, { jobs: JOBS });
 
-      ({ component, exists, table } = setup());
+      await act(async () => {
+        ({ component, exists, table } = setup());
+      });
 
-      await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
     });
 

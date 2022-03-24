@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from 'react-router-dom';
 
-import { Filter } from '../../../../../../src/plugins/data/common/es_query';
+import type { Filter } from '@kbn/es-query';
 import '../../common/mock/match_media';
 import {
   TestProviders,
@@ -23,7 +23,8 @@ import { inputsActions } from '../../common/store/inputs';
 import { State, createStore } from '../../common/store';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { mockCasesContract } from '../../../../cases/public/mocks';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -35,6 +36,25 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
+jest.mock('../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
+
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        cases: {
+          ...mockCasesContract(),
+        },
+      },
+    }),
+  };
+});
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -57,10 +77,10 @@ const mockHistory = {
   createHref: jest.fn(),
   listen: jest.fn(),
 };
-const mockUseSourcererScope = useSourcererScope as jest.Mock;
+const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Hosts - rendering', () => {
   test('it renders the Setup Instructions text when no index is available', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: false,
     });
 
@@ -75,7 +95,7 @@ describe('Hosts - rendering', () => {
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
@@ -90,7 +110,7 @@ describe('Hosts - rendering', () => {
   });
 
   test('it should render tab navigation', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
@@ -137,7 +157,7 @@ describe('Hosts - rendering', () => {
         },
       },
     ];
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: { fields: [], title: 'title' },
     });

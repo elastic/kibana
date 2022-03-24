@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.bazel.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./target_types",
+    "stripInternal": true,
+    "rootDir": "src",
+    "types": ["jest", "node"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["**/__fixtures__/**/*"]
+}

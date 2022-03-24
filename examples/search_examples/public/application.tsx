@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Redirect } from 'react-router-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { AppPluginStartDependencies } from './types';
 import { SearchExamplePage, ExampleLink } from './common/example_page';
@@ -27,7 +27,7 @@ const LINKS: ExampleLink[] = [
     title: 'Search Sessions',
   },
   {
-    path: 'https://github.com/elastic/kibana/blob/master/src/plugins/data/README.mdx',
+    path: 'https://github.com/elastic/kibana/blob/main/src/plugins/data/README.mdx',
     title: 'README (GitHub)',
   },
 ];

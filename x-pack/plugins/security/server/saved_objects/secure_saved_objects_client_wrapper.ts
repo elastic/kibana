@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   SavedObjectReferenceWithContext,
   SavedObjectsBaseOptions,
@@ -32,7 +31,7 @@ import type {
 
 import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import type { AuditLogger, SecurityAuditLogger } from '../audit';
+import type { AuditLogger } from '../audit';
 import { SavedObjectAction, savedObjectEvent } from '../audit';
 import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import type { CheckPrivilegesResponse } from '../authorization/types';
@@ -50,7 +49,6 @@ import {
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
-  legacyAuditLogger: SecurityAuditLogger;
   auditLogger: AuditLogger;
   baseClient: SavedObjectsClientContract;
   errors: SavedObjectsClientContract['errors'];
@@ -84,7 +82,6 @@ interface LegacyEnsureAuthorizedTypeResult {
 
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private readonly actions: Actions;
-  private readonly legacyAuditLogger: PublicMethodsOf<SecurityAuditLogger>;
   private readonly auditLogger: AuditLogger;
   private readonly baseClient: SavedObjectsClientContract;
   private readonly checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
@@ -93,7 +90,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   constructor({
     actions,
-    legacyAuditLogger,
     auditLogger,
     baseClient,
     checkSavedObjectsPrivilegesAsCurrentUser,
@@ -102,7 +98,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }: SecureSavedObjectsClientWrapperOptions) {
     this.errors = errors;
     this.actions = actions;
-    this.legacyAuditLogger = legacyAuditLogger;
     this.auditLogger = auditLogger;
     this.baseClient = baseClient;
     this.checkSavedObjectsPrivilegesAsCurrentUser = checkSavedObjectsPrivilegesAsCurrentUser;
@@ -900,7 +895,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     namespaceOrNamespaces: undefined | string | Array<undefined | string>,
     options: LegacyEnsureAuthorizedOptions = {}
   ): Promise<LegacyEnsureAuthorizedResult> {
-    const { args, auditAction = action, requireFullAuthorization = true } = options;
+    const { requireFullAuthorization = true } = options;
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actionsToTypesMap = new Map(
       types.map((type) => [this.actions.savedObject.get(type, action), type])
@@ -908,10 +903,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const actions = Array.from(actionsToTypesMap.keys());
     const result = await this.checkPrivileges(actions, namespaceOrNamespaces);
 
-    const { hasAllRequested, username, privileges } = result;
-    const spaceIds = uniq(
-      privileges.kibana.map(({ resource }) => resource).filter((x) => x !== undefined)
-    ).sort() as string[];
+    const { hasAllRequested, privileges } = result;
 
     const missingPrivileges = this.getMissingPrivileges(privileges);
     const typeMap = privileges.kibana.reduce<Map<string, LegacyEnsureAuthorizedTypeResult>>(
@@ -930,43 +922,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       new Map()
     );
 
-    const logAuthorizationFailure = () => {
-      this.legacyAuditLogger.savedObjectsAuthorizationFailure(
-        username,
-        auditAction,
-        types,
-        spaceIds,
-        missingPrivileges,
-        args
-      );
-    };
-    const logAuthorizationSuccess = (typeArray: string[], spaceIdArray: string[]) => {
-      this.legacyAuditLogger.savedObjectsAuthorizationSuccess(
-        username,
-        auditAction,
-        typeArray,
-        spaceIdArray,
-        args
-      );
-    };
-
     if (hasAllRequested) {
-      logAuthorizationSuccess(types, spaceIds);
       return { typeMap, status: 'fully_authorized' };
     } else if (!requireFullAuthorization) {
       const isPartiallyAuthorized = privileges.kibana.some(({ authorized }) => authorized);
       if (isPartiallyAuthorized) {
-        for (const [type, { isGloballyAuthorized, authorizedSpaces }] of typeMap.entries()) {
-          // generate an individual audit record for each authorized type
-          logAuthorizationSuccess([type], isGloballyAuthorized ? spaceIds : authorizedSpaces);
-        }
         return { typeMap, status: 'partially_authorized' };
       } else {
-        logAuthorizationFailure();
         return { typeMap, status: 'unauthorized' };
       }
     } else {
-      logAuthorizationFailure();
       const targetTypes = uniq(
         missingPrivileges.map(({ privilege }) => actionsToTypesMap.get(privilege)).sort()
       ).join(',');

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiCallOut,

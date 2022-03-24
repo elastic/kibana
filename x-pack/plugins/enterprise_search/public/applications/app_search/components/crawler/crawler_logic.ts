@@ -12,7 +12,16 @@ import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import { CrawlerData, CrawlerDomain, CrawlEvent, CrawlRequest, CrawlerStatus } from './types';
+import { CrawlerDomainsLogic } from './crawler_domains_logic';
+
+import {
+  CrawlerData,
+  CrawlerDomain,
+  CrawlEvent,
+  CrawlRequest,
+  CrawlerStatus,
+  CrawlerDataFromServer,
+} from './types';
 import { crawlerDataServerToClient } from './utils';
 
 const POLLING_DURATION = 1000;
@@ -23,6 +32,14 @@ const ACTIVE_STATUSES = [
   CrawlerStatus.Running,
   CrawlerStatus.Canceling,
 ];
+
+export interface CrawlRequestOverrides {
+  domain_allowlist?: string[];
+  max_crawl_depth?: number;
+  seed_urls?: string[];
+  sitemap_urls?: string[];
+  sitemap_discovery_disabled?: boolean;
+}
 
 export interface CrawlerValues {
   events: CrawlEvent[];
@@ -39,7 +56,8 @@ interface CrawlerActions {
   fetchCrawlerData(): void;
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   onReceiveCrawlerData(data: CrawlerData): { data: CrawlerData };
-  startCrawl(): void;
+  onStartCrawlRequestComplete(): void;
+  startCrawl(overrides?: CrawlRequestOverrides): { overrides?: CrawlRequestOverrides };
   stopCrawl(): void;
 }
 
@@ -51,7 +69,8 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     fetchCrawlerData: true,
     onCreateNewTimeout: (timeoutId) => ({ timeoutId }),
     onReceiveCrawlerData: (data) => ({ data }),
-    startCrawl: () => null,
+    onStartCrawlRequestComplete: true,
+    startCrawl: (overrides) => ({ overrides }),
     stopCrawl: () => null,
   },
   reducers: {
@@ -104,7 +123,9 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/internal/app_search/engines/${engineName}/crawler`);
+        const response = await http.get<CrawlerDataFromServer>(
+          `/internal/app_search/engines/${engineName}/crawler`
+        );
 
         const crawlerData = crawlerDataServerToClient(response);
         actions.onReceiveCrawlerData(crawlerData);
@@ -124,15 +145,19 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         actions.createNewTimeoutForCrawlerData(POLLING_DURATION_ON_FAILURE);
       }
     },
-    startCrawl: async () => {
+    startCrawl: async ({ overrides = {} }) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
       try {
-        await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests`);
+        await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests`, {
+          body: JSON.stringify({ overrides }),
+        });
         actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);
+      } finally {
+        actions.onStartCrawlRequestComplete();
       }
     },
     stopCrawl: async () => {
@@ -156,6 +181,9 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       }, duration);
 
       actions.onCreateNewTimeout(timeoutIdId);
+    },
+    [CrawlerDomainsLogic.actionTypes.crawlerDomainDeleted]: ({ data }) => {
+      actions.onReceiveCrawlerData(data);
     },
   }),
   events: ({ values }) => ({

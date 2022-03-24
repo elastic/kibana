@@ -5,28 +5,8 @@
  * 2.0.
  */
 
-import { composeHttpHandlerMocks } from '../../../../common/mock/endpoint/http_handler_mock_factory';
-import {
-  GetTrustedAppsListResponse,
-  PostTrustedAppCreateResponse,
-} from '../../../../../common/endpoint/types';
-import { createSampleTrustedApp, createSampleTrustedApps } from '../../trusted_apps/test_utils';
-import {
-  PolicyDetailsArtifactsPageListLocationParams,
-  PolicyDetailsArtifactsPageLocation,
-} from '../types';
-import {
-  fleetGetAgentStatusHttpMock,
-  FleetGetAgentStatusHttpMockInterface,
-  fleetGetEndpointPackagePolicyHttpMock,
-  FleetGetEndpointPackagePolicyHttpMockInterface,
-  fleetGetEndpointPackagePolicyListHttpMock,
-  FleetGetEndpointPackagePolicyListHttpMockInterface,
-  trustedAppsGetListHttpMocks,
-  PolicyDetailsGetTrustedAppsListHttpMocksInterface,
-  trustedAppPutHttpMocks,
-  TrustedAppPutHttpMocksInterface,
-} from '../../mocks';
+import { GetTrustedAppsListResponse } from '../../../../../common/endpoint/types';
+import { createSampleTrustedApps } from '../../trusted_apps/test_utils';
 
 export const getMockListResponse: () => GetTrustedAppsListResponse = () => ({
   data: createSampleTrustedApps({}),
@@ -34,50 +14,3 @@ export const getMockListResponse: () => GetTrustedAppsListResponse = () => ({
   page: 1,
   total: 100,
 });
-
-export const getMockPolicyDetailsArtifactsPageLocationUrlParams = (
-  overrides: Partial<PolicyDetailsArtifactsPageLocation> = {}
-): PolicyDetailsArtifactsPageLocation => {
-  return {
-    page_index: 0,
-    page_size: 10,
-    filter: '',
-    show: undefined,
-    ...overrides,
-  };
-};
-
-export const getMockPolicyDetailsArtifactListUrlParams = (
-  overrides: Partial<PolicyDetailsArtifactsPageListLocationParams> = {}
-): PolicyDetailsArtifactsPageListLocationParams => {
-  return {
-    page_index: 0,
-    page_size: 10,
-    filter: '',
-    ...overrides,
-  };
-};
-
-export const getMockCreateResponse: () => PostTrustedAppCreateResponse = () =>
-  createSampleTrustedApp(1) as unknown as unknown as PostTrustedAppCreateResponse;
-
-export const getAPIError = () => ({
-  statusCode: 500,
-  error: 'Internal Server Error',
-  message: 'Something is not right',
-});
-
-export type PolicyDetailsPageAllApiHttpMocksInterface =
-  FleetGetEndpointPackagePolicyHttpMockInterface &
-    FleetGetAgentStatusHttpMockInterface &
-    FleetGetEndpointPackagePolicyListHttpMockInterface &
-    PolicyDetailsGetTrustedAppsListHttpMocksInterface &
-    TrustedAppPutHttpMocksInterface;
-export const policyDetailsPageAllApiHttpMocks =
-  composeHttpHandlerMocks<PolicyDetailsPageAllApiHttpMocksInterface>([
-    fleetGetEndpointPackagePolicyHttpMock,
-    fleetGetAgentStatusHttpMock,
-    fleetGetEndpointPackagePolicyListHttpMock,
-    trustedAppsGetListHttpMocks,
-    trustedAppPutHttpMocks,
-  ]);

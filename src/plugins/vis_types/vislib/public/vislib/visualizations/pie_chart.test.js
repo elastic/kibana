@@ -13,7 +13,7 @@ import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '@kbn/test/jest';
+} from '@kbn/test-jest-helpers';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';
 import { pieChartMockData } from './pie_chart_mock_data';
@@ -32,7 +32,7 @@ describe('No global chart settings', function () {
   const vislibParams1 = {
     el: '<div class=chart1></div>',
     type: 'pie',
-    addLegend: true,
+    legendDisplay: 'show',
     addTooltip: true,
   };
   let chart1;
@@ -144,7 +144,7 @@ describe('Vislib PieChart Class Test Suite', function () {
 
       const vislibParams = {
         type: 'pie',
-        addLegend: true,
+        legendDisplay: 'show',
         addTooltip: true,
       };
       let vis;

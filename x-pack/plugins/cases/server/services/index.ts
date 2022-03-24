@@ -6,13 +6,13 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { ConnectorTypes } from '../../common';
+import { ConnectorTypes } from '../../common/api';
 
 export { CasesService } from './cases';
 export { CaseConfigureService } from './configure';
 export { CaseUserActionService } from './user_actions';
 export { ConnectorMappingsService } from './connector_mappings';
-export { AlertService, AlertServiceContract } from './alerts';
+export { AlertService } from './alerts';
 export { AttachmentService } from './attachments';
 
 export interface ClientArgs {

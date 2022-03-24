@@ -9,6 +9,7 @@ import { HostStatus } from '../../../../common/endpoint/types';
 import { createMockMetadataRequestContext } from '../../mocks';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { enrichHostMetadata, MetadataRequestContext } from './handlers';
+import { AgentClient } from '../../../../../fleet/server';
 
 describe('test document enrichment', () => {
   let metaReqCtx: jest.Mocked<MetadataRequestContext>;
@@ -23,11 +24,9 @@ describe('test document enrichment', () => {
 
     beforeEach(() => {
       statusFn = jest.fn();
-      (metaReqCtx.endpointAppContextService.getAgentService as jest.Mock).mockImplementation(() => {
-        return {
-          getAgentStatusById: statusFn,
-        };
-      });
+      metaReqCtx.requestHandlerContext!.fleet!.agentClient.asCurrentUser = {
+        getAgentStatusById: statusFn,
+      } as unknown as AgentClient;
     });
 
     it('should return host healthy for online agent', async () => {
@@ -87,12 +86,10 @@ describe('test document enrichment', () => {
     beforeEach(() => {
       agentMock = jest.fn();
       agentPolicyMock = jest.fn();
-      (metaReqCtx.endpointAppContextService.getAgentService as jest.Mock).mockImplementation(() => {
-        return {
-          getAgent: agentMock,
-          getAgentStatusById: jest.fn(),
-        };
-      });
+      metaReqCtx.requestHandlerContext!.fleet!.agentClient.asCurrentUser = {
+        getAgent: agentMock,
+        getAgentStatusById: jest.fn(),
+      } as unknown as AgentClient;
       (metaReqCtx.endpointAppContextService.getAgentPolicyService as jest.Mock).mockImplementation(
         () => {
           return {

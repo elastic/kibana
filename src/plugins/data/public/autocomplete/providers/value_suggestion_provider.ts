@@ -11,7 +11,7 @@ import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
 import { IIndexPattern, IFieldType, UI_SETTINGS, ValueSuggestionsMethod } from '../../../common';
-import { TimefilterSetup } from '../../query';
+import type { TimefilterSetup } from '../../query';
 import { AutocompleteUsageCollector } from '../collectors';
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
@@ -56,7 +56,7 @@ export const setupValueSuggestionProvider = (
   }
 
   const requestSuggestions = memoize(
-    (
+    <T = unknown>(
       index: string,
       field: IFieldType,
       query: string,
@@ -68,7 +68,7 @@ export const setupValueSuggestionProvider = (
     ) => {
       usageCollector?.trackRequest();
       return core.http
-        .fetch(`/api/kibana/suggestions/values/${index}`, {
+        .fetch<T>(`/api/kibana/suggestions/values/${index}`, {
           method: 'POST',
           body: JSON.stringify({
             query,
@@ -103,9 +103,16 @@ export const setupValueSuggestionProvider = (
       useTimeRange ?? core!.uiSettings.get<boolean>(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE);
     const { title } = indexPattern;
 
+    const isVersionFieldType = field.type === 'string' && field.esTypes?.includes('version');
+
     if (field.type === 'boolean') {
       return [true, false];
-    } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
+    } else if (
+      !shouldSuggestValues ||
+      !field.aggregatable ||
+      field.type !== 'string' ||
+      isVersionFieldType // suggestions don't work for version fields
+    ) {
       return [];
     }
 

@@ -9,7 +9,6 @@ import { first, map } from 'rxjs/operators';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ReportingCore } from '../';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { ReportingSetupDeps } from '../types';
 import { GetLicense } from './';
 import { getReportingUsage } from './get_reporting_usage';
 import { ReportingUsageType } from './types';
@@ -19,7 +18,6 @@ import { reportingSchema } from './schema';
  * @return {Object} kibana usage stats type collection object
  */
 export function getReportingUsageCollector(
-  reporting: ReportingCore,
   usageCollection: UsageCollectionSetup,
   getLicense: GetLicense,
   exportTypesRegistry: ExportTypesRegistry,
@@ -28,8 +26,7 @@ export function getReportingUsageCollector(
   return usageCollection.makeUsageCollector<ReportingUsageType>({
     type: 'reporting',
     fetch: ({ esClient }: CollectorFetchContext) => {
-      const config = reporting.getConfig();
-      return getReportingUsage(config, getLicense, esClient, exportTypesRegistry);
+      return getReportingUsage(getLicense, esClient, exportTypesRegistry);
     },
     isReady,
     schema: reportingSchema,
@@ -38,7 +35,7 @@ export function getReportingUsageCollector(
 
 export function registerReportingUsageCollector(
   reporting: ReportingCore,
-  { licensing, usageCollection }: ReportingSetupDeps
+  usageCollection?: UsageCollectionSetup
 ) {
   if (!usageCollection) {
     return;
@@ -46,6 +43,7 @@ export function registerReportingUsageCollector(
 
   const exportTypesRegistry = reporting.getExportTypesRegistry();
   const getLicense = async () => {
+    const { licensing } = await reporting.getPluginStartDeps();
     return await licensing.license$
       .pipe(
         map(({ isAvailable, type }) => ({
@@ -61,7 +59,6 @@ export function registerReportingUsageCollector(
   const collectionIsReady = reporting.pluginStartsUp.bind(reporting);
 
   const collector = getReportingUsageCollector(
-    reporting,
     usageCollection,
     getLicense,
     exportTypesRegistry,

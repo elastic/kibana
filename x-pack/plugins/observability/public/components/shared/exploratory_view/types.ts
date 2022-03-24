@@ -17,7 +17,7 @@ import {
 } from '../../../../../lens/public';
 
 import { PersistableFilter } from '../../../../../lens/common';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../src/plugins/data_views/common';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',
@@ -56,7 +56,15 @@ export interface SeriesConfig {
   filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
   baseFilters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
-  definitionFields: string[];
+  definitionFields: Array<
+    | string
+    | {
+        field: string;
+        nested?: string;
+        singleSelection?: boolean;
+        filters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
+      }
+  >;
   metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
@@ -94,7 +102,7 @@ export interface UrlFilter {
 }
 
 export interface ConfigProps {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   series?: SeriesUrl;
 }
 

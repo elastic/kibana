@@ -6,31 +6,34 @@
  */
 
 import { Values } from '@kbn/utility-types';
-import { AlertExecutorOptions } from '../../../alerting/server';
-import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_INSTANCE_ID,
   ALERT_UUID,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   SPACE_IDS,
-  TAGS,
+  ALERT_RULE_TAGS,
   TIMESTAMP,
-} from '../../common/technical_rule_data_field_names';
+} from '@kbn/rule-data-utils';
+
+import { AlertExecutorOptions } from '../../../alerting/server';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 
 const commonAlertFieldNames = [
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   SPACE_IDS,
-  TAGS,
+  ALERT_RULE_TAGS,
   TIMESTAMP,
 ];
 export type CommonAlertFieldName = Values<typeof commonAlertFieldNames>;
@@ -46,12 +49,13 @@ export const getCommonAlertFields = (
   return {
     [ALERT_RULE_CATEGORY]: options.rule.ruleTypeName,
     [ALERT_RULE_CONSUMER]: options.rule.consumer,
+    [ALERT_RULE_EXECUTION_UUID]: options.executionId,
     [ALERT_RULE_NAME]: options.rule.name,
     [ALERT_RULE_PRODUCER]: options.rule.producer,
     [ALERT_RULE_TYPE_ID]: options.rule.ruleTypeId,
     [ALERT_RULE_UUID]: options.alertId,
     [SPACE_IDS]: [options.spaceId],
-    [TAGS]: options.tags,
+    [ALERT_RULE_TAGS]: options.tags,
     [TIMESTAMP]: options.startedAt.toISOString(),
   };
 };

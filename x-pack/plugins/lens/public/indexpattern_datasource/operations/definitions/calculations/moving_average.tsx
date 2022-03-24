@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useDebounceWithOptions } from '../../../../shared_components';
@@ -21,10 +21,16 @@ import {
   checkForDataLayerType,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import { getFormatFromPreviousColumn, isValidNumber, getFilter } from '../helpers';
+import {
+  getFormatFromPreviousColumn,
+  isValidNumber,
+  getFilter,
+  combineErrorMessages,
+} from '../helpers';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
+import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.movingAverageOf', {
@@ -86,12 +92,10 @@ export const movingAverageOperation: OperationDefinition<
       window: [(layer.columns[columnId] as MovingAverageIndexPatternColumn).params.window],
     });
   },
-  buildColumn: (
-    { referenceIds, previousColumn, layer },
-    columnParams = { window: WINDOW_DEFAULT_VALUE }
-  ) => {
+  buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];
-    const { window = WINDOW_DEFAULT_VALUE } = columnParams;
+    const window = columnParams?.window ?? WINDOW_DEFAULT_VALUE;
+
     return {
       label: ofName(metric?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
@@ -114,13 +118,16 @@ export const movingAverageOperation: OperationDefinition<
   },
   onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
   getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
-    return getErrorsForDateReference(
-      layer,
-      columnId,
-      i18n.translate('xpack.lens.indexPattern.movingAverage', {
-        defaultMessage: 'Moving average',
-      })
-    );
+    return combineErrorMessages([
+      getErrorsForDateReference(
+        layer,
+        columnId,
+        i18n.translate('xpack.lens.indexPattern.movingAverage', {
+          defaultMessage: 'Moving average',
+        })
+      ),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]);
   },
   getHelpMessage: () => <MovingAveragePopup />,
   getDisabledStatus(indexPattern, layer, layerType) {
@@ -193,7 +200,7 @@ function MovingAverageParamEditor({
       label={i18n.translate('xpack.lens.indexPattern.movingAverage.window', {
         defaultMessage: 'Window size',
       })}
-      display="columnCompressed"
+      display="rowCompressed"
       fullWidth
       isInvalid={!isValidNumber(inputValue)}
     >

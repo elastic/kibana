@@ -21,6 +21,10 @@ import type { EmbeddableStart } from '../../../../../../../src/plugins/embeddabl
 import type { MapsStartApi } from '../../../../../maps/public';
 import type { DataVisualizerPluginStart } from '../../../../../data_visualizer/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '../../../../../triggers_actions_ui/public';
+import type { FieldFormatsRegistry } from '../../../../../../../src/plugins/field_formats/common';
+import type { DashboardSetup } from '../../../../../../../src/plugins/dashboard/public';
+import type { SpacesPluginStart } from '../../../../../spaces/public';
+import type { ChartsPluginStart } from '../../../../../../../src/plugins/charts/public';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
@@ -32,6 +36,10 @@ interface StartPlugins {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer?: DataVisualizerPluginStart;
   usageCollection?: UsageCollectionSetup;
+  fieldFormats: FieldFormatsRegistry;
+  dashboard: DashboardSetup;
+  spacesApi: SpacesPluginStart;
+  charts?: ChartsPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

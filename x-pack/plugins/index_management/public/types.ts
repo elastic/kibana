@@ -23,3 +23,9 @@ export interface SetupDependencies {
 export interface StartDependencies {
   share: SharePluginStart;
 }
+
+export interface ClientConfigType {
+  ui: {
+    enabled: boolean;
+  };
+}

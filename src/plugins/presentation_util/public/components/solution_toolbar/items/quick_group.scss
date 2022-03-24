@@ -1,11 +1,25 @@
 .quickButtonGroup {
-  .quickButtonGroup__button {
-    background-color: $euiColorEmptyShade;
-    @include kbnThemeStyle('v8') {
+  .euiButtonGroup__buttons {
+    border-radius: $euiBorderRadius;
+
+    .quickButtonGroup__button {
+      background-color: $euiColorEmptyShade;
       // sass-lint:disable-block no-important
       border-width: $euiBorderWidthThin !important;
       border-style: solid !important;
       border-color: $euiBorderColor !important;
+    }
+
+    .quickButtonGroup__button:first-of-type {
+      // sass-lint:disable-block no-important
+      border-top-left-radius: $euiBorderRadius !important;
+      border-bottom-left-radius: $euiBorderRadius !important;
+    }
+
+    .quickButtonGroup__button:last-of-type {
+      // sass-lint:disable-block no-important
+      border-top-right-radius: $euiBorderRadius !important;
+      border-bottom-right-radius: $euiBorderRadius !important;
     }
   }
 }

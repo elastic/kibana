@@ -15,7 +15,7 @@ export interface ChromeBadge
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [iconType](./kibana-plugin-core-public.chromebadge.icontype.md) | <code>IconType</code> |  |
-|  [text](./kibana-plugin-core-public.chromebadge.text.md) | <code>string</code> |  |
-|  [tooltip](./kibana-plugin-core-public.chromebadge.tooltip.md) | <code>string</code> |  |
+|  [iconType?](./kibana-plugin-core-public.chromebadge.icontype.md) | IconType | <i>(Optional)</i> |
+|  [text](./kibana-plugin-core-public.chromebadge.text.md) | string |  |
+|  [tooltip](./kibana-plugin-core-public.chromebadge.tooltip.md) | string |  |
 

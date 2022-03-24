@@ -24,10 +24,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_custom']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos_custom');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/date_nanos_custom'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
+        'doc_table:legacy': true,
       });
     });
 
@@ -45,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_custom');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
   });
 }

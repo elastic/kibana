@@ -9,16 +9,16 @@ import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
-import { AbstractTMSSource } from '../tms_source';
+import { ITMSSource } from '../tms_source';
 import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty } from '../source';
+import { AbstractSource, ImmutableSourceProperty } from '../source';
 import { XYZTMSSourceConfig } from './xyz_tms_editor';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
   defaultMessage: 'Tile Map Service',
 });
 
-export class XYZTMSSource extends AbstractTMSSource {
+export class XYZTMSSource extends AbstractSource implements ITMSSource {
   static type = SOURCE_TYPES.EMS_XYZ;
 
   readonly _descriptor: XYZTMSSourceDescriptor;

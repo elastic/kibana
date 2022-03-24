@@ -1,0 +1,198 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule is triggered when indicators from the Threat Intel Filebeat module (v8.x) has a match against local file or network observations.",
+  "from": "now-65m",
+  "index": [
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "logs-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "interval": "1h",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Threat Intel Filebeat Module (v8.x) Indicator Match",
+  "note": "## Triage and Analysis\n\n### Investigating Threat Intel Indicator Matches\n\nThreat Intel indicator match rules allow matching from a local observation such as an endpoint event that records a file\nhash with an entry of a file hash stored within the Threat Intel integrations. Matches can also occur on\nan IP address, registry path, URL, or imphash.\n\nThe matches will be based on the incoming last 30 days feed data so it's important to validate the data and review the results by\ninvestigating the associated activity to determine if it requires further investigation.\n\nIf an indicator matches a local observation, the following enriched fields will be generated to identify the indicator, field, and type matched.\n\n- `threat.indicator.matched.atomic` - this identifies the atomic indicator that matched the local observation\n- `threat.indicator.matched.field` - this identifies the indicator field that matched the local observation\n- `threat.indicator.matched.type` - this identifies the indicator type that matched the local observation\n\n#### Possible investigation steps:\n- Investigation should be validated and reviewed based on the data (file hash, registry path, URL, imphash) that was matched\nand by viewing the source of that activity.\n- Consider the history of the indicator that was matched. Has it happened before? Is it happening on multiple machines?\nThese kinds of questions can help understand if the activity is related to legitimate behavior.\n- Consider the user and their role within the company: is this something related to their job or work function?\n\n### False Positive Analysis\n- For any matches found, it's important to consider the initial release date of that indicator. Threat intelligence can\nbe a great tool for augmenting existing security processes, while at the same time it should be understood that threat\nintelligence can represent a specific set of activity observed at a point in time. For example, an IP address\nmay have hosted malware observed in a Dridex campaign months ago, but it's possible that IP has been remediated and\nno longer represents any threat.\n- Adversaries often use legitimate tools as network administrators such as `PsExec` or `AdFind`; these tools often find their\nway into indicator lists creating the potential for false positives.\n- It's possible after large and publicly written campaigns, curious employees might end up going directly to attacker infrastructure and triggering these rules.\n\n### Response and Remediation\n- If suspicious or malicious behavior is observed, take immediate action to isolate activity to prevent further\npost-compromise behavior.\n- One example of a response if a machine matched a command and control IP address would be to add an entry to a network\ndevice such as a firewall or proxy appliance to prevent any outbound activity from leaving that machine.\n- Another example of a response with a malicious file hash match would involve validating if the file was properly quarantined,\nreviewing current running processes for any abnormal activity, and investigating for any other follow-up actions such as persistence or lateral movement.\n",
+  "query": "file.hash.*:* or file.pe.imphash:* or source.ip:* or destination.ip:* or url.full:* or registry.path:*\n",
+  "references": [
+    "https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-threatintel.html"
+  ],
+  "risk_score": 99,
+  "rule_id": "699e9fdb-b77c-4c01-995c-1c15019b9c43",
+  "severity": "critical",
+  "tags": [
+    "Elastic",
+    "Windows",
+    "Elastic Endgame",
+    "Network",
+    "Continuous Monitoring",
+    "SecOps",
+    "Monitoring"
+  ],
+  "threat_filters": [
+    {
+      "$state": {
+        "store": "appState"
+      },
+      "meta": {
+        "disabled": false,
+        "key": "event.module",
+        "negate": false,
+        "params": {
+          "query": "threatintel"
+        },
+        "type": "phrase"
+      },
+      "query": {
+        "match_phrase": {
+          "event.module": "threatintel"
+        }
+      }
+    },
+    {
+      "$state": {
+        "store": "appState"
+      },
+      "meta": {
+        "disabled": false,
+        "key": "event.category",
+        "negate": false,
+        "params": {
+          "query": "threat"
+        },
+        "type": "phrase"
+      },
+      "query": {
+        "match_phrase": {
+          "event.category": "threat"
+        }
+      }
+    },
+    {
+      "$state": {
+        "store": "appState"
+      },
+      "meta": {
+        "disabled": false,
+        "key": "event.kind",
+        "negate": false,
+        "params": {
+          "query": "enrichment"
+        },
+        "type": "phrase"
+      },
+      "query": {
+        "match_phrase": {
+          "event.kind": "enrichment"
+        }
+      }
+    },
+    {
+      "$state": {
+        "store": "appState"
+      },
+      "meta": {
+        "disabled": false,
+        "key": "event.type",
+        "negate": false,
+        "params": {
+          "query": "indicator"
+        },
+        "type": "phrase"
+      },
+      "query": {
+        "match_phrase": {
+          "event.type": "indicator"
+        }
+      }
+    }
+  ],
+  "threat_index": [
+    "filebeat-8*"
+  ],
+  "threat_indicator_path": "threat.indicator",
+  "threat_language": "kuery",
+  "threat_mapping": [
+    {
+      "entries": [
+        {
+          "field": "file.hash.md5",
+          "type": "mapping",
+          "value": "threat.indicator.file.hash.md5"
+        }
+      ]
+    },
+    {
+      "entries": [
+        {
+          "field": "file.hash.sha1",
+          "type": "mapping",
+          "value": "threat.indicator.file.hash.sha1"
+        }
+      ]
+    },
+    {
+      "entries": [
+        {
+          "field": "file.hash.sha256",
+          "type": "mapping",
+          "value": "threat.indicator.file.hash.sha256"
+        }
+      ]
+    },
+    {
+      "entries": [
+        {
+          "field": "file.pe.imphash",
+          "type": "mapping",
+          "value": "threat.indicator.file.pe.imphash"
+        }
+      ]
+    },
+    {
+      "entries": [
+        {
+          "field": "source.ip",
+          "type": "mapping",
+          "value": "threat.indicator.ip"
+        }
+      ]
+    },
+    {
+      "entries": [
+        {
+          "field": "destination.ip",
+          "type": "mapping",
+          "value": "threat.indicator.ip"
+        }
+      ]
+    },
+    {
+      "entries": [
+        {
+          "field": "url.full",
+          "type": "mapping",
+          "value": "threat.indicator.url.full"
+        }
+      ]
+    },
+    {
+      "entries": [
+        {
+          "field": "registry.path",
+          "type": "mapping",
+          "value": "threat.indicator.registry.path"
+        }
+      ]
+    }
+  ],
+  "threat_query": "@timestamp >= \"now-30d/d\" and event.module:threatintel and (threat.indicator.file.hash.*:* or threat.indicator.file.pe.imphash:* or threat.indicator.ip:* or threat.indicator.registry.path:* or threat.indicator.url.full:*)",
+  "timeline_id": "495ad7a7-316e-4544-8a0f-9c098daee76e",
+  "timeline_title": "Generic Threat Match Timeline",
+  "type": "threat_match",
+  "version": 3
+}

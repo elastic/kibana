@@ -20,9 +20,8 @@ import {
   EuiText,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { IFieldType } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   SnapshotCustomAggregation,
   SnapshotCustomMetricInput,
@@ -30,6 +29,7 @@ import {
   SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';
 import { EuiTheme, withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
+import { DerivedIndexPattern } from '../../../../../../containers/metrics_source';
 
 interface SelectedOption {
   label: string;
@@ -53,7 +53,7 @@ const AGGREGATION_LABELS = {
 interface Props {
   theme: EuiTheme | undefined;
   metric?: SnapshotCustomMetricInput;
-  fields: IFieldType[];
+  fields: DerivedIndexPattern['fields'];
   customMetrics: SnapshotCustomMetricInput[];
   onChange: (metric: SnapshotCustomMetricInput) => void;
   onCancel: () => void;

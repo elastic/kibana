@@ -24,13 +24,6 @@ describe('the InfraSources lib', () => {
         attributes: {
           metricAlias: 'METRIC_ALIAS',
           logIndices: { type: 'index_pattern', indexPatternId: 'log_index_pattern_0' },
-          fields: {
-            container: 'CONTAINER',
-            host: 'HOST',
-            pod: 'POD',
-            tiebreaker: 'TIEBREAKER',
-            timestamp: 'TIMESTAMP',
-          },
         },
         references: [
           {
@@ -50,13 +43,6 @@ describe('the InfraSources lib', () => {
         configuration: {
           metricAlias: 'METRIC_ALIAS',
           logIndices: { type: 'index_pattern', indexPatternId: 'LOG_INDEX_PATTERN' },
-          fields: {
-            container: 'CONTAINER',
-            host: 'HOST',
-            pod: 'POD',
-            tiebreaker: 'TIEBREAKER',
-            timestamp: 'TIMESTAMP',
-          },
         },
       });
     });
@@ -67,12 +53,6 @@ describe('the InfraSources lib', () => {
           default: {
             metricAlias: 'METRIC_ALIAS',
             logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
-            fields: {
-              host: 'HOST',
-              pod: 'POD',
-              tiebreaker: 'TIEBREAKER',
-              timestamp: 'TIMESTAMP',
-            },
           },
         }),
       });
@@ -82,11 +62,7 @@ describe('the InfraSources lib', () => {
         version: 'foo',
         type: infraSourceConfigurationSavedObjectName,
         updated_at: '2000-01-01T00:00:00.000Z',
-        attributes: {
-          fields: {
-            container: 'CONTAINER',
-          },
-        },
+        attributes: {},
         references: [],
       });
 
@@ -99,13 +75,6 @@ describe('the InfraSources lib', () => {
         configuration: {
           metricAlias: 'METRIC_ALIAS',
           logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
-          fields: {
-            container: 'CONTAINER',
-            host: 'HOST',
-            pod: 'POD',
-            tiebreaker: 'TIEBREAKER',
-            timestamp: 'TIMESTAMP',
-          },
         },
       });
     });
@@ -133,13 +102,6 @@ describe('the InfraSources lib', () => {
         configuration: {
           metricAlias: expect.any(String),
           logIndices: expect.any(Object),
-          fields: {
-            container: expect.any(String),
-            host: expect.any(String),
-            pod: expect.any(String),
-            tiebreaker: expect.any(String),
-            timestamp: expect.any(String),
-          },
         },
       });
     });
@@ -147,6 +109,14 @@ describe('the InfraSources lib', () => {
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
+  alerting: {
+    inventory_threshold: {
+      group_by_page_size: 10000,
+    },
+    metric_threshold: {
+      group_by_page_size: 10000,
+    },
+  },
   enabled: true,
   inventory: {
     compositeSize: 2000,

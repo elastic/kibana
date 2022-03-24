@@ -6,18 +6,21 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { QUERY_RULE_TYPE_ID } from '../../../../../common/constants';
-import { QueryRuleParams, queryRuleParams } from '../../schemas/rule_schemas';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
+
+import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
 
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
+    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown) => {
@@ -44,7 +47,7 @@ export const createQueryAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {
@@ -52,7 +55,7 @@ export const createQueryAlertType = (
           bulkCreate,
           exceptionItems,
           listClient,
-          rule,
+          completeRule,
           searchAfterSize,
           tuple,
           wrapHits,
@@ -66,10 +69,10 @@ export const createQueryAlertType = (
         bulkCreate,
         exceptionItems,
         experimentalFeatures,
-        eventsTelemetry: undefined,
+        eventsTelemetry,
         listClient,
         logger,
-        rule,
+        completeRule,
         searchAfterSize,
         services,
         tuple,

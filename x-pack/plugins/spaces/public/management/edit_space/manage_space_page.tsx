@@ -21,7 +21,7 @@ import { difference } from 'lodash';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
 
 import { SectionLoading } from '../../../../../../src/plugins/es_ui_shared/public';

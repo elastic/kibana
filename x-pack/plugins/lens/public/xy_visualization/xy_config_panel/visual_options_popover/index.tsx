@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ToolbarPopover, TooltipWrapper } from '../../../shared_components';
+import { ToolbarPopover, TooltipWrapper, ValueLabelsSettings } from '../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
@@ -15,6 +15,7 @@ import { XYState } from '../../types';
 import { hasHistogramSeries } from '../../state_helpers';
 import { ValidLayer } from '../../../../common/expressions';
 import type { FramePublicAPI } from '../../../types';
+import { getDataLayers } from '../../visualization_helpers';
 
 function getValueLabelDisableReason({
   isAreaPercentage,
@@ -49,24 +50,25 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
   setState,
   datasourceLayers,
 }) => {
-  const isAreaPercentage = state?.layers.some(
+  const dataLayers = getDataLayers(state.layers);
+  const isAreaPercentage = dataLayers.some(
     ({ seriesType }) => seriesType === 'area_percentage_stacked'
   );
 
-  const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
+  const hasNonBarSeries = dataLayers.some(({ seriesType }) =>
     ['area_stacked', 'area', 'line'].includes(seriesType)
   );
 
-  const hasBarNotStacked = state?.layers.some(({ seriesType }) =>
+  const hasBarNotStacked = dataLayers.some(({ seriesType }) =>
     ['bar', 'bar_horizontal'].includes(seriesType)
   );
 
-  const hasAreaSeries = state?.layers.some(({ seriesType }) =>
+  const hasAreaSeries = dataLayers.some(({ seriesType }) =>
     ['area_stacked', 'area', 'area_percentage_stacked'].includes(seriesType)
   );
 
   const isHistogramSeries = Boolean(
-    hasHistogramSeries(state?.layers as ValidLayer[], datasourceLayers)
+    hasHistogramSeries(dataLayers as ValidLayer[], datasourceLayers)
   );
 
   const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
@@ -102,16 +104,27 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
           }}
         />
 
-        <MissingValuesOptions
-          isValueLabelsEnabled={isValueLabelsEnabled}
-          isFittingEnabled={isFittingEnabled}
-          valueLabels={state?.valueLabels}
-          fittingFunction={state?.fittingFunction}
+        <ValueLabelsSettings
+          isVisible={isValueLabelsEnabled}
+          valueLabels={state?.valueLabels ?? 'hide'}
           onValueLabelChange={(newMode) => {
             setState({ ...state, valueLabels: newMode });
           }}
+        />
+
+        <MissingValuesOptions
+          isFittingEnabled={isFittingEnabled}
+          fittingFunction={state?.fittingFunction}
+          emphasizeFitting={state?.emphasizeFitting}
+          endValue={state?.endValue}
           onFittingFnChange={(newVal) => {
             setState({ ...state, fittingFunction: newVal });
+          }}
+          onEmphasizeFittingChange={(newVal) => {
+            setState({ ...state, emphasizeFitting: newVal });
+          }}
+          onEndValueChange={(newVal) => {
+            setState({ ...state, endValue: newVal });
           }}
         />
 

@@ -31,4 +31,10 @@ export const alertFormI18n = {
       defaultMessage: 'Please select one or more connectors',
     }
   ),
+  emailPlaceHolder: i18n.translate(
+    'xpack.uptime.sourceConfiguration.alertDefaultForm.emailConnectorPlaceHolder',
+    {
+      defaultMessage: 'To: Email for email connector',
+    }
+  ),
 };

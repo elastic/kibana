@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { ItemTemplate } from './item_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { NodeReact } from '../../../components/elasticsearch';
+import { Node } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useCharts } from '../../hooks/use_charts';
@@ -82,7 +82,7 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes/${node}`;
     if (services.http?.fetch && clusterUuid) {
-      const response = await services.http?.fetch(url, {
+      const response = await services.http?.fetch<{ shards: unknown[]; nodes: unknown[] }>(url, {
         method: 'POST',
         body: JSON.stringify({
           showSystemIndices,
@@ -143,7 +143,7 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
-            <NodeReact
+            <Node
               alerts={alerts}
               labels={labels.node}
               nodeId={node}

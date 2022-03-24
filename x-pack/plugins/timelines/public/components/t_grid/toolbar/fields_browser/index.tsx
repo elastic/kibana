@@ -6,15 +6,15 @@
  */
 
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { debounce } from 'lodash';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
+import type { FieldBrowserProps } from '../../../../../common/types/fields_browser';
 import { FieldsBrowser } from './field_browser';
-import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
+import { filterBrowserFieldsByFieldName, filterSelectedBrowserFields } from './helpers';
 import * as i18n from './translations';
-import type { FieldBrowserProps } from './types';
 
 const FIELDS_BUTTON_CLASS_NAME = 'fields-button';
 
@@ -34,31 +34,58 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   timelineId,
   columnHeaders,
   browserFields,
+  options,
   width,
 }) => {
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
-  /** tracks the latest timeout id from `setTimeout`*/
-  const inputTimeoutId = useRef(0);
-
   /** all field names shown in the field browser must contain this string (when specified) */
   const [filterInput, setFilterInput] = useState('');
+  /** debounced filterInput, the one that is applied to the filteredBrowserFields */
+  const [appliedFilterInput, setAppliedFilterInput] = useState('');
   /** all fields in this collection have field names that match the filterInput */
   const [filteredBrowserFields, setFilteredBrowserFields] = useState<BrowserFields | null>(null);
+  /** when true, show only the the selected field */
+  const [filterSelectedEnabled, setFilterSelectedEnabled] = useState(false);
   /** when true, show a spinner in the input to indicate the field browser is searching for matching field names */
   const [isSearching, setIsSearching] = useState(false);
   /** this category will be displayed in the right-hand pane of the field browser */
-  const [selectedCategoryId, setSelectedCategoryId] = useState(DEFAULT_CATEGORY_NAME);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   /** show the field browser */
   const [show, setShow] = useState(false);
+
+  // debounced function to apply the input filter
+  // will delay the call to setAppliedFilterInput by INPUT_TIMEOUT ms
+  // the parameter used will be the last one passed
+  const debouncedApplyFilterInput = useMemo(
+    () =>
+      debounce((input: string) => {
+        setAppliedFilterInput(input);
+      }, INPUT_TIMEOUT),
+    []
+  );
   useEffect(() => {
     return () => {
-      if (inputTimeoutId.current !== 0) {
-        // ⚠️ mutation: cancel any remaining timers and zero-out the timer id:
-        clearTimeout(inputTimeoutId.current);
-        inputTimeoutId.current = 0;
-      }
+      debouncedApplyFilterInput.cancel();
     };
-  }, []);
+  }, [debouncedApplyFilterInput]);
+
+  const selectionFilteredBrowserFields = useMemo<BrowserFields>(
+    () =>
+      filterSelectedEnabled
+        ? filterSelectedBrowserFields({ browserFields, columnHeaders })
+        : browserFields,
+    [browserFields, columnHeaders, filterSelectedEnabled]
+  );
+
+  useEffect(() => {
+    setFilteredBrowserFields(
+      filterBrowserFieldsByFieldName({
+        browserFields: selectionFilteredBrowserFields,
+        substring: appliedFilterInput,
+      })
+    );
+    setIsSearching(false);
+  }, [appliedFilterInput, selectionFilteredBrowserFields]);
 
   /** Shows / hides the field browser */
   const onShow = useCallback(() => {
@@ -68,57 +95,31 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   /** Invoked when the field browser should be hidden */
   const onHide = useCallback(() => {
     setFilterInput('');
+    setAppliedFilterInput('');
     setFilteredBrowserFields(null);
+    setFilterSelectedEnabled(false);
     setIsSearching(false);
-    setSelectedCategoryId(DEFAULT_CATEGORY_NAME);
+    setSelectedCategoryIds([]);
     setShow(false);
   }, []);
 
   /** Invoked when the user types in the filter input */
   const updateFilter = useCallback(
     (newFilterInput: string) => {
-      setFilterInput(newFilterInput);
       setIsSearching(true);
-      if (inputTimeoutId.current !== 0) {
-        clearTimeout(inputTimeoutId.current); // ⚠️ mutation: cancel any previous timers
-      }
-      // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
-      inputTimeoutId.current = window.setTimeout(() => {
-        const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
-          browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
-          substring: newFilterInput,
-        });
-        setFilteredBrowserFields(newFilteredBrowserFields);
-        setIsSearching(false);
-
-        const newSelectedCategoryId =
-          newFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
-            ? DEFAULT_CATEGORY_NAME
-            : Object.keys(newFilteredBrowserFields)
-                .sort()
-                .reduce<string>(
-                  (selected, category) =>
-                    newFilteredBrowserFields[category].fields != null &&
-                    newFilteredBrowserFields[selected].fields != null &&
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    Object.keys(newFilteredBrowserFields[category].fields!).length >
-                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                      Object.keys(newFilteredBrowserFields[selected].fields!).length
-                      ? category
-                      : selected,
-                  Object.keys(newFilteredBrowserFields)[0]
-                );
-        setSelectedCategoryId(newSelectedCategoryId);
-      }, INPUT_TIMEOUT);
+      setFilterInput(newFilterInput);
+      debouncedApplyFilterInput(newFilterInput);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [browserFields, filterInput, inputTimeoutId.current]
+    [debouncedApplyFilterInput]
   );
 
-  // only merge in the default category if the field browser is visible
-  const browserFieldsWithDefaultCategory = useMemo(() => {
-    return show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {};
-  }, [show, browserFields]);
+  /** Invoked when the user changes the view all/selected value  */
+  const onFilterSelectedChange = useCallback(
+    (filterSelected: boolean) => {
+      setFilterSelectedEnabled(filterSelected);
+    },
+    [setFilterSelectedEnabled]
+  );
 
   return (
     <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
@@ -139,18 +140,21 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
 
       {show && (
         <FieldsBrowser
-          browserFields={browserFieldsWithDefaultCategory}
           columnHeaders={columnHeaders}
           filteredBrowserFields={
-            filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory
+            filteredBrowserFields != null ? filteredBrowserFields : browserFields
           }
+          filterSelectedEnabled={filterSelectedEnabled}
           isSearching={isSearching}
-          onCategorySelected={setSelectedCategoryId}
+          setSelectedCategoryIds={setSelectedCategoryIds}
+          onFilterSelectedChange={onFilterSelectedChange}
           onHide={onHide}
           onSearchInputChange={updateFilter}
+          options={options}
           restoreFocusTo={customizeColumnsButtonRef}
           searchInput={filterInput}
-          selectedCategoryId={selectedCategoryId}
+          appliedFilterInput={appliedFilterInput}
+          selectedCategoryIds={selectedCategoryIds}
           timelineId={timelineId}
           width={width}
         />

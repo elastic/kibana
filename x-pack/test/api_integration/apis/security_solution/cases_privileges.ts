@@ -11,15 +11,15 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
-} from '../../../case_api_integration/common/lib/authentication';
+} from '../../../cases_api_integration/common/lib/authentication';
 
-import { Role, User } from '../../../case_api_integration/common/lib/authentication/types';
+import { Role, User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
   createCase,
   deleteAllCaseItems,
   getCase,
-} from '../../../case_api_integration/common/lib/utils';
-import { getPostCaseRequest } from '../../../case_api_integration/common/lib/mock';
+} from '../../../cases_api_integration/common/lib/utils';
+import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
 import { APP_ID } from '../../../../plugins/security_solution/common/constants';
 
 const secAll: Role = {

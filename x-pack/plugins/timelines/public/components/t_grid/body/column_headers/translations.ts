@@ -23,10 +23,6 @@ export const FULL_SCREEN = i18n.translate('xpack.timelines.timeline.fullScreenBu
   defaultMessage: 'Full screen',
 });
 
-export const HIDE_COLUMN = i18n.translate('xpack.timelines.timeline.hideColumnLabel', {
-  defaultMessage: 'Hide column',
-});
-
 export const SORT_AZ = i18n.translate('xpack.timelines.timeline.sortAZLabel', {
   defaultMessage: 'Sort A-Z',
 });

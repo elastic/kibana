@@ -24,7 +24,7 @@ export function systemLogsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'systemLogs',
     name: i18n.translate('home.tutorials.systemLogs.nameTitle', {
-      defaultMessage: 'System logs',
+      defaultMessage: 'System Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
@@ -56,8 +56,8 @@ export function systemLogsSpecProvider(context: TutorialContext): TutorialSchema
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['os_system', 'security'],
   };
 }

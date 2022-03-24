@@ -13,17 +13,28 @@ export {
   ILLEGAL_CHARACTERS,
   validateDataView,
 } from '../common/lib';
-export { formatHitProvider, onRedirectNoIndexPattern } from './data_views';
+export { onRedirectNoIndexPattern } from './data_views';
 
-export { IndexPatternField, IIndexPatternFieldList, TypeMeta } from '../common';
+export type { IIndexPatternFieldList, TypeMeta, RuntimeType } from '../common';
+export type { DataViewSpec, FieldSpec, DataViewAttributes } from '../common';
+export {
+  IndexPatternField,
+  DataViewField,
+  DataViewType,
+  DataViewSavedObjectConflictError,
+  META_FIELDS,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
+} from '../common';
 
+export type { IndexPatternsContract } from './data_views';
+export type { DataViewListItem } from './data_views';
 export {
   IndexPatternsService,
-  IndexPatternsContract,
   IndexPattern,
   DataViewsApiClient,
   DataViewsService,
-  DataViewsContract,
   DataView,
 } from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
@@ -39,7 +50,14 @@ export function plugin() {
   return new DataViewsPublicPlugin();
 }
 
-export type { DataViewsPublicPluginSetup, DataViewsPublicPluginStart } from './types';
+export type {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+  DataViewsContract,
+  HasDataViewsResponse,
+  IndicesResponse,
+  IndicesResponseModified,
+} from './types';
 
 // Export plugin after all other imports
-export type { DataViewsPublicPlugin as DataPlugin };
+export type { DataViewsPublicPlugin as DataViewsPlugin };

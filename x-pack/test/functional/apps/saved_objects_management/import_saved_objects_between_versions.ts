@@ -20,51 +20,63 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
+  const getExportCount = async () => {
+    return await retry.tryForTime(10000, async () => {
+      const exportText = await testSubjects.getVisibleText('exportAllObjects');
+      const parts = exportText.trim().split(' ');
+      if (parts.length !== 3) {
+        throw new Error('text not loaded yet');
+      }
+      const count = Number.parseInt(parts[1], 10);
+      if (count === 0) {
+        throw new Error('text not loaded yet');
+      }
+      return count;
+    });
+  };
+
   describe('Export import saved objects between versions', function () {
     before(async function () {
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/getting_started/shakespeare');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
     });
 
+    beforeEach(async () => {
+      await PageObjects.savedObjects.waitTableIsLoaded();
+    });
+
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.unload('x-pack/test/functional/es_archives/getting_started/shakespeare');
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     it('should be able to import 7.13 saved objects into 8.0.0', async function () {
-      await retry.tryForTime(10000, async () => {
-        const existingSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
-        // Kibana always has 1 advanced setting as a saved object
-        await expect(existingSavedObjects).to.be('Export 1 object');
-      });
+      const initialObjectCount = await getExportCount();
+
       await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', '_7.13_import_saved_objects.ndjson')
       );
       await PageObjects.savedObjects.checkImportSucceeded();
       await PageObjects.savedObjects.clickImportDone();
-      const importedSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
-      // verifying the count of saved objects after importing .ndjson
-      await expect(importedSavedObjects).to.be('Export 87 objects');
+      await PageObjects.savedObjects.waitTableIsLoaded();
+
+      const newObjectCount = await getExportCount();
+      expect(newObjectCount - initialObjectCount).to.eql(86);
     });
 
     it('should be able to import alerts and actions saved objects from 7.14 into 8.0.0', async function () {
-      await retry.tryForTime(10000, async () => {
-        const existingSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
-        // Kibana always has 1 advanced setting as a saved object
-        await expect(existingSavedObjects).to.be('Export 87 objects');
-      });
+      const initialObjectCount = await getExportCount();
+
       await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', '_7.14_import_alerts_actions.ndjson')
       );
       await PageObjects.savedObjects.checkImportSucceeded();
       await PageObjects.savedObjects.clickImportDone();
-      const importedSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
-      // verifying the count of saved objects after importing .ndjson
-      await expect(importedSavedObjects).to.be('Export 110 objects');
+      await PageObjects.savedObjects.waitTableIsLoaded();
+
+      const newObjectCount = await getExportCount();
+      expect(newObjectCount - initialObjectCount).to.eql(23);
     });
   });
 }

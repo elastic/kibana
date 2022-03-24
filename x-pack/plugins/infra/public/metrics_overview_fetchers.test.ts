@@ -19,7 +19,7 @@ function setup() {
     return Promise.resolve([
       core as CoreStart,
       deps as InfraClientStartDeps,
-      void 0 as InfraClientStartExports,
+      {} as InfraClientStartExports,
     ]) as Promise<[CoreStart, InfraClientStartDeps, InfraClientStartExports]>;
   });
   return { core, mockedGetStartServices };
@@ -31,21 +31,27 @@ describe('Metrics UI Observability Homepage Functions', () => {
       const { core, mockedGetStartServices } = setup();
       core.http.get.mockResolvedValue({
         hasData: true,
+        configuration: {
+          metricAlias: 'metric-*',
+        },
       });
       const hasData = createMetricsHasData(mockedGetStartServices);
       const response = await hasData();
       expect(core.http.get).toHaveBeenCalledTimes(1);
-      expect(response).toBeTruthy();
+      expect(response.hasData).toBeTruthy();
     });
     it('should return false when false', async () => {
       const { core, mockedGetStartServices } = setup();
       core.http.get.mockResolvedValue({
         hasData: false,
+        configuration: {
+          metricAlias: 'metric-*',
+        },
       });
       const hasData = createMetricsHasData(mockedGetStartServices);
       const response = await hasData();
       expect(core.http.get).toHaveBeenCalledTimes(1);
-      expect(response).toBeFalsy();
+      expect(response.hasData).toBeFalsy();
     });
   });
 

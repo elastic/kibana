@@ -361,6 +361,7 @@ describe('api', () => {
       const res = await api.getFields({
         externalService,
         params: {},
+        logger: mockedLogger,
       });
       expect(res).toEqual(serviceNowCommonFields);
     });
@@ -371,6 +372,7 @@ describe('api', () => {
       const res = await api.getChoices({
         externalService,
         params: { fields: ['priority'] },
+        logger: mockedLogger,
       });
       expect(res).toEqual(serviceNowChoices);
     });
@@ -383,6 +385,7 @@ describe('api', () => {
         params: {
           externalId: 'incident-1',
         },
+        logger: mockedLogger,
       });
       expect(res).toEqual({
         description: 'description from servicenow',

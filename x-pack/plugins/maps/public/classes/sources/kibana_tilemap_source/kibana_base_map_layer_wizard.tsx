@@ -7,16 +7,18 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 // @ts-ignore
 import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
-import { TileLayer } from '../../layers/tile_layer/tile_layer';
+import { RasterTileLayer } from '../../layers/raster_tile_layer/raster_tile_layer';
 import { getKibanaTileMap } from '../../../util';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
 
 export const kibanaBasemapLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.KIBANA_BASEMAP,
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const tilemap = getKibanaTileMap();
@@ -29,7 +31,7 @@ export const kibanaBasemapLayerWizardConfig: LayerWizard = {
   icon: 'logoKibana',
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = () => {
-      const layerDescriptor = TileLayer.createDescriptor({
+      const layerDescriptor = RasterTileLayer.createDescriptor({
         sourceDescriptor: KibanaTilemapSource.createDescriptor(),
       });
       previewLayers([layerDescriptor]);

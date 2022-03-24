@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
 import {
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
@@ -16,9 +15,9 @@ import { registerSavedObjectsCountUsageCollector } from './saved_objects_count_c
 describe('saved_objects_count_collector', () => {
   const usageCollectionMock = createUsageCollectionSetupMock();
 
-  const legacyConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
+  const kibanaIndex = '.kibana-tests';
 
-  beforeAll(() => registerSavedObjectsCountUsageCollector(usageCollectionMock, legacyConfig$));
+  beforeAll(() => registerSavedObjectsCountUsageCollector(usageCollectionMock, kibanaIndex));
   afterAll(() => jest.clearAllTimers());
 
   test('registered collector is set', () => {
@@ -39,16 +38,14 @@ describe('saved_objects_count_collector', () => {
   test('should return some values when the aggregations return something', async () => {
     const fetchContextMock = createCollectorFetchContextMock();
     fetchContextMock.esClient.search = jest.fn().mockImplementation(() => ({
-      body: {
-        aggregations: {
-          types: {
-            buckets: [
-              { key: 'type_one', doc_count: 20 },
-              { key: 'type_two', doc_count: 45 },
-              { key: 'type-three', doc_count: 66 },
-              { key: 'type-four', doc_count: 0 },
-            ],
-          },
+      aggregations: {
+        types: {
+          buckets: [
+            { key: 'type_one', doc_count: 20 },
+            { key: 'type_two', doc_count: 45 },
+            { key: 'type-three', doc_count: 66 },
+            { key: 'type-four', doc_count: 0 },
+          ],
         },
       },
     }));

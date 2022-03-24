@@ -18,8 +18,8 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [errors](./kibana-plugin-core-server.savedobjectsclient.errors.md) |  | <code>typeof SavedObjectsErrorHelpers</code> |  |
-|  [errors](./kibana-plugin-core-server.savedobjectsclient.errors.md) | <code>static</code> | <code>typeof SavedObjectsErrorHelpers</code> |  |
+|  [errors](./kibana-plugin-core-server.savedobjectsclient.errors.md) |  | typeof SavedObjectsErrorHelpers |  |
+|  [errors](./kibana-plugin-core-server.savedobjectsclient.errors.md) | <code>static</code> | typeof SavedObjectsErrorHelpers |  |
 
 ## Methods
 

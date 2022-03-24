@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export {
-  FileDataVisualizer,
-  IndexDataVisualizer,
-  FileDataVisualizerSpec,
-  IndexDataVisualizerSpec,
-} from '../../application';
+export type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../../application';
+export { FileDataVisualizer, IndexDataVisualizer } from '../../application';

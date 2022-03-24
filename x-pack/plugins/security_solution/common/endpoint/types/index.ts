@@ -12,6 +12,7 @@ import { ManifestSchema } from '../schema/manifest';
 export * from './actions';
 export * from './os';
 export * from './trusted_apps';
+export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 
 /**
  * Supported React-Router state for the Policy Details page
@@ -177,7 +178,7 @@ export interface ResolverPaginatedEvents {
 }
 
 /**
- * Returned by the server via /api/endpoint/metadata
+ * Returned by the server via POST /api/endpoint/metadata
  */
 export interface HostResultList {
   /* the hosts restricted by the page size */
@@ -739,7 +740,23 @@ export type SafeEndpointEvent = Partial<{
     }>;
     pid: ECSField<number>;
     hash: Hashes;
+    working_directory: ECSField<string>;
     parent: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    session_leader: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    entry_leader: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    group_leader: Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
       pid: ECSField<number>;
@@ -904,7 +921,7 @@ export interface PolicyConfig {
       registry: boolean;
       security: boolean;
     };
-    malware: ProtectionFields;
+    malware: ProtectionFields & BlocklistFields;
     memory_protection: ProtectionFields & SupportedFields;
     behavior_protection: ProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
@@ -940,7 +957,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: ProtectionFields;
+    malware: ProtectionFields & BlocklistFields;
     behavior_protection: ProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
@@ -968,7 +985,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: ProtectionFields;
+    malware: ProtectionFields & BlocklistFields;
     behavior_protection: ProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
@@ -1033,6 +1050,10 @@ export interface ProtectionFields {
 /** Policy:  Supported fields */
 export interface SupportedFields {
   supported: boolean;
+}
+
+export interface BlocklistFields {
+  blocklist: boolean;
 }
 
 /** Policy protection mode options */
@@ -1231,3 +1252,26 @@ export interface ListPageRouteState {
   /** The label for the button */
   backButtonLabel?: string;
 }
+
+/**
+ * REST API standard base response for list types
+ */
+interface BaseListResponse<D = unknown> {
+  data: D[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+export interface AdditionalOnSwitchChangeParams {
+  value: boolean;
+  policyConfigData: UIPolicyConfig;
+  protectionOsList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+}
+
+/**
+ * Returned by the server via GET /api/endpoint/metadata
+ */
+export type MetadataListResponse = BaseListResponse<HostInfo>;
+
+export type { EndpointPrivileges } from './authz';

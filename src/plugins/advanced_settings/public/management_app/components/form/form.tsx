@@ -22,12 +22,12 @@ import {
   EuiButtonEmpty,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { toMountPoint } from '../../../../../kibana_react/public';
-import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
+import { KibanaThemeProvider, toMountPoint } from '../../../../../kibana_react/public';
+import { DocLinksStart, ThemeServiceStart, ToastsStart } from '../../../../../../core/public';
 
 import { getCategoryName } from '../../lib';
 import { Field, getEditableValue } from '../field';
@@ -44,8 +44,9 @@ interface FormProps {
   save: (changes: SettingsChanges) => Promise<boolean[]>;
   showNoResultsMessage: boolean;
   enableSaving: boolean;
-  dockLinks: DocLinksStart['links'];
+  docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
+  theme: ThemeServiceStart['theme$'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   queryText?: string;
 }
@@ -191,7 +192,7 @@ export class Form extends PureComponent<FormProps> {
         defaultMessage: 'One or more settings require you to reload the page to take effect.',
       }),
       text: toMountPoint(
-        <>
+        <KibanaThemeProvider theme$={this.props.theme}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton size="s" onClick={() => window.location.reload()}>
@@ -201,7 +202,7 @@ export class Form extends PureComponent<FormProps> {
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
+        </KibanaThemeProvider>
       ),
       color: 'success',
     });
@@ -263,7 +264,7 @@ export class Form extends PureComponent<FormProps> {
                   unsavedChanges={this.state.unsavedChanges[setting.name]}
                   clearChange={this.clearChange}
                   enableSaving={this.props.enableSaving}
-                  dockLinks={this.props.dockLinks}
+                  docLinks={this.props.docLinks}
                   toasts={this.props.toasts}
                 />
               );
@@ -368,7 +369,7 @@ export class Form extends PureComponent<FormProps> {
               <EuiButton
                 className="mgtAdvancedSettingsForm__button"
                 disabled={areChangesInvalid}
-                color="secondary"
+                color="success"
                 fill
                 size="s"
                 iconType="check"

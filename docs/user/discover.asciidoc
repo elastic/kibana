@@ -3,33 +3,23 @@
 
 [partintro]
 --
-**_Gain insight to your data._**
-
-*Discover* enables you to quickly search and filter your data, get information
-about the structure of the fields, and visualize your data with *Lens* and *Maps*.
-You can customize and save your searches and place them on a dashboard.
-
-++++
-<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
-</script>
-<img
-style="width: 100%; margin: auto; display: block;"
-class="vidyard-player-embed"
-src="https://play.vidyard.com/c2qBPz74BU16ncbvDWGvbz.jpg"
-data-uuid="c2qBPz74BU16ncbvDWGvbz"
-data-v="4"
-data-type="inline"
-/>
-++++
-
-[float]
-=== Explore and query your data
-
 You have questions about your data.
 What pages on your website contain a
 specific word or phrase? What events were logged most recently?
 What processes take longer than 500 milliseconds to respond?
-This tutorial shows you how to use *Discover* to quickly search large amounts of
+
+With *Discover*, you can quickly search and filter your data, get information
+about the structure of the fields, and display your findings in a visualization.
+You can also customize and save your searches and place them on a dashboard.
+
+[role="screenshot"]
+image::images/discover.png[A view of the Discover app]
+
+
+[float]
+=== Explore and query your data
+
+This tutorial shows you how to use *Discover* to search large amounts of
 data and understand what’s going on at any given time.
 
 You’ll learn to:
@@ -43,9 +33,7 @@ that summarize the contents of the data.
 At the end of this tutorial, you’ll be ready to start exploring with your own
 data in *Discover*.
 
-
-[float]
-=== Prerequisites
+*Prerequisites:*
 
 - If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 - You must have data in {es}.  This tutorial uses the
@@ -64,12 +52,16 @@ Tell {kib} where to find the data you want to explore, and then specify the time
 
 . Select the data you want to work with.
 +
-{kib} uses an <<index-patterns,index pattern>> to tell it where to find
+{kib} uses a <<data-views,{data-source}>> to tell it where to find
 your {es} data.
-To view the ecommerce sample data, make sure the index pattern is set to **kibana_sample_data_ecommerce**.
+To view the ecommerce sample data, make sure the {data-source} is set to **kibana_sample_data_ecommerce**.
 +
 [role="screenshot"]
-image::images/discover-index-pattern.png[How to set the index pattern in Discover, width=50%]
+image::images/discover-data-view.png[How to set the {data-source} in Discover, width=50%]
++
+To create a data view for your own data,
+click the ellipsis icon (…​), and then click *Create new data view*.
+For details, refer to <<data-views, Create a data view.>>
 
 . Adjust the <<set-time-filter,time range>> to view data for the *Last 7 days*.
 +
@@ -85,8 +77,8 @@ click and drag the mouse over the chart.
 === Explore the fields in your data
 
 **Discover** includes a table that shows all the documents that match your search.
-By default, the table includes columns for the time field and the document `_source`,
-which can be overwhelming. You’ll modify this table to display only your fields of interest.
+By default, the table includes columns for the time field and the document `_source`.
+You’ll modify this table to display your fields of interest.
 
 . Scan through the list of **Available fields** until you find the `manufacturer` field.
 You can also search for the field by name.
@@ -101,7 +93,7 @@ image:images/find-manufacturer-field.png[Fields list that displays the top five 
 
 . Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
 
-. Find the `customer_first_name` and `customer_last_name` last name fields and add
+. Find the `customer_first_name` and `customer_last_name` fields and add
 them to your document table. Your table should look similar to this:
 +
 [role="screenshot"]
@@ -110,22 +102,22 @@ image:images/document-table.png[Document table with fields for manufacturer, cus
 . To rearrange the table columns, hover the mouse over a
 column header, and then use the move control.
 
-. To view more of the document table, click *Hide chart*.
+. To view more of the document table, click *Chart options > Hide chart*.
 
 [float]
 [[add-field-in-discover]]
-=== Add a field to your index pattern
+=== Add a field to your {data-source}
 
 What happens if you forgot to define an important value as a separate field? Or, what if you
 want to combine two fields and treat them as one? This is where {ref}/runtime.html[runtime fields] come into play.
-You can add a runtime field to your index pattern from inside of **Discover**,
+You can add a runtime field to your {data-source} from inside of **Discover**,
 and then use that field for analysis and visualizations,
 the same way you do with other fields.
 
-. Click the ellipsis icon (...), and then click *Add field to index pattern*.
+. Click the ellipsis icon (...), and then click *Add field*.
 +
 [role="screenshot"]
-image:images/add-field-to-pattern.png[Dropdown menu located next to index pattern field with item for adding a field to an index pattern, width=50%]
+image:images/add-field-to-data-view.png[Dropdown menu located next to {data-source} field with item for adding a field to a {data-source}, width=50%]
 
 . In the *Create field* form, enter `hello` for the name.
 
@@ -166,7 +158,7 @@ refer to <<runtime-fields, Explore your data with runtime fields>>.
 
 One of the unique capabilities of **Discover** is the ability to combine
 free text search with filtering based on structured data.
-To search all fields, enter a simple string in the **Search** field.
+To search all fields, enter a simple string in the query bar.
 
 [role="screenshot"]
 image:images/discover-search-field.png[Search field in Discover]
@@ -180,17 +172,19 @@ you can use to build a structured query.
 Search the ecommerce data for documents where the country matches US:
 
 . Enter `g`, and then select *geoip.country_iso_code*.
-. Select *equals some value* and *US*, and then click *Update*.
+. Select *:* for equals some value and *US*, and then click *Update*.
 . For a more complex search, try:
 +
-`geoip.country_iso_code : US and products.taxless_price >= 75`
+```ts
+geoip.country_iso_code : US and products.taxless_price >= 75
+```
 
 [float]
 [[filter-in-discover]]
 === Filter your data
 
 Whereas the query defines the set of documents you are interested in,
-filters enable you to zero in on different subsets of those documents.
+filters enable you to zero in on subsets of those documents.
 You can filter results to include or exclude specific fields, filter for a value in a range,
 and more.
 
@@ -236,14 +230,11 @@ You can bookmark this document and share the link.
 
 Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
 Saving a search saves the query text, filters,
-and current view of *Discover*&mdash;the columns selected in the document table, the sort order, and the index pattern.
+and current view of *Discover*, including the columns selected in the document table, the sort order, and the {data-source}.
 
 . In the toolbar, click **Save**.
 
 . Give your search a title, and then click **Save**.
-+
-[role="screenshot"]
-image:images/discover-save-saved-search.png[Save saved search in Discover, width=50%]
 
 [float]
 === Visualize your findings
@@ -298,3 +289,7 @@ include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
 include::{kib-repo-dir}/discover/save-search.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
+
+include::{kib-repo-dir}/discover/document-explorer.asciidoc[]
+
+include::{kib-repo-dir}/discover/field-statistics.asciidoc[]

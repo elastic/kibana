@@ -16,14 +16,23 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
   const find = getService('find');
   const browser = getService('browser');
   const pageObjects = getPageObjects(['common']);
+  const comboBox = getService('comboBox');
 
   return {
     async goToTime(time: string) {
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
-      await datePickerInput.clearValueWithKeyboard({ charByChar: true });
-      await datePickerInput.type([time, browser.keys.RETURN]);
+
+      // explicitly focus to trigger tooltip
+      await datePickerInput.focus();
+
+      await datePickerInput.clearValueWithKeyboard();
+      await datePickerInput.type(time);
+
+      // dismiss the tooltip, which won't be hidden because blur doesn't happen reliably
+      await testSubjects.click('waffleDatePickerIntervalTooltip');
+
       await this.waitForLoading();
     },
 
@@ -63,6 +72,98 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       expect(await values2[2].getVisibleText()).to.be('256.3kbit/s');
       expect(await metrics2[3].getVisibleText()).to.be('Inbound traffic');
       expect(await values2[3].getVisibleText()).to.be('255.1kbit/s');
+    },
+
+    async getNodesWithValues() {
+      const nodes = await testSubjects.findAll('nodeContainer');
+      const promises = nodes.map(async (node) => {
+        const nodeName = await node.findByTestSubject('nodeName');
+        const name = await nodeName.getVisibleText();
+        const nodeValue = await node.findByTestSubject('nodeValue');
+        const value = await nodeValue.getVisibleText();
+        const color = await nodeValue.getAttribute('color');
+        return { name, value: parseFloat(value), color };
+      });
+      return await Promise.all(promises);
+    },
+
+    async sortNodesBy(sort: string) {
+      await testSubjects.click('waffleSortByDropdown');
+      if (sort === 'value') {
+        await testSubjects.find('waffleSortByValue');
+        await testSubjects.click('waffleSortByValue');
+      } else {
+        await testSubjects.find('waffleSortByName');
+        await testSubjects.click('waffleSortByName');
+      }
+    },
+
+    async groupByCustomField(field: string) {
+      await testSubjects.click('waffleGroupByDropdown');
+      const contextMenu = await testSubjects.find('groupByContextMenu');
+      const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
+      await menuItems[0].click();
+      const groupByCustomField = await testSubjects.find('groupByCustomField');
+      await comboBox.setElement(groupByCustomField, field);
+      await testSubjects.click('groupByCustomFieldAddButton');
+      await this.waitForLoading();
+      const groupNameLinks = await testSubjects.findAll('groupNameLink');
+      return Promise.all(groupNameLinks.map(async (link) => link.getVisibleText()));
+    },
+
+    async enterSearchTerm(query: string) {
+      const input = await this.clearSearchTerm();
+      await input.type(query);
+
+      // wait for input value to echo the input before submitting
+      // this ensures the React state has caught up with the events
+      await retry.try(async () => {
+        const value = await input.getAttribute('value');
+        expect(value).to.eql(query);
+      });
+
+      await input.type(browser.keys.RETURN);
+      await this.waitForLoading();
+    },
+
+    async clearSearchTerm() {
+      const input = await testSubjects.find('infraSearchField');
+      await input.clearValueWithKeyboard();
+      return input;
+    },
+
+    async openLegendControls() {
+      await testSubjects.click('openLegendControlsButton');
+      await testSubjects.find('legendControls');
+    },
+
+    async changePalette(paletteId: string) {
+      const paletteSelector = await testSubjects.find('legendControlsPalette');
+      await paletteSelector.click();
+      const paletteSelectorEntry = await paletteSelector.findByCssSelector(
+        `option[value=${paletteId}]`
+      );
+      await paletteSelectorEntry.click();
+    },
+
+    async applyLegendControls() {
+      await testSubjects.click('applyLegendControlsButton');
+    },
+
+    async toggleReverseSort() {
+      await testSubjects.click('waffleSortByDropdown');
+      await testSubjects.find('waffleSortByDirection');
+      await testSubjects.click('waffleSortByDirection');
+    },
+
+    async openTimeline() {
+      await testSubjects.click('toggleTimelineButton');
+      await testSubjects.existOrFail('timelineContainerOpen');
+    },
+
+    async closeTimeline() {
+      await testSubjects.click('toggleTimelineButton');
+      await testSubjects.existOrFail('timelineContainerClosed');
     },
 
     async openInvenotrySwitcher() {
@@ -183,7 +284,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
     async setAnomaliesDate(date: string) {
       await testSubjects.click('superDatePickerShowDatesButton');
-      await testSubjects.click('superDatePickerstartDatePopoverButton');
       await testSubjects.click('superDatePickerAbsoluteTab');
       const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
       await datePickerInput.clearValueWithKeyboard();

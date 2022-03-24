@@ -39,10 +39,8 @@ export class ThemeService {
 
   /** A React hook for consuming the dark mode value */
   public useDarkMode = (): boolean => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [value, update] = useState(false);
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       const s = this.darkModeEnabled$.subscribe(update);
       return () => s.unsubscribe();
@@ -53,12 +51,9 @@ export class ThemeService {
 
   /** A React hook for consuming the charts theme */
   public useChartsTheme = (): PartialTheme => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [value, update] = useState(this._chartsTheme$.getValue());
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const ref = useRef(value);
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       const s = this.chartsTheme$.subscribe((val) => {
         if (val !== ref.current) {
@@ -74,12 +69,9 @@ export class ThemeService {
 
   /** A React hook for consuming the charts theme */
   public useChartsBaseTheme = (): Theme => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [value, update] = useState(this._chartsBaseTheme$.getValue());
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const ref = useRef(value);
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       const s = this.chartsBaseTheme$.subscribe((val) => {
         if (val !== ref.current) {
@@ -97,9 +89,8 @@ export class ThemeService {
   public init(uiSettings: CoreSetup['uiSettings']) {
     this._uiSettingsDarkMode$ = uiSettings.get$<boolean>('theme:darkMode');
     this._uiSettingsDarkMode$.subscribe((darkMode) => {
-      this._chartsTheme$.next(
-        darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme
-      );
+      const theme = darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
+      this._chartsTheme$.next(theme);
       this._chartsBaseTheme$.next(darkMode ? DARK_THEME : LIGHT_THEME);
     });
   }

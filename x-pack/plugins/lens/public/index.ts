@@ -12,29 +12,41 @@ export type {
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
 export type { XYState } from './xy_visualization/types';
-export type { DataType, OperationMetadata } from './types';
 export type {
-  PieVisualizationState,
-  PieLayerState,
-  SharedPieLayerState,
-  MetricState,
+  DatasourcePublicAPI,
+  DataType,
+  OperationMetadata,
+  SuggestionRequest,
+  TableSuggestion,
+  Visualization,
+  VisualizationSuggestion,
+} from './types';
+export type {
   AxesSettingsConfig,
   XYLayerConfig,
   LegendConfig,
   SeriesType,
-  ValueLabelConfig,
   YAxisMode,
   XYCurveType,
   YConfig,
 } from '../common/expressions';
+export type {
+  ValueLabelConfig,
+  PieVisualizationState,
+  PieLayerState,
+  SharedPieLayerState,
+} from '../common/types';
+
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
+export type { HeatmapVisualizationState } from './heatmap_visualization/types';
+export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,
-  IndexPatternColumn,
-  FieldBasedIndexPatternColumn,
   OperationType,
   IncompleteColumn,
+  GenericIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -55,9 +67,12 @@ export type {
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
   OverallSumIndexPatternColumn,
+  FormulaPublicApi,
+  StaticValueIndexPatternColumn,
 } from './indexpattern_datasource/types';
 export type { LensEmbeddableInput } from './embeddable';
+export { layerTypes } from '../common';
 
-export { LensPublicStart } from './plugin';
+export type { LensPublicStart, LensPublicSetup } from './plugin';
 
 export const plugin = () => new LensPlugin();

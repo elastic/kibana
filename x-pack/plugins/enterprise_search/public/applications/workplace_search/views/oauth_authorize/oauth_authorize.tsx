@@ -27,7 +27,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { Loading } from '../../../shared/loading';

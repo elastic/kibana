@@ -6,19 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { SavedObject } from 'kibana/server';
 import { Spaces } from '../../scenarios';
 import {
   checkAAD,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   TaskManagerDoc,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { RawAlert } from '../../../../../plugins/alerting/server/types';
+import { RawRule } from '../../../../../plugins/alerting/server/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
@@ -31,11 +30,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     after(() => objectRemover.removeAll());
 
     async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
-      const scheduledTask: ApiResponse<estypes.GetResponse<TaskManagerDoc>> = await es.get({
+      const scheduledTask = await es.get<TaskManagerDoc>({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
-      return scheduledTask.body._source!;
+      return scheduledTask._source!;
     }
 
     it('should handle create alert request appropriately', async () => {
@@ -54,7 +53,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             actions: [
               {
                 id: createdAction.id,
@@ -133,7 +132,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             actions: [
               {
                 id: createdAction.id,
@@ -191,10 +190,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         execution_status: response.body.execution_status,
       });
 
-      const esResponse = await es.get<SavedObject<RawAlert>>({
-        index: '.kibana',
-        id: `alert:${response.body.id}`,
-      });
+      const esResponse = await es.get<SavedObject<RawRule>>(
+        {
+          index: '.kibana',
+          id: `alert:${response.body.id}`,
+        },
+        { meta: true }
+      );
       expect(esResponse.statusCode).to.eql(200);
       const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
       expect(rawActions).to.eql([
@@ -242,7 +244,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             params: {
               ignoredButPersisted: lotsOfSpaces,
             },
@@ -270,12 +272,60 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should create rules with mapped parameters', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const createResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            params: {
+              risk_score: 40,
+              severity: 'medium',
+              another_param: 'another',
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+            ],
+          })
+        )
+        .expect(200);
+
+      const response = await supertest.get(
+        `${getUrlPrefix(
+          Spaces.space1.id
+        )}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
+      );
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
+      expect(response.body.total).to.equal(1);
+      expect(response.body.data[0].mapped_params).to.eql({
+        risk_score: 40,
+        severity: '40-medium',
+      });
+    });
+
     it('should allow providing custom saved object ids (uuid v1)', async () => {
       const customId = '09570bb0-6299-11eb-8fde-9fe5ce6ea450';
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${customId}`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData());
+        .send(getTestRuleData());
 
       expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
@@ -294,7 +344,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${customId}`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData());
+        .send(getTestRuleData());
 
       expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
@@ -313,7 +363,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${customId}`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData());
+        .send(getTestRuleData());
 
       expect(response.status).to.eql(400);
       expect(response.body).to.eql({
@@ -329,13 +379,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       const createdAlertResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${customId}`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlertResponse.body.id, 'rule', 'alerting');
       await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${customId}`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(409);
     });
 
@@ -343,7 +393,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ consumer: 'some consumer patrick invented' }));
+        .send(getTestRuleData({ consumer: 'some consumer patrick invented' }));
 
       expect(response.status).to.eql(403);
       expect(response.body).to.eql({
@@ -361,7 +411,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ enabled: false }));
+        .send(getTestRuleData({ enabled: false }));
 
       expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
@@ -385,7 +435,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           rule_type_id: alertTypeId,
           notify_when: notifyWhen,
           ...testAlert
-        } = getTestAlertData({
+        } = getTestRuleData({
           actions: [
             {
               id: createdAction.id,

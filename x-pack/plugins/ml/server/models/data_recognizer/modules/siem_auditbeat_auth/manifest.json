@@ -10,7 +10,8 @@
       "filter": [
         {"term": {"event.category": "authentication"}},
         {"term": {"agent.type": "auditbeat"}}
-      ]
+      ],
+      "must_not": { "terms": { "_tier": [ "data_frozen", "data_cold" ] } }
     }
   },
   "jobs": [

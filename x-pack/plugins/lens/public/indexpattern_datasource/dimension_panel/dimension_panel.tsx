@@ -6,18 +6,17 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiText, EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { IndexPatternColumn } from '../indexpattern';
+import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnInvalid } from '../utils';
 import { IndexPatternPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
 import { DateRange, layerTypes } from '../../../common';
 import { getOperationSupportMatrix } from './operation_support';
+import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 
 export type IndexPatternDimensionTriggerProps =
   DatasourceDimensionTriggerProps<IndexPatternPrivateState> & {
@@ -49,69 +48,28 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   const layerId = props.layerId;
   const layer = props.state.layers[layerId];
   const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
-  const { columnId, uniqueLabel, invalid, invalidMessage } = props;
+  const { columnId, uniqueLabel, invalid, invalidMessage, hideTooltip } = props;
 
   const currentColumnHasErrors = useMemo(
     () => invalid || isColumnInvalid(layer, columnId, currentIndexPattern),
     [layer, columnId, currentIndexPattern, invalid]
   );
 
-  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] ?? null;
+  const selectedColumn: GenericIndexPatternColumn | null = layer.columns[props.columnId] ?? null;
 
   if (!selectedColumn) {
     return null;
   }
   const formattedLabel = wrapOnDot(uniqueLabel);
 
-  if (currentColumnHasErrors) {
-    return (
-      <EuiToolTip
-        content={
-          invalidMessage ?? (
-            <p>
-              {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
-                defaultMessage: 'Invalid configuration.',
-              })}
-              <br />
-              {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
-                defaultMessage: 'Click for more details.',
-              })}
-            </p>
-          )
-        }
-        anchorClassName="eui-displayBlock"
-      >
-        <EuiText
-          size="s"
-          color="danger"
-          id={columnId}
-          className="lnsLayerPanel__triggerText"
-          data-test-subj="lns-dimensionTrigger"
-        >
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon size="s" type="alert" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>{selectedColumn.label}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-      </EuiToolTip>
-    );
-  }
-
   return (
-    <EuiText
-      size="s"
+    <DimensionTrigger
       id={columnId}
-      className="lnsLayerPanel__triggerText"
-      data-test-subj="lns-dimensionTrigger"
-    >
-      <EuiFlexItem grow={true}>
-        <span>
-          <span className="lnsLayerPanel__triggerTextLabel">{formattedLabel}</span>
-        </span>
-      </EuiFlexItem>
-    </EuiText>
+      label={!currentColumnHasErrors ? formattedLabel : selectedColumn.label}
+      isInvalid={Boolean(currentColumnHasErrors)}
+      hideTooltip={hideTooltip}
+      invalidMessage={invalidMessage}
+    />
   );
 };
 
@@ -121,11 +79,13 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   const layerId = props.layerId;
   const currentIndexPattern =
     props.state.indexPatterns[props.state.layers[layerId]?.indexPatternId];
+  if (!currentIndexPattern) {
+    return null;
+  }
   const operationSupportMatrix = getOperationSupportMatrix(props);
 
-  const selectedColumn: IndexPatternColumn | null =
+  const selectedColumn: GenericIndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
-
   return (
     <DimensionEditor
       {...props}

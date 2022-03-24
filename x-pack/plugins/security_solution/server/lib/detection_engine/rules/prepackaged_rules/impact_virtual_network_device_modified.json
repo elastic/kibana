@@ -1,0 +1,47 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies when a virtual network device is modified or deleted. This can be a network virtual appliance, virtual hub, or virtual router.",
+  "false_positives": [
+    "Virtual Network Device modification or deletion may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Virtual Network Device modification or deletion by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Virtual Network Device Modified or Deleted",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:(\"MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/WRITE\" or\n\"MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/DELETE\" or \"MICROSOFT.NETWORK/NETWORKINTERFACES/WRITE\" or\n\"MICROSOFT.NETWORK/NETWORKINTERFACES/JOIN/ACTION\" or \"MICROSOFT.NETWORK/NETWORKINTERFACES/DELETE\" or\n\"MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/DELETE\" or \"MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/WRITE\" or\n\"MICROSOFT.NETWORK/VIRTUALHUBS/DELETE\" or \"MICROSOFT.NETWORK/VIRTUALHUBS/WRITE\" or\n\"MICROSOFT.NETWORK/VIRTUALROUTERS/WRITE\" or \"MICROSOFT.NETWORK/VIRTUALROUTERS/DELETE\") and \nevent.outcome:(Success or success)\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations"
+  ],
+  "risk_score": 21,
+  "rule_id": "573f6e7a-7acf-4bcd-ad42-c4969124d3c0",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Network Security"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

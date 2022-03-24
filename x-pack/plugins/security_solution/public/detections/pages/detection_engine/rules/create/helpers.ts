@@ -6,6 +6,7 @@
  */
 
 import { has, isEmpty } from 'lodash/fp';
+import { Unit } from '@elastic/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
 
@@ -15,6 +16,7 @@ import type {
   List,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  ThreatMapping,
   Threats,
   ThreatSubtechnique,
   ThreatTechnique,
@@ -37,6 +39,12 @@ import {
   RuleStepsFormData,
   RuleStep,
 } from '../types';
+import { FieldValueQueryBar } from '../../../../components/rules/query_bar';
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import { stepDefineDefaultValue } from '../../../../components/rules/step_define_rule';
+import { stepAboutDefaultValue } from '../../../../components/rules/step_about_rule/default_value';
+import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_actions';
+import { FieldValueThreshold } from '../../../../components/rules/threshold_input';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
@@ -259,7 +267,6 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         ...(ruleType === 'query' &&
           ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
       };
-
   return {
     ...baseFields,
     ...typeFields,
@@ -386,3 +393,58 @@ export const formatRule = <T>(
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
   ]) as unknown as T;
+
+export const formatPreviewRule = ({
+  index,
+  query,
+  threatIndex,
+  threatQuery,
+  ruleType,
+  threatMapping,
+  timeFrame,
+  threshold,
+  machineLearningJobId,
+  anomalyThreshold,
+}: {
+  index: string[];
+  threatIndex: string[];
+  query: FieldValueQueryBar;
+  threatQuery: FieldValueQueryBar;
+  ruleType: Type;
+  threatMapping: ThreatMapping;
+  timeFrame: Unit;
+  threshold: FieldValueThreshold;
+  machineLearningJobId: string[];
+  anomalyThreshold: number;
+}): CreateRulesSchema => {
+  const defineStepData = {
+    ...stepDefineDefaultValue,
+    index,
+    queryBar: query,
+    ruleType,
+    threatIndex,
+    threatQueryBar: threatQuery,
+    threatMapping,
+    threshold,
+    machineLearningJobId,
+    anomalyThreshold,
+  };
+  const aboutStepData = {
+    ...stepAboutDefaultValue,
+    name: 'Preview Rule',
+    description: 'Preview Rule',
+  };
+  const scheduleStepData = {
+    from: `now-${timeFrame === 'M' ? '25h' : timeFrame === 'd' ? '65m' : '6m'}`,
+    interval: `${timeFrame === 'M' ? '1d' : timeFrame === 'd' ? '1h' : '5m'}`,
+  };
+  return {
+    ...formatRule<CreateRulesSchema>(
+      defineStepData,
+      aboutStepData,
+      scheduleStepData,
+      stepActionsDefaultValue
+    ),
+    ...scheduleStepData,
+  };
+};

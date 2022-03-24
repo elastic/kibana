@@ -40,10 +40,11 @@ export const summaryExceptionListRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { id, list_id: listId, namespace_type: namespaceType } = request.query;
+        const { id, list_id: listId, namespace_type: namespaceType, filter } = request.query;
         const exceptionLists = getExceptionListClient(context);
         if (id != null || listId != null) {
           const exceptionListSummary = await exceptionLists.getExceptionListSummary({
+            filter,
             id,
             listId,
             namespaceType,

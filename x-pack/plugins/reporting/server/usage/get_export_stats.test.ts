@@ -8,7 +8,7 @@
 import { getExportTypesRegistry } from '../lib';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
-import { FeatureAvailabilityMap } from './types';
+import { FeatureAvailabilityMap, MetricsStats } from './types';
 
 let featureMap: FeatureAvailabilityMap;
 const sizesAggResponse = {
@@ -22,7 +22,7 @@ const sizesAggResponse = {
 };
 
 beforeEach(() => {
-  featureMap = { PNG: true, csv: true, csv_searchsource: true, printable_pdf: true };
+  featureMap = { PNG: true, csv_searchsource: true, printable_pdf: true };
 });
 
 const exportTypesHandler = getExportTypesHandler(getExportTypesRegistry());
@@ -76,18 +76,27 @@ test('Model of job status and status-by-pdf-app', () => {
 test('Model of jobTypes', () => {
   const result = getExportStats(
     {
-      PNG: { available: true, total: 3, sizes: sizesAggResponse },
+      PNG: {
+        available: true,
+        total: 3,
+        output_size: sizesAggResponse,
+        app: { dashboard: 0, visualization: 3, 'canvas workpad': 0 },
+        metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
+      },
       printable_pdf: {
         available: true,
         total: 3,
-        sizes: sizesAggResponse,
+        output_size: sizesAggResponse,
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
-        layout: { preserve_layout: 3, print: 0 },
+        layout: { preserve_layout: 3, print: 0, canvas: 0 },
+        metrics: { pdf_cpu: {}, pdf_memory: {}, pdf_pages: {} } as MetricsStats,
       },
       csv_searchsource: {
         available: true,
         total: 3,
-        sizes: sizesAggResponse,
+        app: { search: 3 },
+        output_size: sizesAggResponse,
+        metrics: { csv_rows: {} } as MetricsStats,
       },
     },
     featureMap,
@@ -100,14 +109,14 @@ test('Model of jobTypes', () => {
         "canvas workpad": 0,
         "dashboard": 0,
         "search": 0,
-        "visualization": 0,
+        "visualization": 3,
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {},
+        "png_memory": Object {},
       },
       "output_size": Object {
         "1.0": 5093470,
@@ -121,38 +130,19 @@ test('Model of jobTypes', () => {
       "total": 3,
     }
   `);
-  expect(result.csv).toMatchInlineSnapshot(`
-    Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "total": 0,
-    }
-  `);
   expect(result.csv_searchsource).toMatchInlineSnapshot(`
     Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
-        "search": 0,
+        "search": 3,
         "visualization": 0,
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {},
       },
       "output_size": Object {
         "1.0": 5093470,
@@ -181,6 +171,11 @@ test('Model of jobTypes', () => {
         "preserve_layout": 3,
         "print": 0,
       },
+      "metrics": Object {
+        "pdf_cpu": Object {},
+        "pdf_memory": Object {},
+        "pdf_pages": Object {},
+      },
       "output_size": Object {
         "1.0": 5093470,
         "25.0": 5093470,
@@ -202,7 +197,9 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         available: true,
         total: 15,
         deprecated: 5,
-        sizes: sizesAggResponse,
+        output_size: sizesAggResponse,
+        app: { dashboard: 0, visualization: 0, 'canvas workpad': 0 },
+        metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
       },
     },
     featureMap,
@@ -218,10 +215,10 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
       },
       "available": true,
       "deprecated": 5,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {},
+        "png_memory": Object {},
       },
       "output_size": Object {
         "1.0": 5093470,
@@ -237,33 +234,59 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
   `);
 });
 
-test('CSV counts, provides all jobs implicitly deprecated due to jobtype', () => {
+test('Incorporate metric stats', () => {
   const result = getExportStats(
     {
-      csv: {
+      PNGV2: {
         available: true,
-        total: 15,
-        deprecated: 0,
-        sizes: sizesAggResponse,
+        total: 3,
+        output_size: sizesAggResponse,
+        app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
+        metrics: {
+          png_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
+          png_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
+        },
+      },
+      printable_pdf_v2: {
+        available: true,
+        total: 3,
+        output_size: sizesAggResponse,
+        metrics: {
+          pdf_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
+          pdf_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
+          pdf_pages: { '50.0': 4, '75.0': 4, '95.0': 4, '99.0': 4 },
+        },
+        app: { dashboard: 3, visualization: 0, 'canvas workpad': 0 },
+        layout: { preserve_layout: 3, print: 0, canvas: 0 },
       },
     },
     featureMap,
     exportTypesHandler
   );
-  expect(result.csv).toMatchInlineSnapshot(`
+  expect(result.PNGV2).toMatchInlineSnapshot(`
     Object {
       "app": Object {
-        "canvas workpad": 0,
+        "canvas workpad": 3,
         "dashboard": 0,
         "search": 0,
         "visualization": 0,
       },
-      "available": true,
-      "deprecated": 15,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "available": false,
+      "deprecated": 0,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": 0.01,
+          "75.0": 0.01,
+          "95.0": 0.01,
+          "99.0": 0.01,
+        },
+        "png_memory": Object {
+          "50.0": 3485,
+          "75.0": 3496,
+          "95.0": 3678,
+          "99.0": 3782,
+        },
       },
       "output_size": Object {
         "1.0": 5093470,
@@ -274,7 +297,54 @@ test('CSV counts, provides all jobs implicitly deprecated due to jobtype', () =>
         "95.0": 11935594,
         "99.0": 11935594,
       },
-      "total": 15,
+      "total": 3,
+    }
+  `);
+  expect(result.printable_pdf_v2).toMatchInlineSnapshot(`
+    Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 3,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": false,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 3,
+        "print": 0,
+      },
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": 0.01,
+          "75.0": 0.01,
+          "95.0": 0.01,
+          "99.0": 0.01,
+        },
+        "pdf_memory": Object {
+          "50.0": 3485,
+          "75.0": 3496,
+          "95.0": 3678,
+          "99.0": 3782,
+        },
+        "pdf_pages": Object {
+          "50.0": 4,
+          "75.0": 4,
+          "95.0": 4,
+          "99.0": 4,
+        },
+      },
+      "output_size": Object {
+        "1.0": 5093470,
+        "25.0": 5093470,
+        "5.0": 5093470,
+        "50.0": 8514532,
+        "75.0": 11935594,
+        "95.0": 11935594,
+        "99.0": 11935594,
+      },
+      "total": 3,
     }
   `);
 });

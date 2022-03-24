@@ -13,11 +13,16 @@ import { TemplateContext } from '../template_context';
 function generator({
   imageTag,
   imageFlavor,
+  dockerPush,
+  dockerTagQualifier,
   version,
   dockerTargetFilename,
   baseOSImage,
   architecture,
 }: TemplateContext) {
+  const dockerTargetName = `${imageTag}${imageFlavor}:${version}${
+    dockerTagQualifier ? '-' + dockerTagQualifier : ''
+  }`;
   return dedent(`
   #!/usr/bin/env bash
   #
@@ -54,10 +59,11 @@ function generator({
   retry_docker_pull ${baseOSImage}
 
   echo "Building: kibana${imageFlavor}-docker"; \\
-  docker build -t ${imageTag}${imageFlavor}:${version} -f Dockerfile . || exit 1;
+  docker build -t ${dockerTargetName} -f Dockerfile . || exit 1;
 
-  docker save ${imageTag}${imageFlavor}:${version} | gzip -c > ${dockerTargetFilename}
+  docker save ${dockerTargetName} | gzip -c > ${dockerTargetFilename}
 
+  ${dockerPush} && docker image push ${dockerTargetName}
   exit 0
   `);
 }

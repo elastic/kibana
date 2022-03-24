@@ -24,7 +24,7 @@ export const SERVICE_NOW_CONNECTOR_CARD = '[data-test-subj=".servicenow-card"]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
-export const URL = '[data-test-subj="apiUrlFromInput"]';
+export const URL = '[data-test-subj="credentialsApiUrlFromInput"]';
 
 export const USERNAME = '[data-test-subj="connector-servicenow-username-form-input"]';
 

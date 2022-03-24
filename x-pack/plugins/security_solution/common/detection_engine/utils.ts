@@ -16,7 +16,7 @@ import type {
 import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
-import { RuleExecutionStatus, Threshold, ThresholdNormalized } from './schemas/common/schemas';
+import { Threshold, ThresholdNormalized } from './schemas/common';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
@@ -64,12 +64,3 @@ export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormali
 
 export const normalizeMachineLearningJobIds = (value: string | string[]): string[] =>
   Array.isArray(value) ? value : [value];
-
-export const getRuleStatusText = (
-  value: RuleExecutionStatus | null | undefined
-): RuleExecutionStatus | null =>
-  value === RuleExecutionStatus['partial failure']
-    ? RuleExecutionStatus.warning
-    : value != null
-    ? value
-    : null;

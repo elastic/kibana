@@ -10,7 +10,7 @@
 In {ecloud}, {fleet} flags are already configured.
 ====
 
-You can configure `xpack.fleet` settings in your `kibana.yml`. 
+You can configure `xpack.fleet` settings in your `kibana.yml`.
 By default, {fleet} is enabled. To use {fleet}, you also need to configure {kib} and {es} hosts.
 
 See the {fleet-guide}/index.html[{fleet}] docs for more information.
@@ -20,11 +20,8 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 
 [cols="2*<"]
 |===
-| `xpack.fleet.enabled` {ess-icon}
-  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-  Set to `true` (default) to enable {fleet}. 
 | `xpack.fleet.agents.enabled` {ess-icon}
-  | Set to `true` (default) to enable {fleet}. 
+  | Set to `true` (default) to enable {fleet}.
 |===
 
 [[fleet-data-visualizer-settings]]
@@ -36,7 +33,8 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 | `xpack.fleet.registryUrl`
   | The address to use to reach the {package-manager} registry.
 | `xpack.fleet.registryProxyUrl`
-  | The proxy address to use to reach the {package-manager} registry.
+  | The proxy address to use to reach the {package-manager} registry if an internet connection is not directly available.
+  Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details.
 
 |===
 
@@ -65,7 +63,7 @@ want {fleet} to load up by default.
 | `xpack.fleet.packages`
   | List of integrations that are installed when the {fleet} app starts
   up for the first time. Required properties are:
-  
+
   `name`:: Name of the integration from the package registry.
   `version`:: Either an exact semantic version, or the keyword `latest` to fetch
   the latest integration version.
@@ -78,18 +76,19 @@ Required properties are:
   `name`:: Policy name.
 
 Optional properties are:
-  
+
   `description`:: Text description of this policy.
   `namespace`:: String identifying this policy's namespace.
   `monitoring_enabled`:: List of keywords that specify the monitoring data to collect.
   Valid values include `['logs']`, `['metrics']`, and `['logs', 'metrics']`.
-  `is_managed`:: If `true`, this policy is editable by the user and can only
+  `is_managed`:: If `true`, this policy is not editable by the user and can only
   be changed by updating the {kib} config.
   `is_default`:: If `true`, this policy is the default agent policy.
   `is_default_fleet_server`:: If `true`, this policy is the default {fleet-server} agent policy.
   `data_output_id`:: ID of the output to send data (Need to be identical to `monitoring_output_id`)
   `monitoring_output_id`:: ID of the output to send monitoring data. (Need to be identical to `data_output_id`)
   `package_policies`:: List of integration policies to add to this policy.
+    `id`::: Unique ID of the integration policy. The ID may be a number or string.
     `name`::: (required) Name of the integration policy.
     `package`::: (required) Integration that this policy configures
       `name`:::: Name of the integration associated with this policy.
@@ -131,6 +130,7 @@ xpack.fleet.agentPolicies:
       - package:
           name: system
         name: System Integration
+        id: preconfigured-system
         inputs:
           - type: system/metrics
             enabled: true

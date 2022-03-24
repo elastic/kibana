@@ -5,89 +5,72 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { Breakpoints } from '../../../../hooks/use_breakpoints';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
-import { getServiceColumns, ServiceList } from './';
-import { items } from './__fixtures__/service_api_mock_data';
+import { composeStories } from '@storybook/testing-react';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import {
-  getCallApmApiSpy,
-  getCreateCallApmApiSpy,
-} from '../../../../services/rest/callApmApiSpy';
+import { Breakpoints } from '../../../../hooks/use_breakpoints';
+import { getServiceColumns } from './';
+import * as stories from './service_list.stories';
+import * as timeSeriesColor from '../../../shared/charts/helper/get_timeseries_color';
 
-function Wrapper({ children }: { children?: ReactNode }) {
-  return (
-    <MemoryRouter initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}>
-      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
-    </MemoryRouter>
-  );
-}
+const { Example, EmptyState } = composeStories(stories);
+
+const query = {
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  environment: ENVIRONMENT_ALL.value,
+  kuery: '',
+  serviceGroup: '',
+};
+
+const service: any = {
+  serviceName: 'opbeans-python',
+  agentName: 'python',
+  transactionsPerMinute: {
+    value: 86.93333333333334,
+    timeseries: [],
+  },
+  errorsPerMinute: {
+    value: 12.6,
+    timeseries: [],
+  },
+  avgResponseTime: {
+    value: 91535.42944785276,
+    timeseries: [],
+  },
+  environments: ['test'],
+  transactionType: 'request',
+};
 
 describe('ServiceList', () => {
   beforeAll(() => {
-    mockMoment();
-
-    const callApmApiSpy = getCallApmApiSpy().mockImplementation(
-      ({ endpoint }) => {
-        if (endpoint === 'GET /internal/apm/fallback_to_transactions') {
-          return Promise.resolve({ fallbackToTransactions: false });
-        }
-        return Promise.reject(`Response for ${endpoint} is not defined`);
-      }
-    );
-
-    getCreateCallApmApiSpy().mockImplementation(() => callApmApiSpy as any);
+    jest.spyOn(timeSeriesColor, 'getTimeSeriesColor').mockImplementation(() => {
+      return {
+        currentPeriodColor: 'green',
+        previousPeriodColor: 'black',
+      };
+    });
   });
 
-  it('renders empty state', () => {
-    expect(() =>
-      renderWithTheme(<ServiceList isLoading={false} items={[]} />, {
-        wrapper: Wrapper,
-      })
-    ).not.toThrowError();
+  it('renders empty state', async () => {
+    render(<EmptyState />);
+
+    expect(await screen.findByRole('table')).toBeInTheDocument();
   });
 
-  it('renders with data', () => {
-    expect(() =>
-      renderWithTheme(<ServiceList isLoading={false} items={items} />, {
-        wrapper: Wrapper,
-      })
-    ).not.toThrowError();
+  it('renders with data', async () => {
+    render(<Example />);
+
+    expect(await screen.findByRole('table')).toBeInTheDocument();
   });
 
   describe('responsive columns', () => {
-    const query = {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      environment: ENVIRONMENT_ALL.value,
-      kuery: '',
-    };
-
-    const service: any = {
-      serviceName: 'opbeans-python',
-      agentName: 'python',
-      transactionsPerMinute: {
-        value: 86.93333333333334,
-        timeseries: [],
-      },
-      errorsPerMinute: {
-        value: 12.6,
-        timeseries: [],
-      },
-      avgResponseTime: {
-        value: 91535.42944785276,
-        timeseries: [],
-      },
-      environments: ['test'],
-      transactionType: 'request',
-    };
     describe('when small', () => {
       it('shows environment, transaction type and sparklines', () => {
         const renderedColumns = getServiceColumns({
+          comparisonDataLoading: false,
+          showHealthStatusColumn: true,
           query,
           showTransactionTypeColumn: true,
           breakpoints: {
@@ -111,8 +94,10 @@ describe('ServiceList', () => {
         expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
         expect(renderedColumns[4]).toMatchInlineSnapshot(`
           <ListMetric
-            color="euiColorVis1"
+            color="green"
+            comparisonSeriesColor="black"
             hideSeries={false}
+            isLoading={false}
             valueLabel="0 ms"
           />
         `);
@@ -122,6 +107,8 @@ describe('ServiceList', () => {
     describe('when Large', () => {
       it('hides environment, transaction type and sparklines', () => {
         const renderedColumns = getServiceColumns({
+          comparisonDataLoading: false,
+          showHealthStatusColumn: true,
           query,
           showTransactionTypeColumn: true,
           breakpoints: {
@@ -135,8 +122,10 @@ describe('ServiceList', () => {
         expect(renderedColumns.length).toEqual(5);
         expect(renderedColumns[2]).toMatchInlineSnapshot(`
           <ListMetric
-            color="euiColorVis1"
+            color="green"
+            comparisonSeriesColor="black"
             hideSeries={true}
+            isLoading={false}
             valueLabel="0 ms"
           />
         `);
@@ -145,6 +134,8 @@ describe('ServiceList', () => {
       describe('when XL', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
+            comparisonDataLoading: false,
+            showHealthStatusColumn: true,
             query,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -167,8 +158,10 @@ describe('ServiceList', () => {
           `);
           expect(renderedColumns[3]).toMatchInlineSnapshot(`
             <ListMetric
-              color="euiColorVis1"
+              color="green"
+              comparisonSeriesColor="black"
               hideSeries={false}
+              isLoading={false}
               valueLabel="0 ms"
             />
           `);
@@ -178,6 +171,8 @@ describe('ServiceList', () => {
       describe('when XXL', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
+            comparisonDataLoading: false,
+            showHealthStatusColumn: true,
             query,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -201,8 +196,10 @@ describe('ServiceList', () => {
           expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
           expect(renderedColumns[4]).toMatchInlineSnapshot(`
             <ListMetric
-              color="euiColorVis1"
+              color="green"
+              comparisonSeriesColor="black"
               hideSeries={false}
+              isLoading={false}
               valueLabel="0 ms"
             />
           `);
@@ -212,44 +209,36 @@ describe('ServiceList', () => {
   });
 
   describe('without ML data', () => {
-    it('does not render the health column', () => {
-      const { queryByText } = renderWithTheme(
-        <ServiceList isLoading={false} items={items} />,
-        {
-          wrapper: Wrapper,
-        }
-      );
-      const healthHeading = queryByText('Health');
-
-      expect(healthHeading).toBeNull();
-    });
-
-    it('sorts by throughput', async () => {
-      const { findByTitle } = renderWithTheme(
-        <ServiceList isLoading={false} items={items} />,
-        {
-          wrapper: Wrapper,
-        }
-      );
-
-      expect(await findByTitle('Throughput')).toBeInTheDocument();
+    it('hides healthStatus column', () => {
+      const renderedColumns = getServiceColumns({
+        comparisonDataLoading: false,
+        showHealthStatusColumn: false,
+        query,
+        showTransactionTypeColumn: true,
+        breakpoints: {
+          isSmall: false,
+          isLarge: false,
+          isXl: false,
+        } as Breakpoints,
+      }).map((c) => c.field);
+      expect(renderedColumns.includes('healthStatus')).toBeFalsy();
     });
   });
 
   describe('with ML data', () => {
-    it('renders the health column', async () => {
-      const { findByTitle } = renderWithTheme(
-        <ServiceList
-          isLoading={false}
-          items={items.map((item) => ({
-            ...item,
-            healthStatus: ServiceHealthStatus.warning,
-          }))}
-        />,
-        { wrapper: Wrapper }
-      );
-
-      expect(await findByTitle('Health')).toBeInTheDocument();
+    it('shows healthStatus column', () => {
+      const renderedColumns = getServiceColumns({
+        comparisonDataLoading: false,
+        showHealthStatusColumn: true,
+        query,
+        showTransactionTypeColumn: true,
+        breakpoints: {
+          isSmall: false,
+          isLarge: false,
+          isXl: false,
+        } as Breakpoints,
+      }).map((c) => c.field);
+      expect(renderedColumns.includes('healthStatus')).toBeTruthy();
     });
   });
 });

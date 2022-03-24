@@ -8,16 +8,18 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { Breakdowns } from './breakdowns';
-import { mockIndexPattern, mockUxSeries, render } from '../../rtl_helpers';
+import { mockDataView, mockUxSeries, render } from '../../rtl_helpers';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { RECORDS_FIELD } from '../../configurations/constants';
 import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fieldnames';
+import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
 describe('Breakdowns', function () {
   const dataViewSeries = getDefaultConfigs({
     reportType: 'data-distribution',
-    indexPattern: mockIndexPattern,
+    dataView: mockDataView,
     dataType: 'ux',
+    reportConfigMap: obsvReportConfigMap,
   });
 
   it('should render properly', async function () {
@@ -60,8 +62,9 @@ describe('Breakdowns', function () {
   it('does not show percentile breakdown for records metrics', function () {
     const kpiConfig = getDefaultConfigs({
       reportType: 'kpi-over-time',
-      indexPattern: mockIndexPattern,
+      dataView: mockDataView,
       dataType: 'ux',
+      reportConfigMap: obsvReportConfigMap,
     });
 
     render(

@@ -33,13 +33,13 @@ describe('getFullRedirectAppUrl', () => {
 
   test('smoke test', () => {
     expect(getFullRedirectAppUrl(config, 'test', undefined)).toBe(
-      'http://localhost:1234/test/s/test/app/management/insightsAndAlerting/reporting/r'
+      'http://localhost:1234/test/s/test/app/reportingRedirect'
     );
   });
 
   test('adding forceNow', () => {
     expect(getFullRedirectAppUrl(config, 'test', 'TEST with a space')).toBe(
-      'http://localhost:1234/test/s/test/app/management/insightsAndAlerting/reporting/r?forceNow=TEST%20with%20a%20space'
+      'http://localhost:1234/test/s/test/app/reportingRedirect?forceNow=TEST%20with%20a%20space'
     );
   });
 });

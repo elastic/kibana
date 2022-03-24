@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { DeleteResponse, SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import type { TransportResult } from '@elastic/elasticsearch';
+import {
+  DeleteResponse,
+  SearchHit,
+  SearchResponse,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
-import { PromiseType } from 'utility-types';
 import { ReportingCore } from '../../';
 import { REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import { ReportApiJSON, ReportSource } from '../../../common/types';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
-
-type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
 
 const defaultSize = 10;
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
@@ -50,7 +51,7 @@ interface JobsQueryFactory {
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
   getError(id: string): Promise<string>;
-  delete(deleteIndex: string, id: string): Promise<ApiResponse<DeleteResponse>>;
+  delete(deleteIndex: string, id: string): Promise<TransportResult<DeleteResponse>>;
 }
 
 export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
@@ -59,14 +60,14 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
   }
 
   async function execQuery<
-    T extends (client: ElasticsearchClient) => Promise<PromiseType<ReturnType<T>> | undefined>
-  >(callback: T): Promise<UnwrapPromise<ReturnType<T>> | undefined> {
+    T extends (client: ElasticsearchClient) => Promise<Awaited<ReturnType<T>> | undefined>
+  >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
     try {
       const { asInternalUser: client } = await reportingCore.getEsClient();
 
       return await callback(client);
     } catch (error) {
-      if (error instanceof ResponseError && [401, 403, 404].includes(error.statusCode)) {
+      if (error instanceof errors.ResponseError && [401, 403, 404].includes(error.statusCode!)) {
         return;
       }
 
@@ -97,10 +98,10 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       const response = (await execQuery((elasticsearchClient) =>
         elasticsearchClient.search({ body, index: getIndex() })
-      )) as ApiResponse<SearchResponse<ReportSource>>;
+      )) as SearchResponse<ReportSource>;
 
       return (
-        response?.body.hits?.hits.map((report: SearchHit<ReportSource>) => {
+        response?.hits?.hits.map((report: SearchHit<ReportSource>) => {
           const { _source: reportSource, ...reportHead } = report;
           if (!reportSource) {
             throw new Error(`Search hit did not include _source!`);
@@ -130,13 +131,13 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
         elasticsearchClient.count({ body, index: getIndex() })
       );
 
-      return response?.body.count ?? 0;
+      return response?.count ?? 0;
     },
 
     async get(user, id) {
       const { logger } = reportingCore.getPluginSetupDeps();
       if (!id) {
-        logger.warning(`No ID provided for GET`);
+        logger.warn(`No ID provided for GET`);
         return;
       }
 
@@ -159,9 +160,9 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
         elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
       );
 
-      const result = response?.body.hits?.hits?.[0];
+      const result = response?.hits?.hits?.[0];
       if (!result?._source) {
-        logger.warning(`No hits resulted in search`);
+        logger.warn(`No hits resulted in search`);
         return;
       }
 
@@ -189,7 +190,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       const response = await execQuery((elasticsearchClient) =>
         elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
       );
-      const hits = response?.body.hits?.hits?.[0];
+      const hits = response?.hits?.hits?.[0];
       const status = hits?._source?.status;
 
       if (status !== statuses.JOB_STATUS_FAILED) {
@@ -204,7 +205,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
         const { asInternalUser: elasticsearchClient } = await reportingCore.getEsClient();
         const query = { id, index: deleteIndex, refresh: true };
 
-        return await elasticsearchClient.delete(query);
+        return await elasticsearchClient.delete(query, { meta: true });
       } catch (error) {
         throw new Error(
           i18n.translate('xpack.reporting.jobsQuery.deleteError', {

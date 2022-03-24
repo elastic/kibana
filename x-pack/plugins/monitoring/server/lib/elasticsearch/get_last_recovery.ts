@@ -19,6 +19,8 @@ import {
   ElasticsearchResponseHit,
 } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 /**
  * Filter out shard activity that we do not care about.
@@ -86,32 +88,63 @@ export function handleMbLastRecoveries(resp: ElasticsearchResponse, start: numbe
   return filtered;
 }
 
-export async function getLastRecovery(req: LegacyRequest, esIndexPattern: string, size: number) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getLastRecovery');
-
+export async function getLastRecovery(req: LegacyRequest, size: number) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
   const clusterUuid = req.params.clusterUuid;
 
   const metric = ElasticsearchMetric.getMetricFields();
+
+  const dataset = 'index_recovery';
+  const moduleType = 'elasticsearch';
+  const indexPattern = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType,
+    dataset,
+    ccs: req.payload.ccs,
+  });
+
   const legacyParams = {
-    index: esIndexPattern,
+    index: indexPattern,
     size: 1,
     ignore_unavailable: true,
     body: {
       _source: ['index_recovery.shards'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({ type: 'index_recovery', start, end, clusterUuid, metric }),
+      query: createQuery({
+        type: dataset,
+        metricset: dataset,
+        start,
+        end,
+        clusterUuid,
+        metric,
+      }),
     },
   };
-  const mbParams = {
-    index: esIndexPattern,
+
+  const indexPatternEcs = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType,
+    dataset,
+    ccs: req.payload.ccs,
+    ecsLegacyOnly: true,
+  });
+  const ecsParams = {
+    index: indexPatternEcs,
     size,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       _source: ['elasticsearch.index.recovery', '@timestamp'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({ type: 'index_recovery', start, end, clusterUuid, metric }),
+      query: createQuery({
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
+        start,
+        end,
+        clusterUuid,
+        metric,
+      }),
       aggs: {
         max_timestamp: {
           max: {
@@ -125,7 +158,7 @@ export async function getLastRecovery(req: LegacyRequest, esIndexPattern: string
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const [legacyResp, mbResp] = await Promise.all([
     callWithRequest(req, 'search', legacyParams),
-    callWithRequest(req, 'search', mbParams),
+    callWithRequest(req, 'search', ecsParams),
   ]);
   const legacyResult = handleLegacyLastRecoveries(legacyResp, start);
   const mbResult = handleMbLastRecoveries(mbResp, start);

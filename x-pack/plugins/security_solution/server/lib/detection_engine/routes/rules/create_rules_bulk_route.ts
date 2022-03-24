@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
 import { transformValidateBulkError } from './validate';
@@ -43,14 +43,10 @@ export const createRulesBulkRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
+      const rulesClient = context.alerting.getRulesClient();
       const esClient = context.core.elasticsearch.client;
       const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.securitySolution?.getAppClient();
-
-      if (!siemClient || !rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
+      const siemClient = context.securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
         license: context.licensing.license,
@@ -96,7 +92,7 @@ export const createRulesBulkRoute = (
                 });
               }
 
-              throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
+              throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
               const finalIndex = internalRule.params.outputIndex;
               const indexExists = await getIndexExists(esClient.asCurrentUser, finalIndex);
               if (!isRuleRegistryEnabled && !indexExists) {
@@ -116,11 +112,16 @@ export const createRulesBulkRoute = (
                 await rulesClient.muteAll({ id: createdRule.id });
               }
 
-              return transformValidateBulkError(internalRule.params.ruleId, createdRule, undefined);
+              return transformValidateBulkError(
+                internalRule.params.ruleId,
+                createdRule,
+                null,
+                isRuleRegistryEnabled
+              );
             } catch (err) {
               return transformBulkError(
                 internalRule.params.ruleId,
-                err as Error & { statusCode?: number | undefined }
+                err as Error & { statusCode?: number }
               );
             }
           })

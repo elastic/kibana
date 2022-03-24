@@ -24,7 +24,7 @@ import { EuiIcon } from '@elastic/eui';
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import euiVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import type { DecisionPathPlotData } from './use_classification_path_data';
 import { formatSingleValue } from '../../../../../formatters/format_value';
 import {
@@ -132,7 +132,11 @@ export const DecisionPathChart = ({
       <Chart
         size={{ height: DECISION_PATH_MARGIN + decisionPathData.length * DECISION_PATH_ROW_HEIGHT }}
       >
-        <Settings theme={theme} rotation={90} />
+        <Settings
+          // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+          theme={theme}
+          rotation={90}
+        />
         {regressionBaselineData && (
           <LineAnnotation
             id="xpack.ml.dataframe.analytics.explorationResults.decisionPathBaseline"

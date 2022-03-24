@@ -260,7 +260,7 @@ export class AnomalyExplorerChartsService {
         detector.function === ML_JOB_AGGREGATION.LAT_LONG
           ? ML_JOB_AGGREGATION.LAT_LONG
           : mlFunctionToESAggregation(detector.function),
-      timeField: job.data_description.time_field,
+      timeField: job.data_description.time_field!,
       interval: job.analysis_config.bucket_span,
       datafeedConfig: job.datafeed_config,
       summaryCountFieldName: job.analysis_config.summary_count_field_name,
@@ -729,6 +729,7 @@ export class AnomalyExplorerChartsService {
       config: SeriesConfigWithMetadata,
       range: ChartRange
     ) {
+      // FIXME performs an API call per chart. should perform 1 call for all charts
       return mlResultsService
         .getScheduledEventsByBucket(
           [config.jobId],

@@ -7,12 +7,17 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, findTestSubject, TestBed, TestBedConfig } from '@kbn/test/jest';
+import {
+  registerTestBed,
+  findTestSubject,
+  TestBed,
+  AsyncTestBedConfig,
+} from '@kbn/test-jest-helpers';
 import { WatchList } from '../../../public/application/sections/watch_list/components/watch_list';
 import { ROUTES, REFRESH_INTERVALS } from '../../../common/constants';
 import { withAppContext } from './app_context.mock';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`${ROUTES.API_ROOT}/watches`],
   },

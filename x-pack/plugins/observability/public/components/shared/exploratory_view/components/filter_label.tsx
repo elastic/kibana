@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { useSeriesFilters } from '../hooks/use_series_filters';
 import { FilterValueLabel } from '../../filter_value_label/filter_value_label';
 import { SeriesUrl } from '../types';
@@ -19,7 +19,7 @@ interface Props {
   series: SeriesUrl;
   negate: boolean;
   definitionFilter?: boolean;
-  indexPattern: IndexPattern;
+  dataView: DataView;
   removeFilter: (field: string, value: string | string[], notVal: boolean) => void;
 }
 
@@ -30,15 +30,15 @@ export function FilterLabel({
   field,
   value,
   negate,
-  indexPattern,
+  dataView,
   removeFilter,
   definitionFilter,
 }: Props) {
   const { invertFilter } = useSeriesFilters({ seriesId, series });
 
-  return indexPattern ? (
+  return dataView ? (
     <FilterValueLabel
-      indexPattern={indexPattern}
+      dataView={dataView}
       removeFilter={removeFilter}
       invertFilter={(val) => {
         if (!definitionFilter) invertFilter(val);

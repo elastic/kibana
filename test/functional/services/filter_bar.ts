@@ -87,6 +87,12 @@ export class FilterBarService extends FtrService {
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
+  public async toggleFilterNegated(key: string): Promise<void> {
+    await this.testSubjects.click(`~filter & ~filter-key-${key}`);
+    await this.testSubjects.click(`negateFilter`);
+    await this.header.awaitGlobalLoadingIndicatorHidden();
+  }
+
   public async isFilterPinned(key: string): Promise<boolean> {
     const filter = await this.testSubjects.find(`~filter & ~filter-key-${key}`);
     return (await filter.getAttribute('data-test-subj')).includes('filter-pinned');
@@ -95,6 +101,11 @@ export class FilterBarService extends FtrService {
   public async getFilterCount(): Promise<number> {
     const filters = await this.testSubjects.findAll('~filter');
     return filters.length;
+  }
+
+  public async getFiltersLabel(): Promise<string[]> {
+    const filters = await this.testSubjects.findAll('~filter');
+    return Promise.all(filters.map((filter) => filter.getVisibleText()));
   }
 
   /**
@@ -199,5 +210,6 @@ export class FilterBarService extends FtrService {
   public async selectIndexPattern(indexPatternTitle: string): Promise<void> {
     await this.testSubjects.click('addFilter');
     await this.comboBox.set('filterIndexPatternsSelect', indexPatternTitle);
+    await this.testSubjects.click('addFilter');
   }
 }

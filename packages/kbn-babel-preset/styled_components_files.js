@@ -14,7 +14,7 @@ module.exports = {
   USES_STYLED_COMPONENTS: [
     /packages[\/\\]kbn-ui-shared-deps-(npm|src)[\/\\]/,
     /src[\/\\]plugins[\/\\](data|kibana_react)[\/\\]/,
-    /x-pack[\/\\]plugins[\/\\](apm|beats_management|cases|fleet|infra|lists|observability|osquery|security_solution|timelines|uptime)[\/\\]/,
+    /x-pack[\/\\]plugins[\/\\](apm|beats_management|cases|fleet|infra|lists|observability|osquery|security_solution|timelines|uptime|ux)[\/\\]/,
     /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]/,
   ],
 };

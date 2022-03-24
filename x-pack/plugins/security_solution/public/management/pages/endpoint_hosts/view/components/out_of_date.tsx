@@ -7,12 +7,18 @@
 
 import React from 'react';
 import { EuiText, EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const OutOfDate = React.memo<{ style?: React.CSSProperties }>(({ style, ...otherProps }) => {
   return (
-    <EuiText color="subdued" size="xs" className="eui-textNoWrap" style={style} {...otherProps}>
-      <EuiIcon size="m" type="alert" color="warning" />
+    <EuiText
+      color="subdued"
+      size="xs"
+      className="eui-textNoWrap eui-displayInlineBlock"
+      style={style}
+      {...otherProps}
+    >
+      <EuiIcon className={'eui-alignTop'} size="m" type="alert" color="warning" />
       <FormattedMessage id="xpack.securitySolution.outOfDateLabel" defaultMessage="Out-of-date" />
     </EuiText>
   );

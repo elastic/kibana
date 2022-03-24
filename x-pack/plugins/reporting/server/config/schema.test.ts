@@ -9,203 +9,11 @@ import { ConfigSchema } from './schema';
 
 describe('Reporting Config Schema', () => {
   it(`context {"dev":false,"dist":false} produces correct config`, () => {
-    expect(ConfigSchema.validate({}, { dev: false, dist: false })).toMatchInlineSnapshot(`
-      Object {
-        "capture": Object {
-          "browser": Object {
-            "autoDownload": true,
-            "chromium": Object {
-              "proxy": Object {
-                "enabled": false,
-              },
-            },
-            "type": "chromium",
-          },
-          "loadDelay": "PT3S",
-          "maxAttempts": 1,
-          "networkPolicy": Object {
-            "enabled": true,
-            "rules": Array [
-              Object {
-                "allow": true,
-                "host": undefined,
-                "protocol": "http:",
-              },
-              Object {
-                "allow": true,
-                "host": undefined,
-                "protocol": "https:",
-              },
-              Object {
-                "allow": true,
-                "host": undefined,
-                "protocol": "ws:",
-              },
-              Object {
-                "allow": true,
-                "host": undefined,
-                "protocol": "wss:",
-              },
-              Object {
-                "allow": true,
-                "host": undefined,
-                "protocol": "data:",
-              },
-              Object {
-                "allow": false,
-                "host": undefined,
-                "protocol": undefined,
-              },
-            ],
-          },
-          "timeouts": Object {
-            "openUrl": "PT1M",
-            "renderComplete": "PT30S",
-            "waitForElements": "PT30S",
-          },
-          "zoom": 2,
-        },
-        "csv": Object {
-          "checkForFormulas": true,
-          "enablePanelActionDownload": true,
-          "escapeFormulaValues": false,
-          "maxSizeBytes": ByteSizeValue {
-            "valueInBytes": 10485760,
-          },
-          "scroll": Object {
-            "duration": "30s",
-            "size": 500,
-          },
-          "useByteOrderMarkEncoding": false,
-        },
-        "enabled": true,
-        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "kibanaServer": Object {},
-        "poll": Object {
-          "jobCompletionNotifier": Object {
-            "interval": 10000,
-            "intervalErrorMultiplier": 5,
-          },
-          "jobsRefresh": Object {
-            "interval": 5000,
-            "intervalErrorMultiplier": 5,
-          },
-        },
-        "queue": Object {
-          "indexInterval": "week",
-          "pollEnabled": true,
-          "pollInterval": "PT3S",
-          "pollIntervalErrorMultiplier": 10,
-          "timeout": "PT2M",
-        },
-        "roles": Object {
-          "allow": Array [
-            "reporting_user",
-          ],
-          "enabled": true,
-        },
-      }
-    `);
+    expect(ConfigSchema.validate({}, { dev: false, dist: false })).toMatchSnapshot();
   });
 
   it(`context {"dev":false,"dist":true} produces correct config`, () => {
-    expect(ConfigSchema.validate({}, { dev: false, dist: true })).toMatchInlineSnapshot(`
-      Object {
-        "capture": Object {
-          "browser": Object {
-            "autoDownload": false,
-            "chromium": Object {
-              "inspect": false,
-              "proxy": Object {
-                "enabled": false,
-              },
-            },
-            "type": "chromium",
-          },
-          "loadDelay": "PT3S",
-          "maxAttempts": 3,
-          "networkPolicy": Object {
-            "enabled": true,
-            "rules": Array [
-              Object {
-                "allow": true,
-                "host": undefined,
-                "protocol": "http:",
-              },
-              Object {
-                "allow": true,
-                "host": undefined,
-                "protocol": "https:",
-              },
-              Object {
-                "allow": true,
-                "host": undefined,
-                "protocol": "ws:",
-              },
-              Object {
-                "allow": true,
-                "host": undefined,
-                "protocol": "wss:",
-              },
-              Object {
-                "allow": true,
-                "host": undefined,
-                "protocol": "data:",
-              },
-              Object {
-                "allow": false,
-                "host": undefined,
-                "protocol": undefined,
-              },
-            ],
-          },
-          "timeouts": Object {
-            "openUrl": "PT1M",
-            "renderComplete": "PT30S",
-            "waitForElements": "PT30S",
-          },
-          "zoom": 2,
-        },
-        "csv": Object {
-          "checkForFormulas": true,
-          "enablePanelActionDownload": true,
-          "escapeFormulaValues": false,
-          "maxSizeBytes": ByteSizeValue {
-            "valueInBytes": 10485760,
-          },
-          "scroll": Object {
-            "duration": "30s",
-            "size": 500,
-          },
-          "useByteOrderMarkEncoding": false,
-        },
-        "enabled": true,
-        "kibanaServer": Object {},
-        "poll": Object {
-          "jobCompletionNotifier": Object {
-            "interval": 10000,
-            "intervalErrorMultiplier": 5,
-          },
-          "jobsRefresh": Object {
-            "interval": 5000,
-            "intervalErrorMultiplier": 5,
-          },
-        },
-        "queue": Object {
-          "indexInterval": "week",
-          "pollEnabled": true,
-          "pollInterval": "PT3S",
-          "pollIntervalErrorMultiplier": 10,
-          "timeout": "PT2M",
-        },
-        "roles": Object {
-          "allow": Array [
-            "reporting_user",
-          ],
-          "enabled": true,
-        },
-      }
-    `);
+    expect(ConfigSchema.validate({}, { dev: false, dist: true })).toMatchSnapshot();
   });
 
   it('allows Duration values for certain keys', () => {
@@ -247,52 +55,33 @@ describe('Reporting Config Schema', () => {
     ).toBe('qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq');
 
     expect(ConfigSchema.validate({ encryptionKey: 'weaksauce' }).encryptionKey).toBe('weaksauce');
-
-    // disableSandbox
-    expect(
-      ConfigSchema.validate({ capture: { browser: { chromium: { disableSandbox: true } } } })
-        .capture.browser.chromium
-    ).toMatchObject({ disableSandbox: true, proxy: { enabled: false } });
-
     // kibanaServer
     expect(
       ConfigSchema.validate({ kibanaServer: { hostname: 'Frodo' } }).kibanaServer
     ).toMatchObject({ hostname: 'Frodo' });
   });
 
-  it('allows setting a wildcard for chrome proxy bypass', () => {
-    expect(
-      ConfigSchema.validate({
-        capture: {
-          browser: {
-            chromium: {
-              proxy: {
-                enabled: true,
-                server: 'http://example.com:8080',
-                bypass: ['*.example.com', '*bar.example.com', 'bats.example.com'],
-              },
-            },
-          },
-        },
-      }).capture.browser.chromium.proxy
-    ).toMatchInlineSnapshot(`
-      Object {
-        "bypass": Array [
-          "*.example.com",
-          "*bar.example.com",
-          "bats.example.com",
-        ],
-        "enabled": true,
-        "server": "http://example.com:8080",
-      }
-    `);
-  });
+  it.each(['0', '0.0', '0.0.0'])(
+    `fails to validate "kibanaServer.hostname" with an invalid hostname: "%s"`,
+    (address) => {
+      expect(() =>
+        ConfigSchema.validate({
+          kibanaServer: { hostname: address },
+        })
+      ).toThrowError(`[kibanaServer.hostname]: value must be a valid hostname (see RFC 1123).`);
+    }
+  );
 
-  it(`logs the proper validation messages`, () => {
-    // kibanaServer
-    const throwValidationErr = () => ConfigSchema.validate({ kibanaServer: { hostname: '0' } });
-    expect(throwValidationErr).toThrowError(
-      `[kibanaServer.hostname]: value must be a valid hostname (see RFC 1123).`
-    );
-  });
+  it.each(['0.0.0.0', '0000:0000:0000:0000:0000:0000:0000:0000', '::'])(
+    `fails to validate "kibanaServer.hostname" hostname as zero: "%s"`,
+    (address) => {
+      expect(() =>
+        ConfigSchema.validate({
+          kibanaServer: { hostname: address },
+        })
+      ).toThrowError(
+        `[kibanaServer.hostname]: cannot use '0.0.0.0' as Kibana host name, consider using the default (localhost) instead`
+      );
+    }
+  );
 });

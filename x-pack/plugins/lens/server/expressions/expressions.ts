@@ -7,12 +7,11 @@
 
 import type { CoreSetup } from 'kibana/server';
 import {
-  pie,
   xyChart,
   counterRate,
-  metricChart,
   yAxisConfig,
-  layerConfig,
+  dataLayerConfig,
+  referenceLineLayerConfig,
   formatColumn,
   legendConfig,
   renameColumns,
@@ -22,6 +21,7 @@ import {
   axisTitlesVisibilityConfig,
   getTimeScale,
   getDatatable,
+  lensMultitable,
 } from '../../common/expressions';
 import { getFormatFactory, getTimeZoneFactory } from './utils';
 
@@ -32,13 +32,14 @@ export const setupExpressions = (
   core: CoreSetup<PluginStartContract>,
   expressions: ExpressionsServerSetup
 ) => {
+  [lensMultitable].forEach((expressionType) => expressions.registerType(expressionType));
+
   [
-    pie,
     xyChart,
     counterRate,
-    metricChart,
     yAxisConfig,
-    layerConfig,
+    dataLayerConfig,
+    referenceLineLayerConfig,
     formatColumn,
     legendConfig,
     renameColumns,

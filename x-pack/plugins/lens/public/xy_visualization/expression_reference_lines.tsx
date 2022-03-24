@@ -12,12 +12,12 @@ import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { FieldFormat } from 'src/plugins/field_formats/common';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
-import type { LayerArgs, YConfig } from '../../common/expressions';
+import { euiLightVars } from '@kbn/ui-theme';
+import type { IconPosition, ReferenceLineLayerArgs, YAxisMode } from '../../common/expressions';
 import type { LensMultiTable } from '../../common/types';
-import { hasIcon } from './xy_config_panel/reference_line_panel';
+import { hasIcon } from './xy_config_panel/shared/icon_select';
 
-const REFERENCE_LINE_MARKER_SIZE = 20;
+export const REFERENCE_LINE_MARKER_SIZE = 20;
 
 export const computeChartMargins = (
   referenceLinePaddings: Partial<Record<Position, number>>,
@@ -55,7 +55,7 @@ export const computeChartMargins = (
 
 // Note: it does not take into consideration whether the reference line is in view or not
 export const getReferenceLineRequiredPaddings = (
-  referenceLineLayers: LayerArgs[],
+  referenceLineLayers: ReferenceLineLayerArgs[],
   axesMap: Record<'left' | 'right', unknown>
 ) => {
   // collect all paddings for the 4 axis: if any text is detected double it.
@@ -101,8 +101,8 @@ function mapVerticalToHorizontalPlacement(placement: Position) {
 // otherwise use the same axis
 // this function assume the chart is vertical
 function getBaseIconPlacement(
-  iconPosition: YConfig['iconPosition'],
-  axisMode: YConfig['axisMode'],
+  iconPosition: IconPosition | undefined,
+  axisMode: YAxisMode | undefined,
   axesMap: Record<string, unknown>
 ) {
   if (iconPosition === 'auto') {
@@ -157,27 +157,44 @@ function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
   );
 }
 
+interface MarkerConfig {
+  axisMode?: YAxisMode;
+  icon?: string;
+  textVisibility?: boolean;
+}
+
 function getMarkerToShow(
-  yConfig: YConfig,
+  markerConfig: MarkerConfig,
   label: string | undefined,
   isHorizontal: boolean,
   hasReducedPadding: boolean
 ) {
   // show an icon if present
-  if (hasIcon(yConfig.icon)) {
-    return <EuiIcon type={yConfig.icon} />;
+  if (hasIcon(markerConfig.icon)) {
+    return <EuiIcon type={markerConfig.icon} />;
   }
   // if there's some text, check whether to show it as marker, or just show some padding for the icon
-  if (yConfig.textVisibility) {
+  if (markerConfig.textVisibility) {
     if (hasReducedPadding) {
       return getMarkerBody(
         label,
-        (!isHorizontal && yConfig.axisMode === 'bottom') ||
-          (isHorizontal && yConfig.axisMode !== 'bottom')
+        (!isHorizontal && markerConfig.axisMode === 'bottom') ||
+          (isHorizontal && markerConfig.axisMode !== 'bottom')
       );
     }
     return <EuiIcon type="empty" />;
   }
+}
+
+export interface ReferenceLineAnnotationsProps {
+  layers: ReferenceLineLayerArgs[];
+  data: LensMultiTable;
+  formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
+  paletteService: PaletteRegistry;
+  syncColors: boolean;
+  axesMap: Record<'left' | 'right', boolean>;
+  isHorizontal: boolean;
+  paddingMap: Partial<Record<Position, number>>;
 }
 
 export const ReferenceLineAnnotations = ({
@@ -189,16 +206,7 @@ export const ReferenceLineAnnotations = ({
   axesMap,
   isHorizontal,
   paddingMap,
-}: {
-  layers: LayerArgs[];
-  data: LensMultiTable;
-  formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
-  paletteService: PaletteRegistry;
-  syncColors: boolean;
-  axesMap: Record<'left' | 'right', boolean>;
-  isHorizontal: boolean;
-  paddingMap: Partial<Record<Position, number>>;
-}) => {
+}: ReferenceLineAnnotationsProps) => {
   return (
     <>
       {layers.flatMap((layer) => {
@@ -317,10 +325,9 @@ export const ReferenceLineAnnotations = ({
                 id={`${layerId}-${yConfig.forAccessor}-rect`}
                 key={`${layerId}-${yConfig.forAccessor}-rect`}
                 dataValues={table.rows.map(() => {
-                  const nextValue =
-                    !isFillAbove && shouldCheckNextReferenceLine
-                      ? row[groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor]
-                      : undefined;
+                  const nextValue = shouldCheckNextReferenceLine
+                    ? row[groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor]
+                    : undefined;
                   if (yConfig.axisMode === 'bottom') {
                     return {
                       coordinates: {

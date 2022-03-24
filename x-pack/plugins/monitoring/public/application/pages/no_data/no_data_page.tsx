@@ -17,7 +17,7 @@ import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../
 import { Legacy } from '../../../legacy_shims';
 import { Enabler } from './enabler';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-import { initSetupModeState } from '../../setup_mode/setup_mode';
+import { initSetupModeState } from '../../../lib/setup_mode';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 

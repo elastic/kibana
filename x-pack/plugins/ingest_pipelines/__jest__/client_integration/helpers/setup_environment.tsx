@@ -11,11 +11,16 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { LocationDescriptorObject } from 'history';
 import { HttpSetup } from 'kibana/public';
 
+import { ApplicationStart } from 'src/core/public';
+import { MockUrlService } from 'src/plugins/share/common/mocks';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { sharePluginMock } from '../../../../../../src/plugins/share/public/mocks';
 import {
   notificationServiceMock,
   docLinksServiceMock,
   scopedHistoryMock,
+  uiSettingsServiceMock,
+  applicationServiceMock,
 } from '../../../../../../src/core/public/mocks';
 
 import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
@@ -36,17 +41,34 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}?${location.search}`;
 });
 
+const applicationMock = {
+  ...applicationServiceMock.createStartContract(),
+  capabilities: {
+    dev_tools: {
+      show: true,
+    },
+  },
+} as any as ApplicationStart;
+
 const appServices = {
   breadcrumbs: breadcrumbService,
   metric: uiMetricService,
   documentation: documentationService,
   api: apiService,
+  fileReader: {
+    readFile: jest.fn((file) => file.text()),
+  },
   notifications: notificationServiceMock.createSetupContract(),
   history,
-  urlGenerators: {
-    getUrlGenerator: jest.fn().mockReturnValue({
-      createUrl: jest.fn(),
-    }),
+  uiSettings: uiSettingsServiceMock.createSetupContract(),
+  url: sharePluginMock.createStartContract().url,
+  fileUpload: {
+    getMaxBytes: jest.fn().mockReturnValue(100),
+    getMaxBytesFormatted: jest.fn().mockReturnValue('100'),
+  },
+  application: applicationMock,
+  share: {
+    url: new MockUrlService(),
   },
 };
 

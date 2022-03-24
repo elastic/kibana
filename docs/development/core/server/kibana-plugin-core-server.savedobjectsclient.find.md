@@ -16,9 +16,9 @@ find<T = unknown, A = unknown>(options: SavedObjectsFindOptions): Promise<SavedO
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>SavedObjectsFindOptions</code> |  |
+|  options | SavedObjectsFindOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsFindResponse<T, A>>`
+Promise&lt;SavedObjectsFindResponse&lt;T, A&gt;&gt;
 

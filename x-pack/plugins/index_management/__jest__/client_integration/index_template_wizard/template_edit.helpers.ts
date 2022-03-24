@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { TemplateEdit } from '../../../public/application/sections/template_edit';
 import { WithAppDependencies } from '../helpers';
 
 import { formSetup, TestSubjects } from './template_form.helpers';
 import { TEMPLATE_NAME } from './constants';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`/edit_template/${TEMPLATE_NAME}`],
     componentRoutePath: `/edit_template/:name`,

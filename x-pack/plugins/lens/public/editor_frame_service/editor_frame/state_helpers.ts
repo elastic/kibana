@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectReference } from 'kibana/public';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import {
   Datasource,
@@ -17,6 +17,7 @@ import {
   Visualization,
   VisualizationDimensionGroupConfig,
   VisualizationMap,
+  VisualizeEditorContext,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
@@ -27,6 +28,7 @@ import {
   getMissingCurrentDatasource,
   getMissingIndexPatterns,
   getMissingVisualizationTypeError,
+  getUnknownVisualizationTypeError,
 } from '../error_helper';
 import { DatasourceStates } from '../../state_management';
 
@@ -34,7 +36,7 @@ export async function initializeDatasources(
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates,
   references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext,
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext,
   options?: InitializationOptions
 ) {
   const states: DatasourceStates = {};
@@ -95,6 +97,12 @@ export async function persistedStateToExpression(
     return {
       ast: null,
       errors: [{ shortMessage: '', longMessage: getMissingVisualizationTypeError() }],
+    };
+  }
+  if (!visualizations[visualizationType]) {
+    return {
+      ast: null,
+      errors: [getUnknownVisualizationTypeError(visualizationType)],
     };
   }
   const visualization = visualizations[visualizationType!];

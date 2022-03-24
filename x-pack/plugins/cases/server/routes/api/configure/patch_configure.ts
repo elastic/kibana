@@ -11,41 +11,36 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import {
-  CASE_CONFIGURE_DETAILS_URL,
   CaseConfigureRequestParamsRt,
   throwErrors,
   CasesConfigurePatch,
   excess,
-} from '../../../../common';
-import { RouteDeps } from '../types';
-import { wrapError, escapeHatch } from '../utils';
+} from '../../../../common/api';
+import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
-export function initPatchCaseConfigure({ router, logger }: RouteDeps) {
-  router.patch(
-    {
-      path: CASE_CONFIGURE_DETAILS_URL,
-      validate: {
-        params: escapeHatch,
-        body: escapeHatch,
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const params = pipe(
-          excess(CaseConfigureRequestParamsRt).decode(request.params),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+export const patchCaseConfigureRoute = createCasesRoute({
+  method: 'patch',
+  path: CASE_CONFIGURE_DETAILS_URL,
+  handler: async ({ context, request, response }) => {
+    try {
+      const params = pipe(
+        excess(CaseConfigureRequestParamsRt).decode(request.params),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const client = await context.cases.getCasesClient();
-        const configuration = request.body as CasesConfigurePatch;
+      const client = await context.cases.getCasesClient();
+      const configuration = request.body as CasesConfigurePatch;
 
-        return response.ok({
-          body: await client.configure.update(params.configuration_id, configuration),
-        });
-      } catch (error) {
-        logger.error(`Failed to get patch configure in route: ${error}`);
-        return response.customError(wrapError(error));
-      }
+      return response.ok({
+        body: await client.configure.update(params.configuration_id, configuration),
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to patch configure in route: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});

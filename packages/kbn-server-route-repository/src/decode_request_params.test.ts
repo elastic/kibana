@@ -69,7 +69,7 @@ describe('decodeRequestParams', () => {
     };
 
     expect(decode).toThrowErrorMatchingInlineSnapshot(`
-      "Excess keys are not allowed: 
+      "Excess keys are not allowed:
       path.extraKey"
     `);
   });

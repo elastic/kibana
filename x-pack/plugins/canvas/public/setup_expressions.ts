@@ -26,7 +26,7 @@ export const setupExpressions = async ({
   const loadServerFunctionWrappers = async () => {
     if (!cached) {
       cached = (async () => {
-        const serverFunctionList = await coreSetup.http.get(API_ROUTE_FUNCTIONS);
+        const serverFunctionList = await coreSetup.http.get<any>(API_ROUTE_FUNCTIONS);
         const batchedFunction = bfetch.batchedFunction({ url: API_ROUTE_FUNCTIONS });
         const { serialize } = serializeProvider(expressions.getTypes());
 

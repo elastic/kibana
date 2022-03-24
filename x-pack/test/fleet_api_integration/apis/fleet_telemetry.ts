@@ -70,20 +70,35 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     before(async () => {
-      // Get FleetServer policy id
-      const { body: apiResponse } = await supertest.get(`/api/fleet/agent_policies`).expect(200);
-      const defaultFleetServerPolicy = apiResponse.items.find(
-        (item: any) => item.is_default_fleet_server
-      );
+      // create agent policies
+      let { body: apiResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          name: 'Fleet Server policy 1',
+          namespace: 'default',
+          has_fleet_server: true,
+        })
+        .expect(200);
+      const fleetServerPolicy = apiResponse.item;
 
-      const defaultServerPolicy = apiResponse.items.find((item: any) => item.is_default);
+      ({ body: apiResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          name: 'Agent policy 1',
+          namespace: 'default',
+        })
+        .expect(200));
 
-      if (!defaultFleetServerPolicy) {
-        throw new Error('No default Fleet server policy');
+      const agentPolicy = apiResponse.item;
+
+      if (!fleetServerPolicy) {
+        throw new Error('No Fleet server policy');
       }
 
-      if (!defaultServerPolicy) {
-        throw new Error('No default policy');
+      if (!agentPolicy) {
+        throw new Error('No agent policy');
       }
 
       await supertest
@@ -93,26 +108,27 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       // Default Fleet Server
-      await generateAgent('healthy', defaultFleetServerPolicy.id);
-      await generateAgent('healthy', defaultFleetServerPolicy.id);
-      await generateAgent('error', defaultFleetServerPolicy.id);
+      await generateAgent('healthy', fleetServerPolicy.id);
+      await generateAgent('healthy', fleetServerPolicy.id);
+      await generateAgent('error', fleetServerPolicy.id);
 
       // Default policy
-      await generateAgent('healthy', defaultServerPolicy.id);
-      await generateAgent('offline', defaultServerPolicy.id);
-      await generateAgent('error', defaultServerPolicy.id);
-      await generateAgent('degraded', defaultServerPolicy.id);
-      await generateAgent('error-unenrolling', defaultServerPolicy.id);
+      await generateAgent('healthy', agentPolicy.id);
+      await generateAgent('offline', agentPolicy.id);
+      await generateAgent('error', agentPolicy.id);
+      await generateAgent('degraded', agentPolicy.id);
+      await generateAgent('error-unenrolling', agentPolicy.id);
     });
 
     it('should return the correct telemetry values for fleet', async () => {
       const {
-        body: [apiResponse],
+        body: [{ stats: apiResponse }],
       } = await supertest
         .post(`/api/telemetry/v2/clusters/_stats`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           unencrypted: true,
+          refreshCache: true,
         })
         .expect(200);
 

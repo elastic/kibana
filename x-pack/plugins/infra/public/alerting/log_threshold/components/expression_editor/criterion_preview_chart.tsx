@@ -19,7 +19,7 @@ import {
   LineAnnotation,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   ChartContainer,
@@ -35,7 +35,7 @@ import {
   NUM_BUCKETS,
 } from '../../../common/criterion_preview_chart/criterion_preview_chart';
 import {
-  PartialAlertParams,
+  PartialRuleParams,
   Threshold,
   Criterion,
   Comparator,
@@ -47,18 +47,19 @@ import {
 } from '../../../../../common/http_api/log_alerts/';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
 
 const GROUP_LIMIT = 5;
 
 interface Props {
-  alertParams: PartialAlertParams;
+  ruleParams: PartialRuleParams;
   chartCriterion: Partial<Criterion>;
   sourceId: string;
   showThreshold: boolean;
 }
 
 export const CriterionPreview: React.FC<Props> = ({
-  alertParams,
+  ruleParams,
   chartCriterion,
   sourceId,
   showThreshold,
@@ -69,12 +70,12 @@ export const CriterionPreview: React.FC<Props> = ({
     const params = {
       criteria,
       count: {
-        comparator: alertParams.count.comparator,
-        value: alertParams.count.value,
+        comparator: ruleParams.count.comparator,
+        value: ruleParams.count.value,
       },
-      timeSize: alertParams.timeSize,
-      timeUnit: alertParams.timeUnit,
-      groupBy: alertParams.groupBy,
+      timeSize: ruleParams.timeSize,
+      timeUnit: ruleParams.timeUnit,
+      groupBy: ruleParams.groupBy,
     };
 
     try {
@@ -83,11 +84,11 @@ export const CriterionPreview: React.FC<Props> = ({
       return null;
     }
   }, [
-    alertParams.timeSize,
-    alertParams.timeUnit,
-    alertParams.groupBy,
-    alertParams.count.comparator,
-    alertParams.count.value,
+    ruleParams.timeSize,
+    ruleParams.timeUnit,
+    ruleParams.groupBy,
+    ruleParams.count.comparator,
+    ruleParams.count.value,
     chartCriterion,
   ]);
 
@@ -102,7 +103,7 @@ export const CriterionPreview: React.FC<Props> = ({
           : NUM_BUCKETS / 4
       } // Display less data for groups due to space limitations
       sourceId={sourceId}
-      threshold={alertParams.count}
+      threshold={ruleParams.count}
       chartAlertParams={chartAlertParams}
       showThreshold={showThreshold}
     />
@@ -126,6 +127,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
 }) => {
   const { uiSettings } = useKibana().services;
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+  const timezone = useKibanaTimeZoneSetting();
 
   const {
     getChartPreviewData,
@@ -134,7 +136,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     chartPreviewData: series,
   } = useChartPreviewData({
     sourceId,
-    alertParams: chartAlertParams,
+    ruleParams: chartAlertParams,
     buckets,
   });
 
@@ -224,7 +226,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
         <Chart>
           <BarSeries
             id="criterion-preview"
-            xScaleType={ScaleType.Linear}
+            xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="timestamp"
             yAccessors={['value']}
@@ -242,6 +244,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               },
             }}
             color={!isGrouped ? colorTransformer(Color.color0) : undefined}
+            timeZone={timezone}
           />
           {showThreshold && threshold ? (
             <LineAnnotation

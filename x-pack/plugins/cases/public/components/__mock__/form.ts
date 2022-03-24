@@ -36,7 +36,7 @@ export const mockFormHook = {
   __readFieldConfigFromSchema: jest.fn(),
 };
 
-export const getFormMock = (sampleData: any) => ({
+export const getFormMock = (sampleData: unknown) => ({
   ...mockFormHook,
   submit: () =>
     Promise.resolve({

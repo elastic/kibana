@@ -9,12 +9,12 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { FieldTypeIcon } from './field_type_icon';
-import { JOB_FIELD_TYPES } from '../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../common/constants';
 
 describe('FieldTypeIcon', () => {
   test(`render component when type matches a field type`, () => {
     const typeIconComponent = shallow(
-      <FieldTypeIcon type={JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} needsAria={false} />
+      <FieldTypeIcon type={JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
     expect(typeIconComponent).toMatchSnapshot();
   });
@@ -24,7 +24,7 @@ describe('FieldTypeIcon', () => {
     jest.useFakeTimers();
 
     const typeIconComponent = mount(
-      <FieldTypeIcon type={JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} needsAria={false} />
+      <FieldTypeIcon type={JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
 
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);

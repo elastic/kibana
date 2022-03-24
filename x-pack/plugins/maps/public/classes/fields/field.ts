@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { TileMetaFeature } from '../../../common/descriptor_types';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 
 export interface IField {
   getName(): string;
+  getMbFieldName(): string;
   getRootName(): string;
   canValueBeFormatted(): boolean;
   getLabel(): Promise<string>;
@@ -21,20 +23,30 @@ export interface IField {
   isValid(): boolean;
   getExtendedStatsFieldMetaRequest(): Promise<unknown | null>;
   getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null>;
-  getCategoricalFieldMetaRequest(size: number): Promise<unknown>;
+  getCategoricalFieldMetaRequest(size: number): Promise<unknown | null>;
 
-  // Whether Maps-app can automatically determine the domain of the field-values
-  // if this is not the case (e.g. for .mvt tiled data),
-  // then styling properties that require the domain to be known cannot use this property.
-  supportsAutoDomain(): boolean;
+  /*
+   * IField.supportsFieldMetaFromLocalData returns boolean indicating whether field value domain
+   * can be determined from local data
+   */
+  supportsFieldMetaFromLocalData(): boolean;
 
-  // Whether Maps-app can automatically determine the domain of the field-values
-  // _without_ having to retrieve the data as GeoJson
-  // e.g. for ES-sources, this would use the extended_stats API
-  supportsFieldMeta(): boolean;
+  /*
+   * IField.supportsFieldMetaFromEs returns boolean indicating whether field value domain
+   * can be determined from Elasticsearch.
+   * When true, getExtendedStatsFieldMetaRequest, getPercentilesFieldMetaRequest, and getCategoricalFieldMetaRequest
+   * can not return null
+   */
+  supportsFieldMetaFromEs(): boolean;
 
-  canReadFromGeoJson(): boolean;
   isEqual(field: IField): boolean;
+
+  pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature): { min: number; max: number } | null;
+
+  /*
+   * IField.isCount returns true when field is a value determining the size of a set
+   */
+  isCount(): boolean;
 }
 
 export class AbstractField implements IField {
@@ -46,8 +58,20 @@ export class AbstractField implements IField {
     this._origin = origin || FIELD_ORIGIN.SOURCE;
   }
 
+  supportsFieldMetaFromEs(): boolean {
+    throw new Error('must implement AbstractField#supportsFieldMetaFromEs');
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    throw new Error('must implement AbstractField#supportsFieldMetaFromLocalData');
+  }
+
   getName(): string {
     return this._fieldName;
+  }
+
+  getMbFieldName(): string {
+    return this.getName();
   }
 
   getRootName(): string {
@@ -59,7 +83,7 @@ export class AbstractField implements IField {
   }
 
   getSource(): IVectorSource {
-    throw new Error('must implement Field#getSource');
+    throw new Error('must implement AbstractField#getSource');
   }
 
   isValid(): boolean {
@@ -83,10 +107,6 @@ export class AbstractField implements IField {
     return this._origin;
   }
 
-  supportsFieldMeta(): boolean {
-    return false;
-  }
-
   async getExtendedStatsFieldMetaRequest(): Promise<unknown> {
     return null;
   }
@@ -99,15 +119,15 @@ export class AbstractField implements IField {
     return null;
   }
 
-  supportsAutoDomain(): boolean {
-    return true;
-  }
-
-  canReadFromGeoJson(): boolean {
-    return true;
-  }
-
   isEqual(field: IField) {
     return this._origin === field.getOrigin() && this._fieldName === field.getName();
+  }
+
+  pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
+    return null;
+  }
+
+  isCount() {
+    return false;
   }
 }

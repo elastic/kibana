@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export { FileDataVisualizer, FileDataVisualizerSpec } from './file_data_visualizer';
-export {
-  IndexDataVisualizer,
+export type { FileDataVisualizerSpec } from './file_data_visualizer';
+export { FileDataVisualizer } from './file_data_visualizer';
+export type {
   IndexDataVisualizerSpec,
   IndexDataVisualizerViewProps,
 } from './index_data_visualizer';
+export { IndexDataVisualizer } from './index_data_visualizer';

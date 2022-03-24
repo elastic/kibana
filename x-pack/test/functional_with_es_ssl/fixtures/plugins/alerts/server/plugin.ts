@@ -8,7 +8,7 @@
 import { Plugin, CoreSetup } from 'kibana/server';
 import {
   PluginSetupContract as AlertingSetup,
-  AlertType,
+  RuleType,
 } from '../../../../../../plugins/alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 
@@ -18,7 +18,7 @@ export interface AlertingExampleDeps {
   features: FeaturesPluginSetup;
 }
 
-export const noopAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
+export const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
   id: 'test.noop',
   name: 'Test: Noop',
   actionGroups: [{ id: 'default', name: 'Default' }],
@@ -29,7 +29,7 @@ export const noopAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
   producer: 'alerts',
 };
 
-export const alwaysFiringAlertType: AlertType<
+export const alwaysFiringAlertType: RuleType<
   { instances: Array<{ id: string; state: any }> },
   never, // Only use if defining useSavedObjectReferences hook
   {
@@ -54,8 +54,8 @@ export const alwaysFiringAlertType: AlertType<
     const { services, state, params } = alertExecutorOptions;
 
     (params.instances || []).forEach((instance: { id: string; state: any }) => {
-      services
-        .alertInstanceFactory(instance.id)
+      services.alertFactory
+        .create(instance.id)
         .replaceState({ instanceStateValue: true, ...(instance.state || {}) })
         .scheduleActions('default');
     });
@@ -67,7 +67,7 @@ export const alwaysFiringAlertType: AlertType<
   },
 };
 
-export const failingAlertType: AlertType<never, never, never, never, never, 'default' | 'other'> = {
+export const failingAlertType: RuleType<never, never, never, never, never, 'default' | 'other'> = {
   id: 'test.failing',
   name: 'Test: Failing',
   actionGroups: [

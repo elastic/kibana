@@ -7,6 +7,7 @@
 
 import { RouteDependencies } from '../../plugin';
 
+import { registerSearchRelevanceSuggestionsRoutes } from './adaptive_relevance';
 import { registerAnalyticsRoutes } from './analytics';
 import { registerApiLogsRoutes } from './api_logs';
 import { registerCrawlerRoutes } from './crawler';
@@ -22,7 +23,6 @@ import { registerResultSettingsRoutes } from './result_settings';
 import { registerRoleMappingsRoutes } from './role_mappings';
 import { registerSchemaRoutes } from './schema';
 import { registerSearchRoutes } from './search';
-import { registerSearchRelevanceSuggestionsRoutes } from './search_relevance_suggestions';
 import { registerSearchSettingsRoutes } from './search_settings';
 import { registerSearchUIRoutes } from './search_ui';
 import { registerSettingsRoutes } from './settings';

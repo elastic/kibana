@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../../../../id_generator';
 import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
@@ -19,6 +19,63 @@ import { getCustomDropTarget, getAdditionalClassesOnDroppable } from './drop_tar
 const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
   defaultMessage: 'Empty dimension',
 });
+
+interface EmptyButtonProps {
+  columnId: string;
+  onClick: (id: string) => void;
+  group: VisualizationDimensionGroupConfig;
+}
+
+const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => (
+  <EuiButtonEmpty
+    className="lnsLayerPanel__triggerText"
+    color="text"
+    size="s"
+    iconType="plusInCircleFilled"
+    contentProps={{
+      className: 'lnsLayerPanel__triggerTextContent',
+    }}
+    aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnAriaLabel', {
+      defaultMessage: 'Add or drag-and-drop a field to {groupLabel}',
+      values: { groupLabel: group.groupLabel },
+    })}
+    data-test-subj="lns-empty-dimension"
+    onClick={() => {
+      onClick(columnId);
+    }}
+  >
+    <FormattedMessage
+      id="xpack.lens.configure.emptyConfig"
+      defaultMessage="Add or drag-and-drop a field"
+    />
+  </EuiButtonEmpty>
+);
+
+const SuggestedValueButton = ({ columnId, group, onClick }: EmptyButtonProps) => (
+  <EuiButtonEmpty
+    className="lnsLayerPanel__triggerText"
+    color="text"
+    size="s"
+    iconType="plusInCircleFilled"
+    contentProps={{
+      className: 'lnsLayerPanel__triggerTextContent',
+    }}
+    aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnAriaLabel', {
+      defaultMessage: 'Add or drag-and-drop a field to {groupLabel}',
+      values: { groupLabel: group.groupLabel },
+    })}
+    data-test-subj="lns-empty-dimension-suggested-value"
+    onClick={() => {
+      onClick(columnId);
+    }}
+  >
+    <FormattedMessage
+      id="xpack.lens.configure.suggestedValuee"
+      defaultMessage="Suggested value: {value}"
+      values={{ value: group.suggestedValue?.() }}
+    />
+  </EuiButtonEmpty>
+);
 
 export function EmptyDimensionButton({
   group,
@@ -34,12 +91,12 @@ export function EmptyDimensionButton({
   layerId: string;
   groupIndex: number;
   layerIndex: number;
-  onClick: (id: string) => void;
   onDrop: (
     droppedItem: DragDropIdentifier,
     dropTarget: DragDropIdentifier,
     dropType?: DropType
   ) => void;
+  onClick: (id: string) => void;
   group: VisualizationDimensionGroupConfig;
   groups: VisualizationDimensionGroupConfig[];
 
@@ -105,28 +162,11 @@ export function EmptyDimensionButton({
         getCustomDropTarget={getCustomDropTarget}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
-          <EuiButtonEmpty
-            className="lnsLayerPanel__triggerText"
-            color="text"
-            size="s"
-            iconType="plusInCircleFilled"
-            contentProps={{
-              className: 'lnsLayerPanel__triggerTextContent',
-            }}
-            aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnAriaLabel', {
-              defaultMessage: 'Add or drag-and-drop a field to {groupLabel}',
-              values: { groupLabel: group.groupLabel },
-            })}
-            data-test-subj="lns-empty-dimension"
-            onClick={() => {
-              onClick(value.columnId);
-            }}
-          >
-            <FormattedMessage
-              id="xpack.lens.configure.emptyConfig"
-              defaultMessage="Add or drag-and-drop a field"
-            />
-          </EuiButtonEmpty>
+          {typeof group.suggestedValue?.() === 'number' ? (
+            <SuggestedValueButton columnId={value.columnId} onClick={onClick} group={group} />
+          ) : (
+            <DefaultEmptyButton columnId={value.columnId} onClick={onClick} group={group} />
+          )}
         </div>
       </DragDrop>
     </div>

@@ -6,17 +6,31 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionVariables } from '../../types';
+import { pick } from 'lodash';
+import { ActionVariables, REQUIRED_ACTION_VARIABLES, CONTEXT_ACTION_VARIABLES } from '../../types';
 import { ActionVariable } from '../../../../alerting/common';
 
+export type OmitMessageVariablesType = 'all' | 'keepContext';
+
 // return a "flattened" list of action variables for an alertType
-export function transformActionVariables(actionVariables: ActionVariables): ActionVariable[] {
+export function transformActionVariables(
+  actionVariables: ActionVariables,
+  omitMessageVariables?: OmitMessageVariablesType
+): ActionVariable[] {
+  const filteredActionVariables: ActionVariables = omitMessageVariables
+    ? omitMessageVariables === 'all'
+      ? pick(actionVariables, REQUIRED_ACTION_VARIABLES)
+      : pick(actionVariables, [...REQUIRED_ACTION_VARIABLES, ...CONTEXT_ACTION_VARIABLES])
+    : actionVariables;
+
   const alwaysProvidedVars = getAlwaysProvidedActionVariables();
-  const contextVars = actionVariables.context
-    ? prefixKeys(actionVariables.context, 'context.')
+  const paramsVars = prefixKeys(filteredActionVariables.params, 'params.');
+  const contextVars = filteredActionVariables.context
+    ? prefixKeys(filteredActionVariables.context, 'context.')
     : [];
-  const paramsVars = prefixKeys(actionVariables.params, 'params.');
-  const stateVars = prefixKeys(actionVariables.state, 'state.');
+  const stateVars = filteredActionVariables.state
+    ? prefixKeys(filteredActionVariables.state, 'state.')
+    : [];
 
   return alwaysProvidedVars.concat(contextVars, paramsVars, stateVars);
 }

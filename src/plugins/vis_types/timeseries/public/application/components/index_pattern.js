@@ -27,15 +27,16 @@ import { IndexPatternSelect } from './lib/index_pattern_select';
 import { YesNo } from './yes_no';
 import { LastValueModePopover } from './last_value_mode_popover';
 import { KBN_FIELD_TYPES } from '../../../../../data/public';
-import { FormValidationContext } from '../contexts/form_validation_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
 import { AUTO_INTERVAL } from '../../../common/constants';
-import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
+import { isTimerangeModeEnabled } from '../../../common/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
-import { getDataStart, getUISettings } from '../../services';
+import { PanelModelContext } from '../contexts/panel_model_context';
+import { FormValidationContext } from '../contexts/form_validation_context';
+import { getUISettings, getDataViewsStart } from '../../services';
 import { UI_SETTINGS } from '../../../../../data/common';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
@@ -68,6 +69,7 @@ export const IndexPattern = ({
   model: _model,
   allowLevelOfDetail,
   allowIndexSwitchingMode,
+  baseIndexPattern,
 }) => {
   const config = getUISettings();
   const timeFieldName = `${prefix}time_field`;
@@ -76,11 +78,14 @@ export const IndexPattern = ({
   const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
   const updateControlValidity = useContext(FormValidationContext);
-
+  const panelModel = useContext(PanelModelContext);
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
+
   const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
 
   const [fetchedIndex, setFetchedIndex] = useState(null);
+
+  const isTimeSeries = panelModel.type === PANEL_TYPES.TIMESERIES;
 
   const handleMaxBarsChange = useCallback(
     ({ target }) => {
@@ -126,7 +131,7 @@ export const IndexPattern = ({
   const selectedTimeRangeOption = timeRangeOptions.find(
     ({ value }) => model[TIME_RANGE_MODE_KEY] === value
   );
-  const isTimeSeries = model.type === PANEL_TYPES.TIMESERIES;
+
   const isDataTimerangeModeInvalid =
     !disabled &&
     selectedTimeRangeOption &&
@@ -138,20 +143,22 @@ export const IndexPattern = ({
 
   useEffect(() => {
     async function fetchIndex() {
-      const { indexPatterns } = getDataStart();
+      const dataViews = getDataViewsStart();
       let fetchedIndexPattern = {
         indexPattern: undefined,
         indexPatternString: undefined,
       };
 
+      const indexPatternToFetch = index || baseIndexPattern;
+
       try {
-        fetchedIndexPattern = index
-          ? await fetchIndexPattern(index, indexPatterns, {
+        fetchedIndexPattern = indexPatternToFetch
+          ? await fetchIndexPattern(indexPatternToFetch, dataViews, {
               fetchKibanaIndexForStringIndexes: true,
             })
           : {
               ...fetchedIndexPattern,
-              defaultIndex: await indexPatterns.getDefault(),
+              defaultIndex: await dataViews.getDefault(),
             };
       } catch {
         // nothing to be here
@@ -161,7 +168,7 @@ export const IndexPattern = ({
     }
 
     fetchIndex();
-  }, [index]);
+  }, [index, baseIndexPattern]);
 
   const toggleIndicatorDisplay = useCallback(
     () => onChange({ [HIDE_LAST_VALUE_INDICATOR]: !model.hide_last_value_indicator }),
@@ -252,7 +259,11 @@ export const IndexPattern = ({
             restrict={RESTRICT_FIELDS}
             value={model[timeFieldName]}
             disabled={disabled}
-            onChange={handleSelectChange(timeFieldName)}
+            onChange={(value) =>
+              onChange({
+                [timeFieldName]: value?.[0],
+              })
+            }
             indexPattern={model[indexPatternName]}
             fields={fields}
             placeholder={
@@ -382,6 +393,7 @@ IndexPattern.defaultProps = {
 };
 
 IndexPattern.propTypes = {
+  baseIndexPattern: PropTypes.oneOf([PropTypes.object, PropTypes.string]),
   model: PropTypes.object.isRequired,
   fields: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,

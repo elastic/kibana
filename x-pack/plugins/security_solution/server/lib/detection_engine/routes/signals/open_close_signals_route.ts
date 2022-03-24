@@ -5,20 +5,36 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { Logger } from 'src/core/server';
 import { setSignalStatusValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/set_signal_status_type_dependents';
 import {
   SetSignalsStatusSchemaDecoded,
   setSignalsStatusSchema,
 } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+} from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-
+import { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
+import { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import {
+  getSessionIDfromKibanaRequest,
+  createAlertStatusPayloads,
+} from '../../../telemetry/insights';
 
-export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
+export const setSignalsStatusRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  security: SetupPlugins['security'],
+  sender: ITelemetryEventsSender
+) => {
   router.post(
     {
       path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -37,6 +53,7 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
       const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
+      const spaceId = context.securitySolution?.getSpaceId() ?? 'default';
 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
@@ -44,6 +61,30 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
 
       if (!siemClient) {
         return siemResponse.error({ statusCode: 404 });
+      }
+
+      const clusterId = sender.getClusterID();
+      const [isTelemetryOptedIn, username] = await Promise.all([
+        sender.isTelemetryOptedIn(),
+        security?.authc.getCurrentUser(request)?.username,
+      ]);
+      if (isTelemetryOptedIn && clusterId) {
+        // Sometimes the ids are in the query not passed in the request?
+        const toSendAlertIds = get(query, 'bool.filter.terms._id') || signalIds;
+        // Get Context for Insights Payloads
+        const sessionId = getSessionIDfromKibanaRequest(clusterId, request);
+        if (username && toSendAlertIds && sessionId && status) {
+          const insightsPayloads = createAlertStatusPayloads(
+            clusterId,
+            toSendAlertIds,
+            sessionId,
+            username,
+            DETECTION_ENGINE_SIGNALS_STATUS_URL,
+            status
+          );
+          logger.debug(`Sending Insights Payloads ${JSON.stringify(insightsPayloads)}`);
+          await sender.sendOnDemand(INSIGHTS_CHANNEL, insightsPayloads);
+        }
       }
 
       let queryObject;
@@ -58,8 +99,8 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
         };
       }
       try {
-        const { body } = await esClient.updateByQuery({
-          index: siemClient.getSignalsIndex(),
+        const body = await esClient.updateByQuery({
+          index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
           conflicts: conflicts ?? 'abort',
           // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2
           // Note: Before we tried to use "refresh: wait_for" but I do not think that was available and instead it defaulted to "refresh: true"

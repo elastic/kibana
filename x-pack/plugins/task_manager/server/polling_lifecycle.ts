@@ -9,6 +9,7 @@ import { Subject, Observable, Subscription } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
+import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
 import type { Logger, ExecutionContextStart } from '../../../../src/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
@@ -49,11 +50,13 @@ import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
   definitions: TaskTypeDictionary;
+  unusedTypes: string[];
   taskStore: TaskStore;
   config: TaskManagerConfig;
   middleware: Middleware;
   elasticsearchAndSOAvailability$: Observable<boolean>;
   executionContext: ExecutionContextStart;
+  usageCounter?: UsageCounter;
 } & ManagedConfiguration;
 
 export type TaskLifecycleEvent =
@@ -87,6 +90,9 @@ export class TaskPollingLifecycle {
 
   private middleware: Middleware;
 
+  private usageCounter?: UsageCounter;
+  private config: TaskManagerConfig;
+
   /**
    * Initializes the task manager, preventing any further addition of middleware,
    * enabling the task manipulation methods, and beginning the background polling
@@ -102,13 +108,17 @@ export class TaskPollingLifecycle {
     config,
     taskStore,
     definitions,
+    unusedTypes,
     executionContext,
+    usageCounter,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
     this.definitions = definitions;
     this.store = taskStore;
     this.executionContext = executionContext;
+    this.usageCounter = usageCounter;
+    this.config = config;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -128,6 +138,7 @@ export class TaskPollingLifecycle {
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
       definitions,
+      unusedTypes,
       logger: this.logger,
       getCapacity: (taskType?: string) =>
         taskType && this.definitions.get(taskType)?.maxConcurrency
@@ -230,6 +241,8 @@ export class TaskPollingLifecycle {
       onTaskEvent: this.emitEvent,
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
+      usageCounter: this.usageCounter,
+      eventLoopDelayConfig: { ...this.config.event_loop_delay },
     });
   };
 

@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import {
+  INDEX_CREATED_BY,
   JOB_MAP_NODE_TYPES,
   JobMapNodeTypes,
 } from '../../../common/constants/data_frame_analytics';
@@ -19,7 +20,6 @@ import {
   DataFrameAnalyticsStats,
   MapElements,
 } from '../../../common/types/data_frame_analytics';
-import { INDEX_META_DATA_CREATED_BY } from '../../../../file_upload/common';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   ExtendAnalyticsMapArgs,
@@ -104,21 +104,19 @@ export class AnalyticsManager {
     const resp = await this._mlClient.getTrainedModels({
       model_id: modelId,
     });
-    const modelData = resp?.body?.trained_model_configs[0];
+    const modelData = resp?.trained_model_configs[0];
     return modelData;
   }
 
   private async getAnalyticsModels() {
     const resp = await this._mlClient.getTrainedModels();
-    const models = resp?.body?.trained_model_configs;
+    const models = resp?.trained_model_configs;
     return models;
   }
 
   private async getAnalyticsStats() {
-    const resp = await this._mlClient.getDataFrameAnalyticsStats<{
-      data_frame_analytics: DataFrameAnalyticsStats[];
-    }>({ size: 1000 });
-    const stats = resp?.body?.data_frame_analytics;
+    const resp = await this._mlClient.getDataFrameAnalyticsStats({ size: 1000 });
+    const stats = resp?.data_frame_analytics;
     return stats;
   }
 
@@ -129,9 +127,7 @@ export class AnalyticsManager {
         }
       : undefined;
     const resp = await this._mlClient.getDataFrameAnalytics(options);
-    let jobData = analyticsId
-      ? resp?.body?.data_frame_analytics[0]
-      : resp?.body?.data_frame_analytics;
+    let jobData = analyticsId ? resp?.data_frame_analytics[0] : resp?.data_frame_analytics;
 
     if (analyticsId !== undefined) {
       const jobStats = this.findJobStats(analyticsId);
@@ -152,14 +148,14 @@ export class AnalyticsManager {
     const indexData = await this._client.asInternalUser.indices.get({
       index,
     });
-    return indexData?.body;
+    return indexData;
   }
 
   private async getTransformData(transformId: string) {
     const transform = await this._client.asInternalUser.transform.getTransform({
       transform_id: transformId,
     });
-    const transformData = transform?.body?.transforms[0];
+    const transformData = transform?.transforms[0];
     return transformData;
   }
 
@@ -458,14 +454,14 @@ export class AnalyticsManager {
             if (
               link.isWildcardIndexPattern === false &&
               (link.meta === undefined ||
-                link.meta?.created_by.includes(INDEX_META_DATA_CREATED_BY))
+                link.meta?.created_by.includes(INDEX_CREATED_BY.FILE_DATA_VISUALIZER))
             ) {
               rootIndexPattern = nextLinkId;
               complete = true;
               break;
             }
 
-            if (link.meta?.created_by === 'data-frame-analytics') {
+            if (link.meta?.created_by === INDEX_CREATED_BY.DATA_FRAME_ANALYTICS) {
               nextLinkId = link.meta.analytics;
               nextType = JOB_MAP_NODE_TYPES.ANALYTICS;
             }

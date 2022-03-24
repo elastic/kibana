@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
-import { stopPropagationAndPreventDefault } from '../../../../common';
+import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
 import { HoverActionComponentProps, FilterValueFnArgs } from './types';
@@ -36,7 +36,7 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
   }) => {
     const filterOutValueFn = useCallback(() => {
       const makeFilter = (currentVal: string | null | undefined) =>
-        currentVal?.length === 0
+        currentVal == null || currentVal?.length === 0
           ? createFilter(field, null, false)
           : createFilter(field, currentVal, true);
       const filters = Array.isArray(value)

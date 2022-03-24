@@ -6,14 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   AlertUtils,
   checkAAD,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
@@ -33,11 +32,11 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
     after(() => objectRemover.removeAll());
 
     async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
-      const scheduledTask: ApiResponse<estypes.GetResponse<TaskManagerDoc>> = await es.get({
+      const scheduledTask = await es.get<TaskManagerDoc>({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
-      return scheduledTask.body._source!;
+      return scheduledTask._source!;
     }
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -61,7 +60,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 actions: [
                   {
@@ -147,7 +146,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
                 enabled: false,
@@ -196,7 +195,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
                 enabled: false,
@@ -250,7 +249,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.noop',
                 consumer: 'alerts',
                 enabled: false,
@@ -305,7 +304,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData({ enabled: false }))
+            .send(getTestRuleData({ enabled: false }))
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -376,7 +375,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix('other')}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData({ enabled: false }))
+            .send(getTestRuleData({ enabled: false }))
             .expect(200);
           objectRemover.add('other', createdAlert.id, 'rule', 'alerting');
 

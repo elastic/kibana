@@ -10,14 +10,13 @@
 
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
-import type { RuntimeField } from '../types';
-import { DuplicateField } from '../../../kibana_utils/common';
+import type { RuntimeField, RuntimeFieldSpec, RuntimeType, FieldConfiguration } from '../types';
+import { CharacterNotAllowedInField } from '../../../kibana_utils/common';
 
 import { IIndexPattern, IFieldType } from '../../common';
 import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
-import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import {
   FieldFormatsStartCommon,
@@ -25,6 +24,7 @@ import {
   SerializedFieldFormat,
 } from '../../../field_formats/common';
 import { DataViewSpec, TypeMeta, SourceFilter, DataViewFieldMap } from '../types';
+import { removeFieldAttrs } from './utils';
 
 interface DataViewDeps {
   spec?: DataViewSpec;
@@ -37,7 +37,6 @@ interface SavedObjectBody {
   fieldAttrs?: string;
   title?: string;
   timeFieldName?: string;
-  intervalName?: string;
   fields?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
@@ -45,7 +44,13 @@ interface SavedObjectBody {
   type?: string;
 }
 
-type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
+/**
+ * An interface representing a data view that is time based.
+ */
+export interface TimeBasedDataView extends DataView {
+  timeFieldName: NonNullable<DataView['timeFieldName']>;
+  getTimeField: () => DataViewField;
+}
 
 export class DataView implements IIndexPattern {
   public id?: string;
@@ -58,20 +63,9 @@ export class DataView implements IIndexPattern {
   public fields: IIndexPatternFieldList & { toSpec: () => DataViewFieldMap };
   public timeFieldName: string | undefined;
   /**
-   * @deprecated Used by time range index patterns
-   * @removeBy 8.1
-   *
-   */
-  public intervalName: string | undefined;
-  /**
    * Type is used to identify rollup index patterns
    */
   public type: string | undefined;
-  public formatHit: {
-    (hit: Record<string, any>, type?: string): any;
-    formatField: FormatFieldFn;
-  };
-  public formatField: FormatFieldFn;
   /**
    * @deprecated Use `flattenHit` utility method exported from data plugin instead.
    */
@@ -82,11 +76,12 @@ export class DataView implements IIndexPattern {
    */
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];
+  public namespaces: string[];
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
   private fieldAttrs: FieldAttrs;
-  private runtimeFieldMap: Record<string, RuntimeField>;
+  private runtimeFieldMap: Record<string, RuntimeFieldSpec>;
 
   /**
    * prevents errors when index pattern exists before indices
@@ -103,11 +98,6 @@ export class DataView implements IIndexPattern {
     this.fields = fieldList([], this.shortDotsEnable);
 
     this.flattenHit = flattenHitWrapper(this, metaFields);
-    this.formatHit = formatHitProvider(
-      this,
-      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
-    );
-    this.formatField = this.formatHit.formatField;
 
     // set values
     this.id = spec.id;
@@ -122,9 +112,9 @@ export class DataView implements IIndexPattern {
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
     this.fieldAttrs = spec.fieldAttrs || {};
-    this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
+    this.namespaces = spec.namespaces || [];
   }
 
   /**
@@ -197,11 +187,13 @@ export class DataView implements IIndexPattern {
       };
     });
 
+    const runtimeFields = this.getRuntimeMappings();
+
     return {
       storedFields: ['*'],
       scriptFields,
       docvalueFields,
-      runtimeFields: this.runtimeFieldMap,
+      runtimeFields,
     };
   }
 
@@ -222,7 +214,6 @@ export class DataView implements IIndexPattern {
       fieldFormats: this.fieldFormatMap,
       runtimeFieldMap: this.runtimeFieldMap,
       fieldAttrs: this.fieldAttrs,
-      intervalName: this.intervalName,
       allowNoIndex: this.allowNoIndex,
     };
   }
@@ -237,41 +228,9 @@ export class DataView implements IIndexPattern {
   }
 
   /**
-   * Add scripted field to field list
-   *
-   * @param name field name
-   * @param script script code
-   * @param fieldType
-   * @param lang
-   * @deprecated use runtime field instead
-   * @removeBy 8.1
-   */
-  async addScriptedField(name: string, script: string, fieldType: string = 'string') {
-    const scriptedFields = this.getScriptedFields();
-    const names = _.map(scriptedFields, 'name');
-
-    if (_.includes(names, name)) {
-      throw new DuplicateField(name);
-    }
-
-    this.fields.add({
-      name,
-      script,
-      type: fieldType,
-      scripted: true,
-      lang: 'painless',
-      aggregatable: true,
-      searchable: true,
-      count: 0,
-      readFromDocValues: false,
-    });
-  }
-
-  /**
    * Remove scripted field from field list
    * @param fieldName
    * @deprecated use runtime field instead
-   * @removeBy 8.1
    */
 
   removeScriptedField(fieldName: string) {
@@ -283,8 +242,7 @@ export class DataView implements IIndexPattern {
 
   /**
    *
-   * @deprecated use runtime field instead
-   * @removeBy 8.1
+   * @deprecated Will be removed when scripted fields are removed
    */
   getNonScriptedFields() {
     return [...this.fields.getAll().filter((field) => !field.scripted)];
@@ -293,17 +251,16 @@ export class DataView implements IIndexPattern {
   /**
    *
    * @deprecated use runtime field instead
-   * @removeBy 8.1
    */
   getScriptedFields() {
     return [...this.fields.getAll().filter((field) => field.scripted)];
   }
 
-  isTimeBased(): boolean {
+  isTimeBased(): this is TimeBasedDataView {
     return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
   }
 
-  isTimeNanosBased(): boolean {
+  isTimeNanosBased(): this is TimeBasedDataView {
     const timeField = this.getTimeField();
     return !!(timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1);
   }
@@ -336,7 +293,6 @@ export class DataView implements IIndexPattern {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
       title: this.title,
       timeFieldName: this.timeFieldName,
-      intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
       fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
       fieldFormatMap,
@@ -365,26 +321,34 @@ export class DataView implements IIndexPattern {
 
   /**
    * Add a runtime field - Appended to existing mapped field or a new field is
-   * created as appropriate
+   * created as appropriate.
    * @param name Field name
    * @param runtimeField Runtime field definition
    */
-  addRuntimeField(name: string, runtimeField: RuntimeField) {
-    const existingField = this.getFieldByName(name);
-    if (existingField) {
-      existingField.runtimeField = runtimeField;
-    } else {
-      this.fields.add({
-        name,
-        runtimeField,
-        type: castEsToKbnFieldTypeName(runtimeField.type),
-        aggregatable: true,
-        searchable: true,
-        count: 0,
-        readFromDocValues: false,
-      });
+  addRuntimeField(name: string, runtimeField: RuntimeField): DataViewField[] {
+    if (name.includes('*')) {
+      throw new CharacterNotAllowedInField('*', name);
     }
-    this.runtimeFieldMap[name] = runtimeField;
+
+    const { type, script, customLabel, format, popularity } = runtimeField;
+
+    if (type === 'composite') {
+      return this.addCompositeRuntimeField(name, runtimeField);
+    }
+
+    this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
+    const field = this.updateOrAddRuntimeField(
+      name,
+      type,
+      { type, script },
+      {
+        customLabel,
+        format,
+        popularity,
+      }
+    );
+
+    return [field];
   }
 
   /**
@@ -400,7 +364,60 @@ export class DataView implements IIndexPattern {
    * @param name
    */
   getRuntimeField(name: string): RuntimeField | null {
-    return this.runtimeFieldMap[name] ?? null;
+    if (!this.runtimeFieldMap[name]) {
+      return null;
+    }
+
+    const { type, script, fields } = { ...this.runtimeFieldMap[name] };
+    const runtimeField: RuntimeField = {
+      type,
+      script,
+    };
+
+    if (type === 'composite') {
+      runtimeField.fields = fields;
+    }
+
+    return runtimeField;
+  }
+
+  getAllRuntimeFields(): Record<string, RuntimeField> {
+    return Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeField>>(
+      (acc, fieldName) => ({
+        ...acc,
+        [fieldName]: this.getRuntimeField(fieldName)!,
+      }),
+      {}
+    );
+  }
+
+  getFieldsByRuntimeFieldName(name: string): Record<string, DataViewField> | undefined {
+    const runtimeField = this.getRuntimeField(name);
+    if (!runtimeField) {
+      return;
+    }
+
+    if (runtimeField.type === 'composite') {
+      return Object.entries(runtimeField.fields!).reduce<Record<string, DataViewField>>(
+        (acc, [subFieldName, subField]) => {
+          const fieldFullName = `${name}.${subFieldName}`;
+          const dataViewField = this.getFieldByName(fieldFullName);
+
+          if (!dataViewField) {
+            // We should never enter here as all composite runtime subfield
+            // are converted to data view fields.
+            return acc;
+          }
+          acc[subFieldName] = dataViewField;
+          return acc;
+        },
+        {}
+      );
+    }
+
+    const primitveRuntimeField = this.getFieldByName(name);
+
+    return primitveRuntimeField && { [name]: primitveRuntimeField };
   }
 
   /**
@@ -425,15 +442,24 @@ export class DataView implements IIndexPattern {
    */
   removeRuntimeField(name: string) {
     const existingField = this.getFieldByName(name);
-    if (existingField) {
-      if (existingField.isMapped) {
-        // mapped field, remove runtimeField def
-        existingField.runtimeField = undefined;
-      } else {
-        this.fields.remove(existingField);
-      }
+
+    if (existingField && existingField.isMapped) {
+      // mapped field, remove runtimeField def
+      existingField.runtimeField = undefined;
+    } else {
+      Object.values(this.getFieldsByRuntimeFieldName(name) || {}).forEach((field) => {
+        this.fields.remove(field);
+      });
     }
     delete this.runtimeFieldMap[name];
+  }
+
+  /**
+   * Return the "runtime_mappings" section of the ES search query
+   */
+  getRuntimeMappings(): estypes.MappingRuntimeFields {
+    // @ts-expect-error The ES client does not yet include the "composite" runtime type
+    return _.cloneDeep(this.runtimeFieldMap);
   }
 
   /**
@@ -476,9 +502,7 @@ export class DataView implements IIndexPattern {
     if (fieldObject) {
       if (!newCount) fieldObject.deleteCount();
       else fieldObject.count = newCount;
-      return;
     }
-
     this.setFieldAttrs(fieldName, 'count', newCount);
   }
 
@@ -489,6 +513,92 @@ export class DataView implements IIndexPattern {
   public readonly deleteFieldFormat = (fieldName: string) => {
     delete this.fieldFormatMap[fieldName];
   };
+
+  private addCompositeRuntimeField(name: string, runtimeField: RuntimeField): DataViewField[] {
+    const { fields } = runtimeField;
+
+    // Make sure subFields are provided
+    if (fields === undefined || Object.keys(fields).length === 0) {
+      throw new Error(`Can't add composite runtime field [name = ${name}] without subfields.`);
+    }
+
+    // Make sure no field with the same name already exist
+    if (this.getFieldByName(name) !== undefined) {
+      throw new Error(
+        `Can't create composite runtime field ["${name}"] as there is already a field with this name`
+      );
+    }
+
+    // We first remove the runtime composite field with the same name which will remove all of its subFields.
+    // This guarantees that we don't leave behind orphan data view fields
+    this.removeRuntimeField(name);
+
+    const runtimeFieldSpec = removeFieldAttrs(runtimeField);
+
+    // We don't add composite runtime fields to the field list as
+    // they are not fields but **holder** of fields.
+    // What we do add to the field list are all their subFields.
+    const dataViewFields = Object.entries(fields).map(([subFieldName, subField]) =>
+      // Every child field gets the complete runtime field script for consumption by searchSource
+      this.updateOrAddRuntimeField(`${name}.${subFieldName}`, subField.type, runtimeFieldSpec, {
+        customLabel: subField.customLabel,
+        format: subField.format,
+        popularity: subField.popularity,
+      })
+    );
+
+    this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
+    return dataViewFields;
+  }
+
+  private updateOrAddRuntimeField(
+    fieldName: string,
+    fieldType: RuntimeType,
+    runtimeFieldSpec: RuntimeFieldSpec,
+    config: FieldConfiguration
+  ): DataViewField {
+    if (fieldType === 'composite') {
+      throw new Error(
+        `Trying to add composite field as primmitive field, this shouldn't happen! [name = ${fieldName}]`
+      );
+    }
+
+    // Create the field if it does not exist or update an existing one
+    let createdField: DataViewField | undefined;
+    const existingField = this.getFieldByName(fieldName);
+
+    if (existingField) {
+      existingField.runtimeField = runtimeFieldSpec;
+    } else {
+      createdField = this.fields.add({
+        name: fieldName,
+        runtimeField: runtimeFieldSpec,
+        type: castEsToKbnFieldTypeName(fieldType),
+        esTypes: [fieldType],
+        aggregatable: true,
+        searchable: true,
+        count: config.popularity ?? 0,
+        readFromDocValues: false,
+      });
+    }
+
+    // Apply configuration to the field
+    if (config.customLabel || config.customLabel === null) {
+      this.setFieldCustomLabel(fieldName, config.customLabel);
+    }
+
+    if (config.popularity || config.popularity === null) {
+      this.setFieldCount(fieldName, config.popularity);
+    }
+
+    if (config.format) {
+      this.setFieldFormat(fieldName, config.format);
+    } else if (config.format === null) {
+      this.deleteFieldFormat(fieldName);
+    }
+
+    return createdField ?? existingField!;
+  }
 }
 
 /**

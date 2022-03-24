@@ -6,7 +6,7 @@
  */
 
 /*
- * Formatter which uses the fieldFormat object of a Kibana index pattern
+ * Formatter which uses the fieldFormat object of a Kibana data view
  * field to format the value of a field.
  */
 

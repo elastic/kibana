@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import type { Filter } from '@kbn/es-query';
 import { HostItem, LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
@@ -33,7 +34,7 @@ import { inputsSelectors } from '../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { HostDetailsTabs } from './details_tabs';
@@ -47,11 +48,12 @@ import { Display } from '../display';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
@@ -97,7 +99,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [dispatch]
   );
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
@@ -106,7 +108,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     skip: selectedPatterns.length === 0,
   });
   const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    config: getEsQueryConfig(kibana.services.uiSettings),
     indexPattern,
     queries: [query],
     filters: getFilters(),
@@ -117,6 +119,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   useEffect(() => {
     dispatch(setHostDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
+
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   return (
     <>
@@ -174,6 +178,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     setQuery={setQuery}
                     refetch={refetch}
                     inspect={inspect}
+                    hostName={detailName}
                   />
                 )}
               </AnomalyTableProvider>
@@ -193,7 +198,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               <EuiSpacer />
 
               <SecuritySolutionTabNavigation
-                navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
+                navTabs={navTabsHostDetails({
+                  hasMlUserPermissions: hasMlUserPermissions(capabilities),
+                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  hostName: detailName,
+                })}
               />
 
               <EuiSpacer />
@@ -219,8 +228,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         </>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage border title={detailName} />
-
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}

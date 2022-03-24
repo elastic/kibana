@@ -15,23 +15,31 @@ import {
   getSuccessfulSignalUpdateResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { SetupPlugins } from '../../../../plugin';
+import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     server = serverMock.create();
+    logger = loggingSystemMock.createLogger();
     ({ context } = requestContextMock.createTools());
-    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        getSuccessfulSignalUpdateResponse()
-      )
+
+    context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
+      getSuccessfulSignalUpdateResponse()
     );
-    setSignalsStatusRoute(server.router);
+    const telemetrySenderMock = createMockTelemetryEventsSender();
+    const securityMock = {
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
+      },
+    } as unknown as SetupPlugins['security'];
+    setSignalsStatusRoute(server.router, logger, securityMock, telemetrySenderMock);
   });
 
   describe('status on signal', () => {
@@ -57,8 +65,8 @@ describe('set signal status', () => {
     });
 
     test('catches error if asCurrentUser throws error', async () => {
-      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue(
-        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
+        new Error('Test error')
       );
       const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
       expect(response.status).toEqual(500);

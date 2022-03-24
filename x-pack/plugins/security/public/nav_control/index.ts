@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { SecurityNavControlService, SecurityNavControlServiceStart } from './nav_control_service';
+export type { SecurityNavControlServiceStart } from './nav_control_service';
+export { SecurityNavControlService } from './nav_control_service';
 export type { UserMenuLink } from './nav_control_component';

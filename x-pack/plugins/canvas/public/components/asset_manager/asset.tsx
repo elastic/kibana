@@ -9,7 +9,7 @@ import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { set } from '@elastic/safer-lodash-set';
 
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import { fromExpression, toExpression } from '@kbn/interpreter';
 
 // @ts-expect-error untyped local
 import { elementsRegistry } from '../../lib/elements_registry';

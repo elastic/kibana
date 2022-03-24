@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { RegionMapVisRenderValue } from './region_map_fn';
-import { RegionMapVisualization } from './region_map_visualization';
+import type { RegionMapVisRenderValue } from './region_map_fn';
+import { LazyWrapper } from '../../lazy_wrapper';
 import { REGION_MAP_RENDER } from './types';
+
+const getLazyComponent = () => {
+  return lazy(() => import('./region_map_visualization'));
+};
 
 export const regionMapRenderer = {
   name: REGION_MAP_RENDER,
@@ -20,17 +24,16 @@ export const regionMapRenderer = {
       unmountComponentAtNode(domNode);
     });
 
-    render(
-      <RegionMapVisualization
-        onInitialRenderComplete={() => {
-          handlers.done();
-        }}
-        filters={filters}
-        query={query}
-        timeRange={timeRange}
-        visConfig={visConfig}
-      />,
-      domNode
-    );
+    const props = {
+      onInitialRenderComplete: () => {
+        handlers.done();
+      },
+      filters,
+      query,
+      timeRange,
+      visConfig,
+    };
+
+    render(<LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />, domNode);
   },
 } as ExpressionRenderDefinition<RegionMapVisRenderValue>;

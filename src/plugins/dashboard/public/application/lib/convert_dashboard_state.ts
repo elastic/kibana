@@ -11,6 +11,7 @@ import type { KibanaExecutionContext } from 'src/core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
+import { TimeRange } from '../../services/data';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardState,
@@ -19,7 +20,9 @@ import {
   DashboardContainerInput,
   DashboardBuildContext,
 } from '../../types';
-import { convertSavedPanelsToPanelMap } from './convert_saved_panels_to_panel_map';
+import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
+import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_control_group';
+import { ControlGroupInput } from '../../../../controls/public';
 
 interface SavedObjectToDashboardStateProps {
   version: string;
@@ -72,7 +75,12 @@ export const savedObjectToDashboardState = ({
     version,
     usageCollection
   );
-
+  if (rawState.timeRestore) {
+    rawState.timeRange = { from: savedDashboard.timeFrom, to: savedDashboard.timeTo } as TimeRange;
+  }
+  rawState.controlGroupInput = deserializeControlGroupFromDashboardSavedObject(
+    savedDashboard
+  ) as ControlGroupInput;
   return { ...rawState, panels: convertSavedPanelsToPanelMap(rawState.panels) };
 };
 
@@ -91,8 +99,18 @@ export const stateToDashboardContainerInput = ({
   const { filterManager, timefilter: timefilterService } = queryService;
   const { timefilter } = timefilterService;
 
-  const { expandedPanelId, fullScreenMode, description, options, viewMode, panels, query, title } =
-    dashboardState;
+  const {
+    controlGroupInput,
+    expandedPanelId,
+    fullScreenMode,
+    description,
+    options,
+    viewMode,
+    panels,
+    query,
+    title,
+    timeRestore,
+  } = dashboardState;
 
   return {
     refreshConfig: timefilter.getRefreshInterval(),
@@ -102,6 +120,7 @@ export const stateToDashboardContainerInput = ({
     dashboardCapabilities,
     isEmbeddedExternally,
     ...(options || {}),
+    controlGroupInput,
     searchSessionId,
     expandedPanelId,
     description,
@@ -112,6 +131,7 @@ export const stateToDashboardContainerInput = ({
     timeRange: {
       ..._.cloneDeep(timefilter.getTime()),
     },
+    timeRestore,
     executionContext,
   };
 };

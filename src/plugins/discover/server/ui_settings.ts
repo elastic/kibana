@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { UiSettingsParams } from 'kibana/server';
+import type { DocLinksServiceSetup, UiSettingsParams } from 'kibana/server';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
@@ -26,9 +26,14 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
+  TRUNCATE_MAX_HEIGHT,
+  SHOW_FIELD_STATISTICS,
+  ROW_HEIGHT_OPTION,
 } from '../common';
 
-export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
+export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
+  docLinks: DocLinksServiceSetup
+) => ({
   [DEFAULT_COLUMNS_SETTING]: {
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
       defaultMessage: 'Default columns',
@@ -47,7 +52,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     }),
     value: 200,
     description: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedText', {
-      defaultMessage: 'Maximum number of fields rendered in the document column',
+      defaultMessage: 'Maximum number of fields rendered in the document summary',
     }),
     category: ['discover'],
     schema: schema.number(),
@@ -80,7 +85,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     type: 'select',
     description: i18n.translate('discover.advancedSettings.sortDefaultOrderText', {
       defaultMessage:
-        'Controls the default sort direction for time based index patterns in the Discover app.',
+        'Controls the default sort direction for time based data views in the Discover app.',
     }),
     category: ['discover'],
     schema: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
@@ -150,20 +155,29 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     description: i18n.translate('discover.advancedSettings.context.tieBreakerFieldsText', {
       defaultMessage:
         'A comma-separated list of fields to use for tie-breaking between documents that have the same timestamp value. ' +
-        'From this list the first field that is present and sortable in the current index pattern is used.',
+        'From this list the first field that is present and sortable in the current data view is used.',
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
   },
   [DOC_TABLE_LEGACY]: {
-    name: i18n.translate('discover.advancedSettings.docTableVersionName', {
-      defaultMessage: 'Use classic table',
+    name: i18n.translate('discover.advancedSettings.disableDocumentExplorer', {
+      defaultMessage: 'Document Explorer or classic view',
     }),
-    value: true,
-    description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
+    value: false,
+    description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
-        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen view. ' +
-        'Turn on this option to use the classic table. Turn off to use the new table. ',
+        'To use the new {documentExplorerDocs} instead of the classic view, turn off this option. ' +
+        'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
+      values: {
+        documentExplorerDocs:
+          `<a href=${docLinks.links.discover.documentExplorer}
+            target="_blank" rel="noopener">` +
+          i18n.translate('discover.advancedSettings.documentExplorerLinkText', {
+            defaultMessage: 'Document Explorer',
+          }) +
+          '</a>',
+      },
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -172,13 +186,14 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       name: 'discover:useLegacyDataGrid',
     },
   },
+
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
-      defaultMessage: 'Modify columns when changing index patterns',
+      defaultMessage: 'Modify columns when changing data views',
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchText', {
-      defaultMessage: 'Remove columns that are not available in the new index pattern.',
+      defaultMessage: 'Remove columns that are not available in the new data view.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -201,6 +216,33 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     category: ['discover'],
     schema: schema.boolean(),
   },
+  [SHOW_FIELD_STATISTICS]: {
+    name: i18n.translate('discover.advancedSettings.discover.showFieldStatistics', {
+      defaultMessage: 'Show field statistics',
+    }),
+    description: i18n.translate(
+      'discover.advancedSettings.discover.showFieldStatisticsDescription',
+      {
+        defaultMessage: `Enable the {fieldStatisticsDocs} to show details such as the minimum and maximum values of a numeric field or a map of a geo field. This functionality is in beta and is subject to change.`,
+        values: {
+          fieldStatisticsDocs:
+            `<a href=${docLinks.links.discover.fieldStatistics}
+            target="_blank" rel="noopener">` +
+            i18n.translate('discover.advancedSettings.discover.fieldStatisticsLinkText', {
+              defaultMessage: 'Field statistics view',
+            }) +
+            '</a>',
+        },
+      }
+    ),
+    value: true,
+    category: ['discover'],
+    schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:showFieldStatistics',
+    },
+  },
   [SHOW_MULTIFIELDS]: {
     name: i18n.translate('discover.advancedSettings.discover.showMultifields', {
       defaultMessage: 'Show multi-fields',
@@ -209,7 +251,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       defaultMessage: `Controls whether {multiFields} display in the expanded document view. In most cases, multi-fields are the same as the original field. This option is only available when \`searchFieldsFromSource\` is off.`,
       values: {
         multiFields:
-          `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html"
+          `<a href=${docLinks.links.elasticsearch.mappingMultifields}
             target="_blank" rel="noopener">` +
           i18n.translate('discover.advancedSettings.discover.multiFieldsLinkText', {
             defaultMessage: 'multi-fields',
@@ -220,5 +262,29 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
+  },
+  [ROW_HEIGHT_OPTION]: {
+    name: i18n.translate('discover.advancedSettings.params.rowHeightTitle', {
+      defaultMessage: 'Row height in the Document Explorer',
+    }),
+    value: 3,
+    category: ['discover'],
+    description: i18n.translate('discover.advancedSettings.params.rowHeightText', {
+      defaultMessage:
+        'The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.',
+    }),
+    schema: schema.number({ min: -1 }),
+  },
+  [TRUNCATE_MAX_HEIGHT]: {
+    name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
+      defaultMessage: 'Maximum cell height in the classic table',
+    }),
+    value: 115,
+    category: ['discover'],
+    description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
+      defaultMessage:
+        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
+    }),
+    schema: schema.number({ min: 0 }),
   },
 });

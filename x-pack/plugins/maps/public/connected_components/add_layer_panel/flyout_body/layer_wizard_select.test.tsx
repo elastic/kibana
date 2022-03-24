@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../classes/layers/layer_wizard_registry', () => ({}));
+jest.mock('../../../classes/layers', () => ({}));
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -19,7 +19,7 @@ const defaultProps = {
 describe('LayerWizardSelect', () => {
   beforeAll(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../../classes/layers/layer_wizard_registry').getLayerWizards = async () => {
+    require('../../../classes/layers').getLayerWizards = async () => {
       return [
         {
           categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],

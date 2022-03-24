@@ -26,7 +26,6 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
@@ -43,22 +42,16 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { getDetails } from '../../tasks/rule_details';
 import {
   changeRowsPerPageTo100,
   filterByCustomRules,
-  goToCreateNewRule,
   goToRuleDetails,
-  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineEqlRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -68,7 +61,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, EQL', () => {
   const expectedUrls = getEqlRule().referenceUrls.join('');
@@ -91,18 +84,13 @@ describe('Detection rules, EQL', () => {
     });
   });
 
-  it('Creates and activates a new EQL rule', function () {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+  it('Creates and enables a new EQL rule', function () {
+    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -188,18 +176,13 @@ describe('Detection rules, sequence EQL', () => {
     });
   });
 
-  it('Creates and activates a new EQL rule with a sequence', function () {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+  it('Creates and enables a new EQL rule with a sequence', function () {
+    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -221,7 +204,6 @@ describe('Detection rules, sequence EQL', () => {
         cy.log('ALERT_DATA_GRID', text);
         expect(text).contains(this.rule.name);
         expect(text).contains(this.rule.severity.toLowerCase());
-        expect(text).contains(this.rule.riskScore);
       });
   });
 });

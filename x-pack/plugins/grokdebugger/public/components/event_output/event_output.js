@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiCodeEditor } from '../../shared_imports';
 

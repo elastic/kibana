@@ -8,17 +8,11 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { PDF_JOB_TYPE } from '../../../../common/constants';
+import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
-import { RunTaskFn, RunTaskFnFactory } from '../../../types';
-import {
-  decryptJobHeaders,
-  getConditionalHeaders,
-  getFullUrls,
-  omitBlockedHeaders,
-  getCustomLogo,
-} from '../../common';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { PdfScreenshotOptions, RunTaskFn, RunTaskFnFactory } from '../../../types';
+import { decryptJobHeaders, getFullUrls, getCustomLogo } from '../../common';
+import { generatePdfObservable } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
@@ -27,36 +21,35 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
     const encryptionKey = config.get('encryptionKey');
 
     return async function runTask(jobId, job, cancellationToken, stream) {
-      const jobLogger = parentLogger.clone([PDF_JOB_TYPE, 'execute-job', jobId]);
-      const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
-      const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
+      const jobLogger = parentLogger.get(`execute-job:${jobId}`);
+      const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
+      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePdf: { end: () => void } | null | undefined;
-
-      const generatePdfObservable = await generatePdfObservableFactory(reporting);
 
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
-        map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
-        map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
-        mergeMap((conditionalHeaders) =>
-          getCustomLogo(reporting, conditionalHeaders, job.spaceId, jobLogger)
-        ),
-        mergeMap(({ logo, conditionalHeaders }) => {
+        mergeMap((headers) => getCustomLogo(reporting, headers, job.spaceId, jobLogger)),
+        mergeMap(({ headers, logo }) => {
           const urls = getFullUrls(config, job);
 
           const { browserTimezone, layout, title } = job;
           apmGetAssets?.end();
 
-          apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
-          return generatePdfObservable(
-            jobLogger,
+          apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
+          return generatePdfObservable(reporting, {
+            format: 'pdf',
             title,
+            logo,
             urls,
             browserTimezone,
-            conditionalHeaders,
-            layout,
-            logo
-          );
+            headers,
+            layout: {
+              ...layout,
+              // TODO: We do not do a runtime check for supported layout id types for now. But technically
+              // we should.
+              id: layout?.id as PdfScreenshotOptions['layout']['id'],
+            },
+          });
         }),
         tap(({ buffer }) => {
           apmGeneratePdf?.end();
@@ -64,8 +57,9 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
             stream.write(buffer);
           }
         }),
-        map(({ warnings }) => ({
+        map(({ metrics, warnings }) => ({
           content_type: 'application/pdf',
+          metrics: { pdf: metrics },
           warnings,
         })),
         catchError((err) => {

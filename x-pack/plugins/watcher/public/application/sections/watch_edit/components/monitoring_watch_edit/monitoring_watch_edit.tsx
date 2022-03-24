@@ -8,7 +8,7 @@
 import React, { useContext } from 'react';
 
 import { EuiPageContent, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { WatchContext } from '../../watch_context';
 import { useAppContext } from '../../../../app_context';
 

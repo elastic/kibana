@@ -25,7 +25,6 @@ import type { SpacesPluginStart } from '../../spaces/public';
 
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 
 import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
@@ -37,7 +36,7 @@ import { isFullLicense, isMlEnabled } from '../common/license';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 import { MlLocatorDefinition, MlLocator } from './locator';
-import type { MapsStartApi } from '../../maps/public';
+import type { MapsStartApi, MapsSetupApi } from '../../maps/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -46,21 +45,30 @@ import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
 import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import { registerManagementSection } from './application/management';
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import type {
+  FieldFormatsSetup,
+  FieldFormatsStart,
+} from '../../../../src/plugins/field_formats/public';
+import type { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
+import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
   share: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer: DataVisualizerPluginStart;
+  fieldFormats: FieldFormatsStart;
+  dashboard: DashboardStart;
+  charts: ChartsPluginStart;
 }
 
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
+  maps?: MapsSetupApi;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -72,6 +80,8 @@ export interface MlSetupDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
   alerting?: AlertingSetup;
   usageCollection?: UsageCollectionSetup;
+  fieldFormats: FieldFormatsSetup;
+  dashboard: DashboardSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -101,9 +111,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         return renderApp(
           coreStart,
           {
+            charts: pluginsStart.charts,
             data: pluginsStart.data,
+            dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
-            kibanaLegacy: pluginsStart.kibanaLegacy,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
@@ -116,6 +127,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             triggersActionsUi: pluginsStart.triggersActionsUi,
             dataVisualizer: pluginsStart.dataVisualizer,
             usageCollection: pluginsSetup.usageCollection,
+            fieldFormats: pluginsStart.fieldFormats,
           },
           params
         );
@@ -151,11 +163,24 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
       // register various ML plugin features which require a full license
       // note including registerFeature in register_helper would cause the page bundle size to increase significantly
-      const { registerEmbeddables, registerMlUiActions, registerSearchLinks, registerMlAlerts } =
-        await import('./register_helper');
+      const {
+        registerEmbeddables,
+        registerMlUiActions,
+        registerSearchLinks,
+        registerMlAlerts,
+        registerMapExtension,
+      } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
       const fullLicense = isFullLicense(license);
+
+      if (pluginsSetup.maps) {
+        // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
+        const canGetJobs = capabilities.ml?.canGetJobs === true;
+        const canCreateJobs = capabilities.ml?.canCreateJob === true;
+        await registerMapExtension(pluginsSetup.maps, core, { canGetJobs, canCreateJobs });
+      }
+
       if (mlEnabled) {
         registerSearchLinks(this.appUpdater$, fullLicense);
 

@@ -5,22 +5,13 @@
  * 2.0.
  */
 
-import { journey, step } from '@elastic/synthetics';
-
-export const byTestId = (testId: string) => {
-  return `[data-test-subj=${testId}]`;
-};
+import { journey, step, before } from '@elastic/synthetics';
+import { byTestId, waitForLoadingToFinish } from './utils';
 
 journey('uptime', ({ page, params }) => {
-  async function waitForLoadingToFinish() {
-    let isLoadingVisible = true;
-
-    while (isLoadingVisible) {
-      const loading = await page.$(byTestId('kbnLoadingMessage'));
-      isLoadingVisible = loading !== null;
-      await page.waitForTimeout(5 * 1000);
-    }
-  }
+  before(async () => {
+    await waitForLoadingToFinish({ page });
+  });
 
   step('Go to Kibana', async () => {
     await page.goto(`${params.kibanaUrl}/app/uptime?dateRangeStart=now-5y&dateRangeEnd=now`, {
@@ -38,7 +29,6 @@ journey('uptime', ({ page, params }) => {
   });
 
   step('dismiss synthetics notice', async () => {
-    await waitForLoadingToFinish();
     await page.click('[data-test-subj=uptimeDismissSyntheticsCallout]', {
       timeout: 60 * 1000,
     });

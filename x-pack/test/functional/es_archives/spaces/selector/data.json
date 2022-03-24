@@ -42,3 +42,138 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space-1",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is space I",
+        "name": "Space 1"
+      },
+      "type": "space"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space-2",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is space II",
+        "name": "Space 2"
+      },
+      "type": "space"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space-3",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is space III",
+        "name": "Space 3"
+      },
+      "type": "space"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space-4",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is space IV",
+        "name": "Space 4"
+      },
+      "type": "space"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space-5",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is space V",
+        "name": "Space 5"
+      },
+      "type": "space"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space-6",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is space VI",
+        "name": "Space 6"
+      },
+      "type": "space"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space-7",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is space VII",
+        "name": "Space 7"
+      },
+      "type": "space"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space-8",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is space VIII",
+        "name": "Space 8"
+      },
+      "type": "space"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space-9",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is space IX",
+        "name": "Space 9"
+      },
+      "type": "space"
+    }
+  }
+}

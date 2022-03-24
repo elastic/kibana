@@ -7,7 +7,8 @@
  */
 
 import { enumeratePatterns } from '../team_assignment/enumerate_patterns';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 const log = new ToolingLog({
   level: 'info',
@@ -15,16 +16,17 @@ const log = new ToolingLog({
 });
 
 describe(`enumeratePatterns`, () => {
-  it(`should resolve x-pack/plugins/reporting/server/browsers/extract/unzip.ts to kibana-reporting`, () => {
+  it(`should resolve x-pack/plugins/screenshotting/server/browsers/extract/unzip.ts to kibana-screenshotting`, () => {
     const actual = enumeratePatterns(REPO_ROOT)(log)(
-      new Map([['x-pack/plugins/reporting', ['kibana-reporting']]])
+      new Map([['x-pack/plugins/screenshotting', ['kibana-screenshotting']]])
     );
 
-    expect(
-      actual[0].includes(
-        'x-pack/plugins/reporting/server/browsers/extract/unzip.ts kibana-reporting'
-      )
-    ).toBe(true);
+    expect(actual).toHaveProperty(
+      '0',
+      expect.arrayContaining([
+        'x-pack/plugins/screenshotting/server/browsers/extract/unzip.ts kibana-screenshotting',
+      ])
+    );
   });
   it(`should resolve src/plugins/charts/common/static/color_maps/color_maps.ts to kibana-app`, () => {
     const actual = enumeratePatterns(REPO_ROOT)(log)(
@@ -35,13 +37,13 @@ describe(`enumeratePatterns`, () => {
       'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app'
     );
   });
-  it(`should resolve x-pack/plugins/security_solution/public/common/components/exceptions/edit_exception_modal/translations.ts to kibana-security`, () => {
+  it(`should resolve x-pack/plugins/security_solution/public/common/components/exceptions/edit_exception_flyout/translations.ts to kibana-security`, () => {
     const short = 'x-pack/plugins/security_solution';
     const actual = enumeratePatterns(REPO_ROOT)(log)(new Map([[short, ['kibana-security']]]));
 
     expect(
       actual[0].includes(
-        `${short}/public/common/components/exceptions/edit_exception_modal/translations.ts kibana-security`
+        `${short}/public/common/components/exceptions/edit_exception_flyout/translations.ts kibana-security`
       )
     ).toBe(true);
   });

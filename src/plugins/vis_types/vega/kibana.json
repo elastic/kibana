@@ -3,9 +3,9 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "visualizations", "mapsEms", "expressions", "inspector"],
+  "requiredPlugins": ["data", "visualizations", "mapsEms", "expressions", "inspector", "dataViews"],
   "optionalPlugins": ["home","usageCollection"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor", "esUiShared"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

@@ -8,19 +8,21 @@
 
 import { CoreSetup, Plugin } from 'kibana/public';
 
-import { VisualizePluginSetup } from '../../visualize/public';
 import { DefaultEditorController } from './default_editor_controller';
+import { setTheme } from './services';
+import type { VisualizationsSetup } from '../../visualizations/public';
 
 export interface VisDefaultEditorSetupDependencies {
-  visualize: VisualizePluginSetup;
+  visualizations: VisualizationsSetup;
 }
 
 export class VisDefaultEditorPlugin
   implements Plugin<void, void, VisDefaultEditorSetupDependencies, {}>
 {
-  public setup(core: CoreSetup, { visualize }: VisDefaultEditorSetupDependencies) {
-    if (visualize) {
-      visualize.visEditorsRegistry.registerDefault(DefaultEditorController);
+  public setup(core: CoreSetup, { visualizations }: VisDefaultEditorSetupDependencies) {
+    setTheme(core.theme);
+    if (visualizations) {
+      visualizations.visEditorsRegistry.registerDefault(DefaultEditorController);
     }
   }
 

@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
-import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
+import { I18nProvider } from '@kbn/i18n-react';
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
 import { UiSettingsType } from '../../../../../../core/public';
@@ -17,8 +17,9 @@ import { notificationServiceMock, docLinksServiceMock } from '../../../../../../
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field, getEditableValue } from './field';
 
-jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
-jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
+jest.mock('../../../../../kibana_react/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn(),
+}));
 
 const defaults = {
   requiresPageReload: false,
@@ -206,7 +207,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
 
@@ -225,7 +226,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
 
@@ -239,7 +240,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={false}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
         expect(component).toMatchSnapshot();
@@ -256,7 +257,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
 
@@ -273,7 +274,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
         expect(component).toMatchSnapshot();
@@ -288,7 +289,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
             unsavedChanges={{
               // @ts-ignore
               value: exampleValues[setting.type],
@@ -310,7 +311,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
           />
         );
         const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
@@ -332,7 +333,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             toasts={notificationServiceMock.createStartContract().toasts}
-            dockLinks={docLinksServiceMock.createStartContract().links}
+            docLinks={docLinksServiceMock.createStartContract().links}
             {...props}
           />
         </I18nProvider>

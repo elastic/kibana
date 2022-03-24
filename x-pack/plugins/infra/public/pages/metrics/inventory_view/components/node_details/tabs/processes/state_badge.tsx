@@ -12,7 +12,7 @@ import { STATE_NAMES } from './states';
 export const StateBadge = ({ state }: { state: string }) => {
   switch (state) {
     case 'running':
-      return <EuiBadge color="secondary">{STATE_NAMES.running}</EuiBadge>;
+      return <EuiBadge color="success">{STATE_NAMES.running}</EuiBadge>;
     case 'sleeping':
       return <EuiBadge color="default">{STATE_NAMES.sleeping}</EuiBadge>;
     case 'dead':

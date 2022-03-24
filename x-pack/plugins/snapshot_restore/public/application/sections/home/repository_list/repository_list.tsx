@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 

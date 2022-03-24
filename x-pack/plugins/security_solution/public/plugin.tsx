@@ -10,7 +10,7 @@ import reduceReducers from 'reduce-reducers';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { AnyAction, Reducer } from 'redux';
-import {
+import type {
   PluginSetup,
   PluginStart,
   SetupPlugins,
@@ -37,20 +37,17 @@ import { SOLUTION_NAME } from './common/translations';
 
 import {
   APP_ID,
-  OVERVIEW_PATH,
-  APP_OVERVIEW_PATH,
+  APP_UI_ID,
   APP_PATH,
   DEFAULT_INDEX_KEY,
   APP_ICON_SOLUTION,
   DETECTION_ENGINE_INDEX_URL,
+  SERVER_APP_ID,
+  SOURCERER_API_URL,
 } from '../common/constants';
 
-import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
-import { manageOldSiemRoutes } from './helpers';
-import {
-  IndexFieldsStrategyRequest,
-  IndexFieldsStrategyResponse,
-} from '../common/search_strategy/index_fields';
+import { getDeepLinks } from './app/deep_links';
+import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
 import { SecuritySolutionUiConfigType } from './common/types';
@@ -65,6 +62,8 @@ import {
 } from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
+import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
+import { SecurityDataView } from './common/containers/sourcerer/api';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -98,7 +97,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       {
         usageCollection: plugins.usageCollection,
       },
-      APP_ID
+      APP_UI_ID
     );
 
     if (plugins.home) {
@@ -110,7 +109,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
         }),
         icon: 'logoSecurity',
-        path: APP_OVERVIEW_PATH,
+        path: APP_PATH,
         order: 300,
       });
     }
@@ -133,13 +132,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     })();
 
     core.application.register({
-      id: APP_ID,
+      id: APP_UI_ID,
       title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
       searchable: true,
-      defaultPath: OVERVIEW_PATH,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
       deepLinks: getDeepLinks(this.experimentalFeatures),
@@ -152,7 +150,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           services: await startServices,
           store: await this.store(coreStart, startPlugins, subPlugins),
           usageCollection: plugins.usageCollection,
-          subPlugins,
+          subPluginRoutes: getSubPluginRoutesByCapabilities(
+            subPlugins,
+            coreStart.application.capabilities
+          ),
         });
       },
     });
@@ -232,11 +233,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       });
     } else {
-      updateGlobalNavigation({
-        capabilities: core.application.capabilities,
-        updater$: this.appUpdater$,
-        enableExperimental: this.experimentalFeatures,
-      });
+      this.appUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+        deepLinks: getDeepLinks(
+          this.experimentalFeatures,
+          undefined,
+          core.application.capabilities
+        ),
+      }));
     }
 
     return {};
@@ -291,8 +295,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
+        users: new subPluginClasses.Users(),
         network: new subPluginClasses.Network(),
-        ueba: new subPluginClasses.Ueba(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -313,17 +317,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return {
       overview: subPlugins.overview.start(),
       alerts: subPlugins.alerts.start(storage),
+      cases: subPlugins.cases.start(),
       rules: subPlugins.rules.start(storage),
       exceptions: subPlugins.exceptions.start(storage),
-      cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
+      users: subPlugins.users.start(storage),
       network: subPlugins.network.start(storage),
-      ueba: subPlugins.ueba.start(storage),
       timelines: subPlugins.timelines.start(),
       management: subPlugins.management.start(core, plugins),
     };
   }
-
   /**
    * Lazily instantiate a `SecurityAppStore`. We lazily instantiate this because it requests large dynamic imports. We instantiate it once because each subPlugin needs to share the same reference.
    */
@@ -333,37 +336,38 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     subPlugins: StartedSubPlugins
   ): Promise<SecurityAppStore> {
     if (!this._store) {
-      const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      const [{ createStore, createInitialState }, kibanaIndexPatterns, configIndexPatterns] =
-        await Promise.all([
-          this.lazyApplicationDependencies(),
-          startPlugins.data.indexPatterns.getIdsWithTitle(),
-          startPlugins.data.search
-            .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-              { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
-              {
-                strategy: 'indexFields',
-              }
-            )
-            .toPromise(),
-        ]);
-
       let signal: { name: string | null } = { name: null };
       try {
-        // const { index_name: indexName } = await coreStart.http.fetch(
-        //   `${BASE_RAC_ALERTS_API_PATH}/index`,
-        //   {
-        //     method: 'GET',
-        //     query: { features: SERVER_APP_ID },
-        //   }
-        // );
-        // signal = { name: indexName[0] };
-        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-          method: 'GET',
-        });
+        if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
+          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+            method: 'GET',
+          });
+        }
       } catch {
         signal = { name: null };
       }
+
+      const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
+      let defaultDataView: SourcererModel['defaultDataView'];
+      let kibanaDataViews: SourcererModel['kibanaDataViews'];
+      try {
+        // check for/generate default Security Solution Kibana data view
+        const sourcererDataViews: SecurityDataView = await coreStart.http.fetch(SOURCERER_API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
+          }),
+        });
+        defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
+        kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: KibanaDataView) => ({
+          ...initDataView,
+          ...dataView,
+        }));
+      } catch (error) {
+        defaultDataView = { ...initDataView, error };
+        kibanaDataViews = [];
+      }
+      const { createStore, createInitialState } = await this.lazyApplicationDependencies();
 
       const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
@@ -384,10 +388,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...subPlugins.hosts.storageTimelines!.timelineById,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.network.storageTimelines!.timelineById,
-            ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-              ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                subPlugins.ueba.storageTimelines!.timelineById
-              : {}),
           },
         },
       };
@@ -403,24 +403,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         createInitialState(
           {
             ...subPlugins.hosts.store.initialState,
+            ...subPlugins.users.store.initialState,
             ...subPlugins.network.store.initialState,
-            ...subPlugins.ueba.store.initialState,
             ...timelineInitialState,
             ...subPlugins.management.store.initialState,
           },
           {
-            kibanaIndexPatterns,
-            configIndexPatterns: configIndexPatterns.indicesExist,
+            defaultDataView,
+            kibanaDataViews,
             signalIndexName: signal.name,
             enableExperimental: this.experimentalFeatures,
           }
         ),
         {
           ...subPlugins.hosts.store.reducer,
+          ...subPlugins.users.store.reducer,
           ...subPlugins.network.store.reducer,
-          ...(this.experimentalFeatures.uebaEnabled && subPlugins.ueba != null
-            ? subPlugins.ueba.store.reducer
-            : {}),
           timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
           ...tGridReducer,

@@ -10,10 +10,11 @@ import { HttpFetchQuery } from 'kibana/public';
 import { HttpService } from '../http_service';
 import { basePath } from './index';
 import { useMlKibana } from '../../contexts/kibana';
-import {
+import type {
   TrainedModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
+  NodesOverviewResponse,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -60,13 +61,10 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      * @param params - Optional query params
      */
     getTrainedModels(modelId?: string | string[], params?: InferenceQueryParams) {
-      let model = modelId ?? '';
-      if (Array.isArray(modelId)) {
-        model = modelId.join(',');
-      }
+      const model = Array.isArray(modelId) ? modelId.join(',') : modelId;
 
       return httpService.http<TrainedModelConfigResponse[]>({
-        path: `${apiBasePath}/trained_models${model && `/${model}`}`,
+        path: `${apiBasePath}/trained_models${model ? `/${model}` : ''}`,
         method: 'GET',
         ...(params ? { query: params as HttpFetchQuery } : {}),
       });
@@ -80,13 +78,10 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      * @param params - Optional query params
      */
     getTrainedModelStats(modelId?: string | string[], params?: InferenceStatsQueryParams) {
-      let model = modelId ?? '_all';
-      if (Array.isArray(modelId)) {
-        model = modelId.join(',');
-      }
+      const model = Array.isArray(modelId) ? modelId.join(',') : modelId;
 
       return httpService.http<InferenceStatsResponse>({
-        path: `${apiBasePath}/trained_models/${model}/_stats`,
+        path: `${apiBasePath}/trained_models${model ? `/${model}` : ''}/_stats`,
         method: 'GET',
       });
     },
@@ -114,9 +109,33 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      * @param modelId - Model ID
      */
     deleteTrainedModel(modelId: string) {
-      return httpService.http<any>({
+      return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}`,
         method: 'DELETE',
+      });
+    },
+
+    getTrainedModelsNodesOverview() {
+      return httpService.http<NodesOverviewResponse>({
+        path: `${apiBasePath}/trained_models/nodes_overview`,
+        method: 'GET',
+      });
+    },
+
+    startModelAllocation(modelId: string) {
+      return httpService.http<{ acknowledge: boolean }>({
+        path: `${apiBasePath}/trained_models/${modelId}/deployment/_start`,
+        method: 'POST',
+      });
+    },
+
+    stopModelAllocation(modelId: string, options: { force: boolean } = { force: false }) {
+      const force = options?.force;
+
+      return httpService.http<{ acknowledge: boolean }>({
+        path: `${apiBasePath}/trained_models/${modelId}/deployment/_stop`,
+        method: 'POST',
+        query: { force },
       });
     },
   };

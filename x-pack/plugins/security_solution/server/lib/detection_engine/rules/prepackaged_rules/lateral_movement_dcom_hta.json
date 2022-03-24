@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Incoming DCOM Lateral Movement via MSHTA",
-  "query": "sequence with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and\n     process.name : \"mshta.exe\" and process.args : \"-Embedding\"\n  ] by host.id, process.entity_id\n  [network where event.type == \"start\" and process.name : \"mshta.exe\" and \n     network.direction : (\"incoming\", \"ingress\") and network.transport == \"tcp\" and\n     source.port > 49151 and destination.port > 49151 and not source.address in (\"127.0.0.1\", \"::1\")\n  ] by host.id, process.entity_id\n",
+  "query": "sequence with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and\n     process.name : \"mshta.exe\" and process.args : \"-Embedding\"\n  ] by host.id, process.entity_id\n  [network where event.type == \"start\" and process.name : \"mshta.exe\" and \n     network.direction : (\"incoming\", \"ingress\") and network.transport == \"tcp\" and\n     source.port > 49151 and destination.port > 49151 and source.ip != \"127.0.0.1\" and source.ip != \"::1\"\n  ] by host.id, process.entity_id\n",
   "references": [
     "https://codewhitesec.blogspot.com/2018/07/lethalhta.html"
   ],
@@ -73,5 +73,5 @@
     }
   ],
   "type": "eql",
-  "version": 4
+  "version": 5
 }

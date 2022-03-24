@@ -11,6 +11,7 @@ import {
   Direction,
   NetworkTlsFields,
   FlowTarget,
+  NetworkTlsStrategyResponse,
 } from '../../../../plugins/security_solution/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -83,17 +84,21 @@ const expectedOverviewSourceResult = {
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('Tls Test with Packetbeat', () => {
     describe('Tls Test', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls')
+      );
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
-        const { body: tls } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkQueries.tls,
             timerange: {
               interval: '12h',
@@ -112,19 +117,18 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(tls.edges.length).to.be(1);
         expect(tls.totalCount).to.be(1);
         expect(tls.edges[0].node).to.eql(expectedResult);
       });
 
       it('Ensure data is returned for FlowTarget.Destination', async () => {
-        const { body: tls } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkQueries.tls,
             timerange: {
               interval: '12h',
@@ -143,9 +147,9 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(tls.edges.length).to.be(1);
         expect(tls.totalCount).to.be(1);
         expect(tls.edges[0].node).to.eql(expectedResult);
@@ -153,14 +157,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Tls Overview Test', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls')
+      );
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
-        const { body: tls } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkQueries.tls,
             timerange: {
               interval: '12h',
@@ -179,18 +186,18 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
+
         expect(tls.pageInfo).to.eql(expectedOverviewSourceResult.pageInfo);
         expect(tls.edges[0]).to.eql(expectedOverviewSourceResult.edges[0]);
       });
 
       it('Ensure data is returned for FlowTarget.Destination', async () => {
-        const { body: tls } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkQueries.tls,
             timerange: {
               interval: '12h',
@@ -209,9 +216,10 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
+
         expect(tls.pageInfo).to.eql(expectedOverviewDestinationResult.pageInfo);
         expect(tls.edges[0]).to.eql(expectedOverviewDestinationResult.edges[0]);
       });

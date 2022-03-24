@@ -7,8 +7,10 @@
 
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, AppMountParameters } from 'kibana/public';
-import { StartDependencies } from './plugin';
+import { EuiCallOut } from '@elastic/eui';
+
+import type { CoreSetup, AppMountParameters } from 'kibana/public';
+import type { StartDependencies } from './plugin';
 
 export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>
@@ -16,20 +18,27 @@ export const mount =
     const [core, plugins] = await coreSetup.getStartServices();
     const { App } = await import('./app');
 
-    const deps = {
-      core,
-      plugins,
-    };
-
-    const defaultIndexPattern = await plugins.data.indexPatterns.getDefault();
+    const defaultDataView = await plugins.data.indexPatterns.getDefault();
+    const { formula } = await plugins.lens.stateHelperApi();
 
     const i18nCore = core.i18n;
 
     const reactElement = (
       <i18nCore.Context>
-        <App {...deps} defaultIndexPattern={defaultIndexPattern} />
+        {defaultDataView && defaultDataView.isTimeBased() ? (
+          <App core={core} plugins={plugins} defaultDataView={defaultDataView} formula={formula} />
+        ) : (
+          <EuiCallOut
+            title="Please define a default index pattern to use this demo"
+            color="danger"
+            iconType="alert"
+          >
+            <p>This demo only works if your default index pattern is set and time based</p>
+          </EuiCallOut>
+        )}
       </i18nCore.Context>
     );
+
     render(reactElement, element);
     return () => unmountComponentAtNode(element);
   };

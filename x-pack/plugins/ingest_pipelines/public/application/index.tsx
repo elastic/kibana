@@ -8,27 +8,40 @@
 import { HttpSetup } from 'kibana/public';
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { NotificationsSetup, IUiSettingsClient } from 'kibana/public';
+import { Observable } from 'rxjs';
+
+import { ApplicationStart } from 'src/core/public';
+import { NotificationsSetup, IUiSettingsClient, CoreTheme } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { SharePluginStart } from 'src/plugins/share/public';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
+import type { FileUploadPluginStart } from '../../../file_upload/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '../shared_imports';
 
 import { API_BASE_PATH } from '../../common/constants';
 
 import { AuthorizationProvider } from '../shared_imports';
 
 import { App } from './app';
-import { DocumentationService, UiMetricService, ApiService, BreadcrumbService } from './services';
+import {
+  DocumentationService,
+  UiMetricService,
+  ApiService,
+  BreadcrumbService,
+  FileReaderService,
+} from './services';
 
 export interface AppServices {
   breadcrumbs: BreadcrumbService;
   metric: UiMetricService;
   documentation: DocumentationService;
   api: ApiService;
+  fileReader: FileReaderService;
   notifications: NotificationsSetup;
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;
-  urlGenerators: SharePluginStart['urlGenerators'];
+  share: SharePluginStart;
+  fileUpload: FileUploadPluginStart;
+  application: ApplicationStart;
 }
 
 export interface CoreServices {
@@ -39,7 +52,8 @@ export const renderApp = (
   element: HTMLElement,
   I18nContext: ({ children }: { children: ReactNode }) => JSX.Element,
   services: AppServices,
-  coreServices: CoreServices
+  coreServices: CoreServices,
+  { theme$ }: { theme$: Observable<CoreTheme> }
 ) => {
   render(
     <AuthorizationProvider
@@ -47,9 +61,11 @@ export const renderApp = (
       httpClient={coreServices.http}
     >
       <I18nContext>
-        <KibanaContextProvider services={services}>
-          <App />
-        </KibanaContextProvider>
+        <KibanaThemeProvider theme$={theme$}>
+          <KibanaContextProvider services={services}>
+            <App />
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
       </I18nContext>
     </AuthorizationProvider>,
     element

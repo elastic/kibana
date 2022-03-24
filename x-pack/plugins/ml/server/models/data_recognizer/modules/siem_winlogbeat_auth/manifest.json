@@ -10,7 +10,8 @@
       "filter": [
         {"term": {"agent.type": "winlogbeat"}},
         {"term": {"event.category": "authentication"}}
-      ]
+      ],
+      "must_not": { "terms": { "_tier": [ "data_frozen", "data_cold" ] } }
     }
   },
   "jobs": [

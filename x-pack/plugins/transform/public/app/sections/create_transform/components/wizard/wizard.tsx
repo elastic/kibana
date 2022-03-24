@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
@@ -81,7 +81,7 @@ const StepDefine: FC<DefinePivotStepProps> = ({
 };
 
 interface WizardProps {
-  cloneConfig?: TransformPivotConfig;
+  cloneConfig?: TransformConfigUnion;
   searchItems: SearchItems;
 }
 

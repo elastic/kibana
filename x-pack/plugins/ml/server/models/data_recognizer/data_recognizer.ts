@@ -19,7 +19,6 @@ import { merge } from 'lodash';
 import type { DataViewsService } from '../../../../../../src/plugins/data_views/common';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
-import type { MlInfoResponse } from '../../../common/types/ml_server_info';
 import type { MlClient } from '../../lib/ml_client';
 import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import type {
@@ -52,9 +51,8 @@ import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
-import type { MlJobsStatsResponse } from '../../../common/types/job_service';
 import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
-import type { JobSavedObjectService } from '../../saved_objects';
+import type { MLSavedObjectService } from '../../saved_objects';
 import { isDefined } from '../../../common/types/guards';
 import { isPopulatedObject } from '../../../common/util/object_utils';
 
@@ -113,7 +111,7 @@ export class DataRecognizer {
   private _client: IScopedClusterClient;
   private _mlClient: MlClient;
   private _savedObjectsClient: SavedObjectsClientContract;
-  private _jobSavedObjectService: JobSavedObjectService;
+  private _mlSavedObjectService: MLSavedObjectService;
   private _dataViewsService: DataViewsService;
   private _request: KibanaRequest;
 
@@ -127,6 +125,17 @@ export class DataRecognizer {
   private _calculateModelMemoryLimit: ReturnType<typeof calculateModelMemoryLimitProvider>;
 
   /**
+   * A temporary cache of configs loaded from disk and from save object service.
+   * The configs from disk will not change while kibana is running.
+   * The configs from saved objects could potentially change while an instance of
+   * DataRecognizer exists, if a fleet package containing modules is installed.
+   * However the chance of this happening is very low and so the benefit of using
+   * this cache outweighs the risk of the cache being out of date during the short
+   * existence of a DataRecognizer instance.
+   */
+  private _configCache: Config[] | null = null;
+
+  /**
    * List of the module jobs that require model memory estimation
    */
   private _jobsForModelMemoryEstimation: Array<{ job: ModuleJob; query: any }> = [];
@@ -136,14 +145,14 @@ export class DataRecognizer {
     mlClient: MlClient,
     savedObjectsClient: SavedObjectsClientContract,
     dataViewsService: DataViewsService,
-    jobSavedObjectService: JobSavedObjectService,
+    mlSavedObjectService: MLSavedObjectService,
     request: KibanaRequest
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
     this._savedObjectsClient = savedObjectsClient;
     this._dataViewsService = dataViewsService;
-    this._jobSavedObjectService = jobSavedObjectService;
+    this._mlSavedObjectService = mlSavedObjectService;
     this._request = request;
     this._authorizationHeader = getAuthorizationHeader(request);
     this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
@@ -183,6 +192,10 @@ export class DataRecognizer {
   }
 
   private async _loadConfigs(): Promise<Config[]> {
+    if (this._configCache !== null) {
+      return this._configCache;
+    }
+
     const configs: Config[] = [];
     const dirs = await this._listDirs(this._modulesDir);
     await Promise.all(
@@ -213,7 +226,9 @@ export class DataRecognizer {
       isSavedObject: true,
     }));
 
-    return [...configs, ...savedObjectConfigs];
+    this._configCache = [...configs, ...savedObjectConfigs];
+
+    return this._configCache;
   }
 
   private async _loadSavedObjectModules() {
@@ -289,7 +304,7 @@ export class DataRecognizer {
       query: moduleConfig.query,
     };
 
-    const { body } = await this._client.asCurrentUser.search({
+    const body = await this._client.asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -470,21 +485,21 @@ export class DataRecognizer {
     this._indexPatternId = await this._getIndexPatternId(this._indexPatternName);
 
     // the module's jobs contain custom URLs which require an index patten id
-    // but there is no corresponding index pattern, throw an error
+    // but there is no corresponding data view, throw an error
     if (this._indexPatternId === undefined && this._doJobUrlsContainIndexPatternId(moduleConfig)) {
       throw Boom.badRequest(
-        `Module's jobs contain custom URLs which require a kibana index pattern (${this._indexPatternName}) which cannot be found.`
+        `Module's jobs contain custom URLs which require a Kibana data view (${this._indexPatternName}) which cannot be found.`
       );
     }
 
     // the module's saved objects require an index patten id
-    // but there is no corresponding index pattern, throw an error
+    // but there is no corresponding data view, throw an error
     if (
       this._indexPatternId === undefined &&
       this._doSavedObjectsContainIndexPatternId(moduleConfig)
     ) {
       throw Boom.badRequest(
-        `Module's saved objects contain custom URLs which require a kibana index pattern (${this._indexPatternName}) which cannot be found.`
+        `Module's saved objects contain custom URLs which require a Kibana data view (${this._indexPatternName}) which cannot be found.`
       );
     }
 
@@ -590,7 +605,7 @@ export class DataRecognizer {
 
       if (doJobsExist === true) {
         // Get the IDs of the jobs created from the module, and their earliest / latest timestamps.
-        const { body } = await this._mlClient.getJobStats<MlJobsStatsResponse>({
+        const body = await this._mlClient.getJobStats({
           job_id: jobIds.join(),
         });
         const jobStatsJobs: JobStat[] = [];
@@ -605,8 +620,8 @@ export class DataRecognizer {
             } as JobStat;
 
             if (job.data_counts) {
-              jobStat.earliestTimestampMs = job.data_counts.earliest_record_timestamp;
-              jobStat.latestTimestampMs = job.data_counts.latest_record_timestamp;
+              jobStat.earliestTimestampMs = job.data_counts.earliest_record_timestamp!;
+              jobStat.latestTimestampMs = job.data_counts.latest_record_timestamp!;
               jobStat.latestResultsTimestampMs = getLatestDataOrBucketTimestamp(
                 jobStat.latestTimestampMs,
                 latestBucketTimestampsByJob[job.job_id] as number
@@ -622,13 +637,13 @@ export class DataRecognizer {
     return results;
   }
 
-  // returns a id based on an index pattern name
+  // returns a id based on a data view name
   private async _getIndexPatternId(name: string): Promise<string | undefined> {
     try {
       const dataViews = await this._dataViewsService.find(name);
       return dataViews.find((d) => d.title === name)?.id;
     } catch (error) {
-      mlLog.warn(`Error loading index patterns, ${error}`);
+      mlLog.warn(`Error loading data views, ${error}`);
       return;
     }
   }
@@ -767,11 +782,12 @@ export class DataRecognizer {
       })
     );
     if (applyToAllSpaces === true) {
-      const canCreateGlobalJobs = await this._jobSavedObjectService.canCreateGlobalJobs(
+      const canCreateGlobalJobs = await this._mlSavedObjectService.canCreateGlobalMlSavedObjects(
+        'anomaly-detector',
         this._request
       );
       if (canCreateGlobalJobs === true) {
-        await this._jobSavedObjectService.updateJobsSpaces(
+        await this._mlSavedObjectService.updateJobsSpaces(
           'anomaly-detector',
           jobs.map((j) => j.id),
           ['*'], // spacesToAdd
@@ -783,6 +799,7 @@ export class DataRecognizer {
   }
 
   private async _saveJob(job: ModuleJob) {
+    // @ts-expect-error type mismatch on MlPutJobRequest.body
     return this._mlClient.putJob({ job_id: job.id, body: job.config });
   }
 
@@ -843,7 +860,7 @@ export class DataRecognizer {
     const result = { started: false } as DatafeedResponse;
     let opened = false;
     try {
-      const { body } = await this._mlClient.openJob({
+      const body = await this._mlClient.openJob({
         job_id: datafeed.config.job_id,
       });
       opened = body.opened;
@@ -867,12 +884,7 @@ export class DataRecognizer {
           duration.end = String(end);
         }
 
-        const {
-          body: { started, node },
-        } = await this._mlClient.startDatafeed<{
-          started: boolean;
-          node: string;
-        }>({
+        const { started, node } = await this._mlClient.startDatafeed({
           datafeed_id: datafeed.id,
           ...duration,
         });
@@ -1012,7 +1024,7 @@ export class DataRecognizer {
         // if the job has custom_urls
         if (job.config.custom_settings && job.config.custom_settings.custom_urls) {
           // loop through each url, replacing the INDEX_PATTERN_ID marker
-          job.config.custom_settings.custom_urls.forEach((cUrl) => {
+          job.config.custom_settings.custom_urls.forEach((cUrl: any) => {
             const url = cUrl.url_value;
             if (url.match(INDEX_PATTERN_ID)) {
               const newUrl = url.replace(
@@ -1117,7 +1129,7 @@ export class DataRecognizer {
       try {
         // Checks if all jobs in the module have the same time field configured
         const firstJobTimeField =
-          this._jobsForModelMemoryEstimation[0].job.config.data_description.time_field;
+          this._jobsForModelMemoryEstimation[0].job.config.data_description.time_field!;
         const isSameTimeFields = this._jobsForModelMemoryEstimation.every(
           ({ job }) => job.config.data_description.time_field === firstJobTimeField
         );
@@ -1139,7 +1151,7 @@ export class DataRecognizer {
           let latestMs = end;
           if (earliestMs === undefined || latestMs === undefined) {
             const timeFieldRange = await this._getFallbackTimeRange(
-              job.config.data_description.time_field,
+              job.config.data_description.time_field!,
               query
             );
             earliestMs = timeFieldRange.start;
@@ -1150,7 +1162,7 @@ export class DataRecognizer {
             job.config.analysis_config,
             this._indexPatternName,
             query,
-            job.config.data_description.time_field,
+            job.config.data_description.time_field!,
             earliestMs,
             latestMs
           );
@@ -1168,9 +1180,7 @@ export class DataRecognizer {
       }
     }
 
-    const {
-      body: { limits },
-    } = await this._mlClient.info<MlInfoResponse>();
+    const { limits } = await this._mlClient.info();
     const maxMml = limits.max_model_memory_limit;
 
     if (!maxMml) {
@@ -1389,7 +1399,7 @@ export function dataRecognizerFactory(
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
   dataViewsService: DataViewsService,
-  jobSavedObjectService: JobSavedObjectService,
+  mlSavedObjectService: MLSavedObjectService,
   request: KibanaRequest
 ) {
   return new DataRecognizer(
@@ -1397,7 +1407,7 @@ export function dataRecognizerFactory(
     mlClient,
     savedObjectsClient,
     dataViewsService,
-    jobSavedObjectService,
+    mlSavedObjectService,
     request
   );
 }

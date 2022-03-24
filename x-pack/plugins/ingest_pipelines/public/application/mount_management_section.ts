@@ -9,17 +9,24 @@ import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 
 import { StartDependencies } from '../types';
-import { documentationService, uiMetricService, apiService, breadcrumbService } from './services';
+import {
+  documentationService,
+  uiMetricService,
+  apiService,
+  breadcrumbService,
+  fileReaderService,
+} from './services';
 import { renderApp } from '.';
 
 export async function mountManagementSection(
   { http, getStartServices, notifications }: CoreSetup<StartDependencies>,
   params: ManagementAppMountParams
 ) {
-  const { element, setBreadcrumbs, history } = params;
+  const { element, setBreadcrumbs, history, theme$ } = params;
   const [coreStart, depsStart] = await getStartServices();
   const {
     docLinks,
+    application,
     i18n: { Context: I18nContext },
   } = coreStart;
 
@@ -31,11 +38,14 @@ export async function mountManagementSection(
     metric: uiMetricService,
     documentation: documentationService,
     api: apiService,
+    fileReader: fileReaderService,
     notifications,
     history,
     uiSettings: coreStart.uiSettings,
-    urlGenerators: depsStart.share.urlGenerators,
+    share: depsStart.share,
+    fileUpload: depsStart.fileUpload,
+    application,
   };
 
-  return renderApp(element, I18nContext, services, { http });
+  return renderApp(element, I18nContext, services, { http }, { theme$ });
 }

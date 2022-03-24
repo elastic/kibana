@@ -9,7 +9,8 @@
 import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataView } from 'src/plugins/data_views/public';
 
 import { AnnotationRow } from './annotation_row';
 import { collectionActions, CollectionActionsProps } from './lib/collection_actions';
@@ -21,12 +22,14 @@ interface AnnotationsEditorProps {
   fields: VisFields;
   model: Panel;
   onChange: (partialModel: Partial<Panel>) => void;
+  defaultIndexPattern?: DataView;
 }
 
-export const newAnnotation = () => ({
+export const newAnnotation = (defaultIndexPattern?: DataView) => () => ({
   id: uuid.v1(),
   color: '#F00',
-  index_pattern: '',
+  index_pattern:
+    defaultIndexPattern && defaultIndexPattern.id ? { id: defaultIndexPattern.id } : '',
   time_field: '',
   icon: 'fa-tag',
   ignore_global_filters: 1,
@@ -60,7 +63,11 @@ export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   const { annotations } = props.model;
 
   const handleAdd = useCallback(
-    () => collectionActions.handleAdd(getCollectionActionsProps(props), newAnnotation),
+    () =>
+      collectionActions.handleAdd(
+        getCollectionActionsProps(props),
+        newAnnotation(props.defaultIndexPattern)
+      ),
     [props]
   );
 

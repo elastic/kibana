@@ -18,18 +18,16 @@ export default function (providerContext: FtrProviderContext) {
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
-  const pkgKey = `${pkgName}-${pkgVersion}`;
-  const pkgUpdateKey = `${pkgName}-${pkgUpdateVersion}`;
   const logsTemplateName = `logs-${pkgName}.test_logs`;
   const logsTemplateName2 = `logs-${pkgName}.test_logs2`;
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
 
-  const uninstallPackage = async (pkg: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+  const uninstallPackage = async (pkg: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
-  const installPackage = async (pkg: string) => {
+  const installPackage = async (pkg: string, version: string) => {
     await supertest
-      .post(`/api/fleet/epm/packages/${pkg}`)
+      .post(`/api/fleet/epm/packages/${pkg}/${version}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true });
   };
@@ -39,18 +37,28 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     before(async () => {
-      await installPackage(pkgKey);
-      await installPackage(pkgUpdateKey);
+      await installPackage(pkgName, pkgVersion);
+      await installPackage(pkgName, pkgUpdateVersion);
     });
     after(async () => {
-      await uninstallPackage(pkgUpdateKey);
+      await uninstallPackage(pkgName, pkgUpdateVersion);
     });
     it('should have updated the ILM policy', async function () {
-      const resPolicy = await es.transport.request({
-        method: 'GET',
-        path: `/_ilm/policy/all_assets`,
-      });
+      const resPolicy = await es.ilm.getLifecycle(
+        {
+          name: 'all_assets',
+        },
+        { meta: true }
+      );
+
       expect(resPolicy.body.all_assets.policy).eql({
+        _meta: {
+          managed: true,
+          managed_by: 'fleet',
+          package: {
+            name: 'all_assets',
+          },
+        },
         phases: {
           hot: {
             min_age: '1ms',
@@ -65,76 +73,65 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     it('should have updated the index templates', async function () {
-      const resLogsTemplate = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${logsTemplateName}`,
-      });
+      const resLogsTemplate = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${logsTemplateName}`,
+        },
+        { meta: true }
+      );
       expect(resLogsTemplate.statusCode).equal(200);
-      expect(
-        resLogsTemplate.body.index_templates[0].index_template.template.mappings.properties
-      ).eql({
-        '@timestamp': {
-          type: 'date',
-        },
-        logs_test_name: {
-          type: 'text',
-        },
-        new_field_name: {
-          ignore_above: 1024,
-          type: 'keyword',
-        },
-        data_stream: {
-          properties: {
-            dataset: {
-              type: 'constant_keyword',
-            },
-            namespace: {
-              type: 'constant_keyword',
-            },
-            type: {
-              type: 'constant_keyword',
-            },
-          },
-        },
+      expect(resLogsTemplate.body.index_templates[0].index_template.template.mappings).eql({
+        _meta: { package: { name: 'all_assets' }, managed_by: 'fleet', managed: true },
       });
-      const resMetricsTemplate = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${metricsTemplateName}`,
-      });
+      const resMetricsTemplate = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${metricsTemplateName}`,
+        },
+        { meta: true }
+      );
       expect(resMetricsTemplate.statusCode).equal(200);
-      expect(
-        resMetricsTemplate.body.index_templates[0].index_template.template.mappings.properties
-      ).eql({
-        '@timestamp': {
-          type: 'date',
-        },
-        metrics_test_name2: {
-          ignore_above: 1024,
-          type: 'keyword',
-        },
-        data_stream: {
-          properties: {
-            dataset: {
-              type: 'constant_keyword',
-            },
-            namespace: {
-              type: 'constant_keyword',
-            },
-            type: {
-              type: 'constant_keyword',
-            },
+      expect(resMetricsTemplate.body.index_templates[0].index_template.template.mappings).eql({
+        _meta: {
+          managed: true,
+          managed_by: 'fleet',
+          package: {
+            name: 'all_assets',
           },
         },
       });
     });
     it('should have installed the new index template', async function () {
-      const resLogsTemplate = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${logsTemplateName2}`,
-      });
+      const resLogsTemplate = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${logsTemplateName2}`,
+        },
+        { meta: true }
+      );
       expect(resLogsTemplate.statusCode).equal(200);
+      expect(resLogsTemplate.body.index_templates[0].index_template.template.mappings).eql({
+        _meta: {
+          managed: true,
+          managed_by: 'fleet',
+          package: {
+            name: 'all_assets',
+          },
+        },
+      });
+    });
+    it('should have populated the new component template with the correct mapping', async () => {
+      const resMappings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName2}@mappings`,
+        },
+        { meta: true }
+      );
+      expect(resMappings.statusCode).equal(200);
       expect(
-        resLogsTemplate.body.index_templates[0].index_template.template.mappings.properties
+        resMappings.body.component_templates[0].component_template.template.mappings.properties
       ).eql({
         '@timestamp': {
           type: 'date',
@@ -159,81 +156,123 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     it('should have installed the new versionized pipelines', async function () {
-      const res = await es.transport.request({
-        method: 'GET',
-        path: `/_ingest/pipeline/${logsTemplateName}-${pkgUpdateVersion}`,
-      });
+      const res = await es.ingest.getPipeline(
+        {
+          id: `${logsTemplateName}-${pkgUpdateVersion}`,
+        },
+        { meta: true }
+      );
       expect(res.statusCode).equal(200);
-      const resPipeline1 = await es.transport.request({
-        method: 'GET',
-        path: `/_ingest/pipeline/${logsTemplateName}-${pkgUpdateVersion}-pipeline1`,
-      });
+      const resPipeline1 = await es.ingest.getPipeline(
+        {
+          id: `${logsTemplateName}-${pkgUpdateVersion}-pipeline1`,
+        },
+        { meta: true }
+      );
       expect(resPipeline1.statusCode).equal(200);
     });
     it('should have removed the old versionized pipelines', async function () {
-      const res = await es.transport.request(
+      const res = await es.ingest.getPipeline(
         {
-          method: 'GET',
-          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
+          id: `${logsTemplateName}-${pkgVersion}`,
         },
         {
           ignore: [404],
+          meta: true,
         }
       );
       expect(res.statusCode).equal(404);
-      const resPipeline1 = await es.transport.request(
+      const resPipeline1 = await es.ingest.getPipeline(
         {
-          method: 'GET',
-          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+          id: `${logsTemplateName}-${pkgVersion}-pipeline1`,
         },
         {
           ignore: [404],
+          meta: true,
         }
       );
       expect(resPipeline1.statusCode).equal(404);
-      const resPipeline2 = await es.transport.request(
+      const resPipeline2 = await es.ingest.getPipeline(
         {
-          method: 'GET',
-          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+          id: `${logsTemplateName}-${pkgVersion}-pipeline2`,
         },
         {
           ignore: [404],
+          meta: true,
         }
       );
       expect(resPipeline2.statusCode).equal(404);
     });
-    it('should have updated the component templates', async function () {
-      const resMappings = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}@mappings`,
-      });
+    it('should have updated the logs component templates', async function () {
+      const resMappings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName}@mappings`,
+        },
+        { meta: true }
+      );
       expect(resMappings.statusCode).equal(200);
-      expect(resMappings.body.component_templates[0].component_template.template.mappings).eql({
-        dynamic: true,
-      });
-      const resSettings = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}@settings`,
-      });
-      expect(resSettings.statusCode).equal(200);
-      expect(resSettings.body.component_templates[0].component_template.template.settings).eql({
+      expect(resMappings.body.component_templates[0].component_template.template.settings).eql({
         index: {
-          lifecycle: { name: 'reference2' },
-          codec: 'best_compression',
           mapping: {
             total_fields: {
               limit: '10000',
             },
           },
+        },
+      });
+      expect(resMappings.body.component_templates[0].component_template.template.mappings).eql({
+        dynamic: true,
+        properties: {
+          '@timestamp': {
+            type: 'date',
+          },
+          data_stream: {
+            properties: {
+              dataset: {
+                type: 'constant_keyword',
+              },
+              namespace: {
+                type: 'constant_keyword',
+              },
+              type: {
+                type: 'constant_keyword',
+              },
+            },
+          },
+          logs_test_name: {
+            type: 'text',
+          },
+          new_field_name: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+        },
+      });
+      const resSettings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName}@settings`,
+        },
+        { meta: true }
+      );
+      expect(resSettings.statusCode).equal(200);
+      expect(resSettings.body.component_templates[0].component_template.template.settings).eql({
+        index: {
+          lifecycle: { name: 'reference2' },
+          codec: 'best_compression',
           query: {
             default_field: ['logs_test_name', 'new_field_name'],
           },
         },
       });
-      const resUserSettings = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}@custom`,
-      });
+      const resUserSettings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName}@custom`,
+        },
+        { meta: true }
+      );
       expect(resUserSettings.statusCode).equal(200);
       expect(resUserSettings.body).eql({
         component_templates: [
@@ -241,6 +280,8 @@ export default function (providerContext: FtrProviderContext) {
             name: 'logs-all_assets.test_logs@custom',
             component_template: {
               _meta: {
+                managed: true,
+                managed_by: 'fleet',
                 package: {
                   name: 'all_assets',
                 },
@@ -253,23 +294,39 @@ export default function (providerContext: FtrProviderContext) {
         ],
       });
     });
-    it('should have updated the index patterns', async function () {
-      const resIndexPatternLogs = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'logs-*',
-      });
-      const fields = JSON.parse(resIndexPatternLogs.attributes.fields);
-      const updated = fields.filter((field: { name: string }) => field.name === 'new_field_name');
-      expect(!!updated.length).equal(true);
-      const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'metrics-*',
-      });
-      const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
-      const updatedMetrics = fieldsMetrics.filter(
-        (field: { name: string }) => field.name === 'metrics_test_name2'
+    it('should have updated the metrics mapping component template', async function () {
+      const resMappings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${metricsTemplateName}@mappings`,
+        },
+        { meta: true }
       );
-      expect(!!updatedMetrics.length).equal(true);
+      expect(resMappings.statusCode).equal(200);
+      expect(
+        resMappings.body.component_templates[0].component_template.template.mappings.properties
+      ).eql({
+        '@timestamp': {
+          type: 'date',
+        },
+        metrics_test_name2: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
+        data_stream: {
+          properties: {
+            dataset: {
+              type: 'constant_keyword',
+            },
+            namespace: {
+              type: 'constant_keyword',
+            },
+            type: {
+              type: 'constant_keyword',
+            },
+          },
+        },
+      });
     });
     it('should have updated the kibana assets', async function () {
       const resDashboard = await kibanaServer.savedObjects.get({
@@ -314,6 +371,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'all_assets',
       });
       expect(res.attributes).eql({
+        installed_kibana_space_id: 'default',
         installed_kibana: [
           {
             id: 'sample_dashboard',
@@ -382,6 +440,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'index_template',
           },
           {
+            id: 'logs-all_assets.test_logs2@mappings',
+            type: 'component_template',
+          },
+          {
             id: 'logs-all_assets.test_logs2@settings',
             type: 'component_template',
           },
@@ -392,6 +454,10 @@ export default function (providerContext: FtrProviderContext) {
           {
             id: 'metrics-all_assets.test_metrics',
             type: 'index_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics@mappings',
+            type: 'component_template',
           },
           {
             id: 'metrics-all_assets.test_metrics@settings',
@@ -433,13 +499,11 @@ export default function (providerContext: FtrProviderContext) {
         ],
         name: 'all_assets',
         version: '0.2.0',
-        internal: false,
         removable: true,
         install_version: '0.2.0',
         install_status: 'installed',
         install_started_at: res.attributes.install_started_at,
         install_source: 'registry',
-        keep_policies_up_to_date: false,
       });
     });
   });

@@ -8,7 +8,7 @@ With *TSVB*, you can:
 * Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
 * Annotate time series data with timestamped events from an {es} index.
 * View the data in several types of visualizations, including charts, data tables, and markdown panels.
-* Display multiple <<index-patterns, index patterns>> in each visualization.
+* Display multiple <<data-views, data views>> in each visualization.
 * Use custom functions and some math on aggregations.
 * Customize the data with labels and colors.
 
@@ -16,32 +16,10 @@ With *TSVB*, you can:
 image::images/tsvb-screenshot.png[TSVB overview]
 
 [float]
-[[tsvb-required-choices]]
+[[tsvb-data-view-mode]]
 ==== Open and set up TSVB
 
-Open *TSVB*, then configure the required settings.
-
-. On the dashboard, click *All types*, then select *TSVB*.
-
-. In *TSVB*, click *Panel options*, then specify the required *Data* settings.
-
-.. From the *Index pattern* dropdown, select the index pattern you want to visualize. 
-+
-To visualize the data in an {es} index, open the *Index pattern selection mode* menu, deselect *Use only {kib} index patterns*, then enter the {es} index.
-
-.. From the *Time field* dropdown, select the field you want to visualize, then enter the field *Interval*.
-
-.. Select a *Drop last bucket* option. 
-+
-By default, *TSVB* drops the last bucket because the time filter intersects the time range of the last bucket. To view the partial data, select *No*.
-
-.. To view a filtered set of documents, enter <<kuery-query, KQL filters>> in the *Panel filter* field.
-
-[float]
-[[tsvb-index-pattern-mode]]
-==== Change the {data-source} mode
-
-You can create *TSVB* visualizations with only {data-sources}, or {es} index strings. 
+Open *TSVB*, then configure the required settings. You can create *TSVB* visualizations with only {data-sources}, or {es} index strings. 
 
 When you use only {data-sources}, you are able to:
 
@@ -53,28 +31,58 @@ When you use only {data-sources}, you are able to:
 
 * Improve performance
 
-IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated. To use an {es} index string, contact your administrator, or go to <<advanced-options, Advanced Settings>> and set `metrics:allowStringIndices` to `true`.  Creating *TSVB* visualizations with an {es} index string will be removed in a future release.
-Creating visualizations with only {data-sources} is the default one for new visualizations but it can also be switched for the old implementations:
+[[tsvb-index-pattern-mode]]
 
-. Click *Panel options*, then open the *Index pattern selection mode* options next to the *Index pattern* dropdown.
+IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release. By default, you create *TSVB* visualizations with only {data-sources}. To use an {es} index string, contact your administrator, or go to <<advanced-options, Advanced Settings>> and set `metrics:allowStringIndices` to `true`.
 
-. Select *Use only Kibana index patterns*.
+. On the dashboard, click *All types*, then select *TSVB*.
 
-. From the *Index pattern* drodpown, select the index pattern, then select the *Time field*.
+. In *TSVB*, click *Panel options*, then specify the *Data* settings.
+
+. Open the *Data view mode* options next to the *Data view* dropdown.
+
+. Select *Use only {kib} {data-sources}*.
+
+. From the *Data view* drodpown, select the {data-source}, then select the *Time field* and *Interval*.
+
+. Select a *Drop last bucket* option. 
 +
-image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selection mode action]
+By default, *TSVB* drops the last bucket because the time filter intersects the time range of the last bucket. To view the partial data, select *No*.
+
+. To view a filtered set of documents, enter <<kuery-query, KQL filters>> in the *Panel filter* field.
 
 [float]
-[[configure-the-data-series]]
+[[tsvb-function-reference]]
 ==== Configure the series
 
 Each *TSVB* visualization shares the same options to create a *Series*. Each series can be thought of as a separate {es} aggregation. 
-For each series, the *Options* control the styling and {es} options, and are inherited from *Panel options*.
+The *Options* control the styling and {es} options, and are inherited from *Panel options*.
 When you have separate options for each series, you can compare different {es} indices, and view two time ranges from the same index. 
 
 To configure the value of each series, select the function, then configure the function inputs. Only the last function is displayed.
 
-. From the *Aggregation* dropdown, select the function for the series. 
+. From the *Aggregation* dropdown, select the function for the series. *TSVB* provides you with shortcuts for some frequently-used functions:
++
+*Filter Ratio*::
+  Returns a percent value by calculating a metric on two sets of documents. 
+  For example, calculate the error rate as a percentage of the overall events over time.
++
+*Counter Rate*::
+  Used when dealing with monotonically increasing counters. Shortcut for *Max*, *Derivative*, and *Positive Only*.
++
+*Positive Only*::
+  Removes any negative values from the results, which can be used as a post-processing step
+  after a derivative.
++
+*Series Agg*::
+  Applies a function to all of the *Group by* series to reduce the values to a single number.
+  This function must always be the last metric in the series.
+  For example, if the *Time Series* visualization shows 10 series, the sum *Series Agg* calculates
+  the sum of all 10 bars and outputs a single Y value per X value. This is often confused
+  with the overall sum function, which outputs a single Y value per unique series.
++
+*Math*::
+  For each series, apply simple and advanced calculations. Only use *Math* for the last function in a series.
 
 . To display each group separately, select one of the following options from the *Group by* dropdown:
 
@@ -82,7 +90,7 @@ To configure the value of each series, select the function, then configure the f
 
 * *Terms* &mdash; Displays the top values of the field. The color is only configurable in the *Time Series* chart. To configure, click *Options*, then select an option from the *Split color theme* dropdown.
 
-. Click *Options*, then configure the inputs for the function. 
+. Click *Options*, then configure the inputs for the function. For example, to use a different field format, make a selection from the *Data formatter* dropdown.
 
 [float]
 [[configure-the-visualizations]]
@@ -125,36 +133,8 @@ To change this behavior, click *Panel options*, then specify a URL in the *Item 
 The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax to insert dynamic data, and supports custom CSS.
 
 [float]
-[[tsvb-function-reference]]
-==== TSVB function reference
-
-*TSVB* provides you with shortcuts for some frequently-used functions.
-
-*Filter Ratio*::
-  Returns a percent value by calculating a metric on two sets of documents. 
-  For example, calculate the error rate as a percentage of the overall events over time.
-
-*Counter Rate*::
-  Used when dealing with monotonically increasing counters. Shortcut for *Max*, *Derivative*, and *Positive Only*.
-
-*Positive Only*::
-  Removes any negative values from the results, which can be used as a post-processing step
-  after a derivative.
-
-*Series Agg*::
-  Applies a function to all of the *Group by* series to reduce the values to a single number.
-  This function must always be the last metric in the series.
-  For example, if the *Time Series* visualization shows 10 series, the sum *Series Agg* calculates
-  the sum of all 10 bars and output a single Y value per X value. This is often confused
-  with the overall sum function, which outputs a single Y value per unique series.
-
-*Math*::
-  The math context is able to do simple and advanced calculations per series.
-  This function must always be the last metric in the series.
-
-[float]
 [[save-the-tsvb-panel]]
-===== Save and add the panel
+==== Save and add the panel
 
 Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
 
@@ -209,6 +189,30 @@ For example `dashboards#/view/f193ca90-c9f4-11eb-b038-dd3270053a27`.
 . Click *Save and return*.
 
 . In the toolbar, click *Save as*, then make sure *Store time with dashboard* is deselected. 
+====
+
+[discrete]
+[[how-do-i-base-drilldowns-on-data]]
+.*How do I base drilldown URLs on my data?*
+[%collapsible]
+====
+
+You can build drilldown URLs dynamically with your visualization data.
+
+Do this by adding the `{{key}}` placeholder to your URL
+
+For example `https://example.org/{{key}}`
+
+This instructs TSVB to substitute the value from your visualization wherever it sees `{{key}}`.
+
+If your data contain reserved or invalid URL characters such as "#" or "&", you should apply a transform to URL-encode the key like this `{{encodeURIComponent key}}`. If you are dynamically constructing a drilldown to another location in Kibana (for example, clicking a table row takes to you a value-scoped saved search), you will likely want to Rison-encode your key as it may contain invalid Rison characters. (https://github.com/Nanonid/rison#rison---compact-data-in-uris[Rison] is the serialization format many parts of Kibana use to store information in their URL.)
+
+For example: `discover#/view/0ac50180-82d9-11ec-9f4a-55de56b00cc0?_a=(filters:!((query:(match_phrase:(foo.keyword:{{rison key}})))))`
+
+If both conditions apply, you can cover all cases by applying both transforms: `{{encodeURIComponent (rison key)}}`.
+
+Technical note: TSVB uses https://handlebarsjs.com/[Handlebars] to perform these interpolations. `rison` and `encodeURIComponent` are custom Handlebars helpers provided by Kibana.
+
 ====
 
 [discrete]
@@ -272,20 +276,4 @@ For other types of month over month calculations, use <<timelion, *Timelion*>> o
 
 Calculating the duration between the start and end of an event is unsupported in *TSVB* because *TSVB* requires correlation between different time periods. 
 *TSVB* requires that the duration is pre-calculated.
-====
-
-[discrete]
-[group-on-multiple-fields]
-.*How do I group on multiple fields?*
-[%collapsible]
-====
-
-To group with multiple fields, create runtime fields in the index pattern you are visualizing.
-
-. Create a runtime field. Refer to <<managing-index-patterns, *Manage index patterns data fields*>> for more information.
-+
-[role="screenshot"]
-image::images/tsvb_group_by_multiple_fields.png[Group by multiple fields]
-
-. Create a *TSVB* visualization and group by this field.
 ====

@@ -7,12 +7,13 @@
 
 // For the source of these roles please consult the PR these were introduced https://github.com/elastic/kibana/pull/81866#issue-511165754
 export enum ROLES {
+  soc_manager = 'soc_manager',
   reader = 'reader',
   t1_analyst = 't1_analyst',
   t2_analyst = 't2_analyst',
   hunter = 'hunter',
+  hunter_no_actions = 'hunter_no_actions',
   rule_author = 'rule_author',
-  soc_manager = 'soc_manager',
   platform_engineer = 'platform_engineer',
   detections_admin = 'detections_admin',
 }

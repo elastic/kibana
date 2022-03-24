@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { XYLayerConfig } from '../../common/expressions';
+import { XYDataLayerConfig } from '../../common/expressions';
 import { FramePublicAPI } from '../types';
 import { computeOverallDataDomain, getStaticValue } from './reference_line_helpers';
 
@@ -51,7 +51,7 @@ describe('reference_line helpers', () => {
       // accessor id has no hit in data
       expect(
         getStaticValue(
-          [{ layerId: 'id-a', seriesType: 'area' } as XYLayerConfig], // missing xAccessor for groupId == x
+          [{ layerId: 'id-a', seriesType: 'area' } as XYDataLayerConfig], // missing xAccessor for groupId == x
           'x',
           {
             activeData: getActiveData([
@@ -69,7 +69,7 @@ describe('reference_line helpers', () => {
               seriesType: 'area',
               layerType: 'data',
               accessors: ['d'],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ], // missing hit of accessor "d" in data
           'yLeft',
           {
@@ -88,7 +88,7 @@ describe('reference_line helpers', () => {
               seriesType: 'area',
               layerType: 'data',
               accessors: ['a'],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ], // missing yConfig fallbacks to left axis, but the requested group is yRight
           'yRight',
           {
@@ -107,7 +107,7 @@ describe('reference_line helpers', () => {
               seriesType: 'area',
               layerType: 'data',
               accessors: ['a'],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ], // same as above with x groupId
           'x',
           {
@@ -120,6 +120,32 @@ describe('reference_line helpers', () => {
       ).toBe(100);
     });
 
+    it('should return 0 as result of calculation', () => {
+      expect(
+        getStaticValue(
+          [
+            {
+              layerId: 'id-a',
+              seriesType: 'area',
+              layerType: 'data',
+              accessors: ['a'],
+              yConfig: [{ forAccessor: 'a', axisMode: 'right' }],
+            } as XYDataLayerConfig,
+          ],
+          'yRight',
+          {
+            activeData: getActiveData([
+              {
+                id: 'id-a',
+                rows: [{ a: -30 }, { a: 10 }],
+              },
+            ]),
+          },
+          hasAllNumberHistogram
+        )
+      ).toBe(0);
+    });
+
     it('should work for no yConfig defined and fallback to left axis', () => {
       expect(
         getStaticValue(
@@ -129,7 +155,7 @@ describe('reference_line helpers', () => {
               seriesType: 'area',
               layerType: 'data',
               accessors: ['a'],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ],
           'yLeft',
           {
@@ -152,7 +178,7 @@ describe('reference_line helpers', () => {
               layerType: 'data',
               accessors: ['a'],
               yConfig: [{ forAccessor: 'a', axisMode: 'right' }],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ],
           'yRight',
           {
@@ -179,7 +205,7 @@ describe('reference_line helpers', () => {
               seriesType: 'area',
               layerType: 'data',
               accessors: ['a', 'b'],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ],
           'yLeft',
           { activeData: tables },
@@ -194,7 +220,7 @@ describe('reference_line helpers', () => {
               seriesType: 'area',
               layerType: 'data',
               accessors: ['a', 'b'],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ],
           'yRight',
           { activeData: tables },
@@ -217,7 +243,7 @@ describe('reference_line helpers', () => {
               seriesType: 'area',
               layerType: 'data',
               accessors: ['a', 'b'],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ],
           'yLeft',
           { activeData: tables },
@@ -232,7 +258,7 @@ describe('reference_line helpers', () => {
               seriesType: 'area',
               layerType: 'data',
               accessors: ['a', 'b'],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ],
           'yRight',
           { activeData: tables },
@@ -251,7 +277,7 @@ describe('reference_line helpers', () => {
               layerType: 'data',
               xAccessor: 'a',
               accessors: [],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ],
           'x', // this is influenced by the callback
           {
@@ -274,7 +300,7 @@ describe('reference_line helpers', () => {
               layerType: 'data',
               xAccessor: 'a',
               accessors: [],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ],
           'x',
           {
@@ -298,7 +324,7 @@ describe('reference_line helpers', () => {
       for (const seriesType of ['bar_stacked', 'bar_horizontal_stacked', 'area_stacked'])
         expect(
           computeOverallDataDomain(
-            [{ layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] } as XYLayerConfig],
+            [{ layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] } as XYDataLayerConfig],
             ['a', 'b', 'c'],
             getActiveData([
               {
@@ -324,7 +350,7 @@ describe('reference_line helpers', () => {
       ])
         expect(
           computeOverallDataDomain(
-            [{ layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] } as XYLayerConfig],
+            [{ layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] } as XYDataLayerConfig],
             ['a', 'b', 'c'],
             getActiveData([
               {
@@ -349,7 +375,7 @@ describe('reference_line helpers', () => {
             [
               { layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] },
               { layerId: 'id-b', seriesType, accessors: ['d', 'e', 'f'] },
-            ] as XYLayerConfig[],
+            ] as XYDataLayerConfig[],
             ['a', 'b', 'c', 'd', 'e', 'f'],
             getActiveData([
               { id: 'id-a', rows: [{ a: 25, b: 100, c: 100 }] },
@@ -363,7 +389,7 @@ describe('reference_line helpers', () => {
             [
               { layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] },
               { layerId: 'id-b', seriesType, accessors: ['d', 'e', 'f'] },
-            ] as XYLayerConfig[],
+            ] as XYDataLayerConfig[],
             ['a', 'b', 'c', 'd', 'e', 'f'],
             getActiveData([
               {
@@ -399,7 +425,7 @@ describe('reference_line helpers', () => {
             [
               { layerId: 'id-a', seriesType, accessors: ['a', 'b', 'c'] },
               { layerId: 'id-b', seriesType, accessors: ['d', 'e', 'f'] },
-            ] as XYLayerConfig[],
+            ] as XYDataLayerConfig[],
             ['a', 'b', 'c', 'd', 'e', 'f'],
             getActiveData([
               { id: 'id-a', rows: Array(3).fill({ a: 100, b: 100, c: 100 }) },
@@ -417,7 +443,7 @@ describe('reference_line helpers', () => {
               [
                 { layerId: 'id-a', seriesType: nonStackedSeries, accessors: ['a', 'b', 'c'] },
                 { layerId: 'id-b', seriesType: stackedSeries, accessors: ['d', 'e', 'f'] },
-              ] as XYLayerConfig[],
+              ] as XYDataLayerConfig[],
               ['a', 'b', 'c', 'd', 'e', 'f'],
               getActiveData([
                 { id: 'id-a', rows: [{ a: 100, b: 100, c: 100 }] },
@@ -439,7 +465,7 @@ describe('reference_line helpers', () => {
             [
               { layerId: 'id-a', seriesType, xAccessor: 'c', accessors: ['a', 'b'] },
               { layerId: 'id-b', seriesType, xAccessor: 'f', accessors: ['d', 'e'] },
-            ] as XYLayerConfig[],
+            ] as XYDataLayerConfig[],
             ['a', 'b', 'd', 'e'],
             getActiveData([
               {
@@ -459,6 +485,34 @@ describe('reference_line helpers', () => {
         ).toEqual({ min: 0, max: 375 });
     });
 
+    it('should compute the correct value for a histogram on stacked chart for the xAccessor', () => {
+      for (const seriesType of ['bar_stacked', 'bar_horizontal_stacked', 'area_stacked'])
+        expect(
+          computeOverallDataDomain(
+            [
+              { layerId: 'id-a', seriesType, accessors: ['c'] },
+              { layerId: 'id-b', seriesType, accessors: ['f'] },
+            ] as XYDataLayerConfig[],
+            ['c', 'f'],
+            getActiveData([
+              {
+                id: 'id-a',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({ a: 50 * i, b: 100 * i, c: i })),
+              },
+              {
+                id: 'id-b',
+                rows: Array(3)
+                  .fill(1)
+                  .map((_, i) => ({ d: 25 * (i + 1), e: i % 2 ? 100 : null, f: i })),
+              },
+            ]),
+            false // this will avoid the stacking behaviour
+          )
+        ).toEqual({ min: 0, max: 2 });
+    });
+
     it('should compute the correct value for a histogram non-stacked chart', () => {
       for (const seriesType of ['bar', 'bar_horizontal', 'line', 'area'])
         expect(
@@ -466,7 +520,7 @@ describe('reference_line helpers', () => {
             [
               { layerId: 'id-a', seriesType, xAccessor: 'c', accessors: ['a', 'b'] },
               { layerId: 'id-b', seriesType, xAccessor: 'f', accessors: ['d', 'e'] },
-            ] as XYLayerConfig[],
+            ] as XYDataLayerConfig[],
             ['a', 'b', 'd', 'e'],
             getActiveData([
               {
@@ -495,7 +549,7 @@ describe('reference_line helpers', () => {
               layerId: 'id-a',
               seriesType: 'area_stacked',
               accessors: ['a', 'b', 'c'],
-            } as XYLayerConfig,
+            } as XYDataLayerConfig,
           ],
           ['a', 'b', 'c'],
           getActiveData([
@@ -514,7 +568,13 @@ describe('reference_line helpers', () => {
       ).toEqual({ min: 0, max: 200 }); // it is stacked, so max is the sum and 0 is the fallback
       expect(
         computeOverallDataDomain(
-          [{ layerId: 'id-a', seriesType: 'area', accessors: ['a', 'b', 'c'] } as XYLayerConfig],
+          [
+            {
+              layerId: 'id-a',
+              seriesType: 'area',
+              accessors: ['a', 'b', 'c'],
+            } as XYDataLayerConfig,
+          ],
           ['a', 'b', 'c'],
           getActiveData([
             {
@@ -548,7 +608,7 @@ describe('reference_line helpers', () => {
           [
             { layerId: 'id-a', seriesType: 'area', accessors: ['a', 'b', 'c'] },
             { layerId: 'id-b', seriesType: 'line', accessors: ['d', 'e', 'f'] },
-          ] as XYLayerConfig[],
+          ] as XYDataLayerConfig[],
           ['a', 'b'],
           getActiveData([{ id: 'id-c', rows: [{ a: 100, b: 100 }] }]) // mind the layer id here
         )
@@ -559,7 +619,7 @@ describe('reference_line helpers', () => {
           [
             { layerId: 'id-a', seriesType: 'bar', accessors: ['a', 'b', 'c'] },
             { layerId: 'id-b', seriesType: 'bar_stacked' },
-          ] as XYLayerConfig[],
+          ] as XYDataLayerConfig[],
           ['a', 'b'],
           getActiveData([])
         )

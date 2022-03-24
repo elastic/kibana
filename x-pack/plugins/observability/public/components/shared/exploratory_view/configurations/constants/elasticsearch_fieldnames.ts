@@ -49,7 +49,6 @@ export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
-export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
@@ -107,7 +106,7 @@ export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
 export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
-export const HOST_NAME = 'host.hostname';
+export const HOST_HOSTNAME = 'host.hostname';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES = 'kubernetes';

@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { createServerRouteRepository } from './create_server_route_repository';
 export { createServerRouteFactory } from './create_server_route_factory';
 export { formatRequest } from './format_request';
 export { parseEndpoint } from './parse_endpoint';
 export { decodeRequestParams } from './decode_request_params';
 export { routeValidationObject } from './route_validation_object';
-export {
+export type {
   RouteRepositoryClient,
   ReturnOf,
   EndpointOf,
@@ -21,4 +20,5 @@ export {
   ServerRouteRepository,
   ServerRoute,
   RouteParamsRT,
+  RouteState,
 } from './typings';

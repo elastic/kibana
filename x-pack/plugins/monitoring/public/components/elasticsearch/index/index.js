@@ -22,7 +22,6 @@ import { Logs } from '../../logs';
 import { AlertsCallout } from '../../../alerts/callout';
 
 export const Index = ({
-  scope,
   indexSummary,
   metrics,
   clusterUuid,
@@ -32,7 +31,6 @@ export const Index = ({
   ...props
 }) => {
   const metricsToShow = [
-    metrics.index_mem,
     metrics.index_size,
     metrics.index_search_request_rate,
     metrics.index_request_rate,
@@ -63,7 +61,7 @@ export const Index = ({
             <Logs logs={logs} indexUuid={indexUuid} clusterUuid={clusterUuid} />
           </EuiPanel>
           <EuiSpacer size="m" />
-          <ShardAllocation scope={scope} type="index" />
+          <ShardAllocation {...props} />
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

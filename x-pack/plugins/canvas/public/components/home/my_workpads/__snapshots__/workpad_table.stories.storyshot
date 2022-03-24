@@ -341,7 +341,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       className="euiCheckbox__input"
                       data-test-subj="checkboxSelectRow-workpad-2"
                       disabled={false}
-                      id="_selection_column_workpad-2-checkbox"
+                      id="__table_generated-id_selection_column_workpad-2-checkbox"
                       onChange={[Function]}
                       title="Select this row"
                       type="checkbox"
@@ -353,7 +353,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell"
+                className="euiTableRowCell euiTableRowCell--middle"
                 style={
                   Object {
                     "width": undefined,
@@ -382,7 +382,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell"
+                className="euiTableRowCell euiTableRowCell--middle"
                 style={
                   Object {
                     "width": "20%",
@@ -401,7 +401,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell"
+                className="euiTableRowCell euiTableRowCell--middle"
                 style={
                   Object {
                     "width": "20%",
@@ -420,7 +420,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell euiTableRowCell--hasActions"
+                className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                 style={
                   Object {
                     "width": undefined,
@@ -449,7 +449,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Export workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -476,7 +475,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Clone workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -515,7 +513,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       className="euiCheckbox__input"
                       data-test-subj="checkboxSelectRow-workpad-1"
                       disabled={false}
-                      id="_selection_column_workpad-1-checkbox"
+                      id="__table_generated-id_selection_column_workpad-1-checkbox"
                       onChange={[Function]}
                       title="Select this row"
                       type="checkbox"
@@ -527,7 +525,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell"
+                className="euiTableRowCell euiTableRowCell--middle"
                 style={
                   Object {
                     "width": undefined,
@@ -556,7 +554,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell"
+                className="euiTableRowCell euiTableRowCell--middle"
                 style={
                   Object {
                     "width": "20%",
@@ -575,7 +573,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell"
+                className="euiTableRowCell euiTableRowCell--middle"
                 style={
                   Object {
                     "width": "20%",
@@ -594,7 +592,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell euiTableRowCell--hasActions"
+                className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                 style={
                   Object {
                     "width": undefined,
@@ -623,7 +621,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Export workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -650,7 +647,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Clone workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -689,7 +685,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       className="euiCheckbox__input"
                       data-test-subj="checkboxSelectRow-workpad-0"
                       disabled={false}
-                      id="_selection_column_workpad-0-checkbox"
+                      id="__table_generated-id_selection_column_workpad-0-checkbox"
                       onChange={[Function]}
                       title="Select this row"
                       type="checkbox"
@@ -701,7 +697,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell"
+                className="euiTableRowCell euiTableRowCell--middle"
                 style={
                   Object {
                     "width": undefined,
@@ -730,7 +726,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell"
+                className="euiTableRowCell euiTableRowCell--middle"
                 style={
                   Object {
                     "width": "20%",
@@ -749,7 +745,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell"
+                className="euiTableRowCell euiTableRowCell--middle"
                 style={
                   Object {
                     "width": "20%",
@@ -768,7 +764,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 </div>
               </td>
               <td
-                className="euiTableRowCell euiTableRowCell--hasActions"
+                className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
                 style={
                   Object {
                     "width": undefined,
@@ -797,7 +793,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Export workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -824,7 +819,6 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           <button
                             aria-label="Clone workpad"
                             className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                            disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
                             onFocus={[Function]}
@@ -853,7 +847,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
           className="euiSpacer euiSpacer--m"
         />
         <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
         >
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -896,11 +890,20 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <nav
+              aria-label="Pagination for table: "
               className="euiPagination"
             >
+              <span
+                aria-atomic="true"
+                aria-relevant="additions text"
+                className="euiScreenReaderOnly"
+                role="status"
+              >
+                Page 1 of 1
+              </span>
               <button
                 aria-label="Previous page"
-                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-previous"
                 disabled={true}
                 onClick={[Function]}
@@ -915,6 +918,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 />
               </button>
               <ul
+                aria-label="Pagination for table: "
                 className="euiPagination__list"
               >
                 <li
@@ -924,7 +928,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                     aria-controls="__table_generated-id"
                     aria-current={true}
                     aria-label="Page 1 of 1"
-                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
                     data-test-subj="pagination-button-0"
                     disabled={true}
                     onClick={[Function]}
@@ -944,7 +948,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
               </ul>
               <button
                 aria-label="Next page"
-                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-next"
                 disabled={true}
                 onClick={[Function]}

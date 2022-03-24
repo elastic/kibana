@@ -22,10 +22,11 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
 import * as helpers from '../helpers';
+import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -33,11 +34,17 @@ jest.mock('../../../containers/index', () => ({
 jest.mock('../../../containers/details/index', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
+jest.mock('../../fields_browser', () => ({
+  useFieldBrowserOptions: jest.fn(),
+}));
 jest.mock('../body/events/index', () => ({
   Events: () => <></>,
 }));
 
 jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
+}));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -49,9 +56,17 @@ jest.mock('../../../../common/lib/kibana', () => {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
       services: {
+        theme: {
+          theme$: {},
+        },
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
+        },
+        cases: {
+          ui: {
+            getCasesContext: () => mockCasesContext,
+          },
         },
         uiSettings: {
           get: jest.fn(),
@@ -102,13 +117,12 @@ describe('Timeline', () => {
     ]);
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
 
-    (useSourcererScope as jest.Mock).mockReturnValue(mockSourcererScope);
+    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
     props = {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
-      eventType: 'all',
       expandedDetail: {},
       filters: [],
       timelineId: TimelineId.test,
@@ -126,7 +140,6 @@ describe('Timeline', () => {
       start: startDate,
       status: TimelineStatus.active,
       timerangeKind: 'absolute',
-      updateEventTypeAndIndexesName: jest.fn(),
       activeTab: TimelineTabs.query,
       show: true,
     };
@@ -187,12 +200,13 @@ describe('Timeline', () => {
     });
 
     test('it does render the timeline table when the source is loading with no events', () => {
-      (useSourcererScope as jest.Mock).mockReturnValue({
+      (useSourcererDataView as jest.Mock).mockReturnValue({
         browserFields: {},
         docValueFields: [],
         loading: true,
         indexPattern: {},
         selectedPatterns: [],
+        missingPatterns: [],
       });
       const wrapper = mount(
         <TestProviders>

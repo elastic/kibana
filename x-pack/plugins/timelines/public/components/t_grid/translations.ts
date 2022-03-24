@@ -22,7 +22,7 @@ export const EVENTS_TABLE_ARIA_LABEL = ({
 export const BULK_ACTION_OPEN_SELECTED = i18n.translate(
   'xpack.timelines.timeline.openSelectedTitle',
   {
-    defaultMessage: 'Open selected',
+    defaultMessage: 'Mark as open',
   }
 );
 

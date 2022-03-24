@@ -7,17 +7,17 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { IFieldType } from 'src/plugins/data/public';
+import { DataViewField } from 'src/plugins/data_views/common';
 import { Criterion } from './criterion';
 import {
-  PartialAlertParams,
+  PartialRuleParams,
   PartialCountCriteria as PartialCountCriteriaType,
   PartialCriteria as PartialCriteriaType,
   PartialCriterion as PartialCriterionType,
   PartialRatioCriteria as PartialRatioCriteriaType,
-  isRatioAlert,
+  isRatioRule,
   getNumerator,
   getDenominator,
 } from '../../../../../common/alerting/logs/log_threshold/types';
@@ -34,11 +34,11 @@ const QueryBText = i18n.translate('xpack.infra.logs.alerting.threshold.ratioCrit
 });
 
 interface SharedProps {
-  fields: IFieldType[];
+  fields: DataViewField[];
   criteria?: PartialCriteriaType;
   defaultCriterion: PartialCriterionType;
   errors: Errors['criteria'];
-  alertParams: PartialAlertParams;
+  ruleParams: PartialRuleParams;
   sourceId: string;
   updateCriteria: (criteria: PartialCriteriaType) => void;
 }
@@ -49,7 +49,7 @@ export const Criteria: React.FC<CriteriaProps> = (props) => {
   const { criteria, errors } = props;
   if (!criteria || criteria.length === 0) return null;
 
-  return !isRatioAlert(criteria) ? (
+  return !isRatioRule(criteria) ? (
     <CountCriteria {...props} criteria={criteria} errors={errors} />
   ) : (
     <RatioCriteria {...props} criteria={criteria} errors={errors} />
@@ -57,7 +57,7 @@ export const Criteria: React.FC<CriteriaProps> = (props) => {
 };
 
 interface CriteriaWrapperProps {
-  alertParams: SharedProps['alertParams'];
+  ruleParams: SharedProps['ruleParams'];
   fields: SharedProps['fields'];
   updateCriterion: (idx: number, params: PartialCriterionType) => void;
   removeCriterion: (idx: number) => void;
@@ -76,7 +76,7 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
     criteria,
     fields,
     errors,
-    alertParams,
+    ruleParams,
     sourceId,
     isRatio = false,
   } = props;
@@ -103,7 +103,7 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
               arrowDisplay="right"
             >
               <CriterionPreview
-                alertParams={alertParams}
+                ruleParams={ruleParams}
                 chartCriterion={criterion}
                 sourceId={sourceId}
                 showThreshold={!isRatio}

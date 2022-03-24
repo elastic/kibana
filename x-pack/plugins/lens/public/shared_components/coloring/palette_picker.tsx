@@ -15,7 +15,6 @@ import {
   defaultPaletteParams,
 } from './constants';
 import type { CustomPaletteParams } from '../../../common';
-import { getStopsForFixedMode } from './utils';
 
 function getCustomPaletteConfig(
   palettes: PaletteRegistry,
@@ -27,7 +26,10 @@ function getCustomPaletteConfig(
   if (activePalette && activePalette.name !== CUSTOM_PALETTE) {
     const currentPalette = palettes.get(activePalette.name);
     if (currentPalette) {
-      const stops = currentPalette.getCategoricalColors(DEFAULT_COLOR_STEPS, activePalette?.params);
+      const stops = currentPalette.getCategoricalColors(
+        activePalette?.params?.steps || DEFAULT_COLOR_STEPS,
+        activePalette?.params
+      );
       const palette = activePalette.params?.reverse ? stops.reverse() : stops;
       return {
         value: id,
@@ -49,7 +51,9 @@ function getCustomPaletteConfig(
     title,
     type: FIXED_PROGRESSION,
     'data-test-subj': `custom-palette`,
-    palette: getStopsForFixedMode(activePalette.params.stops, activePalette.params.colorStops),
+    palette: (activePalette.params.colorStops || activePalette.params.stops).map(
+      (colorStop) => colorStop.color
+    ),
   };
 }
 
@@ -76,7 +80,7 @@ export function PalettePicker({
     )
     .map(({ id, title, getCategoricalColors }) => {
       const colors = getCategoricalColors(
-        DEFAULT_COLOR_STEPS,
+        activePalette?.params?.steps || DEFAULT_COLOR_STEPS,
         id === activePalette?.name ? activePalette?.params : undefined
       );
       return {

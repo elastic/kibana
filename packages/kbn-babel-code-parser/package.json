@@ -7,6 +7,9 @@
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/elastic/kibana/tree/master/packages/kbn-babel-code-parser"
+    "url": "https://github.com/elastic/kibana/tree/main/packages/kbn-babel-code-parser"
+  },
+  "kibana": {
+    "devOnly": true
   }
 }

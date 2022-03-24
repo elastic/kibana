@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { EuiTitle, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ClusterView } from './components/cluster_view';
 import './shard_allocation.scss';
+import { ClusterView } from './components/cluster_view';
 
-export const ShardAllocation = ({ scope, type, shardStats }) => {
+export const ShardAllocation = (props) => {
   const types = [
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.primaryLabel', {
@@ -24,7 +24,7 @@ export const ShardAllocation = ({ scope, type, shardStats }) => {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.replicaLabel', {
         defaultMessage: 'Replica',
       }),
-      color: 'secondary',
+      color: 'success',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.relocatingLabel', {
@@ -77,13 +77,7 @@ export const ShardAllocation = ({ scope, type, shardStats }) => {
         ))}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <ClusterView
-        scope={scope}
-        shardStats={shardStats}
-        showSystemIndices={scope.showSystemIndices}
-        toggleShowSystemIndices={scope.toggleShowSystemIndices}
-        type={type}
-      />
+      <ClusterView {...props} />
     </div>
   );
 };

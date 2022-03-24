@@ -26,7 +26,8 @@ If {stack-security-features} are enabled, users must have the necessary
 privileges to use {ml-features}. Refer to
 {ml-docs}/setup.html#setup-privileges[Set up {ml-features}].
 
-NOTE: There are limitations in {ml-features} that affect {kib}. For more information, refer to {ml-docs}/ml-limitations.html[Machine learning].
+NOTE: There are limitations in {ml-features} that affect {kib}. For more 
+information, refer to {ml-docs}/ml-limitations.html[{ml-cap}].
 
 --
 
@@ -47,10 +48,8 @@ pane:
 [role="screenshot"]
 image::user/ml/images/ml-job-management.png[Job Management]
 
-You can use the *Settings* pane to create and edit
-{ml-docs}/ml-ad-finding-anomalies.html#ml-ad-calendars[calendars] and the
-filters that are used in
-{ml-docs}/ml-ad-finding-anomalies.html#ml-ad-rules[custom rules]:
+You can use the *Settings* pane to create and edit calendars and the
+filters that are used in custom rules:
 
 [role="screenshot"]
 image::user/ml/images/ml-settings.png[Calendar Management]
@@ -85,8 +84,6 @@ and {ml-docs}/ml-ad-overview.html[{ml-cap} {anomaly-detect}].
 
 [[xpack-ml-dfanalytics]]
 == {dfanalytics-cap}
-
-experimental[]
 
 The Elastic {ml} {dfanalytics} feature enables you to analyze your data using
 {classification}, {oldetection}, and {regression} algorithms and generate new

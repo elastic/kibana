@@ -14,9 +14,9 @@ static isBadRequestError(error: Error | DecoratedError): boolean;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  error | <code>Error &#124; DecoratedError</code> |  |
+|  error | Error \| DecoratedError |  |
 
 <b>Returns:</b>
 
-`boolean`
+boolean
 

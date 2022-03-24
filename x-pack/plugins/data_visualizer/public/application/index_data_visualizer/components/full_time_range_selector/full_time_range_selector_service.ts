@@ -6,13 +6,16 @@
  */
 
 import moment from 'moment';
-import { estypes } from '@elastic/elasticsearch';
-import { Query, TimefilterContract } from 'src/plugins/data/public';
+import { TimefilterContract } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
+import type { ToastsStart } from 'kibana/public';
+import { DataView } from '../../../../../../../../src/plugins/data_views/public';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { getTimeFieldRange } from '../../services/time_field_range';
-import { GetTimeFieldRangeResponse } from '../../../../../common/types/time_field_request';
+import type { GetTimeFieldRangeResponse } from '../../../../../common/types/time_field_request';
+import { addExcludeFrozenToQuery } from '../../utils/query_utils';
 
 export interface TimeRange {
   from: number;
@@ -21,21 +24,31 @@ export interface TimeRange {
 
 export async function setFullTimeRange(
   timefilter: TimefilterContract,
-  indexPattern: IndexPattern,
-  query?: Query
+  dataView: DataView,
+  query?: QueryDslQueryContainer,
+  excludeFrozenData?: boolean,
+  toasts?: ToastsStart
 ): Promise<GetTimeFieldRangeResponse> {
-  const runtimeMappings = indexPattern.getComputedFields()
-    .runtimeFields as estypes.MappingRuntimeFields;
+  const runtimeMappings = dataView.getRuntimeMappings();
   const resp = await getTimeFieldRange({
-    index: indexPattern.title,
-    timeFieldName: indexPattern.timeFieldName,
-    query,
+    index: dataView.title,
+    timeFieldName: dataView.timeFieldName,
+    query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
     ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
   });
-  timefilter.setTime({
-    from: moment(resp.start.epoch).toISOString(),
-    to: moment(resp.end.epoch).toISOString(),
-  });
+
+  if (resp.start.epoch && resp.end.epoch) {
+    timefilter.setTime({
+      from: moment(resp.start.epoch).toISOString(),
+      to: moment(resp.end.epoch).toISOString(),
+    });
+  } else {
+    toasts?.addWarning({
+      title: i18n.translate('xpack.dataVisualizer.index.fullTimeRangeSelector.noResults', {
+        defaultMessage: 'No results match your search criteria',
+      }),
+    });
+  }
   return resp;
 }
 

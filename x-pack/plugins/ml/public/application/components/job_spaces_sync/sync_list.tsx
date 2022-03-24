@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { FC, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiText, EuiTitle, EuiAccordion, EuiTextColor, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiText,
+  EuiTitle,
+  EuiAccordion,
+  EuiTextColor,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import { SyncSavedObjectResponse } from '../../../../common/types/saved_objects';
+import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 
 export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ syncItems }) => {
   if (syncItems === null) {
@@ -39,17 +46,17 @@ export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ sy
 };
 
 const SavedObjectsCreated: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
-  const items = Object.keys(syncItems.savedObjectsCreated);
+  const count = getTotalItemsCount(syncItems.savedObjectsCreated);
 
   const title = (
     <>
       <EuiTitle size="xs" data-test-subj="mlJobMgmtSyncFlyoutMissingObjectsTitle">
         <h3>
-          <EuiTextColor color={items.length ? 'default' : 'subdued'}>
+          <EuiTextColor color={count ? 'default' : 'subdued'}>
             <FormattedMessage
               id="xpack.ml.management.syncSavedObjectsFlyout.savedObjectsCreated.title"
               defaultMessage="Missing saved objects ({count})"
-              values={{ count: items.length }}
+              values={{ count }}
             />
           </EuiTextColor>
         </h3>
@@ -66,21 +73,23 @@ const SavedObjectsCreated: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
       </EuiText>
     </>
   );
-  return <SyncItem id="savedObjectsCreated" title={title} items={items} />;
+  return (
+    <SyncItem id="savedObjectsCreated" title={title} results={syncItems.savedObjectsCreated} />
+  );
 };
 
 const SavedObjectsDeleted: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
-  const items = Object.keys(syncItems.savedObjectsDeleted);
+  const count = getTotalItemsCount(syncItems.savedObjectsDeleted);
 
   const title = (
     <>
       <EuiTitle size="xs" data-test-subj="mlJobMgmtSyncFlyoutUnmatchedObjectsTitle">
         <h3>
-          <EuiTextColor color={items.length ? 'default' : 'subdued'}>
+          <EuiTextColor color={count ? 'default' : 'subdued'}>
             <FormattedMessage
               id="xpack.ml.management.syncSavedObjectsFlyout.savedObjectsDeleted.title"
               defaultMessage="Unmatched saved objects ({count})"
-              values={{ count: items.length }}
+              values={{ count }}
             />
           </EuiTextColor>
         </h3>
@@ -97,21 +106,23 @@ const SavedObjectsDeleted: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
       </EuiText>
     </>
   );
-  return <SyncItem id="savedObjectsDeleted" title={title} items={items} />;
+  return (
+    <SyncItem id="savedObjectsDeleted" title={title} results={syncItems.savedObjectsDeleted} />
+  );
 };
 
 const DatafeedsAdded: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
-  const items = Object.keys(syncItems.datafeedsAdded);
+  const count = getTotalItemsCount(syncItems.datafeedsAdded);
 
   const title = (
     <>
       <EuiTitle size="xs" data-test-subj="mlJobMgmtSyncFlyoutObjectsMissingDatafeedTitle">
         <h3>
-          <EuiTextColor color={items.length ? 'default' : 'subdued'}>
+          <EuiTextColor color={count ? 'default' : 'subdued'}>
             <FormattedMessage
               id="xpack.ml.management.syncSavedObjectsFlyout.datafeedsAdded.title"
               defaultMessage="Saved objects with missing datafeeds ({count})"
-              values={{ count: items.length }}
+              values={{ count }}
             />
           </EuiTextColor>
         </h3>
@@ -128,21 +139,21 @@ const DatafeedsAdded: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems 
       </EuiText>
     </>
   );
-  return <SyncItem id="datafeedsAdded" title={title} items={items} />;
+  return <SyncItem id="datafeedsAdded" title={title} results={syncItems.datafeedsAdded} />;
 };
 
 const DatafeedsRemoved: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
-  const items = Object.keys(syncItems.datafeedsRemoved);
+  const count = getTotalItemsCount(syncItems.datafeedsRemoved);
 
   const title = (
     <>
       <EuiTitle size="xs" data-test-subj="mlJobMgmtSyncFlyoutObjectsUnmatchedDatafeedTitle">
         <h3>
-          <EuiTextColor color={items.length ? 'default' : 'subdued'}>
+          <EuiTextColor color={count ? 'default' : 'subdued'}>
             <FormattedMessage
               id="xpack.ml.management.syncSavedObjectsFlyout.datafeedsRemoved.title"
               defaultMessage="Saved objects with unmatched datafeed IDs ({count})"
-              values={{ count: items.length }}
+              values={{ count }}
             />
           </EuiTextColor>
         </h3>
@@ -159,21 +170,35 @@ const DatafeedsRemoved: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItem
       </EuiText>
     </>
   );
-  return <SyncItem id="datafeedsRemoved" title={title} items={items} />;
+  return <SyncItem id="datafeedsRemoved" title={title} results={syncItems.datafeedsRemoved} />;
 };
 
-const SyncItem: FC<{ id: string; title: JSX.Element; items: string[] }> = ({
+const SyncItem: FC<{ id: string; title: JSX.Element; results: SyncResult }> = ({
   id,
   title,
-  items,
-}) => (
-  <EuiAccordion id={id} buttonContent={title} paddingSize="l">
-    <EuiText size="s">
-      <ul>
-        {items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </EuiText>
-  </EuiAccordion>
-);
+  results,
+}) => {
+  return (
+    <EuiAccordion id={id} buttonContent={title} paddingSize="l">
+      {Object.entries(results).map(([type, items]) => {
+        return (
+          <Fragment key={type}>
+            <EuiText size="s">
+              <h4>{type}</h4>
+              <ul>
+                {Object.keys(items).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </EuiText>
+            <EuiSpacer size="s" />
+          </Fragment>
+        );
+      })}
+    </EuiAccordion>
+  );
+};
+
+function getTotalItemsCount(result: SyncResult) {
+  return Object.values(result).flatMap((r) => Object.keys(r)).length;
+}

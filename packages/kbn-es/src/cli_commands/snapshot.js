@@ -10,6 +10,7 @@ const dedent = require('dedent');
 const getopts = require('getopts');
 import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 const { Cluster } = require('../cluster');
+const { parseTimeoutToMs } = require('../utils');
 
 exports.description = 'Downloads and run from a nightly snapshot';
 
@@ -29,6 +30,11 @@ exports.help = (defaults = {}) => {
       -E                Additional key=value settings to pass to Elasticsearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on Elasticsearch
+      --use-cached      Skips cache verification and use cached ES snapshot.
+      --skip-ready-check  Disable the ready check,
+      --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
+      --plugins         Comma seperated list of Elasticsearch plugins to install
+      --secure-files     Comma seperated list of secure_setting_name=/path pairs
 
     Example:
 
@@ -51,11 +57,14 @@ exports.run = async (defaults = {}) => {
       installPath: 'install-path',
       dataArchive: 'data-archive',
       esArgs: 'E',
+      useCached: 'use-cached',
+      skipReadyCheck: 'skip-ready-check',
+      readyTimeout: 'ready-timeout',
+      secureFiles: 'secure-files',
     },
 
-    string: ['version'],
-
-    boolean: ['download-only'],
+    string: ['version', 'ready-timeout'],
+    boolean: ['download-only', 'use-cached', 'skip-ready-check'],
 
     default: defaults,
   });
@@ -70,6 +79,13 @@ exports.run = async (defaults = {}) => {
     if (options.dataArchive) {
       await cluster.extractDataDirectory(installPath, options.dataArchive);
     }
+    if (options.plugins) {
+      await cluster.installPlugins(installPath, options.plugins, options);
+    }
+    if (options.secureFiles) {
+      const pairs = options.secureFiles.split(',').map((kv) => kv.split('=').map((v) => v.trim()));
+      await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
+    }
 
     reportTime(installStartTime, 'installed', {
       success: true,
@@ -80,6 +96,7 @@ exports.run = async (defaults = {}) => {
       reportTime,
       startTime: runStartTime,
       ...options,
+      readyTimeout: parseTimeoutToMs(options.readyTimeout),
     });
   }
 };

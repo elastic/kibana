@@ -78,13 +78,19 @@ export const migrations = {
   '8.0.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
     ...doc,
     ...(doc.attributes && {
-      // owner: Team:Geo
       attributes: Object.keys(doc.attributes).reduce(
         (acc, key) =>
           [
+            // owner: Team:Geo
             'visualization:regionmap:showWarnings',
             'visualization:tileMap:WMSdefaults',
             'visualization:tileMap:maxPrecision',
+            // owner: Team:Core
+            'telemetry:optIn',
+            'xPackMonitoring:allowReport',
+            'theme:version',
+            // owner: Team:AppServices
+            'courier:batchSearches',
           ].includes(key)
             ? {
                 ...acc,
@@ -95,6 +101,40 @@ export const migrations = {
               },
         {}
       ),
+    }),
+    references: doc.references || [],
+  }),
+  '8.1.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+    ...doc,
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce((acc, key) => {
+        if (key === 'format:defaultTypeMap') {
+          const initial = JSON.parse(doc.attributes[key]);
+          const updated = {
+            ...initial,
+            geo_point: { id: 'geo_point', params: { transform: 'wkt' } },
+          };
+          return {
+            ...acc,
+            'format:defaultTypeMap': JSON.stringify(updated, null, 2),
+          };
+        } else if (key === 'securitySolution:rulesTableRefresh') {
+          const initial = JSON.parse(doc.attributes[key]);
+          const updated = {
+            on: initial.on,
+            value: initial.value,
+          };
+          return {
+            ...acc,
+            [key]: JSON.stringify(updated, null, 2),
+          };
+        } else {
+          return {
+            ...acc,
+            [key]: doc.attributes[key],
+          };
+        }
+      }, {}),
     }),
     references: doc.references || [],
   }),

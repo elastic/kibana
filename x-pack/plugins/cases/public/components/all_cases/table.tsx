@@ -5,70 +5,45 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, MutableRefObject } from 'react';
+import React, { FunctionComponent, MutableRefObject, useCallback } from 'react';
 import {
   EuiEmptyPrompt,
   EuiLoadingContent,
   EuiTableSelectionType,
-  EuiBasicTable as _EuiBasicTable,
+  EuiBasicTable,
   EuiBasicTableProps,
+  Pagination,
 } from '@elastic/eui';
 import classnames from 'classnames';
 import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
-import { CasesNavigation, LinkButton } from '../links';
-import { AllCases, Case, FilterOptions } from '../../../common';
+import { LinkButton } from '../links';
+import { AllCases, Case, FilterOptions } from '../../../common/ui/types';
 import * as i18n from './translations';
+import { useCreateCaseNavigation } from '../../common/navigation';
 
 interface CasesTableProps {
-  columns: EuiBasicTableProps<Case>['columns']; //  CasesColumns[];
-  createCaseNavigation: CasesNavigation;
+  columns: EuiBasicTableProps<Case>['columns'];
   data: AllCases;
   filterOptions: FilterOptions;
-  goToCreateCase: (e: React.MouseEvent) => void;
+  goToCreateCase?: () => void;
   handleIsLoading: (a: boolean) => void;
   isCasesLoading: boolean;
   isCommentUpdating: boolean;
   isDataEmpty: boolean;
   isSelectorView?: boolean;
-  itemIdToExpandedRowMap: EuiBasicTableProps<Case>['itemIdToExpandedRowMap'];
   onChange: EuiBasicTableProps<Case>['onChange'];
-  pagination: EuiBasicTableProps<Case>['pagination'];
+  pagination: Pagination;
   refreshCases: (a?: boolean) => void;
   selectedCases: Case[];
   selection: EuiTableSelectionType<Case>;
   showActions: boolean;
   sorting: EuiBasicTableProps<Case>['sorting'];
-  tableRef: MutableRefObject<_EuiBasicTable | undefined>;
+  tableRef: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<Case>['rowProps'];
   userCanCrud: boolean;
 }
-
-const EuiBasicTable: any = _EuiBasicTable;
-const BasicTable = styled(EuiBasicTable)`
-  ${({ theme }) => `
-    .euiTableRow-isExpandedRow.euiTableRow-isSelectable .euiTableCellContent {
-      padding: 8px 0 8px 32px;
-    }
-
-    &.isSelectorView .euiTableRow.isDisabled {
-      cursor: not-allowed;
-      background-color: ${theme.eui.euiTableHoverClickableColor};
-    }
-
-    &.isSelectorView .euiTableRow.euiTableRow-isExpandedRow .euiTableRowCell,
-    &.isSelectorView .euiTableRow.euiTableRow-isExpandedRow:hover {
-      background-color: transparent;
-    }
-
-    &.isSelectorView .euiTableRow.euiTableRow-isExpandedRow {
-      .subCase:hover {
-        background-color: ${theme.eui.euiTableHoverClickableColor};
-      }
-    }
-  `}
-`;
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -76,7 +51,6 @@ const Div = styled.div`
 
 export const CasesTable: FunctionComponent<CasesTableProps> = ({
   columns,
-  createCaseNavigation,
   data,
   filterOptions,
   goToCreateCase,
@@ -85,7 +59,6 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   isCommentUpdating,
   isDataEmpty,
   isSelectorView,
-  itemIdToExpandedRowMap,
   onChange,
   pagination,
   refreshCases,
@@ -96,13 +69,26 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   tableRef,
   tableRowProps,
   userCanCrud,
-}) =>
-  isCasesLoading && isDataEmpty ? (
+}) => {
+  const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
+  const navigateToCreateCaseClick = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      if (goToCreateCase != null) {
+        goToCreateCase();
+      } else {
+        navigateToCreateCase();
+      }
+    },
+    [goToCreateCase, navigateToCreateCase]
+  );
+
+  return isCasesLoading && isDataEmpty ? (
     <Div>
       <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
     </Div>
   ) : (
-    <Div>
+    <Div data-test-subj={isCasesLoading ? 'cases-table-loading' : null}>
       <CasesTableUtilityBar
         data={data}
         enableBulkActions={showActions}
@@ -111,14 +97,13 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         selectedCases={selectedCases}
         refreshCases={refreshCases}
       />
-      <BasicTable
+      <EuiBasicTable
         className={classnames({ isSelectorView })}
         columns={columns}
         data-test-subj="cases-table"
         isSelectable={showActions}
         itemId="id"
         items={data.cases}
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         loading={isCommentUpdating}
         noItemsMessage={
           <EuiEmptyPrompt
@@ -131,12 +116,12 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
                   isDisabled={!userCanCrud}
                   fill
                   size="s"
-                  onClick={goToCreateCase}
-                  href={createCaseNavigation.href}
+                  onClick={navigateToCreateCaseClick}
+                  href={getCreateCaseUrl()}
                   iconType="plusInCircle"
                   data-test-subj="cases-table-add-case"
                 >
-                  {i18n.ADD_NEW_CASE}
+                  {i18n.CREATE_CASE_TITLE}
                 </LinkButton>
               )
             }
@@ -151,3 +136,5 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
       />
     </Div>
   );
+};
+CasesTable.displayName = 'CasesTable';

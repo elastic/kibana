@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from 'src/core/server';
-import { AlertType, AlertExecutorOptions } from '../../types';
+import { RuleType, AlertExecutorOptions } from '../../types';
 import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
 import {
   EsQueryAlertParams,
@@ -25,7 +25,7 @@ export const ES_QUERY_ID = '.es-query';
 export const ActionGroupId = 'query matched';
 export const ConditionMetAlertInstanceId = 'query matched';
 
-export function getAlertType(logger: Logger): AlertType<
+export function getAlertType(logger: Logger): RuleType<
   EsQueryAlertParams,
   never, // Only use if defining useSavedObjectReferences hook
   EsQueryAlertState,
@@ -160,9 +160,10 @@ export function getAlertType(logger: Logger): AlertType<
     >
   ) {
     const { alertId, name, services, params, state } = options;
+    const { alertFactory, scopedClusterClient } = services;
     const previousTimestamp = state.latestTimestamp;
 
-    const esClient = services.scopedClusterClient.asCurrentUser;
+    const esClient = scopedClusterClient.asCurrentUser;
     const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -223,7 +224,7 @@ export function getAlertType(logger: Logger): AlertType<
 
     logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);
 
-    const { body: searchResult } = await esClient.search(query);
+    const { body: searchResult } = await esClient.search(query, { meta: true });
 
     logger.debug(
       `alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`
@@ -254,7 +255,7 @@ export function getAlertType(logger: Logger): AlertType<
       };
 
       const actionContext = addMessages(options, baseContext, params);
-      const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
+      const alertInstance = alertFactory.create(ConditionMetAlertInstanceId);
       alertInstance
         // store the params we would need to recreate the query that led to this alert instance
         .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })

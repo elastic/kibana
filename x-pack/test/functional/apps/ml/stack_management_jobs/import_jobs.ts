@@ -49,6 +49,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
     });
 
     for (const testData of testDataListPositive) {
@@ -73,21 +75,28 @@ export default function ({ getService }: FtrProviderContext) {
       it('ensures jobs have been imported', async () => {
         if (testData.expected.jobType === 'anomaly-detector') {
           await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
-          await ml.jobTable.refreshJobList();
           for (const id of testData.expected.jobIds) {
-            await ml.jobTable.filterWithSearchString(id);
+            await ml.jobTable.filterWithSearchString(id, 1, 'stackMgmtJobList');
           }
           for (const id of testData.expected.skippedJobIds) {
-            await ml.jobTable.filterWithSearchString(id, 0);
+            await ml.jobTable.filterWithSearchString(id, 0, 'stackMgmtJobList');
           }
         } else {
           await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
-          await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
+          await ml.dataFrameAnalyticsTable.refreshAnalyticsTable('stackMgmtJobList');
           for (const id of testData.expected.jobIds) {
-            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(id, true);
+            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(
+              id,
+              true,
+              'mlAnalyticsRefreshListButton'
+            );
           }
           for (const id of testData.expected.skippedJobIds) {
-            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(id, false);
+            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(
+              id,
+              false,
+              'mlAnalyticsRefreshListButton'
+            );
           }
         }
       });

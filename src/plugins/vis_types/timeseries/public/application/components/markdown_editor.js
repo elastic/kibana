@@ -19,8 +19,8 @@ import { CodeEditor, MarkdownLang } from '../../../../../kibana_react/public';
 
 import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { getDataStart } from '../../services';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { getDataViewsStart } from '../../services';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
 export class MarkdownEditor extends Component {
@@ -46,8 +46,8 @@ export class MarkdownEditor extends Component {
   };
 
   async componentDidMount() {
-    const { indexPatterns } = getDataStart();
-    const { indexPattern } = await fetchIndexPattern(this.props.model.index_pattern, indexPatterns);
+    const dataViews = getDataViewsStart();
+    const { indexPattern } = await fetchIndexPattern(this.props.model.index_pattern, dataViews);
     this.setState({ fieldFormatMap: indexPattern?.fieldFormatMap });
   }
 

@@ -10,35 +10,54 @@ import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana
 
 export function getNoDataConfig({
   docsLink,
+  shouldBypassNoDataScreen,
+  loading,
   basePath,
-  hasData,
+  hasApmData,
+  hasApmIntegrations,
 }: {
   docsLink: string;
+  shouldBypassNoDataScreen: boolean;
+  loading: boolean;
   basePath?: string;
-  hasData?: boolean;
+  hasApmData?: boolean;
+  hasApmIntegrations?: boolean;
 }): KibanaPageTemplateProps['noDataConfig'] {
-  // Returns no data config when there is no historical data
-  if (hasData === false) {
-    return {
-      solution: i18n.translate('xpack.apm.noDataConfig.solutionName', {
-        defaultMessage: 'Observability',
-      }),
-      actions: {
-        beats: {
-          title: i18n.translate('xpack.apm.noDataConfig.beatsCard.title', {
-            defaultMessage: 'Add data with APM agents',
-          }),
-          description: i18n.translate(
-            'xpack.apm.noDataConfig.beatsCard.description',
-            {
-              defaultMessage:
-                'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
-            }
-          ),
-          href: basePath + `/app/home#/tutorial/apm`,
-        },
-      },
-      docsLink,
-    };
+  // don't show "no data screen" when there is APM data or it should be bypassed
+  if (hasApmData || shouldBypassNoDataScreen || loading) {
+    return;
   }
+  const noDataConfigDetails = hasApmIntegrations
+    ? {
+        title: i18n.translate('xpack.apm.noDataConfig.addDataButtonLabel', {
+          defaultMessage: 'Add data',
+        }),
+        href: `${basePath}/app/home#/tutorial/apm`,
+      }
+    : {
+        title: i18n.translate(
+          'xpack.apm.noDataConfig.addApmIntegrationButtonLabel',
+          {
+            defaultMessage: 'Add the APM integration',
+          }
+        ),
+        href: `${basePath}/app/integrations/detail/apm/overview`,
+      };
+
+  return {
+    solution: i18n.translate('xpack.apm.noDataConfig.solutionName', {
+      defaultMessage: 'Observability',
+    }),
+    actions: {
+      elasticAgent: {
+        title: noDataConfigDetails.title,
+        description: i18n.translate('xpack.apm.ux.overview.agent.description', {
+          defaultMessage:
+            'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
+        }),
+        href: noDataConfigDetails.href,
+      },
+    },
+    docsLink,
+  };
 }

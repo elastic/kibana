@@ -20,6 +20,7 @@ interface BuilderLogicButtonsProps {
   isNested: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
+  isOrHidden?: boolean;
   showNestedButton: boolean;
   onAddClickWhenNested: () => void;
   onAndClicked: () => void;
@@ -32,6 +33,7 @@ export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
   isNested,
   isNestedDisabled = true,
   isOrDisabled = false,
+  isOrHidden = false,
   showNestedButton = false,
   onAddClickWhenNested,
   onAndClicked,
@@ -50,18 +52,20 @@ export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
         {i18n.AND}
       </MyEuiButton>
     </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <MyEuiButton
-        fill
-        size="s"
-        iconType="plusInCircle"
-        onClick={onOrClicked}
-        isDisabled={isOrDisabled}
-        data-test-subj="exceptionsOrButton"
-      >
-        {i18n.OR}
-      </MyEuiButton>
-    </EuiFlexItem>
+    {!isOrHidden && (
+      <EuiFlexItem grow={false}>
+        <MyEuiButton
+          fill
+          size="s"
+          iconType="plusInCircle"
+          onClick={onOrClicked}
+          isDisabled={isOrDisabled}
+          data-test-subj="exceptionsOrButton"
+        >
+          {i18n.OR}
+        </MyEuiButton>
+      </EuiFlexItem>
+    )}
     {showNestedButton && (
       <EuiFlexItem grow={false}>
         <EuiButton

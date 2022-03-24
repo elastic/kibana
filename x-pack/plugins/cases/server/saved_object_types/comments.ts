@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../common';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
 import { createCommentsMigrations, CreateCommentsMigrationsDeps } from './migrations';
 
 export const createCaseCommentSavedObjectType = ({
@@ -20,9 +20,6 @@ export const createCaseCommentSavedObjectType = ({
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
-      associationType: {
-        type: 'keyword',
-      },
       comment: {
         type: 'text',
       },

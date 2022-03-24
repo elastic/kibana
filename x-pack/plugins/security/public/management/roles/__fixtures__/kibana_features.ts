@@ -17,9 +17,19 @@ export const createFeature = (
     excludeFromBaseRead?: boolean;
     privileges?: KibanaFeatureConfig['privileges'];
     category?: KibanaFeatureConfig['category'];
+    requireAllSpacesOnAllPrivilege?: boolean;
+    disabledReadPrivilege?: boolean;
   }
 ) => {
-  const { excludeFromBaseAll, excludeFromBaseRead, privileges, category, ...rest } = config;
+  const {
+    excludeFromBaseAll,
+    excludeFromBaseRead,
+    privileges,
+    category,
+    requireAllSpacesOnAllPrivilege: requireAllSpaces = false,
+    disabledReadPrivilege: disabled = false,
+    ...rest
+  } = config;
   return new KibanaFeature({
     app: [],
     category: category ?? { id: 'foo', label: 'foo' },
@@ -35,6 +45,7 @@ export const createFeature = (
                 read: ['read-type'],
               },
               ui: ['read-ui', 'all-ui', `read-${config.id}`, `all-${config.id}`],
+              requireAllSpaces,
             },
             read: {
               excludeFromBasePrivileges: excludeFromBaseRead,
@@ -43,6 +54,7 @@ export const createFeature = (
                 read: ['read-type'],
               },
               ui: ['read-ui', `read-${config.id}`],
+              disabled,
             },
           },
     ...rest,

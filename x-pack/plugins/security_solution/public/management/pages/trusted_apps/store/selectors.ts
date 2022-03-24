@@ -85,12 +85,6 @@ export const getCurrentLocationIncludedPolicies = (
   return state.location.included_policies;
 };
 
-export const getCurrentLocationExcludedPolicies = (
-  state: Immutable<TrustedAppsListPageState>
-): string => {
-  return state.location.excluded_policies;
-};
-
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
   return getLastLoadedResourceState(state.listView.listResourceState)?.data.totalItemsCount || 0;
 };
@@ -227,6 +221,11 @@ export const listOfPolicies: (
 ) => Immutable<GetPolicyListResponse['items']> = createSelector(policiesState, (policies) => {
   return isLoadedResourceState(policies) ? policies.data.items : [];
 });
+
+export const isLoadingListOfPolicies: (state: Immutable<TrustedAppsListPageState>) => boolean =
+  createSelector(policiesState, (policies) => {
+    return isLoadingResourceState(policies);
+  });
 
 export const getMapOfPoliciesById: (
   state: Immutable<TrustedAppsListPageState>

@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageContent,
+  EuiPageBody,
+  EuiPageContentBody,
+  EuiTab,
+  EuiTabs,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IHttpFetchError } from 'kibana/public';
+import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
@@ -16,12 +24,15 @@ import { PageLoading } from '../../components';
 import {
   getSetupModeState,
   isSetupModeFeatureEnabled,
+  toggleSetupMode,
   updateSetupModeData,
-} from '../setup_mode/setup_mode';
+} from '../../lib/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
 import { AlertsDropdown } from '../../alerts/alerts_dropdown';
-import { ActionMenu } from '../../components/action_menu';
 import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
+import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button';
+import { HeaderMenuPortal } from '../../../../observability/public';
+import { HeaderActionMenuContext } from '../../application/contexts/header_action_menu_context';
 
 export interface TabMenuItem {
   id: string;
@@ -49,9 +60,11 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 
   const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
   const [loaded, setLoaded] = useState(false);
+  const [isRequestPending, setIsRequestPending] = useState(false);
   const history = useHistory();
   const [hasError, setHasError] = useState(false);
   const handleRequestError = useRequestErrorHandler();
+  const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
   const getPageDataResponseHandler = useCallback(
     (result: any) => {
@@ -62,19 +75,29 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   );
 
   useEffect(() => {
+    setIsRequestPending(true);
     getPageData?.()
       .then(getPageDataResponseHandler)
-      .catch((err: IHttpFetchError) => {
+      .catch((err: IHttpFetchError<ResponseErrorBody>) => {
         handleRequestError(err);
         setHasError(true);
       })
       .finally(() => {
         setLoaded(true);
+        setIsRequestPending(false);
       });
   }, [getPageData, currentTimerange, getPageDataResponseHandler, handleRequestError]);
 
   const onRefresh = () => {
-    getPageData?.().then(getPageDataResponseHandler).catch(handleRequestError);
+    // don't refresh when a request is pending
+    if (isRequestPending) return;
+    setIsRequestPending(true);
+    getPageData?.()
+      .then(getPageDataResponseHandler)
+      .catch(handleRequestError)
+      .finally(() => {
+        setIsRequestPending(false);
+      });
 
     if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       updateSetupModeData();
@@ -91,32 +114,44 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
     return children;
   };
 
+  const { supported, enabled } = getSetupModeState();
+
   return (
-    <div className="app-container" data-test-subj="monitoringAppContainer">
-      <ActionMenu>
-        <AlertsDropdown />
-      </ActionMenu>
-      <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
-      {tabs && (
-        <EuiTabs>
-          {tabs.map((item, idx) => {
-            return (
-              <EuiTab
-                key={idx}
-                disabled={isDisabledTab(product)}
-                title={item.label}
-                data-test-subj={item.testSubj}
-                href={createHref(item.route)}
-                isSelected={isTabSelected(item.route)}
-              >
-                {item.label}
-              </EuiTab>
-            );
-          })}
-        </EuiTabs>
-      )}
-      <div>{renderContent()}</div>
-    </div>
+    <EuiPage data-test-subj="monitoringAppContainer">
+      <EuiPageBody>
+        <EuiPageContent>
+          {setHeaderActionMenu && theme$ && (
+            <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+              {supported && (
+                <SetupModeToggleButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
+              )}
+              <AlertsDropdown />
+            </HeaderMenuPortal>
+          )}
+          <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
+          <EuiSpacer size="m" />
+          {tabs && (
+            <EuiTabs size="l">
+              {tabs.map((item, idx) => {
+                return (
+                  <EuiTab
+                    key={idx}
+                    disabled={isDisabledTab(product)}
+                    title={item.label}
+                    data-test-subj={item.testSubj}
+                    href={createHref(item.route)}
+                    isSelected={isTabSelected(item.route)}
+                  >
+                    {item.label}
+                  </EuiTab>
+                );
+              })}
+            </EuiTabs>
+          )}
+          <EuiPageContentBody>{renderContent()}</EuiPageContentBody>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 };
 

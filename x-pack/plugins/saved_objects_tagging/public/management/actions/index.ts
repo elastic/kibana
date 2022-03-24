@@ -14,7 +14,7 @@ import { getDeleteAction } from './delete';
 import { getEditAction } from './edit';
 import { getAssignAction } from './assign';
 
-export { TagAction } from './types';
+export type { TagAction } from './types';
 
 interface GetActionsOptions {
   core: CoreStart;
@@ -29,12 +29,11 @@ interface GetActionsOptions {
 }
 
 export const getTableActions = ({
-  core: { notifications, overlays },
+  core: { notifications, overlays, theme },
   capabilities,
   tagClient,
   tagCache,
   assignmentService,
-  setLoading,
   assignableTypes,
   fetchTags,
   canceled$,
@@ -42,7 +41,7 @@ export const getTableActions = ({
   const actions: TagAction[] = [];
 
   if (capabilities.edit) {
-    actions.push(getEditAction({ notifications, overlays, tagClient, fetchTags }));
+    actions.push(getEditAction({ notifications, overlays, theme, tagClient, fetchTags }));
   }
 
   if (capabilities.assign && assignableTypes.length > 0) {
@@ -54,6 +53,7 @@ export const getTableActions = ({
         fetchTags,
         notifications,
         overlays,
+        theme,
         canceled$,
       })
     );

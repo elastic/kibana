@@ -16,7 +16,7 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 import type { SpacesApi } from '../../spaces/public';
 import { registerFeature } from './register_feature';
 import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
-import type { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
 import { getTransformHealthRuleType } from './alerting';
 
 export interface PluginsDependencies {
@@ -27,7 +27,7 @@ export interface PluginsDependencies {
   share: SharePluginStart;
   spaces?: SpacesApi;
   alerting?: AlertingSetup;
-  triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export class TransformUiPlugin {

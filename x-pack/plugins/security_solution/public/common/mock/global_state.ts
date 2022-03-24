@@ -14,8 +14,6 @@ import {
   NetworkTlsFields,
   NetworkUsersFields,
   RiskScoreFields,
-  HostRulesFields,
-  HostTacticsFields,
 } from '../../../common/search_strategy';
 import { State } from '../store';
 
@@ -26,16 +24,39 @@ import {
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_INDEX_PATTERN,
+  DEFAULT_DATA_VIEW_ID,
+  DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
-import { uebaModel } from '../../ueba/store';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
-import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
-import { mockIndexPattern } from './index_pattern';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
+import { getScopePatternListSelection } from '../store/sourcerer/helpers';
+import {
+  mockBrowserFields,
+  mockDocValueFields,
+  mockIndexFields,
+  mockRuntimeMappings,
+} from '../containers/source/mock';
+import { usersModel } from '../../users/store';
+
+export const mockSourcererState = {
+  ...initialSourcererState,
+  signalIndexName: `${DEFAULT_SIGNALS_INDEX}-spacename`,
+  defaultDataView: {
+    ...initialSourcererState.defaultDataView,
+    browserFields: mockBrowserFields,
+    docValueFields: mockDocValueFields,
+    id: DEFAULT_DATA_VIEW_ID,
+    indexFields: mockIndexFields,
+    loading: false,
+    patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
+    runtimeMappings: mockRuntimeMappings,
+    title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`].join(','),
+  },
+};
 
 export const mockGlobalState: State = {
   app: {
@@ -60,6 +81,12 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
         externalAlerts: { activePage: 0, limit: 10 },
+        hostRisk: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          severitySelection: [],
+        },
       },
     },
     details: {
@@ -75,6 +102,12 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
         externalAlerts: { activePage: 0, limit: 10 },
+        hostRisk: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          severitySelection: [],
+        },
       },
     },
   },
@@ -164,33 +197,29 @@ export const mockGlobalState: State = {
       },
     },
   },
-  ueba: {
+  users: {
     page: {
       queries: {
-        [uebaModel.UebaTableType.riskScore]: {
+        [usersModel.UsersTableType.allUsers]: {
           activePage: 0,
           limit: 10,
-          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          // TODO sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+        },
+        [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.risk]: {
+          activePage: 0,
+          limit: 10,
+          sort: {
+            field: RiskScoreFields.timestamp,
+            direction: Direction.asc,
+          },
+          severitySelection: [],
         },
       },
     },
     details: {
       queries: {
-        [uebaModel.UebaTableType.hostRules]: {
-          activePage: 0,
-          limit: 10,
-          sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
-        },
-        [uebaModel.UebaTableType.hostTactics]: {
-          activePage: 0,
-          limit: 10,
-          sort: { field: HostTacticsFields.riskScore, direction: Direction.desc },
-        },
-        [uebaModel.UebaTableType.userRules]: {
-          activePage: 0,
-          limit: 10,
-          sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
-        },
+        [usersModel.UsersTableType.anomalies]: null,
       },
     },
   },
@@ -241,6 +270,7 @@ export const mockGlobalState: State = {
       test: {
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.notes,
+        dataViewId: DEFAULT_DATA_VIEW_ID,
         deletedEventIds: [],
         documentType: '',
         queryFields: [],
@@ -294,24 +324,48 @@ export const mockGlobalState: State = {
     insertTimeline: null,
   },
   sourcerer: {
-    ...initialSourcererState,
+    ...mockSourcererState,
+    defaultDataView: {
+      ...mockSourcererState.defaultDataView,
+      title: `${mockSourcererState.defaultDataView.title},fakebeat-*`,
+    },
+    kibanaDataViews: [
+      {
+        ...mockSourcererState.defaultDataView,
+        title: `${mockSourcererState.defaultDataView.title},fakebeat-*`,
+      },
+    ],
     sourcererScopes: {
-      ...initialSourcererState.sourcererScopes,
+      ...mockSourcererState.sourcererScopes,
       [SourcererScopeName.default]: {
-        ...initialSourcererState.sourcererScopes[SourcererScopeName.default],
-        selectedPatterns: DEFAULT_INDEX_PATTERN,
-        browserFields: mockBrowserFields,
-        indexPattern: mockIndexPattern,
-        docValueFields: mockDocValueFields,
-        loading: false,
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.default,
+          mockSourcererState.signalIndexName,
+          true
+        ),
+      },
+      [SourcererScopeName.detections]: {
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.detections],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.detections,
+          mockSourcererState.signalIndexName,
+          true
+        ),
       },
       [SourcererScopeName.timeline]: {
-        ...initialSourcererState.sourcererScopes[SourcererScopeName.timeline],
-        selectedPatterns: DEFAULT_INDEX_PATTERN,
-        browserFields: mockBrowserFields,
-        indexPattern: mockIndexPattern,
-        docValueFields: mockDocValueFields,
-        loading: false,
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.timeline],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.timeline,
+          mockSourcererState.signalIndexName,
+          true
+        ),
       },
     },
   },

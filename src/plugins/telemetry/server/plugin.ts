@@ -7,23 +7,24 @@
  */
 
 import { URL } from 'url';
-import { AsyncSubject, Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
+import type { Observable } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
+import { take } from 'rxjs/operators';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
 } from 'src/plugins/telemetry_collection_manager/server';
-import { take } from 'rxjs/operators';
-import {
+import type {
   CoreSetup,
   PluginInitializerContext,
   ISavedObjectsRepository,
   CoreStart,
-  SavedObjectsClient,
   Plugin,
   Logger,
-  UiSettingsServiceStart,
-} from '../../../core/server';
+} from 'src/core/server';
+import type { SecurityPluginStart } from '../../../../x-pack/plugins/security/server';
+import { SavedObjectsClient } from '../../../core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {
@@ -32,8 +33,7 @@ import {
 } from './collectors';
 import type { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
-import { handleOldSettings } from './handle_old_settings';
-import { getTelemetrySavedObject } from './telemetry_repository';
+import { getTelemetrySavedObject, TelemetrySavedObject } from './telemetry_repository';
 import { getTelemetryOptIn, getTelemetryChannelEndpoint } from '../common/telemetry_config';
 
 interface TelemetryPluginsDepsSetup {
@@ -43,6 +43,7 @@ interface TelemetryPluginsDepsSetup {
 
 interface TelemetryPluginsDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
+  security?: SecurityPluginStart;
 }
 
 /**
@@ -79,8 +80,19 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   /**
    * @private Used to mark the completion of the old UI Settings migration
    */
-  private readonly oldUiSettingsHandled$ = new AsyncSubject();
-  private savedObjectsClient?: ISavedObjectsRepository;
+  private savedObjectsInternalRepository?: ISavedObjectsRepository;
+
+  /**
+   * @private
+   * Used to interact with the Telemetry Saved Object.
+   * Some users may not have access to the document but some queries
+   * are still relevant to them like fetching when was the last time it was reported.
+   *
+   * Using the internal client in all cases ensures the permissions to interact the document.
+   */
+  private savedObjectsInternalClient$ = new ReplaySubject<SavedObjectsClient>(1);
+
+  private security?: SecurityPluginStart;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.logger = initializerContext.logger.get();
@@ -110,6 +122,8 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       logger: this.logger,
       router,
       telemetryCollectionManager,
+      savedObjectsInternalClient$: this.savedObjectsInternalClient$,
+      getSecurity: () => this.security,
     });
 
     this.registerMappings((opts) => savedObjects.registerType(opts));
@@ -118,27 +132,41 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     return {
       getTelemetryUrl: async () => {
         const { sendUsageTo } = await config$.pipe(take(1)).toPromise();
-        const telemetryUrl = getTelemetryChannelEndpoint({ env: sendUsageTo, channelName: 'main' });
+        const telemetryUrl = getTelemetryChannelEndpoint({
+          env: sendUsageTo,
+          channelName: 'snapshot',
+        });
 
         return new URL(telemetryUrl);
       },
     };
   }
 
-  public start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
-    const { savedObjects, uiSettings } = core;
+  public start(
+    core: CoreStart,
+    { telemetryCollectionManager, security }: TelemetryPluginsDepsStart
+  ) {
+    const { savedObjects } = core;
     const savedObjectsInternalRepository = savedObjects.createInternalRepository();
-    this.savedObjectsClient = savedObjectsInternalRepository;
+    this.savedObjectsInternalRepository = savedObjectsInternalRepository;
+    this.savedObjectsInternalClient$.next(new SavedObjectsClient(savedObjectsInternalRepository));
 
-    // Not catching nor awaiting these promises because they should never reject
-    this.handleOldUiSettings(uiSettings);
-    this.startFetcherWhenOldSettingsAreHandled(core, telemetryCollectionManager);
+    this.security = security;
+
+    this.startFetcher(core, telemetryCollectionManager);
 
     return {
       getIsOptedIn: async () => {
-        await this.oldUiSettingsHandled$.pipe(take(1)).toPromise(); // Wait for the old settings to be handled
-        const internalRepository = new SavedObjectsClient(savedObjectsInternalRepository);
-        const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
+        const internalRepositoryClient = await this.savedObjectsInternalClient$
+          .pipe(take(1))
+          .toPromise();
+        let telemetrySavedObject: TelemetrySavedObject = false; // if an error occurs while fetching opt-in status, a `false` result indicates that Kibana cannot opt-in
+        try {
+          telemetrySavedObject = await getTelemetrySavedObject(internalRepositoryClient);
+        } catch (err) {
+          this.logger.debug('Failed to check telemetry opt-in status: ' + err.message);
+        }
+
         const config = await this.config$.pipe(take(1)).toPromise();
         const allowChangingOptInStatus = config.allowChangingOptInStatus;
         const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
@@ -155,24 +183,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  private async handleOldUiSettings(uiSettings: UiSettingsServiceStart) {
-    const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient!);
-    const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-
-    try {
-      await handleOldSettings(savedObjectsClient, uiSettingsClient);
-    } catch (error) {
-      this.logger.warn('Unable to update legacy telemetry configs.');
-    }
-    // Set the mark in the AsyncSubject as complete so all the methods that require this method to be completed before working, can move on
-    this.oldUiSettingsHandled$.complete();
-  }
-
-  private async startFetcherWhenOldSettingsAreHandled(
+  private startFetcher(
     core: CoreStart,
     telemetryCollectionManager: TelemetryCollectionManagerPluginStart
   ) {
-    await this.oldUiSettingsHandled$.pipe(take(1)).toPromise(); // Wait for the old settings to be handled
+    // We start the fetcher having updated everything we need to using the config settings
     this.fetcherTask.start(core, { telemetryCollectionManager });
   }
 
@@ -213,7 +228,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   private registerUsageCollectors(usageCollection: UsageCollectionSetup) {
-    const getSavedObjectsClient = () => this.savedObjectsClient;
+    const getSavedObjectsClient = () => this.savedObjectsInternalRepository;
 
     registerTelemetryPluginUsageCollector(usageCollection, {
       currentKibanaVersion: this.currentKibanaVersion,

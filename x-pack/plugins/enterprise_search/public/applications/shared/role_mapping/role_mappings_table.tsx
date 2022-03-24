@@ -7,31 +7,24 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
 import { ACTIONS_HEADER } from '../constants';
-import { docLinks } from '../doc_links';
 import { RoleRules } from '../types';
 
 import './role_mappings_table.scss';
 
-const AUTH_PROVIDER_DOCUMENTATION_URL = `${docLinks.enterpriseSearchBase}/users-access.html`;
-
 import {
-  ANY_AUTH_PROVIDER,
-  ANY_AUTH_PROVIDER_OPTION_LABEL,
   ROLE_LABEL,
   ALL_LABEL,
-  AUTH_PROVIDER_LABEL,
   EXTERNAL_ATTRIBUTE_LABEL,
   ATTRIBUTE_VALUE_LABEL,
   FILTER_ROLE_MAPPINGS_PLACEHOLDER,
   ROLE_MAPPINGS_NO_RESULTS_MESSAGE,
   EXTERNAL_ATTRIBUTE_TOOLTIP,
-  AUTH_PROVIDER_TOOLTIP,
 } from './constants';
 import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 
@@ -48,7 +41,6 @@ interface Props {
   accessHeader: string;
   roleMappings: Array<ASRoleMapping | WSRoleMapping>;
   accessAllEngines?: boolean;
-  shouldShowAuthProvider?: boolean;
   initializeRoleMapping(roleMappingId: string): void;
   handleDeleteMapping(roleMappingId: string): void;
 }
@@ -57,7 +49,6 @@ export const RoleMappingsTable: React.FC<Props> = ({
   accessItemKey,
   accessHeader,
   roleMappings,
-  shouldShowAuthProvider,
   initializeRoleMapping,
   handleDeleteMapping,
 }) => {
@@ -124,24 +115,6 @@ export const RoleMappingsTable: React.FC<Props> = ({
     },
   };
 
-  const authProviderCol: EuiBasicTableColumn<SharedRoleMapping> = {
-    field: 'authProvider',
-    name: AUTH_PROVIDER_LABEL,
-    render: (_, { authProvider }: SharedRoleMapping) => {
-      if (authProvider[0] === ANY_AUTH_PROVIDER) {
-        return ANY_AUTH_PROVIDER_OPTION_LABEL;
-      }
-      return (
-        <span data-test-subj="ProviderSpecificList">
-          {authProvider.join(', ')}{' '}
-          <EuiLink href={AUTH_PROVIDER_DOCUMENTATION_URL} target="_blank">
-            <EuiIconTip type="alert" color="warning" content={AUTH_PROVIDER_TOOLTIP} />
-          </EuiLink>
-        </span>
-      );
-    },
-  };
-
   const actionsCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'id',
     name: ACTIONS_HEADER,
@@ -159,12 +132,10 @@ export const RoleMappingsTable: React.FC<Props> = ({
     ),
   };
 
-  const columns = shouldShowAuthProvider
-    ? [attributeNameCol, attributeValueCol, roleCol, accessItemsCol, authProviderCol, actionsCol]
-    : [attributeNameCol, attributeValueCol, roleCol, accessItemsCol, actionsCol];
+  const columns = [attributeNameCol, attributeValueCol, roleCol, accessItemsCol, actionsCol];
 
   const pagination = {
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
     pageSize: 10,
   };
 

@@ -42,5 +42,6 @@ const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
     </EuiConfirmModal>
   );
 };
+ConfirmDeleteCaseModalComp.displayName = 'ConfirmDeleteCaseModalComp';
 
 export const ConfirmDeleteCaseModal = React.memo(ConfirmDeleteCaseModalComp);

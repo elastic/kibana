@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
+import React, { useState, ChangeEvent, useEffect, useRef, KeyboardEventHandler } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -57,6 +57,12 @@ export function SeriesName({ series, seriesId }: Props) {
     }
   };
 
+  const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (event) => {
+    if (event.key === 'Enter') {
+      setIsEditingEnabled(false);
+    }
+  };
+
   useEffect(() => {
     setValue(series.name);
   }, [series.name]);
@@ -75,12 +81,14 @@ export function SeriesName({ series, seriesId }: Props) {
             <EuiFieldText
               value={value}
               onChange={onChange}
-              fullWidth
               onBlur={onSave}
+              onKeyDown={onKeyDown}
+              fullWidth
               inputRef={inputRef}
               aria-label={i18n.translate('xpack.observability.expView.seriesEditor.seriesName', {
                 defaultMessage: 'Series name',
               })}
+              data-test-subj="exploratoryViewSeriesNameInput"
             />
           </EuiOutsideClickDetector>
         </EuiFlexItem>

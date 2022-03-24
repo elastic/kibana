@@ -68,9 +68,6 @@ export enum SEARCH_EVENT_TYPE {
   SESSIONS_LIST_LOADED = 'sessionsListLoaded',
 }
 
-/**
- * @internal
- */
 export interface SearchUsageCollector {
   trackQueryTimedOut: () => Promise<void>;
   trackSessionIndicatorTourLoading: () => Promise<void>;

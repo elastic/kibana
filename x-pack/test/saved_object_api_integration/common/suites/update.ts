@@ -9,30 +9,30 @@ import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
-import {
-  createRequest,
-  expectResponses,
-  getUrlPrefix,
-  getTestTitle,
-} from '../lib/saved_object_test_utils';
+import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface UpdateTestDefinition extends TestDefinition {
-  request: { type: string; id: string };
+  request: { type: string; id: string; upsert?: boolean };
 }
 export type UpdateTestSuite = TestSuite<UpdateTestDefinition>;
 export interface UpdateTestCase extends TestCase {
-  failure?: 403 | 404;
+  failure?: 403 | 404 | 409;
+  upsert?: boolean;
 }
 
 const NEW_ATTRIBUTE_KEY = 'title'; // all type mappings include this attribute, for simplicity's sake
 const NEW_ATTRIBUTE_VAL = `Updated attribute value ${Date.now()}`;
 
+const ALIAS_CONFLICT_OBJ = Object.freeze({ type: 'resolvetype', id: 'alias-match' }); // this fixture was created to test the resolve API, but we are reusing to test the alias conflict error
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
 export const TEST_CASES: Record<string, UpdateTestCase> = Object.freeze({
   ...CASES,
+  ALIAS_CONFLICT_OBJ,
   DOES_NOT_EXIST,
 });
+
+const createRequest = ({ type, id, upsert }: UpdateTestCase) => ({ type, id, upsert });
 
 export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('update');
@@ -89,8 +89,9 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
         for (const test of tests) {
           it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-            const { type, id } = test.request;
-            const requestBody = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };
+            const { type, id, upsert } = test.request;
+            const attributes = { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL };
+            const requestBody = { attributes, ...(upsert && { upsert: attributes }) };
             await supertest
               .put(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
               .auth(user?.username, user?.password)

@@ -35,7 +35,7 @@ import {
   MLUISettingsClientUninitialized,
 } from './errors';
 import { MlClient, getMlClient } from '../lib/ml_client';
-import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
+import { mlSavedObjectServiceFactory, MLSavedObjectService } from '../saved_objects';
 import {
   getAlertingServiceProvider,
   MlAlertingServiceProvider,
@@ -76,7 +76,7 @@ export interface SharedServicesChecks {
 interface OkParams {
   scopedClient: IScopedClusterClient;
   mlClient: MlClient;
-  jobSavedObjectService: JobSavedObjectService;
+  mlSavedObjectService: MLSavedObjectService;
   getFieldsFormatRegistry: FieldFormatsRegistryProvider;
   getDataViewsService: GetDataViewsService;
 }
@@ -126,7 +126,7 @@ export function createSharedServices(
       hasMlCapabilities,
       scopedClient,
       mlClient,
-      jobSavedObjectService,
+      mlSavedObjectService,
       getFieldsFormatRegistry,
       getDataViewsService,
     } = getRequestItems(request);
@@ -150,7 +150,7 @@ export function createSharedServices(
         return callback({
           scopedClient,
           mlClient,
-          jobSavedObjectService,
+          mlSavedObjectService,
           getFieldsFormatRegistry,
           getDataViewsService,
         });
@@ -201,13 +201,16 @@ function getRequestItemsProvider(
     // will not receive a real request object when being called from an alert.
     // instead a dummy request object will be supplied
     const clusterClient = getClusterClient();
-    const jobSavedObjectService = jobSavedObjectServiceFactory(
-      savedObjectsClient,
-      internalSavedObjectsClient,
-      spaceEnabled,
-      authorization,
-      isMlReady
-    );
+    const getSobSavedObjectService = (client: IScopedClusterClient) => {
+      return mlSavedObjectServiceFactory(
+        savedObjectsClient,
+        internalSavedObjectsClient,
+        spaceEnabled,
+        authorization,
+        client,
+        isMlReady
+      );
+    };
 
     if (clusterClient === null) {
       throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
@@ -235,10 +238,12 @@ function getRequestItemsProvider(
       return fieldFormatRegistry;
     };
 
+    let mlSavedObjectService;
     if (request instanceof KibanaRequest) {
       hasMlCapabilities = getHasMlCapabilities(request);
       scopedClient = clusterClient.asScoped(request);
-      mlClient = getMlClient(scopedClient, jobSavedObjectService);
+      mlSavedObjectService = getSobSavedObjectService(scopedClient);
+      mlClient = getMlClient(scopedClient, mlSavedObjectService);
     } else {
       hasMlCapabilities = () => Promise.resolve();
       const { asInternalUser } = clusterClient;
@@ -246,20 +251,22 @@ function getRequestItemsProvider(
         asInternalUser,
         asCurrentUser: asInternalUser,
       };
-      mlClient = getMlClient(scopedClient, jobSavedObjectService);
+      mlSavedObjectService = getSobSavedObjectService(scopedClient);
+      mlClient = getMlClient(scopedClient, mlSavedObjectService);
     }
 
     const getDataViewsService = getDataViewsServiceFactory(
       getDataViews,
       savedObjectsClient,
-      scopedClient
+      scopedClient,
+      request
     );
 
     return {
       hasMlCapabilities,
       scopedClient,
       mlClient,
-      jobSavedObjectService,
+      mlSavedObjectService,
       getFieldsFormatRegistry,
       getDataViewsService,
     };

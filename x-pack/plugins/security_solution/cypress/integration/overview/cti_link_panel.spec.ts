@@ -9,10 +9,7 @@ import {
   OVERVIEW_CTI_ENABLE_MODULE_BUTTON,
   OVERVIEW_CTI_LINKS,
   OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL,
-  OVERVIEW_CTI_LINKS_INFO_INNER_PANEL,
-  OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL,
   OVERVIEW_CTI_TOTAL_EVENT_COUNT,
-  OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON,
 } from '../../screens/overview';
 
 import { loginAndWaitForPage } from '../../tasks/login';
@@ -28,12 +25,11 @@ describe('CTI Link Panel', () => {
   it('renders disabled threat intel module as expected', () => {
     loginAndWaitForPage(OVERVIEW_URL);
     cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL}`).should('exist');
-    cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
     cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 indicators');
     cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`).should('exist');
     cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`)
       .should('have.attr', 'href')
-      .and('match', /filebeat-module-threatintel.html/);
+      .and('match', /app\/integrations\/browse\?q=threat%20intelligence/);
   });
 
   describe('enabled threat intel module', () => {
@@ -49,17 +45,15 @@ describe('CTI Link Panel', () => {
       loginAndWaitForPage(
         `${OVERVIEW_URL}?sourcerer=(timerange:(from:%272021-07-08T04:00:00.000Z%27,kind:absolute,to:%272021-07-09T03:59:59.999Z%27))`
       );
-      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('exist');
-      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
-      cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
+      cy.get(`${OVERVIEW_CTI_LINKS}`).should('exist');
       cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 indicators');
     });
 
     it('renders dashboard module as expected when there are events in the selected time period', () => {
       loginAndWaitForPage(OVERVIEW_URL);
-      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('not.exist');
-      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
-      cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
+      cy.get(`${OVERVIEW_CTI_LINKS}`).should('exist');
+      cy.get(OVERVIEW_CTI_LINKS).should('not.contain.text', 'Anomali');
+      cy.get(OVERVIEW_CTI_LINKS).should('contain.text', 'AbuseCH malware');
       cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 indicator');
     });
   });

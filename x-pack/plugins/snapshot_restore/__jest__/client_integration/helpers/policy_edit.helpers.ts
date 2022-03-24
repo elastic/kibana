@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { PolicyEdit } from '../../../public/application/sections/policy_edit';
 import { WithAppDependencies } from './setup_environment';
 import { POLICY_NAME } from './constant';
 import { formSetup, PolicyFormTestSubjects } from './policy_form.helpers';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`/edit_policy/${POLICY_NAME}`],
     componentRoutePath: '/edit_policy/:name',

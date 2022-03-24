@@ -95,20 +95,13 @@ const handleMetadataTransformStatsChanged: CaseReducer<MetadataTransformStatsCha
 /* eslint-disable-next-line complexity */
 export const endpointListReducer: StateReducer = (state = initialEndpointPageState(), action) => {
   if (action.type === 'serverReturnedEndpointList') {
-    const {
-      hosts,
-      total,
-      request_page_size: pageSize,
-      request_page_index: pageIndex,
-      policy_info: policyVersionInfo,
-    } = action.payload;
+    const { data, total, page, pageSize } = action.payload;
     return {
       ...state,
-      hosts,
+      hosts: data,
       total,
+      pageIndex: page,
       pageSize,
-      pageIndex,
-      policyVersionInfo,
       loading: false,
       error: undefined,
     };

@@ -7,12 +7,11 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
-import { UiSettingsType } from '../../../../../../core/public';
-
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { notificationServiceMock } from '../../../../../../core/public/mocks';
+import { UiSettingsType } from '../../../../../../core/public';
+import { themeServiceMock, notificationServiceMock } from '../../../../../../core/public/mocks';
 import { SettingsChanges } from '../../types';
 import { Form } from './form';
 
@@ -126,7 +125,8 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={true}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -145,7 +145,8 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={false}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -164,7 +165,8 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={true}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -183,7 +185,8 @@ describe('Form', () => {
         showNoResultsMessage={false}
         enableSaving={true}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -202,7 +205,8 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={false}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
     (wrapper.instance() as Form).setState({
@@ -232,7 +236,8 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={false}
         toasts={toasts}
-        dockLinks={{} as any}
+        docLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
     (wrapper.instance() as Form).setState({
@@ -268,7 +273,8 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={false}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -296,7 +302,8 @@ describe('Form', () => {
         showNoResultsMessage={true}
         enableSaving={false}
         toasts={{} as any}
-        dockLinks={{} as any}
+        docLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 

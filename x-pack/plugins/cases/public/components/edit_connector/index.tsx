@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import {
   EuiText,
@@ -21,7 +20,8 @@ import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
 
 import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
-import { ActionConnector, Case, ConnectorTypeFields } from '../../../common';
+import { Case } from '../../../common/ui/types';
+import { ActionConnector, ConnectorTypeFields, NONE_CONNECTOR_ID } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { CaseUserActions } from '../../containers/types';
@@ -30,17 +30,15 @@ import { getConnectorFieldsFromUserActions } from './helpers';
 import * as i18n from './translations';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
-import { CasesNavigation } from '../links';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
 
 export interface EditConnectorProps {
   caseData: Case;
   caseServices: CaseServices;
-  configureCasesNavigation: CasesNavigation;
   connectorName: string;
   connectors: ActionConnector[];
   hasDataToPush: boolean;
-  hideConnectorServiceNowSir?: boolean;
   isLoading: boolean;
   isValidConnector: boolean;
   onSubmit: (
@@ -49,7 +47,6 @@ export interface EditConnectorProps {
     onError: () => void,
     onSuccess: () => void
   ) => void;
-  permissionsError?: string;
   updateCase: (newCase: Case) => void;
   userActions: CaseUserActions[];
   userCanCrud?: boolean;
@@ -116,26 +113,29 @@ export const EditConnector = React.memo(
   ({
     caseData,
     caseServices,
-    configureCasesNavigation,
     connectorName,
     connectors,
     hasDataToPush,
-    hideConnectorServiceNowSir = false,
     isLoading,
     isValidConnector,
     onSubmit,
-    permissionsError,
     updateCase,
     userActions,
     userCanCrud = true,
   }: EditConnectorProps) => {
     const caseFields = caseData.connector.fields;
     const selectedConnector = caseData.connector.id;
+
     const { form } = useForm({
       defaultValue: { connectorId: selectedConnector },
       options: { stripEmptyFields: false },
       schema,
     });
+    const { actions } = useApplicationCapabilities();
+    const actionsReadCapabilities = actions.read;
+
+    // by default save if disabled
+    const [enableSave, setEnableSave] = useState(false);
 
     const { setFieldValue, submit } = form;
 
@@ -143,6 +143,21 @@ export const EditConnector = React.memo(
       editConnectorReducer,
       { ...initialState, fields: caseFields }
     );
+
+    // only enable the save button if changes were made to the previous selected
+    // connector or its fields
+    useEffect(() => {
+      // null and none are equivalent to `no connector`.
+      // This makes sure we don't enable the button when the "no connector" option is selected
+      // by default. e.g. when a case is created without a selector
+      const isNoConnectorDeafultValue =
+        currentConnector === null && selectedConnector === NONE_CONNECTOR_ID;
+      const enable =
+        (!isNoConnectorDeafultValue && currentConnector?.id !== selectedConnector) ||
+        !deepEqual(fields, caseFields);
+
+      setEnableSave(enable);
+    }, [caseFields, currentConnector, fields, selectedConnector]);
 
     useEffect(() => {
       // Initialize the current connector with the connector information attached to the case if we can find that
@@ -250,7 +265,6 @@ export const EditConnector = React.memo(
     });
 
     const { pushButton, pushCallouts } = usePushToService({
-      configureCasesNavigation,
       connector: {
         ...caseData.connector,
         name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
@@ -291,7 +305,7 @@ export const EditConnector = React.memo(
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup data-test-subj="edit-connectors" direction="column">
-          {!isLoading && !editConnector && pushCallouts && permissionsError == null && (
+          {!isLoading && !editConnector && pushCallouts && actionsReadCapabilities && (
             <EuiFlexItem data-test-subj="push-callouts">{pushCallouts}</EuiFlexItem>
           )}
           <DisappearingFlexItem $isHidden={!editConnector}>
@@ -307,7 +321,6 @@ export const EditConnector = React.memo(
                       dataTestSubj: 'caseConnectors',
                       defaultValue: selectedConnector,
                       disabled: !userCanCrud,
-                      hideConnectorServiceNowSir,
                       idAria: 'caseConnectors',
                       isEdit: editConnector,
                       isLoading,
@@ -319,9 +332,9 @@ export const EditConnector = React.memo(
             </Form>
           </DisappearingFlexItem>
           <EuiFlexItem data-test-subj="edit-connector-fields-form-flex-item">
-            {!editConnector && permissionsError && (
+            {!editConnector && !actionsReadCapabilities && (
               <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
-                <span>{permissionsError}</span>
+                <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
               </EuiText>
             )}
             <ConnectorFieldsForm
@@ -336,7 +349,8 @@ export const EditConnector = React.memo(
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color="secondary"
+                    disabled={!enableSave}
+                    color="success"
                     data-test-subj="edit-connectors-submit"
                     fill
                     iconType="save"
@@ -363,7 +377,7 @@ export const EditConnector = React.memo(
             !isLoading &&
             !editConnector &&
             userCanCrud &&
-            !permissionsError && (
+            actionsReadCapabilities && (
               <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
                 <span>{pushButton}</span>
               </EuiFlexItem>

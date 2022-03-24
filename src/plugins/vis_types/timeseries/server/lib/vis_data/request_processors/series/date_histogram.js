@@ -11,8 +11,6 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { search, UI_SETTINGS } from '../../../../../../../../plugins/data/server';
-import { AGG_TYPE, getAggsByType } from '../../../../../common/agg_utils';
-import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 
 const { dateHistogramInterval } = search.aggs;
 
@@ -32,17 +30,19 @@ export function dateHistogram(
 
     const { timeField, interval, maxBars } = await buildSeriesMetaParams();
     const { from, to } = offsetTime(req, series.offset_time);
-    const { timezone } = capabilities;
 
-    const { intervalString } = getBucketSize(
-      req,
-      interval,
-      capabilities,
-      maxBars ? Math.min(maxBarsUiSettings, maxBars) : barTargetUiSettings
-    );
     let bucketInterval;
 
     const overwriteDateHistogramForLastBucketMode = () => {
+      const { timezone } = capabilities;
+
+      const { intervalString } = getBucketSize(
+        req,
+        interval,
+        capabilities,
+        maxBars ? Math.min(maxBarsUiSettings, maxBars) : barTargetUiSettings
+      );
+
       overwrite(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
         field: timeField,
         min_doc_count: 0,
@@ -58,35 +58,12 @@ export function dateHistogram(
     };
 
     const overwriteDateHistogramForEntireTimerangeMode = () => {
-      const metricAggs = getAggsByType((agg) => agg.id)[AGG_TYPE.METRIC];
-
-      // we should use auto_date_histogram only for metric aggregations and math
-      if (
-        series.metrics.every(
-          (metric) => metricAggs.includes(metric.type) || metric.type === TSVB_METRIC_TYPES.MATH
-        )
-      ) {
-        overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
-          field: timeField,
-          buckets: 1,
-        });
-
-        bucketInterval = `${to.valueOf() - from.valueOf()}ms`;
-        return;
-      }
-
-      overwrite(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
+      overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
         field: timeField,
-        min_doc_count: 0,
-        time_zone: timezone,
-        extended_bounds: {
-          min: from.valueOf(),
-          max: to.valueOf(),
-        },
-        ...dateHistogramInterval(intervalString),
+        buckets: 1,
       });
 
-      bucketInterval = intervalString;
+      bucketInterval = `${to.valueOf() - from.valueOf()}ms`;
     };
 
     isLastValueTimerangeMode(panel, series)
@@ -98,7 +75,8 @@ export function dateHistogram(
       panelId: panel.id,
       seriesId: series.id,
       intervalString: bucketInterval,
-      index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      dataViewId: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      indexPatternString: seriesIndex.indexPatternString,
     });
 
     return next(doc);

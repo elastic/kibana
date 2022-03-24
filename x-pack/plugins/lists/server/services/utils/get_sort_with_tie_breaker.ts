@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SortFieldOrUndefined, SortOrderOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getSortWithTieBreaker = ({
@@ -13,7 +13,7 @@ export const getSortWithTieBreaker = ({
 }: {
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-}): estypes.SearchSortCombinations[] => {
+}): estypes.SortCombinations[] => {
   const ascOrDesc = sortOrder ?? ('asc' as const);
   if (sortField != null) {
     return [{ [sortField]: ascOrDesc, tie_breaker_id: 'asc' as const }];

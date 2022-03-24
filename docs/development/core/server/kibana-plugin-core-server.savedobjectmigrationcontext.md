@@ -16,8 +16,8 @@ export interface SavedObjectMigrationContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [convertToMultiNamespaceTypeVersion](./kibana-plugin-core-server.savedobjectmigrationcontext.converttomultinamespacetypeversion.md) | <code>string</code> | The version in which this object type is being converted to a multi-namespace type |
-|  [isSingleNamespaceType](./kibana-plugin-core-server.savedobjectmigrationcontext.issinglenamespacetype.md) | <code>boolean</code> | Whether this is a single-namespace type or not |
-|  [log](./kibana-plugin-core-server.savedobjectmigrationcontext.log.md) | <code>SavedObjectsMigrationLogger</code> | logger instance to be used by the migration handler |
-|  [migrationVersion](./kibana-plugin-core-server.savedobjectmigrationcontext.migrationversion.md) | <code>string</code> | The migration version that this migration function is defined for |
+|  [convertToMultiNamespaceTypeVersion?](./kibana-plugin-core-server.savedobjectmigrationcontext.converttomultinamespacetypeversion.md) | string | <i>(Optional)</i> The version in which this object type is being converted to a multi-namespace type |
+|  [isSingleNamespaceType](./kibana-plugin-core-server.savedobjectmigrationcontext.issinglenamespacetype.md) | boolean | Whether this is a single-namespace type or not |
+|  [log](./kibana-plugin-core-server.savedobjectmigrationcontext.log.md) | SavedObjectsMigrationLogger | logger instance to be used by the migration handler |
+|  [migrationVersion](./kibana-plugin-core-server.savedobjectmigrationcontext.migrationversion.md) | string | The migration version that this migration function is defined for |
 

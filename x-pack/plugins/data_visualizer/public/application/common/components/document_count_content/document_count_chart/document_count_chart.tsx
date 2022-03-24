@@ -6,16 +6,13 @@
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
-
 import { i18n } from '@kbn/i18n';
-
 import {
   Axis,
   BarSeries,
   BrushEndListener,
   Chart,
   ElementClickListener,
-  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
@@ -23,7 +20,9 @@ import {
   XYBrushEvent,
 } from '@elastic/charts';
 import moment from 'moment';
+import { IUiSettingsClient } from 'kibana/public';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
+import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../../../../src/plugins/charts/common';
 
 export interface DocumentCountChartPoint {
   time: number | string;
@@ -40,6 +39,16 @@ interface Props {
 
 const SPEC_ID = 'document_count';
 
+function getTimezone(uiSettings: IUiSettingsClient) {
+  if (uiSettings.isDefault('dateFormat:tz')) {
+    const detectedTimezone = moment.tz.guess();
+    if (detectedTimezone) return detectedTimezone;
+    else return moment().format('Z');
+  } else {
+    return uiSettings.get('dateFormat:tz', 'Browser');
+  }
+}
+
 export const DocumentCountChart: FC<Props> = ({
   width,
   chartPoints,
@@ -48,8 +57,14 @@ export const DocumentCountChart: FC<Props> = ({
   interval,
 }) => {
   const {
-    services: { data },
+    services: { data, uiSettings, fieldFormats, charts },
   } = useDataVisualizerKibana();
+
+  const chartTheme = charts.theme.useChartsTheme();
+  const chartBaseTheme = charts.theme.useChartsBaseTheme();
+
+  const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
+  const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
 
   const seriesName = i18n.translate(
     'xpack.dataVisualizer.dataGrid.field.documentCountChart.seriesLabel',
@@ -62,8 +77,6 @@ export const DocumentCountChart: FC<Props> = ({
     min: timeRangeEarliest,
     max: timeRangeLatest,
   };
-
-  const dateFormatter = niceTimeFormatter([timeRangeEarliest, timeRangeLatest]);
 
   const adjustedChartPoints = useMemo(() => {
     // Display empty chart when no data in range
@@ -110,6 +123,8 @@ export const DocumentCountChart: FC<Props> = ({
     timefilterUpdateHandler(range);
   };
 
+  const timeZone = getTimezone(uiSettings);
+
   return (
     <div style={{ width: width ?? '100%' }} data-test-subj="dataVisualizerDocumentCountChart">
       <Chart
@@ -122,12 +137,16 @@ export const DocumentCountChart: FC<Props> = ({
           xDomain={xDomain}
           onBrushEnd={onBrushEnd as BrushEndListener}
           onElementClick={onElementClick}
+          theme={chartTheme}
+          baseTheme={chartBaseTheme}
         />
         <Axis
           id="bottom"
           position={Position.Bottom}
           showOverlappingTicks={true}
-          tickFormat={dateFormatter}
+          tickFormat={(value) => xAxisFormatter.convert(value)}
+          timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
+          style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
         />
         <Axis id="left" position={Position.Left} />
         <BarSeries
@@ -138,6 +157,7 @@ export const DocumentCountChart: FC<Props> = ({
           xAccessor="time"
           yAccessors={['value']}
           data={adjustedChartPoints}
+          timeZone={timeZone}
         />
       </Chart>
     </div>

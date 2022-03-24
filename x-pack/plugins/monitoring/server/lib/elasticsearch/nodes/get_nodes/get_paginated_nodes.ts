@@ -14,6 +14,7 @@ import { sortNodes } from './sort_nodes';
 import { paginate } from '../../../pagination/paginate';
 import { getMetrics } from '../../../details/get_metrics';
 import { LegacyRequest } from '../../../../types';
+import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
 
 /**
  * This function performs an optimization around the node listing tables in the UI. To avoid
@@ -41,7 +42,6 @@ interface Node {
 
 export async function getPaginatedNodes(
   req: LegacyRequest,
-  esIndexPattern: string,
   { clusterUuid }: { clusterUuid: string },
   metricSet: string[],
   pagination: { index: number; size: number },
@@ -52,19 +52,23 @@ export async function getPaginatedNodes(
     nodesShardCount,
   }: {
     clusterStats: {
-      cluster_state: { nodes: Record<string, Node> };
+      cluster_state?: { nodes: Record<string, Node> };
+      elasticsearch?: ElasticsearchModifiedSource['elasticsearch'];
     };
     nodesShardCount: { nodes: Record<string, { shardCount: number }> };
   }
 ) {
-  const config = req.server.config();
-  const size = Number(config.get('monitoring.ui.max_bucket_size'));
-  const nodes: Node[] = await getNodeIds(req, esIndexPattern, { clusterUuid }, size);
+  const config = req.server.config;
+  const size = config.ui.max_bucket_size;
+  const nodes: Node[] = await getNodeIds(req, { clusterUuid }, size);
 
   // Add `isOnline` and shards from the cluster state and shard stats
-  const clusterState = clusterStats?.cluster_state ?? { nodes: {} };
+  const clusterStateNodes =
+    clusterStats?.cluster_state?.nodes ??
+    clusterStats?.elasticsearch?.cluster?.stats?.state?.nodes ??
+    {};
   for (const node of nodes) {
-    node.isOnline = !isUndefined(clusterState?.nodes[node.uuid]);
+    node.isOnline = !isUndefined(clusterStateNodes && clusterStateNodes[node.uuid]);
     node.shardCount = nodesShardCount?.nodes[node.uuid]?.shardCount ?? 0;
   }
 
@@ -83,17 +87,18 @@ export async function getPaginatedNodes(
   const groupBy = {
     field: `source_node.uuid`,
     include: nodes.map((node) => node.uuid),
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size,
   };
   const metricSeriesData = await getMetrics(
     req,
-    esIndexPattern,
+    'elasticsearch',
     metricSet,
     filters,
     { nodes },
     4,
     groupBy
   );
+
   for (const metricName in metricSeriesData) {
     if (!metricSeriesData.hasOwnProperty(metricName)) {
       continue;

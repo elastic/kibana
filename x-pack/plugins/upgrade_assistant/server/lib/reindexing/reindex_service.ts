@@ -11,7 +11,6 @@ import { first } from 'rxjs/operators';
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
 import {
-  IndexGroup,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
@@ -31,10 +30,6 @@ import { ReindexActions } from './reindex_actions';
 
 import { error } from './error';
 
-const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
-const ML_INDICES = ['.ml-state', '.ml-anomalies', '.ml-config'];
-const WATCHER_INDICES = ['.watches', '.triggered-watches'];
-
 export interface ReindexService {
   /**
    * Checks whether or not the user has proper privileges required to reindex this index.
@@ -47,13 +42,7 @@ export interface ReindexService {
    * Resolves to null if index does not exist.
    * @param indexName
    */
-  detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | null>;
-
-  /**
-   * Returns an IndexGroup if the index belongs to one, otherwise undefined.
-   * @param indexName
-   */
-  getIndexGroup(indexName: string): IndexGroup | undefined;
+  detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | undefined>;
 
   /**
    * Creates a new reindex operation for a given index.
@@ -126,6 +115,8 @@ export interface ReindexService {
    * @param indexName
    */
   cancelReindexing(indexName: string): Promise<ReindexSavedObject>;
+
+  getIndexAliases(indexName: string): any;
 }
 
 export const reindexServiceFactory = (
@@ -135,83 +126,6 @@ export const reindexServiceFactory = (
   licensing: LicensingPluginSetup
 ): ReindexService => {
   // ------ Utility functions
-
-  /**
-   * If the index is a ML index that will cause jobs to fail when set to readonly,
-   * turn on 'upgrade mode' to pause all ML jobs.
-   * @param reindexOp
-   */
-  const stopMlJobs = async () => {
-    await actions.incrementIndexGroupReindexes(IndexGroup.ml);
-    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async (mlDoc) => {
-      await validateNodesMinimumVersion(6, 7);
-
-      const { body } = await esClient.ml.setUpgradeMode({
-        enabled: true,
-      });
-
-      if (!body.acknowledged) {
-        throw new Error(`Could not stop ML jobs`);
-      }
-
-      return mlDoc;
-    });
-  };
-
-  /**
-   * Resumes ML jobs if there are no more remaining reindex operations.
-   */
-  const resumeMlJobs = async () => {
-    await actions.decrementIndexGroupReindexes(IndexGroup.ml);
-    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async (mlDoc) => {
-      if (mlDoc.attributes.runningReindexCount === 0) {
-        const { body } = await esClient.ml.setUpgradeMode({
-          enabled: false,
-        });
-
-        if (!body.acknowledged) {
-          throw new Error(`Could not resume ML jobs`);
-        }
-      }
-
-      return mlDoc;
-    });
-  };
-
-  /**
-   * Stops Watcher in Elasticsearch.
-   */
-  const stopWatcher = async () => {
-    await actions.incrementIndexGroupReindexes(IndexGroup.watcher);
-    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async (watcherDoc) => {
-      const { body } = await esClient.watcher.stop();
-
-      if (!body.acknowledged) {
-        throw new Error('Could not stop Watcher');
-      }
-
-      return watcherDoc;
-    });
-  };
-
-  /**
-   * Starts Watcher in Elasticsearch.
-   */
-  const startWatcher = async () => {
-    await actions.decrementIndexGroupReindexes(IndexGroup.watcher);
-    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async (watcherDoc) => {
-      if (watcherDoc.attributes.runningReindexCount === 0) {
-        const { body } = await esClient.watcher.start();
-
-        if (!body.acknowledged) {
-          throw new Error('Could not start Watcher');
-        }
-      }
-
-      return watcherDoc;
-    });
-  };
-
   const cleanupChanges = async (reindexOp: ReindexSavedObject) => {
     // Cancel reindex task if it was started but not completed
     if (reindexOp.attributes.lastCompletedStep === ReindexStep.reindexStarted) {
@@ -226,7 +140,7 @@ export const reindexServiceFactory = (
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
       await esClient.indices.putSettings({
         index: reindexOp.attributes.indexName,
-        body: { settings: { blocks: { write: false } } },
+        body: { blocks: { write: false } },
       });
     }
 
@@ -239,47 +153,10 @@ export const reindexServiceFactory = (
       });
     }
 
-    // Resume consumers if we ever got past this point.
-    if (reindexOp.attributes.lastCompletedStep >= ReindexStep.indexGroupServicesStopped) {
-      await resumeIndexGroupServices(reindexOp);
-    }
-
     return reindexOp;
   };
 
   // ------ Functions used to process the state machine
-
-  const validateNodesMinimumVersion = async (minMajor: number, minMinor: number) => {
-    const { body: nodesResponse } = await esClient.nodes.info();
-
-    const outDatedNodes = Object.values(nodesResponse.nodes).filter((node: any) => {
-      const matches = node.version.match(VERSION_REGEX);
-      const major = parseInt(matches[1], 10);
-      const minor = parseInt(matches[2], 10);
-
-      // All ES nodes must be >= 6.7.0 to pause ML jobs
-      return !(major > minMajor || (major === minMajor && minor >= minMinor));
-    });
-
-    if (outDatedNodes.length > 0) {
-      const nodeList = JSON.stringify(outDatedNodes.map((n: any) => n.name));
-      throw new Error(
-        `Some nodes are not on minimum version (${minMajor}.${minMinor}.0)  required: ${nodeList}`
-      );
-    }
-  };
-
-  const stopIndexGroupServices = async (reindexOp: ReindexSavedObject) => {
-    if (isMlIndex(reindexOp.attributes.indexName)) {
-      await stopMlJobs();
-    } else if (isWatcherIndex(reindexOp.attributes.indexName)) {
-      await stopWatcher();
-    }
-
-    return actions.updateReindexOp(reindexOp, {
-      lastCompletedStep: ReindexStep.indexGroupServicesStopped,
-    });
-  };
 
   /**
    * Sets the original index as readonly so new data can be indexed until the reindex
@@ -288,9 +165,9 @@ export const reindexServiceFactory = (
    */
   const setReadonly = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
-    const { body: putReadonly } = await esClient.indices.putSettings({
+    const putReadonly = await esClient.indices.putSettings({
       index: indexName,
-      body: { settings: { blocks: { write: true } } },
+      body: { blocks: { write: true } },
     });
 
     if (!putReadonly.acknowledged) {
@@ -314,15 +191,26 @@ export const reindexServiceFactory = (
 
     const { settings, mappings } = transformFlatSettings(flatSettings);
 
-    const { body: createIndex } = await esClient.indices.create({
-      index: newIndexName,
-      body: {
-        settings,
-        mappings,
-      },
-    });
+    let createIndex;
+    try {
+      createIndex = await esClient.indices.create({
+        index: newIndexName,
+        body: {
+          settings,
+          mappings,
+        },
+      });
+    } catch (err) {
+      // If for any reason the new index name generated by the `generateNewIndexName` already
+      // exists (this could happen if kibana is restarted during reindexing), we can just go
+      // ahead with the process without needing to create the index again.
+      // See: https://github.com/elastic/kibana/issues/123816
+      if (err?.body?.error?.type !== 'resource_already_exists_exception') {
+        throw err;
+      }
+    }
 
-    if (!createIndex.acknowledged) {
+    if (createIndex && !createIndex?.acknowledged) {
       throw error.cannotCreateIndex(`Index could not be created: ${newIndexName}`);
     }
 
@@ -352,7 +240,7 @@ export const reindexServiceFactory = (
       throw error.indexNotFound(`Index ${indexName} does not exist.`);
     }
 
-    const { body: startReindexResponse } = await esClient.reindex({
+    const startReindexResponse = await esClient.reindex({
       refresh: true,
       wait_for_completion: false,
       body: {
@@ -385,7 +273,7 @@ export const reindexServiceFactory = (
     const taskId = reindexOp.attributes.reindexTaskId!;
 
     // Check reindexing task progress
-    const { body: taskResponse } = await esClient.tasks.get({
+    const taskResponse = await esClient.tasks.get({
       task_id: taskId,
       wait_for_completion: false,
     });
@@ -405,12 +293,8 @@ export const reindexServiceFactory = (
       // Do any other cleanup work necessary
       reindexOp = await cleanupChanges(reindexOp);
     } else {
-      // Check that it reindexed all documents
-      const {
-        body: { count },
-      } = await esClient.count({ index: reindexOp.attributes.indexName });
-
-      if (taskResponse.task.status!.created < count) {
+      // Check that no failures occurred
+      if (taskResponse.response?.failures?.length) {
         // Include the entire task result in the error message. This should be guaranteed
         // to be JSON-serializable since it just came back from Elasticsearch.
         throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
@@ -424,7 +308,7 @@ export const reindexServiceFactory = (
     }
 
     // Delete the task from ES .tasks index
-    const { body: deleteTaskResp } = await esClient.delete({
+    const deleteTaskResp = await esClient.delete({
       index: '.tasks',
       id: taskId,
     });
@@ -436,6 +320,14 @@ export const reindexServiceFactory = (
     return reindexOp;
   };
 
+  const getIndexAliases = async (indexName: string) => {
+    const response = await esClient.indices.getAlias({
+      index: indexName,
+    });
+
+    return response[indexName]?.aliases ?? {};
+  };
+
   /**
    * Creates an alias that points the old index to the new index, deletes the old index.
    * @param reindexOp
@@ -443,17 +335,13 @@ export const reindexServiceFactory = (
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
     const { indexName, newIndexName, reindexOptions } = reindexOp.attributes;
 
-    const { body: response } = await esClient.indices.getAlias({
-      index: indexName,
-    });
-
-    const existingAliases = response[indexName].aliases;
+    const existingAliases = await getIndexAliases(indexName);
 
     const extraAliases = Object.keys(existingAliases).map((aliasName) => ({
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
     }));
 
-    const { body: aliasResponse } = await esClient.indices.updateAliases({
+    const aliasResponse = await esClient.indices.updateAliases({
       body: {
         actions: [
           { add: { index: newIndexName, alias: indexName } },
@@ -474,23 +362,6 @@ export const reindexServiceFactory = (
     return actions.updateReindexOp(reindexOp, {
       lastCompletedStep: ReindexStep.aliasCreated,
     });
-  };
-
-  const resumeIndexGroupServices = async (reindexOp: ReindexSavedObject) => {
-    if (isMlIndex(reindexOp.attributes.indexName)) {
-      await resumeMlJobs();
-    } else if (isWatcherIndex(reindexOp.attributes.indexName)) {
-      await startWatcher();
-    }
-
-    // Only change the status if we're still in-progress (this function is also called when the reindex fails or is cancelled)
-    if (reindexOp.attributes.status === ReindexStatus.inProgress) {
-      return actions.updateReindexOp(reindexOp, {
-        lastCompletedStep: ReindexStep.indexGroupServicesStarted,
-      });
-    } else {
-      return reindexOp;
-    }
   };
 
   // ------ The service itself
@@ -537,40 +408,33 @@ export const reindexServiceFactory = (
         ],
       } as any;
 
-      if (isMlIndex(indexName)) {
-        body.cluster = [...body.cluster, 'manage_ml'];
-      }
-
-      if (isWatcherIndex(indexName)) {
-        body.cluster = [...body.cluster, 'manage_watcher'];
-      }
-
-      const { body: resp } = await esClient.security.hasPrivileges({
+      const resp = await esClient.security.hasPrivileges({
         body,
       });
 
       return resp.has_all_requested;
     },
 
-    async detectReindexWarnings(indexName: string) {
+    async detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | undefined> {
       const flatSettings = await actions.getFlatSettings(indexName);
-      if (!flatSettings) {
-        return null;
-      } else {
-        return getReindexWarnings(flatSettings);
-      }
-    },
 
-    getIndexGroup(indexName: string) {
-      if (isMlIndex(indexName)) {
-        return IndexGroup.ml;
-      } else if (isWatcherIndex(indexName)) {
-        return IndexGroup.watcher;
+      if (!flatSettings) {
+        return undefined;
+      } else {
+        return [
+          // By default all reindexing operations will replace an index with an alias (with the same name)
+          // pointing to a newly created "reindexed" index. This is destructive as delete operations originally
+          // done on the index itself will now need to be done to the "reindexed-{indexName}"
+          {
+            warningType: 'replaceIndexWithAlias',
+          },
+          ...getReindexWarnings(flatSettings),
+        ];
       }
     },
 
     async createReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
-      const { body: indexExists } = await esClient.indices.exists({ index: indexName });
+      const indexExists = await esClient.indices.exists({ index: indexName });
       if (!indexExists) {
         throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
       }
@@ -636,9 +500,6 @@ export const reindexServiceFactory = (
         try {
           switch (lockedReindexOp.attributes.lastCompletedStep) {
             case ReindexStep.created:
-              lockedReindexOp = await stopIndexGroupServices(lockedReindexOp);
-              break;
-            case ReindexStep.indexGroupServicesStopped:
               lockedReindexOp = await setReadonly(lockedReindexOp);
               break;
             case ReindexStep.readonly:
@@ -654,12 +515,10 @@ export const reindexServiceFactory = (
               lockedReindexOp = await switchAlias(lockedReindexOp);
               break;
             case ReindexStep.aliasCreated:
-              lockedReindexOp = await resumeIndexGroupServices(lockedReindexOp);
-              break;
-            case ReindexStep.indexGroupServicesStarted:
               lockedReindexOp = await actions.updateReindexOp(lockedReindexOp, {
                 status: ReindexStatus.completed,
               });
+              break;
             default:
               break;
           }
@@ -755,7 +614,7 @@ export const reindexServiceFactory = (
         );
       }
 
-      const { body: resp } = await esClient.tasks.cancel({
+      const resp = await esClient.tasks.cancel({
         task_id: reindexOp.attributes.reindexTaskId!,
       });
 
@@ -765,15 +624,7 @@ export const reindexServiceFactory = (
 
       return reindexOp;
     },
+
+    getIndexAliases,
   };
-};
-
-export const isMlIndex = (indexName: string) => {
-  const sourceName = sourceNameForIndex(indexName);
-  return ML_INDICES.indexOf(sourceName) >= 0;
-};
-
-export const isWatcherIndex = (indexName: string) => {
-  const sourceName = sourceNameForIndex(indexName);
-  return WATCHER_INDICES.indexOf(sourceName) >= 0;
 };

@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-export {
+export type {
   SaveResult,
   SavedObject,
-  showSaveModal,
-  SavedObjectLoader,
   SavedObjectsStart,
   SavedObjectSaveOpts,
+} from '../../../saved_objects/public';
+export {
+  showSaveModal,
   SavedObjectSaveModal,
   getSavedObjectFinder,
-  SavedObjectLoaderFindOptions,
 } from '../../../saved_objects/public';
+export { SavedObjectLoader } from './saved_object_loader';
+export type { SavedObjectLoaderFindOptions } from './saved_object_loader';

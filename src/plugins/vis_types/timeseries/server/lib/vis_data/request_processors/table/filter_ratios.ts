@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { esQuery } from '../../../../../../../data/server';
+import { buildEsQuery } from '@kbn/es-query';
 import { overwrite, bucketTransform } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 
@@ -30,12 +30,12 @@ export const filterRatios: TableRequestProcessorsFunction = ({
           overwrite(
             doc,
             `${aggRoot}.timeseries.aggs.${metric.id}-numerator.filter`,
-            esQuery.buildEsQuery(indexPattern, metric.numerator!, [], esQueryConfig)
+            buildEsQuery(indexPattern, metric.numerator!, [], esQueryConfig)
           );
           overwrite(
             doc,
             `${aggRoot}.timeseries.aggs.${metric.id}-denominator.filter`,
-            esQuery.buildEsQuery(indexPattern, metric.denominator!, [], esQueryConfig)
+            buildEsQuery(indexPattern, metric.denominator!, [], esQueryConfig)
           );
 
           let numeratorPath = `${metric.id}-numerator>_count`;

@@ -18,6 +18,5 @@ readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClient
 ```js
 const client = elasticsearch.createClient('my-app-name', config);
 const data = await client.asInternalUser.search();
-
 ```
 

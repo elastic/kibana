@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiPopover } from '@elastic/eui';
 
 export const BulkOperationPopover: React.FunctionComponent = ({ children }) => {
@@ -25,7 +25,7 @@ export const BulkOperationPopover: React.FunctionComponent = ({ children }) => {
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         >
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.buttonTitle"
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.buttonTitle"
             defaultMessage="Manage rules"
           />
         </EuiButton>

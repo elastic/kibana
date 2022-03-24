@@ -8,17 +8,21 @@
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import {
-  EndpointPrivileges,
-  useEndpointPrivileges,
-} from '../../../common/components/user_privileges/use_endpoint_privileges';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 import { SearchExceptions, SearchExceptionsProps } from '.';
-jest.mock('../../../common/components/user_privileges/use_endpoint_privileges');
+import { getEndpointPrivilegesInitialStateMock } from '../../../common/components/user_privileges/endpoint/mocks';
+import {
+  initialUserPrivilegesState,
+  UserPrivilegesState,
+} from '../../../common/components/user_privileges/user_privileges_context';
+import { EndpointPrivileges } from '../../../../common/endpoint/types';
+
+jest.mock('../../../common/components/user_privileges');
 
 let onSearchMock: jest.Mock;
-const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
 describe('Search exceptions', () => {
   let appTestContext: AppContextTestRender;
@@ -27,15 +31,16 @@ describe('Search exceptions', () => {
     props?: Partial<SearchExceptionsProps>
   ) => ReturnType<AppContextTestRender['render']>;
 
-  const loadedUserEndpointPrivilegesState = (
+  const loadedUserPrivilegesState = (
     endpointOverrides: Partial<EndpointPrivileges> = {}
-  ): EndpointPrivileges => ({
-    loading: false,
-    canAccessFleet: true,
-    canAccessEndpointManagement: true,
-    isPlatinumPlus: false,
-    ...endpointOverrides,
-  });
+  ): UserPrivilegesState => {
+    return {
+      ...initialUserPrivilegesState(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        ...endpointOverrides,
+      }),
+    };
+  };
 
   beforeEach(() => {
     onSearchMock = jest.fn();
@@ -52,11 +57,11 @@ describe('Search exceptions', () => {
       return renderResult;
     };
 
-    mockUseEndpointPrivileges.mockReturnValue(loadedUserEndpointPrivilegesState());
+    mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState());
   });
 
   afterAll(() => {
-    mockUseEndpointPrivileges.mockReset();
+    mockUseUserPrivileges.mockReset();
   });
 
   it('should have a default value', () => {
@@ -78,7 +83,7 @@ describe('Search exceptions', () => {
     });
 
     expect(onSearchMock).toHaveBeenCalledTimes(1);
-    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '', '');
+    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '', false);
   });
 
   it('should dispatch search action when click on button', () => {
@@ -91,7 +96,7 @@ describe('Search exceptions', () => {
     });
 
     expect(onSearchMock).toHaveBeenCalledTimes(1);
-    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '', '');
+    expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue, '', true);
   });
 
   it('should hide refresh button', () => {
@@ -103,8 +108,8 @@ describe('Search exceptions', () => {
   it('should hide policies selector when no license', () => {
     const generator = new EndpointDocGenerator('policy-list');
     const policy = generator.generatePolicyPackagePolicy();
-    mockUseEndpointPrivileges.mockReturnValue(
-      loadedUserEndpointPrivilegesState({ isPlatinumPlus: false })
+    mockUseUserPrivileges.mockReturnValue(
+      loadedUserPrivilegesState({ canCreateArtifactsByPolicy: false })
     );
     const element = render({ policyList: [policy], hasPolicyFilter: true });
 
@@ -114,8 +119,8 @@ describe('Search exceptions', () => {
   it('should display policies selector when right license', () => {
     const generator = new EndpointDocGenerator('policy-list');
     const policy = generator.generatePolicyPackagePolicy();
-    mockUseEndpointPrivileges.mockReturnValue(
-      loadedUserEndpointPrivilegesState({ isPlatinumPlus: true })
+    mockUseUserPrivileges.mockReturnValue(
+      loadedUserPrivilegesState({ canCreateArtifactsByPolicy: true })
     );
     const element = render({ policyList: [policy], hasPolicyFilter: true });
 

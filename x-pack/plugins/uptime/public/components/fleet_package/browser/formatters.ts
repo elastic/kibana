@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { BrowserFields, ConfigKeys } from '../types';
+import { BrowserFields, ConfigKey } from '../types';
 import {
   Formatter,
   commonFormatters,
+  objectToJsonFormatter,
   arrayToJsonFormatter,
   stringToJsonFormatter,
-  objectToJsonFormatter,
 } from '../common/formatters';
 import {
   tlsValueToYamlFormatter,
@@ -21,34 +21,55 @@ import {
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
+const throttlingFormatter: Formatter = (fields) => {
+  if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return 'false';
+
+  const getThrottlingValue = (v: string | undefined, suffix: 'd' | 'u' | 'l') =>
+    v !== '' && v !== undefined ? `${v}${suffix}` : null;
+
+  return [
+    getThrottlingValue(fields[ConfigKey.DOWNLOAD_SPEED], 'd'),
+    getThrottlingValue(fields[ConfigKey.UPLOAD_SPEED], 'u'),
+    getThrottlingValue(fields[ConfigKey.LATENCY], 'l'),
+  ]
+    .filter((v) => v !== null)
+    .join('/');
+};
+
 export const browserFormatters: BrowserFormatMap = {
-  [ConfigKeys.METADATA]: (fields) => objectToJsonFormatter(fields[ConfigKeys.METADATA]),
-  [ConfigKeys.SOURCE_ZIP_URL]: null,
-  [ConfigKeys.SOURCE_ZIP_USERNAME]: null,
-  [ConfigKeys.SOURCE_ZIP_PASSWORD]: null,
-  [ConfigKeys.SOURCE_ZIP_FOLDER]: null,
-  [ConfigKeys.SOURCE_ZIP_PROXY_URL]: null,
-  [ConfigKeys.SOURCE_INLINE]: (fields) => stringToJsonFormatter(fields[ConfigKeys.SOURCE_INLINE]),
-  [ConfigKeys.PARAMS]: null,
-  [ConfigKeys.SCREENSHOTS]: null,
-  [ConfigKeys.SYNTHETICS_ARGS]: (fields) =>
-    arrayToJsonFormatter(fields[ConfigKeys.SYNTHETICS_ARGS]),
-  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: (fields) =>
-    tlsValueToYamlFormatter(fields[ConfigKeys.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]),
-  [ConfigKeys.ZIP_URL_TLS_CERTIFICATE]: (fields) =>
-    tlsValueToYamlFormatter(fields[ConfigKeys.ZIP_URL_TLS_CERTIFICATE]),
-  [ConfigKeys.ZIP_URL_TLS_KEY]: (fields) =>
-    tlsValueToYamlFormatter(fields[ConfigKeys.ZIP_URL_TLS_KEY]),
-  [ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]: (fields) =>
-    tlsValueToStringFormatter(fields[ConfigKeys.ZIP_URL_TLS_KEY_PASSPHRASE]),
-  [ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]: (fields) =>
-    tlsValueToStringFormatter(fields[ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]),
-  [ConfigKeys.ZIP_URL_TLS_VERSION]: (fields) =>
-    tlsArrayToYamlFormatter(fields[ConfigKeys.ZIP_URL_TLS_VERSION]),
-  [ConfigKeys.JOURNEY_FILTERS_MATCH]: (fields) =>
-    stringToJsonFormatter(fields[ConfigKeys.JOURNEY_FILTERS_MATCH]),
-  [ConfigKeys.JOURNEY_FILTERS_TAGS]: (fields) =>
-    arrayToJsonFormatter(fields[ConfigKeys.JOURNEY_FILTERS_TAGS]),
-  [ConfigKeys.IGNORE_HTTPS_ERRORS]: null,
+  [ConfigKey.METADATA]: (fields) => objectToJsonFormatter(fields[ConfigKey.METADATA]),
+  [ConfigKey.URLS]: null,
+  [ConfigKey.PORT]: null,
+  [ConfigKey.SOURCE_ZIP_URL]: null,
+  [ConfigKey.SOURCE_ZIP_USERNAME]: null,
+  [ConfigKey.SOURCE_ZIP_PASSWORD]: null,
+  [ConfigKey.SOURCE_ZIP_FOLDER]: null,
+  [ConfigKey.SOURCE_ZIP_PROXY_URL]: null,
+  [ConfigKey.SOURCE_INLINE]: (fields) => stringToJsonFormatter(fields[ConfigKey.SOURCE_INLINE]),
+  [ConfigKey.PARAMS]: null,
+  [ConfigKey.SCREENSHOTS]: null,
+  [ConfigKey.IS_THROTTLING_ENABLED]: null,
+  [ConfigKey.DOWNLOAD_SPEED]: null,
+  [ConfigKey.UPLOAD_SPEED]: null,
+  [ConfigKey.LATENCY]: null,
+  [ConfigKey.SYNTHETICS_ARGS]: (fields) => arrayToJsonFormatter(fields[ConfigKey.SYNTHETICS_ARGS]),
+  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: (fields) =>
+    tlsValueToYamlFormatter(fields[ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]),
+  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: (fields) =>
+    tlsValueToYamlFormatter(fields[ConfigKey.ZIP_URL_TLS_CERTIFICATE]),
+  [ConfigKey.ZIP_URL_TLS_KEY]: (fields) =>
+    tlsValueToYamlFormatter(fields[ConfigKey.ZIP_URL_TLS_KEY]),
+  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: (fields) =>
+    tlsValueToStringFormatter(fields[ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]),
+  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: (fields) =>
+    tlsValueToStringFormatter(fields[ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]),
+  [ConfigKey.ZIP_URL_TLS_VERSION]: (fields) =>
+    tlsArrayToYamlFormatter(fields[ConfigKey.ZIP_URL_TLS_VERSION]),
+  [ConfigKey.JOURNEY_FILTERS_MATCH]: (fields) =>
+    stringToJsonFormatter(fields[ConfigKey.JOURNEY_FILTERS_MATCH]),
+  [ConfigKey.JOURNEY_FILTERS_TAGS]: (fields) =>
+    arrayToJsonFormatter(fields[ConfigKey.JOURNEY_FILTERS_TAGS]),
+  [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
+  [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   ...commonFormatters,
 };

@@ -6,13 +6,13 @@ When you log in, {kib} creates a session that is used to authenticate subsequent
 
 When your session expires, or you log out, {kib} will invalidate your cookie and remove session information from the index. {kib} also periodically invalidates and removes any expired sessions that weren't explicitly invalidated.
 
-To manage user sessions programmatically, {kib} exposes <<session-management-api, session management APIs>>.
+To manage user sessions programmatically, {kib} exposes <<session-management-api, session management APIs>>. For details, check out <<security-session-and-cookie-settings, Session and cookie security settings>>.
 
 [[session-idle-timeout]]
 ==== Session idle timeout
 
 You can use `xpack.security.session.idleTimeout` to expire sessions after a period of inactivity. This and `xpack.security.session.lifespan` are both highly recommended.
-By default, sessions expire after 1 hour of inactivity. To define another value for a sliding session expiration, set the  property in the `kibana.yml` configuration file. The idle timeout is formatted as a duration of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '20m', '24h', '7d', '1w'). For example, set the idle timeout to expire sessions after 30 minutes of inactivity:
+By default, sessions expire after 8 hours of inactivity. To define another value for a sliding session expiration, set the  property in the `kibana.yml` configuration file. The idle timeout is formatted as a duration of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '20m', '24h', '7d', '1w'). For example, set the idle timeout to expire sessions after 30 minutes of inactivity:
 
 --
 [source,yaml]

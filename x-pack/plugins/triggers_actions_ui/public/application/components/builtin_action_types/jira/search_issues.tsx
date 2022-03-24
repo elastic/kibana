@@ -8,7 +8,7 @@
 import React, { useMemo, useEffect, useCallback, useState, memo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, IToasts } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
 import { useGetIssues } from './use_get_issues';
 import { useGetSingleIssue } from './use_get_single_issue';
@@ -17,10 +17,7 @@ import * as i18n from './translations';
 interface Props {
   selectedValue?: string | null;
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: IToasts;
   actionConnector?: ActionConnector;
   onChange: (parentIssueKey: string) => void;
 }

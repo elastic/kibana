@@ -6,6 +6,8 @@
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
+
+import { handleEsError } from '../shared_imports';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 
@@ -33,6 +35,7 @@ describe('ES deprecations API', () => {
     mockRouter = createMockRouter();
     routeDependencies = {
       router: mockRouter,
+      lib: { handleEsError },
     };
     registerESDeprecationRoutes(routeDependencies);
   });

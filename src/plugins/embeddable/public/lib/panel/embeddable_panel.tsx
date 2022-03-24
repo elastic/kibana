@@ -12,7 +12,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
-import { CoreStart, OverlayStart } from '../../../../../core/public';
+import { CoreStart, OverlayStart, ThemeServiceStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { UsageCollectionStart } from '../../../../usage_collection/public';
 
@@ -53,8 +53,27 @@ const removeById =
   ({ id }: { id: string }) =>
     disabledActions.indexOf(id) === -1;
 
+/**
+ * Embeddable container may provide information about its environment,
+ * Use it for drilling down data that is static or doesn't have to be reactive,
+ * otherwise prefer passing data with input$
+ * */
+export interface EmbeddableContainerContext {
+  /**
+   * Current app's path including query and hash starting from {appId}
+   */
+  getCurrentPath?: () => string;
+}
+
 interface Props {
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
+
+  /**
+   * Ordinal number of the embeddable in the container, used as a
+   * "title" when the panel has no title, i.e. "Panel {index}".
+   */
+  index?: number;
+
   getActions: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories?: EmbeddableStart['getEmbeddableFactories'];
@@ -70,6 +89,8 @@ interface Props {
   showShadow?: boolean;
   showBadges?: boolean;
   showNotifications?: boolean;
+  containerContext?: EmbeddableContainerContext;
+  theme: ThemeServiceStart;
 }
 
 interface State {
@@ -238,7 +259,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   public render() {
-    const viewOnlyMode = this.state.viewMode === ViewMode.VIEW;
+    const viewOnlyMode = [ViewMode.VIEW, ViewMode.PRINT].includes(this.state.viewMode);
     const classes = classNames('embPanel', {
       'embPanel--editing': !viewOnlyMode,
       'embPanel--loading': this.state.loading,
@@ -272,6 +293,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             }
             closeContextMenu={this.state.closeContextMenu}
             title={title}
+            index={this.props.index}
             badges={this.state.badges}
             notifications={this.state.notifications}
             embeddable={this.props.embeddable}
@@ -334,8 +356,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     ) {
       return actions;
     }
-
-    const createGetUserData = (overlays: OverlayStart) =>
+    const createGetUserData = (overlays: OverlayStart, theme: ThemeServiceStart) =>
       async function getUserData(context: { embeddable: IEmbeddable }) {
         return new Promise<{ title: string | undefined; hideTitle?: boolean }>((resolve) => {
           const session = overlays.openModal(
@@ -347,7 +368,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
                   resolve({ title, hideTitle });
                 }}
                 cancel={() => session.close()}
-              />
+              />,
+              { theme$: theme.theme$ }
             ),
             {
               'data-test-subj': 'customizePanel',
@@ -360,20 +382,24 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     // registry.
     return {
       ...actions,
-      customizePanelTitle: new CustomizePanelTitleAction(createGetUserData(this.props.overlays)),
+      customizePanelTitle: new CustomizePanelTitleAction(
+        createGetUserData(this.props.overlays, this.props.theme)
+      ),
       addPanel: new AddPanelAction(
         this.props.getEmbeddableFactory,
         this.props.getAllEmbeddableFactories,
         this.props.overlays,
         this.props.notifications,
         this.props.SavedObjectFinder,
+        this.props.theme,
         this.props.reportUiCounter
       ),
       removePanel: new RemovePanelAction(),
       editPanel: new EditPanelAction(
         this.props.getEmbeddableFactory,
         this.props.application,
-        this.props.stateTransfer
+        this.props.stateTransfer,
+        this.props.containerContext?.getCurrentPath
       ),
     };
   };

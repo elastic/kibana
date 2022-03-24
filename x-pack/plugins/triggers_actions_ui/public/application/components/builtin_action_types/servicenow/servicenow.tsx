@@ -18,8 +18,10 @@ import {
   ServiceNowSecrets,
   ServiceNowITSMActionParams,
   ServiceNowSIRActionParams,
+  ServiceNowITOMActionParams,
 } from './types';
 import { isValidUrl } from '../../../lib/value_validators';
+import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from './helpers';
 
 const validateConnector = async (
   action: ServiceNowActionConnector
@@ -27,7 +29,7 @@ const validateConnector = async (
   const translations = await import('./translations');
   const configErrors = {
     apiUrl: new Array<string>(),
-    isLegacy: new Array<string>(),
+    usesTableApi: new Array<string>(),
   };
   const secretsErrors = {
     username: new Array<string>(),
@@ -90,6 +92,20 @@ export const SERVICENOW_SIR_TITLE = i18n.translate(
   }
 );
 
+export const SERVICENOW_ITOM_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow ITOM',
+  }
+);
+
+export const SERVICENOW_ITOM_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.selectMessageText',
+  {
+    defaultMessage: 'Create an event in ServiceNow ITOM.',
+  }
+);
+
 export function getServiceNowITSMActionType(): ActionTypeModel<
   ServiceNowConfig,
   ServiceNowSecrets,
@@ -107,7 +123,6 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
     ): Promise<GenericValidationResult<unknown>> => {
       const translations = await import('./translations');
       const errors = {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'subActionParams.incident.short_description': new Array<string>(),
       };
       const validationResult = {
@@ -123,6 +138,10 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
       return validationResult;
     },
     actionParamsFields: lazy(() => import('./servicenow_itsm_params')),
+    customConnectorSelectItem: {
+      getText: getConnectorDescriptiveTitle,
+      getComponent: getSelectedConnectorIcon,
+    },
   };
 }
 
@@ -143,7 +162,6 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
     ): Promise<GenericValidationResult<unknown>> => {
       const translations = await import('./translations');
       const errors = {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'subActionParams.incident.short_description': new Array<string>(),
       };
       const validationResult = {
@@ -159,5 +177,40 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
       return validationResult;
     },
     actionParamsFields: lazy(() => import('./servicenow_sir_params')),
+    customConnectorSelectItem: {
+      getText: getConnectorDescriptiveTitle,
+      getComponent: getSelectedConnectorIcon,
+    },
+  };
+}
+
+export function getServiceNowITOMActionType(): ActionTypeModel<
+  ServiceNowConfig,
+  ServiceNowSecrets,
+  ServiceNowITOMActionParams
+> {
+  return {
+    id: '.servicenow-itom',
+    iconClass: lazy(() => import('./logo')),
+    selectMessage: SERVICENOW_ITOM_DESC,
+    actionTypeTitle: SERVICENOW_ITOM_TITLE,
+    validateConnector,
+    actionConnectorFields: lazy(() => import('./servicenow_connectors_no_app')),
+    validateParams: async (
+      actionParams: ServiceNowITOMActionParams
+    ): Promise<GenericValidationResult<unknown>> => {
+      const translations = await import('./translations');
+      const errors = {
+        severity: new Array<string>(),
+      };
+      const validationResult = { errors };
+
+      if (actionParams?.subActionParams?.severity == null) {
+        errors.severity.push(translations.SEVERITY_REQUIRED);
+      }
+
+      return validationResult;
+    },
+    actionParamsFields: lazy(() => import('./servicenow_itom_params')),
   };
 }

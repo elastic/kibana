@@ -15,7 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Local Scheduled Task Creation",
-  "query": "sequence with maxspan=1m\n  [process where event.type != \"end\" and\n    ((process.name : (\"cmd.exe\", \"wscript.exe\", \"rundll32.exe\", \"regsvr32.exe\", \"wmic.exe\", \"mshta.exe\",\n                      \"powershell.exe\", \"pwsh.exe\", \"WmiPrvSe.exe\", \"wsmprovhost.exe\", \"winrshost.exe\") or\n    process.pe.original_file_name : (\"cmd.exe\", \"wscript.exe\", \"rundll32.exe\", \"regsvr32.exe\", \"wmic.exe\", \"mshta.exe\",\n                                     \"powershell.exe\", \"pwsh.exe\", \"WmiPrvSe.exe\", \"wsmprovhost.exe\",\n                                     \"winrshost.exe\")) or\n    process.code_signature.trusted == false)] by process.entity_id\n  [process where event.type == \"start\" and\n    (process.name : \"schtasks.exe\" or process.pe.original_file_name == \"schtasks.exe\") and\n    process.args : (\"/create\", \"-create\") and process.args : (\"/RU\", \"/SC\", \"/TN\", \"/TR\", \"/F\", \"/XML\") and\n    /* exclude SYSTEM SIDs - look for task creations by non-SYSTEM user */\n    not user.id : (\"S-1-5-18\", \"S-1-5-19\", \"S-1-5-20\")] by process.parent.entity_id\n",
+  "query": "sequence with maxspan=1m\n  [process where event.type != \"end\" and\n    ((process.name : (\"cmd.exe\", \"wscript.exe\", \"rundll32.exe\", \"regsvr32.exe\", \"wmic.exe\", \"mshta.exe\",\n                      \"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\", \"WmiPrvSe.exe\", \"wsmprovhost.exe\", \"winrshost.exe\") or\n    process.pe.original_file_name : (\"cmd.exe\", \"wscript.exe\", \"rundll32.exe\", \"regsvr32.exe\", \"wmic.exe\", \"mshta.exe\",\n                                     \"powershell.exe\", \"pwsh.dll\", \"powershell_ise.exe\", \"WmiPrvSe.exe\", \"wsmprovhost.exe\",\n                                     \"winrshost.exe\")) or\n    process.code_signature.trusted == false)] by process.entity_id\n  [process where event.type == \"start\" and\n    (process.name : \"schtasks.exe\" or process.pe.original_file_name == \"schtasks.exe\") and\n    process.args : (\"/create\", \"-create\") and process.args : (\"/RU\", \"/SC\", \"/TN\", \"/TR\", \"/F\", \"/XML\") and\n    /* exclude SYSTEM Integrity Level - look for task creations by non-SYSTEM user */\n    not (process.Ext.token.integrity_level_name : \"System\" or winlog.event_data.IntegrityLevel : \"System\")\n  ] by process.parent.entity_id\n",
   "risk_score": 21,
   "rule_id": "afcce5ad-65de-4ed2-8516-5e093d3ac99a",
   "severity": "low",
@@ -52,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 8
+  "version": 10
 }

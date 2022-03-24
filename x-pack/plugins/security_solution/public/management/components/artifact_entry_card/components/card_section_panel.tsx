@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import styled from 'styled-components';
 import { EuiPanel, EuiPanelProps } from '@elastic/eui';
 
 export type CardSectionPanelProps = Exclude<
@@ -13,7 +14,20 @@ export type CardSectionPanelProps = Exclude<
   'hasBorder' | 'hasShadow' | 'paddingSize'
 >;
 
+const StyledEuiPanel = styled(EuiPanel)`
+  padding: 32px;
+  &.top-section {
+    padding-bottom: 24px;
+  }
+  &.bottom-section {
+    padding-top: 24px;
+  }
+  &.artifact-entry-collapsible-card {
+    padding: 24px !important;
+  }
+`;
+
 export const CardSectionPanel = memo<CardSectionPanelProps>((props) => {
-  return <EuiPanel {...props} hasBorder={false} hasShadow={false} paddingSize="l" />;
+  return <StyledEuiPanel {...props} hasBorder={false} hasShadow={false} paddingSize="l" />;
 });
 CardSectionPanel.displayName = 'CardSectionPanel';

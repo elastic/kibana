@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { BrowserField } from '../../../../../../timelines/common';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
+import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { getAllFieldsByName } from '../../../../common/containers/source';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   response: string;
@@ -15,6 +20,7 @@ export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' 
   uniqueQueryId: string;
   loading: boolean;
 }
+
 /**
  * * Add query to inspect button utility.
  * * Delete query from inspect button utility when component unmounts
@@ -47,4 +53,31 @@ export const useInspectButton = ({
       }
     };
   }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery]);
+};
+
+function getAggregatableFields(fields: { [fieldName: string]: Partial<BrowserField> }) {
+  return Object.entries(fields).reduce<EuiComboBoxOptionOption[]>(
+    (filteredOptions: EuiComboBoxOptionOption[], [key, field]) => {
+      if (field.aggregatable === true) {
+        return [...filteredOptions, { label: key, value: key }];
+      } else {
+        return filteredOptions;
+      }
+    },
+    []
+  );
+}
+
+export const useStackByFields = () => {
+  const { pathname } = useLocation();
+
+  const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
+  const allFields = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
+  const [stackByFieldOptions, setStackByFieldOptions] = useState(() =>
+    getAggregatableFields(allFields)
+  );
+  useEffect(() => {
+    setStackByFieldOptions(getAggregatableFields(allFields));
+  }, [allFields]);
+  return useMemo(() => stackByFieldOptions, [stackByFieldOptions]);
 };

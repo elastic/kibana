@@ -8,6 +8,7 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '../../../../src/plugins/share/public';
 import { PLUGIN_ID } from '../common';
+import type { MyForwardableState } from '../public/types';
 
 export const REPORTING_EXAMPLE_LOCATOR_ID = 'REPORTING_EXAMPLE_LOCATOR_ID';
 
@@ -20,10 +21,11 @@ export class ReportingExampleLocatorDefinition implements LocatorDefinition<{}> 
     '1.0.0': (state: {}) => ({ ...state, migrated: true }),
   };
 
-  public readonly getLocation = async (params: {}) => {
+  public readonly getLocation = async (params: MyForwardableState) => {
+    const path = Boolean(params.captureTest) ? '/captureTest' : '/';
     return {
       app: PLUGIN_ID,
-      path: '/',
+      path,
       state: params,
     };
   };

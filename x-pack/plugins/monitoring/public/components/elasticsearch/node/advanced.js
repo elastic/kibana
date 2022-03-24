@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { NodeDetailStatus } from '../node_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertsCallout } from '../../../alerts/callout';
 
 export const AdvancedNode = ({ nodeSummary, metrics, alerts, ...props }) => {
@@ -27,8 +27,6 @@ export const AdvancedNode = ({ nodeSummary, metrics, alerts, ...props }) => {
     metrics.node_gc_time,
     metrics.node_jvm_mem,
     metrics.node_cpu_utilization,
-    metrics.node_index_1,
-    metrics.node_index_2,
     metrics.node_index_3,
     metrics.node_index_4,
     metrics.node_index_time,

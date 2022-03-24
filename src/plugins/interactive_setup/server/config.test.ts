@@ -15,7 +15,7 @@ describe('config schema', () => {
         "connectionCheck": Object {
           "interval": "PT5S",
         },
-        "enabled": false,
+        "enabled": true,
       }
     `);
   });
@@ -27,7 +27,7 @@ describe('config schema', () => {
           "connectionCheck": Object {
             "interval": "PT1S",
           },
-          "enabled": false,
+          "enabled": true,
         }
       `);
     });

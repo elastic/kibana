@@ -31,6 +31,6 @@ yarn spec_to_console -g "<ELASTICSEARCH-REPO-FOLDER>/rest-api-spec/src/main/reso
 * Ad hoc additions
 
 ### Updating the script
-When converting query params defined in the REST API specs to console autocompletion definitions, the script relies on a set of known conversion rules specified in [lib/convert/params.js](https://github.com/elastic/kibana/blob/master/packages/kbn-spec-to-console/lib/convert/params.js).
+When converting query params defined in the REST API specs to console autocompletion definitions, the script relies on a set of known conversion rules specified in [lib/convert/params.js](https://github.com/elastic/kibana/blob/main/packages/kbn-spec-to-console/lib/convert/params.js).
 For example, `"keep_on_completion":{"type":"boolean"}` from REST API specs is converted to `"keep_on_completion": "__flag__"` in console autocomplete definitions.
-When an unknown parameter type is encountered in REST API specs, the script will throw an `Unexpected type error` and the file [lib/convert/params.js](https://github.com/elastic/kibana/blob/master/packages/kbn-spec-to-console/lib/convert/params.js) needs to be updated by adding a new conversion rule. 
+When an unknown parameter type is encountered in REST API specs, the script will throw an `Unexpected type error` and the file [lib/convert/params.js](https://github.com/elastic/kibana/blob/main/packages/kbn-spec-to-console/lib/convert/params.js) needs to be updated by adding a new conversion rule. 

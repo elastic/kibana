@@ -23,16 +23,17 @@ export function systemMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: 'systemMetrics',
     name: i18n.translate('home.tutorials.systemMetrics.nameTitle', {
-      defaultMessage: 'System metrics',
+      defaultMessage: 'System Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.systemMetrics.shortDescription', {
-      defaultMessage: 'Collect CPU, memory, network, and disk statistics from the host.',
+      defaultMessage:
+        'Collect CPU, memory, network, and disk metrics from System hosts with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.systemMetrics.longDescription', {
       defaultMessage:
-        'The `system` Metricbeat module collects CPU, memory, network, and disk statistics from the host. \
+        'The `system` Metricbeat module collects CPU, memory, network, and disk statistics from host. \
 It collects system wide statistics and statistics per process and filesystem. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -57,8 +58,8 @@ It collects system wide statistics and statistics per process and filesystem. \
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/system_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['os_system', 'security'],
   };
 }

@@ -1,7 +1,7 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-ui-shared-deps-npm"
 PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-npm"
@@ -23,7 +23,6 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "eui_theme_vars/package.json",
   "package.json",
   "README.md"
 ]
@@ -35,10 +34,7 @@ RUNTIME_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
   "@npm//@emotion/react",
-  "@npm//abortcontroller-polyfill",
-  "@npm//angular",
   "@npm//babel-loader",
-  "@npm//babel-plugin-transform-react-remove-prop-types",
   "@npm//core-js",
   "@npm//css-loader",
   "@npm//fflate",
@@ -48,6 +44,7 @@ RUNTIME_DEPS = [
   "@npm//moment-timezone",
   "@npm//moment",
   "@npm//raw-loader",
+  "@npm//react-ace",
   "@npm//react-dom",
   "@npm//react-intl",
   "@npm//react-is",
@@ -55,7 +52,6 @@ RUNTIME_DEPS = [
   "@npm//react-router",
   "@npm//react",
   "@npm//regenerator-runtime",
-  "@npm//resize-observer-polyfill",
   "@npm//rison-node",
   "@npm//rxjs",
   "@npm//styled-components",
@@ -75,8 +71,6 @@ TYPES_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
   "@npm//@emotion/react",
-  "@npm//abortcontroller-polyfill",
-  "@npm//angular",
   "@npm//babel-loader",
   "@npm//core-js",
   "@npm//css-loader",
@@ -94,7 +88,6 @@ TYPES_DEPS = [
   "@npm//react-router",
   "@npm//react-router-dom",
   "@npm//regenerator-runtime",
-  "@npm//resize-observer-polyfill",
   "@npm//rison-node",
   "@npm//rxjs",
   "@npm//styled-components",
@@ -127,11 +120,9 @@ ts_project(
   deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
 )
 
@@ -156,7 +147,7 @@ webpack(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types", ":shared_built_assets"],
+  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -172,6 +163,23 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

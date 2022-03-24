@@ -10,8 +10,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { cloneDeep, get } from 'lodash';
 
 import { EuiSpacer } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 
-import { IAggConfig } from '../../../../../../../data/public';
+import { BUCKET_TYPES, IAggConfig } from '../../../../../../../data/public';
+import { getUISettings } from '../../../../services';
 
 import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
@@ -27,6 +29,7 @@ import {
   mapPositionOpposingOpposite,
 } from './utils';
 import { getSeriesParams } from '../../../../utils/get_series_params';
+import { LEGACY_TIME_AXIS } from '../../../../../../../charts/common';
 
 export type SetParamByIndex = <P extends keyof ValueAxis, O extends keyof SeriesParam>(
   axesName: 'valueAxes' | 'seriesParams',
@@ -287,6 +290,20 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
     updateAxisTitle(updatedSeries);
   }, [firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle, aggs, schemaName]);
 
+  const isTimeViz = aggs.aggs.some(
+    (agg) =>
+      agg.schema === 'segment' && agg.enabled && agg.type?.name === BUCKET_TYPES.DATE_HISTOGRAM
+  );
+  const xAxisIsHorizontal =
+    stateParams.categoryAxes[0].position === Position.Bottom ||
+    stateParams.categoryAxes[0].position === Position.Top;
+  const useLegacyTimeAxis = getUISettings().get(LEGACY_TIME_AXIS, false);
+  const linearOrStackedBars = stateParams.seriesParams.every(
+    ({ mode, type }) => type !== 'histogram' || (type === 'histogram' && mode === 'stacked')
+  );
+  const useMultiLayerAxis =
+    xAxisIsHorizontal && isTimeViz && !useLegacyTimeAxis && linearOrStackedBars;
+
   return isTabSelected ? (
     <>
       <SeriesPanel
@@ -311,6 +328,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
         axis={stateParams.categoryAxes[0]}
         onPositionChanged={onCategoryAxisPositionChanged}
         setCategoryAxis={setCategoryAxis}
+        useMultiLayerAxis={useMultiLayerAxis}
       />
     </>
   ) : null;

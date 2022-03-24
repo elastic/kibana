@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   samplerShardSize: number;
@@ -41,7 +41,7 @@ const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map((v) => {
 export const ShardSizeFilter: FC<Props> = ({ samplerShardSize, setSamplerShardSize }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false} style={{ width: 270 }}>
+      <EuiFlexItem grow={false} style={{ width: 310 }}>
         <EuiSuperSelect
           options={searchSizeOptions}
           valueOfSelected={String(samplerShardSize)}

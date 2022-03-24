@@ -8,9 +8,9 @@
 
 import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { QuerySuggestion } from '../../autocomplete';
-import { SuggestionOnClick } from './types';
+import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 
 function getEuiIconType(type: string) {
   switch (type) {
@@ -31,16 +31,32 @@ function getEuiIconType(type: string) {
 
 interface Props {
   onClick: SuggestionOnClick;
-  onMouseEnter: () => void;
+  onMouseEnter: SuggestionOnMouseEnter;
   selected: boolean;
   index: number;
   suggestion: QuerySuggestion;
-  innerRef: (node: HTMLDivElement) => void;
+  innerRef: (index: number, node: HTMLDivElement) => void;
   ariaId: string;
   shouldDisplayDescription: boolean;
 }
 
-export function SuggestionComponent(props: Props) {
+export const SuggestionComponent = React.memo(function SuggestionComponent(props: Props) {
+  const { index, innerRef, onClick, onMouseEnter, suggestion } = props;
+  const setRef = useCallback(
+    (node: HTMLDivElement) => {
+      innerRef(index, node);
+    },
+    [index, innerRef]
+  );
+
+  const handleClick = useCallback(() => {
+    onClick(suggestion, index);
+  }, [index, onClick, suggestion]);
+
+  const handleMouseEnter = useCallback(() => {
+    onMouseEnter(suggestion, index);
+  }, [index, onMouseEnter, suggestion]);
+
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
@@ -50,9 +66,9 @@ export function SuggestionComponent(props: Props) {
         active: props.selected,
       })}
       role="option"
-      onClick={() => props.onClick(props.suggestion, props.index)}
-      onMouseEnter={props.onMouseEnter}
-      ref={props.innerRef}
+      onMouseEnter={handleMouseEnter}
+      onClick={handleClick}
+      ref={setRef}
       id={props.ariaId}
       aria-selected={props.selected}
       data-test-subj={`autocompleteSuggestion-${
@@ -72,4 +88,4 @@ export function SuggestionComponent(props: Props) {
       </div>
     </div>
   );
-}
+});

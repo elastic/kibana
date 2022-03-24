@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
 import {
@@ -21,16 +21,17 @@ import {
 import { CombinedField, CombinedFieldsForm } from '../../../common/components/combined_fields';
 import { JsonEditor, EDITOR_MODE } from '../json_editor';
 import { FindFileStructureResponse } from '../../../../../../file_upload/common';
+import { CreateDataViewToolTip } from './create_data_view_tooltip';
 const EDITOR_HEIGHT = '300px';
 
 interface Props {
   index: string;
-  indexPattern: string;
+  dataView: string;
   initialized: boolean;
   onIndexChange(): void;
-  createIndexPattern: boolean;
-  onCreateIndexPatternChange(): void;
-  onIndexPatternChange(): void;
+  createDataView: boolean;
+  onCreateDataViewChange(): void;
+  onDataViewChange(): void;
   indexSettingsString: string;
   mappingsString: string;
   pipelineString: string;
@@ -38,20 +39,21 @@ interface Props {
   onMappingsStringChange(mappings: string): void;
   onPipelineStringChange(pipeline: string): void;
   indexNameError: string;
-  indexPatternNameError: string;
+  dataViewNameError: string;
   combinedFields: CombinedField[];
   onCombinedFieldsChange(combinedFields: CombinedField[]): void;
   results: FindFileStructureResponse;
+  canCreateDataView: boolean;
 }
 
 export const AdvancedSettings: FC<Props> = ({
   index,
-  indexPattern,
+  dataView,
   initialized,
   onIndexChange,
-  createIndexPattern,
-  onCreateIndexPatternChange,
-  onIndexPatternChange,
+  createDataView,
+  onCreateDataViewChange,
+  onDataViewChange,
   indexSettingsString,
   mappingsString,
   pipelineString,
@@ -59,10 +61,11 @@ export const AdvancedSettings: FC<Props> = ({
   onMappingsStringChange,
   onPipelineStringChange,
   indexNameError,
-  indexPatternNameError,
+  dataViewNameError,
   combinedFields,
   onCombinedFieldsChange,
   results,
+  canCreateDataView,
 }) => {
   return (
     <React.Fragment>
@@ -98,37 +101,39 @@ export const AdvancedSettings: FC<Props> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiCheckbox
-        id="createIndexPattern"
-        label={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.createIndexPatternLabel"
-            defaultMessage="Create index pattern"
-          />
-        }
-        checked={createIndexPattern === true}
-        disabled={initialized === true}
-        onChange={onCreateIndexPatternChange}
-      />
+      <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
+        <EuiCheckbox
+          id="createDataView"
+          label={
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.advancedImportSettings.createDataViewLabel"
+              defaultMessage="Create data view"
+            />
+          }
+          checked={createDataView === true}
+          disabled={initialized === true || canCreateDataView === false}
+          onChange={onCreateDataViewChange}
+        />
+      </CreateDataViewToolTip>
 
       <EuiSpacer size="s" />
 
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.indexPatternNameLabel"
-            defaultMessage="Index pattern name"
+            id="xpack.dataVisualizer.file.advancedImportSettings.dataViewNameLabel"
+            defaultMessage="Data view name"
           />
         }
-        isInvalid={indexPatternNameError !== ''}
-        error={[indexPatternNameError]}
+        isInvalid={dataViewNameError !== ''}
+        error={[dataViewNameError]}
       >
         <EuiFieldText
-          disabled={createIndexPattern === false || initialized === true}
-          placeholder={createIndexPattern === true ? index : ''}
-          value={indexPattern}
-          onChange={onIndexPatternChange}
-          isInvalid={indexPatternNameError !== ''}
+          disabled={createDataView === false || initialized === true}
+          placeholder={createDataView === true ? index : ''}
+          value={dataView}
+          onChange={onDataViewChange}
+          isInvalid={dataViewNameError !== ''}
         />
       </EuiFormRow>
 

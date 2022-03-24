@@ -6,12 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
-import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
 
 export function kibanaOverviewRoute(server) {
   /**
@@ -35,20 +33,20 @@ export function kibanaOverviewRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
 
       try {
+        const moduleType = 'kibana';
+        const dsDataset = 'stats';
         const [clusterStatus, metrics] = await Promise.all([
-          getKibanaClusterStatus(req, kbnIndexPattern, { clusterUuid }),
-          getMetrics(req, kbnIndexPattern, metricSet, [
+          getKibanaClusterStatus(req, { clusterUuid }),
+          getMetrics(req, moduleType, metricSet, [
             {
               bool: {
                 should: [
+                  { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
+                  { term: { 'metricset.name': dsDataset } },
                   { term: { type: 'kibana_stats' } },
-                  { term: { 'metricset.name': 'stats' } },
                 ],
               },
             },

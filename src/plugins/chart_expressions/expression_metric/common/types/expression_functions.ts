@@ -9,35 +9,33 @@
 import {
   Datatable,
   ExpressionFunctionDefinition,
-  Range,
   ExpressionValueRender,
   Style,
 } from '../../../../expressions';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { ColorSchemas, ColorMode } from '../../../../charts/common';
-import { VisParams, visType } from './expression_renderers';
+import { ColorMode, CustomPaletteState, PaletteOutput } from '../../../../charts/common';
+import { VisParams, visType, LabelPositionType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
 export interface MetricArguments {
   percentageMode: boolean;
-  colorSchema: ColorSchemas;
   colorMode: ColorMode;
-  useRanges: boolean;
-  invertColors: boolean;
   showLabels: boolean;
-  bgFill: string;
-  subText: string;
-  colorRange: Range[];
+  palette?: PaletteOutput<CustomPaletteState>;
   font: Style;
-  metric: ExpressionValueVisDimension[];
-  bucket: ExpressionValueVisDimension;
+  labelFont: Style;
+  labelPosition: LabelPositionType;
+  metric: Array<ExpressionValueVisDimension | string>;
+  bucket?: ExpressionValueVisDimension | string;
+  colorFullBackground: boolean;
+  autoScale?: boolean;
 }
 
 export type MetricInput = Datatable;
 
 export interface MetricVisRenderConfig {
   visType: typeof visType;
-  visData: MetricInput;
+  visData: Datatable;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
 }
 

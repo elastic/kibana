@@ -8,7 +8,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButtonIcon,
@@ -79,7 +79,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
           aria-label={i18n.translate(
             'visTypeTimeseries.indexPatternSelect.switchModePopover.areaLabel',
             {
-              defaultMessage: 'Configure index pattern selection mode',
+              defaultMessage: 'Configure data view selection mode',
             }
           )}
           onClick={onButtonClick}
@@ -97,14 +97,13 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
       >
         <EuiPopoverTitle>
           {i18n.translate('visTypeTimeseries.indexPatternSelect.switchModePopover.title', {
-            defaultMessage: 'Index pattern selection mode',
+            defaultMessage: 'Data view mode',
           })}
         </EuiPopoverTitle>
         <EuiText>
           <FormattedMessage
             id="visTypeTimeseries.indexPatternSelect.switchModePopover.text"
-            defaultMessage="An index pattern identifies one or more Elasticsearch indices that you want to explore.
-            Kibana index patterns are used by default. {allowStringIndicesLabel}"
+            defaultMessage="A data view groups and retrieves data from Elasticsearch. Disable this mode to directly query Elasticsearch indices instead. {allowStringIndicesLabel}"
             values={{
               allowStringIndicesLabel,
             }}
@@ -116,7 +115,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
           label={i18n.translate(
             'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
             {
-              defaultMessage: 'Use only index patterns',
+              defaultMessage: 'Use Kibana data views',
             }
           )}
           onChange={switchMode}

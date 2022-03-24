@@ -23,7 +23,7 @@ import {
   EuiSpacer,
   EuiFormRow,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { PANEL_TYPES } from '../../../../common/enums';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
@@ -180,7 +180,11 @@ const TopHitAggUi = (props) => {
             restrict={aggWithOptionsRestrictFields}
             indexPattern={indexPattern}
             value={model.field}
-            onChange={handleSelectChange('field')}
+            onChange={(value) =>
+              handleChange({
+                field: value?.[0],
+              })
+            }
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -242,7 +246,11 @@ const TopHitAggUi = (props) => {
             }
             restrict={ORDER_DATE_RESTRICT_FIELDS}
             value={model.order_by}
-            onChange={handleSelectChange('order_by')}
+            onChange={(value) =>
+              handleChange({
+                order_by: value?.[0],
+              })
+            }
             indexPattern={indexPattern}
             fields={fields}
             data-test-subj="topHitOrderByFieldSelect"

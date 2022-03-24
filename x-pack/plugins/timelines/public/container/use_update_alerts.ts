@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreStart } from '../../../../../src/core/public';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { AlertStatus } from '../../../timelines/common';
+import type { AlertStatus } from '../../../timelines/common/types';
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   RAC_ALERTS_BULK_UPDATE_URL,
@@ -40,15 +40,16 @@ export const useUpdateAlertsStatus = (
   return {
     updateAlertStatus: async ({ status, index, query }) => {
       if (useDetectionEngine) {
-        return http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+        return http.fetch<estypes.UpdateByQueryResponse>(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
           method: 'POST',
           body: JSON.stringify({ status, query }),
         });
       } else {
-        const { body } = await http.post(RAC_ALERTS_BULK_UPDATE_URL, {
-          body: JSON.stringify({ index, status, query }),
-        });
-        return body;
+        const response = await http.post<estypes.UpdateByQueryResponse>(
+          RAC_ALERTS_BULK_UPDATE_URL,
+          { body: JSON.stringify({ index, status, query }) }
+        );
+        return response;
       }
     },
   };

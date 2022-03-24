@@ -1,0 +1,460 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UrlFormatEditor should render normally 1`] = `
+<div>
+  <div
+    class="euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        <span>
+          Type
+        </span>
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiFormControlLayout"
+      >
+        <div
+          class="euiFormControlLayout__childrenWrapper"
+        >
+          <select
+            class="euiSelect"
+            data-test-subj="urlEditorType"
+            id="generated-id"
+          >
+            <option
+              value="a"
+            >
+              Link
+            </option>
+            <option
+              value="img"
+            >
+              Image
+            </option>
+            <option
+              value="audio"
+            >
+              Audio
+            </option>
+          </select>
+          <div
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              class="euiFormControlLayoutCustomIcon"
+            >
+              <span
+                aria-hidden="true"
+                class="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="arrowDown"
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        <span>
+          Open in a new tab
+        </span>
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiSwitch"
+      >
+        <button
+          aria-checked="false"
+          aria-labelledby="generated-id"
+          class="euiSwitch__button"
+          id="generated-id"
+          role="switch"
+          type="button"
+        >
+          <span
+            class="euiSwitch__body"
+          >
+            <span
+              class="euiSwitch__thumb"
+            />
+            <span
+              class="euiSwitch__track"
+            >
+              <span
+                class="euiSwitch__icon"
+                data-euiicon-type="cross"
+              />
+              <span
+                class="euiSwitch__icon euiSwitch__icon--checked"
+                data-euiicon-type="check"
+              />
+            </span>
+          </span>
+        </button>
+        <span
+          class="euiSwitch__label"
+          id="generated-id"
+        >
+          <span>
+            Off
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        aria-invalid="false"
+        class="euiFormLabel euiFormRow__label"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        <span>
+          URL template
+        </span>
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiFormControlLayout"
+      >
+        <div
+          class="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            aria-describedby="generated-id-help-0"
+            class="euiFieldText"
+            data-test-subj="urlEditorUrlTemplate"
+            id="generated-id"
+            type="text"
+            value=""
+          />
+        </div>
+      </div>
+      <div
+        class="euiFormHelpText euiFormRow__text"
+        id="generated-id-help-0"
+      >
+        <a
+          class="euiLink euiLink--primary"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
+          rel="noopener"
+          target="_blank"
+        >
+          <span>
+            URL template help
+          </span>
+          <span
+            aria-label="External link"
+            class="euiLink__externalIcon"
+            data-euiicon-type="popout"
+          />
+          <span
+            class="euiScreenReaderOnly"
+          >
+            (opens in a new tab or window)
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        aria-invalid="false"
+        class="euiFormLabel euiFormRow__label"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        <span>
+          Label template
+        </span>
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiFormControlLayout"
+      >
+        <div
+          class="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            aria-describedby="generated-id-help-0"
+            class="euiFieldText"
+            data-test-subj="urlEditorLabelTemplate"
+            id="generated-id"
+            type="text"
+            value=""
+          />
+        </div>
+      </div>
+      <div
+        class="euiFormHelpText euiFormRow__text"
+        id="generated-id-help-0"
+      >
+        <a
+          class="euiLink euiLink--primary"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
+          rel="noopener"
+          target="_blank"
+        >
+          <span>
+            Label template help
+          </span>
+          <span
+            aria-label="External link"
+            class="euiLink__externalIcon"
+            data-euiicon-type="popout"
+          />
+          <span
+            class="euiScreenReaderOnly"
+          >
+            (opens in a new tab or window)
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        <span>
+          Samples
+        </span>
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiBasicTable kbnFieldFormatEditor__samples"
+        id="generated-id"
+      >
+        <div>
+          <div
+            class="euiTableHeaderMobile"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              />
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              />
+            </div>
+          </div>
+          <table
+            class="euiTable euiTable--compressed euiTable--responsive"
+            id="__table_generated-id"
+            tabindex="-1"
+          >
+            <caption
+              class="euiScreenReaderOnly euiTableCaption"
+            />
+            <thead>
+              <tr>
+                <th
+                  class="euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_input_0"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                      title="Input"
+                    >
+                      Input
+                    </span>
+                  </span>
+                </th>
+                <th
+                  class="euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_output_1"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                      title="Output"
+                    >
+                      Output
+                    </span>
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="euiTableRow"
+              >
+                <td
+                  class="euiTableRowCell euiTableRowCell--middle"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Input
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    john
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell euiTableRowCell--middle"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Output
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    <div
+                      class=""
+                    >
+                      converted url for john
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr
+                class="euiTableRow"
+              >
+                <td
+                  class="euiTableRowCell euiTableRowCell--middle"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Input
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    /some/pathname/asset.png
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell euiTableRowCell--middle"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Output
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    <div
+                      class=""
+                    >
+                      converted url for /some/pathname/asset.png
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr
+                class="euiTableRow"
+              >
+                <td
+                  class="euiTableRowCell euiTableRowCell--middle"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Input
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    1234
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell euiTableRowCell--middle"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Output
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    <div
+                      class=""
+                    >
+                      converted url for 1234
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

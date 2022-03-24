@@ -17,7 +17,7 @@ import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { getSpaceAvatarComponent } from '../space_avatar';
@@ -43,6 +43,7 @@ export const SpaceListInternal = ({
   namespaces,
   displayLimit = DEFAULT_DISPLAY_LIMIT,
   behaviorContext,
+  listOnClick = () => {},
 }: SpaceListProps) => {
   const { spacesDataPromise } = useSpaces();
 
@@ -103,14 +104,22 @@ export const SpaceListInternal = ({
 
     if (displayLimit && authorizedSpaceTargets.length > displayLimit) {
       button = isExpanded ? (
-        <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(false)}>
+        <EuiButtonEmpty
+          size="xs"
+          onClick={() => setIsExpanded(false)}
+          style={{ alignSelf: 'center' }}
+        >
           <FormattedMessage
             id="xpack.spaces.spaceList.showLessSpacesLink"
             defaultMessage="show less"
           />
         </EuiButtonEmpty>
       ) : (
-        <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(true)}>
+        <EuiButtonEmpty
+          size="xs"
+          onClick={() => setIsExpanded(true)}
+          style={{ alignSelf: 'center' }}
+        >
           <FormattedMessage
             id="xpack.spaces.spaceList.showMoreSpacesLink"
             defaultMessage="+{count} more"
@@ -147,7 +156,14 @@ export const SpaceListInternal = ({
           const isDisabled = space.isFeatureDisabled;
           return (
             <EuiFlexItem grow={false} key={space.id}>
-              <LazySpaceAvatar space={space} isDisabled={isDisabled} size={'s'} />
+              <LazySpaceAvatar
+                space={space}
+                isDisabled={isDisabled}
+                size={'s'}
+                onClick={listOnClick}
+                onKeyPress={listOnClick}
+                style={{ cursor: 'pointer' }}
+              />
             </EuiFlexItem>
           );
         })}

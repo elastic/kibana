@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -22,43 +22,49 @@ const strings = {
     }),
   getTitleText: () =>
     i18n.translate('xpack.canvas.embedObject.titleText', {
-      defaultMessage: 'Add from Kibana',
+      defaultMessage: 'Add from library',
     }),
 };
 export interface Props {
   onClose: () => void;
-  onSelect: (id: string, embeddableType: string) => void;
+  onSelect: (id: string, embeddableType: string, isByValueEnabled?: boolean) => void;
   availableEmbeddables: string[];
+  isByValueEnabled?: boolean;
 }
 
-export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables, onClose }) => {
+export const AddEmbeddableFlyout: FC<Props> = ({
+  onSelect,
+  availableEmbeddables,
+  onClose,
+  isByValueEnabled,
+}) => {
   const embeddablesService = useEmbeddablesService();
   const platformService = usePlatformService();
   const { getEmbeddableFactories } = embeddablesService;
   const { getSavedObjects, getUISettings } = platformService;
 
-  const onAddPanel = (id: string, savedObjectType: string, name: string) => {
-    const embeddableFactories = getEmbeddableFactories();
+  const onAddPanel = useCallback(
+    (id: string, savedObjectType: string) => {
+      const embeddableFactories = getEmbeddableFactories();
+      // Find the embeddable type from the saved object type
+      const found = Array.from(embeddableFactories).find((embeddableFactory) => {
+        return Boolean(
+          embeddableFactory.savedObjectMetaData &&
+            embeddableFactory.savedObjectMetaData.type === savedObjectType
+        );
+      });
 
-    // Find the embeddable type from the saved object type
-    const found = Array.from(embeddableFactories).find((embeddableFactory) => {
-      return Boolean(
-        embeddableFactory.savedObjectMetaData &&
-          embeddableFactory.savedObjectMetaData.type === savedObjectType
-      );
-    });
+      const foundEmbeddableType = found ? found.type : 'unknown';
 
-    const foundEmbeddableType = found ? found.type : 'unknown';
-
-    onSelect(id, foundEmbeddableType);
-  };
+      onSelect(id, foundEmbeddableType, isByValueEnabled);
+    },
+    [isByValueEnabled, getEmbeddableFactories, onSelect]
+  );
 
   const embeddableFactories = getEmbeddableFactories();
 
   const availableSavedObjects = Array.from(embeddableFactories)
-    .filter((factory) => {
-      return availableEmbeddables.includes(factory.type);
-    })
+    .filter((factory) => isByValueEnabled || availableEmbeddables.includes(factory.type))
     .map((factory) => factory.savedObjectMetaData)
     .filter<SavedObjectMetaData<{}>>(function (
       maybeSavedObjectMetaData

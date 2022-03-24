@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { TransformId, TransformPivotConfig } from '../../../../../../common/types/transform';
+import type { TransformConfigUnion, TransformId } from '../../../../../../common/types/transform';
 
 export type EsIndexName = string;
+export type EsIngestPipelineName = string;
 export type IndexPatternTitle = string;
 
 export interface StepDetailsExposedState {
@@ -15,6 +16,7 @@ export interface StepDetailsExposedState {
   continuousModeDelay: string;
   createIndexPattern: boolean;
   destinationIndex: EsIndexName;
+  destinationIngestPipeline: EsIngestPipelineName;
   isContinuousModeEnabled: boolean;
   isRetentionPolicyEnabled: boolean;
   retentionPolicyDateField: string;
@@ -27,6 +29,7 @@ export interface StepDetailsExposedState {
   transformSettingsDocsPerSecond?: number;
   valid: boolean;
   indexPatternTimeField?: string | undefined;
+  _meta?: Record<string, unknown>;
 }
 
 const defaultContinuousModeDelay = '60s';
@@ -47,6 +50,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
     transformFrequency: defaultTransformFrequency,
     transformSettingsMaxPageSearchSize: defaultTransformSettingsMaxPageSearchSize,
     destinationIndex: '',
+    destinationIngestPipeline: '',
     touched: false,
     valid: false,
     indexPatternTimeField: undefined,
@@ -55,7 +59,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
 
 export function applyTransformConfigToDetailsState(
   state: StepDetailsExposedState,
-  transformConfig?: TransformPivotConfig
+  transformConfig?: TransformConfigUnion
 ): StepDetailsExposedState {
   // apply the transform configuration to wizard DETAILS state
   if (transformConfig !== undefined) {
@@ -70,6 +74,11 @@ export function applyTransformConfigToDetailsState(
     // Description
     if (transformConfig.description !== undefined) {
       state.transformDescription = transformConfig.description;
+    }
+
+    // Ingest Pipeline
+    if (transformConfig.dest.pipeline !== undefined) {
+      state.destinationIngestPipeline = transformConfig.dest.pipeline;
     }
 
     // Frequency
@@ -93,6 +102,10 @@ export function applyTransformConfigToDetailsState(
       if (typeof transformConfig.settings?.docs_per_second === 'number') {
         state.transformSettingsDocsPerSecond = transformConfig.settings.docs_per_second;
       }
+    }
+
+    if (transformConfig._meta) {
+      state._meta = transformConfig._meta;
     }
   }
   return state;

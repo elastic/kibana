@@ -8,7 +8,7 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { CollapsiblePanel } from './collapsible_panel';
 

@@ -13,7 +13,7 @@ import { AppAction } from '../../../../common/store/actions';
 import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
 import { MANAGEMENT_ROUTING_EVENT_FILTERS_PATH } from '../../../common/constants';
-import { extractEventFiltetrsPageLocation } from '../../../common/routing';
+import { extractEventFiltersPageLocation } from '../../../common/routing';
 import {
   isLoadedResourceState,
   isUninitialisedResourceState,
@@ -66,16 +66,17 @@ const handleEventFiltersListPageDataChanges: CaseReducer<EventFiltersListPageDat
   };
 };
 
-const handleEventFiltersListPageDataExistChanges: CaseReducer<EventFiltersListPageDataExistsChanged> =
-  (state, action) => {
-    return {
-      ...state,
-      listPage: {
-        ...state.listPage,
-        dataExist: action.payload,
-      },
-    };
+const handleEventFiltersListPageDataExistChanges: CaseReducer<
+  EventFiltersListPageDataExistsChanged
+> = (state, action) => {
+  return {
+    ...state,
+    listPage: {
+      ...state.listPage,
+      dataExist: action.payload,
+    },
   };
+};
 
 const eventFiltersInitForm: CaseReducer<EventFiltersInitForm> = (state, action) => {
   return {
@@ -155,7 +156,7 @@ const eventFiltersUpdateSuccess: CaseReducer<EventFiltersUpdateSuccess> = (state
 
 const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   if (isEventFiltersPageLocation(action.payload)) {
-    const location = extractEventFiltetrsPageLocation(parse(action.payload.search.slice(1)));
+    const location = extractEventFiltersPageLocation(parse(action.payload.search.slice(1)));
     return {
       ...state,
       location,

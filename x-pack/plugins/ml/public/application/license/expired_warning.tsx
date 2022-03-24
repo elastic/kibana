@@ -8,8 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
-import { getOverlays } from '../util/dependency_cache';
+import { toMountPoint, wrapWithTheme } from '../../../../../../src/plugins/kibana_react/public';
+import { getOverlays, getTheme } from '../util/dependency_cache';
 
 let expiredLicenseBannerId: string;
 
@@ -20,8 +20,15 @@ export function showExpiredLicenseWarning() {
     });
     // Only show the banner once with no way to dismiss it
     const overlays = getOverlays();
+    const theme = getTheme();
+
     expiredLicenseBannerId = overlays.banners.add(
-      toMountPoint(<EuiCallOut iconType="iInCircle" color="warning" title={message} />)
+      toMountPoint(
+        wrapWithTheme(
+          <EuiCallOut iconType="iInCircle" color="warning" title={message} />,
+          theme.theme$
+        )
+      )
     );
   }
 }

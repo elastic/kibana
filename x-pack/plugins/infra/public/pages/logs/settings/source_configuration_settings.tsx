@@ -14,14 +14,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
-import { Prompt } from '../../../utils/navigation_warning_prompt';
+import { Prompt } from '../../../../../observability/public';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
@@ -67,8 +67,6 @@ export const LogsSettingsPage = () => {
     logIndicesFormElement,
     logColumnsFormElement,
     nameFormElement,
-    tiebreakerFieldFormElement,
-    timestampFieldFormElement,
   } = useLogSourceConfigurationFormState(source?.configuration);
 
   const persistUpdates = useCallback(async () => {
@@ -113,8 +111,6 @@ export const LogsSettingsPage = () => {
             isLoading={isLoading}
             isReadOnly={!isWriteable}
             indicesFormElement={logIndicesFormElement}
-            tiebreakerFieldFormElement={tiebreakerFieldFormElement}
-            timestampFieldFormElement={timestampFieldFormElement}
           />
         </EuiPanel>
         <EuiSpacer />

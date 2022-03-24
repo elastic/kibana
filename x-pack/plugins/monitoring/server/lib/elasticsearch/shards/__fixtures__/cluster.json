@@ -49,17 +49,10 @@
       },
       "segments": {
         "count": 202,
-        "doc_values_memory_in_bytes": 602248,
         "file_sizes": {},
         "fixed_bit_set_memory_in_bytes": 608,
         "index_writer_memory_in_bytes": 2368414,
         "max_unsafe_auto_id_timestamp": 1505411847867,
-        "memory_in_bytes": 5079404,
-        "norms_memory_in_bytes": 475392,
-        "points_memory_in_bytes": 11512,
-        "stored_fields_memory_in_bytes": 65080,
-        "term_vectors_memory_in_bytes": 0,
-        "terms_memory_in_bytes": 3925172,
         "version_map_memory_in_bytes": 697814
       },
       "shards": {

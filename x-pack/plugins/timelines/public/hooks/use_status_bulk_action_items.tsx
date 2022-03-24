@@ -12,6 +12,7 @@ import * as i18n from '../components/t_grid/translations';
 import type { AlertStatus, StatusBulkActionsProps } from '../../common/types/timeline';
 import { useUpdateAlertsStatus } from '../container/use_update_alerts';
 import { useAppToasts } from './use_app_toasts';
+import { STANDALONE_ID } from '../components/t_grid/standalone';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return { bool: { filter: { terms: { _id: eventIds } } } };
@@ -28,7 +29,7 @@ export const useStatusBulkActionItems = ({
   onUpdateFailure,
   timelineId,
 }: StatusBulkActionsProps) => {
-  const { updateAlertStatus } = useUpdateAlertsStatus(timelineId != null);
+  const { updateAlertStatus } = useUpdateAlertsStatus(timelineId !== STANDALONE_ID);
   const { addSuccess, addError, addWarning } = useAppToasts();
 
   const onAlertStatusUpdateSuccess = useCallback(

@@ -11,23 +11,16 @@ import { mlLog } from '../../lib/log';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-  ML_ANNOTATIONS_INDEX_PATTERN,
 } from '../../../common/constants/index_patterns';
 
 // Annotations Feature is available if:
-// - ML_ANNOTATIONS_INDEX_PATTERN index is present
 // - ML_ANNOTATIONS_INDEX_ALIAS_READ alias is present
 // - ML_ANNOTATIONS_INDEX_ALIAS_WRITE alias is present
+// Note there is no need to check for the existence of the indices themselves as aliases are stored
+// in the metadata of the indices they point to, so it's impossible to have an alias that doesn't point to any index.
 export async function isAnnotationsFeatureAvailable({ asInternalUser }: IScopedClusterClient) {
   try {
-    const indexParams = { index: ML_ANNOTATIONS_INDEX_PATTERN };
-
-    const { body: annotationsIndexExists } = await asInternalUser.indices.exists(indexParams);
-    if (!annotationsIndexExists) {
-      return false;
-    }
-
-    const { body: annotationsReadAliasExists } = await asInternalUser.indices.existsAlias({
+    const annotationsReadAliasExists = await asInternalUser.indices.existsAlias({
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       name: ML_ANNOTATIONS_INDEX_ALIAS_READ,
     });
@@ -36,7 +29,7 @@ export async function isAnnotationsFeatureAvailable({ asInternalUser }: IScopedC
       return false;
     }
 
-    const { body: annotationsWriteAliasExists } = await asInternalUser.indices.existsAlias({
+    const annotationsWriteAliasExists = await asInternalUser.indices.existsAlias({
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
       name: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
     });

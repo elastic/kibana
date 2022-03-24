@@ -29,6 +29,7 @@ const MAX_SIMPLE_MESSAGE_LENGTH = 140;
 // That's why we need to pass in `overlays` as a prop cannot get it via context.
 interface ToastNotificationTextProps {
   overlays: CoreStart['overlays'];
+  theme: CoreStart['theme'];
   text: any;
   previewTextLength?: number;
 }
@@ -36,6 +37,7 @@ interface ToastNotificationTextProps {
 export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
   overlays,
   text,
+  theme,
   previewTextLength,
 }) => {
   if (typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
@@ -80,7 +82,8 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
               })}
             </EuiButtonEmpty>
           </EuiModalFooter>
-        </EuiModal>
+        </EuiModal>,
+        { theme$: theme.theme$ }
       )
     );
   };

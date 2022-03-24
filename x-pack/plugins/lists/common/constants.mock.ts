@@ -58,6 +58,7 @@ export const MATCH = 'match';
 export const MATCH_ANY = 'match_any';
 export const WILDCARD = 'wildcard';
 export const MAX_IMPORT_PAYLOAD_BYTES = 9000000;
+export const MAX_IMPORT_SIZE = 10000;
 export const IMPORT_BUFFER_SIZE = 1000;
 export const LIST = 'list';
 export const EXISTS = 'exists';

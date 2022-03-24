@@ -111,6 +111,13 @@ export interface IBasePath {
  */
 export interface IExternalUrl {
   /**
+   * Determines if the provided URL is an internal url.
+   *
+   * @param relativeOrAbsoluteUrl
+   */
+  isInternalUrl(relativeOrAbsoluteUrl: string): boolean;
+
+  /**
    * Determines if the provided URL is a valid location to send users.
    * Validation is based on the configured allow list in kibana.yml.
    *
@@ -296,18 +303,19 @@ export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
  * @public
  */
 export interface HttpHandler {
-  <TResponseBody = any>(path: string, options: HttpFetchOptions & { asResponse: true }): Promise<
+  <TResponseBody = unknown>(
+    path: string,
+    options: HttpFetchOptions & { asResponse: true }
+  ): Promise<HttpResponse<TResponseBody>>;
+  <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & { asResponse: true }): Promise<
     HttpResponse<TResponseBody>
   >;
-  <TResponseBody = any>(options: HttpFetchOptionsWithPath & { asResponse: true }): Promise<
-    HttpResponse<TResponseBody>
-  >;
-  <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
-  <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
+  <TResponseBody = unknown>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+  <TResponseBody = unknown>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
 /** @public */
-export interface HttpResponse<TResponseBody = any> {
+export interface HttpResponse<TResponseBody = unknown> {
   /** The original {@link HttpFetchOptionsWithPath} used to send this request. */
   readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
   /** Raw request sent to Kibana server. */
@@ -322,7 +330,7 @@ export interface HttpResponse<TResponseBody = any> {
  * Properties that can be returned by HttpInterceptor.request to override the response.
  * @public
  */
-export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
+export interface IHttpResponseInterceptorOverrides<TResponseBody = unknown> {
   /** Raw response received, may be undefined if there was an error. */
   readonly response?: Readonly<Response>;
   /** Parsed body received, may be undefined if there was an error. */
@@ -330,19 +338,34 @@ export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
 }
 
 /** @public */
-export interface IHttpFetchError extends Error {
+export interface ResponseErrorBody {
+  message: string;
+  statusCode: number;
+  attributes?: Record<string, unknown>;
+}
+
+/** @public */
+export interface IHttpFetchError<TResponseBody = unknown> extends Error {
   readonly name: string;
   readonly request: Request;
   readonly response?: Response;
   /**
    * @deprecated Provided for legacy compatibility. Prefer the `request` property instead.
+   * @removeBy 8.8.0
+   *
+   * Note to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,
+   * so TS and code-reference navigation might not highlight them.
    */
   readonly req: Request;
   /**
    * @deprecated Provided for legacy compatibility. Prefer the `response` property instead.
+   * @removeBy 8.8.0
+   *
+   * Note to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,
+   * so TS and code-reference navigation might not highlight them.
    */
   readonly res?: Response;
-  readonly body?: any; // TODO: this should be unknown
+  readonly body?: TResponseBody;
 }
 
 /** @public */

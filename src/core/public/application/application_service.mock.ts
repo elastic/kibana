@@ -11,12 +11,15 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { MountPoint } from '../types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+import { themeServiceMock } from '../theme/theme_service.mock';
+import { scopedHistoryMock } from './scoped_history.mock';
 import {
   ApplicationSetup,
   InternalApplicationStart,
   ApplicationStart,
   InternalApplicationSetup,
   PublicAppInfo,
+  AppMountParameters,
 } from './types';
 import { ApplicationServiceContract } from './test_types';
 
@@ -81,6 +84,19 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
   };
 };
 
+const createAppMountParametersMock = (parts: Partial<AppMountParameters>) => {
+  const mock: AppMountParameters = {
+    element: document.createElement('div'),
+    history: scopedHistoryMock.create(),
+    appBasePath: '/app',
+    onAppLeave: jest.fn(),
+    setHeaderActionMenu: jest.fn(),
+    theme$: themeServiceMock.createTheme$(),
+    ...parts,
+  };
+  return mock;
+};
+
 const createMock = (): jest.Mocked<ApplicationServiceContract> => ({
   setup: jest.fn().mockReturnValue(createInternalSetupContractMock()),
   start: jest.fn().mockReturnValue(createInternalStartContractMock()),
@@ -93,4 +109,5 @@ export const applicationServiceMock = {
   createStartContract: createStartContractMock,
   createInternalSetupContract: createInternalSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,
+  createAppMountParameters: createAppMountParametersMock,
 };

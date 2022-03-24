@@ -7,6 +7,7 @@
 
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { AppMountParameters } from 'kibana/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
   createKibanaReactContext,
@@ -14,17 +15,20 @@ import {
 } from '../../../../../../src/plugins/kibana_react/public';
 import { casesFeatureId } from '../../../common';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
-import { AllCasesPage } from './all_cases';
+import { CasesPage } from './';
 
 export default {
   title: 'app/Cases',
-  component: AllCasesPage,
+  component: CasesPage,
   decorators: [
     (Story: ComponentType) => {
       const KibanaReactContext = createKibanaReactContext({
         application: {
           capabilities: { [casesFeatureId]: { read_cases: true } },
           getUrlForApp: () => '',
+        },
+        http: {
+          basePath: { prepend: (link: string) => `http://localhost:5601${link}` },
         },
         cases: { getAllCases: () => <></> },
         chrome: { docTitle: { change: () => {} }, setBadge: () => {} },
@@ -37,6 +41,9 @@ export default {
 
       const pluginContextValue = {
         ObservabilityPageTemplate: KibanaPageTemplate,
+        appMountParameters: {
+          setHeaderActionMenu: () => {},
+        } as unknown as AppMountParameters,
       } as unknown as PluginContextValue;
 
       return (
@@ -53,5 +60,5 @@ export default {
 };
 
 export function EmptyState() {
-  return <AllCasesPage />;
+  return <CasesPage />;
 }

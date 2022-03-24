@@ -30,6 +30,13 @@ interface Deps {
 
 export class PluginsStatusService {
   private readonly pluginStatuses = new Map<PluginName, Observable<ServiceStatus>>();
+  private readonly derivedStatuses = new Map<PluginName, Observable<ServiceStatus>>();
+  private readonly dependenciesStatuses = new Map<
+    PluginName,
+    Observable<Record<PluginName, ServiceStatus>>
+  >();
+  private allPluginsStatuses?: Observable<Record<PluginName, ServiceStatus>>;
+
   private readonly update$ = new BehaviorSubject(true);
   private readonly defaultInheritedStatus$: Observable<ServiceStatus>;
   private newRegistrationsAllowed = true;
@@ -59,7 +66,10 @@ export class PluginsStatusService {
   }
 
   public getAll$(): Observable<Record<PluginName, ServiceStatus>> {
-    return this.getPluginStatuses$([...this.deps.pluginDependencies.keys()]);
+    if (!this.allPluginsStatuses) {
+      this.allPluginsStatuses = this.getPluginStatuses$([...this.deps.pluginDependencies.keys()]);
+    }
+    return this.allPluginsStatuses;
   }
 
   public getDependenciesStatus$(plugin: PluginName): Observable<Record<PluginName, ServiceStatus>> {
@@ -67,35 +77,46 @@ export class PluginsStatusService {
     if (!dependencies) {
       throw new Error(`Unknown plugin: ${plugin}`);
     }
-
-    return this.getPluginStatuses$(dependencies).pipe(
-      // Prevent many emissions at once from dependency status resolution from making this too noisy
-      debounceTime(25)
-    );
+    if (!this.dependenciesStatuses.has(plugin)) {
+      this.dependenciesStatuses.set(
+        plugin,
+        this.getPluginStatuses$(dependencies).pipe(
+          // Prevent many emissions at once from dependency status resolution from making this too noisy
+          debounceTime(25)
+        )
+      );
+    }
+    return this.dependenciesStatuses.get(plugin)!;
   }
 
   public getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus> {
-    return this.update$.pipe(
-      debounceTime(25), // Avoid calling the plugin's custom status logic for every plugin that depends on it.
-      switchMap(() => {
-        // Only go up the dependency tree if any of this plugin's dependencies have a custom status
-        // Helps eliminate memory overhead of creating thousands of Observables unnecessarily.
-        if (this.anyCustomStatuses(plugin)) {
-          return combineLatest([this.deps.core$, this.getDependenciesStatus$(plugin)]).pipe(
-            map(([coreStatus, pluginStatuses]) => {
-              return getSummaryStatus(
-                [...Object.entries(coreStatus), ...Object.entries(pluginStatuses)],
-                {
-                  allAvailableSummary: `All dependencies are available`,
-                }
+    if (!this.derivedStatuses.has(plugin)) {
+      this.derivedStatuses.set(
+        plugin,
+        this.update$.pipe(
+          debounceTime(25), // Avoid calling the plugin's custom status logic for every plugin that depends on it.
+          switchMap(() => {
+            // Only go up the dependency tree if any of this plugin's dependencies have a custom status
+            // Helps eliminate memory overhead of creating thousands of Observables unnecessarily.
+            if (this.anyCustomStatuses(plugin)) {
+              return combineLatest([this.deps.core$, this.getDependenciesStatus$(plugin)]).pipe(
+                map(([coreStatus, pluginStatuses]) => {
+                  return getSummaryStatus(
+                    [...Object.entries(coreStatus), ...Object.entries(pluginStatuses)],
+                    {
+                      allAvailableSummary: `All dependencies are available`,
+                    }
+                  );
+                })
               );
-            })
-          );
-        } else {
-          return this.defaultInheritedStatus$;
-        }
-      })
-    );
+            } else {
+              return this.defaultInheritedStatus$;
+            }
+          })
+        )
+      );
+    }
+    return this.derivedStatuses.get(plugin)!;
   }
 
   private getPluginStatuses$(plugins: PluginName[]): Observable<Record<PluginName, ServiceStatus>> {
@@ -128,7 +149,7 @@ export class PluginsStatusService {
 
         return combineLatest(pluginStatuses).pipe(
           map((statuses) => Object.fromEntries(statuses)),
-          distinctUntilChanged(isDeepStrictEqual)
+          distinctUntilChanged<Record<PluginName, ServiceStatus>>(isDeepStrictEqual)
         );
       })
     );

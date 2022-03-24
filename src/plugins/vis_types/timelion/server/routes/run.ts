@@ -8,7 +8,6 @@
 
 import { IRouter, Logger, CoreSetup } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import Bluebird from 'bluebird';
 import _ from 'lodash';
 // @ts-ignore
 import chainRunnerFn from '../handlers/chain_runner.js';
@@ -77,9 +76,9 @@ export function runRoute(
       },
     },
     router.handleLegacyErrors(async (context, request, response) => {
-      const [, { data }] = await core.getStartServices();
+      const [, { dataViews }] = await core.getStartServices();
       const uiSettings = await context.core.uiSettings.client.getAll();
-      const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
+      const indexPatternsService = await dataViews.dataViewsServiceFactory(
         context.core.savedObjects.client,
         context.core.elasticsearch.client.asCurrentUser
       );
@@ -96,7 +95,7 @@ export function runRoute(
       });
       try {
         const chainRunner = chainRunnerFn(tlConfig);
-        const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
+        const sheet = await Promise.all(await chainRunner.processRequest(request.body));
         return response.ok({
           body: {
             sheet,

@@ -6,7 +6,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
+import type {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
 } from '../../../../../../../../src/plugins/data/common';

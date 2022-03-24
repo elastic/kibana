@@ -7,45 +7,50 @@
 
 import React, { memo } from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ManagementEmptyStateWrapper } from '../../../../components/management_empty_state_wrapper';
 
 export const EmptyState = memo<{
   onAdd: () => void;
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
-}>(({ onAdd, isAddDisabled = false }) => {
+  backComponent?: React.ReactNode;
+}>(({ onAdd, isAddDisabled = false, backComponent }) => {
   return (
-    <EuiEmptyPrompt
-      data-test-subj="trustedAppEmptyState"
-      iconType="plusInCircle"
-      title={
-        <h2>
+    <ManagementEmptyStateWrapper>
+      <EuiEmptyPrompt
+        data-test-subj="trustedAppEmptyState"
+        iconType="plusInCircle"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.securitySolution.trustedapps.listEmptyState.title"
+              defaultMessage="Add your first trusted application"
+            />
+          </h2>
+        }
+        body={
           <FormattedMessage
-            id="xpack.securitySolution.trustedapps.listEmptyState.title"
-            defaultMessage="Add your first trusted application"
+            id="xpack.securitySolution.trustedapps.listEmptyState.message"
+            defaultMessage="Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts."
           />
-        </h2>
-      }
-      body={
-        <FormattedMessage
-          id="xpack.securitySolution.trustedapps.listEmptyState.message"
-          defaultMessage="There are currently no trusted applications on your endpoint."
-        />
-      }
-      actions={
-        <EuiButton
-          fill
-          isDisabled={isAddDisabled}
-          onClick={onAdd}
-          data-test-subj="trustedAppsListAddButton"
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.trustedapps.list.addButton"
-            defaultMessage="Add trusted application"
-          />
-        </EuiButton>
-      }
-    />
+        }
+        actions={[
+          <EuiButton
+            fill
+            isDisabled={isAddDisabled}
+            onClick={onAdd}
+            data-test-subj="trustedAppsListAddButton"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.trustedapps.list.addButton"
+              defaultMessage="Add trusted application"
+            />
+          </EuiButton>,
+          ...(backComponent ? [backComponent] : []),
+        ]}
+      />
+    </ManagementEmptyStateWrapper>
   );
 });
 

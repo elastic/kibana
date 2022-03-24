@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+import { merge, cloneDeep } from 'lodash';
 import Boom from '@hapi/boom';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type {
@@ -16,16 +16,28 @@ import type {
   RegistryElasticsearch,
   InstallablePackage,
   IndexTemplate,
+  PackageInfo,
+  IndexTemplateMappings,
+  TemplateMapEntry,
+  TemplateMap,
 } from '../../../../types';
+
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
 import { removeAssetTypesFromInstalledEs, saveInstalledEsRefs } from '../../packages/install';
 import {
-  FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
-  FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
+  FLEET_COMPONENT_TEMPLATES,
+  MAPPINGS_TEMPLATE_SUFFIX,
+  SETTINGS_TEMPLATE_SUFFIX,
+  USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../../constants';
+
+import { getESAssetMetadata } from '../meta';
+import { retryTransientEsErrors } from '../retry';
+
+import { getPackageInfo } from '../../packages';
 
 import {
   generateMappings,
@@ -36,17 +48,20 @@ import {
 } from './template';
 import { buildDefaultSettings } from './default_settings';
 
+const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
+
 export const installTemplates = async (
   installablePackage: InstallablePackage,
   esClient: ElasticsearchClient,
+  logger: Logger,
   paths: string[],
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<IndexTemplateEntry[]> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
   // Install component templates first, as they are used by the index templates
-  await installPreBuiltComponentTemplates(paths, esClient);
-  await installPreBuiltTemplates(paths, esClient);
+  await installPreBuiltComponentTemplates(paths, esClient, logger);
+  await installPreBuiltTemplates(paths, esClient, logger);
 
   // remove package installation's references to index templates
   await removeAssetTypesFromInstalledEs(savedObjectsClient, installablePackage.name, [
@@ -57,11 +72,18 @@ export const installTemplates = async (
   const dataStreams = installablePackage.data_streams;
   if (!dataStreams) return [];
 
+  const packageInfo = await getPackageInfo({
+    savedObjectsClient,
+    pkgName: installablePackage.name,
+    pkgVersion: installablePackage.version,
+  });
+
   const installedTemplatesNested = await Promise.all(
     dataStreams.map((dataStream) =>
       installTemplateForDataStream({
-        pkg: installablePackage,
+        pkg: packageInfo,
         esClient,
+        logger,
         dataStream,
       })
     )
@@ -81,7 +103,11 @@ export const installTemplates = async (
   return installedTemplates;
 };
 
-const installPreBuiltTemplates = async (paths: string[], esClient: ElasticsearchClient) => {
+const installPreBuiltTemplates = async (
+  paths: string[],
+  esClient: ElasticsearchClient,
+  logger: Logger
+) => {
   const templatePaths = paths.filter((path) => isTemplate(path));
   const templateInstallPromises = templatePaths.map(async (path) => {
     const { file } = getPathParts(path);
@@ -93,10 +119,16 @@ const installPreBuiltTemplates = async (paths: string[], esClient: Elasticsearch
 
     if (content.hasOwnProperty('template') || content.hasOwnProperty('composed_of')) {
       // Template is v2
-      return esClient.indices.putIndexTemplate(esClientParams, esClientRequestOptions);
+      return retryTransientEsErrors(
+        () => esClient.indices.putIndexTemplate(esClientParams, esClientRequestOptions),
+        { logger }
+      );
     } else {
       // template is V1
-      return esClient.indices.putTemplate(esClientParams, esClientRequestOptions);
+      return retryTransientEsErrors(
+        () => esClient.indices.putTemplate(esClientParams, esClientRequestOptions),
+        { logger }
+      );
     }
   });
   try {
@@ -110,7 +142,8 @@ const installPreBuiltTemplates = async (paths: string[], esClient: Elasticsearch
 
 const installPreBuiltComponentTemplates = async (
   paths: string[],
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  logger: Logger
 ) => {
   const templatePaths = paths.filter((path) => isComponentTemplate(path));
   const templateInstallPromises = templatePaths.map(async (path) => {
@@ -123,7 +156,10 @@ const installPreBuiltComponentTemplates = async (
       body: content,
     };
 
-    return esClient.cluster.putComponentTemplate(esClientParams, { ignore: [404] });
+    return retryTransientEsErrors(
+      () => esClient.cluster.putComponentTemplate(esClientParams, { ignore: [404] }),
+      { logger }
+    );
   });
 
   try {
@@ -154,15 +190,18 @@ const isComponentTemplate = (path: string) => {
 export async function installTemplateForDataStream({
   pkg,
   esClient,
+  logger,
   dataStream,
 }: {
-  pkg: InstallablePackage;
+  pkg: PackageInfo;
   esClient: ElasticsearchClient;
+  logger: Logger;
   dataStream: RegistryDataStream;
 }): Promise<IndexTemplateEntry> {
   const fields = await loadFieldsFromYaml(pkg, dataStream.path);
   return installTemplate({
     esClient,
+    logger,
     fields,
     dataStream,
     packageVersion: pkg.version,
@@ -170,71 +209,81 @@ export async function installTemplateForDataStream({
   });
 }
 
-interface TemplateMapEntry {
-  _meta: { package?: { name: string } };
-  template:
-    | {
-        mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
-      }
-    | {
-        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
-      };
-}
-type TemplateMap = Record<string, TemplateMapEntry>;
 function putComponentTemplate(
   esClient: ElasticsearchClient,
+  logger: Logger,
   params: {
     body: TemplateMapEntry;
     name: string;
     create?: boolean;
   }
-): { clusterPromise: Promise<any>; name: string } {
+): {
+  clusterPromise: ReturnType<typeof esClient.cluster.putComponentTemplate>;
+  name: string;
+} {
   const { name, body, create = false } = params;
   return {
-    clusterPromise: esClient.cluster.putComponentTemplate(
-      // @ts-expect-error body is missing required key `settings`. TemplateMapEntry has settings *or* mappings
-      { name, body, create },
-      { ignore: [404] }
+    clusterPromise: retryTransientEsErrors(
+      () => esClient.cluster.putComponentTemplate({ name, body, create }, { ignore: [404] }),
+      { logger }
     ),
     name,
   };
 }
 
-const mappingsSuffix = '@mappings';
-const settingsSuffix = '@settings';
-const userSettingsSuffix = '@custom';
 type TemplateBaseName = string;
-type UserSettingsTemplateName = `${TemplateBaseName}${typeof userSettingsSuffix}`;
+type UserSettingsTemplateName = `${TemplateBaseName}${typeof USER_SETTINGS_TEMPLATE_SUFFIX}`;
 
 const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
-  name.endsWith(userSettingsSuffix);
+  name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX);
 
 function buildComponentTemplates(params: {
+  mappings: IndexTemplateMappings;
   templateName: string;
   registryElasticsearch: RegistryElasticsearch | undefined;
   packageName: string;
   defaultSettings: IndexTemplate['template']['settings'];
 }) {
-  const { templateName, registryElasticsearch, packageName, defaultSettings } = params;
-  const mappingsTemplateName = `${templateName}${mappingsSuffix}`;
-  const settingsTemplateName = `${templateName}${settingsSuffix}`;
-  const userSettingsTemplateName = `${templateName}${userSettingsSuffix}`;
+  const { templateName, registryElasticsearch, packageName, defaultSettings, mappings } = params;
+  const mappingsTemplateName = `${templateName}${MAPPINGS_TEMPLATE_SUFFIX}`;
+  const settingsTemplateName = `${templateName}${SETTINGS_TEMPLATE_SUFFIX}`;
+  const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
 
   const templatesMap: TemplateMap = {};
-  const _meta = { package: { name: packageName } };
+  const _meta = getESAssetMetadata({ packageName });
 
-  if (registryElasticsearch && registryElasticsearch['index_template.mappings']) {
-    templatesMap[mappingsTemplateName] = {
-      template: {
-        mappings: registryElasticsearch['index_template.mappings'],
-      },
-      _meta,
-    };
+  const indexTemplateSettings = registryElasticsearch?.['index_template.settings'] ?? {};
+  // @ts-expect-error no property .mapping (yes there is)
+  const indexTemplateMappingSettings = indexTemplateSettings?.index?.mapping;
+  const indexTemplateSettingsForTemplate = cloneDeep(indexTemplateSettings);
+
+  // index.mapping settings must go on the mapping component template otherwise
+  // the template may be rejected e.g if nested_fields.limit has been increased
+  if (indexTemplateMappingSettings) {
+    // @ts-expect-error no property .mapping
+    delete indexTemplateSettingsForTemplate.index.mapping;
   }
+
+  templatesMap[mappingsTemplateName] = {
+    template: {
+      settings: {
+        index: {
+          mapping: {
+            total_fields: {
+              limit: '10000',
+            },
+            ...indexTemplateMappingSettings,
+          },
+        },
+      },
+      mappings: merge(mappings, registryElasticsearch?.['index_template.mappings'] ?? {}),
+    },
+    _meta,
+  };
 
   templatesMap[settingsTemplateName] = {
     template: {
-      settings: merge(defaultSettings, registryElasticsearch?.['index_template.settings'] ?? {}),
+      settings: merge(defaultSettings, indexTemplateSettingsForTemplate),
     },
     _meta,
   };
@@ -251,61 +300,95 @@ function buildComponentTemplates(params: {
 }
 
 async function installDataStreamComponentTemplates(params: {
+  mappings: IndexTemplateMappings;
   templateName: string;
   registryElasticsearch: RegistryElasticsearch | undefined;
   esClient: ElasticsearchClient;
+  logger: Logger;
   packageName: string;
   defaultSettings: IndexTemplate['template']['settings'];
 }) {
-  const { templateName, registryElasticsearch, esClient, packageName, defaultSettings } = params;
-  const templates = buildComponentTemplates({
+  const {
+    templateName,
+    registryElasticsearch,
+    esClient,
+    packageName,
+    defaultSettings,
+    logger,
+    mappings,
+  } = params;
+  const componentTemplates = buildComponentTemplates({
+    mappings,
     templateName,
     registryElasticsearch,
     packageName,
     defaultSettings,
   });
-  const templateNames = Object.keys(templates);
-  const templateEntries = Object.entries(templates);
-
+  const templateEntries = Object.entries(componentTemplates);
   // TODO: Check return values for errors
   await Promise.all(
     templateEntries.map(async ([name, body]) => {
       if (isUserSettingsTemplate(name)) {
         // look for existing user_settings template
-        const result = await esClient.cluster.getComponentTemplate({ name }, { ignore: [404] });
-        const hasUserSettingsTemplate = result.body.component_templates?.length === 1;
+        const result = await retryTransientEsErrors(
+          () => esClient.cluster.getComponentTemplate({ name }, { ignore: [404] }),
+          { logger }
+        );
+        const hasUserSettingsTemplate = result.component_templates?.length === 1;
         if (!hasUserSettingsTemplate) {
           // only add if one isn't already present
-          const { clusterPromise } = putComponentTemplate(esClient, { body, name, create: true });
+          const { clusterPromise } = putComponentTemplate(esClient, logger, {
+            body,
+            name,
+          });
           return clusterPromise;
         }
       } else {
-        const { clusterPromise } = putComponentTemplate(esClient, { body, name });
+        const { clusterPromise } = putComponentTemplate(esClient, logger, { body, name });
         return clusterPromise;
       }
     })
   );
 
-  return templateNames;
+  return { componentTemplateNames: Object.keys(componentTemplates) };
 }
 
-export async function ensureDefaultComponentTemplate(esClient: ElasticsearchClient) {
-  const { body: getTemplateRes } = await esClient.cluster.getComponentTemplate(
-    {
-      name: FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
-    },
-    {
-      ignore: [404],
-    }
+export async function ensureDefaultComponentTemplates(
+  esClient: ElasticsearchClient,
+  logger: Logger
+) {
+  return Promise.all(
+    FLEET_COMPONENT_TEMPLATES.map(({ name, body }) =>
+      ensureComponentTemplate(esClient, logger, name, body)
+    )
+  );
+}
+
+export async function ensureComponentTemplate(
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  name: string,
+  body: TemplateMapEntry
+) {
+  const getTemplateRes = await retryTransientEsErrors(
+    () =>
+      esClient.cluster.getComponentTemplate(
+        {
+          name,
+        },
+        {
+          ignore: [404],
+        }
+      ),
+    { logger }
   );
 
   const existingTemplate = getTemplateRes?.component_templates?.[0];
   if (!existingTemplate) {
-    await putComponentTemplate(esClient, {
-      name: FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
-      body: FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
-      create: true,
-    });
+    await putComponentTemplate(esClient, logger, {
+      name,
+      body,
+    }).clusterPromise;
   }
 
   return { isCreated: !existingTemplate };
@@ -313,12 +396,14 @@ export async function ensureDefaultComponentTemplate(esClient: ElasticsearchClie
 
 export async function installTemplate({
   esClient,
+  logger,
   fields,
   dataStream,
   packageVersion,
   packageName,
 }: {
   esClient: ElasticsearchClient;
+  logger: Logger;
   fields: Field[];
   dataStream: RegistryDataStream;
   packageVersion: string;
@@ -340,13 +425,17 @@ export async function installTemplate({
   }
 
   // Datastream now throw an error if the aliases field is present so ensure that we remove that field.
-  const { body: getTemplateRes } = await esClient.indices.getIndexTemplate(
-    {
-      name: templateName,
-    },
-    {
-      ignore: [404],
-    }
+  const getTemplateRes = await retryTransientEsErrors(
+    () =>
+      esClient.indices.getIndexTemplate(
+        {
+          name: templateName,
+        },
+        {
+          ignore: [404],
+        }
+      ),
+    { logger }
   );
 
   const existingIndexTemplate = getTemplateRes?.index_templates?.[0];
@@ -367,33 +456,35 @@ export async function installTemplate({
       },
     };
 
-    await esClient.indices.putIndexTemplate(updateIndexTemplateParams, { ignore: [404] });
+    await retryTransientEsErrors(
+      () => esClient.indices.putIndexTemplate(updateIndexTemplateParams, { ignore: [404] }),
+      { logger }
+    );
   }
 
   const defaultSettings = buildDefaultSettings({
     templateName,
     packageName,
-    fields,
+    fields: validFields,
     type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
   });
 
-  const composedOfTemplates = await installDataStreamComponentTemplates({
+  const { componentTemplateNames } = await installDataStreamComponentTemplates({
+    mappings,
     templateName,
     registryElasticsearch: dataStream.elasticsearch,
     esClient,
+    logger,
     packageName,
     defaultSettings,
   });
 
   const template = getTemplate({
-    type: dataStream.type,
     templateIndexPattern,
-    fields: validFields,
-    mappings,
     pipelineName,
     packageName,
-    composedOfTemplates,
+    composedOfTemplates: componentTemplateNames,
     templatePriority,
     hidden: dataStream.hidden,
   });
@@ -404,7 +495,10 @@ export async function installTemplate({
     body: template,
   };
 
-  await esClient.indices.putIndexTemplate(esClientParams, { ignore: [404] });
+  await retryTransientEsErrors(
+    () => esClient.indices.putIndexTemplate(esClientParams, { ignore: [404] }),
+    { logger }
+  );
 
   return {
     templateName,
@@ -422,7 +516,9 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
     ];
     const componentTemplates = installedTemplate.indexTemplate.composed_of
       // Filter global component template shared between integrations
-      .filter((componentTemplateId) => componentTemplateId !== FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME)
+      .filter(
+        (componentTemplateId) => !FLEET_COMPONENT_TEMPLATE_NAMES.includes(componentTemplateId)
+      )
       .map((componentTemplateId) => ({
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,

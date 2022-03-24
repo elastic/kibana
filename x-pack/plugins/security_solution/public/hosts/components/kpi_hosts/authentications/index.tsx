@@ -8,8 +8,12 @@
 import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
+import { kpiUserAuthenticationsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_area';
+import { kpiUserAuthenticationsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_bar';
+import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_metric_success';
+import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentication_metric_failure';
 import { useHostsKpiAuthentications } from '../../../containers/kpi_hosts/authentications';
-import { HostsKpiBaseComponentManage } from '../common';
+import { KpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
 
@@ -24,6 +28,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.authenticationsSuccess,
         icon: 'check',
+        lensAttributes: kpiUserAuthenticationsMetricSuccessLensAttributes,
       },
       {
         key: 'authenticationsFailure',
@@ -32,11 +37,14 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.authenticationsFailure,
         icon: 'cross',
+        lensAttributes: kpiUserAuthenticationsMetricFailureLensAttributes,
       },
     ],
     enableAreaChart: true,
     enableBarChart: true,
     description: i18n.USER_AUTHENTICATIONS,
+    areaChartLensAttributes: kpiUserAuthenticationsAreaLensAttributes,
+    barChartLensAttributes: kpiUserAuthenticationsBarLensAttributes,
   },
 ];
 
@@ -58,7 +66,7 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
   });
 
   return (
-    <HostsKpiBaseComponentManage
+    <KpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}

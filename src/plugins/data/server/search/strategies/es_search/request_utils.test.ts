@@ -6,18 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getShardTimeout, getDefaultSearchParams, shimAbortSignal } from './request_utils';
+import { getShardTimeout, getDefaultSearchParams } from './request_utils';
 import { IUiSettingsClient, SharedGlobalConfig } from 'kibana/server';
-
-const createSuccessTransportRequestPromise = (
-  body: any,
-  { statusCode = 200 }: { statusCode?: number } = {}
-) => {
-  const promise = Promise.resolve({ body, statusCode }) as any;
-  promise.abort = jest.fn();
-
-  return promise;
-};
 
 describe('request utils', () => {
   describe('getShardTimeout', () => {
@@ -87,51 +77,6 @@ describe('request utils', () => {
         expect(result).toHaveProperty('ignore_unavailable', true);
         expect(result).toHaveProperty('track_total_hits', true);
       });
-    });
-  });
-
-  describe('shimAbortSignal', () => {
-    test('aborts the promise if the signal is already aborted', async () => {
-      const promise = createSuccessTransportRequestPromise({
-        success: true,
-      });
-      const controller = new AbortController();
-      controller.abort();
-      shimAbortSignal(promise, controller.signal);
-
-      expect(promise.abort).toHaveBeenCalled();
-    });
-
-    test('aborts the promise if the signal is aborted', () => {
-      const promise = createSuccessTransportRequestPromise({
-        success: true,
-      });
-      const controller = new AbortController();
-      shimAbortSignal(promise, controller.signal);
-      controller.abort();
-
-      expect(promise.abort).toHaveBeenCalled();
-    });
-
-    test('returns the original promise', async () => {
-      const promise = createSuccessTransportRequestPromise({
-        success: true,
-      });
-      const controller = new AbortController();
-      const response = await shimAbortSignal(promise, controller.signal);
-
-      expect(response).toEqual(expect.objectContaining({ body: { success: true } }));
-    });
-
-    test('allows the promise to be aborted manually', () => {
-      const promise = createSuccessTransportRequestPromise({
-        success: true,
-      });
-      const controller = new AbortController();
-      const enhancedPromise = shimAbortSignal(promise, controller.signal);
-
-      enhancedPromise.abort();
-      expect(promise.abort).toHaveBeenCalled();
     });
   });
 });

@@ -73,11 +73,8 @@ export const CurationsTable: React.FC = () => {
       truncateText: true,
       mobileOptions: {
         header: true,
-        // Note: the below props are valid props per https://elastic.github.io/eui/#/tabular-content/tables (Responsive tables), but EUI's types have a bug reporting it as an error
-        // @ts-ignore
         enlarge: true,
         width: '100%',
-        truncateText: false,
       },
     },
     {
@@ -146,7 +143,7 @@ export const CurationsTable: React.FC = () => {
         loading={dataLoading}
         pagination={{
           ...convertMetaToPagination(meta),
-          hidePerPageOptions: true,
+          showPerPageOptions: false,
         }}
         onChange={handlePageChange(onPaginate)}
       />

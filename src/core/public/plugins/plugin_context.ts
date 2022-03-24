@@ -88,12 +88,14 @@ export function createPluginSetupContext<
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
     },
     fatalErrors: deps.fatalErrors,
+    executionContext: deps.executionContext,
     http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
     injectedMetadata: {
       getInjectedVar: deps.injectedMetadata.getInjectedVar,
     },
+    theme: deps.theme,
     getStartServices: () => plugin.startDependencies,
   };
 }
@@ -128,6 +130,7 @@ export function createPluginStartContext<
       getUrlForApp: deps.application.getUrlForApp,
     },
     docLinks: deps.docLinks,
+    executionContext: deps.executionContext,
     http: deps.http,
     chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
@@ -140,5 +143,6 @@ export function createPluginStartContext<
     },
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
+    theme: deps.theme,
   };
 }

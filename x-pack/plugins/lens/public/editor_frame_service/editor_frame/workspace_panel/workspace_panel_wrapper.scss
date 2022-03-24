@@ -10,6 +10,7 @@
   height: 100%;
 
   .lnsWorkspacePanelWrapper__pageContentBody {
+    @include euiBottomShadowMedium;
     @include euiScrollBar;
     flex-grow: 1;
     display: flex;
@@ -18,14 +19,6 @@
     border-radius: $euiBorderRadius;
     background: $euiColorEmptyShade;
     height: 100%;
-
-    @include kbnThemeStyle('v7') {
-      @include euiBottomShadowSmall;
-    }
-
-    @include kbnThemeStyle('v8') {
-      @include euiBottomShadowMedium;
-    }
 
     > * {
       flex: 1 1 100%;
@@ -39,16 +32,11 @@
   &.lnsWorkspacePanelWrapper--fullscreen {
     margin-bottom: 0;
   }
+
 }
 
 .lnsWorkspacePanel__dragDrop {
-  @include kbnThemeStyle('v7') {
-    border: $euiBorderThin;
-  }
-
-  @include kbnThemeStyle('v8') {
-    border: $euiBorderWidthThin solid transparent;
-  }
+  border: $euiBorderWidthThin solid transparent;
 
   &.lnsDragDrop-isDropTarget {
     @include lnsDroppable;
@@ -93,6 +81,14 @@
 
 .lnsWorkspacePanelWrapper__toolbar {
   margin-bottom: 0;
+
+  &.lnsWorkspacePanelWrapper__toolbar--fullscreen {
+    padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+  }
+
+  & > .euiFlexItem {
+    min-height: $euiButtonHeightSmall;
+  }
 }
 
 .lnsDropIllustration__adjustFill {

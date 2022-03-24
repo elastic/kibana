@@ -29,7 +29,7 @@ Once uploaded to the telemetry cluster, the data telemetry is stored in
 
 ### Generating sample data
 
-The script in `scripts/upload-telemetry-data` can generate sample telemetry data and upload it to a cluster of your choosing.
+The script in `scripts/upload_telemetry_data` can generate sample telemetry data and upload it to a cluster of your choosing.
 
 You'll need to set the `GITHUB_TOKEN` environment variable to a token that has `repo` scope so it can read from the
 [elastic/telemetry](https://github.com/elastic/telemetry) repository. (You probably have a token that works for this in

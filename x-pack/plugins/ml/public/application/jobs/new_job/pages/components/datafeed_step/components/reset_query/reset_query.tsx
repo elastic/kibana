@@ -7,7 +7,7 @@
 
 import React, { FC, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiConfirmModal, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { getDefaultDatafeedQuery } from '../../../../../utils/new_job_utils';

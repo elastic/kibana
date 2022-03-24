@@ -5,97 +5,97 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../common';
-import { AlertService, AlertServiceContract } from '.';
+import { CaseStatuses } from '../../../common/api';
+import { AlertService } from '.';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import { ALERT_WORKFLOW_STATUS } from '../../../../rule_registry/common/technical_rule_data_field_names';
 
 describe('updateAlertsStatus', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.create().get('case');
 
   describe('happy path', () => {
-    let alertService: AlertServiceContract;
+    let alertService: AlertService;
 
     beforeEach(async () => {
-      alertService = new AlertService();
+      alertService = new AlertService(esClient, logger);
       jest.resetAllMocks();
     });
 
     it('updates the status of the alert correctly', async () => {
-      const args = {
-        alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }],
-        scopedClusterClient: esClient,
-        logger,
-      };
+      const args = [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }];
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toHaveBeenCalledWith({
-        index: '.siem-signals',
-        conflicts: 'abort',
-        body: {
-          script: {
-            source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
-              ctx._source['${ALERT_WORKFLOW_STATUS}'] = 'closed'
-            }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
-              ctx._source.signal.status = 'closed'
-            }`,
-            lang: 'painless',
-          },
-          query: {
-            ids: {
-              values: ['alert-id-1'],
+      expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "ids": Object {
+                  "values": Array [
+                    "alert-id-1",
+                  ],
+                },
+              },
+              "script": Object {
+                "lang": "painless",
+                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'closed'
+                      }",
+              },
             },
+            "conflicts": "abort",
+            "ignore_unavailable": true,
+            "index": ".siem-signals",
           },
-        },
-        ignore_unavailable: true,
-      });
+        ]
+      `);
     });
 
     it('buckets the alerts by index', async () => {
-      const args = {
-        alerts: [
-          { id: 'id1', index: '1', status: CaseStatuses.closed },
-          { id: 'id2', index: '1', status: CaseStatuses.closed },
-        ],
-        scopedClusterClient: esClient,
-        logger,
-      };
+      const args = [
+        { id: 'id1', index: '1', status: CaseStatuses.closed },
+        { id: 'id2', index: '1', status: CaseStatuses.closed },
+      ];
 
       await alertService.updateAlertsStatus(args);
 
       expect(esClient.updateByQuery).toBeCalledTimes(1);
-      expect(esClient.updateByQuery).toHaveBeenCalledWith({
-        index: '1',
-        conflicts: 'abort',
-        body: {
-          script: {
-            source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
-              ctx._source['${ALERT_WORKFLOW_STATUS}'] = 'closed'
-            }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
-              ctx._source.signal.status = 'closed'
-            }`,
-            lang: 'painless',
-          },
-          query: {
-            ids: {
-              values: ['id1', 'id2'],
+      expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "ids": Object {
+                  "values": Array [
+                    "id1",
+                    "id2",
+                  ],
+                },
+              },
+              "script": Object {
+                "lang": "painless",
+                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'closed'
+                      }",
+              },
             },
+            "conflicts": "abort",
+            "ignore_unavailable": true,
+            "index": "1",
           },
-        },
-        ignore_unavailable: true,
-      });
+        ]
+      `);
     });
 
     it('translates in-progress to acknowledged', async () => {
-      const args = {
-        alerts: [{ id: 'id1', index: '1', status: CaseStatuses['in-progress'] }],
-        scopedClusterClient: esClient,
-        logger,
-      };
+      const args = [{ id: 'id1', index: '1', status: CaseStatuses['in-progress'] }];
 
       await alertService.updateAlertsStatus(args);
 
@@ -114,11 +114,11 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'acknowledged'
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'acknowledged'
-                    }",
+                        ctx._source['kibana.alert.workflow_status'] = 'acknowledged'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'acknowledged'
+                      }",
               },
             },
             "conflicts": "abort",
@@ -130,14 +130,10 @@ describe('updateAlertsStatus', () => {
     });
 
     it('makes two calls when the statuses are different', async () => {
-      const args = {
-        alerts: [
-          { id: 'id1', index: '1', status: CaseStatuses.closed },
-          { id: 'id2', index: '1', status: CaseStatuses.open },
-        ],
-        scopedClusterClient: esClient,
-        logger,
-      };
+      const args = [
+        { id: 'id1', index: '1', status: CaseStatuses.closed },
+        { id: 'id2', index: '1', status: CaseStatuses.open },
+      ];
 
       await alertService.updateAlertsStatus(args);
 
@@ -157,11 +153,11 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'closed'
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
-                    }",
+                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'closed'
+                      }",
               },
             },
             "conflicts": "abort",
@@ -186,11 +182,11 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'open'
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'open'
-                    }",
+                        ctx._source['kibana.alert.workflow_status'] = 'open'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'open'
+                      }",
               },
             },
             "conflicts": "abort",
@@ -202,14 +198,10 @@ describe('updateAlertsStatus', () => {
     });
 
     it('makes two calls when the indices are different', async () => {
-      const args = {
-        alerts: [
-          { id: 'id1', index: '1', status: CaseStatuses.closed },
-          { id: 'id2', index: '2', status: CaseStatuses.open },
-        ],
-        scopedClusterClient: esClient,
-        logger,
-      };
+      const args = [
+        { id: 'id1', index: '1', status: CaseStatuses.closed },
+        { id: 'id2', index: '2', status: CaseStatuses.open },
+      ];
 
       await alertService.updateAlertsStatus(args);
 
@@ -229,11 +221,11 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'closed'
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
-                    }",
+                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'closed'
+                      }",
               },
             },
             "conflicts": "abort",
@@ -258,11 +250,11 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'open'
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'open'
-                    }",
+                        ctx._source['kibana.alert.workflow_status'] = 'open'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'open'
+                      }",
               },
             },
             "conflicts": "abort",
@@ -274,11 +266,9 @@ describe('updateAlertsStatus', () => {
     });
 
     it('ignores empty indices', async () => {
-      await alertService.updateAlertsStatus({
-        alerts: [{ id: 'alert-id-1', index: '', status: CaseStatuses.open }],
-        scopedClusterClient: esClient,
-        logger,
-      });
+      await alertService.updateAlertsStatus([
+        { id: 'alert-id-1', index: '', status: CaseStatuses.open },
+      ]);
 
       expect(esClient.updateByQuery).not.toHaveBeenCalled();
     });

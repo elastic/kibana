@@ -7,10 +7,9 @@
 
 import { useMemo } from 'react';
 import { useFetcher } from './use_fetcher';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
-import { useTheme } from './use_theme';
 import { getTimeRangeComparison } from '../components/shared/time_comparison/get_time_range_comparison';
 import { useTimeRange } from './use_time_range';
 import { useApmParams } from './use_apm_params';
@@ -23,18 +22,12 @@ export function useTransactionLatencyChartsFetcher({
   environment: string;
 }) {
   const { transactionType, serviceName } = useApmServiceContext();
-  const theme = useTheme();
   const {
-    urlParams: {
-      transactionName,
-      latencyAggregationType,
-      comparisonType,
-      comparisonEnabled,
-    },
-  } = useUrlParams();
+    urlParams: { transactionName, latencyAggregationType },
+  } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, comparisonType, comparisonEnabled },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -45,7 +38,6 @@ export function useTransactionLatencyChartsFetcher({
     comparisonType,
     comparisonEnabled,
   });
-
   const { data, error, status } = useFetcher(
     (callApmApi) => {
       if (
@@ -55,24 +47,25 @@ export function useTransactionLatencyChartsFetcher({
         transactionType &&
         latencyAggregationType
       ) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionType,
-              transactionName,
-              latencyAggregationType,
-              comparisonStart,
-              comparisonEnd,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionType,
+                transactionName,
+                latencyAggregationType,
+                comparisonStart,
+                comparisonEnd,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [
@@ -93,7 +86,6 @@ export function useTransactionLatencyChartsFetcher({
     () =>
       getLatencyChartSelector({
         latencyChart: data,
-        theme,
         latencyAggregationType,
       }),
     // It should only update when the data has changed

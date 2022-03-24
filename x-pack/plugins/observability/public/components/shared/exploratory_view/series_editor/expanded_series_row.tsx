@@ -48,13 +48,13 @@ export function ExpandedSeriesRow(seriesProps: Props) {
 
   return (
     <div style={{ width: '100%' }}>
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem>
+      <EuiFlexGroup gutterSize="xs" wrap>
+        <EuiFlexItem grow={1}>
           <EuiFormRow label={DATE_LABEL} fullWidth>
             <DatePickerCol {...seriesProps} />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={2}>
           <ReportDefinitionCol seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -62,8 +62,8 @@ export function ExpandedSeriesRow(seriesProps: Props) {
       <EuiFormRow label={FILTERS_LABEL} fullWidth>
         <SeriesFilter seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
       </EuiFormRow>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={2}>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
           <EuiFormRow label={BREAKDOWN_BY_LABEL}>
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem style={{ minWidth: 200 }}>
@@ -74,7 +74,7 @@ export function ExpandedSeriesRow(seriesProps: Props) {
           </EuiFormRow>
         </EuiFlexItem>
         {(hasOperationType || (columnType === 'operation' && !hasPercentileBreakdown)) && (
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem>
             <EuiFormRow label={OPERATION_LABEL}>
               <OperationTypeSelect
                 {...seriesProps}

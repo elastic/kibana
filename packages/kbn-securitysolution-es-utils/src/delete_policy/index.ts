@@ -10,10 +10,7 @@ import type { ElasticsearchClient } from '../elasticsearch_client';
 
 export const deletePolicy = async (
   esClient: ElasticsearchClient,
-  policy: string
+  name: string
 ): Promise<unknown> => {
-  return (
-    // @ts-expect-error policy_id is required by mistake. fixed in the v8.0
-    (await esClient.ilm.deleteLifecycle({ policy })).body
-  );
+  return (await esClient.ilm.deleteLifecycle({ name }, { meta: true })).body;
 };

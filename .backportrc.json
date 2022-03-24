@@ -1,8 +1,12 @@
 {
-  "upstream": "elastic/kibana",
+  "repoOwner": "elastic",
+  "repoName": "kibana",
   "targetBranchChoices": [
-    { "name": "master", "checked": true },
-    { "name": "7.x", "checked": true },
+    "main",
+    "8.1",
+    "8.0",
+    "7.17",
+    "7.16",
     "7.15",
     "7.14",
     "7.13",
@@ -30,12 +34,14 @@
     "6.0",
     "5.6"
   ],
-  "targetPRLabels": ["backport"],
+  "targetPRLabels": [
+    "backport"
+  ],
   "branchLabelMapping": {
-    "^v8.0.0$": "master",
-    "^v7.16.0$": "7.x",
+    "^v8.2.0$": "main",
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"
   },
   "autoMerge": true,
-  "autoMergeMethod": "squash"
+  "autoMergeMethod": "squash",
+  "backportBinary": "node scripts/backport"
 }

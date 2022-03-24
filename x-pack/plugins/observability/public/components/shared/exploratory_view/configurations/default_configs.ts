@@ -5,48 +5,39 @@
  * 2.0.
  */
 
-import { AppDataType, ReportViewType } from '../types';
-import { getRumDistributionConfig } from './rum/data_distribution_config';
-import { getSyntheticsDistributionConfig } from './synthetics/data_distribution_config';
-import { getSyntheticsKPIConfig } from './synthetics/kpi_over_time_config';
-import { getKPITrendsLensConfig } from './rum/kpi_over_time_config';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { getCoreWebVitalsConfig } from './rum/core_web_vitals_config';
-import { getMobileKPIConfig } from './mobile/kpi_over_time_config';
-import { getMobileKPIDistributionConfig } from './mobile/distribution_config';
-import { getMobileDeviceDistributionConfig } from './mobile/device_distribution_config';
-import { DataTypes, ReportTypes } from './constants';
+import { AppDataType, ReportViewType, SeriesConfig } from '../types';
+import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import { ReportConfigMap } from '../contexts/exploratory_view_config';
 
 interface Props {
   reportType: ReportViewType;
-  indexPattern: IndexPattern;
+  dataView: DataView;
   dataType: AppDataType;
+  reportConfigMap: ReportConfigMap;
 }
 
-export const getDefaultConfigs = ({ reportType, dataType, indexPattern }: Props) => {
-  switch (dataType) {
-    case DataTypes.UX:
-      if (reportType === ReportTypes.DISTRIBUTION) {
-        return getRumDistributionConfig({ indexPattern });
-      }
-      if (reportType === ReportTypes.CORE_WEB_VITAL) {
-        return getCoreWebVitalsConfig({ indexPattern });
-      }
-      return getKPITrendsLensConfig({ indexPattern });
-    case DataTypes.SYNTHETICS:
-      if (reportType === ReportTypes.DISTRIBUTION) {
-        return getSyntheticsDistributionConfig({ indexPattern });
-      }
-      return getSyntheticsKPIConfig({ indexPattern });
-    case DataTypes.MOBILE:
-      if (reportType === ReportTypes.DISTRIBUTION) {
-        return getMobileKPIDistributionConfig({ indexPattern });
-      }
-      if (reportType === ReportTypes.DEVICE_DISTRIBUTION) {
-        return getMobileDeviceDistributionConfig({ indexPattern });
-      }
-      return getMobileKPIConfig({ indexPattern });
-    default:
-      return getKPITrendsLensConfig({ indexPattern });
+export const getDefaultConfigs = ({
+  reportType,
+  dataType,
+  dataView,
+  reportConfigMap,
+}: Props): SeriesConfig => {
+  let configResult: SeriesConfig | undefined;
+
+  reportConfigMap[dataType]?.some((fn) => {
+    const config = fn({ dataView });
+    if (config.reportType === reportType) {
+      configResult = config;
+    }
+    return config.reportType === reportType;
+  });
+
+  if (!configResult) {
+    // not a user facing error, more of a dev focused error
+    throw new Error(
+      `No report config provided for dataType: ${dataType} and reportType: ${reportType}`
+    );
   }
+
+  return configResult;
 };

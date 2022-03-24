@@ -17,7 +17,8 @@ import React, { useCallback } from 'react';
 import { DropResult, DragDropContext, BeforeCapture } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 
-import type { ColumnHeaderOptions, BrowserFields } from '../../../common';
+import type { BrowserFields } from '../../../common/search_strategy';
+import type { ColumnHeaderOptions } from '../../../common/types';
 import { useAddToTimelineSensor } from '../../hooks/use_add_to_timeline';
 import { addFieldToTimelineColumns, getTimelineIdFromColumnDroppableId } from './helpers';
 

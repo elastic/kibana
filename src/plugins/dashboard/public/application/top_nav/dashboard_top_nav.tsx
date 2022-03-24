@@ -110,7 +110,9 @@ export function DashboardTopNav({
   } = useKibana<DashboardAppServices>().services;
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
   const timefilter = data.query.timefilter.timefilter;
-  const toasts = core.notifications.toasts;
+  const { notifications, theme } = core;
+  const { toasts } = notifications;
+  const { theme$ } = theme;
 
   const dispatchDashboardStateChange = useDashboardDispatch();
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
@@ -159,6 +161,7 @@ export function DashboardTopNav({
           overlays: core.overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
           reportUiCounter: usageCollection?.reportUiCounter,
+          theme: core.theme,
         }),
       }));
     }
@@ -169,6 +172,7 @@ export function DashboardTopNav({
     core.notifications,
     core.savedObjects,
     core.overlays,
+    core.theme,
     uiSettings,
     usageCollection,
   ]);
@@ -367,7 +371,7 @@ export function DashboardTopNav({
       });
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
-    showCloneModal(onClone, currentState.title);
+    showCloneModal({ onClone, title: currentState.title, theme$ });
   }, [
     dashboardSessionStorage,
     savedObjectsTagging,
@@ -375,6 +379,7 @@ export function DashboardTopNav({
     kibanaVersion,
     redirectTo,
     timefilter,
+    theme$,
     toasts,
   ]);
 
@@ -395,9 +400,10 @@ export function DashboardTopNav({
         onHidePanelTitlesChange: (isChecked: boolean) => {
           dispatchDashboardStateChange(setHidePanelTitles(isChecked));
         },
+        theme$,
       });
     },
-    [dashboardAppState, dispatchDashboardStateChange]
+    [dashboardAppState, dispatchDashboardStateChange, theme$]
   );
 
   const showShare = useCallback(
@@ -407,16 +413,24 @@ export function DashboardTopNav({
       const timeRange = timefilter.getTime();
       ShowShareModal({
         share,
+        timeRange,
         kibanaVersion,
         anchorElement,
         dashboardCapabilities,
+        dashboardSessionStorage,
         currentDashboardState: currentState,
         savedDashboard: dashboardAppState.savedDashboard,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
-        timeRange,
       });
     },
-    [dashboardAppState, dashboardCapabilities, share, kibanaVersion, timefilter]
+    [
+      share,
+      timefilter,
+      kibanaVersion,
+      dashboardAppState,
+      dashboardCapabilities,
+      dashboardSessionStorage,
+    ]
   );
 
   const dashboardTopNavActions = useMemo(() => {
@@ -494,7 +508,7 @@ export function DashboardTopNav({
             {
               'data-test-subj': 'dashboardUnsavedChangesBadge',
               badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
-              color: 'secondary',
+              color: 'success',
             },
           ]
         : undefined;
@@ -511,7 +525,7 @@ export function DashboardTopNav({
       showDatePicker,
       showFilterBar,
       setMenuMountPoint: embedSettings ? undefined : setHeaderActionMenu,
-      indexPatterns: dashboardAppState.indexPatterns,
+      indexPatterns: dashboardAppState.dataViews,
       showSaveQuery: dashboardCapabilities.saveQuery,
       useDefaultBehaviors: true,
       savedQuery: state.savedQuery,
@@ -584,17 +598,16 @@ export function DashboardTopNav({
                 />
               ),
               quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-              addFromLibraryButton: (
-                <AddFromLibraryButton
-                  onClick={addFromLibrary}
-                  data-test-subj="dashboardAddPanelButton"
-                />
-              ),
               extraButtons: [
                 <EditorMenu
                   createNewVisType={createNewVisType}
                   dashboardContainer={dashboardAppState.dashboardContainer}
                 />,
+                <AddFromLibraryButton
+                  onClick={addFromLibrary}
+                  data-test-subj="dashboardAddPanelButton"
+                />,
+                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(),
               ],
             }}
           </SolutionToolbar>

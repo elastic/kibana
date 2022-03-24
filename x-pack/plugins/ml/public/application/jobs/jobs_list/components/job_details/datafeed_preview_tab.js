@@ -14,7 +14,7 @@ import { ml } from '../../../../services/ml_api_service';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { ML_DATA_PREVIEW_COUNT } from '../../../../../../common/util/job_utils';
 import { MLJobEditor } from '../ml_job_editor';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export class DatafeedPreviewPane extends Component {
   constructor(props) {

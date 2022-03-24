@@ -64,7 +64,7 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     if (!isIndexPattern(fetchedIndexPattern) && fetchedSavedSearch === undefined) {
       setError(
         i18n.translate('xpack.transform.searchItems.errorInitializationTitle', {
-          defaultMessage: `An error occurred initializing the Kibana index pattern or saved search.`,
+          defaultMessage: `An error occurred initializing the Kibana data view or saved search.`,
         })
       );
       return;

@@ -8,7 +8,7 @@
 import React, { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Axis,
   Chart,

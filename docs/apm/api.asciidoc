@@ -10,8 +10,8 @@ Some APM app features are provided via a REST API:
 
 * <<agent-config-api>>
 * <<apm-annotation-api>>
-* <<kibana-api,Kibana API>>
 * <<rum-sourcemap-api>>
+* <<agent-key-api>>
 
 [float]
 [[apm-api-example]]
@@ -70,6 +70,13 @@ curl -X POST \
       ]
     }'
 ----
+
+[float]
+[[kibana-api]]
+=== Kibana API
+
+In addition to the APM specific API endpoints, Kibana provides its own <<api,REST API>>
+which you can use to automate certain aspects of configuring and deploying Kibana.
 
 ////
 *******************************************************
@@ -474,98 +481,12 @@ curl -X POST \
 *******************************************************
 ////
 
-[[kibana-api]]
-=== Kibana API
-
-In addition to the APM specific API endpoints, Kibana provides its own <<api,REST API>>
-which you can use to automate certain aspects of configuring and deploying Kibana.
-An example is below.
-
-[[api-create-apm-index-pattern]]
-==== Customize the APM index pattern
-
-Use Kibana's <<saved-objects-api-update,update object API>> to update the default APM index pattern on the fly.
-
-The following example sets the default APM app index pattern to `some-other-pattern-*`:
-
-[source,sh]
-----
-curl -X PUT "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
--H 'Content-Type: application/json' \
--H 'kbn-xsrf: true' \
--H 'Authorization: Basic ${YOUR_AUTH_TOKEN}' \
--d' {
-      "attributes": {
-        "title": "some-other-pattern-*", <2>
-      }
-    }'
-----
-<1> `apm_static_index_pattern_id` is the internal, hard-coded ID of the APM index pattern.
-This value should not be changed
-<2> Your custom index pattern matcher.
-
-The API returns the following:
-
-[source,json]
-----
-{
-   "id":"apm_static_index_pattern_id",
-   "type":"index-pattern",
-   "updated_at":"2020-07-06T22:55:59.555Z",
-   "version":"WzYsMV0=",
-   "attributes":{
-      "title":"some-other-pattern-*"
-   }
-}
-----
-
-To view the new APM app index pattern, use the <<saved-objects-api-get,GET object API>>:
-
-[source,sh]
-----
-curl -X GET "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
--H 'kbn-xsrf: true' \
--H 'Authorization: Basic ${YOUR_AUTH_TOKEN}'
-----
-<1> `apm_static_index_pattern_id` is the internal, hard-coded ID of the APM index pattern.
-
-The API returns the following:
-
-[source,json]
-----
-{
-  "id":"apm_static_index_pattern_id",
-  "type":"index-pattern",
-  "updated_at":"2020-07-06T22:55:59.555Z",
-  "version":"WzYsMV0=",
-  "attributes":{...}
-    "fieldFormatMap":"{...}
-    "fields":"[{...},{...},...]
-    "sourceFilters":"[{\"value\":\"sourcemap.sourcemap\"}]",
-    "timeFieldName":"@timestamp",
-    "title":"some-other-pattern-*"
-   },
-   ...
-}
-----
-
-// More examples will go here
-
-More information on Kibana's API is available in <<api,REST API>>.
-
-////
-*******************************************************
-*******************************************************
-////
-
 [role="xpack"]
 [[rum-sourcemap-api]]
 === RUM source map API
 
 IMPORTANT: This endpoint is only compatible with the
-{apm-server-ref}/apm-integration.html[APM integration for Elastic Agent].
-Users with a standalone APM Server should instead use the APM Server
-{apm-server-ref}/sourcemap-api.html[source map upload API].
+{apm-guide-ref}/index.html[APM integration for Elastic Agent].
 
 A source map allows minified files to be mapped back to original source code --
 allowing you to maintain the speed advantage of minified code,
@@ -788,3 +709,109 @@ curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9"
 --------------------------------------------------
 {}
 --------------------------------------------------
+
+////
+*******************************************************
+*******************************************************
+////
+
+[role="xpack"]
+[[agent-key-api]]
+=== APM agent Key API
+
+The Agent Key API allows you to configure agent keys to authorize requests from APM agents to the APM Server.
+
+The following Agent key APIs are available:
+
+* <<apm-create-agent-key>> to create an agent key
+
+[float]
+[[use-agent-key-api]]
+==== How to use APM APIs
+
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
+
+////
+*******************************************************
+////
+
+[[apm-create-agent-key]]
+==== Create agent key
+
+Create an APM agent API key. Specify API key privileges in the request body at creation time.
+
+[[apm-create-agent-key-privileges]]
+===== Privileges
+
+The user creating an APM agent API key must have at least the `manage_own_api_key` cluster privilege
+and the APM application-level privileges that it wishes to grant.
+
+====== Example role
+
+The example below uses the Kibana <<role-management-api,role management API>> to create a role named `apm_agent_key_user`.
+Create and assign this role to a user that wishes to create APM agent API keys.
+
+[source,js]
+--------------------------------------------------
+POST /_security/role/apm_agent_key_user
+{
+  "cluster": ["manage_own_api_key"],
+  "applications": [{
+    "application": "apm",
+    "privileges": ["event:write", "sourcemap:write", "config_agent:read"],
+    "resources": ["*"]
+  }]
+}
+--------------------------------------------------
+
+[[apm-create-agent-key-req]]
+===== Request
+
+`POST /api/apm/agent_keys`
+
+[role="child_attributes"]
+[[apm-create-agent-key-req-body]]
+===== Request body
+
+`name`::
+(required, string) Name of the agent key.
+
+`privileges`::
+(required, array) APM agent key privileges. It can take one or more of the following values:
+
+  - `event:write`. Required for ingesting agent events.
+  - `config_agent:read`. Required for agents to read agent configuration remotely.
+  - `sourcemap:write`. Required for uploading sourcemaps.
+
+[[apm-agent-key-create-example]]
+===== Example
+
+[source,curl]
+--------------------------------------------------
+POST /api/apm/agent_keys
+{
+    "name": "apm-key",
+    "privileges": ["event:write", "config_agent:read", "sourcemap:write"]
+}
+--------------------------------------------------
+
+[[apm-agent-key-create-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "agentKey": {
+    "id": "3DCLmn0B3ZMhLUa7WBG9",
+    "name": "apm-key",
+    "api_key": "PjGloCGOTzaZr8ilUPvkjA",
+    "encoded": "M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ=="
+  }
+}
+--------------------------------------------------
+
+Once created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.

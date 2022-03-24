@@ -11,7 +11,7 @@ import { omitBy, isNil } from 'lodash';
 import Style from 'style-it';
 
 import { ExpressionRenderer } from 'src/plugins/expressions';
-import { getType } from '@kbn/interpreter/common';
+import { getType } from '@kbn/interpreter';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
 // @ts-expect-error Untyped local

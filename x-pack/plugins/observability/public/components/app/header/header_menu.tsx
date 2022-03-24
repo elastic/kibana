@@ -8,25 +8,24 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityAppServices } from '../../../application/types';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import HeaderMenuPortal from '../../shared/header_menu_portal';
 
 export function ObservabilityHeaderMenu(): React.ReactElement | null {
   const {
     appMountParameters: { setHeaderActionMenu },
-    core: {
-      http: {
-        basePath: { prepend },
-      },
-    },
   } = usePluginContext();
 
+  const { http, theme } = useKibana<ObservabilityAppServices>().services;
+
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
       <EuiHeaderLinks>
         <EuiHeaderLink
           color="primary"
-          href={prepend('/app/home#/tutorial_directory/logging')}
+          href={http.basePath.prepend('/app/integrations/browse')}
           iconType="indexOpen"
         >
           {addDataLinkText}
@@ -37,5 +36,5 @@ export function ObservabilityHeaderMenu(): React.ReactElement | null {
 }
 
 const addDataLinkText = i18n.translate('xpack.observability.home.addData', {
-  defaultMessage: 'Add data',
+  defaultMessage: 'Add integrations',
 });

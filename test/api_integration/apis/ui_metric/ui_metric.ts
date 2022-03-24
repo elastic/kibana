@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ report })
         .expect(200);
 
-      const { body: response } = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
       const ids = response.hits.hits.map(({ _id }: { _id: string }) => _id);
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
     });
@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ report })
         .expect(200);
 
-      const { body: response } = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
       const ids = response.hits.hits.map(({ _id }: { _id: string }) => _id);
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
       expect(ids.includes(`ui-metric:myApp:${uniqueEventName}`)).to.eql(true);
@@ -99,9 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const {
-        body: {
-          hits: { hits },
-        },
+        hits: { hits },
       } = await es.search<any>({ index: '.kibana', q: 'type:ui-metric' });
 
       const countTypeEvent = hits.find(

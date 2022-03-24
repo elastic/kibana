@@ -10,8 +10,6 @@ import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { useValues } from 'kea';
 
-import { EuiSpacer } from '@elastic/eui';
-
 import { EngineLogic } from '../../../engine';
 import { Result } from '../../../result';
 import { Result as ResultType, ResultAction } from '../../../result/types';
@@ -30,16 +28,13 @@ export const CurationResult: React.FC<Props> = ({ actions, dragHandleProps, resu
   } = useValues(EngineLogic);
 
   return (
-    <>
-      <Result
-        result={result}
-        actions={actions}
-        isMetaEngine={isMetaEngine}
-        schemaForTypeHighlights={schema}
-        dragHandleProps={dragHandleProps}
-        resultPosition={typeof index === 'undefined' ? undefined : index + 1}
-      />
-      <EuiSpacer size="m" />
-    </>
+    <Result
+      result={result}
+      actions={actions}
+      isMetaEngine={isMetaEngine}
+      schemaForTypeHighlights={schema}
+      dragHandleProps={dragHandleProps}
+      resultPosition={typeof index === 'undefined' ? undefined : index + 1}
+    />
   );
 };

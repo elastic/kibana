@@ -7,19 +7,19 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ElasticsearchTestBed, setupElasticsearchPage, setupEnvironment } from '../helpers';
-
+import { setupEnvironment } from '../helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
 
 describe('Default deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
-
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
     httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
@@ -27,23 +27,38 @@ describe('Default deprecation flyout', () => {
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
+    httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
+      reindexOp: null,
+      warnings: [],
+      hasRequiredPrivileges: true,
+      meta: {
+        indexName: 'foo',
+        reindexName: 'reindexed-foo',
+        aliases: [],
+      },
+    });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, {
+        isReadOnlyMode: false,
+      });
     });
 
     testBed.component.update();
   });
 
-  it('renders a flyout with deprecation details', async () => {
+  test('renders a flyout with deprecation details', async () => {
     const multiFieldsDeprecation = esDeprecationsMockResponse.deprecations[2];
     const { actions, find, exists } = testBed;
 
-    await actions.clickDefaultDeprecationAt(0);
+    await actions.table.clickDeprecationRowAt('default', 0);
 
     expect(exists('defaultDeprecationDetails')).toBe(true);
     expect(find('defaultDeprecationDetails.flyoutTitle').text()).toContain(
       multiFieldsDeprecation.message
+    );
+    expect(find('defaultDeprecationDetails.documentationLink').props().href).toBe(
+      multiFieldsDeprecation.url
     );
     expect(find('defaultDeprecationDetails.flyoutDescription').text()).toContain(
       multiFieldsDeprecation.index

@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
+import { noop, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { APP_ID } from '../../../../../common/constants';
+import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import {
   FIRST_ARIA_INDEX,
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
+  getActionsColumnWidth,
 } from '../../../../../../timelines/public';
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
@@ -34,14 +37,13 @@ import { TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { OnRowSelected, OnSelectAll } from '../events';
-import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
+import { getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 interface OwnProps {
@@ -61,14 +63,10 @@ interface OwnProps {
   onRuleChange?: () => void;
 }
 
-const NUM_OF_ICON_IN_TIMELINE_ROW = 2;
-
 export const hasAdditionalActions = (id: TimelineId): boolean =>
   [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
     id
   );
-
-const EXTRA_WIDTH = 4; // px
 
 export type StatefulBodyProps = OwnProps & PropsFromRedux;
 
@@ -93,6 +91,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     setSelected,
     clearSelected,
     onRuleChange,
+    show,
     showCheckboxes,
     refetch,
     renderCellValue,
@@ -103,11 +102,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     leadingControlColumns = [],
     trailingControlColumns = [],
   }) => {
+    const dispatch = useDispatch();
     const containerRef = useRef<HTMLDivElement | null>(null);
     const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
+    const ACTION_BUTTON_COUNT = 5;
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
@@ -146,6 +147,19 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [isSelectAllChecked, onSelectAll, selectAll]);
 
+    useEffect(() => {
+      if (!isEmpty(browserFields) && !isEmpty(columnHeaders)) {
+        columnHeaders.forEach(({ id: columnId }) => {
+          if (browserFields.base?.fields?.[columnId] == null) {
+            const [category] = columnId.split('.');
+            if (browserFields[category]?.fields?.[columnId] == null) {
+              dispatch(timelineActions.removeColumn({ id, columnId }));
+            }
+          }
+        });
+      }
+    }, [browserFields, columnHeaders, dispatch, id]);
+
     const enabledRowRenderers = useMemo(() => {
       if (
         excludedRowRendererIds &&
@@ -158,17 +172,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
     }, [excludedRowRendererIds, rowRenderers]);
 
-    const actionsColumnWidth = useMemo(
-      () =>
-        getActionsColumnWidth(
-          isEventViewer,
-          showCheckboxes,
-          hasAdditionalActions(id as TimelineId)
-            ? DEFAULT_ICON_BUTTON_WIDTH * NUM_OF_ICON_IN_TIMELINE_ROW + EXTRA_WIDTH
-            : 0
-        ),
-      [isEventViewer, showCheckboxes, id]
-    );
+    const actionsColumnWidth = useMemo(() => getActionsColumnWidth(ACTION_BUTTON_COUNT), []);
 
     const columnWidths = useMemo(
       () =>
@@ -223,59 +227,65 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       },
       [columnHeaders.length, containerRef, data.length]
     );
+    const kibana = useKibana();
+    const casesPermissions = useGetUserCasesPermissions();
+    const CasesContext = kibana.services.cases.ui.getCasesContext();
 
     return (
       <>
         <TimelineBody data-test-subj="timeline-body" ref={containerRef}>
-          <EventsTable
-            $activePage={activePage}
-            $columnCount={columnCount}
-            data-test-subj={`${tabType}-events-table`}
-            columnWidths={totalWidth}
-            onKeyDown={onKeyDown}
-            $rowCount={data.length}
-            $totalPages={totalPages}
-          >
-            <ColumnHeaders
-              actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              isEventViewer={isEventViewer}
-              isSelectAllChecked={isSelectAllChecked}
-              onSelectAll={onSelectAll}
-              showEventsSelect={false}
-              showSelectAllCheckbox={showCheckboxes}
-              sort={sort}
-              tabType={tabType}
-              timelineId={id}
-              leadingControlColumns={leadingControlColumns}
-              trailingControlColumns={trailingControlColumns}
-            />
+          <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
+            <EventsTable
+              $activePage={activePage}
+              $columnCount={columnCount}
+              data-test-subj={`${tabType}-events-table`}
+              columnWidths={totalWidth}
+              onKeyDown={onKeyDown}
+              $rowCount={data.length}
+              $totalPages={totalPages}
+            >
+              <ColumnHeaders
+                actionsColumnWidth={actionsColumnWidth}
+                browserFields={browserFields}
+                columnHeaders={columnHeaders}
+                isEventViewer={isEventViewer}
+                isSelectAllChecked={isSelectAllChecked}
+                onSelectAll={onSelectAll}
+                show={show}
+                showEventsSelect={false}
+                showSelectAllCheckbox={showCheckboxes}
+                sort={sort}
+                tabType={tabType}
+                timelineId={id}
+                leadingControlColumns={leadingControlColumns}
+                trailingControlColumns={trailingControlColumns}
+              />
 
-            <Events
-              containerRef={containerRef}
-              actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              data={data}
-              eventIdToNoteIds={eventIdToNoteIds}
-              id={id}
-              isEventViewer={isEventViewer}
-              lastFocusedAriaColindex={lastFocusedAriaColindex}
-              loadingEventIds={loadingEventIds}
-              onRowSelected={onRowSelected}
-              pinnedEventIds={pinnedEventIds}
-              refetch={refetch}
-              renderCellValue={renderCellValue}
-              rowRenderers={enabledRowRenderers}
-              onRuleChange={onRuleChange}
-              selectedEventIds={selectedEventIds}
-              showCheckboxes={showCheckboxes}
-              leadingControlColumns={leadingControlColumns}
-              trailingControlColumns={trailingControlColumns}
-              tabType={tabType}
-            />
-          </EventsTable>
+              <Events
+                containerRef={containerRef}
+                actionsColumnWidth={actionsColumnWidth}
+                browserFields={browserFields}
+                columnHeaders={columnHeaders}
+                data={data}
+                eventIdToNoteIds={eventIdToNoteIds}
+                id={id}
+                isEventViewer={isEventViewer}
+                lastFocusedAriaColindex={lastFocusedAriaColindex}
+                loadingEventIds={loadingEventIds}
+                onRowSelected={onRowSelected}
+                pinnedEventIds={pinnedEventIds}
+                refetch={refetch}
+                renderCellValue={renderCellValue}
+                rowRenderers={enabledRowRenderers}
+                onRuleChange={onRuleChange}
+                selectedEventIds={selectedEventIds}
+                showCheckboxes={showCheckboxes}
+                leadingControlColumns={leadingControlColumns}
+                trailingControlColumns={trailingControlColumns}
+                tabType={tabType}
+              />
+            </EventsTable>
+          </CasesContext>
         </TimelineBody>
         <TimelineBodyGlobalStyle />
       </>
@@ -297,7 +307,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     prevProps.renderCellValue === nextProps.renderCellValue &&
     prevProps.rowRenderers === nextProps.rowRenderers &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
-    prevProps.tabType === nextProps.tabType
+    prevProps.tabType === nextProps.tabType &&
+    prevProps.show === nextProps.show
 );
 
 BodyComponent.displayName = 'BodyComponent';
@@ -320,6 +331,7 @@ const makeMapStateToProps = () => {
       pinnedEventIds,
       selectedEventIds,
       showCheckboxes,
+      show,
     } = timeline;
 
     return {
@@ -332,6 +344,7 @@ const makeMapStateToProps = () => {
       pinnedEventIds,
       selectedEventIds,
       showCheckboxes,
+      show,
     };
   };
   return mapStateToProps;

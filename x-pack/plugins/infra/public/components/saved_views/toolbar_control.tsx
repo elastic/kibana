@@ -75,8 +75,12 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     setModalOpen(true);
   }, [find, hideSavedViewMenu]);
   const showSavedViewMenu = useCallback(() => {
+    if (isSavedViewMenuOpen) {
+      setIsSavedViewMenuOpen(false);
+      return;
+    }
     setIsSavedViewMenuOpen(true);
-  }, [setIsSavedViewMenuOpen]);
+  }, [setIsSavedViewMenuOpen, isSavedViewMenuOpen]);
   const save = useCallback(
     (name: string, hasTime: boolean = false) => {
       const currentState = {
@@ -146,6 +150,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
             data-test-subj="savedViews-openPopover"
             iconType="arrowDown"
             iconSide="right"
+            color="text"
           >
             {currentView
               ? currentView.name
@@ -172,7 +177,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
             data-test-subj="savedViews-updateView"
             iconType={'refresh'}
             onClick={openUpdateModal}
-            disabled={!currentView || currentView.id === '0'}
+            isDisabled={!currentView || currentView.id === '0'}
             label={i18n.translate('xpack.infra.savedView.updateView', {
               defaultMessage: 'Update view',
             })}

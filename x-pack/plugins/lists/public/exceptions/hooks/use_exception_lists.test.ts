@@ -49,6 +49,7 @@ describe('useExceptionLists', () => {
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
           showEventFilters: false,
+          showHostIsolationExceptions: false,
           showTrustedApps: false,
         })
       );
@@ -86,6 +87,7 @@ describe('useExceptionLists', () => {
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
           showEventFilters: false,
+          showHostIsolationExceptions: false,
           showTrustedApps: false,
         })
       );
@@ -127,6 +129,7 @@ describe('useExceptionLists', () => {
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
           showEventFilters: false,
+          showHostIsolationExceptions: false,
           showTrustedApps: true,
         })
       );
@@ -137,7 +140,7 @@ describe('useExceptionLists', () => {
 
       expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
         filters:
-          '(exception-list.attributes.list_id: endpoint_trusted_apps* OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
+          '(exception-list.attributes.list_id: endpoint_trusted_apps* OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*) AND (not exception-list.attributes.list_id: endpoint_host_isolation_exceptions* AND not exception-list-agnostic.attributes.list_id: endpoint_host_isolation_exceptions*)',
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
@@ -163,6 +166,7 @@ describe('useExceptionLists', () => {
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
           showEventFilters: false,
+          showHostIsolationExceptions: false,
           showTrustedApps: false,
         })
       );
@@ -173,7 +177,7 @@ describe('useExceptionLists', () => {
 
       expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
         filters:
-          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
+          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*) AND (not exception-list.attributes.list_id: endpoint_host_isolation_exceptions* AND not exception-list-agnostic.attributes.list_id: endpoint_host_isolation_exceptions*)',
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
@@ -199,6 +203,7 @@ describe('useExceptionLists', () => {
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
           showEventFilters: true,
+          showHostIsolationExceptions: false,
           showTrustedApps: false,
         })
       );
@@ -209,7 +214,7 @@ describe('useExceptionLists', () => {
 
       expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
         filters:
-          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (exception-list.attributes.list_id: endpoint_event_filters* OR exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
+          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (exception-list.attributes.list_id: endpoint_event_filters* OR exception-list-agnostic.attributes.list_id: endpoint_event_filters*) AND (not exception-list.attributes.list_id: endpoint_host_isolation_exceptions* AND not exception-list-agnostic.attributes.list_id: endpoint_host_isolation_exceptions*)',
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
@@ -235,6 +240,7 @@ describe('useExceptionLists', () => {
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
           showEventFilters: false,
+          showHostIsolationExceptions: false,
           showTrustedApps: false,
         })
       );
@@ -245,7 +251,81 @@ describe('useExceptionLists', () => {
 
       expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
         filters:
-          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
+          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*) AND (not exception-list.attributes.list_id: endpoint_host_isolation_exceptions* AND not exception-list-agnostic.attributes.list_id: endpoint_host_isolation_exceptions*)',
+        http: mockKibanaHttpService,
+        namespaceTypes: 'single,agnostic',
+        pagination: { page: 1, perPage: 20 },
+        signal: new AbortController().signal,
+      });
+    });
+  });
+
+  test('fetches host isolation exceptions lists if "hostIsolationExceptionsFilter" is true', async () => {
+    const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
+
+    await act(async () => {
+      const { waitForNextUpdate } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+        useExceptionLists({
+          errorMessage: 'Uh oh',
+          filterOptions: {},
+          http: mockKibanaHttpService,
+          initialPagination: {
+            page: 1,
+            perPage: 20,
+            total: 0,
+          },
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
+          showEventFilters: false,
+          showHostIsolationExceptions: true,
+          showTrustedApps: false,
+        })
+      );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
+        filters:
+          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*) AND (exception-list.attributes.list_id: endpoint_host_isolation_exceptions* OR exception-list-agnostic.attributes.list_id: endpoint_host_isolation_exceptions*)',
+        http: mockKibanaHttpService,
+        namespaceTypes: 'single,agnostic',
+        pagination: { page: 1, perPage: 20 },
+        signal: new AbortController().signal,
+      });
+    });
+  });
+
+  test('does not fetch host isolation exceptions lists if "showHostIsolationExceptions" is false', async () => {
+    const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
+
+    await act(async () => {
+      const { waitForNextUpdate } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+        useExceptionLists({
+          errorMessage: 'Uh oh',
+          filterOptions: {},
+          http: mockKibanaHttpService,
+          initialPagination: {
+            page: 1,
+            perPage: 20,
+            total: 0,
+          },
+          namespaceTypes: ['single', 'agnostic'],
+          notifications: mockKibanaNotificationsService,
+          showEventFilters: false,
+          showHostIsolationExceptions: false,
+          showTrustedApps: false,
+        })
+      );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
+        filters:
+          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*) AND (not exception-list.attributes.list_id: endpoint_host_isolation_exceptions* AND not exception-list-agnostic.attributes.list_id: endpoint_host_isolation_exceptions*)',
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
@@ -274,6 +354,7 @@ describe('useExceptionLists', () => {
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
           showEventFilters: false,
+          showHostIsolationExceptions: false,
           showTrustedApps: false,
         })
       );
@@ -284,7 +365,7 @@ describe('useExceptionLists', () => {
 
       expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
         filters:
-          '(exception-list.attributes.created_by:Moi OR exception-list-agnostic.attributes.created_by:Moi) AND (exception-list.attributes.name.text:Sample Endpoint OR exception-list-agnostic.attributes.name.text:Sample Endpoint) AND (not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
+          '(exception-list.attributes.created_by:Moi OR exception-list-agnostic.attributes.created_by:Moi) AND (exception-list.attributes.name.text:Sample Endpoint OR exception-list-agnostic.attributes.name.text:Sample Endpoint) AND (not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*) AND (not exception-list.attributes.list_id: endpoint_host_isolation_exceptions* AND not exception-list-agnostic.attributes.list_id: endpoint_host_isolation_exceptions*)',
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
@@ -318,6 +399,7 @@ describe('useExceptionLists', () => {
             namespaceTypes,
             notifications,
             showEventFilters,
+            showHostIsolationExceptions: false,
             showTrustedApps,
           }),
         {
@@ -333,6 +415,7 @@ describe('useExceptionLists', () => {
             namespaceTypes: ['single'],
             notifications: mockKibanaNotificationsService,
             showEventFilters: false,
+            showHostIsolationExceptions: false,
             showTrustedApps: false,
           },
         }
@@ -354,6 +437,7 @@ describe('useExceptionLists', () => {
         namespaceTypes: ['single', 'agnostic'],
         notifications: mockKibanaNotificationsService,
         showEventFilters: false,
+        showHostIsolationExceptions: false,
         showTrustedApps: false,
       });
       // NOTE: Only need one call here because hook already initilaized
@@ -382,6 +466,7 @@ describe('useExceptionLists', () => {
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
           showEventFilters: false,
+          showHostIsolationExceptions: false,
           showTrustedApps: false,
         })
       );
@@ -421,6 +506,7 @@ describe('useExceptionLists', () => {
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
           showEventFilters: false,
+          showHostIsolationExceptions: false,
           showTrustedApps: false,
         })
       );

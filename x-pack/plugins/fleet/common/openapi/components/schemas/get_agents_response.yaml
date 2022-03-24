@@ -1,0 +1,23 @@
+title: Get Agent response
+type: object
+properties:
+  list:
+    type: array
+    items:
+      $ref: ./agent.yaml
+    deprecated: true
+  items:
+    type: array
+    items:
+      $ref: ./agent.yaml
+  total:
+    type: number
+  page:
+    type: number
+  perPage:
+    type: number
+required:
+  - items
+  - total
+  - page
+  - perPage

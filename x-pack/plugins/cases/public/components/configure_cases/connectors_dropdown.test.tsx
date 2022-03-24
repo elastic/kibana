@@ -13,11 +13,6 @@ import { render, screen } from '@testing-library/react';
 import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
-import { useKibana } from '../../common/lib/kibana';
-import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
-
-jest.mock('../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('ConnectorsDropdown', () => {
   let wrapper: ReactWrapper;
@@ -29,10 +24,7 @@ describe('ConnectorsDropdown', () => {
     selectedConnector: 'none',
   };
 
-  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
-
   beforeAll(() => {
-    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectors);
     wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
   });
 
@@ -171,7 +163,7 @@ describe('ConnectorsDropdown', () => {
           "value": "servicenow-sir",
         },
         Object {
-          "data-test-subj": "dropdown-connector-servicenow-legacy",
+          "data-test-subj": "dropdown-connector-servicenow-uses-table-api",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
             gutterSize="s"
@@ -190,22 +182,22 @@ describe('ConnectorsDropdown', () => {
             >
               <span>
                 My Connector
+                 (deprecated)
               </span>
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
             >
-              <EuiIconTip
-                aria-label="Deprecated connector"
+              <Styled(EuiIconTip)
+                aria-label="This connector is deprecated. Update it, or create a new one."
                 color="warning"
-                content="Please update your connector"
+                content="This connector is deprecated. Update it, or create a new one."
                 size="m"
-                title="Deprecated connector"
                 type="alert"
               />
             </EuiFlexItem>
           </EuiFlexGroup>,
-          "value": "servicenow-legacy",
+          "value": "servicenow-uses-table-api",
         },
       ]
     `);
@@ -245,27 +237,6 @@ describe('ConnectorsDropdown', () => {
     ).toBeTruthy();
   });
 
-  test('if the props hideConnectorServiceNowSir is true, the connector should not be part of the list of options  ', () => {
-    const newWrapper = mount(
-      <ConnectorsDropdown
-        {...props}
-        selectedConnector={'servicenow-1'}
-        hideConnectorServiceNowSir={true}
-      />,
-      {
-        wrappingComponent: TestProviders,
-      }
-    );
-    const selectProps = newWrapper.find(EuiSuperSelect).props();
-    const options = selectProps.options as Array<{ 'data-test-subj': string }>;
-    expect(
-      options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-1')
-    ).toBeTruthy();
-    expect(
-      options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-sir')
-    ).toBeFalsy();
-  });
-
   test('it does not throw when accessing the icon if the connector type is not registered', () => {
     expect(() =>
       mount(
@@ -288,12 +259,14 @@ describe('ConnectorsDropdown', () => {
     ).not.toThrowError();
   });
 
-  test('it shows the deprecated tooltip when the connector is legacy', () => {
-    render(<ConnectorsDropdown {...props} selectedConnector="servicenow-legacy" />, {
+  test('it shows the deprecated tooltip when the connector is deprecated', () => {
+    render(<ConnectorsDropdown {...props} selectedConnector="servicenow-uses-table-api" />, {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    const tooltips = screen.getAllByLabelText('Deprecated connector');
+    const tooltips = screen.getAllByLabelText(
+      'This connector is deprecated. Update it, or create a new one.'
+    );
     expect(tooltips[0]).toBeInTheDocument();
   });
 });

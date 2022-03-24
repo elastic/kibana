@@ -22,11 +22,7 @@ import {
   parseSearchSourceJSON,
   DataPublicPluginStart,
 } from '../../../../plugins/data/public';
-import {
-  checkForDuplicateTitle,
-  saveWithConfirmation,
-  isErrorNonFatal,
-} from '../../../../plugins/saved_objects/public';
+import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
@@ -41,6 +37,7 @@ import type { TypesStart, BaseVisType } from '../vis_types';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
+import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_utils/constants';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
@@ -236,6 +233,7 @@ export async function getSavedVisualization(
     saved_object: resp,
     outcome,
     alias_target_id: aliasTargetId,
+    alias_purpose: aliasPurpose,
   } = await services.savedObjectsClient.resolve<SavedObjectAttributes>(SAVED_VIS_TYPE, id);
 
   if (!resp._version) {
@@ -257,6 +255,7 @@ export async function getSavedVisualization(
   savedObject.sharingSavedObjectProps = {
     aliasTargetId,
     outcome,
+    aliasPurpose,
     errorJSON:
       outcome === 'conflict' && services.spaces
         ? JSON.stringify({
@@ -395,7 +394,7 @@ export async function saveVisualization(
     return savedObject.id;
   } catch (err: any) {
     savedObject.id = originalId;
-    if (isErrorNonFatal(err)) {
+    if (err && [OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED].includes(err.message)) {
       return '';
     }
     return Promise.reject(err);

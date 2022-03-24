@@ -30,7 +30,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./state_sync'),
       require.resolve('./routing'),
       require.resolve('./expressions_explorer'),
-      require.resolve('./index_pattern_field_editor_example'),
+      require.resolve('./data_view_field_editor_example'),
       require.resolve('./field_formats'),
       require.resolve('./partial_results'),
     ],
@@ -42,7 +42,6 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'telemetry:optIn': false,
       },
     },
     pageObjects: functionalConfig.get('pageObjects'),
@@ -62,6 +61,7 @@ export default async function ({ readConfigFile }) {
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
+        '--telemetry.optIn=false',
         ...examples.map(
           (exampleDir) => `--plugin-path=${resolve(KIBANA_ROOT, 'examples', exampleDir)}`
         ),

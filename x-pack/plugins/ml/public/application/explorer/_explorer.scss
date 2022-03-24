@@ -5,11 +5,6 @@ $borderRadius: $euiBorderRadius / 2;
   display: inline-block;
   color: $euiColorDarkShade;
 
-  .mlAnomalyExplorer__filterBar {
-    padding-right: $euiSize;
-    padding-left: $euiSize;
-  }
-
   .results-container {
     padding: 0 0 $euiSize 0;
 

@@ -6,17 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
-  elasticsearchClientMock,
-  MockedTransportRequestPromise,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../core/server/elasticsearch/client/mocks';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { elasticsearchServiceMock } from '../../../../../../core/server/mocks';
 import { pluginInitializerContextConfigMock } from '../../../../../../core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
 
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
-import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { KbnServerError } from '../../../../../kibana_utils/server';
 
 describe('ES search strategy', () => {
@@ -27,31 +24,28 @@ describe('ES search strategy', () => {
       skipped: 2,
       successful: 7,
     },
-  };
-  let mockedApiCaller: MockedTransportRequestPromise<any>;
-  let mockApiCaller: jest.Mock<() => MockedTransportRequestPromise<any>>;
+  } as estypes.SearchResponse;
+
   const mockLogger: any = {
     debug: () => {},
   };
 
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
   function getMockedDeps(err?: Record<string, any>) {
-    mockApiCaller = jest.fn().mockImplementation(() => {
-      if (err) {
-        mockedApiCaller = elasticsearchClientMock.createErrorTransportRequestPromise(err);
-      } else {
-        mockedApiCaller = elasticsearchClientMock.createSuccessTransportRequestPromise(
-          successBody,
-          { statusCode: 200 }
-        );
-      }
-      return mockedApiCaller;
-    });
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    if (err) {
+      esClient.search.mockImplementation(() => Promise.reject(err));
+    } else {
+      esClient.search.mockResponse(successBody, { statusCode: 200 });
+    }
 
     return {
       uiSettingsClient: {
         get: () => {},
       },
-      esClient: { asCurrentUser: { search: mockApiCaller } },
+      esClient: { asCurrentUser: esClient },
     } as unknown as SearchStrategyDependencies;
   }
 
@@ -69,8 +63,8 @@ describe('ES search strategy', () => {
     await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search({ params }, {}, getMockedDeps())
       .subscribe(() => {
-        expect(mockApiCaller).toBeCalled();
-        expect(mockApiCaller.mock.calls[0][0]).toEqual({
+        expect(esClient.search).toBeCalled();
+        expect(esClient.search.mock.calls[0][0]).toEqual({
           ...params,
           ignore_unavailable: true,
           track_total_hits: true,
@@ -85,8 +79,8 @@ describe('ES search strategy', () => {
     await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search({ params }, {}, getMockedDeps())
       .subscribe(() => {
-        expect(mockApiCaller).toBeCalled();
-        expect(mockApiCaller.mock.calls[0][0]).toEqual({
+        expect(esClient.search).toBeCalled();
+        expect(esClient.search.mock.calls[0][0]).toEqual({
           ...params,
           track_total_hits: true,
         });
@@ -108,7 +102,6 @@ describe('ES search strategy', () => {
         expect(data.isPartial).toBe(false);
         expect(data).toHaveProperty('loaded');
         expect(data).toHaveProperty('rawResponse');
-        expect(mockedApiCaller.abort).not.toBeCalled();
         done();
       }));
 
@@ -122,17 +115,16 @@ describe('ES search strategy', () => {
       .search({ params }, { abortSignal: abortController.signal }, getMockedDeps())
       .toPromise();
 
-    expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toEqual({
+    expect(esClient.search).toBeCalled();
+    expect(esClient.search.mock.calls[0][0]).toEqual({
       ...params,
       track_total_hits: true,
     });
-    expect(mockedApiCaller.abort).toBeCalled();
   });
 
   it('throws normalized error if ResponseError is thrown', async (done) => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
-    const errResponse = new ResponseError({
+    const errResponse = new errors.ResponseError({
       body: indexNotFoundException,
       statusCode: 404,
       headers: {},
@@ -145,7 +137,7 @@ describe('ES search strategy', () => {
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
-      expect(mockApiCaller).toBeCalled();
+      expect(esClient.search).toBeCalled();
       expect(e).toBeInstanceOf(KbnServerError);
       expect(e.statusCode).toBe(404);
       expect(e.message).toBe(errResponse.message);
@@ -156,14 +148,14 @@ describe('ES search strategy', () => {
 
   it('throws normalized error if ElasticsearchClientError is thrown', async (done) => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
-    const errResponse = new ElasticsearchClientError('This is a general ESClient error');
+    const errResponse = new errors.ElasticsearchClientError('This is a general ESClient error');
 
     try {
       await esSearchStrategyProvider(mockConfig$, mockLogger)
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
-      expect(mockApiCaller).toBeCalled();
+      expect(esClient.search).toBeCalled();
       expect(e).toBeInstanceOf(KbnServerError);
       expect(e.statusCode).toBe(500);
       expect(e.message).toBe(errResponse.message);
@@ -181,7 +173,7 @@ describe('ES search strategy', () => {
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
-      expect(mockApiCaller).toBeCalled();
+      expect(esClient.search).toBeCalled();
       expect(e).toBeInstanceOf(KbnServerError);
       expect(e.statusCode).toBe(500);
       expect(e.message).toBe(errResponse.message);
@@ -198,7 +190,7 @@ describe('ES search strategy', () => {
         .search({ indexType: 'banana', params }, {}, getMockedDeps())
         .toPromise();
     } catch (e) {
-      expect(mockApiCaller).not.toBeCalled();
+      expect(esClient.search).not.toBeCalled();
       expect(e).toBeInstanceOf(KbnServerError);
       expect(e.message).toBe('Unsupported index pattern type banana');
       expect(e.statusCode).toBe(400);

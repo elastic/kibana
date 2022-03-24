@@ -20,6 +20,7 @@ import {
   TimelineType,
   TimelineTabs,
   TimelineResult,
+  SingleTimelineResolveResponse,
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
@@ -65,7 +66,7 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
-import { getTimeline } from '../../containers/api';
+import { resolveTimeline } from '../../containers/api';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import { NoteResult } from '../../../../common/types/timeline/note';
 
@@ -346,11 +347,12 @@ export const queryTimelineById = <TCache>({
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
   updateIsLoading({ id: TimelineId.active, isLoading: true });
-  Promise.resolve(getTimeline(timelineId))
+  Promise.resolve(resolveTimeline(timelineId))
     .then((result) => {
-      const timelineToOpen: TimelineResult = omitTypenameInTimeline(
-        getOr({}, 'data.getOneTimeline', result)
-      );
+      const data: SingleTimelineResolveResponse['data'] | null = getOr(null, 'data', result);
+      if (!data) return;
+
+      const timelineToOpen = omitTypenameInTimeline(data.timeline);
 
       const { timeline, notes } = formatTimelineResultToModel(
         timelineToOpen,
@@ -370,6 +372,11 @@ export const queryTimelineById = <TCache>({
           from,
           id: TimelineId.active,
           notes,
+          resolveTimelineConfig: {
+            outcome: data.outcome,
+            alias_target_id: data.alias_target_id,
+            alias_purpose: data.alias_purpose,
+          },
           timeline: {
             ...timeline,
             activeTab: activeTimelineTab,
@@ -399,6 +406,7 @@ export const dispatchUpdateTimeline =
     forceNotes = false,
     from,
     notes,
+    resolveTimelineConfig,
     timeline,
     to,
     ruleNote,
@@ -406,10 +414,10 @@ export const dispatchUpdateTimeline =
   () => {
     if (!isEmpty(timeline.indexNames)) {
       dispatch(
-        sourcererActions.initTimelineIndexPatterns({
+        sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
+          selectedDataViewId: timeline.dataViewId,
           selectedPatterns: timeline.indexNames,
-          eventType: timeline.eventType,
         })
       );
     }
@@ -429,7 +437,9 @@ export const dispatchUpdateTimeline =
     } else {
       dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
     }
-    dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
+    dispatch(
+      dispatchAddTimeline({ id, timeline, resolveTimelineConfig, savedTimeline: duplicate })
+    );
     if (
       timeline.kqlQuery != null &&
       timeline.kqlQuery.filterQuery != null &&

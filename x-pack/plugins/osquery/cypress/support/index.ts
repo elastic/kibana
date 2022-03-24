@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// / <reference types="cypress" />
+
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.
@@ -20,11 +22,26 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
-import './commands';
+// force ESM in this module
+export {};
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+import 'cypress-react-selector';
+// import './coverage';
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Cypress {
+    interface Chainable {
+      getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
+    }
+  }
+}
+
+Cypress.Commands.add('getBySel', (selector, ...args) =>
+  cy.get(`[data-test-subj="${selector}"]`, ...args)
+);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
-Cypress.on('uncaught:exception', () => {
-  return false;
-});
+Cypress.on('uncaught:exception', () => false);

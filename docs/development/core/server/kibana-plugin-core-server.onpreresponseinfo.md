@@ -16,5 +16,5 @@ export interface OnPreResponseInfo
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [statusCode](./kibana-plugin-core-server.onpreresponseinfo.statuscode.md) | <code>number</code> |  |
+|  [statusCode](./kibana-plugin-core-server.onpreresponseinfo.statuscode.md) | number |  |
 

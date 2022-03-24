@@ -14,7 +14,7 @@ import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
 
 export function StandardAgg(props) {
@@ -52,7 +52,6 @@ export function StandardAgg(props) {
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}
-            uiRestrictions={uiRestrictions}
             onChange={handleSelectChange('type')}
             fullWidth
           />
@@ -69,7 +68,11 @@ export function StandardAgg(props) {
               restrict={restrictFields}
               indexPattern={indexPattern}
               value={model.field}
-              onChange={handleSelectChange('field')}
+              onChange={(value) =>
+                handleChange({
+                  field: value?.[0],
+                })
+              }
               uiRestrictions={uiRestrictions}
               fullWidth
             />

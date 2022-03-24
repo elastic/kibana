@@ -32,10 +32,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await security.role.delete('global_all_role');
-
       // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+
+      await security.role.delete('global_all_role');
     });
 
     describe('machine_learning_user', () => {
@@ -77,9 +78,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('global_all');
       });
 
-      it(`doesn't show ml navlink`, async () => {
+      it(`shows ml navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).not.to.contain('Machine Learning');
+        expect(navLinks).to.contain('Machine Learning');
       });
     });
 
@@ -101,6 +102,76 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('shows ML navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Machine Learning');
+      });
+    });
+
+    describe('ml read', () => {
+      before(async () => {
+        await security.role.create('ml_role_read', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+          },
+          kibana: [
+            {
+              base: [],
+              feature: { ml: ['read'], savedObjectsManagement: ['read'] },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('ml_read_user', {
+          password: 'ml_read-password',
+          roles: ['ml_role_read'],
+          full_name: 'ml read',
+        });
+
+        await PageObjects.security.login('ml_read_user', 'ml_read-password');
+      });
+
+      after(async () => {
+        await security.role.delete('ml_role_read');
+        await security.user.delete('ml_read_user');
+      });
+
+      it('shows ML navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Machine Learning');
+      });
+    });
+
+    describe('ml none', () => {
+      before(async () => {
+        await security.role.create('ml_role_none', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+          },
+          kibana: [
+            {
+              base: [],
+              feature: { discover: ['read'] },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('ml_none_user', {
+          password: 'ml_none-password',
+          roles: ['ml_role_none'],
+          full_name: 'ml none',
+        });
+
+        await PageObjects.security.login('ml_none_user', 'ml_none-password');
+      });
+
+      after(async () => {
+        await security.role.delete('ml_role_none');
+        await security.user.delete('ml_none_user');
+      });
+
+      it('does NOT show ML navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.not.contain('Machine Learning');
       });
     });
   });

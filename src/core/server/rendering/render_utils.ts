@@ -7,7 +7,7 @@
  */
 
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
-import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import { PublicUiSettingsParams, UserProvidedValues } from '../ui_settings';
 
 export const getSettingValue = <T>(
@@ -28,7 +28,7 @@ export const getStylesheetPaths = ({
   basePath,
   buildNum,
 }: {
-  themeVersion: string;
+  themeVersion: UiSharedDepsNpm.ThemeVersion;
   darkMode: boolean;
   buildNum: number;
   basePath: string;
@@ -37,17 +37,17 @@ export const getStylesheetPaths = ({
   return [
     ...(darkMode
       ? [
-          themeVersion === 'v7'
-            ? `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename}`
-            : `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkV8CssDistFilename}`,
+          `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename(
+            themeVersion
+          )}`,
           `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
           `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
           `${basePath}/ui/legacy_dark_theme.css`,
         ]
       : [
-          themeVersion === 'v7'
-            ? `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename}`
-            : `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightV8CssDistFilename}`,
+          `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
+            themeVersion
+          )}`,
           `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
           `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
           `${basePath}/ui/legacy_light_theme.css`,

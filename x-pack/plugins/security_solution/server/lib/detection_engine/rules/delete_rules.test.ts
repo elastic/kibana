@@ -6,51 +6,29 @@
  */
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
 import { deleteRules } from './delete_rules';
-import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
-import { DeleteRuleOptions, IRuleStatusSOAttributes } from './types';
-import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { DeleteRuleOptions } from './types';
 
 describe('deleteRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
+  let ruleExecutionLog: ReturnType<typeof ruleExecutionLogMock.forRoutes.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    ruleStatusClient = ruleExecutionLogClientMock.create();
+    ruleExecutionLog = ruleExecutionLogMock.forRoutes.create();
   });
 
   it('should delete the rule along with its actions, and statuses', async () => {
-    const ruleStatus: SavedObjectsFindResult<IRuleStatusSOAttributes> = {
-      id: 'statusId',
-      type: '',
-      references: [],
-      attributes: {
-        alertId: 'alertId',
-        statusDate: '',
-        lastFailureAt: null,
-        lastFailureMessage: null,
-        lastSuccessAt: null,
-        lastSuccessMessage: null,
-        status: null,
-        lastLookBackDate: null,
-        gap: null,
-        bulkCreateTimeDurations: null,
-        searchAfterTimeDurations: null,
-      },
-      score: 0,
-    };
-
-    const rule: DeleteRuleOptions = {
+    const options: DeleteRuleOptions = {
+      ruleId: 'ruleId',
       rulesClient,
-      ruleStatusClient,
-      id: 'ruleId',
-      ruleStatuses: [ruleStatus],
+      ruleExecutionLog,
     };
 
-    await deleteRules(rule);
+    await deleteRules(options);
 
-    expect(rulesClient.delete).toHaveBeenCalledWith({ id: rule.id });
-    expect(ruleStatusClient.delete).toHaveBeenCalledWith(ruleStatus.id);
+    expect(rulesClient.delete).toHaveBeenCalledWith({ id: options.ruleId });
+    expect(ruleExecutionLog.clearExecutionSummary).toHaveBeenCalledWith(options.ruleId);
   });
 });

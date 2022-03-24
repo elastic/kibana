@@ -8,9 +8,9 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SelectOption, SwitchOption } from '../../../../../../../vis_default_editor/public';
 import { Labels } from '../../../../../../../charts/public';
@@ -23,9 +23,15 @@ export interface LabelOptionsProps {
   axisLabels: Labels;
   axisFilterCheckboxName: string;
   setAxisLabel: SetAxisLabel;
+  disableSingleLayerAxisControls?: boolean;
 }
 
-function LabelOptions({ axisLabels, axisFilterCheckboxName, setAxisLabel }: LabelOptionsProps) {
+function LabelOptions({
+  axisLabels,
+  axisFilterCheckboxName,
+  setAxisLabel,
+  disableSingleLayerAxisControls,
+}: LabelOptionsProps) {
   const setAxisLabelRotate = useCallback(
     (paramName: 'rotate', value: Labels['rotate']) => {
       setAxisLabel(paramName, Number(value));
@@ -34,6 +40,15 @@ function LabelOptions({ axisLabels, axisFilterCheckboxName, setAxisLabel }: Labe
   );
 
   const rotateOptions = useMemo(getRotateOptions, []);
+  const multilayerAxisTooltipText = disableSingleLayerAxisControls
+    ? i18n.translate(
+        'visTypeXy.controls.pointSeries.categoryAxis.axisLabelsOptionsMultilayer.disabled',
+        {
+          defaultMessage: 'This option can be configured only with non-time-based axes',
+        }
+      )
+    : undefined;
+  const axisLabelControlDisabled = !axisLabels.show || disableSingleLayerAxisControls;
 
   return (
     <>
@@ -56,39 +71,43 @@ function LabelOptions({ axisLabels, axisFilterCheckboxName, setAxisLabel }: Labe
         value={axisLabels.show}
         setValue={setAxisLabel}
       />
-
       <SwitchOption
         data-test-subj={axisFilterCheckboxName}
-        disabled={!axisLabels.show}
+        disabled={axisLabelControlDisabled}
         label={i18n.translate('visTypeXy.controls.pointSeries.categoryAxis.filterLabelsLabel', {
           defaultMessage: 'Filter labels',
         })}
         paramName="filter"
         value={axisLabels.filter}
         setValue={setAxisLabel}
+        tooltip={multilayerAxisTooltipText}
       />
 
       <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <SelectOption
-            disabled={!axisLabels.show}
-            label={i18n.translate('visTypeXy.controls.pointSeries.categoryAxis.alignLabel', {
-              defaultMessage: 'Align',
-            })}
-            options={rotateOptions}
-            paramName="rotate"
-            value={axisLabels.rotate}
-            setValue={setAxisLabelRotate}
-          />
+          <EuiToolTip content={multilayerAxisTooltipText} delay="long" position="right">
+            <SelectOption
+              disabled={axisLabelControlDisabled}
+              label={i18n.translate('visTypeXy.controls.pointSeries.categoryAxis.alignLabel', {
+                defaultMessage: 'Align',
+              })}
+              options={rotateOptions}
+              paramName="rotate"
+              value={axisLabels.rotate}
+              setValue={setAxisLabelRotate}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <TruncateLabelsOption
-            disabled={!axisLabels.show}
-            value={axisLabels.truncate}
-            setValue={setAxisLabel}
-          />
+          <EuiToolTip content={multilayerAxisTooltipText} delay="long" position="right">
+            <TruncateLabelsOption
+              disabled={axisLabelControlDisabled}
+              value={axisLabels.truncate}
+              setValue={setAxisLabel}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

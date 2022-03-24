@@ -17,13 +17,14 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { transformBulkError, buildSiemResponse } from '../utils';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
+import { legacyMigrate } from '../../rules/utils';
 
 export const patchRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
@@ -45,13 +46,9 @@ export const patchRulesBulkRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const rulesClient = context.alerting?.getRulesClient();
-      const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+      const rulesClient = context.alerting.getRulesClient();
+      const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
       const savedObjectsClient = context.core.savedObjects.client;
-
-      if (!rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
 
       const mlAuthz = buildMlAuthz({
         license: context.licensing.license,
@@ -97,6 +94,7 @@ export const patchRulesBulkRoute = (
             threshold,
             threat_filters: threatFilters,
             threat_index: threatIndex,
+            threat_indicator_path: threatIndicatorPath,
             threat_query: threatQuery,
             threat_mapping: threatMapping,
             threat_language: threatLanguage,
@@ -119,7 +117,7 @@ export const patchRulesBulkRoute = (
           try {
             if (type) {
               // reject an unauthorized "promotion" to ML
-              throwHttpError(await mlAuthz.validateRuleType(type));
+              throwAuthzError(await mlAuthz.validateRuleType(type));
             }
 
             const existingRule = await readRules({
@@ -130,11 +128,17 @@ export const patchRulesBulkRoute = (
             });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
-              throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
+              throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
             }
 
-            const rule = await patchRules({
+            const migratedRule = await legacyMigrate({
+              rulesClient,
+              savedObjectsClient,
               rule: existingRule,
+            });
+
+            const rule = await patchRules({
+              rule: migratedRule,
               rulesClient,
               author,
               buildingBlockType,
@@ -148,8 +152,6 @@ export const patchRulesBulkRoute = (
               license,
               outputIndex,
               savedId,
-              spaceId: context.securitySolution.getSpaceId(),
-              ruleStatusClient,
               timelineId,
               timelineTitle,
               meta,
@@ -170,6 +172,7 @@ export const patchRulesBulkRoute = (
               threshold,
               threatFilters,
               threatIndex,
+              threatIndicatorPath,
               threatQuery,
               threatMapping,
               threatLanguage,
@@ -186,12 +189,13 @@ export const patchRulesBulkRoute = (
               exceptionsList,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleStatuses = await ruleStatusClient.find({
-                logsCount: 1,
-                ruleId: rule.id,
-                spaceId: context.securitySolution.getSpaceId(),
-              });
-              return transformValidateBulkError(rule.id, rule, ruleStatuses, isRuleRegistryEnabled);
+              const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
+              return transformValidateBulkError(
+                rule.id,
+                rule,
+                ruleExecutionSummary,
+                isRuleRegistryEnabled
+              );
             } else {
               return getIdBulkError({ id, ruleId });
             }

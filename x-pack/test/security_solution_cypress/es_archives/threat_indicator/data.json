@@ -31,6 +31,9 @@
             }
           },
           "type": "file"
+        },  
+        "feed": {
+          "name": "AbuseCH malware"
         }
       },
       "abusemalware": {

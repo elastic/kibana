@@ -1,10 +1,6 @@
 @import '../../mixins';
 @import '../../variables';
 
-.lnsSuggestionPanel__title {
-  margin-left: $euiSizeXS / 2;
-}
-
 .lnsSuggestionPanel__suggestions {
   @include euiScrollBar;
   @include lnsOverflowShadowHorizontal;
@@ -16,7 +12,10 @@
   // Padding / negative margins to make room for overflow shadow
   padding-left: $euiSizeXS;
   margin-left: -$euiSizeXS;
-  padding-bottom: $euiSizeXS;
+}
+
+.lnsSuggestionPanel {
+  padding-bottom: $euiSizeS;
 }
 
 .lnsSuggestionPanel__button {
@@ -88,4 +87,8 @@
   font-weight: $euiFontWeightBold;
   text-align: center;
   flex-grow: 0;
+}
+
+.lnsSuggestionPanel__applyChangesPrompt {
+  height: $lnsSuggestionHeight;
 }

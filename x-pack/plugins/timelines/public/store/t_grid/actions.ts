@@ -32,6 +32,17 @@ export const applyDeltaToColumnWidth = actionCreator<{
   delta: number;
 }>('APPLY_DELTA_TO_COLUMN_WIDTH');
 
+export const updateColumnOrder = actionCreator<{
+  columnIds: string[];
+  id: string;
+}>('UPDATE_COLUMN_ORDER');
+
+export const updateColumnWidth = actionCreator<{
+  columnId: string;
+  id: string;
+  width: number;
+}>('UPDATE_COLUMN_WIDTH');
+
 export type ToggleDetailPanel = TimelineExpandedDetailType & {
   tabType?: TimelineTabs;
   timelineId: string;
@@ -105,12 +116,4 @@ export const setTimelineUpdatedAt =
 
 export const addProviderToTimeline = actionCreator<{ id: string; dataProvider: DataProvider }>(
   'ADD_PROVIDER_TO_TIMELINE'
-);
-
-export const setOpenAddToExistingCase = actionCreator<{ id: string; isOpen: boolean }>(
-  'SET_OPEN_ADD_TO_EXISTING_CASE'
-);
-
-export const setOpenAddToNewCase = actionCreator<{ id: string; isOpen: boolean }>(
-  'SET_OPEN_ADD_TO_NEW_CASE'
 );

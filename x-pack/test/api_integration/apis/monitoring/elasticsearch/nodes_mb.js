@@ -10,10 +10,12 @@ import nodesListingFixtureGreen from './fixtures/nodes_listing_green';
 import nodesListingFixtureRed from './fixtures/nodes_listing_red';
 import nodesListingFixtureCgroup from './fixtures/nodes_listing_cgroup';
 import nodesListingFixturePagination from './fixtures/nodes_listing_pagination';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('nodes mb', () => {
     describe('with green platinum cluster', () => {
@@ -29,11 +31,11 @@ export default function ({ getService }) {
       };
 
       before('load clusters archive', () => {
-        return esArchiver.load(archive);
+        return setup(archive);
       });
 
       after('unload clusters archive', () => {
-        return esArchiver.unload(archive);
+        return tearDown();
       });
 
       it('should return data for 2 active nodes', async () => {

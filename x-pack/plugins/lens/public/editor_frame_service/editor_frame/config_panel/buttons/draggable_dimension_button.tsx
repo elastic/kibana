@@ -30,6 +30,8 @@ export function DraggableDimensionButton({
   group,
   groups,
   onDrop,
+  onDragStart,
+  onDragEnd,
   children,
   layerDatasourceDropProps,
   layerDatasource,
@@ -43,6 +45,8 @@ export function DraggableDimensionButton({
     dropTarget: DragDropIdentifier,
     dropType?: DropType
   ) => void;
+  onDragStart: () => void;
+  onDragEnd: () => void;
   group: VisualizationDimensionGroupConfig;
   groups: VisualizationDimensionGroupConfig[];
   label: string;
@@ -77,6 +81,13 @@ export function DraggableDimensionButton({
     (dropTypes.includes('swap_incompatible') || dropTypes.includes('swap_compatible'))
   );
 
+  const canCombine = Boolean(
+    dropTypes &&
+      (dropTypes.includes('combine_compatible') ||
+        dropTypes.includes('field_combine') ||
+        dropTypes.includes('combine_incompatible'))
+  );
+
   const value = useMemo(
     () => ({
       columnId,
@@ -87,6 +98,7 @@ export function DraggableDimensionButton({
       humanData: {
         canSwap,
         canDuplicate,
+        canCombine,
         label,
         groupLabel: group.groupLabel,
         position: accessorIndex + 1,
@@ -104,6 +116,7 @@ export function DraggableDimensionButton({
       group.filterOperations,
       canDuplicate,
       canSwap,
+      canCombine,
     ]
   );
 
@@ -125,7 +138,6 @@ export function DraggableDimensionButton({
     (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
     [value, onDrop]
   );
-
   return (
     <div
       ref={registerNewButtonRefMemoized}
@@ -143,6 +155,8 @@ export function DraggableDimensionButton({
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
         onDrop={handleOnDrop}
+        onDragStart={() => onDragStart()}
+        onDragEnd={() => onDragEnd()}
       >
         {children}
       </DragDrop>

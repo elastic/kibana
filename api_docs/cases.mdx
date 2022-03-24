@@ -4,32 +4,38 @@ slug: /kibana-dev-docs/api/cases
 title: "cases"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the cases plugin
-date: 2020-11-16
+date: 2022-03-15
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'cases']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-import casesObj from './cases.json';
+import casesObj from './cases.devdocs.json';
 
 The Case management system in Kibana
 
-Contact [Security Solution Threat Hunting](https://github.com/orgs/elastic/teams/security-threat-hunting) for questions regarding this plugin.
+Contact [ResponseOps](https://github.com/orgs/elastic/teams/response-ops) for questions regarding this plugin.
 
 **Code health stats**
 
-| Public API count  | Any count | Items lacking comments | Missing exports | 
+| Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 476 | 0 | 432 | 14 |
+| 71 | 0 | 58 | 19 |
 
 ## Client
 
 ### Start
 <DocDefinitionList data={[casesObj.client.start]}/>
 
+### Objects
+<DocDefinitionList data={casesObj.client.objects}/>
+
+### Functions
+<DocDefinitionList data={casesObj.client.functions}/>
+
 ### Classes
 <DocDefinitionList data={casesObj.client.classes}/>
 
-### Interfaces
-<DocDefinitionList data={casesObj.client.interfaces}/>
+### Consts, variables and types
+<DocDefinitionList data={casesObj.client.misc}/>
 
 ## Server
 
@@ -40,9 +46,6 @@ Contact [Security Solution Threat Hunting](https://github.com/orgs/elastic/teams
 <DocDefinitionList data={casesObj.server.interfaces}/>
 
 ## Common
-
-### Objects
-<DocDefinitionList data={casesObj.common.objects}/>
 
 ### Functions
 <DocDefinitionList data={casesObj.common.functions}/>

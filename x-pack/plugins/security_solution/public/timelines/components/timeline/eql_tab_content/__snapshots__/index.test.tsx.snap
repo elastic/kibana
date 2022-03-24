@@ -128,7 +128,6 @@ In other use cases the message field can be used to concatenate different values
   }
   end="2018-03-24T03:33:52.253Z"
   eqlOptions={Object {}}
-  eventType="all"
   expandedDetail={Object {}}
   isLive={false}
   itemsPerPage={5}
@@ -1129,6 +1128,5 @@ In other use cases the message field can be used to concatenate different values
   start="2018-03-23T18:49:23.132Z"
   timelineId="test"
   timerangeKind="absolute"
-  updateEventTypeAndIndexesName={[MockFunction]}
 />
 `;

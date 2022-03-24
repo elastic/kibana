@@ -11,6 +11,10 @@ export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields';
 
 export const ML_APPLY_TIME_RANGE_CONFIG = 'ml.jobSelectorFlyout.applyTimeRange';
 
+export const ML_GETTING_STARTED_CALLOUT_DISMISSED = 'ml.gettingStarted.isDismissed';
+
+export const ML_FROZEN_TIER_PREFERENCE = 'ml.frozenDataTierPreference';
+
 export type PartitionFieldConfig =
   | {
       /**
@@ -41,4 +45,8 @@ export type ApplyTimeRangeConfig = boolean | undefined;
 export type MlStorage = Partial<{
   [ML_ENTITY_FIELDS_CONFIG]: PartitionFieldsConfig;
   [ML_APPLY_TIME_RANGE_CONFIG]: ApplyTimeRangeConfig;
+  [ML_GETTING_STARTED_CALLOUT_DISMISSED]: boolean | undefined;
+  [ML_FROZEN_TIER_PREFERENCE]: 'exclude_frozen' | 'include_frozen';
 }> | null;
+
+export type MlStorageKey = keyof Exclude<MlStorage, null>;

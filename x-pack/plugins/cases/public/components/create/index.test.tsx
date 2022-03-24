@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { TestProviders } from '../../common/mock';
@@ -29,7 +29,6 @@ import {
   useGetFieldsByIssueTypeResponse,
 } from './mock';
 import { CreateCase } from '.';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_tags');
@@ -78,7 +77,7 @@ const defaultProps = {
 
 describe('CreateCase case', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     useConnectorsMock.mockReturnValue(sampleConnectorData);
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
@@ -94,36 +93,38 @@ describe('CreateCase case', () => {
   it('it renders', async () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCase {...defaultProps} owner={[SECURITY_SOLUTION_OWNER]} />
+        <CreateCase {...defaultProps} />
       </TestProviders>
     );
-
-    expect(wrapper.find(`[data-test-subj="create-case-submit"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="create-case-cancel"]`).exists()).toBeTruthy();
+    await act(async () => {
+      expect(wrapper.find(`[data-test-subj="create-case-submit"]`).exists()).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="create-case-cancel"]`).exists()).toBeTruthy();
+    });
   });
 
   it('should call cancel on cancel click', async () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCase {...defaultProps} owner={[SECURITY_SOLUTION_OWNER]} />
+        <CreateCase {...defaultProps} />
       </TestProviders>
     );
-
-    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+    await act(async () => {
+      wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+    });
     expect(defaultProps.onCancel).toHaveBeenCalled();
   });
 
   it('should redirect to new case when posting the case', async () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCase {...defaultProps} owner={[SECURITY_SOLUTION_OWNER]} />
+        <CreateCase {...defaultProps} />
       </TestProviders>
     );
 
-    fillForm(wrapper);
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-    await waitFor(() => {
-      expect(defaultProps.onSuccess).toHaveBeenCalled();
+    await act(async () => {
+      fillForm(wrapper);
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
     });
+    expect(defaultProps.onSuccess).toHaveBeenCalled();
   });
 });

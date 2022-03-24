@@ -8,15 +8,12 @@
 import { actions } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { InitialConfigurationStep } from './initial_configuration_step';
 
 storiesOf('infra/logAnalysis/SetupInitialConfigurationStep', module)
-  .addDecorator((renderStory) => (
-    <EuiThemeProvider>
-      <div style={{ maxWidth: 800 }}>{renderStory()}</div>
-    </EuiThemeProvider>
-  ))
+  .addDecorator((renderStory) => <div style={{ maxWidth: 800 }}>{renderStory()}</div>)
+  .addDecorator(decorateWithGlobalStorybookThemeProviders)
   .add('Reconfiguration with partitioned warnings', () => {
     return (
       <InitialConfigurationStep

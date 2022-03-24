@@ -41,6 +41,14 @@ export const taskExecutionFailureThresholdSchema = schema.object(
   }
 );
 
+const eventLoopDelaySchema = schema.object({
+  monitor: schema.boolean({ defaultValue: true }),
+  warn_threshold: schema.number({
+    defaultValue: 5000,
+    min: 10,
+  }),
+});
+
 export const configSchema = schema.object(
   {
     /* The maximum number of times a task will be attempted before being abandoned as failed */
@@ -63,15 +71,6 @@ export const configSchema = schema.object(
       // a nice round contrived number, feel free to change as we learn how it behaves
       defaultValue: 1000,
       min: 1,
-    }),
-    /* The name of the index used to store task information. */
-    index: schema.string({
-      defaultValue: '.kibana_task_manager',
-      validate: (val) => {
-        if (val.toLowerCase() === '.tasks') {
-          return `"${val}" is an invalid Kibana Task Manager index, as it is already in use by the ElasticSearch Tasks Manager`;
-        }
-      },
     }),
     /* The maximum number of tasks that this Kibana instance will run simultaneously. */
     max_workers: schema.number({
@@ -127,6 +126,7 @@ export const configSchema = schema.object(
         max: DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY,
       }),
     }),
+    event_loop_delay: eventLoopDelaySchema,
     /* These are not designed to be used by most users. Please use caution when changing these */
     unsafe: schema.object({
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -147,3 +147,4 @@ export const configSchema = schema.object(
 
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
+export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;

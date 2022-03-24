@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { orderBy } from 'lodash';
 import React, { useMemo } from 'react';
-import { ValuesType } from 'utility-types';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
@@ -32,23 +31,24 @@ import {
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
-import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
+import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { HealthBadge } from './HealthBadge';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
+import { HealthBadge } from './health_badge';
+import { ServiceListItem } from '../../../../../common/service_inventory';
 
-type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/services'>;
-type Items = ServiceListAPIResponse['items'];
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
-
-type ServiceListItem = ValuesType<Items>;
 
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
@@ -64,33 +64,42 @@ const SERVICE_HEALTH_STATUS_ORDER = [
 export function getServiceColumns({
   query,
   showTransactionTypeColumn,
+  comparisonDataLoading,
   comparisonData,
   breakpoints,
+  showHealthStatusColumn,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
+  showHealthStatusColumn: boolean;
+  comparisonDataLoading: boolean;
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
+
   return [
-    {
-      field: 'healthStatus',
-      name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
-        defaultMessage: 'Health',
-      }),
-      width: `${unit * 6}px`,
-      sortable: true,
-      render: (_, { healthStatus }) => {
-        return (
-          <HealthBadge
-            healthStatus={healthStatus ?? ServiceHealthStatus.unknown}
-          />
-        );
-      },
-    },
+    ...(showHealthStatusColumn
+      ? [
+          {
+            field: 'healthStatus',
+            name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
+              defaultMessage: 'Health',
+            }),
+            width: `${unit * 6}px`,
+            sortable: true,
+            render: (_, { healthStatus }) => {
+              return (
+                <HealthBadge
+                  healthStatus={healthStatus ?? ServiceHealthStatus.unknown}
+                />
+              );
+            },
+          } as ITableColumn<ServiceListItem>,
+        ]
+      : []),
     {
       field: 'serviceName',
       name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
@@ -149,17 +158,24 @@ export function getServiceColumns({
       }),
       sortable: true,
       dataType: 'number',
-      render: (_, { serviceName, latency }) => (
-        <ListMetric
-          series={comparisonData?.currentPeriod[serviceName]?.latency}
-          comparisonSeries={
-            comparisonData?.previousPeriod[serviceName]?.latency
-          }
-          hideSeries={!showWhenSmallOrGreaterThanLarge}
-          color="euiColorVis1"
-          valueLabel={asMillisecondDuration(latency || 0)}
-        />
-      ),
+      render: (_, { serviceName, latency }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.LATENCY_AVG
+        );
+        return (
+          <ListMetric
+            isLoading={comparisonDataLoading}
+            series={comparisonData?.currentPeriod[serviceName]?.latency}
+            comparisonSeries={
+              comparisonData?.previousPeriod[serviceName]?.latency
+            }
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
+            color={currentPeriodColor}
+            valueLabel={asMillisecondDuration(latency || 0)}
+            comparisonSeriesColor={previousPeriodColor}
+          />
+        );
+      },
       align: RIGHT_ALIGNMENT,
     },
     {
@@ -169,17 +185,25 @@ export function getServiceColumns({
       }),
       sortable: true,
       dataType: 'number',
-      render: (_, { serviceName, throughput }) => (
-        <ListMetric
-          series={comparisonData?.currentPeriod[serviceName]?.throughput}
-          comparisonSeries={
-            comparisonData?.previousPeriod[serviceName]?.throughput
-          }
-          hideSeries={!showWhenSmallOrGreaterThanLarge}
-          color="euiColorVis0"
-          valueLabel={asTransactionRate(throughput)}
-        />
-      ),
+      render: (_, { serviceName, throughput }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.THROUGHPUT
+        );
+
+        return (
+          <ListMetric
+            isLoading={comparisonDataLoading}
+            series={comparisonData?.currentPeriod[serviceName]?.throughput}
+            comparisonSeries={
+              comparisonData?.previousPeriod[serviceName]?.throughput
+            }
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
+            color={currentPeriodColor}
+            valueLabel={asTransactionRate(throughput)}
+            comparisonSeriesColor={previousPeriodColor}
+          />
+        );
+      },
       align: RIGHT_ALIGNMENT,
     },
     {
@@ -191,8 +215,12 @@ export function getServiceColumns({
       dataType: 'number',
       render: (_, { serviceName, transactionErrorRate }) => {
         const valueLabel = asPercent(transactionErrorRate, 1);
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        );
         return (
           <ListMetric
+            isLoading={comparisonDataLoading}
             series={
               comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
             }
@@ -200,8 +228,9 @@ export function getServiceColumns({
               comparisonData?.previousPeriod[serviceName]?.transactionErrorRate
             }
             hideSeries={!showWhenSmallOrGreaterThanLarge}
-            color="euiColorVis7"
+            color={currentPeriodColor}
             valueLabel={valueLabel}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -211,7 +240,8 @@ export function getServiceColumns({
 }
 
 interface Props {
-  items: Items;
+  items: ServiceListItem[];
+  comparisonDataLoading: boolean;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
   isLoading: boolean;
@@ -221,6 +251,7 @@ interface Props {
 export function ServiceList({
   items,
   noItemsMessage,
+  comparisonDataLoading,
   comparisonData,
   isLoading,
   isFailure,
@@ -246,18 +277,23 @@ export function ServiceList({
       getServiceColumns({
         query,
         showTransactionTypeColumn,
+        comparisonDataLoading,
         comparisonData,
         breakpoints,
+        showHealthStatusColumn: displayHealthStatus,
       }),
-    [query, showTransactionTypeColumn, comparisonData, breakpoints]
+    [
+      query,
+      showTransactionTypeColumn,
+      comparisonDataLoading,
+      comparisonData,
+      breakpoints,
+      displayHealthStatus,
+    ]
   );
 
-  const columns = displayHealthStatus
-    ? serviceColumns
-    : serviceColumns.filter((column) => column.field !== 'healthStatus');
-  const initialSortField = displayHealthStatus
-    ? 'healthStatus'
-    : 'transactionsPerMinute';
+  const initialSortField = displayHealthStatus ? 'healthStatus' : 'serviceName';
+  const initialSortDirection = displayHealthStatus ? 'desc' : 'asc';
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
@@ -300,14 +336,13 @@ export function ServiceList({
         <ManagedTable
           isLoading={isLoading}
           error={isFailure}
-          columns={columns}
+          columns={serviceColumns}
           items={items}
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
-          initialSortDirection="desc"
-          initialPageSize={50}
+          initialSortDirection={initialSortDirection}
           sortFn={(itemsToSort, sortField, sortDirection) => {
-            // For healthStatus, sort items by healthStatus first, then by TPM
+            // For healthStatus, sort items by healthStatus first, then by name
             return sortField === 'healthStatus'
               ? orderBy(
                   itemsToSort,
@@ -317,9 +352,9 @@ export function ServiceList({
                         ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
                         : -1;
                     },
-                    (item) => item.throughput ?? 0,
+                    (item) => item.serviceName.toLowerCase(),
                   ],
-                  [sortDirection, sortDirection]
+                  [sortDirection, sortDirection === 'asc' ? 'desc' : 'asc']
                 )
               : orderBy(
                   itemsToSort,

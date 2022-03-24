@@ -5,22 +5,31 @@
  * 2.0.
  */
 
-import {
-  MigrationDeprecationInfoDeprecation,
-  MigrationDeprecationInfoResponse,
-} from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
+
+export type DeprecationSource = 'Kibana' | 'Elasticsearch';
+
+export type ClusterUpgradeState = 'isPreparingForUpgrade' | 'isUpgrading' | 'isUpgradeComplete';
+
+export interface ResponseError {
+  statusCode: number;
+  message: string | Error;
+  attributes?: {
+    allNodesUpgraded: boolean;
+  };
+}
 
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.
   created = 0,
-  indexGroupServicesStopped = 10,
   readonly = 20,
   newIndexCreated = 30,
   reindexStarted = 40,
   reindexCompleted = 50,
   aliasCreated = 60,
-  indexGroupServicesStarted = 70,
+  originalIndexDeleted = 70,
+  existingAliasesUpdated = 80,
 }
 
 export enum ReindexStatus {
@@ -29,9 +38,25 @@ export enum ReindexStatus {
   failed,
   paused,
   cancelled,
+  // Used by the UI to differentiate if there was a failure retrieving
+  // the status from the server API
+  fetchFailed,
+}
+
+export interface ReindexStatusResponse {
+  meta: {
+    indexName: string;
+    reindexName: string;
+    // Array of aliases pointing to the index being reindexed
+    aliases: string[];
+  };
+  warnings?: ReindexWarning[];
+  reindexOp?: ReindexOperation;
+  hasRequiredPrivileges?: boolean;
 }
 
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
+
 export interface QueueSettings extends SavedObjectAttributes {
   /**
    * A Unix timestamp of when the reindex operation was enqueued.
@@ -96,7 +121,8 @@ export interface ReindexOperation extends SavedObjectAttributes {
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 // 7.0 -> 8.0 warnings
-export type ReindexWarningTypes = 'customTypeName' | 'indexSetting';
+export type ReindexWarningTypes = 'customTypeName' | 'indexSetting' | 'replaceIndexWithAlias';
+
 export interface ReindexWarning {
   warningType: ReindexWarningTypes;
   /**
@@ -112,14 +138,7 @@ export interface ReindexWarning {
   };
 }
 
-export enum IndexGroup {
-  ml = '___ML_REINDEX_LOCK___',
-  watcher = '___WATCHER_REINDEX_LOCK___',
-}
-
 // Telemetry types
-export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
-export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';
 export type UIOpenOption = 'overview' | 'elasticsearch' | 'kibana';
 export type UIReindexOption = 'close' | 'open' | 'start' | 'stop';
 
@@ -136,41 +155,12 @@ export interface UIReindex {
   stop: boolean;
 }
 
-export interface UpgradeAssistantTelemetrySavedObject {
-  ui_open: {
-    overview: number;
-    elasticsearch: number;
-    kibana: number;
-  };
-  ui_reindex: {
-    close: number;
-    open: number;
-    start: number;
-    stop: number;
-  };
-}
-
 export interface UpgradeAssistantTelemetry {
-  ui_open: {
-    overview: number;
-    elasticsearch: number;
-    kibana: number;
-  };
-  ui_reindex: {
-    close: number;
-    open: number;
-    start: number;
-    stop: number;
-  };
   features: {
     deprecation_logging: {
       enabled: boolean;
     };
   };
-}
-
-export interface UpgradeAssistantTelemetrySavedObjectAttributes {
-  [key: string]: any;
 }
 
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
@@ -209,13 +199,24 @@ export interface IndexSettingAction {
   type: 'indexSetting';
   deprecatedSettings: string[];
 }
+
+export interface ClusterSettingAction {
+  type: 'clusterSetting';
+  deprecatedSettings: string[];
+}
+
 export interface EnrichedDeprecationInfo
-  extends Omit<MigrationDeprecationInfoDeprecation, 'level'> {
-  type: keyof MigrationDeprecationInfoResponse;
+  extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
+  type: keyof estypes.MigrationDeprecationsResponse;
   isCritical: boolean;
   index?: string;
-  correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
+  correctiveAction?: ReindexAction | MlAction | IndexSettingAction | ClusterSettingAction;
   resolveDuringUpgrade: boolean;
+}
+
+export interface CloudBackupStatus {
+  isBackedUp: boolean;
+  lastBackupTime?: string;
 }
 
 export interface ESUpgradeStatus {
@@ -249,4 +250,30 @@ export interface MlOperation extends SavedObjectAttributes {
 export interface DeprecationLoggingStatus {
   isDeprecationLogIndexingEnabled: boolean;
   isDeprecationLoggingEnabled: boolean;
+}
+
+export type MIGRATION_STATUS = 'MIGRATION_NEEDED' | 'NO_MIGRATION_NEEDED' | 'IN_PROGRESS' | 'ERROR';
+export interface SystemIndicesMigrationFeature {
+  id?: string;
+  feature_name: string;
+  minimum_index_version: string;
+  migration_status: MIGRATION_STATUS;
+  indices: Array<{
+    index: string;
+    version: string;
+    failure_cause?: {
+      error: {
+        type: string;
+        reason: string;
+      };
+    };
+  }>;
+}
+export interface SystemIndicesMigrationStatus {
+  features: SystemIndicesMigrationFeature[];
+  migration_status: MIGRATION_STATUS;
+}
+export interface SystemIndicesMigrationStarted {
+  features: SystemIndicesMigrationFeature[];
+  accepted: boolean;
 }

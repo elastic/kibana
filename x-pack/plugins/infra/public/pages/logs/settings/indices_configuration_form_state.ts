@@ -14,7 +14,7 @@ import {
   LogIndexPatternReference,
 } from '../../../../common/log_sources';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
-import { useCompositeFormElement, useFormElement } from './form_elements';
+import { useFormElement } from './form_elements';
 import {
   FormValidationError,
   validateIndexPattern,
@@ -33,12 +33,12 @@ export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
     validate: useMemo(
       () => async (logIndices) => {
         if (logIndices == null) {
-          return validateStringNotEmpty('log index pattern', '');
+          return validateStringNotEmpty('log data view', '');
         } else if (logIndexNameReferenceRT.is(logIndices)) {
           return validateStringNotEmpty('log indices', logIndices.indexName);
         } else {
           const emptyStringErrors = validateStringNotEmpty(
-            'log index pattern',
+            'log data view',
             logIndices.indexPatternId
           );
 
@@ -79,45 +79,4 @@ export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
   });
 
   return logIndicesFormElement;
-};
-
-export interface FieldsFormState {
-  tiebreakerField: string;
-  timestampField: string;
-}
-
-export const useFieldsFormElement = (initialValues: FieldsFormState) => {
-  const tiebreakerFieldFormElement = useFormElement<string, FormValidationError>({
-    initialValue: initialValues.tiebreakerField,
-    validate: useMemo(
-      () => async (tiebreakerField) => validateStringNotEmpty('tiebreaker', tiebreakerField),
-      []
-    ),
-  });
-
-  const timestampFieldFormElement = useFormElement<string, FormValidationError>({
-    initialValue: initialValues.timestampField,
-    validate: useMemo(
-      () => async (timestampField) => validateStringNotEmpty('timestamp', timestampField),
-      []
-    ),
-  });
-
-  const fieldsFormElement = useCompositeFormElement(
-    useMemo(
-      () => ({
-        childFormElements: {
-          tiebreaker: tiebreakerFieldFormElement,
-          timestamp: timestampFieldFormElement,
-        },
-      }),
-      [tiebreakerFieldFormElement, timestampFieldFormElement]
-    )
-  );
-
-  return {
-    fieldsFormElement,
-    tiebreakerFieldFormElement,
-    timestampFieldFormElement,
-  };
 };

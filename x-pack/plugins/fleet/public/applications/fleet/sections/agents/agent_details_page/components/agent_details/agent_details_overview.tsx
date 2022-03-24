@@ -18,12 +18,13 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
-import { AgentPolicyPackageBadges, AgentPolicySummaryLine } from '../../../../../components';
+import { AgentPolicySummaryLine } from '../../../../../components';
+import { AgentHealth } from '../../../components';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -40,6 +41,22 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
     <EuiPanel>
       <EuiDescriptionList compressed>
         {[
+          {
+            title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
+              defaultMessage: 'Status',
+            }),
+            description: <AgentHealth agent={agent} />,
+          },
+          {
+            title: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
+              defaultMessage: 'Last activity',
+            }),
+            description: agent.last_checkin ? (
+              <FormattedRelative value={new Date(agent.last_checkin)} />
+            ) : (
+              '-'
+            ),
+          },
           {
             title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
               defaultMessage: 'Agent ID',
@@ -82,14 +99,6 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               ) : (
                 '-'
               ),
-          },
-          {
-            title: i18n.translate('xpack.fleet.agentDetails.integrationsLabel', {
-              defaultMessage: 'Integrations',
-            }),
-            description: agent.policy_id ? (
-              <AgentPolicyPackageBadges agentPolicyId={agent.policy_id} hideTitle />
-            ) : null,
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.hostNameLabel', {

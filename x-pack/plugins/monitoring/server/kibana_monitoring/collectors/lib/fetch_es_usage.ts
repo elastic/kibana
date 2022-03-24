@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from 'src/core/server';
 import { get } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StackProductUsage } from '../types';
 
 interface ESIndicesBucket {
@@ -85,7 +85,7 @@ export async function fetchESUsage(
     },
   };
 
-  const { body: response } = await callCluster.search(params);
+  const response = await callCluster.search(params);
   const esResponse = response as estypes.SearchResponse<ClusterStats>;
   if (esResponse.hits.hits.length === 0) {
     return {

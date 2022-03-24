@@ -14,15 +14,15 @@ import {
 } from '../../../../../src/plugins/home/server';
 import { CloudSetup } from '../../../cloud/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
-import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_pattern_title';
-import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
+import { getApmDataViewAttributes } from '../routes/data_view/get_apm_data_view_attributes';
+import { getApmDataViewTitle } from '../routes/data_view/get_apm_data_view_title';
+import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
-import apmIndexPattern from './index_pattern.json';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
-    'Collect in-depth performance metrics and errors from inside your applications.',
+    'Collect performance metrics from your applications with Elastic APM.',
 });
 const moduleName = 'apm';
 
@@ -39,16 +39,12 @@ export const tutorialProvider =
     isFleetPluginEnabled: boolean;
   }) =>
   () => {
-    const indexPatternTitle = getApmIndexPatternTitle(apmIndices);
-
+    const dataViewTitle = getApmDataViewTitle(apmIndices);
     const savedObjects = [
       {
-        ...apmIndexPattern,
         id: APM_STATIC_INDEX_PATTERN_ID,
-        attributes: {
-          ...apmIndexPattern.attributes,
-          title: indexPatternTitle,
-        },
+        attributes: getApmDataViewAttributes(dataViewTitle),
+        type: 'index-pattern',
       },
     ];
 
@@ -103,19 +99,22 @@ It allows you to monitor the performance of thousands of applications in real ti
         }
       ),
       euiIconType: 'apmApp',
-      eprPackageOverlap: 'apm',
       integrationBrowserCategories: ['web'],
       artifacts,
       customStatusCheckName: 'apm_fleet_server_status_check',
       onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),
-      elasticCloud: createElasticCloudInstructions(cloud),
+      elasticCloud: createElasticCloudInstructions({
+        apmConfig,
+        isFleetPluginEnabled,
+        cloudSetup: cloud,
+      }),
       previewImagePath: '/plugins/apm/assets/apm.png',
       savedObjects,
       savedObjectsInstallMsg: i18n.translate(
         'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
         {
           defaultMessage:
-            'An APM index pattern is required for some features in the APM UI.',
+            'An APM data view is required for some features in the APM UI.',
         }
       ),
     } as TutorialSchema;

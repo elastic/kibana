@@ -49,7 +49,7 @@ and lighter shades will symbolize countries with less traffic.
 . From the **Layer** dropdown menu, select **World Countries**.
 
 . In **Statistics source**, set:
-** **Index pattern** to **kibana_sample_data_logs**
+** **Data view** to **kibana_sample_data_logs**
 ** **Join field** to **geo.dest**
 
 . Click **Add layer**.
@@ -95,9 +95,7 @@ The layer is only visible when users zoom in.
 
 . Click **Add layer**, and then click **Documents**.
 
-. Set **Index pattern** to **kibana_sample_data_logs**.
-
-. Set **Scaling** to *Limits results to 10000.*
+. Set **Data view** to **kibana_sample_data_logs**.
 
 . Click **Add layer**.
 
@@ -108,6 +106,8 @@ The layer is only visible when users zoom in.
 
 . Add a tooltip field and select **agent**, **bytes**, **clientip**, **host**,
 **machine.os**, **request**, **response**, and **timestamp**.
+
+. In **Scaling**, set *Limits results to 10,000.*
 
 . In **Layer style**, set **Fill color** to **#2200FF**.
 
@@ -128,8 +128,8 @@ traffic. Larger circles will symbolize grids with
 more total bytes transferred, and smaller circles will symbolize
 grids with less bytes transferred.
 
-. Click **Add layer**, and select **Clusters and grids**.
-. Set **Index pattern** to **kibana_sample_data_logs**.
+. Click **Add layer**, and select **Clusters**.
+. Set **Data view** to **kibana_sample_data_logs**.
 . Click **Add layer**.
 . In **Layer settings**, set:
 ** **Name** to `Total Requests and Bytes`

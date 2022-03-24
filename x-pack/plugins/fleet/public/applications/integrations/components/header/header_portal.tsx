@@ -14,14 +14,15 @@ import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/p
 
 export interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
 }
 
-export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu }) => {
+export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu, theme$ }) => {
   const portalNode = useMemo(() => createPortalNode(), []);
 
   useEffect(() => {
     setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />);
+      const mount = toMountPoint(<OutPortal node={portalNode} />, { theme$ });
       return mount(element);
     });
 
@@ -29,7 +30,7 @@ export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu }) => {
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
-  }, [portalNode, setHeaderActionMenu]);
+  }, [portalNode, setHeaderActionMenu, theme$]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;
 };

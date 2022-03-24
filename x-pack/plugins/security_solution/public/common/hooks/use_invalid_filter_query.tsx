@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
 import { appSelectors } from '../store';
 import { appActions } from '../store/app';
 import { useAppToasts } from './use_app_toasts';

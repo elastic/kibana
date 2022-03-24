@@ -6,16 +6,14 @@
  */
 
 import './app.scss';
-
-import { isEqual } from 'lodash';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumb } from '@elastic/eui';
+import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useExecutionContext, useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
 import { syncQueryStateWithUrl } from '../../../../../src/plugins/data/public';
 import { LensAppProps, LensAppServices } from './types';
@@ -26,19 +24,17 @@ import { Document } from '../persistence/saved_object_store';
 
 import {
   setState,
+  applyChanges,
   useLensSelector,
   useLensDispatch,
   LensAppState,
   DispatchSetState,
   selectSavedObjectFormat,
 } from '../state_management';
-import {
-  SaveModalContainer,
-  getLastKnownDocWithoutPinnedFilters,
-  runSaveLensVisualization,
-} from './save_modal_container';
+import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
+import { isLensEqual } from './lens_document_equality';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -59,6 +55,9 @@ export function App({
   setHeaderActionMenu,
   datasourceMap,
   visualizationMap,
+  contextOriginatingApp,
+  topNavMenuEntryGenerators,
+  initialContext,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -73,6 +72,7 @@ export function App({
     getOriginatingAppName,
     spaces,
     http,
+    executionContext,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
   } = lensAppServices;
@@ -92,14 +92,28 @@ export function App({
     isSaveable,
   } = useLensSelector((state) => state.lens);
 
+  const selectorDependencies = useMemo(
+    () => ({
+      datasourceMap,
+      visualizationMap,
+      extractFilterReferences: data.query.filterManager.extract.bind(data.query.filterManager),
+    }),
+    [datasourceMap, visualizationMap, data.query.filterManager]
+  );
+
   const currentDoc = useLensSelector((state) =>
-    selectSavedObjectFormat(state, datasourceMap, visualizationMap)
+    selectSavedObjectFormat(state, selectorDependencies)
   );
 
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
+  const [initialDocFromContext, setInitialDocFromContext] = useState<Document | undefined>(
+    undefined
+  );
+  const [isGoBackToVizEditorModalVisible, setIsGoBackToVizEditorModalVisible] = useState(false);
+  const savedObjectId = (initialInput as LensByReferenceInput)?.savedObjectId;
 
   useEffect(() => {
     if (currentDoc) {
@@ -111,6 +125,12 @@ export function App({
     setIndicateNoData(true);
   }, [setIndicateNoData]);
 
+  useExecutionContext(executionContext, {
+    type: 'application',
+    id: savedObjectId || 'new',
+    page: 'editor',
+  });
+
   useEffect(() => {
     if (indicateNoData) {
       setIndicateNoData(false);
@@ -121,11 +141,9 @@ export function App({
     () =>
       Boolean(
         // Temporarily required until the 'by value' paradigm is default.
-        dashboardFeatureFlag.allowByValueEmbeddables &&
-          isLinkedToOriginatingApp &&
-          !(initialInput as LensByReferenceInput)?.savedObjectId
+        dashboardFeatureFlag.allowByValueEmbeddables && isLinkedToOriginatingApp && !savedObjectId
       ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, initialInput]
+    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, savedObjectId]
   );
 
   useEffect(() => {
@@ -146,12 +164,14 @@ export function App({
 
   useEffect(() => {
     onAppLeave((actions) => {
-      // Confirm when the user has made any changes to an existing doc
-      // or when the user has configured something without saving
-
       if (
         application.capabilities.visualize.save &&
-        !isEqual(persistedDoc?.state, getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state) &&
+        !isLensEqual(
+          persistedDoc,
+          lastKnownDoc,
+          data.query.filterManager.inject.bind(data.query.filterManager),
+          datasourceMap
+        ) &&
         (isSaveable || persistedDoc)
       ) {
         return actions.confirm(
@@ -160,13 +180,26 @@ export function App({
           }),
           i18n.translate('xpack.lens.app.unsavedWorkTitle', {
             defaultMessage: 'Unsaved changes',
-          })
+          }),
+          undefined,
+          i18n.translate('xpack.lens.app.unsavedWorkConfirmBtn', {
+            defaultMessage: 'Discard changes',
+          }),
+          'danger'
         );
       } else {
         return actions.default();
       }
     });
-  }, [onAppLeave, lastKnownDoc, isSaveable, persistedDoc, application.capabilities.visualize.save]);
+  }, [
+    onAppLeave,
+    lastKnownDoc,
+    isSaveable,
+    persistedDoc,
+    application.capabilities.visualize.save,
+    data.query.filterManager,
+    datasourceMap,
+  ]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
@@ -193,8 +226,14 @@ export function App({
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
     const isByValueMode = getIsByValueMode();
+    const comesFromVizEditorDashboard =
+      initialContext && 'originatingApp' in initialContext && initialContext.originatingApp;
     const breadcrumbs: EuiBreadcrumb[] = [];
-    if (isLinkedToOriginatingApp && getOriginatingAppName() && redirectToOrigin) {
+    if (
+      (isLinkedToOriginatingApp || comesFromVizEditorDashboard) &&
+      getOriginatingAppName() &&
+      redirectToOrigin
+    ) {
       breadcrumbs.push({
         onClick: () => {
           redirectToOrigin();
@@ -233,10 +272,12 @@ export function App({
     chrome,
     isLinkedToOriginatingApp,
     persistedDoc,
+    initialContext,
   ]);
 
   const runSave = useCallback(
     (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
+      dispatch(applyChanges());
       return runSaveLensVisualization(
         {
           lastKnownDoc,
@@ -277,9 +318,69 @@ export function App({
       redirectTo,
       lensAppServices,
       dispatchSetState,
+      dispatch,
       setIsSaveModalVisible,
     ]
   );
+
+  // keeping the initial doc state created by the context
+  useEffect(() => {
+    if (lastKnownDoc && !initialDocFromContext) {
+      setInitialDocFromContext(lastKnownDoc);
+    }
+  }, [lastKnownDoc, initialDocFromContext]);
+
+  // if users comes to Lens from the Viz editor, they should have the option to navigate back
+  const goBackToOriginatingApp = useCallback(() => {
+    if (
+      initialContext &&
+      'vizEditorOriginatingAppUrl' in initialContext &&
+      initialContext.vizEditorOriginatingAppUrl
+    ) {
+      const initialDocFromContextHasChanged = !isLensEqual(
+        initialDocFromContext,
+        lastKnownDoc,
+        data.query.filterManager.inject,
+        datasourceMap
+      );
+      if (!initialDocFromContextHasChanged) {
+        onAppLeave((actions) => {
+          return actions.default();
+        });
+        application.navigateToApp('visualize', { path: initialContext.vizEditorOriginatingAppUrl });
+      } else {
+        setIsGoBackToVizEditorModalVisible(true);
+      }
+    }
+  }, [
+    application,
+    data.query.filterManager.inject,
+    datasourceMap,
+    initialContext,
+    initialDocFromContext,
+    lastKnownDoc,
+    onAppLeave,
+  ]);
+
+  const navigateToVizEditor = useCallback(() => {
+    setIsGoBackToVizEditorModalVisible(false);
+    if (
+      initialContext &&
+      'vizEditorOriginatingAppUrl' in initialContext &&
+      initialContext.vizEditorOriginatingAppUrl
+    ) {
+      onAppLeave((actions) => {
+        return actions.default();
+      });
+      application.navigateToApp('visualize', { path: initialContext.vizEditorOriginatingAppUrl });
+    }
+  }, [application, initialContext, onAppLeave]);
+
+  const initialContextIsEmbedded = useMemo(() => {
+    return Boolean(
+      initialContext && 'originatingApp' in initialContext && initialContext.originatingApp
+    );
+  }, [initialContext]);
 
   return (
     <>
@@ -296,8 +397,12 @@ export function App({
           datasourceMap={datasourceMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
+          goBackToOriginatingApp={goBackToOriginatingApp}
+          contextOriginatingApp={contextOriginatingApp}
+          initialContextIsEmbedded={initialContextIsEmbedded}
+          topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+          initialContext={initialContext}
         />
-
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
           <MemoizedEditorFrameWrapper
@@ -332,6 +437,30 @@ export function App({
               : undefined
           }
         />
+      )}
+      {isGoBackToVizEditorModalVisible && (
+        <EuiConfirmModal
+          maxWidth={600}
+          title={i18n.translate('xpack.lens.app.goBackModalTitle', {
+            defaultMessage: 'Discard changes?',
+          })}
+          onCancel={() => setIsGoBackToVizEditorModalVisible(false)}
+          onConfirm={navigateToVizEditor}
+          cancelButtonText={i18n.translate('xpack.lens.app.goBackModalCancelBtn', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('xpack.lens.app.goBackModalTitle', {
+            defaultMessage: 'Discard changes?',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          {i18n.translate('xpack.lens.app.goBackModalMessage', {
+            defaultMessage:
+              'The changes you have made here are not backwards compatible with your original {contextOriginatingApp} visualization. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
+            values: { contextOriginatingApp },
+          })}
+        </EuiConfirmModal>
       )}
     </>
   );

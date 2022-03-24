@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 import { ThreatMap, ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export interface FormattedEntry {
   id: string;
-  field: IndexPatternFieldBase | undefined;
+  field: DataViewFieldBase | undefined;
   type: 'mapping';
-  value: IndexPatternFieldBase | undefined;
+  value: DataViewFieldBase | undefined;
   entryIndex: number;
 }
 

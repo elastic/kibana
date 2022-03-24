@@ -5,199 +5,101 @@
  * 2.0.
  */
 
-import { Datatable } from 'src/plugins/expressions/public';
-import { getSliceValue, getFilterContext } from './render_helpers';
+import type { Datatable } from 'src/plugins/expressions/public';
+
+import { checkTableForContainsSmallValues, shouldShowValuesInLegend } from './render_helpers';
+import { PieLayerState, PieChartTypes } from '../../common';
 
 describe('render helpers', () => {
-  describe('#getSliceValue', () => {
-    it('returns the metric when positive number', () => {
-      expect(
-        getSliceValue(
-          { a: 'Cat', b: 'Home', c: 5 },
-          {
-            id: 'c',
-            name: 'C',
-            meta: { type: 'number' },
-          }
-        )
-      ).toEqual(5);
+  describe('#checkTableForContainsSmallValues', () => {
+    let datatable: Datatable;
+    const columnId = 'foo';
+
+    beforeEach(() => {
+      datatable = {
+        rows: [],
+      } as unknown as Datatable;
     });
 
-    it('returns the metric when negative number', () => {
-      expect(
-        getSliceValue(
-          { a: 'Cat', b: 'Home', c: -100 },
-          {
-            id: 'c',
-            name: 'C',
-            meta: { type: 'number' },
-          }
-        )
-      ).toEqual(0);
+    it('should return true if the data contains values less than the target percentage (1)', () => {
+      datatable.rows = [
+        {
+          [columnId]: 80,
+        },
+        {
+          [columnId]: 20,
+        },
+        {
+          [columnId]: 1,
+        },
+      ];
+      expect(checkTableForContainsSmallValues(datatable, columnId, 1)).toBeTruthy();
     });
 
-    it('returns 0 when metric value is 0', () => {
-      expect(
-        getSliceValue(
-          { a: 'Cat', b: 'Home', c: 0 },
-          {
-            id: 'c',
-            name: 'C',
-            meta: { type: 'number' },
-          }
-        )
-      ).toEqual(0);
+    it('should return true if the data contains values less than the target percentage (42)', () => {
+      datatable.rows = [
+        {
+          [columnId]: 58,
+        },
+        {
+          [columnId]: 42,
+        },
+        {
+          [columnId]: 1,
+        },
+      ];
+      expect(checkTableForContainsSmallValues(datatable, columnId, 42)).toBeTruthy();
     });
 
-    it('returns 0 when metric value is infinite', () => {
-      expect(
-        getSliceValue(
-          { a: 'Cat', b: 'Home', c: Number.POSITIVE_INFINITY },
-          {
-            id: 'c',
-            name: 'C',
-            meta: { type: 'number' },
-          }
-        )
-      ).toEqual(0);
+    it('should return false if the data contains values greater than the target percentage', () => {
+      datatable.rows = [
+        {
+          [columnId]: 22,
+        },
+        {
+          [columnId]: 56,
+        },
+        {
+          [columnId]: 12,
+        },
+      ];
+      expect(checkTableForContainsSmallValues(datatable, columnId, 1)).toBeFalsy();
     });
   });
 
-  describe('#getFilterContext', () => {
-    it('handles single slice click for single ring', () => {
-      const table: Datatable = {
-        type: 'datatable',
-        columns: [
-          { id: 'a', name: 'A', meta: { type: 'string' } },
-          { id: 'b', name: 'B', meta: { type: 'number' } },
-        ],
-        rows: [
-          { a: 'Hi', b: 2 },
-          { a: 'Test', b: 4 },
-          { a: 'Foo', b: 6 },
-        ],
-      };
+  describe('#shouldShowValuesInLegend', () => {
+    it('should firstly read the state value', () => {
       expect(
-        getFilterContext(
-          [
-            {
-              groupByRollup: 'Test',
-              value: 100,
-              depth: 1,
-              path: [],
-              sortIndex: 1,
-              smAccessorValue: '',
-            },
-          ],
-          ['a'],
-          table
+        shouldShowValuesInLegend(
+          { showValuesInLegend: true } as PieLayerState,
+          PieChartTypes.WAFFLE
         )
-      ).toEqual({
-        data: [
-          {
-            row: 1,
-            column: 0,
-            value: 'Test',
-            table,
-          },
-        ],
-      });
+      ).toBeTruthy();
+
+      expect(
+        shouldShowValuesInLegend(
+          { showValuesInLegend: false } as PieLayerState,
+          PieChartTypes.WAFFLE
+        )
+      ).toBeFalsy();
     });
 
-    it('handles single slice click with 2 rings', () => {
-      const table: Datatable = {
-        type: 'datatable',
-        columns: [
-          { id: 'a', name: 'A', meta: { type: 'string' } },
-          { id: 'b', name: 'B', meta: { type: 'string' } },
-          { id: 'c', name: 'C', meta: { type: 'number' } },
-        ],
-        rows: [
-          { a: 'Hi', b: 'Two', c: 2 },
-          { a: 'Test', b: 'Two', c: 5 },
-          { a: 'Foo', b: 'Three', c: 6 },
-        ],
-      };
+    it('should read value from meta in case of value in state is undefined', () => {
       expect(
-        getFilterContext(
-          [
-            {
-              groupByRollup: 'Test',
-              value: 100,
-              depth: 1,
-              path: [],
-              sortIndex: 1,
-              smAccessorValue: '',
-            },
-          ],
-          ['a', 'b'],
-          table
+        shouldShowValuesInLegend(
+          { showValuesInLegend: undefined } as PieLayerState,
+          PieChartTypes.WAFFLE
         )
-      ).toEqual({
-        data: [
-          {
-            row: 1,
-            column: 0,
-            value: 'Test',
-            table,
-          },
-        ],
-      });
-    });
+      ).toBeTruthy();
 
-    it('finds right row for multi slice click', () => {
-      const table: Datatable = {
-        type: 'datatable',
-        columns: [
-          { id: 'a', name: 'A', meta: { type: 'string' } },
-          { id: 'b', name: 'B', meta: { type: 'string' } },
-          { id: 'c', name: 'C', meta: { type: 'number' } },
-        ],
-        rows: [
-          { a: 'Hi', b: 'Two', c: 2 },
-          { a: 'Test', b: 'Two', c: 5 },
-          { a: 'Foo', b: 'Three', c: 6 },
-        ],
-      };
+      expect(shouldShowValuesInLegend({} as PieLayerState, PieChartTypes.WAFFLE)).toBeTruthy();
+
       expect(
-        getFilterContext(
-          [
-            {
-              groupByRollup: 'Test',
-              value: 100,
-              depth: 1,
-              path: [],
-              sortIndex: 1,
-              smAccessorValue: '',
-            },
-            {
-              groupByRollup: 'Two',
-              value: 5,
-              depth: 1,
-              path: [],
-              sortIndex: 1,
-              smAccessorValue: '',
-            },
-          ],
-          ['a', 'b'],
-          table
+        shouldShowValuesInLegend(
+          { showValuesInLegend: undefined } as PieLayerState,
+          PieChartTypes.PIE
         )
-      ).toEqual({
-        data: [
-          {
-            row: 1,
-            column: 0,
-            value: 'Test',
-            table,
-          },
-          {
-            row: 1,
-            column: 1,
-            value: 'Two',
-            table,
-          },
-        ],
-      });
+      ).toBeFalsy();
     });
   });
 });

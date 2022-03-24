@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
 import { serializeRestoreSettings } from '../../../common/lib';
@@ -28,7 +28,7 @@ export function registerRestoreRoutes({
 
       try {
         const snapshotRestores: SnapshotRestore[] = [];
-        const { body: recoveryByIndexName } = await clusterClient.asCurrentUser.indices.recovery({
+        const recoveryByIndexName = await clusterClient.asCurrentUser.indices.recovery({
           human: true,
         });
 
@@ -111,7 +111,7 @@ export function registerRestoreRoutes({
           body: serializeRestoreSettings(restoreSettings) as estypes.SnapshotRestoreRequest['body'],
         });
 
-        return res.ok({ body: response.body });
+        return res.ok({ body: response });
       } catch (e) {
         return handleEsError({ error: e, response: res });
       }

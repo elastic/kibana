@@ -8,7 +8,13 @@
 import { IHttpFetchError } from 'kibana/public';
 import { toasts, fatalError } from './notification';
 
-function createToastConfig(error: IHttpFetchError, errorTitle: string) {
+interface CommonErrorBody {
+  statusCode: number;
+  message: string;
+  error: string;
+}
+
+function createToastConfig(error: IHttpFetchError<CommonErrorBody>, errorTitle: string) {
   // Expect an error in the shape provided by http service.
   if (error && error.body) {
     const { error: errorString, statusCode, message } = error.body;
@@ -19,7 +25,7 @@ function createToastConfig(error: IHttpFetchError, errorTitle: string) {
   }
 }
 
-export function showApiWarning(error: IHttpFetchError, errorTitle: string) {
+export function showApiWarning(error: IHttpFetchError<CommonErrorBody>, errorTitle: string) {
   const toastConfig = createToastConfig(error, errorTitle);
 
   if (toastConfig) {
@@ -31,7 +37,7 @@ export function showApiWarning(error: IHttpFetchError, errorTitle: string) {
   return fatalError.add(error, errorTitle);
 }
 
-export function showApiError(error: IHttpFetchError, errorTitle: string) {
+export function showApiError(error: IHttpFetchError<CommonErrorBody>, errorTitle: string) {
   const toastConfig = createToastConfig(error, errorTitle);
 
   if (toastConfig) {

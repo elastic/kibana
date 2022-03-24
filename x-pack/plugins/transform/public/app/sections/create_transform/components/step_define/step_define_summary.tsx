@@ -7,7 +7,7 @@
 
 import React, { Fragment, FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
@@ -88,8 +88,8 @@ export const StepDefineSummary: FC<Props> = ({
         {searchItems.savedSearch === undefined && (
           <Fragment>
             <EuiFormRow
-              label={i18n.translate('xpack.transform.stepDefineSummary.indexPatternLabel', {
-                defaultMessage: 'Index pattern',
+              label={i18n.translate('xpack.transform.stepDefineSummary.dataViewLabel', {
+                defaultMessage: 'Data view',
               })}
             >
               <span>{searchItems.indexPattern.title}</span>

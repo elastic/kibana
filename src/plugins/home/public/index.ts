@@ -19,13 +19,16 @@ export type {
 export { FeatureCatalogueCategory } from './services';
 
 export type {
+  AddDataTab,
   FeatureCatalogueEntry,
+  FeatureCatalogueRegistry,
   FeatureCatalogueSolution,
   Environment,
   TutorialVariables,
-  TutorialDirectoryNoticeComponent,
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
+  WelcomeRenderTelemetryNotice,
+  WelcomeServiceSetup,
 } from './services';
 
 export { INSTRUCTION_VARIANT, getDisplayText } from '../common/instruction_variant';

@@ -17,11 +17,8 @@ import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { checkBasicLicense } from '../../../license';
-import { loadIndexPatterns } from '../../../util/index_utils';
+import { cacheDataViewsContract } from '../../../util/index_utils';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 enum MODE {
   NEW_JOB,
@@ -37,10 +34,19 @@ const getBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
   getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
   {
-    text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.createJobLabel', {
       defaultMessage: 'Create job',
     }),
-    href: '',
+  },
+];
+
+const getDataVisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectDateViewLabel', {
+      defaultMessage: 'Data View',
+    }),
   },
 ];
 
@@ -64,7 +70,11 @@ export const dataVizIndexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'data_view_datavisualizer',
   path: '/datavisualizer_index_select',
+  title: i18n.translate('xpack.ml.selectDataViewLabel', {
+    defaultMessage: 'Select Data View',
+  }),
   render: (props, deps) => (
     <PageWrapper
       {...props}
@@ -73,7 +83,7 @@ export const dataVizIndexOrSearchRouteFactory = (
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
@@ -85,26 +95,23 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
   } = useMlKibana();
 
   const { redirectToMlAccessDeniedPage } = deps;
-  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
-  );
 
   const newJobResolvers = {
     ...basicResolvers(deps),
     preConfiguredJobRedirect: () =>
-      preConfiguredJobRedirect(deps.indexPatterns, basePath.get(), navigateToUrl),
+      preConfiguredJobRedirect(deps.dataViewsContract, basePath.get(), navigateToUrl),
   };
   const dataVizResolvers = {
     checkBasicLicense,
-    loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
+    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
   };
 
   const { context } = useResolver(
     undefined,
     undefined,
     deps.config,
+    deps.dataViewsContract,
     mode === MODE.NEW_JOB ? newJobResolvers : dataVizResolvers
   );
   return (

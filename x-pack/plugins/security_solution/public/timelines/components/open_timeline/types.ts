@@ -16,6 +16,7 @@ import {
   TemplateTimelineTypeLiteral,
   RowRendererId,
   TimelineStatusLiteralWithNull,
+  SingleTimelineResolveResponse,
 } from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
@@ -194,12 +195,18 @@ export interface OpenTimelineProps {
   hideActions?: ActionTimelineToShow[];
 }
 
+export interface ResolveTimelineConfig {
+  alias_target_id: SingleTimelineResolveResponse['data']['alias_target_id'];
+  outcome: SingleTimelineResolveResponse['data']['outcome'];
+  alias_purpose: SingleTimelineResolveResponse['data']['alias_purpose'];
+}
 export interface UpdateTimeline {
   duplicate: boolean;
   id: string;
   forceNotes?: boolean;
   from: string;
   notes: NoteResult[] | null | undefined;
+  resolveTimelineConfig?: ResolveTimelineConfig;
   timeline: TimelineModel;
   to: string;
   ruleNote?: string;
@@ -210,6 +217,7 @@ export type DispatchUpdateTimeline = ({
   id,
   from,
   notes,
+  resolveTimelineConfig,
   timeline,
   to,
   ruleNote,

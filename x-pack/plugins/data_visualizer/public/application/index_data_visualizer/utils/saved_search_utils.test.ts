@@ -6,19 +6,19 @@
  */
 
 import {
-  getQueryFromSavedSearch,
+  getQueryFromSavedSearchObject,
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
 } from './saved_search_utils';
-import type { SavedSearchSavedObject } from '../../../../common';
+import type { SavedSearchSavedObject } from '../../../../common/types';
 import type { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import type { Filter, FilterStateStore } from '@kbn/es-query';
 import { stubbedSavedObjectIndexPattern } from '../../../../../../../src/plugins/data_views/common/data_view.stub';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { fieldFormatsMock } from '../../../../../../../src/plugins/field_formats/common/mocks';
 import { uiSettingsServiceMock } from 'src/core/public/mocks';
 
-// helper function to create index patterns
+// helper function to create data views
 function createMockDataView(id: string) {
   const {
     type,
@@ -26,7 +26,7 @@ function createMockDataView(id: string) {
     attributes: { timeFieldName, fields, title },
   } = stubbedSavedObjectIndexPattern(id);
 
-  return new IndexPattern({
+  return new DataView({
     spec: {
       id,
       type,
@@ -75,16 +75,16 @@ const kqlSavedSearch: SavedSearch = {
   title: 'farequote_filter_and_kuery',
   description: '',
   columns: ['_source'],
-  // @ts-expect-error We don't need the full object here
+  // @ts-expect-error this isn't a valid SavedSearch object... but does anyone care?
   kibanaSavedObjectMeta: {
     searchSourceJSON:
       '{"highlightAll":true,"version":true,"query":{"query":"responsetime > 49","language":"kuery"},"filter":[{"meta":{"index":"90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0","negate":false,"disabled":false,"alias":null,"type":"phrase","key":"airline","value":"ASA","params":{"query":"ASA","type":"phrase"}},"query":{"match":{"airline":{"query":"ASA","type":"phrase"}}},"$state":{"store":"appState"}}],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
   },
 };
 
-describe('getQueryFromSavedSearch()', () => {
+describe('getQueryFromSavedSearchObject()', () => {
   it('should return parsed searchSourceJSON with query and filter', () => {
-    expect(getQueryFromSavedSearch(luceneSavedSearchObj)).toEqual({
+    expect(getQueryFromSavedSearchObject(luceneSavedSearchObj)).toEqual({
       filter: [
         {
           $state: { store: 'appState' },
@@ -106,7 +106,7 @@ describe('getQueryFromSavedSearch()', () => {
       query: { language: 'lucene', query: 'responsetime:>50' },
       version: true,
     });
-    expect(getQueryFromSavedSearch(kqlSavedSearch)).toEqual({
+    expect(getQueryFromSavedSearchObject(kqlSavedSearch)).toEqual({
       filter: [
         {
           $state: { store: 'appState' },
@@ -130,7 +130,7 @@ describe('getQueryFromSavedSearch()', () => {
     });
   });
   it('should return undefined if invalid searchSourceJSON', () => {
-    expect(getQueryFromSavedSearch(luceneInvalidSavedSearchObj)).toEqual(undefined);
+    expect(getQueryFromSavedSearchObject(luceneInvalidSavedSearchObj)).toEqual(undefined);
   });
 });
 
@@ -212,7 +212,7 @@ describe('getEsQueryFromSavedSearch()', () => {
   it('return undefined if saved search is not provided', () => {
     expect(
       getEsQueryFromSavedSearch({
-        indexPattern: mockDataView,
+        dataView: mockDataView,
         savedSearch: undefined,
         uiSettings: mockUiSettings,
       })
@@ -221,7 +221,7 @@ describe('getEsQueryFromSavedSearch()', () => {
   it('return search data from saved search if neither query nor filter is provided ', () => {
     expect(
       getEsQueryFromSavedSearch({
-        indexPattern: mockDataView,
+        dataView: mockDataView,
         savedSearch: luceneSavedSearchObj,
         uiSettings: mockUiSettings,
       })
@@ -241,7 +241,7 @@ describe('getEsQueryFromSavedSearch()', () => {
   it('should override original saved search with the provided query ', () => {
     expect(
       getEsQueryFromSavedSearch({
-        indexPattern: mockDataView,
+        dataView: mockDataView,
         savedSearch: luceneSavedSearchObj,
         uiSettings: mockUiSettings,
         query: {
@@ -266,7 +266,7 @@ describe('getEsQueryFromSavedSearch()', () => {
   it('should override original saved search with the provided filters ', () => {
     expect(
       getEsQueryFromSavedSearch({
-        indexPattern: mockDataView,
+        dataView: mockDataView,
         savedSearch: luceneSavedSearchObj,
         uiSettings: mockUiSettings,
         query: {

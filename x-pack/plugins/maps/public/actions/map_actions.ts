@@ -11,8 +11,10 @@ import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
-import { Filter, Query, TimeRange } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { Query, TimeRange } from 'src/plugins/data/public';
 import { Geometry, Position } from 'geojson';
+import { asyncForEach } from '@kbn/std';
 import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
 import { MapStoreState } from '../reducers/store';
@@ -60,11 +62,12 @@ import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import { DrawState, MapCenterAndZoom, MapExtent, Timeslice } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
-import { VectorLayer } from '../classes/layers/vector_layer';
-import { SET_DRAW_MODE } from './ui_actions';
-import { expandToTileBoundaries } from '../../common/geo_tile_utils';
+import { updateTooltipStateForLayer } from './tooltip_actions';
+import { isVectorLayer, IVectorLayer } from '../classes/layers/vector_layer';
+import { SET_DRAW_MODE, pushDeletedFeatureId, clearDeletedFeatureIds } from './ui_actions';
+import { expandToTileBoundaries } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
+import { getDeletedFeatureIds } from '../selectors/ui_selectors';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -92,10 +95,16 @@ export function updateMapSetting(
   settingKey: string,
   settingValue: string | boolean | number | object
 ) {
-  return {
-    type: UPDATE_MAP_SETTING,
-    settingKey,
-    settingValue,
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    dispatch({
+      type: UPDATE_MAP_SETTING,
+      settingKey,
+      settingValue,
+    });
+
+    if (settingKey === 'autoFitToDataBounds' && settingValue === true) {
+      dispatch(autoFitToBounds());
+    }
   };
 }
 
@@ -171,7 +180,7 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
     if (prevZoom !== nextZoom) {
       getLayerList(getState()).map((layer) => {
         if (!layer.showAtZoomLevel(nextZoom)) {
-          dispatch(cleanTooltipStateForLayer(layer.getId()));
+          dispatch(updateTooltipStateForLayer(layer));
         }
       });
     }
@@ -314,6 +323,10 @@ export function updateEditShape(shapeToDraw: DRAW_SHAPE | null) {
         drawShape: shapeToDraw,
       },
     });
+
+    if (shapeToDraw !== DRAW_SHAPE.DELETE) {
+      dispatch(clearDeletedFeatureIds());
+    }
   };
 }
 
@@ -346,7 +359,7 @@ export function updateEditLayer(layerId: string | null) {
   };
 }
 
-export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
+export function addNewFeatureToIndex(geometries: Array<Geometry | Position[]>) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -357,12 +370,15 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
       return;
     }
     const layer = getLayerById(layerId, getState());
-    if (!layer || !(layer instanceof VectorLayer)) {
+    if (!layer || !isVectorLayer(layer)) {
       return;
     }
 
     try {
-      await layer.addFeature(geometry);
+      dispatch(updateEditShape(DRAW_SHAPE.WAIT));
+      await asyncForEach(geometries, async (geometry) => {
+        await (layer as IVectorLayer).addFeature(geometry);
+      });
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
       getToasts().addError(e, {
@@ -371,6 +387,7 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
         }),
       });
     }
+    dispatch(updateEditShape(DRAW_SHAPE.SIMPLE_SELECT));
   };
 }
 
@@ -379,17 +396,26 @@ export function deleteFeatureFromIndex(featureId: string) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
+    // There is a race condition where users can click on a previously deleted feature before layer has re-rendered after feature delete.
+    // Check ensures delete requests for previously deleted features are aborted.
+    if (getDeletedFeatureIds(getState()).includes(featureId)) {
+      return;
+    }
+
     const editState = getEditState(getState());
     const layerId = editState ? editState.layerId : undefined;
     if (!layerId) {
       return;
     }
     const layer = getLayerById(layerId, getState());
-    if (!layer || !(layer instanceof VectorLayer)) {
+    if (!layer || !isVectorLayer(layer)) {
       return;
     }
+
     try {
-      await layer.deleteFeature(featureId);
+      dispatch(updateEditShape(DRAW_SHAPE.WAIT));
+      await (layer as IVectorLayer).deleteFeature(featureId);
+      dispatch(pushDeletedFeatureId(featureId));
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
       getToasts().addError(e, {
@@ -398,5 +424,6 @@ export function deleteFeatureFromIndex(featureId: string) {
         }),
       });
     }
+    dispatch(updateEditShape(DRAW_SHAPE.DELETE));
   };
 }

@@ -41,6 +41,19 @@ export const commonAddDropLastBucketIntoTSVBModel = (visState: any) => {
   return visState;
 };
 
+export const commonAddDropLastBucketIntoTSVBModel714Above = (visState: any) => {
+  if (visState && visState.type === 'metrics') {
+    return {
+      ...visState,
+      params: {
+        ...visState.params,
+        drop_last_bucket: visState.params.drop_last_bucket ?? 1,
+      },
+    };
+  }
+  return visState;
+};
+
 export const commonHideTSVBLastValueIndicator = (visState: any) => {
   if (visState && visState.type === 'metrics' && visState.params.type !== 'timeseries') {
     return {
@@ -180,6 +193,22 @@ export const commonRemoveMarkdownLessFromTSVB = (visState: any) => {
       ...visState,
       params: {
         ...params,
+      },
+    };
+  }
+
+  return visState;
+};
+
+export const commonUpdatePieVisApi = (visState: any) => {
+  if (visState && visState.type === 'pie') {
+    const { addLegend, ...restParams } = visState.params;
+
+    return {
+      ...visState,
+      params: {
+        ...restParams,
+        legendDisplay: addLegend ? 'show' : 'hide',
       },
     };
   }

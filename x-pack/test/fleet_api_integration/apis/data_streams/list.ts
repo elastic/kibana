@@ -6,9 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { keyBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
+interface IndexResponse {
+  _id: string;
+  _index: string;
+}
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -16,50 +21,66 @@ export default function (providerContext: FtrProviderContext) {
   const retry = getService('retry');
   const pkgName = 'datastreams';
   const pkgVersion = '0.1.0';
-  const pkgKey = `${pkgName}-${pkgVersion}`;
   const logsTemplateName = `logs-${pkgName}.test_logs`;
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
 
-  const uninstallPackage = async (pkg: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+  const uninstallPackage = async (name: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  const installPackage = async (pkg: string) => {
+  const installPackage = async (name: string, version: string) => {
     return await supertest
-      .post(`/api/fleet/epm/packages/${pkg}`)
+      .post(`/api/fleet/epm/packages/${name}/${version}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true })
       .expect(200);
   };
 
   const seedDataStreams = async () => {
-    await es.transport.request({
-      method: 'POST',
-      path: `/${logsTemplateName}-default/_doc`,
-      body: {
-        '@timestamp': '2015-01-01',
-        logs_test_name: 'test',
-        data_stream: {
-          dataset: `${pkgName}.test_logs`,
-          namespace: 'default',
-          type: 'logs',
+    const responses = [];
+    responses.push(
+      await es.transport.request({
+        method: 'POST',
+        path: `/${logsTemplateName}-default/_doc`,
+        body: {
+          '@timestamp': '2015-01-01',
+          logs_test_name: 'test',
+          data_stream: {
+            dataset: `${pkgName}.test_logs`,
+            namespace: 'default',
+            type: 'logs',
+          },
         },
-      },
-    });
-    await es.transport.request({
-      method: 'POST',
-      path: `/${metricsTemplateName}-default/_doc`,
-      body: {
-        '@timestamp': '2015-01-01',
-        logs_test_name: 'test',
-        data_stream: {
-          dataset: `${pkgName}.test_metrics`,
-          namespace: 'default',
-          type: 'metrics',
+      })
+    );
+    responses.push(
+      await es.transport.request({
+        method: 'POST',
+        path: `/${metricsTemplateName}-default/_doc`,
+        body: {
+          '@timestamp': '2015-01-01',
+          logs_test_name: 'test',
+          data_stream: {
+            dataset: `${pkgName}.test_metrics`,
+            namespace: 'default',
+            type: 'metrics',
+          },
         },
-      },
-    });
+      })
+    );
+
+    return responses as IndexResponse[];
   };
+
+  const getSeedDocsFromResponse = async (indexResponses: IndexResponse[]) =>
+    Promise.all(
+      indexResponses.map((indexResponse) =>
+        es.transport.request({
+          method: 'GET',
+          path: `/${indexResponse._index}/_doc/${indexResponse._id}`,
+        })
+      )
+    );
 
   const getDataStreams = async () => {
     return await supertest.get(`/api/fleet/data_streams`).set('kbn-xsrf', 'xxxx');
@@ -69,11 +90,11 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     beforeEach(async () => {
-      await installPackage(pkgKey);
+      await installPackage(pkgName, pkgVersion);
     });
 
     afterEach(async () => {
-      await uninstallPackage(pkgKey);
+      await uninstallPackage(pkgName, pkgVersion);
       try {
         await es.transport.request({
           method: 'DELETE',
@@ -93,36 +114,59 @@ export default function (providerContext: FtrProviderContext) {
       expect(body).to.eql({ data_streams: [] });
     });
 
-    it('should return correct data stream information', async function () {
+    it('should return correct basic data stream information', async function () {
       await seedDataStreams();
-      await retry.tryForTime(10000, async () => {
-        const { body } = await getDataStreams();
-        return expect(
-          body.data_streams.map((dataStream: any) => {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            const { index, size_in_bytes, ...rest } = dataStream;
-            return rest;
-          })
-        ).to.eql([
-          {
-            dataset: 'datastreams.test_logs',
-            namespace: 'default',
-            type: 'logs',
-            package: 'datastreams',
-            package_version: '0.1.0',
-            last_activity_ms: 1420070400000,
-            dashboards: [],
-          },
+      // we can't compare the array directly as the order is unpredictable
+      const expectedStreamsByDataset = keyBy(
+        [
           {
             dataset: 'datastreams.test_metrics',
             namespace: 'default',
             type: 'metrics',
             package: 'datastreams',
             package_version: '0.1.0',
-            last_activity_ms: 1420070400000,
             dashboards: [],
           },
-        ]);
+          {
+            dataset: 'datastreams.test_logs',
+            namespace: 'default',
+            type: 'logs',
+            package: 'datastreams',
+            package_version: '0.1.0',
+            dashboards: [],
+          },
+        ],
+        'dataset'
+      );
+
+      await retry.tryForTime(10000, async () => {
+        const { body } = await getDataStreams();
+        expect(body.data_streams.length).to.eql(2);
+
+        body.data_streams.forEach((dataStream: any) => {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          const { index, size_in_bytes, size_in_bytes_formatted, last_activity_ms, ...coreFields } =
+            dataStream;
+          expect(expectedStreamsByDataset[coreFields.dataset]).not.to.eql(undefined);
+          expect(coreFields).to.eql(expectedStreamsByDataset[coreFields.dataset]);
+        });
+      });
+    });
+
+    it('should use event.ingested instead of @timestamp for last_activity_ms', async function () {
+      const seedResponse = await seedDataStreams();
+      const docs = await getSeedDocsFromResponse(seedResponse);
+      const docsByDataset: Record<string, any> = keyBy(docs, '_source.data_stream.dataset');
+      await retry.tryForTime(10000, async () => {
+        const { body } = await getDataStreams();
+        expect(body.data_streams.length).to.eql(2);
+        body.data_streams.forEach((dataStream: any) => {
+          expect(docsByDataset[dataStream.dataset]).not.to.eql(undefined);
+          const expectedTimestamp = new Date(
+            docsByDataset[dataStream.dataset]?._source?.event?.ingested
+          ).getTime();
+          expect(dataStream.last_activity_ms).to.eql(expectedTimestamp);
+        });
       });
     });
 
@@ -146,21 +190,24 @@ export default function (providerContext: FtrProviderContext) {
 
       // Wait until backing indices are created
       await retry.tryForTime(10000, async () => {
-        const { body } = await es.transport.request({
-          method: 'GET',
-          path: `/${logsTemplateName}-default,${metricsTemplateName}-default/_search`,
-          body: {
-            size: 0,
-            aggs: {
-              index: {
-                terms: {
-                  field: '_index',
-                  size: 100000,
+        const { body } = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/${logsTemplateName}-default,${metricsTemplateName}-default/_search`,
+            body: {
+              size: 0,
+              aggs: {
+                index: {
+                  terms: {
+                    field: '_index',
+                    size: 100000,
+                  },
                 },
               },
             },
           },
-        });
+          { meta: true }
+        );
         expect(body.aggregations.index.buckets.length).to.eql(4);
       });
 

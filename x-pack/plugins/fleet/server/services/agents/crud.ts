@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
 import type { KueryNode } from '@kbn/es-query';
@@ -16,7 +16,7 @@ import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '
 import { appContextService, agentPolicyService } from '../../services';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
-import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
+import { AGENTS_PREFIX, AGENTS_INDEX } from '../../constants';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
 
@@ -122,28 +122,47 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const res = await esClient.search<FleetServerAgent, {}>({
-    index: AGENTS_INDEX,
-    from: (page - 1) * perPage,
-    size: perPage,
-    sort: `${sortField}:${sortOrder}`,
-    track_total_hits: true,
-    ignore_unavailable: true,
-    body,
-  });
+  const queryAgents = async (from: number, size: number) =>
+    esClient.search<FleetServerAgent, {}>({
+      index: AGENTS_INDEX,
+      from,
+      size,
+      track_total_hits: true,
+      rest_total_hits_as_int: true,
+      ignore_unavailable: true,
+      body: {
+        ...body,
+        sort: [{ [sortField]: { order: sortOrder } }],
+      },
+    });
+  const res = await queryAgents((page - 1) * perPage, perPage);
 
-  let agents = res.body.hits.hits.map(searchHitToAgent);
+  let agents = res.hits.hits.map(searchHitToAgent);
+  let total = res.hits.total as number;
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
-    agents = agents.filter((agent) =>
-      isAgentUpgradeable(agent, appContextService.getKibanaVersion())
-    );
+    // fixing a bug where upgradeable filter was not returning right results https://github.com/elastic/kibana/issues/117329
+    // query all agents, then filter upgradeable, and return the requested page and correct total
+    // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
+    if (total < SO_SEARCH_LIMIT) {
+      const response = await queryAgents(0, SO_SEARCH_LIMIT);
+      agents = response.hits.hits
+        .map(searchHitToAgent)
+        .filter((agent) => isAgentUpgradeable(agent, appContextService.getKibanaVersion()));
+      total = agents.length;
+      const start = (page - 1) * perPage;
+      agents = agents.slice(start, start + perPage);
+    } else {
+      agents = agents.filter((agent) =>
+        isAgentUpgradeable(agent, appContextService.getKibanaVersion())
+      );
+    }
   }
 
   return {
     agents,
-    total: (res.body.hits.total as estypes.SearchTotalHits).value,
+    total,
     page,
     perPage,
   };
@@ -174,7 +193,7 @@ export async function countInactiveAgents(
   const filters = [INACTIVE_AGENT_CONDITION];
 
   if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
+    filters.push(normalizeKuery(AGENTS_PREFIX, kuery));
   }
 
   const kueryNode = _joinFilters(filters);
@@ -184,11 +203,13 @@ export async function countInactiveAgents(
     index: AGENTS_INDEX,
     size: 0,
     track_total_hits: true,
+    rest_total_hits_as_int: true,
+    filter_path: 'hits.total',
     ignore_unavailable: true,
     body,
   });
-  // @ts-expect-error value is number | TotalHits
-  return res.body.hits.total.value;
+
+  return (res.hits.total as number) || 0;
 }
 
 export async function getAgentById(esClient: ElasticsearchClient, agentId: string) {
@@ -199,11 +220,11 @@ export async function getAgentById(esClient: ElasticsearchClient, agentId: strin
       id: agentId,
     });
 
-    if (agentHit.body.found === false) {
+    if (agentHit.found === false) {
       throw agentNotFoundError;
     }
 
-    return searchHitToAgent(agentHit.body);
+    return searchHitToAgent(agentHit);
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {
       throw agentNotFoundError;
@@ -214,11 +235,12 @@ export async function getAgentById(esClient: ElasticsearchClient, agentId: strin
 
 export function isAgentDocument(
   maybeDocument: any
-): maybeDocument is estypes.MgetHit<FleetServerAgent> {
+): maybeDocument is estypes.MgetResponseItem<FleetServerAgent> {
   return '_id' in maybeDocument && '_source' in maybeDocument;
 }
 
-export type ESAgentDocumentResult = estypes.MgetHit<FleetServerAgent>;
+export type ESAgentDocumentResult = estypes.MgetResponseItem<FleetServerAgent>;
+
 export async function getAgentDocuments(
   esClient: ElasticsearchClient,
   agentIds: string[]
@@ -228,7 +250,7 @@ export async function getAgentDocuments(
     body: { docs: agentIds.map((_id) => ({ _id })) },
   });
 
-  return res.body.docs || [];
+  return res.docs || [];
 }
 
 export async function getAgentsById(
@@ -257,7 +279,7 @@ export async function getAgentByAccessAPIKeyId(
     q: `access_api_key_id:${escapeSearchQueryPhrase(accessAPIKeyId)}`,
   });
 
-  const searchHit = res.body.hits.hits[0];
+  const searchHit = res.hits.hits[0];
   const agent = searchHit && searchHitToAgent(searchHit);
 
   if (!searchHit || !agent) {
@@ -315,10 +337,10 @@ export async function bulkUpdateAgents(
   });
 
   return {
-    items: res.body.items.map((item: estypes.BulkResponseItemContainer) => ({
+    items: res.items.map((item) => ({
       id: item.update!._id as string,
       success: !item.update!.error,
-      // @ts-expect-error ErrorCause is not assignable to Error
+      // @ts-expect-error it not assignable to ErrorCause
       error: item.update!.error as Error,
     })),
   };

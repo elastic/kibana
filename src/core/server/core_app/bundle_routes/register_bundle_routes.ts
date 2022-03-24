@@ -10,7 +10,7 @@ import { join } from 'path';
 import { PackageInfo } from '@kbn/config';
 import { fromRoot } from '@kbn/utils';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
-import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import { IRouter } from '../../http';
 import { UiPlugins } from '../../plugins';
 import { FileHashCache } from './file_hash_cache';

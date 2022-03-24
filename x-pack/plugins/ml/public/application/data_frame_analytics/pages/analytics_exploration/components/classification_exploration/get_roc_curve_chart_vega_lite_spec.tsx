@@ -10,6 +10,7 @@
 import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
 import { euiPaletteColorBlind, euiPaletteGray } from '@elastic/eui';
+import { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
 
@@ -43,7 +44,8 @@ export interface RocCurveDataRow extends RocCurveItem {
 export const getRocCurveChartVegaLiteSpec = (
   classificationClasses: string[],
   data: RocCurveDataRow[],
-  legendTitle: string
+  legendTitle: string,
+  euiTheme: typeof euiThemeLight
 ): TopLevelSpec => {
   // we append two rows which make up the data for the diagonal baseline
   data.push({ tpr: 0, fpr: 0, threshold: 1, class_name: BASELINE });
@@ -59,6 +61,8 @@ export const getRocCurveChartVegaLiteSpec = (
     config: {
       legend: {
         orient: 'right',
+        labelColor: euiTheme.euiTextSubduedColor,
+        titleColor: euiTheme.euiTextSubduedColor,
       },
       view: {
         continuousHeight: SIZE,
@@ -101,9 +105,9 @@ export const getRocCurveChartVegaLiteSpec = (
         type: 'quantitative',
         axis: {
           tickColor: GRAY,
-          labelColor: GRAY,
+          labelColor: euiTheme.euiTextSubduedColor,
           domainColor: GRAY,
-          titleColor: GRAY,
+          titleColor: euiTheme.euiTextSubduedColor,
         },
       },
       y: {
@@ -114,9 +118,9 @@ export const getRocCurveChartVegaLiteSpec = (
         type: 'quantitative',
         axis: {
           tickColor: GRAY,
-          labelColor: GRAY,
+          labelColor: euiTheme.euiTextSubduedColor,
           domainColor: GRAY,
-          titleColor: GRAY,
+          titleColor: euiTheme.euiTextSubduedColor,
         },
       },
       tooltip: [

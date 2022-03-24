@@ -23,13 +23,13 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
-import { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import { DataViewListItem } from '../../../../../../../../src/plugins/data_views/common';
 
 function getLinkToOptions() {
   return [
@@ -59,7 +59,7 @@ interface CustomUrlEditorProps {
   setEditCustomUrl: (url: any) => void;
   savedCustomUrls: UrlConfig[];
   dashboards: any[];
-  indexPatterns: DataView[];
+  dataViewListItems: DataViewListItem[];
   queryEntityFieldNames: string[];
 }
 
@@ -71,7 +71,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   setEditCustomUrl,
   savedCustomUrls,
   dashboards,
-  indexPatterns,
+  dataViewListItems,
   queryEntityFieldNames,
 }) => {
   if (customUrl === undefined) {
@@ -164,8 +164,8 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
     return { value: dashboard.id, text: dashboard.title };
   });
 
-  const indexPatternOptions = indexPatterns.map((indexPattern) => {
-    return { value: indexPattern.id, text: indexPattern.title };
+  const dataViewOptions = dataViewListItems.map(({ id, title }) => {
+    return { value: id, text: title };
   });
 
   const entityOptions = queryEntityFieldNames.map((fieldName) => ({ label: fieldName }));
@@ -267,14 +267,14 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.customUrlsEditor.indexPatternLabel"
-                defaultMessage="Index pattern"
+                id="xpack.ml.customUrlsEditor.dataViewLabel"
+                defaultMessage="Data view"
               />
             }
             display="rowCompressed"
           >
             <EuiSelect
-              options={indexPatternOptions}
+              options={dataViewOptions}
               value={kibanaSettings.discoverIndexPatternId}
               onChange={onDiscoverIndexPatternChange}
               data-test-subj="mlJobCustomUrlDiscoverIndexPatternInput"

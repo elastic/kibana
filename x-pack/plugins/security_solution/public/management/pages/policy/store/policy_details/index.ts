@@ -20,4 +20,4 @@ export interface EndpointPolicyDetailsStatePluginState {
 export interface EndpointPolicyDetailsStatePluginReducer {
   policyDetails: ImmutableReducer<PolicyDetailsState, AppAction>;
 }
-export { PolicyDetailsAction } from './action';
+export type { PolicyDetailsAction } from './action';

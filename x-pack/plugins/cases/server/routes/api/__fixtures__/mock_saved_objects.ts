@@ -7,15 +7,13 @@
 
 import { SavedObject } from 'kibana/server';
 import {
-  AssociationType,
   CaseAttributes,
   CaseStatuses,
-  CaseType,
   CommentAttributes,
   CommentType,
   ConnectorTypes,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../../common';
+} from '../../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 
 export const mockCases: Array<SavedObject<CaseAttributes>> = [
   {
@@ -41,7 +39,6 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
       title: 'Super Bad Security Issue',
       status: CaseStatuses.open,
       tags: ['defacement'],
-      type: CaseType.individual,
       updated_at: '2019-11-25T21:54:48.952Z',
       updated_by: {
         full_name: 'elastic',
@@ -80,7 +77,6 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
       title: 'Damaging Data Destruction Detected',
       status: CaseStatuses.open,
       tags: ['Data Destruction'],
-      type: CaseType.individual,
       updated_at: '2019-11-25T22:32:00.900Z',
       updated_by: {
         full_name: 'elastic',
@@ -119,7 +115,6 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
       title: 'Another bad one',
       status: CaseStatuses.open,
       tags: ['LOLBins'],
-      type: CaseType.individual,
       updated_at: '2019-11-25T22:32:17.947Z',
       updated_by: {
         full_name: 'elastic',
@@ -162,7 +157,6 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
       status: CaseStatuses.closed,
       title: 'Another bad one',
       tags: ['LOLBins'],
-      type: CaseType.individual,
       updated_at: '2019-11-25T22:32:17.947Z',
       updated_by: {
         full_name: 'elastic',
@@ -194,7 +188,6 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     type: 'cases-comment',
     id: 'mock-comment-1',
     attributes: {
-      associationType: AssociationType.case,
       comment: 'Wow, good luck catching that bad meanie!',
       type: CommentType.user,
       created_at: '2019-11-25T21:55:00.177Z',
@@ -227,7 +220,6 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     type: 'cases-comment',
     id: 'mock-comment-2',
     attributes: {
-      associationType: AssociationType.case,
       comment: 'Well I decided to update my comment. So what? Deal with it.',
       type: CommentType.user,
       created_at: '2019-11-25T21:55:14.633Z',
@@ -261,7 +253,6 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     type: 'cases-comment',
     id: 'mock-comment-3',
     attributes: {
-      associationType: AssociationType.case,
       comment: 'Wow, good luck catching that bad meanie!',
       type: CommentType.user,
       created_at: '2019-11-25T22:32:30.608Z',
@@ -294,7 +285,6 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     type: 'cases-comment',
     id: 'mock-comment-4',
     attributes: {
-      associationType: AssociationType.case,
       type: CommentType.alert,
       index: 'test-index',
       alertId: 'test-id',
@@ -332,7 +322,6 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     type: 'cases-comment',
     id: 'mock-comment-5',
     attributes: {
-      associationType: AssociationType.case,
       type: CommentType.alert,
       index: 'test-index-2',
       alertId: 'test-id-2',
@@ -370,8 +359,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     type: 'cases-comment',
     id: 'mock-comment-6',
     attributes: {
-      associationType: AssociationType.case,
-      type: CommentType.generatedAlert,
+      type: CommentType.alert,
       index: 'test-index',
       alertId: 'test-id',
       created_at: '2019-11-25T22:32:30.608Z',

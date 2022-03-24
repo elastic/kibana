@@ -19,9 +19,10 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { MAX_TITLE_LENGTH } from '../../../common';
+import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import * as i18n from './translations';
 import { Title } from './title';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   ${({ theme }) => css`
@@ -48,6 +49,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
   isLoading,
   title,
 }) => {
+  const { releasePhase } = useCasesContext();
   const [editMode, setEditMode] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [newTitle, setNewTitle] = useState<string>(title);
@@ -69,6 +71,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
       onSubmit(newTitle);
     }
     setEditMode(false);
+    setErrors([]);
   }, [newTitle, onSubmit, title]);
 
   const handleOnChange = useCallback(
@@ -80,59 +83,58 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
 
   return editMode ? (
     <EuiFormRow isInvalid={hasErrors} error={errors} fullWidth>
-      <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        responsive={true}
+        gutterSize="m"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem grow={true}>
           <EuiFieldText
+            fullWidth={true}
             onChange={handleOnChange}
             value={`${newTitle}`}
             data-test-subj="editable-title-input-field"
           />
         </EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="secondary"
-              data-test-subj="editable-title-submit-btn"
-              fill
-              iconType="save"
-              onClick={onClickSubmit}
-              size="s"
-            >
-              {i18n.SAVE}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="editable-title-cancel-btn"
-              iconType="cross"
-              onClick={onCancel}
-              size="s"
-            >
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="success"
+            data-test-subj="editable-title-submit-btn"
+            fill
+            iconType="save"
+            onClick={onClickSubmit}
+            size="s"
+          >
+            {i18n.SAVE}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="editable-title-cancel-btn"
+            iconType="cross"
+            onClick={onCancel}
+            size="s"
+          >
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
   ) : (
-    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <Title title={title} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
-        {!isLoading && userCanCrud && (
-          <MyEuiButtonIcon
-            aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
-            iconType="pencil"
-            onClick={onClickEditIcon}
-            data-test-subj="editable-title-edit-icon"
-          />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <Title title={title} releasePhase={releasePhase}>
+      {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
+      {!isLoading && userCanCrud && (
+        <MyEuiButtonIcon
+          aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
+          iconType="pencil"
+          onClick={onClickEditIcon}
+          data-test-subj="editable-title-edit-icon"
+        />
+      )}
+    </Title>
   );
 };
+EditableTitleComponent.displayName = 'EditableTitle';
 
 export const EditableTitle = React.memo(EditableTitleComponent);

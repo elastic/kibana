@@ -45,10 +45,10 @@ import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
 import { TlsQueryTable } from './tls_query_table';
 import { UsersQueryTable } from './users_query_table';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../app/types';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 export { getBreadcrumbs } from './utils';
 
@@ -92,10 +92,10 @@ const NetworkDetailsComponent: React.FC = () => {
     dispatch(setNetworkDetailsTablesActivePageToZero());
   }, [detailName, dispatch]);
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const ip = decodeIpv6(detailName);
   const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(uiSettings),
+    config: getEsQueryConfig(uiSettings),
     indexPattern,
     queries: [query],
     filters,
@@ -302,8 +302,6 @@ const NetworkDetailsComponent: React.FC = () => {
         </>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage border title={ip} />
-
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { ColorManager, Props } from './color_manager';
+export type { Props } from './color_manager';
+export { ColorManager } from './color_manager';

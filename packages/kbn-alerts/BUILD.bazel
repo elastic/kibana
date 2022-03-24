@@ -1,9 +1,8 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-alerts"
-
 PKG_REQUIRE_NAME = "@kbn/alerts"
 
 SOURCE_FILES = glob(
@@ -34,13 +33,12 @@ RUNTIME_DEPS = [
   "@npm//@elastic/eui",
   "@npm//enzyme",
   "@npm//react",
-  "@npm//resize-observer-polyfill",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-i18n",
+  "//packages/kbn-i18n:npm_module_types",
   "@npm//@elastic/eui",
-  "@npm//resize-observer-polyfill",
+  "@npm//tslib",
   "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/node",
@@ -79,14 +77,13 @@ ts_project(
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
 )
 
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -102,6 +99,23 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

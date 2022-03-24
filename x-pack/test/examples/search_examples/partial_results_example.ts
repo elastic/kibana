@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const retry = getService('retry');
 
-  describe('Partial results example', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/116038
+  describe.skip('Partial results example', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('searchExamples');
       await testSubjects.click('/search');

@@ -7,13 +7,26 @@
 
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { technicalRuleFieldMap } from './assets/field_maps/technical_rule_field_map';
+import { pick } from 'lodash';
+import {
+  technicalRuleFieldMap,
+  TechnicalRuleFieldMap,
+} from './assets/field_maps/technical_rule_field_map';
 import { runtimeTypeFromFieldMap } from './field_map';
 
-const technicalFieldRuntimeType = runtimeTypeFromFieldMap(technicalRuleFieldMap);
+const technicalFieldRuntimeType =
+  runtimeTypeFromFieldMap<TechnicalRuleFieldMap>(technicalRuleFieldMap);
 
-export const parseTechnicalFields = (input: unknown) => {
-  const validate = technicalFieldRuntimeType.decode(input);
+export const parseTechnicalFields = (input: unknown, partial = false) => {
+  const decodePartial = (alert: unknown) => {
+    const limitedFields = pick(technicalRuleFieldMap, Object.keys(alert as object));
+    const partialTechnicalFieldRuntimeType = runtimeTypeFromFieldMap<TechnicalRuleFieldMap>(
+      limitedFields as unknown as TechnicalRuleFieldMap
+    );
+    return partialTechnicalFieldRuntimeType.decode(alert);
+  };
+
+  const validate = partial ? decodePartial(input) : technicalFieldRuntimeType.decode(input);
 
   if (isLeft(validate)) {
     throw new Error(PathReporter.report(validate).join('\n'));

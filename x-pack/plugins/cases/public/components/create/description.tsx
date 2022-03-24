@@ -9,6 +9,7 @@ import React, { memo, useEffect, useRef } from 'react';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { UseField, useFormContext, useFormData } from '../../common/shared_imports';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
+import { ID as LensPluginId } from '../markdown_editor/plugins/lens/constants';
 
 interface Props {
   isLoading: boolean;
@@ -21,7 +22,8 @@ const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
     useLensDraftComment();
   const { setFieldValue } = useFormContext();
   const [{ title, tags }] = useFormData({ watch: ['title', 'tags'] });
-  const editorRef = useRef<Record<string, any>>();
+  const editorRef = useRef<Record<string, unknown>>();
+  const disabledUiPlugins = [LensPluginId];
 
   useEffect(() => {
     if (draftComment?.commentId === fieldName && editorRef.current) {
@@ -55,6 +57,7 @@ const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
         isDisabled: isLoading,
         caseTitle: title,
         caseTags: tags,
+        disabledUiPlugins,
       }}
     />
   );

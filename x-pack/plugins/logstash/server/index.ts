@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { LogstashPlugin } from './plugin';
 
 export const plugin = (context: PluginInitializerContext) => new LogstashPlugin(context);
-
-export const config: PluginConfigDescriptor = {
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
-};

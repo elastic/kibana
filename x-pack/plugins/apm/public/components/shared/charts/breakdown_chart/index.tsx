@@ -44,6 +44,8 @@ import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { getTimeZone } from '../helper/timezone';
 
 interface Props {
   fetchStatus: FETCH_STATUS;
@@ -66,15 +68,12 @@ export function BreakdownChart({
 }: Props) {
   const history = useHistory();
   const chartTheme = useChartTheme();
-
+  const { core } = useApmPluginContext();
   const { chartRef, setPointerEvent } = useChartPointerEventContext();
-
   const {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}');
-
   const theme = useTheme();
-
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const min = moment.utc(start).valueOf();
@@ -82,7 +81,7 @@ export function BreakdownChart({
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const annotationColor = theme.eui.euiColorSecondary;
+  const annotationColor = theme.eui.euiColorSuccess;
 
   const isEmpty = isTimeseriesEmpty(timeseries);
 
@@ -92,11 +91,13 @@ export function BreakdownChart({
       ? getResponseTimeTickFormatter(getDurationFormatter(maxY))
       : asPercentBound;
 
+  const timeZone = getTimeZone(core.uiSettings);
+
   return (
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
       <Chart ref={chartRef}>
         <Settings
-          tooltip={{ stickTo: 'top' }}
+          tooltip={{ stickTo: 'top', showNullValues: true }}
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }
@@ -150,6 +151,7 @@ export function BreakdownChart({
           timeseries.map((serie) => {
             return (
               <AreaSeries
+                timeZone={timeZone}
                 key={serie.title}
                 id={serie.title}
                 name={serie.title}
@@ -169,7 +171,12 @@ export function BreakdownChart({
           })
         ) : (
           // When timeseries is empty, loads an AreaSeries chart to show the default empty message.
-          <AreaSeries id="empty_chart" data={[]} />
+          <AreaSeries
+            id="empty_chart"
+            xAccessor="x"
+            yAccessors={['y']}
+            data={[]}
+          />
         )}
       </Chart>
     </ChartContainer>

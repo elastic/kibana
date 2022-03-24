@@ -14,39 +14,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'header', 'settings']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/113130
-  describe.skip('source filters', function describeIndexTests() {
+  describe('source filters', function () {
     before(async function () {
-      // delete .kibana index and update configDoc
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-      });
-
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
-
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-
-      await kibanaServer.uiSettings.update({
         'discover:searchFieldsFromSource': false,
       });
 
+      log.debug('management');
+      await PageObjects.common.navigateToApp('settings');
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.addFieldFilter('referer');
+      await PageObjects.settings.addFieldFilter('relatedContent*');
+
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      // After hiding the time picker, we need to wait for
-      // the refresh button to hide before clicking the share button
-      await PageObjects.common.sleep(1000);
+      await retry.try(async function () {
+        expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
+      });
     });
 
     after(async () => {
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/visualize.json'
       );
+      await kibanaServer.uiSettings.unset('defaultIndex');
     });
 
     it('should not get the field referer', async function () {

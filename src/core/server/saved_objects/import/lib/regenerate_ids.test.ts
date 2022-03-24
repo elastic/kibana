@@ -6,37 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { mockUuidv4 } from './__mocks__';
 import { regenerateIds } from './regenerate_ids';
 import { SavedObject } from '../../types';
+
+jest.mock('uuid', () => ({
+  v4: jest
+    .fn()
+    .mockReturnValueOnce('uuidv4 #1')
+    .mockReturnValueOnce('uuidv4 #2')
+    .mockReturnValueOnce('uuidv4 #3'),
+}));
 
 describe('#regenerateIds', () => {
   const objects = [
     { type: 'foo', id: '1' },
     { type: 'bar', id: '2' },
     { type: 'baz', id: '3' },
-  ] as any as SavedObject[];
+  ] as SavedObject[];
 
   test('returns expected values', () => {
-    mockUuidv4
-      .mockReturnValueOnce('uuidv4 #1')
-      .mockReturnValueOnce('uuidv4 #2')
-      .mockReturnValueOnce('uuidv4 #3');
-    expect(regenerateIds(objects)).toMatchInlineSnapshot(`
-      Map {
-        "foo:1" => Object {
-          "id": "uuidv4 #1",
-          "omitOriginId": true,
-        },
-        "bar:2" => Object {
-          "id": "uuidv4 #2",
-          "omitOriginId": true,
-        },
-        "baz:3" => Object {
-          "id": "uuidv4 #3",
-          "omitOriginId": true,
-        },
-      }
-    `);
+    expect(regenerateIds(objects)).toEqual(
+      new Map([
+        ['foo:1', { destinationId: 'uuidv4 #1', omitOriginId: true }],
+        ['bar:2', { destinationId: 'uuidv4 #2', omitOriginId: true }],
+        ['baz:3', { destinationId: 'uuidv4 #3', omitOriginId: true }],
+      ])
+    );
   });
 });

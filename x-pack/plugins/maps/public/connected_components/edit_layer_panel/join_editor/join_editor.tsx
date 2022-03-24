@@ -17,7 +17,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Join } from './resources/join';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
@@ -90,9 +90,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
     ) : (
       <Fragment>
         {renderJoins()}
-
         <EuiSpacer size="s" />
-
         <EuiTextAlign textAlign="center">
           <EuiButtonEmpty
             onClick={addJoin}

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/decorators/area_decorator.js <AreaSeriesDecorator /> should render and match a snapshot 1`] = `
-<Connect(SpecInstance)
+<AreaSeries
   areaSeriesStyle={
     Object {
       "area": Object {

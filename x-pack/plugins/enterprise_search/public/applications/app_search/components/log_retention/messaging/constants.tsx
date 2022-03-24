@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 
 import { LogRetentionOptions, LogRetentionSettings, LogRetentionPolicy } from '../types';
 
@@ -35,6 +35,16 @@ const CAPITALIZATION_MAP = {
     lowercase: i18n.translate(
       'xpack.enterpriseSearch.appSearch.logRetention.type.api.title.lowercase',
       { defaultMessage: 'API' }
+    ),
+  },
+  [LogRetentionOptions.Audit]: {
+    capitalized: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.logRetention.type.audit.title.capitalized',
+      { defaultMessage: 'Audit' }
+    ),
+    lowercase: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.logRetention.type.audit.title.lowercase',
+      { defaultMessage: 'audit' }
     ),
   },
   [LogRetentionOptions.Crawler]: {
@@ -82,14 +92,6 @@ export const NoLogging: React.FC<Props> = ({ type, disabledAt }) => {
     </>
   );
 };
-
-export const ILMDisabled: React.FC<Props> = ({ type }) => (
-  <FormattedMessage
-    id="xpack.enterpriseSearch.appSearch.logRetention.ilmDisabled"
-    defaultMessage="App Search isn't managing {logsType} log retention."
-    values={{ logsType: CAPITALIZATION_MAP[type].lowercase }}
-  />
-);
 
 export const CustomPolicy: React.FC<Props> = ({ type }) => (
   <FormattedMessage

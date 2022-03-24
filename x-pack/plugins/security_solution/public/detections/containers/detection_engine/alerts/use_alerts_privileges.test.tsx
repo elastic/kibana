@@ -12,6 +12,7 @@ import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { Privilege } from './types';
 import { UseAlertsPrivelegesReturn, useAlertsPrivileges } from './use_alerts_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
@@ -86,12 +87,11 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
     result: undefined,
     error: undefined,
   },
-  endpointPrivileges: {
+  endpointPrivileges: getEndpointPrivilegesInitialStateMock({
     loading: true,
     canAccessEndpointManagement: false,
     canAccessFleet: false,
-    isPlatinumPlus: true,
-  },
+  }),
   kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
 };
 

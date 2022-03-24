@@ -6,9 +6,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiCodeEditor } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import 'brace/theme/tomorrow';
+
+import { EuiCodeEditor, EuiCodeEditorProps } from '../shared_imports';
 
 import './osquery_mode.ts';
 
@@ -24,9 +25,14 @@ const EDITOR_PROPS = {
 interface OsqueryEditorProps {
   defaultValue: string;
   onChange: (newValue: string) => void;
+  commands?: EuiCodeEditorProps['commands'];
 }
 
-const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, onChange }) => {
+const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
+  defaultValue,
+  onChange,
+  commands,
+}) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
 
   useDebounce(() => onChange(editorValue.replaceAll('\n', ' ').replaceAll('  ', ' ')), 500, [
@@ -34,7 +40,6 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, on
   ]);
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
-
   return (
     <EuiCodeEditor
       value={editorValue}
@@ -44,8 +49,9 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, on
       name="osquery_editor"
       setOptions={EDITOR_SET_OPTIONS}
       editorProps={EDITOR_PROPS}
-      height="150px"
+      height="100px"
       width="100%"
+      commands={commands}
     />
   );
 };

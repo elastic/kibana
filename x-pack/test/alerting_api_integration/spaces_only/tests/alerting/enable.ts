@@ -6,14 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { Spaces } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   AlertUtils,
   checkAAD,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   TaskManagerDoc,
 } from '../../../common/lib';
@@ -30,18 +29,18 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
     after(() => objectRemover.removeAll());
 
     async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
-      const scheduledTask: ApiResponse<estypes.GetResponse<TaskManagerDoc>> = await es.get({
+      const scheduledTask = await es.get<TaskManagerDoc>({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
-      return scheduledTask.body._source!;
+      return scheduledTask._source!;
     }
 
     it('should handle enable alert request appropriately', async () => {
       const { body: createdAlert } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ enabled: false }))
+        .send(getTestRuleData({ enabled: false }))
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -73,7 +72,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
       const { body: createdAlert } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.other.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ enabled: false }))
+        .send(getTestRuleData({ enabled: false }))
         .expect(200);
       objectRemover.add(Spaces.other.id, createdAlert.id, 'rule', 'alerting');
 
@@ -89,7 +88,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
         const { body: createdAlert } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData({ enabled: false }))
+          .send(getTestRuleData({ enabled: false }))
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 

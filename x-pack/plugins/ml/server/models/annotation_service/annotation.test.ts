@@ -9,7 +9,6 @@ import getAnnotationsRequestMock from './__mocks__/get_annotations_request.json'
 import getAnnotationsResponseMock from './__mocks__/get_annotations_response.json';
 
 import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
-import { ML_ANNOTATIONS_INDEX_ALIAS_WRITE } from '../../../common/constants/index_patterns';
 import { Annotation, isAnnotations } from '../../../common/types/annotations';
 
 import { DeleteParams, GetResponse, IndexAnnotationArgs } from './annotation';
@@ -24,9 +23,9 @@ describe('annotation_service', () => {
 
   beforeEach(() => {
     const callAs = {
-      delete: jest.fn(() => Promise.resolve({ body: acknowledgedResponseMock })),
-      index: jest.fn(() => Promise.resolve({ body: acknowledgedResponseMock })),
-      search: jest.fn(() => Promise.resolve({ body: getAnnotationsResponseMock })),
+      delete: jest.fn(() => Promise.resolve(acknowledgedResponseMock)),
+      index: jest.fn(() => Promise.resolve(acknowledgedResponseMock)),
+      search: jest.fn(() => Promise.resolve(getAnnotationsResponseMock)),
     };
 
     mlClusterClientSpy = {
@@ -42,7 +41,7 @@ describe('annotation_service', () => {
 
       const annotationMockId = 'mockId';
       const deleteParamsMock: DeleteParams = {
-        index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+        index: '.ml-annotations-000001',
         id: annotationMockId,
         refresh: 'wait_for',
       };
@@ -85,7 +84,7 @@ describe('annotation_service', () => {
 
       const mlClusterClientSpyError: any = {
         asInternalUser: {
-          search: jest.fn(() => Promise.resolve({ body: mockEsError })),
+          search: jest.fn(() => Promise.resolve(mockEsError)),
         },
       };
 

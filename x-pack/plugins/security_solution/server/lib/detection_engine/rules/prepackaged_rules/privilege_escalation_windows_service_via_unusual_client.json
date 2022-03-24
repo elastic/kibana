@@ -1,0 +1,58 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation of a Windows service by an unusual client process. Services may be created with administrator privileges but are executed under SYSTEM privileges, so an adversary may also use a service to escalate privileges from administrator to SYSTEM.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-system.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Windows Service Installed via an Unusual Client",
+  "note": "## Config\n\nThe 'Audit Security System Extension' logging policy must be configured for (Success)\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nPolicies > \nWindows Settings > \nSecurity Settings > \nAdvanced Audit Policies Configuration > \nAudit Policies > \nSystem > \nAudit Security System Extension (Success)\n```\n",
+  "query": "event.action:\"service-installed\"  and (winlog.event_data.ClientProcessId:\"0\" or winlog.event_data.ParentProcessId:\"0\")\n",
+  "references": [
+    "https://www.x86matthew.com/view_post?id=create_svc_rpc",
+    "https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4697",
+    "https://github.com/atc-project/atomic-threat-coverage/blob/master/Atomic_Threat_Coverage/Logging_Policies/LP_0100_windows_audit_security_system_extension.md"
+  ],
+  "risk_score": 73,
+  "rule_id": "55c2bf58-2a39-4c58-a384-c8b1978153c2",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/",
+          "subtechnique": [
+            {
+              "id": "T1543.003",
+              "name": "Windows Service",
+              "reference": "https://attack.mitre.org/techniques/T1543/003/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

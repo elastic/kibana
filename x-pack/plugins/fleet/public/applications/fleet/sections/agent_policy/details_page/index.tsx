@@ -5,27 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { Redirect, useRouteMatch, Switch, Route, useHistory, useLocation } from 'react-router-dom';
+import React, { useMemo, useState, useCallback } from 'react';
+import { Redirect, useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
-import {
-  EuiButtonEmpty,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiI18nNumber,
-  EuiIconTip,
-  EuiLink,
-  EuiPortal,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPortal } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
-import styled from 'styled-components';
 
 import type { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
 import { FLEET_ROUTING_PATHS } from '../../../constants';
@@ -38,25 +23,22 @@ import {
   useFleetStatus,
   useIntraAppState,
 } from '../../../hooks';
-import { Loading, Error, AgentEnrollmentFlyout, AddAgentHelpPopover } from '../../../components';
+import { Loading, Error, AgentEnrollmentFlyout } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
-import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
 import { useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
-import { PackagePoliciesView, SettingsView } from './components';
-
-const Divider = styled.div`
-  width: 0;
-  height: 100%;
-  border-left: ${(props) => props.theme.eui.euiBorderThin};
-`;
+import {
+  PackagePoliciesView,
+  SettingsView,
+  HeaderRightContent,
+  HeaderLeftContent,
+} from './components';
 
 export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   const {
     params: { policyId, tabId = '' },
   } = useRouteMatch<{ policyId: string; tabId?: string }>();
-  const history = useHistory();
-  const { getHref, getPath } = useLink();
+  const { getHref } = useLink();
   const agentPolicyRequest = useGetOneAgentPolicy(policyId);
   const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentPolicy } = agentPolicyRequest;
@@ -70,6 +52,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   const [isAddAgentHelpPopoverOpen, setIsAddAgentHelpPopoverOpen] = useState<boolean>(
     openAddAgentHelpPopoverOpenByDefault
   );
+
   const agentStatusRequest = useGetAgentStatus(policyId);
   const { refreshAgentStatus } = agentStatusRequest;
   const {
@@ -80,74 +63,6 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
 
   const { isReady: isFleetReady } = useFleetStatus();
 
-  const headerLeftContent = useMemo(
-    () => (
-      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType="arrowLeft"
-            href={getHref('policies_list')}
-            flush="left"
-            size="xs"
-          >
-            <FormattedMessage
-              id="xpack.fleet.policyDetails.viewAgentListTitle"
-              defaultMessage="View all agent policies"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <EuiFlexGroup alignItems="center" wrap responsive={false} gutterSize="s">
-              <EuiFlexItem>
-                <EuiTitle>
-                  <h1>
-                    {(agentPolicy && agentPolicy.name) || (
-                      <FormattedMessage
-                        id="xpack.fleet.policyDetails.policyDetailsTitle"
-                        defaultMessage="Policy '{id}'"
-                        values={{ id: policyId }}
-                      />
-                    )}
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-              {agentPolicy?.is_managed && (
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    title="Hosted agent policy"
-                    content={i18n.translate(
-                      'xpack.fleet.policyDetails.policyDetailsHostedPolicyTooltip',
-                      {
-                        defaultMessage:
-                          'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
-                      }
-                    )}
-                    type="lock"
-                    size="l"
-                    color="subdued"
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          )}
-        </EuiFlexItem>
-
-        {agentPolicy && agentPolicy.description ? (
-          <EuiFlexItem>
-            <EuiSpacer size="s" />
-            <EuiText color="subdued" size="s" className="eui-textBreakWord">
-              {agentPolicy.description}
-            </EuiText>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    ),
-    [getHref, isLoading, agentPolicy, policyId]
-  );
-
   const onCancelEnrollment = useMemo(() => {
     if (routeState && routeState.onDoneNavigateTo && isFleetReady) {
       const [appId, options] = routeState.onDoneNavigateTo;
@@ -157,118 +72,10 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     return undefined;
   }, [isFleetReady, navigateToApp, routeState]);
 
-  const addAgentLink = (
-    <EuiLink
-      onClick={() => {
-        setIsAddAgentHelpPopoverOpen(false);
-        setIsEnrollmentFlyoutOpen(true);
-      }}
-    >
-      <FormattedMessage id="xpack.fleet.policyDetails.addAgentButton" defaultMessage="Add agent" />
-    </EuiLink>
-  );
-  const headerRightContent = useMemo(
-    () =>
-      agentPolicy ? (
-        <EuiFlexGroup justifyContent={'flexEnd'} direction="row">
-          {[
-            {
-              label: i18n.translate('xpack.fleet.policyDetails.summary.revision', {
-                defaultMessage: 'Revision',
-              }),
-              content: agentPolicy?.revision ?? 0,
-            },
-            { isDivider: true },
-            {
-              label: i18n.translate('xpack.fleet.policyDetails.summary.integrations', {
-                defaultMessage: 'Integrations',
-              }),
-              content: (
-                <EuiI18nNumber
-                  value={
-                    (agentPolicy &&
-                      agentPolicy.package_policies &&
-                      agentPolicy.package_policies.length) ||
-                    0
-                  }
-                />
-              ),
-            },
-            { isDivider: true },
-            {
-              label: i18n.translate('xpack.fleet.policyDetails.summary.usedBy', {
-                defaultMessage: 'Agents',
-              }),
-              content:
-                agentStatus && agentStatus!.total ? (
-                  <LinkedAgentCount
-                    count={agentStatus.total}
-                    agentPolicyId={(agentPolicy && agentPolicy.id) || ''}
-                    showAgentText
-                  />
-                ) : (
-                  <AddAgentHelpPopover
-                    button={addAgentLink}
-                    isOpen={isAddAgentHelpPopoverOpen}
-                    offset={15}
-                    closePopover={() => {
-                      setIsAddAgentHelpPopoverOpen(false);
-                    }}
-                  />
-                ),
-            },
-            { isDivider: true },
-            {
-              label: i18n.translate('xpack.fleet.policyDetails.summary.lastUpdated', {
-                defaultMessage: 'Last updated on',
-              }),
-              content:
-                (agentPolicy && (
-                  <FormattedDate
-                    value={agentPolicy?.updated_at}
-                    year="numeric"
-                    month="short"
-                    day="2-digit"
-                  />
-                )) ||
-                '',
-            },
-            { isDivider: true },
-            {
-              content: agentPolicy && (
-                <AgentPolicyActionMenu
-                  agentPolicy={agentPolicy}
-                  fullButton={true}
-                  onCopySuccess={(newAgentPolicy: AgentPolicy) => {
-                    history.push(getPath('policy_details', { policyId: newAgentPolicy.id }));
-                  }}
-                  onCancelEnrollment={onCancelEnrollment}
-                />
-              ),
-            },
-          ].map((item, index) => (
-            <EuiFlexItem grow={false} key={index}>
-              {item.isDivider ?? false ? (
-                <Divider />
-              ) : item.label ? (
-                <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
-                  <EuiDescriptionListTitle className="eui-textNoWrap">
-                    {item.label}
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription className="eui-textNoWrap">
-                    {item.content}
-                  </EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              ) : (
-                item.content
-              )}
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ) : undefined,
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [agentPolicy, policyId, agentStatus, isAddAgentHelpPopoverOpen]
-  );
+  const addAgent = useCallback(() => {
+    setIsAddAgentHelpPopoverOpen(false);
+    setIsEnrollmentFlyoutOpen(true);
+  }, []);
 
   const headerTabs = useMemo(() => {
     return [
@@ -355,6 +162,21 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     onCancelEnrollment,
     policyId,
   ]);
+  const headerLeftContent = (
+    <HeaderLeftContent agentPolicy={agentPolicy} policyId={policyId} isLoading={isLoading} />
+  );
+  const headerRightContent = (
+    <HeaderRightContent
+      agentPolicy={agentPolicy}
+      agentStatus={agentStatus}
+      policyId={policyId}
+      onCancelEnrollment={onCancelEnrollment}
+      isLoading={isLoading}
+      isAddAgentHelpPopoverOpen={isAddAgentHelpPopoverOpen}
+      setIsAddAgentHelpPopoverOpen={setIsAddAgentHelpPopoverOpen}
+      addAgent={addAgent}
+    />
+  );
 
   return (
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshAgentPolicy }}>

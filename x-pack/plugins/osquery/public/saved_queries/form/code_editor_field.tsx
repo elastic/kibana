@@ -6,18 +6,24 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiCodeBlock, EuiFormRow } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
 
 import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { OsqueryEditor } from '../../editor';
 import { FieldHook } from '../../shared_imports';
 
+const StyledEuiCodeBlock = styled(EuiCodeBlock)`
+  min-height: 100px;
+`;
+
 interface CodeEditorFieldProps {
+  euiFieldProps?: Record<string, unknown>;
   field: FieldHook<string>;
 }
 
-const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ field }) => {
+const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ euiFieldProps, field }) => {
   const { value, label, labelAppend, helpText, setValue, errors } = field;
   const error = errors[0]?.message;
 
@@ -30,7 +36,18 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ field }) => 
       error={error}
       fullWidth
     >
-      <OsqueryEditor defaultValue={value} onChange={setValue} />
+      {euiFieldProps?.disabled ? (
+        <StyledEuiCodeBlock
+          language="sql"
+          fontSize="m"
+          paddingSize="m"
+          transparentBackground={!value.length}
+        >
+          {value}
+        </StyledEuiCodeBlock>
+      ) : (
+        <OsqueryEditor defaultValue={value} onChange={setValue} />
+      )}
     </EuiFormRow>
   );
 };

@@ -5,20 +5,66 @@
  * 2.0.
  */
 
-import '../../__mocks__/kea_logic';
+import '../../__mocks__/shallow_useeffect.mock';
+import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
-
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { mountWithIntl } from '../../test_helpers';
 
 import { ErrorStatePrompt } from './';
 
 describe('ErrorState', () => {
-  it('renders', () => {
-    const wrapper = shallow(<ErrorStatePrompt />);
+  const values = {
+    config: {},
+    cloud: { isCloudEnabled: true },
+    errorConnectingMessage: '502 Bad Gateway',
+  };
 
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+  beforeAll(() => {
+    setMockValues(values);
+  });
+
+  it('renders an error message', () => {
+    const wrapper = mountWithIntl(<ErrorStatePrompt />);
+    expect(wrapper.text()).toContain('502 Bad Gateway');
+  });
+
+  it('renders a cloud specific error on cloud deployments', () => {
+    setMockValues({
+      ...values,
+      cloud: { isCloudEnabled: true },
+    });
+    const wrapper = mountWithIntl(<ErrorStatePrompt />);
+
+    expect(wrapper.find('[data-test-subj="CloudError"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="SelfManagedError"]').exists()).toBe(false);
+  });
+
+  it('renders a different error if not a cloud deployment', () => {
+    setMockValues({
+      ...values,
+      cloud: { isCloudEnabled: false },
+    });
+    const wrapper = mountWithIntl(<ErrorStatePrompt />);
+
+    expect(wrapper.find('[data-test-subj="CloudError"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="SelfManagedError"]').exists()).toBe(true);
+  });
+
+  describe('chrome visiblity', () => {
+    it('sets chrome visibility to true when not on personal dashboard route', () => {
+      mockKibanaValues.history.location.pathname = '/overview';
+      mountWithIntl(<ErrorStatePrompt />);
+
+      expect(mockKibanaValues.setChromeIsVisible).toHaveBeenCalledWith(true);
+    });
+
+    it('sets chrome visibility to false when on personal dashboard route', () => {
+      mockKibanaValues.history.location.pathname = '/p/sources';
+      mountWithIntl(<ErrorStatePrompt />);
+
+      expect(mockKibanaValues.setChromeIsVisible).toHaveBeenCalledWith(false);
+    });
   });
 });

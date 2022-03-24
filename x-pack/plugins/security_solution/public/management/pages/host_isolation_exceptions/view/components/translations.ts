@@ -11,7 +11,7 @@ import { ServerApiError } from '../../../../../common/types';
 export const NAME_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.hostIsolationExceptions.form.name.placeholder',
   {
-    defaultMessage: 'New IP',
+    defaultMessage: 'Host isolation exception name',
   }
 );
 
@@ -32,7 +32,7 @@ export const NAME_ERROR = i18n.translate(
 export const DESCRIPTION_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.hostIsolationExceptions.form.description.placeholder',
   {
-    defaultMessage: 'Describe your Host Isolation Exception',
+    defaultMessage: 'Describe your host isolation exception',
   }
 );
 
@@ -60,7 +60,7 @@ export const IP_LABEL = i18n.translate(
 export const IP_ERROR = i18n.translate(
   'xpack.securitySolution.hostIsolationExceptions.form.ip.error',
   {
-    defaultMessage: 'The ip is invalid. Only IPv4 with optional CIDR is supported',
+    defaultMessage: 'The IP is invalid. Only IPv4 with optional CIDR is supported',
   }
 );
 

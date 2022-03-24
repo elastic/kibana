@@ -27,10 +27,10 @@ describe('createMetricsK8sAnomaliesQuery', () => {
         pagination,
       })
     ).toMatchObject({
-      allowNoIndices: true,
-      ignoreUnavailable: true,
-      trackScores: false,
-      trackTotalHits: false,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      track_scores: false,
+      track_total_hits: false,
       body: {
         query: {
           bool: {

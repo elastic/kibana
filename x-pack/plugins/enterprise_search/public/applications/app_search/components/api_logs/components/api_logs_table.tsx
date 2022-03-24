@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 
@@ -98,7 +98,7 @@ export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
     ? {
         pagination: {
           ...convertMetaToPagination(meta),
-          hidePerPageOptions: true,
+          showPerPageOptions: false,
         },
         onChange: handlePageChange(onPaginate),
       }

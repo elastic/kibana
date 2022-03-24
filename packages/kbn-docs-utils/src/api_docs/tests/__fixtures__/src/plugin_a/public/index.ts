@@ -19,6 +19,11 @@ export * from './types';
 export const imAnAny: any = 'hi';
 export const imAnUnknown: unknown = 'hi';
 
+// This kind of type was triggering an `any` type even though it has no anys!
+export interface InterfaceWithIndexSignature {
+  [key: string]: { foo: string };
+}
+
 export function plugin() {
   return new PluginA();
 }

@@ -7,6 +7,7 @@
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
+  uiSettingsServiceMock,
 } from '../../../../../src/core/server/mocks';
 import {
   AlertExecutorOptions,
@@ -31,6 +32,7 @@ export const createDefaultAlertExecutorOptions = <
   createdAt = new Date(),
   startedAt = new Date(),
   updatedAt = new Date(),
+  shouldWriteAlerts = true,
 }: {
   alertId?: string;
   ruleName?: string;
@@ -39,6 +41,7 @@ export const createDefaultAlertExecutorOptions = <
   createdAt?: Date;
   startedAt?: Date;
   updatedAt?: Date;
+  shouldWriteAlerts?: boolean;
 }): AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
   alertId,
   createdBy: 'CREATED_BY',
@@ -65,13 +68,16 @@ export const createDefaultAlertExecutorOptions = <
   params,
   spaceId: 'SPACE_ID',
   services: {
-    alertInstanceFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>()
-      .alertInstanceFactory,
+    alertFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>().alertFactory,
     savedObjectsClient: savedObjectsClientMock.create(),
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    shouldWriteAlerts: () => shouldWriteAlerts,
+    shouldStopExecution: () => false,
   },
   state,
   updatedBy: null,
   previousStartedAt: null,
   namespace: undefined,
+  executionId: 'b33f65d7-6e8b-4aae-8d20-c93613deb33f',
 });

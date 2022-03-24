@@ -20,11 +20,11 @@ import { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../..
 
 interface Options {
   sourceId: string;
-  alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
+  ruleParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   buckets: number;
 }
 
-export const useChartPreviewData = ({ sourceId, alertParams, buckets }: Options) => {
+export const useChartPreviewData = ({ sourceId, ruleParams, buckets }: Options) => {
   const { http } = useKibana().services;
 
   const [chartPreviewData, setChartPreviewData] = useState<
@@ -36,7 +36,7 @@ export const useChartPreviewData = ({ sourceId, alertParams, buckets }: Options)
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         setHasError(false);
-        return await callGetChartPreviewDataAPI(sourceId, http!.fetch, alertParams, buckets);
+        return await callGetChartPreviewDataAPI(sourceId, http!.fetch, ruleParams, buckets);
       },
       onResolve: ({ data: { series } }) => {
         setHasError(false);
@@ -46,7 +46,7 @@ export const useChartPreviewData = ({ sourceId, alertParams, buckets }: Options)
         setHasError(true);
       },
     },
-    [sourceId, http, alertParams, buckets]
+    [sourceId, http, ruleParams, buckets]
   );
 
   const isLoading = useMemo(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type DatafeedId = string;
 
@@ -15,4 +15,4 @@ export type ChunkingConfig = estypes.MlChunkingConfig;
 
 export type Aggregation = Record<string, estypes.AggregationsAggregationContainer>;
 
-export type IndicesOptions = estypes.MlDatafeedIndicesOptions;
+export type IndicesOptions = estypes.IndicesOptions;

@@ -58,7 +58,6 @@ export const uiReducer = handleActions<UiState, UiPayload>(
       ...state,
       esKuery: action.payload as string,
     }),
-
     [String(setAlertFlyoutType)]: (state, action: Action<string>) => ({
       ...state,
       alertFlyoutType: action.payload,

@@ -12,8 +12,9 @@ import {
   DynamicSettingsSaveType,
 } from '../../../common/runtime_types';
 import { apiService } from './utils';
+import { API_URLS } from '../../../common/constants';
 
-const apiPath = '/api/uptime/dynamic_settings';
+const apiPath = API_URLS.DYNAMIC_SETTINGS;
 
 interface SaveApiRequest {
   settings: DynamicSettings;

@@ -55,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await ml.api.cleanMlIndices();
+        await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
       });
 
       it('opens a job from job list link', async () => {
@@ -63,7 +64,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToJobManagement();
 
         await ml.testExecution.logTestStep('open job in single metric viewer');
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
@@ -142,6 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await ml.api.cleanMlIndices();
+        await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
       });
 
       it('opens a job from job list link', async () => {
@@ -150,7 +151,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToJobManagement();
 
         await ml.testExecution.logTestStep('open job in single metric viewer');
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobConfig.job_id, 1);
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobConfig.job_id);

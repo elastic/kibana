@@ -2,7 +2,8 @@
 [[rule-types]]
 == Rule types
 
-A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides two types of rules:  rules specific to the Elastic Stack and rules specific to a domain.
+A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the Elastic Stack and rules registered by one of the {kib} apps.
+You can create most rules types in <<create-and-manage-rules,Stack Management > Rules and Connectors>>. For information on creating security rules, refer to {security-guide}/rules-ui-create.html[Create a detection rule].
 
 [NOTE]
 ==============================================
@@ -15,41 +16,63 @@ see {subscriptions}[the subscription page].
 [[stack-rules]]
 === Stack rules
 
-<<create-and-manage-rules, Stack rules>> are built into {kib}.  To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
+<<create-and-manage-rules, Stack rules>> are built into {kib}. To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
 
 [cols="2*<"]
 |===
-
-| <<rule-type-index-threshold>>
-| Aggregate field values from documents using {es} queries, compare them to threshold values, and schedule actions to run when the thresholds are met.
 
 | <<rule-type-es-query>>
 | Run a user-configured {es} query, compare the number of matches to a configured threshold, and schedule actions to run when the threshold condition is met.
 
+| <<rule-type-index-threshold>>
+| Aggregate field values from documents using {es} queries, compare them to threshold values, and schedule actions to run when the thresholds are met.
+
+| {ref}/transform-alerts.html[{transform-cap} rules]
+| beta:[] Run scheduled checks on a {ctransform} to check its health. If a {ctransform} meets the conditions, an alert is created and the associated action is triggered.
+
+| <<geo-alerting, Tracking containment>>
+| Run an {es} query to determine if any documents are currently contained in any boundaries from a specified boundary index and generate alerts when a rule's conditions are met.
+
 |===
 
 [float]
-[[domain-specific-rules]]
-=== Domain rules
+[[observability-rules]]
+=== Observability rules
 
-Domain rules are registered by *Observability*, *Security*, <<maps, Maps>> and <<xpack-ml, Machine Learning>>.
+Observability rules are categorized into APM and User Experience, Logs, Metrics, Stack Monitoring, and Uptime.
 
 [cols="2*<"]
 |===
 
-| {observability-guide}/create-alerts.html[Observability rules]
-| Detect complex conditions in the *Logs*, *Metrics*, and *Uptime* apps.
 
-| {security-guide}/prebuilt-rules.html[Security rules]
-| Detect suspicious source events with pre-built or custom rules and create alerts when a rule’s conditions are met.
+| <<apm-alerts, APM and User Experience>>
+| Detect complex conditions in *APM* data and trigger built-in actions when the conditions are met.
 
-| <<geo-alerting, Maps rules>>
-| Run an {es} query to determine if any documents are currently contained in any boundaries from a specified boundary index and generate alerts when a rule's conditions are met.
+| {observability-guide}/create-alerts.html[Logs rules]
+| Detect complex conditions in the *Logs* app.
 
-| {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] beta:[]
-| Run scheduled checks on an anomaly detection job to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered.
+| {observability-guide}/create-alerts.html[Metrics rules]
+| Detect complex conditions in the *Metrics* app.
+
+| <<kibana-alerts,Stack Monitoring>>
+| Provide {kib} Alerting rules out-of-the box to notify you of potential issues in the Elastic Stack.
+
+| {observability-guide}/create-alerts.html[Uptime rules]
+| Detect complex conditions in the *Uptime* app.
 
 |===
+
+[float]
+[[ml-rules]]
+=== Machine learning rules
+
+beta:[] {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] run scheduled checks on an {anomaly-job} to detect anomalies with certain conditions. If an anomaly meets the conditions, an alert is created and the associated action is triggered.
+
+[float]
+[[security-rules]]
+=== Security rules
+
+Security rules detect suspicious source events with pre-built or custom rules and create alerts when a rule’s conditions are met. For more information, refer to {security-guide}/prebuilt-rules.html[Security rules].
 
 include::rule-types/index-threshold.asciidoc[]
 include::rule-types/es-query.asciidoc[]

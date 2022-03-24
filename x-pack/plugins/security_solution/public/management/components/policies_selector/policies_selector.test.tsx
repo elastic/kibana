@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
-import { render, act, fireEvent, RenderResult } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import React from 'react';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 
@@ -46,13 +48,11 @@ describe('Policies selector', () => {
       const defaultIncludedPolicies = 'abc123';
       const defaultExcludedPolicies = 'global';
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
-      act(() => {
-        fireEvent.click(element.getByTestId('policiesSelectorButton'));
-      });
+
+      userEvent.click(element.getByTestId('policiesSelectorButton'));
       expect(element.getByText(policy.name)).toHaveTextContent(policy.name);
-      act(() => {
-        fireEvent.click(element.getByText('Unassigned entries'));
-      });
+
+      userEvent.click(element.getByText('Unassigned entries'));
       expect(onChangeSelectionMock).toHaveBeenCalledWith([
         { checked: 'on', id: 'abc123', name: 'test policy A' },
         { checked: 'off', id: 'global', name: 'Global entries' },
@@ -65,12 +65,10 @@ describe('Policies selector', () => {
       const defaultIncludedPolicies = 'abc123';
       const defaultExcludedPolicies = 'global';
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
-      act(() => {
-        fireEvent.click(element.getByTestId('policiesSelectorButton'));
-      });
-      act(() => {
-        fireEvent.click(element.getByText(policy.name));
-      });
+
+      userEvent.click(element.getByTestId('policiesSelectorButton'));
+
+      userEvent.click(element.getByText(policy.name));
       expect(onChangeSelectionMock).toHaveBeenCalledWith([
         { checked: 'off', id: 'abc123', name: 'test policy A' },
         { checked: 'off', id: 'global', name: 'Global entries' },
@@ -82,12 +80,10 @@ describe('Policies selector', () => {
       const defaultIncludedPolicies = 'abc123';
       const defaultExcludedPolicies = 'global';
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
-      act(() => {
-        fireEvent.click(element.getByTestId('policiesSelectorButton'));
-      });
-      act(() => {
-        fireEvent.click(element.getByText('Global entries'));
-      });
+
+      userEvent.click(element.getByTestId('policiesSelectorButton'));
+
+      userEvent.click(element.getByText('Global entries'));
       expect(onChangeSelectionMock).toHaveBeenCalledWith([
         { checked: 'on', id: 'abc123', name: 'test policy A' },
         { checked: undefined, id: 'global', name: 'Global entries' },
@@ -99,27 +95,29 @@ describe('Policies selector', () => {
   describe('When filter policy', () => {
     it('should filter policy by name', () => {
       const element = getElement({});
-      act(() => {
-        fireEvent.click(element.getByTestId('policiesSelectorButton'));
-      });
-      act(() => {
-        fireEvent.change(element.getByTestId('policiesSelectorSearch'), {
-          target: { value: policy.name },
-        });
-      });
+
+      userEvent.click(element.getByTestId('policiesSelectorButton'));
+
+      userEvent.type(element.getByTestId('policiesSelectorSearch'), policy.name);
       expect(element.queryAllByText('Global entries')).toStrictEqual([]);
       expect(element.getByText(policy.name)).toHaveTextContent(policy.name);
     });
     it('should filter with no results', () => {
       const element = getElement({});
-      act(() => {
-        fireEvent.click(element.getByTestId('policiesSelectorButton'));
-      });
-      act(() => {
-        fireEvent.change(element.getByTestId('policiesSelectorSearch'), {
-          target: { value: 'no results' },
-        });
-      });
+
+      userEvent.click(element.getByTestId('policiesSelectorButton'));
+
+      userEvent.type(element.getByTestId('policiesSelectorSearch'), 'no results');
+      expect(element.queryAllByText('Global entries')).toStrictEqual([]);
+      expect(element.queryAllByText('Unassigned entries')).toStrictEqual([]);
+      expect(element.queryAllByText(policy.name)).toStrictEqual([]);
+    });
+    it('should filter with special chars', () => {
+      const element = getElement({});
+
+      userEvent.click(element.getByTestId('policiesSelectorButton'));
+
+      userEvent.type(element.getByTestId('policiesSelectorSearch'), '*');
       expect(element.queryAllByText('Global entries')).toStrictEqual([]);
       expect(element.queryAllByText('Unassigned entries')).toStrictEqual([]);
       expect(element.queryAllByText(policy.name)).toStrictEqual([]);

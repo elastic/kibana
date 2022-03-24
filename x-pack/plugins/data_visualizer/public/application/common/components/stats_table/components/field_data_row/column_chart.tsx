@@ -22,7 +22,8 @@ interface Props {
   columnType: EuiDataGridColumn;
   dataTestSubj: string;
   hideLabel?: boolean;
-  maxChartColumns?: number;
+  maxChartColumns: number;
+  isNumeric?: boolean;
 }
 
 const zeroSize = { bottom: 0, left: 0, right: 0, top: 0 };
@@ -34,16 +35,21 @@ export const ColumnChart: FC<Props> = ({
   dataTestSubj,
   hideLabel,
   maxChartColumns,
+  isNumeric,
 }) => {
-  const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns);
+  const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns, isNumeric);
 
   return (
-    <div data-test-subj={dataTestSubj}>
+    <div data-test-subj={dataTestSubj} style={{ width: '100%' }}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
         <Chart size={size}>
           <Settings
-            xDomain={{ min: 0, max: 9 }}
-            theme={{ chartMargins: zeroSize, chartPaddings: zeroSize }}
+            xDomain={Array.from({ length: maxChartColumns }, (_, i) => i)}
+            theme={{
+              chartMargins: zeroSize,
+              chartPaddings: zeroSize,
+              crosshair: { band: { visible: false } },
+            }}
           />
           <Axis
             id="bottom"
@@ -55,7 +61,7 @@ export const ColumnChart: FC<Props> = ({
           />
           <BarSeries
             id={'count'}
-            xScaleType={ScaleType.Linear}
+            xScaleType={ScaleType.Ordinal}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['doc_count']}
@@ -66,7 +72,6 @@ export const ColumnChart: FC<Props> = ({
       )}
       <div
         className={classNames('dataGridChart__legend', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataGridChart__legend--numeric': columnType.schema === 'number',
         })}
         data-test-subj={`${dataTestSubj}-legend`}

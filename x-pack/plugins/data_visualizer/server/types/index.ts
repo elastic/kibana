@@ -5,4 +5,3 @@
  * 2.0.
  */
 export * from './deps';
-export * from './chart_data';

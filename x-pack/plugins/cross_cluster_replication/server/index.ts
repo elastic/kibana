@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { CrossClusterReplicationServerPlugin } from './plugin';
-import { configSchema, CrossClusterReplicationConfig } from './config';
+
+export { config } from './config';
 
 export const plugin = (pluginInitializerContext: PluginInitializerContext) =>
   new CrossClusterReplicationServerPlugin(pluginInitializerContext);
-
-export const config: PluginConfigDescriptor<CrossClusterReplicationConfig> = {
-  schema: configSchema,
-  exposeToBrowser: {
-    ui: true,
-  },
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
-};

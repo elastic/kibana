@@ -31,6 +31,14 @@ import { RouteDependencies } from '../../../';
 import { Body, Query } from './validation_config';
 
 function toURL(base: string, path: string) {
+  const [p, query = ''] = path.split('?');
+
+  // if there is a '+' sign in query e.g. ?q=create_date:[2020-05-10T08:00:00.000+08:00 TO *]
+  // node url encodes it as a whitespace which results in a faulty request
+  // we need to replace '+' with '%2b' to encode it correctly
+  if (/\+/g.test(query)) {
+    path = `${p}?${query.replace(/\+/g, '%2b')}`;
+  }
   const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
   // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
@@ -116,7 +124,7 @@ export const createHandler =
   }: RouteDependencies): RequestHandler<unknown, Query, Body> =>
   async (ctx, request, response) => {
     const { body, query } = request;
-    const { path, method } = query;
+    const { method, path, withProductOrigin } = query;
 
     if (kibanaVersion.major < 8) {
       // The "console.proxyFilter" setting in kibana.yaml has been deprecated in 8.x
@@ -153,6 +161,11 @@ export const createHandler =
         const requestHeaders = {
           ...headers,
           ...getProxyHeaders(request),
+          // There are a few internal calls that console UI makes to ES in order to get mappings, aliases and templates
+          // in the autocomplete mechanism from the editor. At this particular time, those requests generate deprecation
+          // logs since they access system indices. With this header we can provide a way to the UI to determine which
+          // requests need to deprecation logs and which ones dont.
+          ...(withProductOrigin && { 'x-elastic-product-origin': 'kibana' }),
         };
 
         esIncomingMessage = await proxyRequest({

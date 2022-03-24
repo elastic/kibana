@@ -5,7 +5,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["expressions", "visualizations", "charts", "presentationUtil", "fieldFormats"],
-  "requiredBundles": ["kibanaUtils"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"],
   "optionalPlugins": [],
   "owner": {
     "name": "Vis Editors",

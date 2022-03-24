@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/WorkpadHeader/EditorMenu dark mode 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownLeft"
+  data-test-subj="canvasEditorMenuButton"
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      className="euiButton euiButton--text solutionToolbarButton undefined"
+      data-test-subj="canvasEditorMenuButton"
+      disabled={false}
+      onClick={[Function]}
+      style={
+        Object {
+          "minWidth": undefined,
+        }
+      }
+      type="button"
+    >
+      <span
+        className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+      >
+        <span
+          className="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="arrowDown"
+          size="m"
+        />
+        <span
+          className="euiButton__text"
+        >
+          Select type
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/EditorMenu default 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownLeft"
+  data-test-subj="canvasEditorMenuButton"
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      className="euiButton euiButton--text solutionToolbarButton undefined"
+      data-test-subj="canvasEditorMenuButton"
+      disabled={false}
+      onClick={[Function]}
+      style={
+        Object {
+          "minWidth": undefined,
+        }
+      }
+      type="button"
+    >
+      <span
+        className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+      >
+        <span
+          className="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="arrowDown"
+          size="m"
+        />
+        <span
+          className="euiButton__text"
+        >
+          Select type
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

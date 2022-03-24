@@ -35,7 +35,7 @@ Port `12345` is used as an example here, it can be anything, but the environment
 ## DockerServers service setup
 
 We use the `DockerServers` service provided by `kbn-test`. The documentation for this functionality can be found here:
-https://github.com/elastic/kibana/blob/master/packages/kbn-test/src/functional_test_runner/lib/docker_servers/README.md
+https://github.com/elastic/kibana/blob/main/packages/kbn-test/src/functional_test_runner/lib/docker_servers/README.md
 
 The main configuration for the `DockerServers` service for our tests can be found in `x-pack/test/fleet_api_integration/config.ts`:
 

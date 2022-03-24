@@ -13,10 +13,19 @@ test --experimental_guard_against_concurrent_changes
 query --experimental_guard_against_concurrent_changes
 
 ## Cache action outputs on disk so they persist across output_base and bazel shutdown (eg. changing branches)
-common --disk_cache=~/.bazel-cache/disk-cache
+build --disk_cache=~/.bazel-cache/disk-cache
+fetch --disk_cache=~/.bazel-cache/disk-cache
+query --disk_cache=~/.bazel-cache/disk-cache
+sync --disk_cache=~/.bazel-cache/disk-cache
+test --disk_cache=~/.bazel-cache/disk-cache
 
 ## Bazel repo cache settings
-common --repository_cache=~/.bazel-cache/repository-cache
+build --repository_cache=~/.bazel-cache/repository-cache
+fetch --repository_cache=~/.bazel-cache/repository-cache
+query --repository_cache=~/.bazel-cache/repository-cache
+run --repository_cache=~/.bazel-cache/repository-cache
+sync --repository_cache=~/.bazel-cache/repository-cache
+test --repository_cache=~/.bazel-cache/repository-cache
 
 # Bazel will create symlinks from the workspace directory to output artifacts.
 # Build results will be placed in a directory called "bazel-bin"
@@ -35,9 +44,7 @@ build --experimental_inprocess_symlink_creation
 
 # Incompatible flags to run with
 build --incompatible_no_implicit_file_export
-build --incompatible_restrict_string_escapes
 query --incompatible_no_implicit_file_export
-query --incompatible_restrict_string_escapes
 
 # Log configs
 ## different from default
@@ -120,8 +127,11 @@ test --incompatible_strict_action_env
 # collect coverage information from test targets
 coverage --instrument_test_targets
 
-# Settings for CI
-# Bazel flags for CI are in /src/dev/ci_setup/.bazelrc-ci
+# Metadata settings
+build --workspace_status_command="node ./src/dev/bazel_workspace_status.js"
+
+# Load remote cache settings, if they exist
+try-import %workspace%/.bazelrc.cache
 
 # Load any settings specific to the current user.
 # .bazelrc.user should appear in .gitignore so that settings are not shared with team members

@@ -8,15 +8,16 @@
     "data",
     "embeddable",
     "inspector",
-    "kibanaLegacy",
+    "fieldFormats",
     "urlForwarding",
     "navigation",
     "uiActions",
     "savedObjects",
-    "indexPatternFieldEditor"
+    "dataViewFieldEditor",
+    "dataViewEditor"
   ],
   "optionalPlugins": ["home", "share", "usageCollection", "spaces"],
-  "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "fieldFormats", "dataViews"],
+  "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "dataViews"],
   "extraPublicDirs": ["common"],
   "owner": {
     "name": "Data Discovery",

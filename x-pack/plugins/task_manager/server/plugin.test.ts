@@ -17,7 +17,6 @@ describe('TaskManagerPlugin', () => {
     test('throws if no valid UUID is available', async () => {
       const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
         max_workers: 10,
-        index: 'foo',
         max_attempts: 9,
         poll_interval: 3000,
         version_conflict_threshold: 80,
@@ -44,6 +43,10 @@ describe('TaskManagerPlugin', () => {
         unsafe: {
           exclude_task_types: [],
         },
+        event_loop_delay: {
+          monitor: true,
+          warn_threshold: 5000,
+        },
       });
 
       pluginInitializerContext.env.instanceUuid = '';
@@ -59,7 +62,6 @@ describe('TaskManagerPlugin', () => {
     test('throws if setup methods are called after start', async () => {
       const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
         max_workers: 10,
-        index: 'foo',
         max_attempts: 9,
         poll_interval: 3000,
         version_conflict_threshold: 80,
@@ -85,6 +87,10 @@ describe('TaskManagerPlugin', () => {
         },
         unsafe: {
           exclude_task_types: [],
+        },
+        event_loop_delay: {
+          monitor: true,
+          warn_threshold: 5000,
         },
       });
 
@@ -130,7 +136,6 @@ describe('TaskManagerPlugin', () => {
     test('it logs a warning when the unsafe `exclude_task_types` config is used', async () => {
       const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
         max_workers: 10,
-        index: 'foo',
         max_attempts: 9,
         poll_interval: 3000,
         version_conflict_threshold: 80,
@@ -156,6 +161,10 @@ describe('TaskManagerPlugin', () => {
         },
         unsafe: {
           exclude_task_types: ['*'],
+        },
+        event_loop_delay: {
+          monitor: true,
+          warn_threshold: 5000,
         },
       });
 

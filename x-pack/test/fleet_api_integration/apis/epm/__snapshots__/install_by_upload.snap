@@ -26,8 +26,8 @@ Object {
     "kibana": Object {
       "dashboard": Array [
         Object {
-          "file": "apache-Logs-Apache-Dashboard-ecs-new.json",
-          "path": "apache-0.1.4/kibana/dashboard/apache-Logs-Apache-Dashboard-ecs-new.json",
+          "file": "apache-Logs-Apache-Dashboard-ecs.json",
+          "path": "apache-0.1.4/kibana/dashboard/apache-Logs-Apache-Dashboard-ecs.json",
           "pkgkey": "apache-0.1.4",
           "service": "kibana",
           "type": "dashboard",
@@ -42,6 +42,13 @@ Object {
       ],
       "search": Array [
         Object {
+          "file": "Apache-HTTPD-ecs.json",
+          "path": "apache-0.1.4/kibana/search/Apache-HTTPD-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "search",
+        },
+        Object {
           "file": "Apache-access-logs-ecs.json",
           "path": "apache-0.1.4/kibana/search/Apache-access-logs-ecs.json",
           "pkgkey": "apache-0.1.4",
@@ -55,46 +62,11 @@ Object {
           "service": "kibana",
           "type": "search",
         },
-        Object {
-          "file": "Apache-HTTPD-ecs.json",
-          "path": "apache-0.1.4/kibana/search/Apache-HTTPD-ecs.json",
-          "pkgkey": "apache-0.1.4",
-          "service": "kibana",
-          "type": "search",
-        },
       ],
       "visualization": Array [
         Object {
-          "file": "Apache-access-unique-IPs-map-ecs.json",
-          "path": "apache-0.1.4/kibana/visualization/Apache-access-unique-IPs-map-ecs.json",
-          "pkgkey": "apache-0.1.4",
-          "service": "kibana",
-          "type": "visualization",
-        },
-        Object {
           "file": "Apache-HTTPD-CPU-ecs.json",
           "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-CPU-ecs.json",
-          "pkgkey": "apache-0.1.4",
-          "service": "kibana",
-          "type": "visualization",
-        },
-        Object {
-          "file": "Apache-HTTPD-Load1-slash-5-slash-15-ecs.json",
-          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Load1-slash-5-slash-15-ecs.json",
-          "pkgkey": "apache-0.1.4",
-          "service": "kibana",
-          "type": "visualization",
-        },
-        Object {
-          "file": "Apache-response-codes-over-time-ecs.json",
-          "path": "apache-0.1.4/kibana/visualization/Apache-response-codes-over-time-ecs.json",
-          "pkgkey": "apache-0.1.4",
-          "service": "kibana",
-          "type": "visualization",
-        },
-        Object {
-          "file": "Apache-HTTPD-Workers-ecs.json",
-          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Workers-ecs.json",
           "pkgkey": "apache-0.1.4",
           "service": "kibana",
           "type": "visualization",
@@ -107,8 +79,8 @@ Object {
           "type": "visualization",
         },
         Object {
-          "file": "Apache-error-logs-over-time-ecs.json",
-          "path": "apache-0.1.4/kibana/visualization/Apache-error-logs-over-time-ecs.json",
+          "file": "Apache-HTTPD-Load1-slash-5-slash-15-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Load1-slash-5-slash-15-ecs.json",
           "pkgkey": "apache-0.1.4",
           "service": "kibana",
           "type": "visualization",
@@ -121,6 +93,13 @@ Object {
           "type": "visualization",
         },
         Object {
+          "file": "Apache-HTTPD-Total-accesses-and-kbytes-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Total-accesses-and-kbytes-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
           "file": "Apache-HTTPD-Uptime-ecs.json",
           "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Uptime-ecs.json",
           "pkgkey": "apache-0.1.4",
@@ -128,15 +107,15 @@ Object {
           "type": "visualization",
         },
         Object {
-          "file": "Apache-operating-systems-ecs.json",
-          "path": "apache-0.1.4/kibana/visualization/Apache-operating-systems-ecs.json",
+          "file": "Apache-HTTPD-Workers-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Workers-ecs.json",
           "pkgkey": "apache-0.1.4",
           "service": "kibana",
           "type": "visualization",
         },
         Object {
-          "file": "Apache-HTTPD-Total-accesses-and-kbytes-ecs.json",
-          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Total-accesses-and-kbytes-ecs.json",
+          "file": "Apache-access-unique-IPs-map-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-access-unique-IPs-map-ecs.json",
           "pkgkey": "apache-0.1.4",
           "service": "kibana",
           "type": "visualization",
@@ -149,8 +128,29 @@ Object {
           "type": "visualization",
         },
         Object {
+          "file": "Apache-error-logs-over-time-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-error-logs-over-time-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-operating-systems-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-operating-systems-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
           "file": "Apache-response-codes-of-top-URLs-ecs.json",
           "path": "apache-0.1.4/kibana/visualization/Apache-response-codes-of-top-URLs-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-response-codes-over-time-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-response-codes-over-time-ecs.json",
           "pkgkey": "apache-0.1.4",
           "service": "kibana",
           "type": "visualization",
@@ -162,7 +162,9 @@ Object {
     "web",
   ],
   "conditions": Object {
-    "kibana.version": "^7.9.0",
+    "kibana": Object {
+      "version": "^7.9.0",
+    },
   },
   "data_streams": Array [
     Object {
@@ -174,6 +176,7 @@ Object {
       "streams": Array [
         Object {
           "description": "Collect Apache access logs",
+          "enabled": true,
           "input": "logfile",
           "template_path": "log.yml.hbs",
           "title": "Apache access logs",
@@ -198,14 +201,46 @@ Object {
       "type": "logs",
     },
     Object {
-      "dataset": "apache.status",
+      "dataset": "apache.error",
       "ingest_pipeline": "default",
+      "package": "apache",
+      "path": "error",
+      "release": "experimental",
+      "streams": Array [
+        Object {
+          "description": "Collect Apache error logs",
+          "enabled": true,
+          "input": "logfile",
+          "template_path": "log.yml.hbs",
+          "title": "Apache error logs",
+          "vars": Array [
+            Object {
+              "default": Array [
+                "/var/log/apache2/error.log*",
+                "/var/log/httpd/error_log*",
+              ],
+              "multi": true,
+              "name": "paths",
+              "required": true,
+              "show_user": true,
+              "title": "Paths",
+              "type": "text",
+            },
+          ],
+        },
+      ],
+      "title": "Apache error logs",
+      "type": "logs",
+    },
+    Object {
+      "dataset": "apache.status",
       "package": "apache",
       "path": "status",
       "release": "experimental",
       "streams": Array [
         Object {
           "description": "Collect Apache status metrics",
+          "enabled": true,
           "input": "apache/metrics",
           "template_path": "stream.yml.hbs",
           "title": "Apache status metrics",
@@ -234,44 +269,15 @@ Object {
       "title": "Apache status metrics",
       "type": "metrics",
     },
-    Object {
-      "dataset": "apache.error",
-      "ingest_pipeline": "default",
-      "package": "apache",
-      "path": "error",
-      "release": "experimental",
-      "streams": Array [
-        Object {
-          "description": "Collect Apache error logs",
-          "input": "logfile",
-          "template_path": "log.yml.hbs",
-          "title": "Apache error logs",
-          "vars": Array [
-            Object {
-              "default": Array [
-                "/var/log/apache2/error.log*",
-                "/var/log/httpd/error_log*",
-              ],
-              "multi": true,
-              "name": "paths",
-              "required": true,
-              "show_user": true,
-              "title": "Paths",
-              "type": "text",
-            },
-          ],
-        },
-      ],
-      "title": "Apache error logs",
-      "type": "logs",
-    },
   ],
-  "description": "Apache Uploaded Test Integration",
+  "description": "Apache Integration",
+  "download": "/epr/apache/apache-0.1.4.zip",
   "format_version": "1.0.0",
   "icons": Array [
     Object {
+      "path": "/package/apache/0.1.4/img/logo_apache.svg",
       "size": "32x32",
-      "src": "/img/logo_apache_test.svg",
+      "src": "/img/logo_apache.svg",
       "title": "Apache Logo",
       "type": "image/svg+xml",
     },
@@ -282,6 +288,7 @@ Object {
   "owner": Object {
     "github": "elastic/integrations-services",
   },
+  "path": "/package/apache/0.1.4",
   "policy_templates": Array [
     Object {
       "description": "Collect logs and metrics from Apache instances",
@@ -290,7 +297,6 @@ Object {
           "description": "Collecting Apache access and error logs",
           "title": "Collect logs from Apache instances",
           "type": "logfile",
-          "vars": Array [],
         },
         Object {
           "description": "Collecting Apache status metrics",
@@ -331,16 +337,20 @@ Object {
       "install_version": "0.1.4",
       "installed_es": Array [
         Object {
-          "id": "logs-apache.access-0.1.4",
+          "id": "logs-apache.access-0.1.4-default",
           "type": "ingest_pipeline",
         },
         Object {
-          "id": "logs-apache.error-0.1.4",
+          "id": "logs-apache.error-0.1.4-default",
           "type": "ingest_pipeline",
         },
         Object {
           "id": "logs-apache.access",
           "type": "index_template",
+        },
+        Object {
+          "id": "logs-apache.access@mappings",
+          "type": "component_template",
         },
         Object {
           "id": "logs-apache.access@settings",
@@ -355,6 +365,10 @@ Object {
           "type": "index_template",
         },
         Object {
+          "id": "metrics-apache.status@mappings",
+          "type": "component_template",
+        },
+        Object {
           "id": "metrics-apache.status@settings",
           "type": "component_template",
         },
@@ -365,6 +379,10 @@ Object {
         Object {
           "id": "logs-apache.error",
           "type": "index_template",
+        },
+        Object {
+          "id": "logs-apache.error@mappings",
+          "type": "component_template",
         },
         Object {
           "id": "logs-apache.error@settings",
@@ -449,8 +467,7 @@ Object {
           "type": "search",
         },
       ],
-      "internal": false,
-      "keep_policies_up_to_date": false,
+      "installed_kibana_space_id": "default",
       "name": "apache",
       "package_assets": Array [
         Object {
@@ -696,12 +713,14 @@ Object {
   },
   "screenshots": Array [
     Object {
+      "path": "/package/apache/0.1.4/img/kibana-apache.png",
       "size": "1215x1199",
-      "src": "/img/kibana-apache-test.png",
+      "src": "/img/kibana-apache.png",
       "title": "Apache Integration",
       "type": "image/png",
     },
     Object {
+      "path": "/package/apache/0.1.4/img/apache_httpd_server_status.png",
       "size": "1919x1079",
       "src": "/img/apache_httpd_server_status.png",
       "title": "Apache HTTPD Server Status",

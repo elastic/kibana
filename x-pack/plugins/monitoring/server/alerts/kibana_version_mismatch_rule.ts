@@ -17,18 +17,12 @@ import {
   CommonAlertParams,
   AlertVersions,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
-import {
-  RULE_KIBANA_VERSION_MISMATCH,
-  LEGACY_RULE_DETAILS,
-  INDEX_PATTERN_KIBANA,
-} from '../../common/constants';
+import { Alert } from '../../../alerting/server';
+import { RULE_KIBANA_VERSION_MISMATCH, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 
 export class KibanaVersionMismatchRule extends BaseRule {
@@ -68,17 +62,11 @@ export class KibanaVersionMismatchRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: string[]
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let kibanaIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_KIBANA);
-    if (availableCcs) {
-      kibanaIndexPattern = getCcsIndexPattern(kibanaIndexPattern, availableCcs);
-    }
     const kibanaVersions = await fetchKibanaVersions(
       esClient,
       clusters,
-      kibanaIndexPattern,
       Globals.app.config.ui.max_bucket_size,
       params.filterQuery
     );
@@ -109,7 +97,7 @@ export class KibanaVersionMismatchRule extends BaseRule {
   }
 
   protected async executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

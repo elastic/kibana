@@ -8,6 +8,8 @@
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
+
+import { TimelineId } from '../../../../common/types';
 import '../../mock/match_media';
 import { TestProviders, mockIndexPattern } from '../../mock';
 
@@ -27,6 +29,9 @@ jest.mock('react-router-dom', () => {
 
 jest.mock('../../lib/kibana');
 jest.mock('../link_to');
+jest.mock('../visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
 
 jest.mock('uuid', () => {
   return {
@@ -126,9 +131,59 @@ describe('TopN', () => {
 
       expect(toggleTopN).toHaveBeenCalled();
     });
+  });
 
-    test('it enables the view select by default', () => {
-      expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(false);
+  describe('view selection', () => {
+    const detectionAlertsTimelines = [
+      TimelineId.detectionsPage,
+      TimelineId.detectionsRulesDetailsPage,
+    ];
+
+    const nonDetectionAlertTables = [
+      TimelineId.hostsPageEvents,
+      TimelineId.hostsPageExternalAlerts,
+      TimelineId.networkPageExternalAlerts,
+      TimelineId.casePage,
+    ];
+
+    test('it disables view selection when timelineId is undefined', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <TopN {...testProps} timelineId={undefined} />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(true);
+    });
+
+    test('it disables view selection when timelineId is `active`', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <TopN {...testProps} timelineId={TimelineId.active} />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(true);
+    });
+
+    detectionAlertsTimelines.forEach((timelineId) => {
+      test(`it enables view selection for detection alert table '${timelineId}'`, () => {
+        const wrapper = mount(
+          <TestProviders>
+            <TopN {...testProps} timelineId={timelineId} />
+          </TestProviders>
+        );
+        expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(false);
+      });
+    });
+
+    nonDetectionAlertTables.forEach((timelineId) => {
+      test(`it disables view selection for NON detection alert table '${timelineId}'`, () => {
+        const wrapper = mount(
+          <TestProviders>
+            <TopN {...testProps} timelineId={timelineId} />
+          </TestProviders>
+        );
+        expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(true);
+      });
     });
   });
 
@@ -201,10 +256,6 @@ describe('TopN', () => {
           <TopN {...testProps} combinedQueries={JSON.stringify(combinedQueries)} />
         </TestProviders>
       );
-    });
-
-    test(`it disables the view select when 'options' contains only one entry`, () => {
-      expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(true);
     });
 
     test(`it renders EventsByDataset when defaultView is 'all'`, () => {

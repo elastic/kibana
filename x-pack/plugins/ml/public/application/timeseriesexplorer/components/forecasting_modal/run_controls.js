@@ -33,7 +33,7 @@ import {
   createPermissionFailureMessage,
 } from '../../../capabilities/check_capabilities';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 function getRunInputDisabledState(job, isForecastRequested) {
   // Disable the 'run forecast' text field and button if any of the conditions are met:

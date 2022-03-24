@@ -13,7 +13,7 @@ import {
 
 import { engines } from '../../__mocks__/engines.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { elasticsearchUsers } from '../../../shared/role_mapping/__mocks__/elasticsearch_users';
 
@@ -21,7 +21,8 @@ import {
   asRoleMapping,
   asSingleUserRoleMapping,
 } from '../../../shared/role_mapping/__mocks__/roles';
-import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { RoleMappingsLogic } from './role_mappings_logic';
 
@@ -29,11 +30,10 @@ const emptyUser = { username: '', email: '' };
 
 describe('RoleMappingsLogic', () => {
   const { http } = mockHttpValues;
-  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(RoleMappingsLogic);
   const DEFAULT_VALUES = {
     attributes: [],
-    availableAuthProviders: [],
     elasticsearchRoles: [],
     elasticsearchUser: emptyUser,
     elasticsearchUsers: [],
@@ -45,11 +45,9 @@ describe('RoleMappingsLogic', () => {
     attributeName: 'username',
     dataLoading: true,
     hasAdvancedRoles: false,
-    multipleAuthProvidersConfig: false,
     availableEngines: [],
     selectedEngines: new Set(),
     accessAllEngines: true,
-    selectedAuthProviders: [ANY_AUTH_PROVIDER],
     selectedOptions: [],
     roleMappingErrors: [],
     singleUserRoleMapping: null,
@@ -63,10 +61,8 @@ describe('RoleMappingsLogic', () => {
   };
 
   const mappingsServerProps = {
-    multipleAuthProvidersConfig: true,
     roleMappings: [asRoleMapping],
     attributes: ['email', 'metadata', 'username', 'role'],
-    authProviders: [ANY_AUTH_PROVIDER],
     availableEngines: engines,
     elasticsearchRoles: [],
     hasAdvancedRoles: false,
@@ -94,10 +90,8 @@ describe('RoleMappingsLogic', () => {
           roleMappings: [asRoleMapping],
           dataLoading: false,
           attributes: mappingsServerProps.attributes,
-          availableAuthProviders: mappingsServerProps.authProviders,
           availableEngines: mappingsServerProps.availableEngines,
           accessAllEngines: true,
-          multipleAuthProvidersConfig: true,
           attributeName: 'username',
           attributeValue: '',
           elasticsearchRoles: mappingsServerProps.elasticsearchRoles,
@@ -222,7 +216,6 @@ describe('RoleMappingsLogic', () => {
 
         expect(RoleMappingsLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          multipleAuthProvidersConfig: true,
           attributeValue: elasticsearchRoles[0],
           roleMappings: [asRoleMapping],
           roleMapping: null,
@@ -253,54 +246,6 @@ describe('RoleMappingsLogic', () => {
       expect(RoleMappingsLogic.values).toEqual({
         ...DEFAULT_VALUES,
         attributeValue: 'changed_value',
-      });
-    });
-
-    describe('handleAuthProviderChange', () => {
-      beforeEach(() => {
-        mount({
-          ...mappingsServerProps,
-          roleMappings: [
-            {
-              ...asRoleMapping,
-              authProvider: ['foo'],
-            },
-          ],
-        });
-      });
-      const providers = ['bar', 'baz'];
-      const providerWithAny = [ANY_AUTH_PROVIDER, providers[1]];
-      it('handles empty state', () => {
-        RoleMappingsLogic.actions.handleAuthProviderChange([]);
-
-        expect(RoleMappingsLogic.values.selectedAuthProviders).toEqual([ANY_AUTH_PROVIDER]);
-      });
-
-      it('handles single value', () => {
-        RoleMappingsLogic.actions.handleAuthProviderChange([providers[0]]);
-
-        expect(RoleMappingsLogic.values.selectedAuthProviders).toEqual([providers[0]]);
-      });
-
-      it('handles multiple values', () => {
-        RoleMappingsLogic.actions.handleAuthProviderChange(providers);
-
-        expect(RoleMappingsLogic.values.selectedAuthProviders).toEqual(providers);
-      });
-
-      it('handles "any" auth in previous state', () => {
-        mount({
-          ...mappingsServerProps,
-          roleMappings: [
-            {
-              ...asRoleMapping,
-              authProvider: [ANY_AUTH_PROVIDER],
-            },
-          ],
-        });
-        RoleMappingsLogic.actions.handleAuthProviderChange(providerWithAny);
-
-        expect(RoleMappingsLogic.values.selectedAuthProviders).toEqual([providers[1]]);
       });
     });
 
@@ -391,12 +336,8 @@ describe('RoleMappingsLogic', () => {
         expect(setRoleMappingsSpy).toHaveBeenCalledWith(mappingsServerProps);
       });
 
-      it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         RoleMappingsLogic.actions.enableRoleBasedAccess();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -411,12 +352,8 @@ describe('RoleMappingsLogic', () => {
         expect(setRoleMappingsDataSpy).toHaveBeenCalledWith(mappingsServerProps);
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         RoleMappingsLogic.actions.initializeRoleMappings();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
 
       it('resets roleMapping state', () => {
@@ -485,7 +422,6 @@ describe('RoleMappingsLogic', () => {
       const body = {
         roleType: 'owner',
         accessAllEngines: true,
-        authProvider: [ANY_AUTH_PROVIDER],
         rules: {
           username: '',
         },
@@ -691,13 +627,9 @@ describe('RoleMappingsLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalled();
       });
 
-      it('handles error', async () => {
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         mount(mappingsServerProps);
-        http.delete.mockReturnValue(Promise.reject('this is an error'));
         RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 

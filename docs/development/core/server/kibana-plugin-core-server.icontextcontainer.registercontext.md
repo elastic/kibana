@@ -16,13 +16,13 @@ registerContext<Context extends RequestHandlerContext, ContextName extends keyof
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  pluginOpaqueId | <code>PluginOpaqueId</code> | The plugin opaque ID for the plugin that registers this context. |
-|  contextName | <code>ContextName</code> | The key of the <code>TContext</code> object this provider supplies the value for. |
-|  provider | <code>IContextProvider&lt;Context, ContextName&gt;</code> | A [IContextProvider](./kibana-plugin-core-server.icontextprovider.md) to be called each time a new context is created. |
+|  pluginOpaqueId | PluginOpaqueId | The plugin opaque ID for the plugin that registers this context. |
+|  contextName | ContextName | The key of the <code>TContext</code> object this provider supplies the value for. |
+|  provider | IContextProvider&lt;Context, ContextName&gt; | A [IContextProvider](./kibana-plugin-core-server.icontextprovider.md) to be called each time a new context is created. |
 
 <b>Returns:</b>
 
-`this`
+this
 
 The [IContextContainer](./kibana-plugin-core-server.icontextcontainer.md) for method chaining.
 

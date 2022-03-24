@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiText,
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -63,6 +64,7 @@ export function LayerPanel(
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
     initialActiveDimensionState
   );
+  const [hideTooltip, setHideTooltip] = useState<boolean>(false);
 
   const {
     framePublicAPI,
@@ -125,11 +127,7 @@ export function LayerPanel(
     dateRange,
   };
 
-  const {
-    groups,
-    supportStaticValue,
-    supportFieldFormat = true,
-  } = useMemo(
+  const { groups } = useMemo(
     () => activeVisualization.getConfiguration(layerVisualizationConfigProps),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -320,12 +318,7 @@ export function LayerPanel(
 
   return (
     <>
-      <section
-        tabIndex={-1}
-        ref={registerLayerRef}
-        className="lnsLayerPanel"
-        style={{ visibility: isDimensionPanelOpen ? 'hidden' : 'visible' }}
-      >
+      <section tabIndex={-1} ref={registerLayerRef} className="lnsLayerPanel">
         <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="none">
           <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
@@ -388,8 +381,28 @@ export function LayerPanel(
           </header>
 
           {groups.map((group, groupIndex) => {
-            const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
+            let isMissing = false;
 
+            if (!isEmptyLayer) {
+              if (group.requiredMinDimensionCount) {
+                isMissing = group.accessors.length < group.requiredMinDimensionCount;
+              } else if (group.required) {
+                isMissing = group.accessors.length === 0;
+              }
+            }
+
+            const isMissingError = group.requiredMinDimensionCount
+              ? i18n.translate('xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel', {
+                  defaultMessage: 'Requires {requiredMinDimensionCount} fields',
+                  values: {
+                    requiredMinDimensionCount: group.requiredMinDimensionCount,
+                  },
+                })
+              : i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
+                  defaultMessage: 'Requires field',
+                });
+
+            const isOptional = !group.required && !group.suggestedValue;
             return (
               <EuiFormRow
                 className="lnsLayerPanel__row"
@@ -399,7 +412,6 @@ export function LayerPanel(
                     {group.groupLabel}
                     {group.groupTooltip && (
                       <>
-                        {' '}
                         <EuiIconTip
                           color="subdued"
                           content={group.groupTooltip}
@@ -414,16 +426,19 @@ export function LayerPanel(
                     )}
                   </>
                 }
+                labelAppend={
+                  isOptional ? (
+                    <EuiText color="subdued" size="xs" data-test-subj="lnsGroup_optional">
+                      {i18n.translate('xpack.lens.editorFrame.optionalDimensionLabel', {
+                        defaultMessage: 'Optional',
+                      })}
+                    </EuiText>
+                  ) : null
+                }
                 labelType="legend"
                 key={group.groupId}
                 isInvalid={isMissing}
-                error={
-                  isMissing
-                    ? i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
-                        defaultMessage: 'Required dimension',
-                      })
-                    : []
-                }
+                error={isMissing ? isMissingError : []}
               >
                 <>
                   {group.accessors.length ? (
@@ -445,6 +460,8 @@ export function LayerPanel(
                             layerDatasource={layerDatasource}
                             layerIndex={layerIndex}
                             layerId={layerId}
+                            onDragStart={() => setHideTooltip(true)}
+                            onDragEnd={() => setHideTooltip(false)}
                             onDrop={onDrop}
                           >
                             <div className="lnsLayerPanel__dimension">
@@ -477,6 +494,13 @@ export function LayerPanel(
                                   );
                                   removeButtonRef(id);
                                 }}
+                                invalid={
+                                  !layerDatasource.isValidColumn(
+                                    layerDatasourceState,
+                                    layerId,
+                                    columnId
+                                  )
+                                }
                               >
                                 <NativeRenderer
                                   render={layerDatasource.renderDimensionTrigger}
@@ -485,6 +509,7 @@ export function LayerPanel(
                                     columnId: accessorConfig.columnId,
                                     groupId: group.groupId,
                                     filterOperations: group.filterOperations,
+                                    hideTooltip,
                                     invalid: group.invalid,
                                     invalidMessage: group.invalidMessage,
                                   }}
@@ -511,7 +536,7 @@ export function LayerPanel(
                         setActiveDimension({
                           activeGroup: group,
                           activeId: id,
-                          isNew: !supportStaticValue,
+                          isNew: !group.supportStaticValue,
                         });
                       }}
                       onDrop={onDrop}
@@ -568,8 +593,9 @@ export function LayerPanel(
                   toggleFullscreen,
                   isFullscreen,
                   setState: updateDataLayerState,
-                  supportStaticValue: Boolean(supportStaticValue),
-                  supportFieldFormat: Boolean(supportFieldFormat),
+                  supportStaticValue: Boolean(activeGroup.supportStaticValue),
+                  paramEditorCustomProps: activeGroup.paramEditorCustomProps,
+                  supportFieldFormat: activeGroup.supportFieldFormat !== false,
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 }}
               />

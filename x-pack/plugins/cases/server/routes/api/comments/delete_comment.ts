@@ -7,42 +7,33 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDeps } from '../types';
-import { wrapError } from '../utils';
-import { CASE_COMMENT_DETAILS_URL } from '../../../../common';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../common/constants';
+import { createCasesRoute } from '../create_cases_route';
+import { createCaseError } from '../../../common/error';
 
-export function initDeleteCommentApi({ router, logger }: RouteDeps) {
-  router.delete(
-    {
-      path: CASE_COMMENT_DETAILS_URL,
-      validate: {
-        params: schema.object({
-          case_id: schema.string(),
-          comment_id: schema.string(),
-        }),
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const client = await context.cases.getCasesClient();
-        await client.attachments.delete({
-          attachmentID: request.params.comment_id,
-          subCaseID: request.query?.subCaseId,
-          caseID: request.params.case_id,
-        });
+export const deleteCommentRoute = createCasesRoute({
+  method: 'delete',
+  path: CASE_COMMENT_DETAILS_URL,
+  params: {
+    params: schema.object({
+      case_id: schema.string(),
+      comment_id: schema.string(),
+    }),
+  },
+  handler: async ({ context, request, response }) => {
+    try {
+      const client = await context.cases.getCasesClient();
+      await client.attachments.delete({
+        attachmentID: request.params.comment_id,
+        caseID: request.params.case_id,
+      });
 
-        return response.noContent();
-      } catch (error) {
-        logger.error(
-          `Failed to delete comment in route case id: ${request.params.case_id} comment id: ${request.params.comment_id} sub case id: ${request.query?.subCaseId}: ${error}`
-        );
-        return response.customError(wrapError(error));
-      }
+      return response.noContent();
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to delete comment in route case id: ${request.params.case_id} comment id: ${request.params.comment_id}: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});

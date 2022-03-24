@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { euiThemeVars } from '@kbn/ui-theme';
 import { mount } from 'enzyme';
 import { omit, set } from 'lodash/fp';
 import React from 'react';
@@ -17,14 +18,12 @@ import {
   getSchema,
 } from './helpers';
 import {
+  DEFAULT_ACTION_BUTTON_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  DEFAULT_ACTIONS_COLUMN_WIDTH,
-  EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
-  SHOW_CHECK_BOXES_COLUMN_WIDTH,
 } from '../constants';
 import { mockBrowserFields } from '../../../../mock/browser_fields';
-import { ColumnHeaderOptions } from '../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../common/types';
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
@@ -44,28 +43,6 @@ describe('helpers', () => {
 
     test('it returns the expected width for a date column', () => {
       expect(getColumnWidthFromType('date')).toEqual(DEFAULT_DATE_COLUMN_MIN_WIDTH);
-    });
-  });
-
-  describe('getActionsColumnWidth', () => {
-    test('returns the default actions column width when isEventViewer is false', () => {
-      expect(getActionsColumnWidth(false)).toEqual(DEFAULT_ACTIONS_COLUMN_WIDTH);
-    });
-
-    test('returns the default actions column width + checkbox width when isEventViewer is false and showCheckboxes is true', () => {
-      expect(getActionsColumnWidth(false, true)).toEqual(
-        DEFAULT_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
-      );
-    });
-
-    test('returns the events viewer actions column width when isEventViewer is true', () => {
-      expect(getActionsColumnWidth(true)).toEqual(EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH);
-    });
-
-    test('returns the events viewer actions column width + checkbox width when isEventViewer is true and showCheckboxes is true', () => {
-      expect(getActionsColumnWidth(true, true)).toEqual(
-        EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
-      );
     });
   });
 
@@ -98,6 +75,7 @@ describe('helpers', () => {
   describe('getColumnHeaders', () => {
     // additional properties used by `EuiDataGrid`:
     const actions = {
+      showHide: false,
       showSortAsc: true,
       showSortDesc: true,
     };
@@ -340,6 +318,139 @@ describe('helpers', () => {
       expect(
         getColumnHeaders([headerDoesNotMatchBrowserField], mockBrowserFields).map(omit('display'))
       ).toEqual(expected);
+    });
+
+    describe('augment the `header` with metadata from `browserFields`', () => {
+      test('it should augment the `header` when field category is base', () => {
+        const fieldName = 'test_field';
+        const testField = {
+          aggregatable: true,
+          category: 'base',
+          description:
+            'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
+          example: '2016-05-23T08:05:34.853Z',
+          format: 'date',
+          indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+          name: fieldName,
+          searchable: true,
+          type: 'date',
+        };
+
+        const browserField = { base: { fields: { [fieldName]: testField } } };
+
+        const header: ColumnHeaderOptions = {
+          columnHeaderType: 'not-filtered',
+          id: fieldName,
+        };
+
+        expect(
+          getColumnHeaders([header], browserField).map(
+            omit(['display', 'actions', 'isSortable', 'defaultSortDirection', 'schema'])
+          )
+        ).toEqual([
+          {
+            ...header,
+            ...browserField.base.fields[fieldName],
+          },
+        ]);
+      });
+
+      test("it should augment the `header` when field is top level and name isn't splittable", () => {
+        const fieldName = 'testFieldName';
+        const testField = {
+          aggregatable: true,
+          category: fieldName,
+          description: 'test field description',
+          example: '2016-05-23T08:05:34.853Z',
+          format: 'date',
+          indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+          name: fieldName,
+          searchable: true,
+          type: 'date',
+        };
+
+        const browserField = { [fieldName]: { fields: { [fieldName]: testField } } };
+
+        const header: ColumnHeaderOptions = {
+          columnHeaderType: 'not-filtered',
+          id: fieldName,
+        };
+
+        expect(
+          getColumnHeaders([header], browserField).map(
+            omit(['display', 'actions', 'isSortable', 'defaultSortDirection', 'schema'])
+          )
+        ).toEqual([
+          {
+            ...header,
+            ...browserField[fieldName].fields[fieldName],
+          },
+        ]);
+      });
+
+      test('it should augment the `header` when field is splittable', () => {
+        const fieldName = 'test.field.splittable';
+        const testField = {
+          aggregatable: true,
+          category: 'test',
+          description: 'test field description',
+          example: '2016-05-23T08:05:34.853Z',
+          format: 'date',
+          indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+          name: fieldName,
+          searchable: true,
+          type: 'date',
+        };
+
+        const browserField = { test: { fields: { [fieldName]: testField } } };
+
+        const header: ColumnHeaderOptions = {
+          columnHeaderType: 'not-filtered',
+          id: fieldName,
+        };
+
+        expect(
+          getColumnHeaders([header], browserField).map(
+            omit(['display', 'actions', 'isSortable', 'defaultSortDirection', 'schema'])
+          )
+        ).toEqual([
+          {
+            ...header,
+            ...browserField.test.fields[fieldName],
+          },
+        ]);
+      });
+    });
+  });
+
+  describe('getActionsColumnWidth', () => {
+    // ideally the following implementation detail wouldn't be part of these tests,
+    // but without it, the test would be brittle when `euiDataGridCellPaddingM` changes:
+    const expectedPadding = parseInt(euiThemeVars.euiDataGridCellPaddingM, 10) * 2;
+
+    test('it returns the expected width', () => {
+      const ACTION_BUTTON_COUNT = 5;
+      const expectedContentWidth = ACTION_BUTTON_COUNT * DEFAULT_ACTION_BUTTON_WIDTH;
+
+      expect(getActionsColumnWidth(ACTION_BUTTON_COUNT)).toEqual(
+        expectedContentWidth + expectedPadding
+      );
+    });
+
+    test('it returns the minimum width when the button count is zero', () => {
+      const ACTION_BUTTON_COUNT = 0;
+
+      expect(getActionsColumnWidth(ACTION_BUTTON_COUNT)).toEqual(
+        DEFAULT_ACTION_BUTTON_WIDTH + expectedPadding
+      );
+    });
+
+    test('it returns the minimum width when the button count is negative', () => {
+      const ACTION_BUTTON_COUNT = -1;
+
+      expect(getActionsColumnWidth(ACTION_BUTTON_COUNT)).toEqual(
+        DEFAULT_ACTION_BUTTON_WIDTH + expectedPadding
+      );
     });
   });
 });

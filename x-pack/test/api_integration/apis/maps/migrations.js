@@ -7,11 +7,12 @@
 
 import expect from '@kbn/expect';
 
+import semver from 'semver';
+
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
 
-  describe('migrations', () => {
+  describe('map migrations', () => {
     describe('saved object migrations', () => {
       it('should apply saved object reference migration when importing map saved objects prior to 7.2.0', async () => {
         const resp = await supertest
@@ -44,24 +45,26 @@ export default function ({ getService }) {
             type: 'index-pattern',
           },
         ]);
-        expect(resp.body.migrationVersion).to.eql({ map: '7.14.0' });
+        expect(resp.body.migrationVersion).to.eql({ map: '8.1.0' }); // migrtionVersion is derived from both "migrations" and "convertToMultiNamespaceVersion" fields when the object is registered
         expect(resp.body.attributes.layerListJSON.includes('indexPatternRefName')).to.be(true);
+      });
+
+      it('should not fail migration with invalid attributes', async () => {
+        await supertest
+          .post(`/api/saved_objects/map`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            attributes: {
+              title: '[Logs] Total Requests and Bytes',
+              layerListJSON: 'not valid layerListJSON',
+            },
+            migrationVersion: {},
+          })
+          .expect(200);
       });
     });
 
     describe('embeddable migrations', () => {
-      before(async () => {
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
-        );
-      });
-
-      after(async () => {
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
-        );
-      });
-
       it('should apply embeddable migrations', async () => {
         const resp = await supertest
           .get(`/api/saved_objects/dashboard/4beb0d80-c2ef-11eb-b0cb-bd162d969e6b`)
@@ -76,7 +79,7 @@ export default function ({ getService }) {
         }
         expect(panels.length).to.be(1);
         expect(panels[0].type).to.be('map');
-        expect(panels[0].version).to.be('8.0.0');
+        expect(semver.gte(panels[0].version, '8.1.0')).to.be(true);
       });
     });
   });

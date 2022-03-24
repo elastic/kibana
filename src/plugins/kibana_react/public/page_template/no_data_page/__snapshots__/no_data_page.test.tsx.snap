@@ -3,89 +3,125 @@
 exports[`NoDataPage render 1`] = `
 <div
   className="kbnNoDataPageContents"
->
-  <EuiText
-    textAlign="center"
-  >
-    <KibanaPageTemplateSolutionNavAvatar
-      iconType="logoElastic"
-      name="Elastic"
-      size="xxl"
-    />
-    <EuiSpacer />
-    <h1>
-      <FormattedMessage
-        defaultMessage="Welcome to Elastic {solution}!"
-        id="kibana-react.noDataPage.welcomeTitle"
-        values={
-          Object {
-            "solution": "Elastic",
-          }
-        }
-      />
-    </h1>
-    <EuiTextColor
-      color="subdued"
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="Add your data to get started, or {link} about {solution}."
-          id="kibana-react.noDataPage.intro"
-          values={
-            Object {
-              "link": <EuiLink
-                href="test"
-              >
-                <FormattedMessage
-                  defaultMessage="learn more"
-                  id="kibana-react.noDataPage.intro.link"
-                  values={Object {}}
-                />
-              </EuiLink>,
-              "solution": "Elastic",
-            }
-          }
-        />
-      </p>
-    </EuiTextColor>
-  </EuiText>
-  <EuiSpacer
-    size="xxl"
-  />
-  <EuiSpacer
-    size="l"
-  />
-  <EuiFlexGrid
-    columns={2}
-    style={
-      Object {
-        "justifyContent": "space-around",
-      }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
     }
-  >
-    <EuiFlexItem
-      className="kbnNoDataPageContents__item"
-      key="empty-page-agent-action"
-    >
-      <ElasticAgentCard
-        solution="Elastic"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      className="kbnNoDataPageContents__item"
-      key="empty-page-beats-action"
-    >
-      <ElasticBeatsCard
-        solution="Elastic"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      className="kbnNoDataPageContents__item"
-      key="empty-page-custom-action"
-    >
-      <NoDataCard />
-    </EuiFlexItem>
-  </EuiFlexGrid>
+  }
+>
+  <NoDataPageBody
+    actionCards={
+      Array [
+        <ElasticAgentCard
+          solution="Elastic"
+        />,
+        <ElasticAgentCard
+          solution="Elastic"
+        />,
+        <NoDataCard />,
+      ]
+    }
+    docsLink="test"
+    pageTitle="Welcome to Elastic Elastic!"
+    solution="Elastic"
+  />
   <EuiSpacer
     size="xxl"
   />

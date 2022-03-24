@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
@@ -25,7 +25,7 @@ function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
       .deleteWatch({
         id: watchId,
       })
-      .then(({ body: success }) => ({ success }))
+      .then((success) => ({ success }))
       .catch((error) => ({ error }));
   });
 

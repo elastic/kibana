@@ -19,6 +19,7 @@ import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { MarkdownSimple } from '../../../../../../../../plugins/kibana_react/public';
+import { LEGACY_TIME_AXIS } from '../../../../../../../../plugins/charts/common';
 import { replaceVars } from '../../lib/replace_vars';
 import { getInterval } from '../../lib/get_interval';
 import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
@@ -238,7 +239,7 @@ class TimeseriesVisualization extends Component {
       } else if (!mainDomainAdded) {
         const tickFormatter = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)
           ? seriesGroupTickFormatter
-          : (val) => val;
+          : createTickFormatter(undefined, undefined, getConfig);
 
         TimeseriesVisualization.addYAxis(yAxis, {
           tickFormatter,
@@ -265,6 +266,7 @@ class TimeseriesVisualization extends Component {
             legend={Boolean(model.show_legend)}
             legendPosition={model.legend_position}
             truncateLegend={Boolean(model.truncate_legend)}
+            ignoreDaylightTime={Boolean(model.ignore_daylight_time)}
             maxLegendLines={model.max_lines_legend}
             tooltipMode={model.tooltip_mode}
             xAxisFormatter={this.xAxisFormatter(interval)}
@@ -272,6 +274,7 @@ class TimeseriesVisualization extends Component {
             syncColors={syncColors}
             palettesService={palettesService}
             interval={interval}
+            useLegacyTimeAxis={getConfig(LEGACY_TIME_AXIS, false)}
             isLastBucketDropped={Boolean(
               model.drop_last_bucket ||
                 model.series.some((series) => series.series_drop_last_bucket)

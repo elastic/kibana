@@ -10,23 +10,35 @@ import { IField, AbstractField } from './field';
 import { IVectorSource } from '../sources/vector_source';
 
 export class InlineField<T extends IVectorSource> extends AbstractField implements IField {
+  private readonly _label?: string;
   private readonly _source: T;
   private readonly _dataType: string;
 
   constructor({
     fieldName,
+    label,
     source,
     origin,
     dataType,
   }: {
     fieldName: string;
+    label?: string;
     source: T;
     origin: FIELD_ORIGIN;
     dataType: string;
   }) {
     super({ fieldName, origin });
+    this._label = label;
     this._source = source;
     this._dataType = dataType;
+  }
+
+  supportsFieldMetaFromEs(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    return true;
   }
 
   getSource(): IVectorSource {
@@ -34,7 +46,7 @@ export class InlineField<T extends IVectorSource> extends AbstractField implemen
   }
 
   async getLabel(): Promise<string> {
-    return this.getName();
+    return this._label ? this._label : this.getName();
   }
 
   async getDataType(): Promise<string> {

@@ -22,6 +22,7 @@ export type {
   ActionType,
   PreConfiguredAction,
   ActionsApiRequestHandlerContext,
+  FindActionResult,
 } from './types';
 
 export type {
@@ -57,7 +58,9 @@ export const plugin = (initContext: PluginInitializerContext) => new ActionsPlug
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot, unused }) => [
-    renameFromRoot('xpack.actions.whitelistedHosts', 'xpack.actions.allowedHosts'),
+    renameFromRoot('xpack.actions.whitelistedHosts', 'xpack.actions.allowedHosts', {
+      level: 'warning',
+    }),
     (settings, fromPath, addDeprecation) => {
       const actions = get(settings, fromPath);
       const customHostSettings = actions?.customHostSettings ?? [];
@@ -69,6 +72,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
         )
       ) {
         addDeprecation({
+          level: 'warning',
           configPath: 'xpack.actions.customHostSettings.ssl.rejectUnauthorized',
           message:
             `"xpack.actions.customHostSettings[<index>].ssl.rejectUnauthorized" is deprecated.` +
@@ -97,15 +101,16 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       const actions = get(settings, fromPath);
       if (actions?.hasOwnProperty('rejectUnauthorized')) {
         addDeprecation({
+          level: 'warning',
           configPath: `${fromPath}.rejectUnauthorized`,
           message:
-            `"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.verificationMode" instead, ` +
+            `"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.ssl.verificationMode" instead, ` +
             `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
             `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
           correctiveActions: {
             manualSteps: [
               `Remove "xpack.actions.rejectUnauthorized" from your kibana configs.`,
-              `Use "xpack.actions.verificationMode" ` +
+              `Use "xpack.actions.ssl.verificationMode" ` +
                 `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
                 `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
             ],
@@ -124,15 +129,16 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       const actions = get(settings, fromPath);
       if (actions?.hasOwnProperty('proxyRejectUnauthorizedCertificates')) {
         addDeprecation({
+          level: 'warning',
           configPath: `${fromPath}.proxyRejectUnauthorizedCertificates`,
           message:
-            `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.proxyVerificationMode" instead, ` +
+            `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.ssl.proxyVerificationMode" instead, ` +
             `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
             `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
           correctiveActions: {
             manualSteps: [
               `Remove "xpack.actions.proxyRejectUnauthorizedCertificates" from your kibana configs.`,
-              `Use "xpack.actions.proxyVerificationMode" ` +
+              `Use "xpack.actions.ssl.proxyVerificationMode" ` +
                 `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
                 `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
             ],

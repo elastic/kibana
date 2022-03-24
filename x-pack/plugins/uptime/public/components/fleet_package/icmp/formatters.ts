@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ICMPFields, ConfigKeys } from '../types';
+import { ICMPFields, ConfigKey } from '../types';
 import { Formatter, commonFormatters, secondsToCronFormatter } from '../common/formatters';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 
 export const icmpFormatters: ICMPFormatMap = {
-  [ConfigKeys.HOSTS]: null,
-  [ConfigKeys.WAIT]: (fields) => secondsToCronFormatter(fields[ConfigKeys.WAIT]),
+  [ConfigKey.HOSTS]: null,
+  [ConfigKey.WAIT]: (fields) => secondsToCronFormatter(fields[ConfigKey.WAIT]),
   ...commonFormatters,
 };

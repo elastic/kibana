@@ -5,15 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import Semver from 'semver';
+import semverGt from 'semver/functions/gt';
 import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
-import { DashboardContainerStateWithType, DashboardPanelState } from './types';
+import {
+  DashboardContainerControlGroupInput,
+  DashboardContainerStateWithType,
+  DashboardPanelState,
+  RawControlGroupAttributes,
+} from './types';
 import { EmbeddablePersistableStateService } from '../../embeddable/common/types';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from './embeddable/embeddable_saved_object_converters';
 import { SavedDashboardPanel } from './types';
+import { CONTROL_GROUP_TYPE } from '../../controls/common';
+
 export interface ExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
 }
@@ -23,7 +30,7 @@ export interface SavedObjectAttributesAndReferences {
 }
 
 const isPre730Panel = (panel: Record<string, string>): boolean => {
-  return 'version' in panel ? Semver.gt('7.3.0', panel.version) : true;
+  return 'version' in panel ? semverGt('7.3.0', panel.version) : true;
 };
 
 function dashboardAttributesToState(attributes: SavedObjectAttributes): {
@@ -35,10 +42,27 @@ function dashboardAttributesToState(attributes: SavedObjectAttributes): {
     inputPanels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
   }
 
+  let controlGroupInput: DashboardContainerControlGroupInput | undefined;
+  if (attributes.controlGroupInput) {
+    const rawControlGroupInput =
+      attributes.controlGroupInput as unknown as RawControlGroupAttributes;
+    if (rawControlGroupInput.panelsJSON && typeof rawControlGroupInput.panelsJSON === 'string') {
+      const controlGroupPanels = JSON.parse(rawControlGroupInput.panelsJSON);
+      if (controlGroupPanels && typeof controlGroupPanels === 'object') {
+        controlGroupInput = {
+          ...rawControlGroupInput,
+          type: CONTROL_GROUP_TYPE,
+          panels: controlGroupPanels,
+        };
+      }
+    }
+  }
+
   return {
     panels: inputPanels,
     state: {
       id: attributes.id as string,
+      controlGroupInput,
       type: 'dashboard',
       panels: inputPanels.reduce<Record<string, DashboardPanelState>>((current, panel, index) => {
         const panelIndex = panel.panelIndex || `${index}`;
@@ -92,20 +116,27 @@ export function extractReferences(
     throw new Error(`"type" attribute is missing from panel "${missingTypeIndex}"`);
   }
 
-  const { state: extractedState, references: extractedReferences } =
+  const { references: extractedReferences, state: rawExtractedState } =
     deps.embeddablePersistableStateService.extract(state);
+  const extractedState = rawExtractedState as DashboardContainerStateWithType;
 
-  const extractedPanels = panelStatesToPanels(
-    (extractedState as DashboardContainerStateWithType).panels,
-    panels
-  );
+  const extractedPanels = panelStatesToPanels(extractedState.panels, panels);
+
+  const newAttributes = {
+    ...attributes,
+    panelsJSON: JSON.stringify(extractedPanels),
+  } as SavedObjectAttributes;
+
+  if (extractedState.controlGroupInput) {
+    newAttributes.controlGroupInput = {
+      ...(attributes.controlGroupInput as SavedObjectAttributes),
+      panelsJSON: JSON.stringify(extractedState.controlGroupInput.panels),
+    };
+  }
 
   return {
     references: [...references, ...extractedReferences],
-    attributes: {
-      ...attributes,
-      panelsJSON: JSON.stringify(extractedPanels),
-    },
+    attributes: newAttributes,
   };
 }
 
@@ -131,16 +162,25 @@ export function injectReferences(
 
   const { panels, state } = dashboardAttributesToState(attributes);
 
-  const injectedState = deps.embeddablePersistableStateService.inject(state, references);
-  const injectedPanels = panelStatesToPanels(
-    (injectedState as DashboardContainerStateWithType).panels,
-    panels
-  );
+  const injectedState = deps.embeddablePersistableStateService.inject(
+    state,
+    references
+  ) as DashboardContainerStateWithType;
+  const injectedPanels = panelStatesToPanels(injectedState.panels, panels);
 
-  return {
+  const newAttributes = {
     ...attributes,
     panelsJSON: JSON.stringify(injectedPanels),
-  };
+  } as SavedObjectAttributes;
+
+  if (injectedState.controlGroupInput) {
+    newAttributes.controlGroupInput = {
+      ...(attributes.controlGroupInput as SavedObjectAttributes),
+      panelsJSON: JSON.stringify(injectedState.controlGroupInput.panels),
+    };
+  }
+
+  return newAttributes;
 }
 
 function pre730ExtractReferences(

@@ -66,6 +66,7 @@ export interface VisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   syncColors: boolean;
+  useLegacyTimeAxis: boolean;
 }
 
 export type VisComponentType = typeof VisComponent;
@@ -211,8 +212,9 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const { visData, visParams, syncColors } = props;
+  const isDarkMode = getThemeService().useDarkMode();
 
-  const config = getConfig(visData, visParams);
+  const config = getConfig(visData, visParams, props.useLegacyTimeAxis, isDarkMode);
   const timeZone = getTimeZone();
   const xDomain =
     config.xAxis.scale.type === ScaleType.Ordinal ? undefined : getXDomain(config.aspects.x.params);
@@ -229,7 +231,7 @@ const VisComponent = (props: VisComponentProps) => {
     () => config.legend.position ?? Position.Right,
     [config.legend.position]
   );
-  const isDarkMode = getThemeService().useDarkMode();
+
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
 
   const splitAccessors = config.aspects.series?.map(({ accessor, formatter }) => {
@@ -362,6 +364,7 @@ const VisComponent = (props: VisComponentProps) => {
           showLegend={showLegend}
           onPointerUpdate={handleCursorUpdate}
           legendPosition={legendPosition}
+          legendSize={visParams.legendSize}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
           legendColorPicker={legendColorPicker}
@@ -371,6 +374,7 @@ const VisComponent = (props: VisComponentProps) => {
             splitSeriesAccessors,
             splitChartColumnAccessor ?? splitChartRowAccessor
           )}
+          ariaLabel={visParams.ariaLabel}
           onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}
           onRenderChange={onRenderChange}
           legendAction={

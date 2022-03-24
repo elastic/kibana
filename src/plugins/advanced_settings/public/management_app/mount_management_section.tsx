@@ -11,9 +11,10 @@ import ReactDOM from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteChildrenProps } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { LocationDescriptor } from 'history';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { url } from '../../../kibana_utils/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
@@ -70,25 +71,28 @@ export async function mountManagementSection(
   chrome.docTitle.change(title);
 
   ReactDOM.render(
-    <I18nProvider>
-      <Router history={params.history}>
-        <Switch>
-          {/* TODO: remove route param (`query`) in 7.13 */}
-          <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
-          <Route path="/">
-            <AdvancedSettings
-              history={params.history}
-              enableSaving={canSave}
-              toasts={notifications.toasts}
-              dockLinks={docLinks.links}
-              uiSettings={uiSettings}
-              componentRegistry={componentRegistry}
-              trackUiMetric={trackUiMetric}
-            />
-          </Route>
-        </Switch>
-      </Router>
-    </I18nProvider>,
+    <KibanaThemeProvider theme$={params.theme$}>
+      <I18nProvider>
+        <Router history={params.history}>
+          <Switch>
+            {/* TODO: remove route param (`query`) in 7.13 */}
+            <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
+            <Route path="/">
+              <AdvancedSettings
+                history={params.history}
+                enableSaving={canSave}
+                toasts={notifications.toasts}
+                docLinks={docLinks.links}
+                uiSettings={uiSettings}
+                theme={params.theme$}
+                componentRegistry={componentRegistry}
+                trackUiMetric={trackUiMetric}
+              />
+            </Route>
+          </Switch>
+        </Router>
+      </I18nProvider>
+    </KibanaThemeProvider>,
     params.element
   );
   return () => {

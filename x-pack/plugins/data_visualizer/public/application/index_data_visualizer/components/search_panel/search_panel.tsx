@@ -12,24 +12,22 @@ import { Query, Filter } from '@kbn/es-query';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
-import {
-  IndexPattern,
-  IndexPatternField,
-  TimeRange,
-} from '../../../../../../../../src/plugins/data/common';
+import { TimeRange } from '../../../../../../../../src/plugins/data/common';
+import { DataView, DataViewField } from '../../../../../../../../src/plugins/data_views/public';
 import { JobFieldType } from '../../../../../common/types';
 import { SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import './_index.scss';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
+import { OverallStats } from '../../types/overall_stats';
 interface Props {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   searchString: Query['query'];
   searchQuery: Query['query'];
   searchQueryLanguage: SearchQueryLanguage;
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
-  overallStats: any;
+  overallStats: OverallStats;
   indexedFieldTypes: JobFieldType[];
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
@@ -47,11 +45,11 @@ interface Props {
     filters: Filter[];
   }): void;
   showEmptyFields: boolean;
-  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export const SearchPanel: FC<Props> = ({
-  indexPattern,
+  dataView,
   searchString,
   searchQueryLanguage,
   samplerShardSize,
@@ -99,7 +97,7 @@ export const SearchPanel: FC<Props> = ({
       const combinedQuery = createMergedEsQuery(
         mergedQuery,
         queryManager.filterManager.getFilters() ?? [],
-        indexPattern,
+        dataView,
         uiSettings
       );
 
@@ -140,7 +138,7 @@ export const SearchPanel: FC<Props> = ({
           }
           // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
           onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
-          indexPatterns={[indexPattern]}
+          indexPatterns={[dataView]}
           placeholder={i18n.translate('xpack.dataVisualizer.searchPanel.queryBarPlaceholderText', {
             defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
           })}

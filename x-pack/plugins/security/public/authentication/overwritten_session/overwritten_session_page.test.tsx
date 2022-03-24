@@ -9,7 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from 'src/core/public/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';

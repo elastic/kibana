@@ -7,8 +7,7 @@
 
 import { get } from 'lodash';
 import { first } from 'rxjs/operators';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { LevelLogger } from '../lib';
+import type { CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
 import { createConfig$ } from './create_config';
 import { ReportingConfigType } from './schema';
 
@@ -52,14 +51,24 @@ interface KbnServerConfigType {
   };
 }
 
+/**
+ * @internal
+ */
 export interface ReportingConfig extends Config<ReportingConfigType> {
   kbnConfig: Config<KbnServerConfigType>;
 }
 
+/**
+ * @internal
+ * @param {PluginInitializerContext<ReportingConfigType>} initContext
+ * @param {CoreSetup} core
+ * @param {Logger} logger
+ * @returns {Promise<ReportingConfig>}
+ */
 export const buildConfig = async (
   initContext: PluginInitializerContext<ReportingConfigType>,
   core: CoreSetup,
-  logger: LevelLogger
+  logger: Logger
 ): Promise<ReportingConfig> => {
   const config$ = initContext.config.create<ReportingConfigType>();
   const { http } = core;

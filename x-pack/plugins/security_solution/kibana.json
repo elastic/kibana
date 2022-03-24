@@ -18,6 +18,7 @@
     "eventLog",
     "features",
     "inspector",
+    "lens",
     "licensing",
     "maps",
     "ruleRegistry",
@@ -35,10 +36,11 @@
     "security",
     "spaces",
     "usageCollection",
-    "lens",
     "lists",
     "home",
-    "telemetry"
+    "telemetry",
+    "dataViewFieldEditor",
+    "osquery"
   ],
   "server": true,
   "ui": true,

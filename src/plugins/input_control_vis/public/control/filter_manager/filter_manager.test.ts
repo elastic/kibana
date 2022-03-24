@@ -10,11 +10,8 @@ import expect from '@kbn/expect';
 
 import { FilterManager } from './filter_manager';
 import { coreMock } from '../../../../../core/public/mocks';
-import {
-  Filter,
-  FilterManager as QueryFilterManager,
-  IndexPatternsContract,
-} from '../../../../data/public';
+import { FilterManager as QueryFilterManager, DataViewsContract } from '../../../../data/public';
+import { Filter } from '@kbn/es-query';
 
 const setupMock = coreMock.createSetup();
 
@@ -44,7 +41,7 @@ describe('FilterManager', function () {
         controlId,
         'field1',
         '1',
-        {} as IndexPatternsContract,
+        {} as DataViewsContract,
         queryFilterMock
       );
     });

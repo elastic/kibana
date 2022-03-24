@@ -7,21 +7,18 @@
  */
 
 import React from 'react';
-import type { FilterLabelProps } from './filter_editor/lib/filter_label';
 
 const Fallback = () => <div />;
 
 const LazyFilterLabel = React.lazy(() => import('./filter_editor/lib/filter_label'));
-export const FilterLabel = (props: FilterLabelProps) => (
+export const FilterLabel = (props: React.ComponentProps<typeof LazyFilterLabel>) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyFilterLabel {...props} />
   </React.Suspense>
 );
 
-import type { FilterItemProps } from './filter_item';
-
 const LazyFilterItem = React.lazy(() => import('./filter_item'));
-export const FilterItem = (props: FilterItemProps) => (
+export const FilterItem = (props: React.ComponentProps<typeof LazyFilterItem>) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyFilterItem {...props} />
   </React.Suspense>

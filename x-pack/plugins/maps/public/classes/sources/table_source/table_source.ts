@@ -6,6 +6,7 @@
  */
 
 import uuid from 'uuid';
+import { GeoJsonProperties } from 'geojson';
 import type { Query } from 'src/plugins/data/common';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
@@ -23,10 +24,11 @@ import {
   BoundsRequestMeta,
   GeoJsonWithMeta,
   IVectorSource,
-  SourceTooltipConfig,
+  SourceStatus,
 } from '../vector_source';
 import { DataRequest } from '../../util/data_request';
 import { InlineField } from '../../fields/inline_field';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 
 export class TableSource extends AbstractVectorSource implements ITermJoinSource, IVectorSource {
   static type = SOURCE_TYPES.TABLE_SOURCE;
@@ -106,6 +108,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
     return new InlineField<TableSource>({
       fieldName: column.name,
+      label: column.label,
       source: this,
       origin: FIELD_ORIGIN.JOIN,
       dataType: column.type,
@@ -128,6 +131,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return this._descriptor.__columns.map((column) => {
       return new InlineField<TableSource>({
         fieldName: column.name,
+        label: column.label,
         source: this,
         origin: FIELD_ORIGIN.JOIN,
         dataType: column.type,
@@ -171,6 +175,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
     return new InlineField<TableSource>({
       fieldName: column.name,
+      label: column.label,
       source: this,
       origin: FIELD_ORIGIN.JOIN,
       dataType: column.type,
@@ -196,7 +201,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     throw new Error('TableSource cannot be used as a left-layer in a term join');
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
     throw new Error('must add tooltip content');
   }
 
@@ -206,5 +211,18 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
   isBoundsAware(): boolean {
     return false;
+  }
+
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+    const tooltipProperties: ITooltipProperty[] = [];
+    for (const key in properties) {
+      if (properties.hasOwnProperty(key)) {
+        const field = this.getFieldByName(key);
+        if (field) {
+          tooltipProperties.push(new TooltipProperty(key, await field.getLabel(), properties[key]));
+        }
+      }
+    }
+    return tooltipProperties;
   }
 }

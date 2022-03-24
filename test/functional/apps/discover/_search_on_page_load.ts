@@ -43,6 +43,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/date_nested.json'
+      );
 
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
@@ -50,11 +53,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/date_nested');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    describe(`when it's false`, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/118432
+    describe.skip(`when it's false`, () => {
       beforeEach(async () => await initSearchOnPageLoad(false));
 
       it('should not fetch data from ES initially', async function () {
@@ -76,6 +81,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('refreshDataButton')).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
+        /**
+         * We should wait for debounce timeout expired 100 ms,
+         * otherwise click event will be skipped. See getFetch$ implementation.
+         */
+        await PageObjects.common.sleep(100);
         await testSubjects.click('refreshDataButton');
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));

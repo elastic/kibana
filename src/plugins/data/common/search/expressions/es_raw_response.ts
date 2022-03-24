@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ExpressionTypeDefinition } from '../../../../expressions/common';
 
 const name = 'es_raw_response';
@@ -82,6 +82,12 @@ export const esRawResponse: EsRawResponseExpressionTypeDefinition = {
         meta: {
           type: 'esdsl',
           source: '*',
+          statistics: {
+            totalCount:
+              typeof context.body.hits.total === 'number'
+                ? context.body.hits.total
+                : context.body.hits.total?.value,
+          },
         },
         columns,
         rows,

@@ -12,7 +12,7 @@ import {
 } from 'kibana/server';
 import { AlertTypeParams } from '../../index';
 import { Query } from '../../../../../../src/plugins/data/common/query';
-import { RawAlert } from '../../types';
+import { RawRule } from '../../types';
 
 // These definitions are dupes of the SO-types in stack_alerts/geo_containment
 // There are not exported to avoid deep imports from stack_alerts plugins into here
@@ -69,8 +69,8 @@ export function extractEntityAndBoundaryReferences(params: GeoContainmentParams)
 }
 
 export function extractRefsFromGeoContainmentAlert(
-  doc: SavedObjectUnsanitizedDoc<RawAlert>
-): SavedObjectUnsanitizedDoc<RawAlert> {
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
   if (doc.attributes.alertTypeId !== GEO_CONTAINMENT_ID) {
     return doc;
   }

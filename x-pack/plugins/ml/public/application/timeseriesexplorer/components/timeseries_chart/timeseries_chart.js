@@ -547,9 +547,18 @@ class TimeseriesChartIntl extends Component {
 
     // Create the path elements for the forecast value line and bounds area.
     if (contextForecastData) {
-      fcsGroup.append('path').attr('class', 'area forecast');
-      fcsGroup.append('path').attr('class', 'values-line forecast');
-      fcsGroup.append('g').attr('class', 'focus-chart-markers forecast');
+      fcsGroup
+        .append('path')
+        .attr('class', 'area forecast')
+        .attr('data-test-subj', 'mlForecastArea');
+      fcsGroup
+        .append('path')
+        .attr('class', 'values-line forecast')
+        .attr('data-test-subj', 'mlForecastValuesline');
+      fcsGroup
+        .append('g')
+        .attr('class', 'focus-chart-markers forecast')
+        .attr('data-test-subj', 'mlForecastMarkers');
     }
 
     fcsGroup
@@ -1194,15 +1203,16 @@ class TimeseriesChartIntl extends Component {
       .call(brush)
       .selectAll('rect')
       .attr('y', -1)
-      .attr('height', contextChartHeight + swimlaneHeight + 1);
+      .attr('height', contextChartHeight + swimlaneHeight + 1)
+      .attr('width', this.vizWidth);
+
+    const handleBrushExtent = brush.extent();
 
     // move the left and right resize areas over to
     // be under the handles
     contextGroup.selectAll('.w rect').attr('x', -10).attr('width', 10);
 
-    contextGroup.selectAll('.e rect').attr('x', 0).attr('width', 10);
-
-    const handleBrushExtent = brush.extent();
+    contextGroup.selectAll('.e rect').attr('transform', null).attr('width', 10);
 
     const topBorder = contextGroup
       .append('rect')
@@ -1238,6 +1248,7 @@ class TimeseriesChartIntl extends Component {
     function brushing() {
       const brushExtent = brush.extent();
       mask.reveal(brushExtent);
+
       leftHandle.attr('x', contextXScale(brushExtent[0]) - 10);
       rightHandle.attr('x', contextXScale(brushExtent[1]) + 0);
 

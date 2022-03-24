@@ -5,7 +5,7 @@
  * 2.0.
  */
 import deepEqual from 'fast-deep-equal';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
 
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
@@ -33,13 +33,17 @@ import {
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 
-interface Props {
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { useFieldBrowserOptions, FieldEditorActions } from '../../../fields_browser';
+
+export interface ColumnHeadersComponentProps {
   actionsColumnWidth: number;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
   onSelectAll: OnSelectAll;
+  show: boolean;
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
   sort: Sort[];
@@ -89,6 +93,7 @@ export const ColumnHeadersComponent = ({
   isEventViewer = false,
   isSelectAllChecked,
   onSelectAll,
+  show,
   showEventsSelect,
   showSelectAllCheckbox,
   sort,
@@ -96,8 +101,24 @@ export const ColumnHeadersComponent = ({
   timelineId,
   leadingControlColumns,
   trailingControlColumns,
-}: Props) => {
+}: ColumnHeadersComponentProps) => {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const fieldEditorActionsRef = useRef<FieldEditorActions>(null);
+
+  useEffect(() => {
+    return () => {
+      if (fieldEditorActionsRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        fieldEditorActionsRef.current.closeEditor();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!show && fieldEditorActionsRef.current) {
+      fieldEditorActionsRef.current.closeEditor();
+    }
+  }, [show]);
 
   const renderClone: DraggableChildrenFn = useCallback(
     (dragProvided, _dragSnapshot, rubric) => {
@@ -169,6 +190,12 @@ export const ColumnHeadersComponent = ({
     [trailingControlColumns]
   );
 
+  const fieldBrowserOptions = useFieldBrowserOptions({
+    sourcererScope: SourcererScopeName.timeline,
+    timelineId: timelineId as TimelineId,
+    editorActionsRef: fieldEditorActionsRef,
+  });
+
   const LeadingHeaderActions = useMemo(() => {
     return leadingHeaderCells.map(
       (Header: React.ComponentType<HeaderActionProps> | React.ComponentType | undefined, index) => {
@@ -194,6 +221,7 @@ export const ColumnHeadersComponent = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
+                fieldBrowserOptions={fieldBrowserOptions}
               />
             )}
           </EventsThGroupActions>
@@ -206,6 +234,7 @@ export const ColumnHeadersComponent = ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
+    fieldBrowserOptions,
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,
@@ -241,6 +270,7 @@ export const ColumnHeadersComponent = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
+                fieldBrowserOptions={fieldBrowserOptions}
               />
             )}
           </EventsThGroupActions>
@@ -253,6 +283,7 @@ export const ColumnHeadersComponent = ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
+    fieldBrowserOptions,
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,
@@ -288,6 +319,7 @@ export const ColumnHeaders = React.memo(
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
     prevProps.onSelectAll === nextProps.onSelectAll &&
+    prevProps.show === nextProps.show &&
     prevProps.showEventsSelect === nextProps.showEventsSelect &&
     prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
     deepEqual(prevProps.sort, nextProps.sort) &&

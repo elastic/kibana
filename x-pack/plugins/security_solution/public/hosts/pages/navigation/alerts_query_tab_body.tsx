@@ -7,46 +7,18 @@
 
 import React, { useMemo } from 'react';
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
 import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsView } from '../../../common/components/alerts_viewer';
+import { filterHostExternalAlertData } from '../../../common/components/visualization_actions/utils';
 import { AlertsComponentQueryProps } from './types';
 
-export const filterHostData: Filter[] = [
-  {
-    query: {
-      bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  exists: {
-                    field: 'host.name',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
-      },
-    },
-    meta: {
-      alias: '',
-      disabled: false,
-      key: 'bool',
-      negate: false,
-      type: 'custom',
-      value:
-        '{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "host.name"}}],"minimum_should_match": 1}}]}}}',
-    },
-  },
-];
 export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => {
   const { pageFilters, ...rest } = alertsProps;
   const hostPageFilters = useMemo(
-    () => (pageFilters != null ? [...filterHostData, ...pageFilters] : filterHostData),
+    () =>
+      pageFilters != null
+        ? [...filterHostExternalAlertData, ...pageFilters]
+        : filterHostExternalAlertData,
     [pageFilters]
   );
 

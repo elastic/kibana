@@ -38,7 +38,7 @@ export const validateIndexName = async (indexName: string) => {
   const indexPatternNames = await getIndexPatternService().getTitles();
   if (indexPatternNames.includes(indexName)) {
     return i18n.translate('xpack.fileUpload.indexPatternAlreadyExistsErrorMessage', {
-      defaultMessage: 'Index pattern already exists.',
+      defaultMessage: 'Data view already exists.',
     });
   }
 

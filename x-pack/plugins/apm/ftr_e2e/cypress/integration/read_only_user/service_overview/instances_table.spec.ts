@@ -6,14 +6,18 @@
  */
 
 import url from 'url';
-import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
+import { synthtrace } from '../../../../synthtrace';
+import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 
-const { start, end } = archives_metadata['apm_8.0.0'];
+const start = '2021-10-10T00:00:00.000Z';
+const end = '2021-10-10T00:15:00.000Z';
 
 const serviceOverviewHref = url.format({
   pathname: '/app/apm/services/opbeans-java/overview',
   query: { rangeFrom: start, rangeTo: end },
 });
+
+const serviceNodeName = 'opbeans-java-prod-1';
 
 const apisToIntercept = [
   {
@@ -27,8 +31,7 @@ const apisToIntercept = [
     name: 'instancesDetailsRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-java/service_overview_instances/details/31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad?*',
+    endpoint: `/internal/apm/services/opbeans-java/service_overview_instances/details/${serviceNodeName}?*`,
     name: 'instanceDetailsRequest',
   },
 ];
@@ -49,8 +52,18 @@ describe('Instances table', () => {
   // });
 
   describe('when data is loaded', () => {
-    const serviceNodeName =
-      '31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad';
+    before(async () => {
+      await synthtrace.index(
+        opbeans({
+          from: new Date(start).getTime(),
+          to: new Date(end).getTime(),
+        })
+      );
+    });
+
+    after(async () => {
+      await synthtrace.clean();
+    });
 
     it('has data in the table', () => {
       cy.visit(serviceOverviewHref);
@@ -91,7 +104,7 @@ describe('Instances table', () => {
       cy.wait('@instancesDetailsRequest');
       cy.get(
         `[data-test-subj="instanceActionsButton_${serviceNodeName}"]`
-      ).realClick();
+      ).click();
       cy.contains('Pod logs');
       cy.contains('Pod metrics');
       cy.contains('Container logs');

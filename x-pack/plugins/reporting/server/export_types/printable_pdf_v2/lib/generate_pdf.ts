@@ -5,130 +5,64 @@
  * 2.0.
  */
 
-import { groupBy, zip } from 'lodash';
 import * as Rx from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
-import { ReportingCore } from '../../../';
-import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../../common/types';
-import { LevelLogger } from '../../../lib';
-import { createLayout, LayoutParams } from '../../../lib/layouts';
-import { getScreenshots$, ScreenshotResults } from '../../../lib/screenshots';
-import { ConditionalHeaders } from '../../common';
-import { PdfMaker } from '../../common/pdf';
+import { mergeMap, tap } from 'rxjs/operators';
+import type { ReportingCore } from '../../../';
+import type { LocatorParams, PdfMetrics, UrlOrUrlLocatorTuple } from '../../../../common/types';
+import type { PdfScreenshotOptions } from '../../../types';
 import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
+import { getTracker } from '../../common/pdf_tracker';
 import type { TaskPayloadPDFV2 } from '../types';
-import { getTracker } from './tracker';
 
-const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
-  const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
-  const values = Object.values(grouped);
-  if (values.length === 1) {
-    return values[0][0];
-  }
+interface PdfResult {
+  buffer: Uint8Array | null;
+  metrics?: PdfMetrics;
+  warnings: string[];
+}
 
-  return null;
-};
+export function generatePdfObservable(
+  reporting: ReportingCore,
+  job: TaskPayloadPDFV2,
+  locatorParams: LocatorParams[],
+  options: Omit<PdfScreenshotOptions, 'urls'>
+): Rx.Observable<PdfResult> {
+  const tracker = getTracker();
+  tracker.startScreenshots();
 
-export async function generatePdfObservableFactory(reporting: ReportingCore) {
-  const config = reporting.getConfig();
-  const captureConfig = config.get('capture');
-  const { browserDriverFactory } = await reporting.getPluginStartDeps();
+  /**
+   * For each locator we get the relative URL to the redirect app
+   */
+  const urls = locatorParams.map((locator) => [
+    getFullRedirectAppUrl(reporting.getConfig(), job.spaceId, job.forceNow),
+    locator,
+  ]) as UrlOrUrlLocatorTuple[];
+  const screenshots$ = reporting.getScreenshots({ ...options, urls }).pipe(
+    tap(({ metrics }) => {
+      if (metrics) {
+        tracker.setCpuUsage(metrics.cpu);
+        tracker.setMemoryUsage(metrics.memory);
+      }
+    }),
+    mergeMap(async ({ metrics, result }) => {
+      tracker.endScreenshots();
+      const warnings: string[] = [];
+      if (result.errors) {
+        warnings.push(...result.errors.map((error) => error.message));
+      }
+      if (result.renderErrors) {
+        warnings.push(...result.renderErrors);
+      }
 
-  return function generatePdfObservable(
-    logger: LevelLogger,
-    job: TaskPayloadPDFV2,
-    title: string,
-    locatorParams: LocatorParams[],
-    browserTimezone: string | undefined,
-    conditionalHeaders: ConditionalHeaders,
-    layoutParams: LayoutParams,
-    logo?: string
-  ): Rx.Observable<{ buffer: Buffer | null; warnings: string[] }> {
-    const tracker = getTracker();
-    tracker.startLayout();
+      return {
+        buffer: result.data,
+        warnings,
+        metrics: {
+          ...metrics,
+          pages: metrics.pageCount,
+        },
+      };
+    })
+  );
 
-    const layout = createLayout(captureConfig, layoutParams);
-    logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
-    tracker.endLayout();
-
-    tracker.startScreenshots();
-
-    /**
-     * For each locator we get the relative URL to the redirect app
-     */
-    const urls = locatorParams.map(() =>
-      getFullRedirectAppUrl(reporting.getConfig(), job.spaceId, job.forceNow)
-    );
-
-    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
-      logger,
-      urlsOrUrlLocatorTuples: zip(urls, locatorParams) as UrlOrUrlLocatorTuple[],
-      conditionalHeaders,
-      layout,
-      browserTimezone,
-    }).pipe(
-      mergeMap(async (results: ScreenshotResults[]) => {
-        tracker.endScreenshots();
-
-        tracker.startSetup();
-        const pdfOutput = new PdfMaker(layout, logo);
-        if (title) {
-          const timeRange = getTimeRange(results);
-          title += timeRange ? ` - ${timeRange}` : '';
-          pdfOutput.setTitle(title);
-        }
-        tracker.endSetup();
-
-        results.forEach((r) => {
-          r.screenshots.forEach((screenshot) => {
-            logger.debug(`Adding image to PDF. Image base64 size: ${screenshot.data.byteLength}`); // prettier-ignore
-            tracker.startAddImage();
-            tracker.endAddImage();
-            pdfOutput.addImage(screenshot.data, {
-              title: screenshot.title ?? undefined,
-              description: screenshot.description ?? undefined,
-            });
-          });
-        });
-
-        let buffer: Buffer | null = null;
-        try {
-          tracker.startCompile();
-          logger.debug(`Compiling PDF using "${layout.id}" layout...`);
-          pdfOutput.generate();
-          tracker.endCompile();
-
-          tracker.startGetBuffer();
-          logger.debug(`Generating PDF Buffer...`);
-          buffer = await pdfOutput.getBuffer();
-
-          const byteLength = buffer?.byteLength ?? 0;
-          logger.debug(`PDF buffer byte length: ${byteLength}`);
-          tracker.setByteLength(byteLength);
-
-          tracker.endGetBuffer();
-        } catch (err) {
-          logger.error(`Could not generate the PDF buffer!`);
-          logger.error(err);
-        }
-
-        tracker.end();
-
-        return {
-          buffer,
-          warnings: results.reduce((found, current) => {
-            if (current.error) {
-              found.push(current.error.message);
-            }
-            if (current.renderErrors) {
-              found.push(...current.renderErrors);
-            }
-            return found;
-          }, [] as string[]),
-        };
-      })
-    );
-
-    return screenshots$;
-  };
+  return screenshots$;
 }

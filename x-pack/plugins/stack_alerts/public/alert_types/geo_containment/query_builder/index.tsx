@@ -7,20 +7,16 @@
 
 import React, { Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AlertTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
+import { fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
+import { RuleTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
 import { GeoContainmentAlertParams } from '../types';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import {
-  esQuery,
-  esKuery,
-  Query,
-  QueryStringInput,
-} from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data/common';
+import { Query, QueryStringInput } from '../../../../../../../src/plugins/data/public';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
@@ -40,9 +36,7 @@ const DEFAULT_VALUES = {
 function validateQuery(query: Query) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    query.language === 'kuery'
-      ? esKuery.fromKueryExpression(query.query)
-      : esQuery.luceneStringToDsl(query.query);
+    query.language === 'kuery' ? fromKueryExpression(query.query) : luceneStringToDsl(query.query);
   } catch (err) {
     return false;
   }
@@ -50,8 +44,8 @@ function validateQuery(query: Query) {
 }
 
 export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<GeoContainmentAlertParams>
-> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, data }) => {
+  RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
+> = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, data }) => {
   const {
     index,
     indexId,
@@ -65,21 +59,20 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
     boundaryIndexQuery,
     boundaryGeoField,
     boundaryNameField,
-  } = alertParams;
+  } = ruleParams;
 
-  const [indexPattern, _setIndexPattern] = useState<IIndexPattern>({
+  const [indexPattern, _setIndexPattern] = useState<DataView>({
     id: '',
-    fields: [],
     title: '',
-  });
-  const setIndexPattern = (_indexPattern?: IIndexPattern) => {
+  } as DataView);
+  const setIndexPattern = (_indexPattern?: DataView) => {
     if (_indexPattern) {
       _setIndexPattern(_indexPattern);
       if (_indexPattern.title) {
-        setAlertParams('index', _indexPattern.title);
+        setRuleParams('index', _indexPattern.title);
       }
       if (_indexPattern.id) {
-        setAlertParams('indexId', _indexPattern.id);
+        setRuleParams('indexId', _indexPattern.id);
       }
     }
   };
@@ -89,19 +82,18 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
       language: 'kuery',
     }
   );
-  const [boundaryIndexPattern, _setBoundaryIndexPattern] = useState<IIndexPattern>({
+  const [boundaryIndexPattern, _setBoundaryIndexPattern] = useState<DataView>({
     id: '',
-    fields: [],
     title: '',
-  });
-  const setBoundaryIndexPattern = (_indexPattern?: IIndexPattern) => {
+  } as DataView);
+  const setBoundaryIndexPattern = (_indexPattern?: DataView) => {
     if (_indexPattern) {
       _setBoundaryIndexPattern(_indexPattern);
       if (_indexPattern.title) {
-        setAlertParams('boundaryIndexTitle', _indexPattern.title);
+        setRuleParams('boundaryIndexTitle', _indexPattern.title);
       }
       if (_indexPattern.id) {
-        setAlertParams('boundaryIndexId', _indexPattern.id);
+        setRuleParams('boundaryIndexId', _indexPattern.id);
       }
     }
   };
@@ -122,8 +114,8 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
 
   useEffect(() => {
     const initToDefaultParams = async () => {
-      setAlertProperty('params', {
-        ...alertParams,
+      setRuleProperty('params', {
+        ...ruleParams,
         index: index ?? DEFAULT_VALUES.INDEX,
         indexId: indexId ?? DEFAULT_VALUES.INDEX_ID,
         entity: entity ?? DEFAULT_VALUES.ENTITY,
@@ -174,9 +166,9 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
         dateField={dateField}
         geoField={geoField}
         errors={errors}
-        setAlertParamsDate={(_date) => setAlertParams('dateField', _date)}
-        setAlertParamsGeoField={(_geoField) => setAlertParams('geoField', _geoField)}
-        setAlertProperty={setAlertProperty}
+        setAlertParamsDate={(_date) => setRuleParams('dateField', _date)}
+        setAlertParamsGeoField={(_geoField) => setRuleParams('geoField', _geoField)}
+        setRuleProperty={setRuleProperty}
         setIndexPattern={setIndexPattern}
         indexPattern={indexPattern}
         isInvalid={!indexId || !dateField || !geoField}
@@ -185,7 +177,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
       <EntityByExpression
         errors={errors}
         entity={entity}
-        setAlertParamsEntity={(entityName) => setAlertParams('entity', entityName)}
+        setAlertParamsEntity={(entityName) => setRuleParams('entity', entityName)}
         indexFields={indexPattern.fields}
         isInvalid={indexId && dateField && geoField ? !entity : false}
       />
@@ -199,7 +191,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
           onChange={(query) => {
             if (query.language) {
               if (validateQuery(query)) {
-                setAlertParams('indexQuery', query);
+                setRuleParams('indexQuery', query);
               }
               setIndexQueryInput(query);
             }
@@ -217,17 +209,17 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
       </EuiTitle>
       <EuiSpacer size="s" />
       <BoundaryIndexExpression
-        alertParams={alertParams}
+        ruleParams={ruleParams}
         errors={errors}
         boundaryIndexPattern={boundaryIndexPattern}
         setBoundaryIndexPattern={setBoundaryIndexPattern}
         setBoundaryGeoField={(_geoField: string | undefined) =>
-          _geoField && setAlertParams('boundaryGeoField', _geoField)
+          _geoField && setRuleParams('boundaryGeoField', _geoField)
         }
         setBoundaryNameField={(_boundaryNameField: string | undefined) =>
           _boundaryNameField
-            ? setAlertParams('boundaryNameField', _boundaryNameField)
-            : setAlertParams('boundaryNameField', '')
+            ? setRuleParams('boundaryNameField', _boundaryNameField)
+            : setRuleParams('boundaryNameField', '')
         }
         boundaryNameField={boundaryNameField}
         data={data}
@@ -242,7 +234,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
           onChange={(query) => {
             if (query.language) {
               if (validateQuery(query)) {
-                setAlertParams('boundaryIndexQuery', query);
+                setRuleParams('boundaryIndexQuery', query);
               }
               setBoundaryIndexQueryInput(query);
             }

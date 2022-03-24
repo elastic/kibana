@@ -43,8 +43,8 @@ export class QueryContext {
     this.query = query;
   }
 
-  async search<TParams>(params: TParams) {
-    return this.callES.search(params);
+  async search<TParams>(params: TParams, operationName?: string) {
+    return this.callES.search(params, operationName);
   }
 
   async count(params: any): Promise<any> {

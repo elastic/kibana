@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { getFilter } from './find_rules';
 import {
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
   SIGNALS_ID,
-} from '../../../../common/constants';
+} from '@kbn/securitysolution-rules';
+
+import { getFilter } from './find_rules';
 
 const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${ML_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${QUERY_RULE_TYPE_ID}
+ OR alert.attributes.alertTypeId: ${SAVED_QUERY_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${INDICATOR_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${THRESHOLD_RULE_TYPE_ID})`.replace(/[\n\r]/g, '');
 

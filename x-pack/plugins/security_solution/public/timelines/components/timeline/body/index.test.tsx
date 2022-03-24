@@ -19,17 +19,17 @@ import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
-import { defaultControlColumn } from './control_columns';
+import { getDefaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 
 jest.mock('../../../../common/lib/kibana/hooks');
 jest.mock('../../../../common/hooks/use_app_toasts');
-
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  const mockCasesContract = jest.requireActual('../../../../../../cases/public/mocks');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
@@ -40,6 +40,11 @@ jest.mock('../../../../common/lib/kibana', () => {
           capabilities: {
             siem: { crud_alerts: true, read_alerts: true },
           },
+        },
+        cases: mockCasesContract.mockCasesContract(),
+        data: {
+          search: jest.fn(),
+          query: jest.fn(),
         },
         uiSettings: {
           get: jest.fn(),
@@ -56,10 +61,6 @@ jest.mock('../../../../common/lib/kibana', () => {
               onBlur: jest.fn(),
               onKeyDown: jest.fn(),
             }),
-          getAddToCasePopover: jest
-            .fn()
-            .mockReturnValue(<div data-test-subj="add-to-case-action">{'Add to case'}</div>),
-          getAddToCaseAction: jest.fn(),
         },
       },
     }),
@@ -109,6 +110,10 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
   maxDelay: () => 3000,
 }));
 
+jest.mock('../../fields_browser/create_field_button', () => ({
+  useCreateFieldButton: () => <></>,
+}));
+
 describe('Body', () => {
   const mount = useMountAppended();
   const mockRefetch = jest.fn();
@@ -118,6 +123,8 @@ describe('Body', () => {
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
+
+  const ACTION_BUTTON_COUNT = 4;
 
   const props: StatefulBodyProps = {
     activePage: 0,
@@ -137,14 +144,19 @@ describe('Body', () => {
     selectedEventIds: {},
     setSelected: jest.fn() as unknown as StatefulBodyProps['setSelected'],
     sort: mockSort,
+    show: true,
     showCheckboxes: false,
     tabType: TimelineTabs.query,
     totalPages: 1,
-    leadingControlColumns: [defaultControlColumn],
+    leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
     trailingControlColumns: [],
   };
 
   describe('rendering', () => {
+    beforeEach(() => {
+      mockDispatch.mockClear();
+    });
+
     test('it renders the column headers', () => {
       const wrapper = mount(
         <TestProviders>
@@ -197,6 +209,28 @@ describe('Body', () => {
         });
       });
     }, 20000);
+
+    test('it dispatches the `REMOVE_COLUMN` action when there is a field removed from the custom fields', async () => {
+      const customFieldId = 'my.custom.runtimeField';
+      const extraFieldProps = {
+        ...props,
+        columnHeaders: [
+          ...defaultHeaders,
+          { id: customFieldId, category: 'my' } as ColumnHeaderOptions,
+        ],
+      };
+      mount(
+        <TestProviders>
+          <BodyComponent {...extraFieldProps} />
+        </TestProviders>
+      );
+
+      expect(mockDispatch).toBeCalledTimes(1);
+      expect(mockDispatch).toBeCalledWith({
+        payload: { columnId: customFieldId, id: 'timeline-test' },
+        type: 'x-pack/timelines/t-grid/REMOVE_COLUMN',
+      });
+    });
   });
 
   describe('action on event', () => {

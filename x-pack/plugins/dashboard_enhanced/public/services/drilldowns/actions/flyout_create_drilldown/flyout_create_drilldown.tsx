@@ -48,11 +48,13 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     return 'plusInCircle';
   }
 
-  private isEmbeddableCompatible(context: EmbeddableContext) {
+  private isEmbeddableCompatible(context: EmbeddableContext): boolean {
     if (!isEnhancedEmbeddable(context.embeddable)) return false;
-    const supportedTriggers = context.embeddable.supportedTriggers();
-    if (!supportedTriggers || !supportedTriggers.length) return false;
     if (context.embeddable.getRoot().type !== 'dashboard') return false;
+    const supportedTriggers = [
+      CONTEXT_MENU_TRIGGER,
+      ...(context.embeddable.supportedTriggers() || []),
+    ];
 
     /**
      * Check if there is an intersection between all registered drilldowns possible triggers that they could be attached to
@@ -61,7 +63,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     const allPossibleTriggers = this.params
       .start()
       .plugins.uiActionsEnhanced.getActionFactories()
-      .map((factory) => factory.supportedTriggers())
+      .map((factory) => (factory.isCompatibleLicense() ? factory.supportedTriggers() : []))
       .reduce((res, next) => res.concat(next), []);
 
     return ensureNestedTriggers(supportedTriggers).some((trigger) =>
@@ -90,13 +92,17 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
       closed$.next(true);
       handle.close();
     };
+    const triggers = [
+      ...ensureNestedTriggers(embeddable.supportedTriggers()),
+      CONTEXT_MENU_TRIGGER,
+    ];
     const handle = core.overlays.openFlyout(
       toMountPoint(
         <plugins.uiActionsEnhanced.DrilldownManager
           closeAfterCreate
           initialRoute={'/new'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
-          triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
+          triggers={triggers}
           placeContext={{ embeddable }}
           templates={templates}
           onClose={close}

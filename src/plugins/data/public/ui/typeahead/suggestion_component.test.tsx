@@ -59,9 +59,10 @@ describe('SuggestionComponent', () => {
   });
 
   it('Should call innerRef with a reference to the root div element', () => {
-    const innerRefCallback = (ref: HTMLDivElement) => {
+    const innerRefCallback = (index: number, ref: HTMLDivElement) => {
       expect(ref.className).toBe('kbnTypeahead__item');
       expect(ref.id).toBe('suggestion-1');
+      expect(index).toBe(0);
     };
 
     mount(

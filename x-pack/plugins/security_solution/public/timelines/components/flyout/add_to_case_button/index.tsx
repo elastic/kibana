@@ -10,18 +10,14 @@ import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { Case, SubCase } from '../../../../../../cases/common';
-import { APP_ID } from '../../../../../common/constants';
+import { Case } from '../../../../../../cases/common';
+import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { TimelineStatus, TimelineId, TimelineType } from '../../../../../common/types/timeline';
-import {
-  getCreateCaseUrl,
-  getCaseDetailsUrl,
-  useFormatUrl,
-} from '../../../../common/components/link_to';
+import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import * as i18n from '../../timeline/properties/translations';
@@ -53,9 +49,9 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   const [isCaseModalOpen, openCaseModal] = useState(false);
 
   const onRowClick = useCallback(
-    async (theCase?: Case | SubCase) => {
+    async (theCase?: Case) => {
       openCaseModal(false);
-      await navigateToApp(APP_ID, {
+      await navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: theCase != null ? getCaseDetailsUrl({ id: theCase.id }) : getCreateCaseUrl(),
       });
@@ -71,15 +67,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     [dispatch, graphEventId, navigateToApp, savedObjectId, timelineId, timelineTitle]
   );
 
-  const { formatUrl } = useFormatUrl(SecurityPageName.case);
   const userPermissions = useGetUserCasesPermissions();
-  const goToCreateCase = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      onRowClick();
-    },
-    [onRowClick]
-  );
 
   const handleButtonClick = useCallback(() => {
     setPopover((currentIsOpen) => !currentIsOpen);
@@ -90,7 +78,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   const handleNewCaseClick = useCallback(() => {
     handlePopoverClose();
 
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.case,
       path: getCreateCaseUrl(),
     }).then(() => {
@@ -173,11 +161,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
       {isCaseModalOpen &&
-        cases.getAllCasesSelectorModal({
-          createCaseNavigation: {
-            href: formatUrl(getCreateCaseUrl()),
-            onClick: goToCreateCase,
-          },
+        cases.ui.getAllCasesSelectorModal({
           onRowClick,
           userCanCrud: userPermissions?.crud ?? false,
           owner: [APP_ID],

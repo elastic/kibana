@@ -13,13 +13,12 @@ import { useHistory } from 'react-router-dom';
 import { XYBrushEvent } from '@elastic/charts';
 import { EuiPanel, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
 
 import { maybe } from '../../../../common/utils/maybe';
-import { HeightRetainer } from '../../shared/HeightRetainer';
-import { fromQuery, push, toQuery } from '../../shared/Links/url_helpers';
+import { fromQuery, push, toQuery } from '../../shared/links/url_helpers';
 
 import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';
 import { latencyCorrelationsTab } from './latency_correlations_tab';
@@ -34,7 +33,7 @@ const tabs = [
 export function TransactionDetailsTabs() {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const history = useHistory();
 
   const [currentTab, setCurrentTab] = useState(traceSamplesTab.key);
@@ -131,20 +130,18 @@ export function TransactionDetailsTabs() {
         ))}
       </EuiTabs>
       <EuiSpacer size="m" />
-      <HeightRetainer>
-        <EuiPanel hasBorder={true}>
-          <TabContent
-            {...{
-              clearChartSelection,
-              onFilter,
-              sampleRangeFrom,
-              sampleRangeTo,
-              selectSampleFromChartSelection,
-              traceSamples,
-            }}
-          />
-        </EuiPanel>
-      </HeightRetainer>
+      <EuiPanel hasBorder={true}>
+        <TabContent
+          {...{
+            clearChartSelection,
+            onFilter,
+            sampleRangeFrom,
+            sampleRangeTo,
+            selectSampleFromChartSelection,
+            traceSamples,
+          }}
+        />
+      </EuiPanel>
     </>
   );
 }

@@ -6,13 +6,12 @@
  */
 
 import { APMConfig } from '../';
-import { PromiseReturnType } from '../../../observability/typings/common';
 import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../src/core/types/elasticsearch';
-import { UxUIFilters } from '../../typings/ui_filters';
-import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
+import { UxUIFilters } from '../../common/ux_ui_filter';
 
 interface Options {
   mockResponse?: (
@@ -96,7 +95,6 @@ export async function inspectSearchParams(
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },
-    dynamicIndexPattern: null as any,
   };
   try {
     response = await fn(mockSetup);
@@ -114,7 +112,7 @@ export async function inspectSearchParams(
   };
 }
 
-export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
+export type SearchParamsMock = Awaited<ReturnType<typeof inspectSearchParams>>;
 
 export function mockNow(date: string | number | Date) {
   const fakeNow = new Date(date).getTime();

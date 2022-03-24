@@ -8,20 +8,27 @@
 import { i18n } from '@kbn/i18n';
 import type { Logger } from 'src/core/server';
 
+import type { KibanaFeature } from '../../../features/common';
 import type { SecurityLicense } from '../../common/licensing';
 import type {
   PrivilegeDeprecationsRolesByFeatureIdRequest,
   PrivilegeDeprecationsRolesByFeatureIdResponse,
 } from '../../common/model';
 import { transformElasticsearchRoleToRole } from '../authorization';
-import type { AuthorizationServiceSetupInternal, ElasticsearchRole } from '../authorization';
+import type { AuthorizationServiceSetupInternal } from '../authorization';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
-export const getPrivilegeDeprecationsService = (
-  authz: Pick<AuthorizationServiceSetupInternal, 'applicationName'>,
-  license: SecurityLicense,
-  logger: Logger
-) => {
+export const getPrivilegeDeprecationsService = ({
+  authz,
+  getFeatures,
+  license,
+  logger,
+}: {
+  authz: Pick<AuthorizationServiceSetupInternal, 'applicationName'>;
+  getFeatures(): Promise<KibanaFeature[]>;
+  license: SecurityLicense;
+  logger: Logger;
+}) => {
   const getKibanaRolesByFeatureId = async ({
     context,
     featureId,
@@ -34,11 +41,13 @@ export const getPrivilegeDeprecationsService = (
     }
     let kibanaRoles;
     try {
-      const { body: elasticsearchRoles } = await context.esClient.asCurrentUser.security.getRole<
-        Record<string, ElasticsearchRole>
-      >();
+      const [features, elasticsearchRoles] = await Promise.all([
+        getFeatures(),
+        context.esClient.asCurrentUser.security.getRole(),
+      ]);
       kibanaRoles = Object.entries(elasticsearchRoles).map(([roleName, elasticsearchRole]) =>
         transformElasticsearchRoleToRole(
+          features,
           // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
           elasticsearchRole,
           roleName,

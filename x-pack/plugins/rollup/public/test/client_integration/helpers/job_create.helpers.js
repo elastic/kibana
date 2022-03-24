@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test/jest';
+import { act } from 'react-dom/test-utils';
+
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { rollupJobsStore } from '../../../crud_app/store';
 import { JobCreate } from '../../../crud_app/sections';
 
@@ -22,7 +24,9 @@ export const setup = (props) => {
   // User actions
   const clickNextStep = () => {
     const button = testBed.find('rollupJobNextButton');
-    button.simulate('click');
+    act(() => {
+      button.simulate('click');
+    });
     component.update();
   };
 
@@ -34,7 +38,9 @@ export const setup = (props) => {
 
   const clickSave = () => {
     const button = testBed.find('rollupJobSaveButton');
-    button.simulate('click');
+    act(() => {
+      button.simulate('click');
+    });
     component.update();
   };
 
@@ -42,23 +48,33 @@ export const setup = (props) => {
   const fillFormFields = async (step) => {
     switch (step) {
       case 'logistics':
-        form.setInputValue('rollupJobName', JOB_TO_CREATE.id);
-        await form.setInputValue('rollupIndexPattern', JOB_TO_CREATE.indexPattern, true);
-        form.setInputValue('rollupIndexName', JOB_TO_CREATE.rollupIndex);
+        act(() => {
+          form.setInputValue('rollupJobName', JOB_TO_CREATE.id);
+        });
+        act(() => {
+          form.setInputValue('rollupIndexPattern', JOB_TO_CREATE.indexPattern);
+        });
+        act(() => {
+          form.setInputValue('rollupIndexName', JOB_TO_CREATE.rollupIndex);
+        });
         break;
       case 'date-histogram':
-        form.setInputValue('rollupJobInterval', JOB_TO_CREATE.interval);
+        act(() => {
+          form.setInputValue('rollupJobInterval', JOB_TO_CREATE.interval);
+        });
         break;
       default:
         return;
     }
+
+    component.update();
   };
 
   // Navigation
   const goToStep = async (targetStep) => {
     const stepHandlers = {
-      1: () => fillFormFields('logistics'),
-      2: () => fillFormFields('date-histogram'),
+      1: async () => await fillFormFields('logistics'),
+      2: async () => await fillFormFields('date-histogram'),
     };
 
     let currentStep = 1;

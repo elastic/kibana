@@ -8,7 +8,7 @@
 
 import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
-import { EuiToolTip, EuiButton, EuiHeaderLink } from '@elastic/eui';
+import { EuiToolTip, EuiButton, EuiHeaderLink, EuiBetaBadge } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
@@ -20,6 +20,19 @@ export function TopNavMenuItem(props: TopNavMenuData) {
   function getTooltip(): string {
     const val = isFunction(props.tooltip) ? props.tooltip() : props.tooltip;
     return val!;
+  }
+
+  function getButtonContainer() {
+    if (props.badge) {
+      return (
+        <>
+          <EuiBetaBadge className="kbnTopNavMenu__betaBadgeItem" {...props.badge} size="s" />
+          {upperFirst(props.label || props.id!)}
+        </>
+      );
+    } else {
+      return upperFirst(props.label || props.id!);
+    }
   }
 
   function handleClick(e: MouseEvent<HTMLButtonElement>) {
@@ -37,13 +50,20 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     className: props.className,
   };
 
+  // If the item specified a href, then override the suppress the onClick
+  // and make it become a regular link
+  const overrideProps =
+    props.target && props.href
+      ? { onClick: undefined, href: props.href, target: props.target }
+      : {};
+
   const btn = props.emphasize ? (
-    <EuiButton size="s" {...commonButtonProps}>
-      {upperFirst(props.label || props.id!)}
+    <EuiButton size="s" {...commonButtonProps} fill>
+      {getButtonContainer()}
     </EuiButton>
   ) : (
-    <EuiHeaderLink size="s" color="primary" {...commonButtonProps}>
-      {upperFirst(props.label || props.id!)}
+    <EuiHeaderLink size="s" color="primary" {...commonButtonProps} {...overrideProps}>
+      {getButtonContainer()}
     </EuiHeaderLink>
   );
 

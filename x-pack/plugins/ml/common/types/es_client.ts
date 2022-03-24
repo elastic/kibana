@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '../util/object_utils';
 
 export function isMultiBucketAggregate(
   arg: unknown
-): arg is estypes.AggregationsMultiBucketAggregate {
+): arg is estypes.AggregationsMultiBucketAggregateBase {
   return isPopulatedObject(arg, ['buckets']);
 }
 

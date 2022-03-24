@@ -33,9 +33,7 @@ import {
   PRIVATE_SOURCE,
   UPDATE_BUTTON,
 } from '../../../constants';
-import { getSourcesPath } from '../../../routes';
-import { SourceDataItem } from '../../../types';
-import { staticSourceData } from '../../content_sources/source_data';
+import { getAddPath, getEditPath, getSourcesPath } from '../../../routes';
 import { SettingsLogic } from '../settings_logic';
 
 export const Connectors: React.FC = () => {
@@ -52,15 +50,15 @@ export const Connectors: React.FC = () => {
   );
 
   const getRowActions = (configured: boolean, serviceType: string, supportedByLicense: boolean) => {
-    const { addPath, editPath } = staticSourceData.find(
-      (s) => s.serviceType === serviceType
-    ) as SourceDataItem;
+    const addPath = getAddPath(serviceType);
+    const editPath = getEditPath(serviceType);
+
     const configurePath = getSourcesPath(addPath, true);
 
     const updateButtons = (
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmptyTo to={editPath} data-test-subj="UpdateButton">
+          <EuiButtonEmptyTo to={editPath as string} data-test-subj="UpdateButton">
             {UPDATE_BUTTON}
           </EuiButtonEmptyTo>
         </EuiFlexItem>

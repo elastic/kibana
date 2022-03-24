@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { flattenHit, IIndexPatternFieldList } from '../../../data/common';
-import { IndexPattern } from '../../../data/common';
+import { IIndexPatternFieldList, DataView } from '../../../data_views/public';
 
 const fields = [
   {
@@ -28,6 +26,7 @@ const fields = [
   {
     name: 'message',
     type: 'string',
+    displayName: 'message',
     scripted: false,
     filterable: false,
     aggregatable: false,
@@ -35,6 +34,7 @@ const fields = [
   {
     name: 'extension',
     type: 'string',
+    displayName: 'extension',
     scripted: false,
     filterable: true,
     aggregatable: true,
@@ -42,6 +42,7 @@ const fields = [
   {
     name: 'bytes',
     type: 'number',
+    displayName: 'bytesDisplayName',
     scripted: false,
     filterable: true,
     aggregatable: true,
@@ -49,12 +50,14 @@ const fields = [
   {
     name: 'scripted',
     type: 'number',
+    displayName: 'scripted',
     scripted: true,
     filterable: false,
   },
   {
     name: 'object.value',
     type: 'number',
+    displayName: 'object.value',
     scripted: false,
     filterable: true,
     aggregatable: true,
@@ -73,23 +76,15 @@ const indexPattern = {
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
   metaFields: ['_index', '_score'],
-  formatField: jest.fn(),
-  flattenHit: undefined,
-  formatHit: jest.fn((hit) => (hit.fields ? hit.fields : hit._source)),
   fields,
   getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
   getSourceFiltering: () => ({}),
   getFieldByName: jest.fn(() => ({})),
   timeFieldName: '',
   docvalueFields: [],
-  getFormatterForField: () => ({ convert: () => 'formatted' }),
-} as unknown as IndexPattern;
+  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+} as unknown as DataView;
 
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
-indexPattern.formatField = (hit: Record<string, unknown>, fieldName: string) => {
-  return fieldName === '_source'
-    ? hit._source
-    : flattenHit(hit as unknown as estypes.SearchHit, indexPattern)[fieldName];
-};
 
 export const indexPatternMock = indexPattern;

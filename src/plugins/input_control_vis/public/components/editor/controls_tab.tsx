@@ -7,7 +7,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from '../../../../data_views/public';
 import { ControlEditor } from './control_editor';
 import {
   addControl,
@@ -49,7 +49,7 @@ class ControlsTab extends PureComponent<ControlsTabProps, ControlsTabUiState> {
     type: CONTROL_TYPES.LIST,
   };
 
-  getIndexPattern = async (indexPatternId: string): Promise<IndexPattern> => {
+  getIndexPattern = async (indexPatternId: string): Promise<DataView> => {
     const [, startDeps] = await this.props.deps.core.getStartServices();
     return await startDeps.data.indexPatterns.get(indexPatternId);
   };

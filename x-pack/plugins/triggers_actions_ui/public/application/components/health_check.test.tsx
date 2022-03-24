@@ -61,7 +61,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
       is_sufficiently_secure: true,
       has_permanent_encryption_key: true,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -81,11 +81,11 @@ describe('health check', () => {
     expect(queryByText('should render')).toBeInTheDocument();
   });
 
-  test('renders warning if TLS is required', async () => {
+  test('renders warning if API keys are disabled', async () => {
     useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       is_sufficiently_secure: false,
       has_permanent_encryption_key: true,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -103,18 +103,17 @@ describe('health check', () => {
       // wait for useEffect to run
     });
 
-    const [description, action] = queryAllByText(/TLS/i);
+    const [description] = queryAllByText(/API keys/i);
+    const [action] = queryAllByText(/Learn more/i);
 
     expect(description.textContent).toMatchInlineSnapshot(
-      `"Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. Learn how to enable TLS.(opens in a new tab or window)"`
+      `"You must enable API keys to use Alerting. Learn more.(opens in a new tab or window)"`
     );
 
-    expect(action.textContent).toMatchInlineSnapshot(
-      `"Learn how to enable TLS.(opens in a new tab or window)"`
-    );
+    expect(action.textContent).toMatchInlineSnapshot(`"Learn more.(opens in a new tab or window)"`);
 
     expect(action.getAttribute('href')).toMatchInlineSnapshot(
-      `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-basic-setup.html#encrypt-internode-communication"`
+      `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"`
     );
   });
 
@@ -122,7 +121,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       is_sufficiently_secure: true,
       has_permanent_encryption_key: false,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -142,11 +141,13 @@ describe('health check', () => {
 
     const description = queryByRole(/banner/i);
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"To create a rule, set a value for xpack.encryptedSavedObjects.encryptionKey in your kibana.yml file and ensure the Encrypted Saved Objects plugin is enabled. Learn how.(opens in a new tab or window)"`
+      `"You must configure an encryption key to use Alerting. Learn more.(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
-    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how.(opens in a new tab or window)"`);
+    expect(action!.textContent).toMatchInlineSnapshot(
+      `"Learn more.(opens in a new tab or window)"`
+    );
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alert-action-settings-kb.html#general-alert-action-settings"`
     );
@@ -156,7 +157,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       is_sufficiently_secure: false,
       has_permanent_encryption_key: false,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -175,14 +176,16 @@ describe('health check', () => {
       // wait for useEffect to run
     });
 
-    const description = queryByText(/Transport Layer Security/i);
+    const description = queryByText(/You must enable/i);
 
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. Learn how.(opens in a new tab or window)"`
+      `"You must enable API keys and configure an encryption key to use Alerting. Learn more.(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
-    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how.(opens in a new tab or window)"`);
+    expect(action!.textContent).toMatchInlineSnapshot(
+      `"Learn more.(opens in a new tab or window)"`
+    );
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alerting-setup.html#alerting-prerequisites"`
     );

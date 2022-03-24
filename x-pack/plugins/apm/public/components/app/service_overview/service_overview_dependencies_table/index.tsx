@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -24,19 +24,26 @@ interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
   isSingleColumn?: boolean;
   link?: ReactNode;
+  showPerPageOptions?: boolean;
 }
 
 export function ServiceOverviewDependenciesTable({
   fixedHeight,
   isSingleColumn = true,
   link,
+  showPerPageOptions = true,
 }: ServiceOverviewDependenciesTableProps) {
   const {
-    urlParams: { comparisonEnabled, comparisonType, latencyAggregationType },
-  } = useUrlParams();
-
-  const {
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      serviceGroup,
+      comparisonEnabled,
+      comparisonType,
+      latencyAggregationType,
+    },
   } = useApmParams('/services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -58,13 +65,15 @@ export function ServiceOverviewDependenciesTable({
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /internal/apm/services/{serviceName}/dependencies',
-        params: {
-          path: { serviceName },
-          query: { start, end, environment, numBuckets: 20, offset },
-        },
-      });
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/dependencies',
+        {
+          params: {
+            path: { serviceName },
+            query: { start, end, environment, numBuckets: 20, offset },
+          },
+        }
+      );
     },
     [start, end, serviceName, environment, offset]
   );
@@ -76,11 +85,11 @@ export function ServiceOverviewDependenciesTable({
       const itemLink =
         location.type === NodeType.backend ? (
           <BackendLink
-            backendName={location.backendName}
             type={location.spanType}
             subtype={location.spanSubtype}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              backendName: location.backendName,
+              comparisonEnabled,
               comparisonType,
               environment,
               kuery,
@@ -100,7 +109,7 @@ export function ServiceOverviewDependenciesTable({
             serviceName={location.serviceName}
             agentName={location.agentName}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+              comparisonEnabled,
               comparisonType,
               environment,
               kuery,
@@ -108,6 +117,7 @@ export function ServiceOverviewDependenciesTable({
               rangeTo,
               latencyAggregationType,
               transactionType,
+              serviceGroup,
             }}
           />
         );
@@ -125,12 +135,33 @@ export function ServiceOverviewDependenciesTable({
       dependencies={dependencies}
       fixedHeight={fixedHeight}
       isSingleColumn={isSingleColumn}
-      title={i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableTitle',
-        {
-          defaultMessage: 'Dependencies',
-        }
-      )}
+      title={
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.dependenciesTableTitleTip',
+            {
+              defaultMessage:
+                'Uninstrumented downstream services or external connections derived from the exit spans of instrumented services.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.dependenciesTableTitle',
+              {
+                defaultMessage: 'Dependencies',
+              }
+            )}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
+      }
       nameColumnTitle={i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumn',
         {
@@ -139,6 +170,7 @@ export function ServiceOverviewDependenciesTable({
       )}
       status={status}
       link={link}
+      showPerPageOptions={showPerPageOptions}
     />
   );
 }

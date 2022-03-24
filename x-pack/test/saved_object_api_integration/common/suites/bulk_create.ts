@@ -65,6 +65,7 @@ const INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES = Object.freeze({
   expectedNamespaces: [ALL_SPACES_ID], // expected namespaces of resulting object
   initialNamespaces: [ALL_SPACES_ID], // args passed to the bulkCreate method
 });
+const ALIAS_CONFLICT_OBJ = Object.freeze({ type: 'resolvetype', id: 'alias-match' }); // this fixture was created to test the resolve API, but we are reusing to test the alias conflict error
 const NEW_NAMESPACE_AGNOSTIC_OBJ = Object.freeze({ type: 'globaltype', id: 'new-globaltype-id' });
 export const TEST_CASES: Record<string, BulkCreateTestCase> = Object.freeze({
   ...CASES,
@@ -74,6 +75,7 @@ export const TEST_CASES: Record<string, BulkCreateTestCase> = Object.freeze({
   INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
   INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
   INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
+  ALIAS_CONFLICT_OBJ,
   NEW_NAMESPACE_AGNOSTIC_OBJ,
 });
 
@@ -103,13 +105,38 @@ export function bulkCreateTestSuiteFactory(esArchiver: any, supertest: SuperTest
         for (let i = 0; i < savedObjects.length; i++) {
           const object = savedObjects[i];
           const testCase = testCaseArray[i];
-          if (testCase.failure === 409 && testCase.fail409Param === 'unresolvableConflict') {
+          if (testCase.failure === 409) {
             const { type, id } = testCase;
-            const error = SavedObjectsErrorHelpers.createConflictError(type, id);
-            const payload = { ...error.output.payload, metadata: { isNotOverwritable: true } };
             expect(object.type).to.eql(type);
             expect(object.id).to.eql(id);
-            expect(object.error).to.eql(payload);
+            let expectedMetadata;
+            if (testCase.fail409Param === 'unresolvableConflict') {
+              expectedMetadata = { isNotOverwritable: true };
+            } else if (testCase.fail409Param === 'aliasConflictDefaultSpace') {
+              expectedMetadata = { spacesWithConflictingAliases: ['default'] };
+            } else if (testCase.fail409Param === 'aliasConflictSpace1') {
+              expectedMetadata = { spacesWithConflictingAliases: ['space_1'] };
+            } else if (testCase.fail409Param === 'aliasConflictAllSpaces') {
+              expectedMetadata = {
+                spacesWithConflictingAliases: ['default', 'space_1', 'space_x'],
+              };
+            }
+            const expectedError = SavedObjectsErrorHelpers.createConflictError(type, id).output
+              .payload;
+            expect(object.error).be.an('object');
+            expect(object.error.statusCode).to.eql(expectedError.statusCode);
+            expect(object.error.error).to.eql(expectedError.error);
+            expect(object.error.message).to.eql(expectedError.message);
+            if (expectedMetadata) {
+              const actualMetadata = object.error.metadata ?? {};
+              if (actualMetadata.spacesWithConflictingAliases) {
+                actualMetadata.spacesWithConflictingAliases =
+                  actualMetadata.spacesWithConflictingAliases.sort();
+              }
+              expect(actualMetadata).to.eql(expectedMetadata);
+            } else {
+              expect(object.error.metadata).to.be(undefined);
+            }
             continue;
           }
           await expectResponses.permitted(object, testCase);

@@ -47,6 +47,49 @@ export interface CreateAnalyticsStepProps extends CreateAnalyticsFormProps {
   stepActivated?: boolean;
 }
 
+async function checkIndexExists(destinationIndex: string) {
+  let resp;
+  let errorMessage;
+  try {
+    resp = await ml.checkIndicesExists({ indices: [destinationIndex] });
+  } catch (e) {
+    errorMessage = extractErrorMessage(e);
+  }
+  return { resp, errorMessage };
+}
+
+async function retryIndexExistsCheck(
+  destinationIndex: string
+): Promise<{ success: boolean; indexExists: boolean; errorMessage?: string }> {
+  let retryCount = 15;
+
+  let resp = await checkIndexExists(destinationIndex);
+  let indexExists = resp.resp && resp.resp[destinationIndex] && resp.resp[destinationIndex].exists;
+
+  while (retryCount > 1 && !indexExists) {
+    retryCount--;
+    await delay(1000);
+    resp = await checkIndexExists(destinationIndex);
+    indexExists = resp.resp && resp.resp[destinationIndex] && resp.resp[destinationIndex].exists;
+  }
+
+  if (indexExists) {
+    return { success: true, indexExists: true };
+  }
+
+  return {
+    success: false,
+    indexExists: false,
+    ...(resp.errorMessage !== undefined ? { errorMessage: resp.errorMessage } : {}),
+  };
+}
+
+function delay(ms = 1000) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const mlContext = useMlContext();
   const [state, dispatch] = useReducer(reducer, getInitialState());
@@ -124,50 +167,89 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const createKibanaIndexPattern = async () => {
-    const indexPatternName = destinationIndex;
-
-    try {
-      await mlContext.indexPatterns.createAndSave(
-        {
-          title: indexPatternName,
-        },
-        false,
-        true
-      );
-
-      addRequestMessage({
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.createIndexPatternSuccessMessage',
-          {
-            defaultMessage: 'Kibana index pattern {indexPatternName} created.',
-            values: { indexPatternName },
+    const dataViewName = destinationIndex;
+    const exists = await retryIndexExistsCheck(destinationIndex);
+    if (exists?.success === true) {
+      // index exists - create data view
+      if (exists?.indexExists === true) {
+        try {
+          await mlContext.dataViewsContract.createAndSave(
+            {
+              title: dataViewName,
+            },
+            false,
+            true
+          );
+          addRequestMessage({
+            message: i18n.translate(
+              'xpack.ml.dataframe.analytics.create.createDataViewSuccessMessage',
+              {
+                defaultMessage: 'Kibana data view {dataViewName} created.',
+                values: { dataViewName },
+              }
+            ),
+          });
+        } catch (e) {
+          // handle data view creation error
+          if (e instanceof DuplicateDataViewError) {
+            addRequestMessage({
+              error: i18n.translate(
+                'xpack.ml.dataframe.analytics.create.duplicateDataViewErrorMessageError',
+                {
+                  defaultMessage: 'The data view {dataViewName} already exists.',
+                  values: { dataViewName },
+                }
+              ),
+              message: i18n.translate(
+                'xpack.ml.dataframe.analytics.create.duplicateDataViewErrorMessage',
+                {
+                  defaultMessage: 'An error occurred creating the Kibana data view:',
+                }
+              ),
+            });
+          } else {
+            addRequestMessage({
+              error: extractErrorMessage(e),
+              message: i18n.translate(
+                'xpack.ml.dataframe.analytics.create.createDataViewErrorMessage',
+                {
+                  defaultMessage: 'An error occurred creating the Kibana data view:',
+                }
+              ),
+            });
           }
-        ),
-      });
-    } catch (e) {
-      if (e instanceof DuplicateDataViewError) {
+        }
+      }
+    } else {
+      // Ran out of retries or there was a problem checking index exists
+      if (exists?.errorMessage) {
         addRequestMessage({
           error: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessageError',
+            'xpack.ml.dataframe.analytics.create.errorCheckingDestinationIndexDataFrameAnalyticsJob',
             {
-              defaultMessage: 'The index pattern {indexPatternName} already exists.',
-              values: { indexPatternName },
+              defaultMessage: '{errorMessage}',
+              values: { errorMessage: exists.errorMessage },
             }
           ),
           message: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessage',
+            'xpack.ml.dataframe.analytics.create.errorOccurredCheckingDestinationIndexDataFrameAnalyticsJob',
             {
-              defaultMessage: 'An error occurred creating the Kibana index pattern:',
+              defaultMessage: 'An error occurred checking destination index exists.',
             }
           ),
         });
       } else {
         addRequestMessage({
-          error: extractErrorMessage(e),
-          message: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.createIndexPatternErrorMessage',
+          error: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.destinationIndexNotCreatedForDataFrameAnalyticsJob',
             {
-              defaultMessage: 'An error occurred creating the Kibana index pattern:',
+              defaultMessage: 'Destination index has not yet been created.',
+            }
+          ),
+          message: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.unableToCreateDataViewForDataFrameAnalyticsJob',
+            {
+              defaultMessage: 'Unable to create data view.',
             }
           ),
         });
@@ -177,9 +259,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const prepareFormValidation = async () => {
     try {
-      // Set the existing index pattern titles.
+      // Set the existing data view names.
       const indexPatternsMap: SourceIndexMap = {};
-      const savedObjects = (await mlContext.indexPatterns.getCache()) || [];
+      const savedObjects = (await mlContext.dataViewsContract.getCache()) || [];
       savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
@@ -193,18 +275,15 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     } catch (e) {
       addRequestMessage({
         error: extractErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorGettingIndexPatternTitles',
-          {
-            defaultMessage: 'An error occurred getting the existing index pattern titles:',
-          }
-        ),
+        message: i18n.translate('xpack.ml.dataframe.analytics.create.errorGettingDataViewNames', {
+          defaultMessage: 'An error occurred getting the existing data view names:',
+        }),
       });
     }
   };
 
   const initiateWizard = async () => {
-    await mlContext.indexPatterns.clearCache();
+    await mlContext.dataViewsContract.clearCache();
     await prepareFormValidation();
   };
 

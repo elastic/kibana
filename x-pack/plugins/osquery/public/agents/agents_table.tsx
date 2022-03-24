@@ -26,6 +26,7 @@ import {
   generateSelectedAgentsMessage,
   ALL_AGENTS_LABEL,
   AGENT_POLICY_LABEL,
+  AGENT_SELECTION_LABEL,
 } from './translations';
 
 import {
@@ -42,7 +43,7 @@ interface AgentsTableProps {
 }
 
 const perPage = 10;
-const DEBOUNCE_DELAY = 100; // ms
+const DEBOUNCE_DELAY = 300; // ms
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange }) => {
   // search related
@@ -65,15 +66,16 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     loading: groupsLoading,
     totalCount: totalNumAgents,
     groups,
+    isFetched: groupsFetched,
   } = useAgentGroups(osqueryPolicyData);
   const grouper = useMemo(() => new AgentGrouper(), []);
-  const { isLoading: agentsLoading, data: agents } = useAllAgents(
-    osqueryPolicyData,
-    debouncedSearchValue,
-    {
-      perPage,
-    }
-  );
+  const {
+    isLoading: agentsLoading,
+    data: agents,
+    isFetched: agentsFetched,
+  } = useAllAgents(osqueryPolicyData, debouncedSearchValue, {
+    perPage,
+  });
 
   // option related
   const [options, setOptions] = useState<GroupOption[]>([]);
@@ -82,6 +84,22 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   const defaultValueInitialized = useRef(false);
 
   useEffect(() => {
+    const handleSelectedOptions = (selection: string[], label: string) => {
+      const agentOptions = find(['label', label], options);
+
+      if (agentOptions) {
+        const defaultOptions = agentOptions.options?.filter((option) => {
+          if (option.key) {
+            return selection.includes(option.key);
+          }
+        });
+
+        if (defaultOptions?.length) {
+          setSelectedOptions(defaultOptions);
+          defaultValueInitialized.current = true;
+        }
+      }
+    };
     if (agentSelection && !defaultValueInitialized.current && options.length) {
       if (agentSelection.allAgentsSelected) {
         const allAgentsOptions = find(['label', ALL_AGENTS_LABEL], options);
@@ -93,32 +111,36 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       }
 
       if (agentSelection.policiesSelected.length) {
-        const policyOptions = find(['label', AGENT_POLICY_LABEL], options);
+        handleSelectedOptions(agentSelection.policiesSelected, AGENT_POLICY_LABEL);
+      }
 
-        if (policyOptions) {
-          const defaultOptions = policyOptions.options?.filter((option) =>
-            agentSelection.policiesSelected.includes(option.label)
-          );
-
-          if (defaultOptions?.length) {
-            setSelectedOptions(defaultOptions);
-            defaultValueInitialized.current = true;
-          }
-        }
+      if (agentSelection.agents.length) {
+        handleSelectedOptions(agentSelection.agents, AGENT_SELECTION_LABEL);
       }
     }
   }, [agentSelection, options, selectedOptions]);
 
   useEffect(() => {
-    // update the groups when groups or agents have changed
-    grouper.setTotalAgents(totalNumAgents);
-    grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups.platforms);
-    grouper.updateGroup(AGENT_GROUP_KEY.Policy, groups.policies);
-    // @ts-expect-error update types
-    grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
-    const newOptions = grouper.generateOptions();
-    setOptions(newOptions);
-  }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents, grouper]);
+    if (agentsFetched && groupsFetched) {
+      // update the groups when groups or agents have changed
+      grouper.setTotalAgents(totalNumAgents);
+      grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups.platforms);
+      grouper.updateGroup(AGENT_GROUP_KEY.Policy, groups.policies);
+      // @ts-expect-error update types
+      grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
+      const newOptions = grouper.generateOptions();
+      setOptions(newOptions);
+    }
+  }, [
+    groups.platforms,
+    groups.policies,
+    totalNumAgents,
+    groupsLoading,
+    agents,
+    agentsFetched,
+    groupsFetched,
+    grouper,
+  ]);
 
   const onSelection = useCallback(
     (selection: GroupOption[]) => {

@@ -16,7 +16,8 @@ import {
   AgentsStrategyResponse,
 } from '../../common/search_strategy';
 
-import { generateTablePaginationOptions, processAggregations } from './helpers';
+import { processAggregations } from './helpers';
+import { generateTablePaginationOptions } from '../common/helpers';
 import { Overlap, Group } from './types';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -35,7 +36,7 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
   const [loading, setLoading] = useState(true);
   const [overlap, setOverlap] = useState<Overlap>(() => ({}));
   const [totalCount, setTotalCount] = useState<number>(0);
-  useQuery(
+  const { isFetched } = useQuery(
     ['agentGroups'],
     async () => {
       const responseData = await data.search
@@ -110,6 +111,7 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
   );
 
   return {
+    isFetched,
     loading,
     totalCount,
     groups: {

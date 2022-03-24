@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
@@ -23,7 +23,7 @@ import { CategoryFacets } from './category_facets';
 
 import type { CategoryParams } from '.';
 import { getParams, categoryExists, mapToCard } from '.';
-import { ALL_CATEGORY } from './category_facets';
+import { INSTALLED_CATEGORY } from './category_facets';
 
 const AnnouncementLink = () => {
   const { docLinks } = useStartServices();
@@ -55,10 +55,6 @@ const Callout = () => (
     </p>
   </EuiCallOut>
 );
-
-const title = i18n.translate('xpack.fleet.epmList.installedTitle', {
-  defaultMessage: 'Installed integrations',
-});
 
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
@@ -115,7 +111,7 @@ export const InstalledPackages: React.FC = memo(() => {
   const categories: CategoryFacet[] = useMemo(
     () => [
       {
-        ...ALL_CATEGORY,
+        ...INSTALLED_CATEGORY,
         count: allInstalledPackages.length,
       },
       {
@@ -153,7 +149,7 @@ export const InstalledPackages: React.FC = memo(() => {
 
   return (
     <PackageListGrid
-      {...{ isLoading, title, controls, setSelectedCategory, callout }}
+      {...{ isLoading, controls, setSelectedCategory, callout }}
       onSearchChange={setSearchTerm}
       initialSearch={searchParam}
       list={cards}

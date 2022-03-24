@@ -32,7 +32,8 @@ import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import type { HistogramItem } from '../../../../../common/search_strategies/types';
+import type { HistogramItem } from '../../../../../common/correlations/types';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -42,6 +43,7 @@ import { ChartContainer } from '../chart_container';
 export interface TransactionDistributionChartData {
   id: string;
   histogram: HistogramItem[];
+  areaSeriesColor: string;
 }
 
 interface TransactionDistributionChartProps {
@@ -49,7 +51,6 @@ interface TransactionDistributionChartProps {
   hasData: boolean;
   markerCurrentTransaction?: number;
   markerValue: number;
-  markerPercentile: number;
   onChartSelection?: BrushEndListener;
   selection?: [number, number];
   status: FETCH_STATUS;
@@ -77,13 +78,10 @@ const CHART_PLACEHOLDER_VALUE = 0.0001;
 // Elastic charts will show any lone bin (i.e. a populated bin followed by empty bin)
 // as a circular marker instead of a bar
 // This provides a workaround by making the next bin not empty
+// TODO Find a way to get rid of this workaround since it alters original values of the data.
 export const replaceHistogramDotsWithBars = (histogramItems: HistogramItem[]) =>
   histogramItems.reduce((histogramItem, _, i) => {
-    if (
-      histogramItem[i - 1]?.doc_count > 0 &&
-      histogramItem[i - 1]?.doc_count !== CHART_PLACEHOLDER_VALUE &&
-      histogramItem[i].doc_count === 0
-    ) {
+    if (histogramItem[i].doc_count === 0) {
       histogramItem[i].doc_count = CHART_PLACEHOLDER_VALUE;
     }
     return histogramItem;
@@ -100,19 +98,13 @@ export function TransactionDistributionChart({
   hasData,
   markerCurrentTransaction,
   markerValue,
-  markerPercentile,
   onChartSelection,
   selection,
   status,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
-
-  const areaSeriesColors = [
-    euiTheme.eui.euiColorVis1,
-    euiTheme.eui.euiColorVis2,
-    euiTheme.eui.euiColorVis5,
-  ];
+  const markerPercentile = DEFAULT_PERCENTILE_THRESHOLD;
 
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
@@ -134,9 +126,9 @@ export function TransactionDistributionChart({
     Math.max(
       ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
     ) ?? 0;
-  const yTicks = Math.ceil(Math.log10(yMax));
+  const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
   const yAxisDomain = {
-    min: 0.9,
+    min: 0.5,
     max: Math.pow(10, yTicks),
   };
 
@@ -164,29 +156,32 @@ export function TransactionDistributionChart({
         <Chart>
           <Settings
             rotation={0}
-            theme={{
+            theme={[
+              {
+                legend: {
+                  spacingBuffer: 100,
+                },
+                areaSeriesStyle: {
+                  line: {
+                    visible: true,
+                  },
+                },
+                axes: {
+                  tickLine: {
+                    visible: true,
+                    size: 5,
+                    padding: 10,
+                  },
+                  tickLabel: {
+                    fontSize: 10,
+                    fill: euiTheme.eui.euiColorMediumShade,
+                    padding: 0,
+                  },
+                },
+              },
               ...chartTheme,
-              legend: {
-                spacingBuffer: 100,
-              },
-              areaSeriesStyle: {
-                line: {
-                  visible: false,
-                },
-              },
-              axes: {
-                ...chartTheme.axes,
-                tickLine: {
-                  size: 5,
-                },
-                tickLabel: {
-                  fontSize: 10,
-                  fill: euiTheme.eui.euiColorMediumShade,
-                  padding: 0,
-                },
-              },
-            }}
-            showLegend
+            ]}
+            showLegend={true}
             legendPosition={Position.Bottom}
             onBrushEnd={onChartSelection}
           />
@@ -238,7 +233,10 @@ export function TransactionDistributionChart({
           />
           <Axis
             id="x-axis"
-            title=""
+            title={i18n.translate(
+              'xpack.apm.transactionDistribution.chart.latencyLabel',
+              { defaultMessage: 'Latency' }
+            )}
             position={Position.Bottom}
             tickFormat={xAxisTickFormat}
             gridLine={{ visible: false }}
@@ -248,7 +246,7 @@ export function TransactionDistributionChart({
             domain={yAxisDomain}
             title={i18n.translate(
               'xpack.apm.transactionDistribution.chart.numberOfTransactionsLabel',
-              { defaultMessage: '# transactions' }
+              { defaultMessage: 'Transactions' }
             )}
             position={Position.Left}
             ticks={yTicks}
@@ -264,8 +262,16 @@ export function TransactionDistributionChart({
               curve={CurveType.CURVE_STEP_AFTER}
               xAccessor="key"
               yAccessors={['doc_count']}
-              color={areaSeriesColors[i]}
+              color={d.areaSeriesColor}
               fit="lookahead"
+              // To make the area appear without the orphaned points technique,
+              // we changed the original data to replace values of 0 with 0.0001.
+              // To show the correct values again in tooltips, we use a custom tickFormat to round values.
+              // We can safely do this because all transaction values above 0 are without decimal points anyway.
+              // An update for Elastic Charts is in the works to be able to customize the above "fit"
+              // attribute. Once that is available we can get rid of the full workaround.
+              // Elastic Charts issue: https://github.com/elastic/elastic-charts/issues/1489
+              tickFormat={(p) => `${Math.round(p)}`}
             />
           ))}
         </Chart>

@@ -7,20 +7,25 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ElasticsearchTestBed, setupElasticsearchPage, setupEnvironment } from '../helpers';
-
-import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
+import { setupEnvironment } from '../helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
+import {
+  esDeprecationsMockResponse,
+  MOCK_SNAPSHOT_ID,
+  MOCK_JOB_ID,
+  MOCK_REINDEX_DEPRECATION,
+} from './mocked_responses';
 
 describe('Index settings deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   const indexSettingDeprecation = esDeprecationsMockResponse.deprecations[1];
-
-  afterAll(() => {
-    server.restore();
-  });
-
   beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
     httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
@@ -28,40 +33,54 @@ describe('Index settings deprecation flyout', () => {
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
-
-    await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+    httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
+      reindexOp: null,
+      warnings: [],
+      hasRequiredPrivileges: true,
+      meta: {
+        indexName: 'foo',
+        reindexName: 'reindexed-foo',
+        aliases: [],
+      },
     });
 
-    const { find, exists, actions, component } = testBed;
+    await act(async () => {
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+    });
 
+    const { actions, component } = testBed;
     component.update();
+    await actions.table.clickDeprecationRowAt('indexSetting', 0);
+  });
 
-    await actions.clickIndexSettingsDeprecationAt(0);
+  it('renders a flyout with deprecation details', async () => {
+    const { find, exists } = testBed;
 
     expect(exists('indexSettingsDetails')).toBe(true);
     expect(find('indexSettingsDetails.flyoutTitle').text()).toContain(
       indexSettingDeprecation.message
     );
+    expect(find('indexSettingsDetails.documentationLink').props().href).toBe(
+      indexSettingDeprecation.url
+    );
     expect(exists('removeSettingsPrompt')).toBe(true);
   });
 
   it('removes deprecated index settings', async () => {
-    const { find, actions } = testBed;
+    const { find, actions, exists } = testBed;
 
-    httpRequestsMockHelpers.setUpdateIndexSettingsResponse({
+    httpRequestsMockHelpers.setUpdateIndexSettingsResponse(indexSettingDeprecation.index!, {
       acknowledged: true,
     });
 
-    await actions.clickDeleteSettingsButton();
+    expect(exists('indexSettingsDetails.warningDeprecationBadge')).toBe(true);
 
-    const request = server.requests[server.requests.length - 1];
+    await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
-    expect(request.method).toBe('POST');
-    expect(request.url).toBe(
-      `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`,
+      expect.anything()
     );
-    expect(request.status).toEqual(200);
 
     // Verify the "Resolution" column of the table is updated
     expect(find('indexSettingsResolutionStatusCell').at(0).text()).toEqual(
@@ -69,12 +88,14 @@ describe('Index settings deprecation flyout', () => {
     );
 
     // Reopen the flyout
-    await actions.clickIndexSettingsDeprecationAt(0);
+    await actions.table.clickDeprecationRowAt('indexSetting', 0);
 
     // Verify prompt to remove setting no longer displays
     expect(find('removeSettingsPrompt').length).toEqual(0);
     // Verify the action button no longer displays
     expect(find('indexSettingsDetails.deleteSettingsButton').length).toEqual(0);
+    // Verify the badge got marked as resolved
+    expect(exists('indexSettingsDetails.resolvedDeprecationBadge')).toBe(true);
   });
 
   it('handles failure', async () => {
@@ -85,17 +106,18 @@ describe('Index settings deprecation flyout', () => {
       message: 'Remove index settings error',
     };
 
-    httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
-
-    await actions.clickDeleteSettingsButton();
-
-    const request = server.requests[server.requests.length - 1];
-
-    expect(request.method).toBe('POST');
-    expect(request.url).toBe(
-      `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`
+    httpRequestsMockHelpers.setUpdateIndexSettingsResponse(
+      indexSettingDeprecation.index!,
+      undefined,
+      error
     );
-    expect(request.status).toEqual(500);
+
+    await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
+
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`,
+      expect.anything()
+    );
 
     // Verify the "Resolution" column of the table is updated
     expect(find('indexSettingsResolutionStatusCell').at(0).text()).toEqual(
@@ -103,7 +125,7 @@ describe('Index settings deprecation flyout', () => {
     );
 
     // Reopen the flyout
-    await actions.clickIndexSettingsDeprecationAt(0);
+    await actions.table.clickDeprecationRowAt('indexSetting', 0);
 
     // Verify the flyout shows an error message
     expect(find('indexSettingsDetails.deleteSettingsError').text()).toContain(

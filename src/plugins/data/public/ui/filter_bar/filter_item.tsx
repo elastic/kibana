@@ -7,7 +7,7 @@
  */
 
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n/react';
+import { InjectedIntl } from '@kbn/i18n-react';
 import {
   Filter,
   isFilterPinned,

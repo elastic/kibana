@@ -20,10 +20,11 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
       from: 'now-50000h',
-      index: ['exceptions-*'],
+      index: rule.index,
       query: rule.customQuery,
       language: 'kuery',
       enabled: false,
+      exceptions_list: rule.exceptionLists ?? [],
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
@@ -58,6 +59,8 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       rule_id: ruleId,
       risk_score: parseInt(rule.riskScore, 10),
       description: rule.description,
+      // Default interval is 1m, our tests config overwrite this to 1s
+      // See https://github.com/elastic/kibana/pull/125396 for details
       interval: '10s',
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
@@ -79,7 +82,7 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       threat_language: 'kuery',
       threat_filters: [],
       threat_index: rule.indicatorIndexPattern,
-      threat_indicator_path: '',
+      threat_indicator_path: rule.threatIndicatorPath,
       from: 'now-50000h',
       index: rule.index,
       query: rule.customQuery || '*:*',
@@ -90,7 +93,7 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
     failOnStatusCode: false,
   });
 
-export const createCustomRuleActivated = (
+export const createCustomRuleEnabled = (
   rule: CustomRule,
   ruleId = '1',
   interval = '100m',
@@ -114,6 +117,7 @@ export const createCustomRuleActivated = (
       enabled: true,
       tags: ['rule1'],
       max_signals: maxSignals,
+      building_block_type: rule.buildingBlockType,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
@@ -125,25 +129,5 @@ export const deleteCustomRule = (ruleId = '1') => {
     url: `api/detection_engine/rules?rule_id=${ruleId}`,
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
-  });
-};
-
-export const createSignalsIndex = () => {
-  cy.request({
-    method: 'POST',
-    url: 'api/detection_engine/index',
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-  });
-};
-
-export const removeSignalsIndex = () => {
-  cy.request({ url: '/api/detection_engine/index', failOnStatusCode: false }).then((response) => {
-    if (response.status === 200) {
-      cy.request({
-        method: 'DELETE',
-        url: `api/detection_engine/index`,
-        headers: { 'kbn-xsrf': 'delete-signals' },
-      });
-    }
   });
 };

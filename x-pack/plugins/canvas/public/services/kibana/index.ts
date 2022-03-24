@@ -22,15 +22,19 @@ import { navLinkServiceFactory } from './nav_link';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';
 import { reportingServiceFactory } from './reporting';
+import { visualizationsServiceFactory } from './visualizations';
 import { workpadServiceFactory } from './workpad';
+import { filtersServiceFactory } from './filters';
 
 export { customElementServiceFactory } from './custom_element';
 export { embeddablesServiceFactory } from './embeddables';
 export { expressionsServiceFactory } from './expressions';
+export { filtersServiceFactory } from './filters';
 export { labsServiceFactory } from './labs';
 export { notifyServiceFactory } from './notify';
 export { platformServiceFactory } from './platform';
 export { reportingServiceFactory } from './reporting';
+export { visualizationsServiceFactory } from './visualizations';
 export { workpadServiceFactory } from './workpad';
 
 export const pluginServiceProviders: PluginServiceProviders<
@@ -39,12 +43,14 @@ export const pluginServiceProviders: PluginServiceProviders<
 > = {
   customElement: new PluginServiceProvider(customElementServiceFactory),
   embeddables: new PluginServiceProvider(embeddablesServiceFactory),
-  expressions: new PluginServiceProvider(expressionsServiceFactory),
+  expressions: new PluginServiceProvider(expressionsServiceFactory, ['filters', 'notify']),
+  filters: new PluginServiceProvider(filtersServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
   navLink: new PluginServiceProvider(navLinkServiceFactory),
   notify: new PluginServiceProvider(notifyServiceFactory),
   platform: new PluginServiceProvider(platformServiceFactory),
   reporting: new PluginServiceProvider(reportingServiceFactory),
+  visualizations: new PluginServiceProvider(visualizationsServiceFactory),
   workpad: new PluginServiceProvider(workpadServiceFactory),
 };
 

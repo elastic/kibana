@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
@@ -145,7 +145,31 @@ describe('HeaderSection', () => {
     expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(true);
   });
 
-  test('it does NOT an inspect button when an `id` is NOT provided', () => {
+  test('it renders an inspect button when an `id` is provided and `showInspectButton` is true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection id="an id" title="Test title" showInspectButton={true}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(true);
+  });
+
+  test('it does NOT render an inspect button when `showInspectButton` is false', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection id="an id" title="Test title" showInspectButton={false}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(false);
+  });
+
+  test('it does NOT render an inspect button when an `id` is NOT provided', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderSection title="Test title">

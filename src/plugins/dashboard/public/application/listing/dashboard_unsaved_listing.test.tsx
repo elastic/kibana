@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';

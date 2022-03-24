@@ -63,6 +63,7 @@ export const LogstashTemplate: React.FC<LogstashTemplateProps> = ({
           defaultMessage: 'Pipelines',
         }),
         route: `/logstash/node/${instance.nodeSummary?.uuid}/pipelines`,
+        testSubj: 'logstashNodeDetailPipelinesLink',
       });
       tabs.push({
         id: 'advanced',
@@ -70,6 +71,7 @@ export const LogstashTemplate: React.FC<LogstashTemplateProps> = ({
           defaultMessage: 'Advanced',
         }),
         route: `/logstash/node/${instance.nodeSummary?.uuid}/advanced`,
+        testSubj: 'logstashNodeDetailAdvancedLink',
       });
     }
   }

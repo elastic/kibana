@@ -1,0 +1,341 @@
+{
+  "id": "screenshotting",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "screenshotting",
+        "id": "def-server.ScreenshotOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScreenshotOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "screenshotting",
+            "scope": "server",
+            "docId": "kibScreenshottingPluginApi",
+            "section": "def-server.ScreenshotOptions",
+            "text": "ScreenshotOptions"
+          },
+          " extends ",
+          "ScreenshotObservableOptions"
+        ],
+        "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-server.ScreenshotOptions.layout",
+            "type": "Object",
+            "tags": [],
+            "label": "layout",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; }"
+            ],
+            "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-server.ScreenshotOptions.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nSource Kibana request object from where the headers will be extracted."
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | undefined"
+            ],
+            "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotting",
+        "id": "def-server.ScreenshotResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScreenshotResult",
+        "description": [],
+        "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-server.ScreenshotResult.layout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layout",
+            "description": [
+              "\nUsed layout instance constructed from the given options."
+            ],
+            "signature": [
+              "BaseLayout",
+              " & LayoutSelectors & Partial<{ width: number; height: number; }>"
+            ],
+            "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-server.ScreenshotResult.metrics",
+            "type": "Object",
+            "tags": [],
+            "label": "metrics",
+            "description": [
+              "\nCollected performance metrics during the screenshotting session."
+            ],
+            "signature": [
+              "PerformanceMetrics",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-server.ScreenshotResult.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [
+              "\nScreenshotting results."
+            ],
+            "signature": [
+              "ScreenshotObservableResult",
+              "[]"
+            ],
+            "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "screenshotting",
+        "id": "def-server.Layout",
+        "type": "Type",
+        "tags": [],
+        "label": "Layout",
+        "description": [],
+        "signature": [
+          "BaseLayout",
+          " & LayoutSelectors & Partial<{ width: number; height: number; }>"
+        ],
+        "path": "x-pack/plugins/screenshotting/server/layouts/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "screenshotting",
+      "id": "def-server.ScreenshottingStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ScreenshottingStart",
+      "description": [
+        "\nStart public contract."
+      ],
+      "path": "x-pack/plugins/screenshotting/server/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "screenshotting",
+          "id": "def-server.ScreenshottingStart.diagnose",
+          "type": "Function",
+          "tags": [],
+          "label": "diagnose",
+          "description": [
+            "\nRuns browser diagnostics."
+          ],
+          "signature": [
+            "(overrideFlags?: string[]) => ",
+            "Observable",
+            "<string>"
+          ],
+          "path": "x-pack/plugins/screenshotting/server/plugin.ts",
+          "deprecated": false,
+          "returnComment": [
+            "Observable with output messages."
+          ],
+          "children": [
+            {
+              "parentPluginId": "screenshotting",
+              "id": "def-server.ScreenshottingStart.diagnose.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "overrideFlags",
+              "description": [],
+              "signature": [
+                "string[]"
+              ],
+              "path": "x-pack/plugins/screenshotting/server/browsers/chromium/driver_factory/index.ts",
+              "deprecated": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "screenshotting",
+          "id": "def-server.ScreenshottingStart.getScreenshots",
+          "type": "Function",
+          "tags": [],
+          "label": "getScreenshots",
+          "description": [
+            "\nTakes screenshots of multiple pages."
+          ],
+          "signature": [
+            "(options: ",
+            {
+              "pluginId": "screenshotting",
+              "scope": "server",
+              "docId": "kibScreenshottingPluginApi",
+              "section": "def-server.ScreenshotOptions",
+              "text": "ScreenshotOptions"
+            },
+            ") => ",
+            "Observable",
+            "<",
+            {
+              "pluginId": "screenshotting",
+              "scope": "server",
+              "docId": "kibScreenshottingPluginApi",
+              "section": "def-server.ScreenshotResult",
+              "text": "ScreenshotResult"
+            },
+            ">"
+          ],
+          "path": "x-pack/plugins/screenshotting/server/plugin.ts",
+          "deprecated": false,
+          "returnComment": [
+            "Observable with screenshotting results."
+          ],
+          "children": [
+            {
+              "parentPluginId": "screenshotting",
+              "id": "def-server.ScreenshottingStart.getScreenshots.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [
+                "Screenshots session options."
+              ],
+              "signature": [
+                {
+                  "pluginId": "screenshotting",
+                  "scope": "server",
+                  "docId": "kibScreenshottingPluginApi",
+                  "section": "def-server.ScreenshotOptions",
+                  "text": "ScreenshotOptions"
+                }
+              ],
+              "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+              "deprecated": false
+            }
+          ]
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "screenshotting",
+        "id": "def-common.LayoutParams",
+        "type": "Type",
+        "tags": [],
+        "label": "LayoutParams",
+        "description": [
+          "\nScreenshot layout parameters."
+        ],
+        "signature": [
+          "{ id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; }"
+        ],
+        "path": "x-pack/plugins/screenshotting/common/layout.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "screenshotting",
+        "id": "def-common.LayoutTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "LayoutTypes",
+        "description": [
+          "\nSupported layout types."
+        ],
+        "path": "x-pack/plugins/screenshotting/common/layout.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-common.LayoutTypes.PRESERVE_LAYOUT",
+            "type": "string",
+            "tags": [],
+            "label": "PRESERVE_LAYOUT",
+            "description": [],
+            "path": "x-pack/plugins/screenshotting/common/layout.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-common.LayoutTypes.PRINT",
+            "type": "string",
+            "tags": [],
+            "label": "PRINT",
+            "description": [],
+            "path": "x-pack/plugins/screenshotting/common/layout.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-common.LayoutTypes.CANVAS",
+            "type": "string",
+            "tags": [],
+            "label": "CANVAS",
+            "description": [],
+            "path": "x-pack/plugins/screenshotting/common/layout.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

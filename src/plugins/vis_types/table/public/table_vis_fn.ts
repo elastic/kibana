@@ -118,9 +118,19 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
         defaultMessage: 'Specifies calculating function for the total row. Possible options are: ',
       }),
     },
+    autoFitRowToContent: {
+      types: ['boolean'],
+      help: '',
+      default: false,
+    },
   },
   fn(input, args, handlers) {
     const convertedData = tableVisResponseHandler(input, args);
+    const inspectorData = {
+      rows: convertedData?.table?.rows ?? input.rows,
+      columns: convertedData?.table?.columns ?? input.columns,
+      type: 'datatable',
+    } as Datatable;
 
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [
@@ -153,7 +163,7 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
           }),
         ]);
       }
-      const logTable = prepareLogTable(input, argsTable);
+      const logTable = prepareLogTable(inspectorData, argsTable);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
     return {

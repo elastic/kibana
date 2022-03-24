@@ -19,7 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
@@ -171,10 +171,10 @@ const PolicyAdvanced = React.memo(
         <EuiFormRow
           fullWidth
           label={
-            <EuiFlexGroup>
-              <EuiFlexItem>{configPath.join('.')}</EuiFlexItem>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem grow={true}>{configPath.join('.')}</EuiFlexItem>
               {documentation && (
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiIconTip content={documentation} position="right" />
                 </EuiFlexItem>
               )}

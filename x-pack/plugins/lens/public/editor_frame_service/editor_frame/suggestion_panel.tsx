@@ -8,20 +8,24 @@
 import './suggestion_panel.scss';
 
 import { camelCase, pick } from 'lodash';
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiIcon,
   EuiTitle,
   EuiPanel,
   EuiIconTip,
   EuiToolTip,
+  EuiButtonEmpty,
+  EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Ast, toExpression } from '@kbn/interpreter/common';
+import { Ast, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { ExecutionContextSearch } from 'src/plugins/data/public';
@@ -55,9 +59,13 @@ import {
   selectActiveDatasourceId,
   selectActiveData,
   selectDatasourceStates,
+  selectChangesApplied,
+  applyChanges,
 } from '../../state_management';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from './config_panel/dimension_container';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
+const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
 
 export interface SuggestionPanelProps {
   datasourceMap: DatasourceMap;
@@ -95,7 +103,6 @@ const PreviewRenderer = ({
   return (
     <div
       className={classNames('lnsSuggestionPanel__chartWrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
     >
@@ -141,7 +148,6 @@ const SuggestionPreview = ({
           hasBorder
           hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsSuggestionPanel__button-isSelected': selected,
           })}
           paddingSize="none"
@@ -189,6 +195,16 @@ export function SuggestionPanel({
   const existsStagedPreview = useLensSelector((state) => Boolean(state.lens.stagedPreview));
   const currentVisualization = useLensSelector(selectCurrentVisualization);
   const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
+  const changesApplied = useLensSelector(selectChangesApplied);
+  // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
+  const [hideSuggestions, setHideSuggestions] = useLocalStorage(
+    LOCAL_STORAGE_SUGGESTIONS_PANEL,
+    false
+  );
+
+  const toggleSuggestions = useCallback(() => {
+    setHideSuggestions(!hideSuggestions);
+  }, [setHideSuggestions, hideSuggestions]);
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
@@ -317,14 +333,98 @@ export function SuggestionPanel({
       trackSuggestionEvent('back_to_current');
       setLastSelectedSuggestion(-1);
       dispatchLens(rollbackSuggestion());
+      dispatchLens(applyChanges());
     }
   }
 
+  const applyChangesPrompt = (
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      className="lnsSuggestionPanel__applyChangesPrompt"
+      paddingSize="m"
+    >
+      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <h3>
+            <FormattedMessage
+              id="xpack.lens.suggestions.applyChangesPrompt"
+              defaultMessage="Apply your changes to see suggestions."
+            />
+          </h3>
+          <EuiSpacer size="s" />
+          <EuiButton
+            fill
+            iconType="play"
+            size="s"
+            className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+            onClick={() => dispatchLens(applyChanges())}
+            data-test-subj="lnsSuggestionApplyChanges"
+          >
+            <FormattedMessage
+              id="xpack.lens.suggestions.applyChangesLabel"
+              defaultMessage="Apply"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+
+  const suggestionsUI = (
+    <>
+      {currentVisualization.activeId && !hideSuggestions && (
+        <SuggestionPreview
+          preview={{
+            error: currentStateError != null,
+            expression: currentStateExpression,
+            icon:
+              visualizationMap[currentVisualization.activeId].getDescription(
+                currentVisualization.state
+              ).icon || 'empty',
+            title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
+              defaultMessage: 'Current visualization',
+            }),
+          }}
+          ExpressionRenderer={AutoRefreshExpressionRenderer}
+          onSelect={rollbackToCurrentVisualization}
+          selected={lastSelectedSuggestion === -1}
+          showTitleAsLabel
+        />
+      )}
+      {!hideSuggestions &&
+        suggestions.map((suggestion, index) => {
+          return (
+            <SuggestionPreview
+              preview={{
+                expression: suggestion.previewExpression,
+                icon: suggestion.previewIcon,
+                title: suggestion.title,
+              }}
+              ExpressionRenderer={AutoRefreshExpressionRenderer}
+              key={index}
+              onSelect={() => {
+                trackUiEvent('suggestion_clicked');
+                if (lastSelectedSuggestion === index) {
+                  rollbackToCurrentVisualization();
+                } else {
+                  setLastSelectedSuggestion(index);
+                  switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
+                }
+              }}
+              selected={index === lastSelectedSuggestion}
+            />
+          );
+        })}
+    </>
+  );
+
   return (
     <div className="lnsSuggestionPanel">
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiTitle className="lnsSuggestionPanel__title" size="xxs">
+      <EuiAccordion
+        id="lensSuggestionsPanel"
+        buttonContent={
+          <EuiTitle size="xxs">
             <h3>
               <FormattedMessage
                 id="xpack.lens.editorFrame.suggestionPanelTitle"
@@ -332,9 +432,12 @@ export function SuggestionPanel({
               />
             </h3>
           </EuiTitle>
-        </EuiFlexItem>
-        {existsStagedPreview && (
-          <EuiFlexItem grow={false}>
+        }
+        forceState={hideSuggestions ? 'closed' : 'open'}
+        onToggle={toggleSuggestions}
+        extraAction={
+          existsStagedPreview &&
+          !hideSuggestions && (
             <EuiToolTip
               content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
                 defaultMessage: 'Refresh the suggestions based on the selected visualization.',
@@ -354,54 +457,13 @@ export function SuggestionPanel({
                 })}
               </EuiButtonEmpty>
             </EuiToolTip>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-
-      <div className="lnsSuggestionPanel__suggestions">
-        {currentVisualization.activeId && (
-          <SuggestionPreview
-            preview={{
-              error: currentStateError != null,
-              expression: currentStateExpression,
-              icon:
-                visualizationMap[currentVisualization.activeId].getDescription(
-                  currentVisualization.state
-                ).icon || 'empty',
-              title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
-                defaultMessage: 'Current visualization',
-              }),
-            }}
-            ExpressionRenderer={AutoRefreshExpressionRenderer}
-            onSelect={rollbackToCurrentVisualization}
-            selected={lastSelectedSuggestion === -1}
-            showTitleAsLabel
-          />
-        )}
-        {suggestions.map((suggestion, index) => {
-          return (
-            <SuggestionPreview
-              preview={{
-                expression: suggestion.previewExpression,
-                icon: suggestion.previewIcon,
-                title: suggestion.title,
-              }}
-              ExpressionRenderer={AutoRefreshExpressionRenderer}
-              key={index}
-              onSelect={() => {
-                trackUiEvent('suggestion_clicked');
-                if (lastSelectedSuggestion === index) {
-                  rollbackToCurrentVisualization();
-                } else {
-                  setLastSelectedSuggestion(index);
-                  switchToSuggestion(dispatchLens, suggestion);
-                }
-              }}
-              selected={index === lastSelectedSuggestion}
-            />
-          );
-        })}
-      </div>
+          )
+        }
+      >
+        <div className="lnsSuggestionPanel__suggestions" data-test-subj="lnsSuggestionsPanel">
+          {changesApplied ? suggestionsUI : applyChangesPrompt}
+        </div>
+      </EuiAccordion>
     </div>
   );
 }

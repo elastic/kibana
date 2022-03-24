@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import TelemetryManagementSection from './telemetry_management_section';
 import { TelemetryService } from '../../../telemetry/public/services';
 import { coreMock } from '../../../../core/public/mocks';
@@ -16,7 +16,9 @@ import type { DocLinksStart } from 'src/core/public';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
-  const docLinks = {} as DocLinksStart['links'];
+  const docLinks = {
+    legal: { privacyStatement: 'https://some-host/some-url' },
+  } as unknown as DocLinksStart['links'];
   const coreSetup = coreMock.createSetup();
 
   it('renders as expected', () => {
@@ -257,7 +259,7 @@ describe('TelemetryManagementSectionComponent', () => {
       await expect(
         toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
       ).resolves.toBe(true);
-      // TODO: Fix `mountWithIntl` types in @kbn/test/jest to make testing easier
+      // TODO: Fix `mountWithIntl` types in @kbn/test-jest-helpers to make testing easier
       expect((component.state() as { enabled: boolean }).enabled).toBe(true);
       await expect(
         toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()

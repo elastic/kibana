@@ -66,8 +66,10 @@ export class Project {
     const disableTypeCheck = projectOptions?.disableTypeCheck || false;
     const name =
       projectOptions?.name || Path.relative(REPO_ROOT, directory) || Path.basename(directory);
-    const include = config.include ? makeMatchers(directory, config.include) : undefined;
-    const exclude = config.exclude ? makeMatchers(directory, config.exclude) : undefined;
+    const includePatterns = config.include;
+    const include = includePatterns ? makeMatchers(directory, includePatterns) : undefined;
+    const excludePatterns = config.exclude;
+    const exclude = excludePatterns ? makeMatchers(directory, excludePatterns) : undefined;
 
     let baseProject;
     if (config.extends) {
@@ -99,7 +101,9 @@ export class Project {
       disableTypeCheck,
       baseProject,
       include,
-      exclude
+      includePatterns,
+      exclude,
+      excludePatterns
     );
     cache.set(tsConfigPath, project);
     return project;
@@ -114,8 +118,21 @@ export class Project {
 
     public readonly baseProject?: Project,
     private readonly include?: IMinimatch[],
-    private readonly exclude?: IMinimatch[]
+    private readonly includePatterns?: string[],
+    private readonly exclude?: IMinimatch[],
+    private readonly excludePatterns?: string[]
   ) {}
+
+  public getIncludePatterns(): string[] {
+    return this.includePatterns
+      ? this.includePatterns
+      : this.baseProject?.getIncludePatterns() ?? [];
+  }
+  public getExcludePatterns(): string[] {
+    return this.excludePatterns
+      ? this.excludePatterns
+      : this.baseProject?.getExcludePatterns() ?? [];
+  }
 
   private getInclude(): IMinimatch[] {
     return this.include ? this.include : this.baseProject?.getInclude() ?? [];

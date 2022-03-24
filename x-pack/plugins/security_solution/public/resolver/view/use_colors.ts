@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
-import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
+import { darkMode, euiThemeVars } from '@kbn/ui-theme';
 import { useMemo } from 'react';
-import { useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 
 type ResolverColorNames =
   | 'copyableFieldBackground'
@@ -31,24 +29,22 @@ type ColorMap = Record<ResolverColorNames, string>;
  * Get access to Kibana-theme based colors.
  */
 export function useColors(): ColorMap {
-  const isDarkMode = useUiSetting('theme:darkMode');
-  const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
   return useMemo(() => {
     return {
-      copyableFieldBackground: theme.euiColorLightShade,
-      descriptionText: theme.euiTextColor,
-      full: theme.euiColorFullShade,
-      graphControls: theme.euiColorDarkestShade,
-      graphControlsBackground: theme.euiColorEmptyShade,
-      graphControlsBorderColor: theme.euiColorLightShade,
-      processBackingFill: `${theme.euiColorPrimary}${isDarkMode ? '1F' : '0F'}`, // Add opacity 0F = 6% , 1F = 12%
-      resolverBackground: theme.euiColorEmptyShade,
-      resolverEdge: isDarkMode ? theme.euiColorLightShade : theme.euiColorLightestShade,
-      resolverBreadcrumbBackground: theme.euiColorLightestShade,
-      resolverEdgeText: isDarkMode ? theme.euiColorFullShade : theme.euiColorDarkShade,
-      triggerBackingFill: `${theme.euiColorDanger}${isDarkMode ? '1F' : '0F'}`,
-      pillStroke: theme.euiColorLightShade,
-      linkColor: theme.euiLinkColor,
+      copyableFieldBackground: euiThemeVars.euiColorLightShade,
+      descriptionText: euiThemeVars.euiTextColor,
+      full: euiThemeVars.euiColorFullShade,
+      graphControls: euiThemeVars.euiColorDarkestShade,
+      graphControlsBackground: euiThemeVars.euiColorEmptyShade,
+      graphControlsBorderColor: euiThemeVars.euiColorLightShade,
+      processBackingFill: `${euiThemeVars.euiColorPrimary}${darkMode ? '1F' : '0F'}`, // Add opacity 0F = 6% , 1F = 12%
+      resolverBackground: euiThemeVars.euiColorEmptyShade,
+      resolverEdge: darkMode ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorLightestShade,
+      resolverBreadcrumbBackground: euiThemeVars.euiColorLightestShade,
+      resolverEdgeText: darkMode ? euiThemeVars.euiColorFullShade : euiThemeVars.euiColorDarkShade,
+      triggerBackingFill: `${euiThemeVars.euiColorDanger}${darkMode ? '1F' : '0F'}`,
+      pillStroke: euiThemeVars.euiColorLightShade,
+      linkColor: euiThemeVars.euiLinkColor,
     };
-  }, [isDarkMode, theme]);
+  }, []);
 }

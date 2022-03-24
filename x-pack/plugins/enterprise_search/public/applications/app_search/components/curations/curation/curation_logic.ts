@@ -21,7 +21,7 @@ import { DELETE_SUCCESS_MESSAGE } from '../constants';
 import { Curation } from '../types';
 import { addDocument, removeDocument } from '../utils';
 
-type CurationPageTabs = 'promoted' | 'hidden';
+type CurationPageTabs = 'promoted' | 'history' | 'hidden';
 
 interface CurationValues {
   dataLoading: boolean;
@@ -194,15 +194,18 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       const { engineName } = EngineLogic.values;
 
       try {
-        await http.put(`/internal/app_search/engines/${engineName}/search_relevance_suggestions`, {
-          body: JSON.stringify([
-            {
-              query: values.activeQuery,
-              type: 'curation',
-              status: 'applied',
-            },
-          ]),
-        });
+        await http.put(
+          `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions`,
+          {
+            body: JSON.stringify([
+              {
+                query: values.activeQuery,
+                type: 'curation',
+                status: 'applied',
+              },
+            ]),
+          }
+        );
         actions.loadCuration();
       } catch (e) {
         flashAPIErrors(e);
@@ -228,7 +231,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(
+        const response = await http.get<Curation>(
           `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           { query: { skip_record_analytics: 'true' } }
         );
@@ -248,9 +251,10 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       clearFlashMessages();
 
       try {
-        const response = await http.put(
+        const response = await http.put<Curation>(
           `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           {
+            query: { skip_record_analytics: 'true' },
             body: JSON.stringify({
               queries: values.queries,
               query: values.activeQuery,
@@ -270,6 +274,9 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       if (activeQueryDeleted) actions.setActiveQuery(queries[0]);
 
       actions.updateCuration();
+    },
+    onSelectPageTab: () => {
+      clearFlashMessages();
     },
     setActiveQuery: () => actions.updateCuration(),
     setPromotedIds: () => actions.updateCuration(),

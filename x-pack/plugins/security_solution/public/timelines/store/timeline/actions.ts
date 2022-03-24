@@ -6,8 +6,8 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+import type { Filter } from '@kbn/es-query';
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
   DataProviderType,
@@ -24,8 +24,7 @@ import type {
   TimelinePersistInput,
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
-import { tGridActions } from '../../../../../timelines/public';
-export const {
+export {
   applyDeltaToColumnWidth,
   clearEventsDeleted,
   clearEventsLoading,
@@ -37,13 +36,16 @@ export const {
   setSelected,
   setTGridSelectAll,
   toggleDetailPanel,
+  updateColumnOrder,
   updateColumns,
+  updateColumnWidth,
   updateIsLoading,
   updateItemsPerPage,
   updateItemsPerPageOptions,
   updateSort,
   upsertColumn,
-} = tGridActions;
+} from '../../../../../timelines/public';
+import { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -89,6 +91,7 @@ export const updateTimeline = actionCreator<{
 export const addTimeline = actionCreator<{
   id: string;
   timeline: TimelineModel;
+  resolveTimelineConfig?: ResolveTimelineConfig;
   savedTimeline?: boolean;
 }>('ADD_TIMELINE');
 
@@ -189,10 +192,11 @@ export const setExcludedRowRendererIds = actionCreator<{
   excludedRowRendererIds: RowRendererId[];
 }>('SET_TIMELINE_EXCLUDED_ROW_RENDERER_IDS');
 
-export const updateIndexNames = actionCreator<{
+export const updateDataView = actionCreator<{
   id: string;
+  dataViewId: string;
   indexNames: string[];
-}>('UPDATE_INDEXES_NAME');
+}>('UPDATE_DATA_VIEW');
 
 export const setActiveTabTimeline = actionCreator<{
   id: string;

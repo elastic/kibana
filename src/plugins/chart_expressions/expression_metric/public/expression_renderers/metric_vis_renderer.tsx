@@ -9,6 +9,8 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { VisualizationContainer } from '../../../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';
@@ -16,29 +18,36 @@ import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));
 
-export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRenderConfig> = () => ({
-  name: EXPRESSION_METRIC_NAME,
-  displayName: 'metric visualization',
-  reuseDomNode: true,
-  render: async (domNode, { visData, visConfig }, handlers) => {
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+export const getMetricVisRenderer = (
+  theme: ThemeServiceStart
+): (() => ExpressionRenderDefinition<MetricVisRenderConfig>) => {
+  return () => ({
+    name: EXPRESSION_METRIC_NAME,
+    displayName: 'metric visualization',
+    reuseDomNode: true,
+    render: async (domNode, { visData, visConfig }, handlers) => {
+      handlers.onDestroy(() => {
+        unmountComponentAtNode(domNode);
+      });
 
-    render(
-      <VisualizationContainer
-        className="mtrVis"
-        showNoResult={!visData.rows?.length}
-        handlers={handlers}
-      >
-        <MetricVisComponent
-          visData={visData}
-          visParams={visConfig}
-          renderComplete={handlers.done}
-          fireEvent={handlers.event}
-        />
-      </VisualizationContainer>,
-      domNode
-    );
-  },
-});
+      render(
+        <KibanaThemeProvider theme$={theme.theme$}>
+          <VisualizationContainer
+            data-test-subj="mtrVis"
+            className="mtrVis"
+            showNoResult={!visData.rows?.length}
+            handlers={handlers}
+          >
+            <MetricVisComponent
+              visData={visData}
+              visParams={visConfig}
+              renderComplete={handlers.done}
+              fireEvent={handlers.event}
+            />
+          </VisualizationContainer>
+        </KibanaThemeProvider>,
+        domNode
+      );
+    },
+  });
+};

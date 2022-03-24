@@ -10,11 +10,13 @@ import path from 'path';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { warnAndSkipTest } from '../../helpers';
+import { testUsers } from '../test_users';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const server = dockerServers.get('registry');
   describe('EPM - package file', () => {
@@ -85,6 +87,32 @@ export default function ({ getService }: FtrProviderContext) {
           warnAndSkipTest(this, log);
         }
       });
+
+      it('should return 200 if the user has only integrations access', async function () {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages/filetest/0.1.0/kibana/search/sample_search.json')
+          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
+          .set('kbn-xsrf', 'xxx')
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+      });
+
+      it('should return 200 if the user has only fleet access', async function () {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages/filetest/0.1.0/kibana/search/sample_search.json')
+          .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+          .set('kbn-xsrf', 'xxx')
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+      });
+
+      it('should return 403 if the user does not have correct permissions', async function () {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages/filetest/0.1.0/kibana/search/sample_search.json')
+          .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
+          .set('kbn-xsrf', 'xxx')
+          .expect(403);
+      });
     });
     describe('it gets files from an uploaded package', () => {
       before(async () => {
@@ -103,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       after(async () => {
         if (!server.enabled) return;
-        await supertest.delete(`/api/fleet/epm/packages/apache-0.1.4`).set('kbn-xsrf', 'xxxx');
+        await supertest.delete(`/api/fleet/epm/packages/apache/0.1.4`).set('kbn-xsrf', 'xxxx');
       });
       it('fetches a .png screenshot image', async function () {
         if (server.enabled) {

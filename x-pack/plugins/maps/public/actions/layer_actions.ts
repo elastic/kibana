@@ -17,6 +17,7 @@ import {
   getLayerListRaw,
   getMapColors,
   getMapReady,
+  getMapSettings,
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
@@ -35,13 +36,19 @@ import {
   SET_SELECTED_LAYER,
   SET_WAITING_FOR_READY_HIDDEN_LAYERS,
   TRACK_CURRENT_LAYER_STATE,
+  UPDATE_LAYER,
   UPDATE_LAYER_ORDER,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
-import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
+import {
+  autoFitToBounds,
+  clearDataRequests,
+  syncDataForLayerId,
+  updateStyleMeta,
+} from './data_request_actions';
+import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   Attribution,
   JoinDescriptor,
@@ -51,6 +58,7 @@ import {
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
+import { OnSourceChangeArgs } from '../classes/sources/source';
 import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
@@ -113,6 +121,22 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
     newLayerList.forEach((layerDescriptor) => {
       dispatch(addLayer(layerDescriptor));
     });
+  };
+}
+
+export function updateLayerById(layerDescriptor: LayerDescriptor) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    dispatch({
+      type: UPDATE_LAYER,
+      layer: layerDescriptor,
+    });
+    await dispatch(syncDataForLayerId(layerDescriptor.id, false));
+    if (getMapSettings(getState()).autoFitToDataBounds) {
+      dispatch(autoFitToBounds());
+    }
   };
 }
 
@@ -217,7 +241,7 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     }
 
     if (!makeVisible) {
-      dispatch(cleanTooltipStateForLayer(layerId));
+      dispatch(updateTooltipStateForLayer(layer));
     }
 
     dispatch({
@@ -323,18 +347,17 @@ function updateMetricsProp(layerId: string, value: unknown) {
   ) => {
     const layer = getLayerById(layerId, getState());
     const previousFields = await (layer as IVectorLayer).getFields();
-    await dispatch({
+    dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
       propName: 'metrics',
       value,
     });
     await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
-    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
-export function updateSourceProp(
+function updateSourcePropWithoutSync(
   layerId: string,
   propName: string,
   value: unknown,
@@ -355,6 +378,28 @@ export function updateSourceProp(
     });
     if (newLayerType) {
       dispatch(updateLayerType(layerId, newLayerType));
+    }
+  };
+}
+
+export function updateSourceProp(
+  layerId: string,
+  propName: string,
+  value: unknown,
+  newLayerType?: LAYER_TYPE
+) {
+  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    await dispatch(updateSourcePropWithoutSync(layerId, propName, value, newLayerType));
+    dispatch(syncDataForLayerId(layerId, false));
+  };
+}
+
+export function updateSourceProps(layerId: string, sourcePropChanges: OnSourceChangeArgs[]) {
+  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    // Using for loop to ensure update completes before starting next update
+    for (let i = 0; i < sourcePropChanges.length; i++) {
+      const { propName, value, newLayerType } = sourcePropChanges[i];
+      await dispatch(updateSourcePropWithoutSync(layerId, propName, value, newLayerType));
     }
     dispatch(syncDataForLayerId(layerId, false));
   };
@@ -504,7 +549,7 @@ function removeLayerFromLayerList(layerId: string) {
     layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
-    dispatch(cleanTooltipStateForLayer(layerId));
+    dispatch(updateTooltipStateForLayer(layerGettingRemoved));
     layerGettingRemoved.destroy();
     dispatch({
       type: REMOVE_LAYER,
@@ -523,13 +568,17 @@ function updateStyleProperties(layerId: string, previousFields: IField[]) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const targetLayer = getLayerById(layerId, getState());
-    if (!targetLayer || !('getFields' in targetLayer)) {
+    const targetLayer: ILayer | undefined = getLayerById(layerId, getState());
+    if (!targetLayer) {
       return;
     }
 
     const style = targetLayer!.getCurrentStyle();
     if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
+      return;
+    }
+
+    if (!('getFields' in targetLayer)) {
       return;
     }
 

@@ -7,8 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { Filter, IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { DataViewField, DataView, ISearchSource } from 'src/plugins/data/common';
 import type { Query } from 'src/plugins/data/common';
+import type { KibanaExecutionContext } from 'kibana/public';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
@@ -16,10 +18,11 @@ import {
   getTimeFilter,
   getSearchService,
 } from '../../../kibana_services';
+import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
-import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
+import { expandToTileBoundaries } from '../../util/geo_tile_utils';
 import { IVectorSource } from '../vector_source';
 import { TimeRange } from '../../../../../../../src/plugins/data/common';
 import {
@@ -36,6 +39,7 @@ import { IField } from '../../fields/field';
 import { FieldFormatter } from '../../../../common/constants';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { makePublicExecutionContext } from '../../../util';
 
 export function isSearchSourceAbortError(error: Error) {
   return error.name === 'AbortError';
@@ -44,7 +48,7 @@ export function isSearchSourceAbortError(error: Error) {
 export interface IESSource extends IVectorSource {
   isESSource(): true;
   getId(): string;
-  getIndexPattern(): Promise<IndexPattern>;
+  getIndexPattern(): Promise<DataView>;
   getIndexPatternId(): string;
   getGeoFieldName(): string;
   loadStylePropsMeta({
@@ -67,7 +71,7 @@ export interface IESSource extends IVectorSource {
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
 
   readonly _descriptor: AbstractESSourceDescriptor;
 
@@ -158,6 +162,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     requestName,
     searchSessionId,
     searchSource,
+    executionContext,
   }: {
     registerCancelCallback: (callback: () => void) => void;
     requestDescription: string;
@@ -165,6 +170,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     requestName: string;
     searchSessionId?: string;
     searchSource: ISearchSource;
+    executionContext: KibanaExecutionContext;
   }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
@@ -181,6 +187,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             title: requestName,
             description: requestDescription,
           },
+          executionContext,
         })
         .toPromise();
       return resp;
@@ -275,6 +282,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       const esResp = await searchSource.fetch({
         abortSignal: abortController.signal,
         legacyHitsTotal: false,
+        executionContext: makePublicExecutionContext('es_source:bounds'),
       });
 
       if (!esResp.aggregations) {
@@ -333,12 +341,12 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   getGeoFieldName(): string {
     if (!this._descriptor.geoField) {
-      throw new Error('Should not call');
+      throw new Error(`Required field 'geoField' not provided in '_descriptor'`);
     }
     return this._descriptor.geoField;
   }
 
-  async getIndexPattern(): Promise<IndexPattern> {
+  async getIndexPattern(): Promise<DataView> {
     // Do we need this cache? Doesn't the IndexPatternService take care of this?
     if (this.indexPattern) {
       return this.indexPattern;
@@ -348,12 +356,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       this.indexPattern = await getIndexPatternService().get(this.getIndexPatternId());
       return this.indexPattern;
     } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.esSource.noIndexPatternErrorMessage', {
-          defaultMessage: `Unable to find Index pattern for id: {indexPatternId}`,
-          values: { indexPatternId: this.getIndexPatternId() },
-        })
-      );
+      throw new Error(getDataViewNotFoundMessage(this.getIndexPatternId()));
     }
   }
 
@@ -366,13 +369,13 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     }
   }
 
-  async _getGeoField(): Promise<IndexPatternField> {
+  async _getGeoField(): Promise<DataViewField> {
     const indexPattern = await this.getIndexPattern();
     const geoField = indexPattern.fields.getByName(this.getGeoFieldName());
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
-          defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
+          defaultMessage: `Data view {indexPatternTitle} no longer contains the geo field {geoField}`,
           values: { indexPatternTitle: indexPattern.title, geoField: this.getGeoFieldName() },
         })
       );
@@ -472,6 +475,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         }
       ),
       searchSessionId,
+      executionContext: makePublicExecutionContext('es_source:style_meta'),
     });
 
     return resp.aggregations;

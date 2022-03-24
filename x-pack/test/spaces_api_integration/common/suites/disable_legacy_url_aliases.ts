@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { LegacyUrlAlias } from 'src/core/server/saved_objects/object_types';
 import { SPACES } from '../lib/spaces';
 import { getUrlPrefix } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
@@ -27,6 +27,7 @@ export interface DisableLegacyUrlAliasesTestCase {
   targetSpace: string;
   targetType: string;
   sourceId: string;
+  expectFound: boolean;
 }
 
 const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
@@ -35,37 +36,45 @@ interface RawLegacyUrlAlias {
 }
 
 export const TEST_CASE_TARGET_TYPE = 'sharedtype';
-export const TEST_CASE_SOURCE_ID = 'default_only'; // two aliases exist for default_only: one in space_1, and one in space_2
-const createRequest = (alias: DisableLegacyUrlAliasesTestCase) => ({
-  aliases: [alias],
+export const TEST_CASE_SOURCE_ID = 'space_1_only'; // two aliases exist for space_1_only: one in the default spacd=e, and one in space_2
+const createRequest = ({ targetSpace, targetType, sourceId }: DisableLegacyUrlAliasesTestCase) => ({
+  aliases: [{ targetSpace, targetType, sourceId }],
 });
 const getTestTitle = ({ targetSpace, targetType, sourceId }: DisableLegacyUrlAliasesTestCase) => {
   return `for alias '${targetSpace}:${targetType}:${sourceId}'`;
 };
 
 export function disableLegacyUrlAliasesTestSuiteFactory(
-  es: KibanaClient,
+  es: Client,
   esArchiver: any,
   supertest: SuperTest<any>
 ) {
   const expectResponseBody =
     (testCase: DisableLegacyUrlAliasesTestCase, statusCode: 204 | 403): ExpectResponseBody =>
     async (response: Record<string, any>) => {
+      const { targetSpace, targetType, sourceId, expectFound } = testCase;
       if (statusCode === 403) {
         expect(response.body).to.eql({
           statusCode: 403,
           error: 'Forbidden',
-          message: `Unable to disable aliases for ${testCase.targetType}`,
+          message: `Unable to disable aliases for ${targetType}`,
         });
       }
-      const { targetSpace, targetType, sourceId } = testCase;
-      const esResponse = await es.get<RawLegacyUrlAlias>({
-        index: '.kibana',
-        id: `${LEGACY_URL_ALIAS_TYPE}:${targetSpace}:${targetType}:${sourceId}`,
-      });
-      const doc = esResponse.body._source!;
-      expect(doc).not.to.be(undefined);
-      expect(doc[LEGACY_URL_ALIAS_TYPE].disabled).to.be(statusCode === 204 ? true : undefined);
+      const esResponse = await es.get<RawLegacyUrlAlias>(
+        {
+          index: '.kibana',
+          id: `${LEGACY_URL_ALIAS_TYPE}:${targetSpace}:${targetType}:${sourceId}`,
+        },
+        { ignore: [404] }
+      );
+      if (expectFound) {
+        expect(esResponse.found).to.be(true);
+        const doc = esResponse._source!;
+        expect(doc).not.to.be(undefined);
+        expect(doc[LEGACY_URL_ALIAS_TYPE].disabled).to.be(statusCode === 204 ? true : undefined);
+      } else {
+        expect(esResponse.found).to.be(false);
+      }
     };
   const createTestDefinitions = (
     testCases: DisableLegacyUrlAliasesTestCase | DisableLegacyUrlAliasesTestCase[],

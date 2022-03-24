@@ -8,7 +8,7 @@ pageLoadAssetSize:
   console: 46091
   core: 435325
   crossClusterReplication: 65408
-  dashboard: 374194
+  dashboard: 82025
   dashboardEnhanced: 65646
   devTools: 38637
   discover: 99999
@@ -29,7 +29,6 @@ pageLoadAssetSize:
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
-  kibanaLegacy: 107711
   kibanaOverview: 56279
   lens: 96624
   licenseManagement: 41817
@@ -42,7 +41,7 @@ pageLoadAssetSize:
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
-  observability: 89709
+  observability: 95000
   painlessLab: 179748
   remoteClusters: 51327
   rollup: 97204
@@ -72,11 +71,10 @@ pageLoadAssetSize:
   visTypeVislib: 242838
   visTypeXy: 113478
   visualizations: 90000
-  visualize: 57431
   watcher: 43598
   runtimeFields: 41752
   stackAlerts: 29684
-  presentationUtil: 94301
+  presentationUtil: 58834
   osquery: 107090
   fileUpload: 25664
   dataVisualizer: 27530
@@ -94,17 +92,18 @@ pageLoadAssetSize:
   expressionShape: 34008
   interactiveSetup: 80000
   expressionTagcloud: 27505
-  securitySolution: 231753
+  securitySolution: 273763
   customIntegrations: 28810
   expressionMetricVis: 23121
+  expressionHeatmap: 27505
   visTypeMetric: 23332
   bfetch: 22837
-  kibanaUtils: 97808
+  kibanaUtils: 79713
   data: 491273
-  dataViews: 41532
+  dataViews: 43532
   expressions: 140958
   fieldFormats: 65209
-  kibanaReact: 84422
+  kibanaReact: 74422
   share: 71239
   uiActions: 35121
   dataEnhanced: 24980
@@ -112,7 +111,16 @@ pageLoadAssetSize:
   embeddableEnhanced: 22107
   uiActionsEnhanced: 38494
   urlDrilldown: 30063
-  indexPatternEditor: 19123
-  indexPatternFieldEditor: 34448
-  indexPatternManagement: 19165
+  dataViewEditor: 12000
+  dataViewFieldEditor: 27000
+  dataViewManagement: 5000
   reporting: 57003
+  visTypeHeatmap: 25340
+  expressionGauge: 25000
+  controls: 34788
+  expressionPartitionVis: 26338
+  sharedUX: 16225
+  ux: 20784
+  sessionView: 77750
+  cloudSecurityPosture: 19109
+  visTypeGauge: 24113

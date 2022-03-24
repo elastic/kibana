@@ -16,9 +16,9 @@ set(sessionValue: T): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  sessionValue | <code>T</code> | value to put |
+|  sessionValue | T | value to put |
 
 <b>Returns:</b>
 
-`void`
+void
 

@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
@@ -31,13 +31,22 @@ const getFilteredClusters = (clusters, queryText) => {
     const normalizedSearchText = queryText.toLowerCase();
 
     return clusters.filter((cluster) => {
-      const { name, seeds } = cluster;
+      const { name, seeds, proxyAddress } = cluster;
       const normalizedName = name.toLowerCase();
+
       if (normalizedName.toLowerCase().includes(normalizedSearchText)) {
         return true;
       }
 
-      return seeds.some((seed) => seed.includes(normalizedSearchText));
+      if (proxyAddress && proxyAddress.toLowerCase().includes(normalizedSearchText)) {
+        return true;
+      }
+
+      if (seeds) {
+        return seeds.some((seed) => seed.includes(normalizedSearchText));
+      }
+
+      return false;
     });
   } else {
     return clusters;
@@ -81,6 +90,11 @@ export class RemoteClusterTable extends Component {
   }
 
   onSearch = ({ query }) => {
+    // There's no need to update the state if there arent any search params
+    if (!query) {
+      return;
+    }
+
     const { clusters } = this.props;
     const { text } = query;
 

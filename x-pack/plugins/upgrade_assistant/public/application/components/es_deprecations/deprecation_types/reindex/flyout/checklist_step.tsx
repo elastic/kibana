@@ -15,15 +15,18 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiLink,
   EuiSpacer,
-  EuiTitle,
+  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { ReindexStatus } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { ReindexProgress } from './progress';
+import { useAppContext } from '../../../../../app_context';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -41,25 +44,25 @@ const buttonLabel = (status?: ReindexStatus) => {
           defaultMessage="Reindexing…"
         />
       );
-    case ReindexStatus.completed:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.doneLabel"
-          defaultMessage="Resolved"
-        />
-      );
     case ReindexStatus.paused:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.resumeLabel"
-          defaultMessage="Resume"
+          defaultMessage="Resume reindexing"
+        />
+      );
+    case ReindexStatus.cancelled:
+      return (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.restartLabel"
+          defaultMessage="Restart reindexing"
         />
       );
     default:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
-          defaultMessage="Run reindex"
+          defaultMessage="Start reindexing"
         />
       );
   }
@@ -69,45 +72,30 @@ const buttonLabel = (status?: ReindexStatus) => {
  * Displays a flyout that shows the current reindexing status for a given index.
  */
 export const ChecklistFlyoutStep: React.FunctionComponent<{
-  renderGlobalCallouts: () => React.ReactNode;
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, renderGlobalCallouts }) => {
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
+  const {
+    services: {
+      api,
+      core: { docLinks },
+    },
+  } = useAppContext();
+
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
+  const isCompleted = status === ReindexStatus.completed;
+  const hasFetchFailed = status === ReindexStatus.fetchFailed;
+  const hasReindexingFailed = status === ReindexStatus.failed;
+
+  const { data: nodes } = api.useLoadNodeDiskSpace();
 
   return (
     <Fragment>
       <EuiFlyoutBody>
-        {renderGlobalCallouts()}
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.calloutTitle"
-              defaultMessage="Index is unable to ingest, update, or delete documents while reindexing"
-            />
-          }
-          color="warning"
-          iconType="alert"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.cantStopDetail"
-              defaultMessage="If you can’t stop document updates or need to reindex into a new cluster,
-                consider using a different upgrade strategy."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
-              defaultMessage="Reindexing will continue in the background, but if Kibana shuts down or restarts you will
-                need to return to this page to resume reindexing."
-            />
-          </p>
-        </EuiCallOut>
-        {!hasRequiredPrivileges && (
+        {hasRequiredPrivileges === false && (
           <Fragment>
             <EuiSpacer />
             <EuiCallOut
@@ -122,15 +110,101 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             />
           </Fragment>
         )}
-        <EuiSpacer />
-        <EuiTitle size="xs">
-          <h3>
+
+        {nodes && nodes.length > 0 && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              data-test-subj="lowDiskSpaceCallout"
+              title={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.lowDiskSpaceCalloutTitle"
+                  defaultMessage="Nodes with low disk space"
+                />
+              }
+            >
+              <>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.lowDiskSpaceCalloutDescription"
+                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
+                />
+
+                <EuiSpacer size="s" />
+
+                <ul>
+                  {nodes.map(({ nodeName, available, nodeId }) => (
+                    <li key={nodeId} data-test-subj="impactedNodeListItem">
+                      <FormattedMessage
+                        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.lowDiskSpaceUsedText"
+                        defaultMessage="{nodeName} ({available} available)"
+                        values={{
+                          nodeName,
+                          available,
+                        }}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
+
+        {(hasFetchFailed || hasReindexingFailed) && (
+          <>
+            <EuiCallOut
+              color="danger"
+              iconType="alert"
+              data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'reindexingFailedCallout'}
+              title={
+                hasFetchFailed ? (
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.fetchFailedCalloutTitle"
+                    defaultMessage="Reindex status not available"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingFailedCalloutTitle"
+                    defaultMessage="Reindexing error"
+                  />
+                )
+              }
+            >
+              {reindexState.errorMessage}
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
+
+        <EuiText>
+          <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
-              defaultMessage="Reindexing process"
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+              defaultMessage="The index will be read-only during reindexing. You won't be able to add, update, or delete documents until reindexing is complete. If you need to reindex to a new cluster, use the reindex API. {docsLink}"
+              values={{
+                docsLink: (
+                  <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.remoteReindex}>
+                    {i18n.translate(
+                      'xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel',
+                      {
+                        defaultMessage: 'Learn more',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
             />
-          </h3>
-        </EuiTitle>
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
+              defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer />
         <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -143,18 +217,21 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              color={status === ReindexStatus.paused ? 'warning' : 'primary'}
-              iconType={status === ReindexStatus.paused ? 'play' : undefined}
-              onClick={startReindex}
-              isLoading={loading}
-              disabled={loading || status === ReindexStatus.completed || !hasRequiredPrivileges}
-            >
-              {buttonLabel(status)}
-            </EuiButton>
-          </EuiFlexItem>
+          {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color={status === ReindexStatus.paused ? 'warning' : 'primary'}
+                iconType={status === ReindexStatus.paused ? 'play' : undefined}
+                onClick={startReindex}
+                isLoading={loading}
+                disabled={loading || !hasRequiredPrivileges}
+                data-test-subj="startReindexingButton"
+              >
+                {buttonLabel(status)}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </Fragment>

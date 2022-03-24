@@ -1,13 +1,13 @@
 {
   "id": "ingestPipelines",
-  "version": "8.0.0",
+  "version": "8.2.0",
   "server": true,
   "ui": true,
   "owner": {
     "name": "Stack Management",
     "githubTeam": "kibana-stack-management"
   },
-  "requiredPlugins": ["management", "features", "share"],
+  "requiredPlugins": ["management", "features", "share", "fileUpload"],
   "optionalPlugins": ["security", "usageCollection"],
   "configPath": ["xpack", "ingest_pipelines"],
   "requiredBundles": ["esUiShared", "kibanaReact"]

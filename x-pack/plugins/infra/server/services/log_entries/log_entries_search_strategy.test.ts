@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { of, throwError } from 'rxjs';
 import {
   elasticsearchServiceMock,
@@ -80,7 +80,6 @@ describe('LogEntries search strategy', () => {
               runtime_field: {
                 type: 'keyword',
                 script: {
-                  lang: 'painless',
                   source: 'emit("runtime value")',
                 },
               },
@@ -110,7 +109,6 @@ describe('LogEntries search strategy', () => {
             {
               _id: 'HIT_ID',
               _index: 'HIT_INDEX',
-              _type: '_doc',
               _score: 0,
               _source: null,
               fields: {
@@ -230,7 +228,7 @@ describe('LogEntries search strategy', () => {
       mockDependencies
     );
 
-    await expect(response.toPromise()).rejects.toThrowError(ResponseError);
+    await expect(response.toPromise()).rejects.toThrowError(errors.ResponseError);
   });
 
   it('forwards cancellation to the underlying search strategy', async () => {
@@ -289,12 +287,7 @@ const createSourceConfigurationMock = (): InfraSource => ({
       },
     ],
     fields: {
-      pod: 'POD_FIELD',
-      host: 'HOST_FIELD',
-      container: 'CONTAINER_FIELD',
       message: ['MESSAGE_FIELD'],
-      timestamp: 'TIMESTAMP_FIELD',
-      tiebreaker: 'TIEBREAKER_FIELD',
     },
     anomalyThreshold: 20,
   },
@@ -307,7 +300,7 @@ const createEsSearchStrategyMock = (esSearchResponse: IEsSearchResponse) => ({
         return of(esSearchResponse);
       } else {
         return throwError(
-          new ResponseError({
+          new errors.ResponseError({
             body: {},
             headers: {},
             meta: {} as any,
@@ -365,6 +358,14 @@ const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
           searchable: true,
         },
       ],
+      runtimeFields: {
+        runtime_field: {
+          type: 'keyword',
+          script: {
+            source: 'emit("runtime value")',
+          },
+        },
+      },
     }),
   ]),
 });

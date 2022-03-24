@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
 import { incrementByKey } from './get_high_level_stats';
@@ -263,6 +263,8 @@ export function processLogstashStateResults(
 export async function fetchLogstashStats(
   callCluster: ElasticsearchClient,
   clusterUuids: string[],
+  start: string,
+  end: string,
   { page = 0, ...options }: { page?: number } & LogstashProcessOptions
 ): Promise<void> {
   const params: estypes.SearchRequest = {
@@ -281,6 +283,8 @@ export async function fetchLogstashStats(
     ],
     body: {
       query: createQuery({
+        start,
+        end,
         filters: [
           { terms: { cluster_uuid: clusterUuids } },
           {
@@ -300,7 +304,7 @@ export async function fetchLogstashStats(
     },
   };
 
-  const { body: results } = await callCluster.search<LogstashStats>(params, {
+  const results = await callCluster.search<LogstashStats>(params, {
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },
@@ -310,17 +314,6 @@ export async function fetchLogstashStats(
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
     processStatsResults(results, options);
-
-    if (hitsLength === HITS_SIZE) {
-      // call recursively
-      const nextOptions = {
-        page: page + 1,
-        ...options,
-      };
-
-      // returns a promise and keeps the caller blocked from returning until the entire clusters object is built
-      return fetchLogstashStats(callCluster, clusterUuids, nextOptions);
-    }
   }
   return Promise.resolve();
 }
@@ -329,6 +322,8 @@ export async function fetchLogstashState(
   callCluster: ElasticsearchClient,
   clusterUuid: string,
   ephemeralIds: string[],
+  start: string,
+  end: string,
   { page = 0, ...options }: { page?: number } & LogstashProcessOptions
 ): Promise<void> {
   const params: estypes.SearchRequest = {
@@ -345,6 +340,8 @@ export async function fetchLogstashState(
     ],
     body: {
       query: createQuery({
+        start,
+        end,
         filters: [
           { terms: { 'logstash_state.pipeline.ephemeral_id': ephemeralIds } },
           {
@@ -361,7 +358,7 @@ export async function fetchLogstashState(
     },
   };
 
-  const { body: results } = await callCluster.search<LogstashState>(params, {
+  const results = await callCluster.search<LogstashState>(params, {
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },
@@ -371,17 +368,6 @@ export async function fetchLogstashState(
   if (hitsLength > 0) {
     // further augment the clusters object with more stats
     processLogstashStateResults(results, clusterUuid, options);
-
-    if (hitsLength === HITS_SIZE) {
-      // call recursively
-      const nextOptions = {
-        page: page + 1,
-        ...options,
-      };
-
-      // returns a promise and keeps the caller blocked from returning until the entire clusters object is built
-      return fetchLogstashState(callCluster, clusterUuid, ephemeralIds, nextOptions);
-    }
   }
   return Promise.resolve();
 }
@@ -396,7 +382,9 @@ export interface LogstashStatsByClusterUuid {
  */
 export async function getLogstashStats(
   callCluster: ElasticsearchClient,
-  clusterUuids: string[]
+  clusterUuids: string[],
+  start: string,
+  end: string
 ): Promise<LogstashStatsByClusterUuid> {
   const options: LogstashProcessOptions = {
     clusters: {}, // the result object to be built up
@@ -405,7 +393,7 @@ export async function getLogstashStats(
     plugins: {},
   };
 
-  await fetchLogstashStats(callCluster, clusterUuids, options);
+  await fetchLogstashStats(callCluster, clusterUuids, start, end, options);
   await Promise.all(
     clusterUuids.map(async (clusterUuid) => {
       if (options.clusters[clusterUuid] !== undefined) {
@@ -413,6 +401,8 @@ export async function getLogstashStats(
           callCluster,
           clusterUuid,
           options.allEphemeralIds[clusterUuid],
+          start,
+          end,
           options
         );
       }

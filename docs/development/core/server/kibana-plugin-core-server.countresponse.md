@@ -15,6 +15,6 @@ export interface CountResponse
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [\_shards](./kibana-plugin-core-server.countresponse._shards.md) | <code>ShardsInfo</code> |  |
-|  [count](./kibana-plugin-core-server.countresponse.count.md) | <code>number</code> |  |
+|  [\_shards](./kibana-plugin-core-server.countresponse._shards.md) | ShardsInfo |  |
+|  [count](./kibana-plugin-core-server.countresponse.count.md) | number |  |
 

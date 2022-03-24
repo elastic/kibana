@@ -9,13 +9,13 @@ Constructs a new instance of the `SimpleSavedObject` class
 <b>Signature:</b>
 
 ```typescript
-constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, }: SavedObjectType<T>);
+constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, updated_at: updatedAt, }: SavedObjectType<T>);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  client | <code>SavedObjectsClientContract</code> |  |
-|  { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, } | <code>SavedObjectType&lt;T&gt;</code> |  |
+|  client | SavedObjectsClientContract |  |
+|  { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, updated\_at: updatedAt, } | SavedObjectType&lt;T&gt; |  |
 

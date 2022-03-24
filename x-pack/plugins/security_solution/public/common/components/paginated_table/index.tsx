@@ -17,6 +17,7 @@ import {
   EuiLoadingContent,
   EuiPagination,
   EuiPopover,
+  EuiTableRowCellProps,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { FC, memo, useState, useMemo, useEffect, ComponentType } from 'react';
@@ -38,6 +39,8 @@ import {
 } from '../../../network/components/network_top_countries_table/columns';
 import { TlsColumns } from '../../../network/components/tls_table/columns';
 import { UncommonProcessTableColumns } from '../../../hosts/components/uncommon_process_table';
+import { HostRiskScoreColumns } from '../../../hosts/components/host_risk_score_table';
+
 import { UsersColumns } from '../../../network/components/users_table/columns';
 import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
@@ -46,9 +49,6 @@ import { useStateToaster } from '../toasters';
 import * as i18n from './translations';
 import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
-import { RiskScoreColumns } from '../../../ueba/components/risk_score_table';
-import { HostRulesColumns } from '../../../ueba/components/host_rules_table';
-import { HostTacticsColumns } from '../../../ueba/components/host_tactics_table';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -77,8 +77,6 @@ declare type HostsTableColumnsTest = [
 
 declare type BasicTableColumns =
   | AuthTableColumns
-  | HostRulesColumns
-  | HostTacticsColumns
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
@@ -87,8 +85,7 @@ declare type BasicTableColumns =
   | NetworkTopCountriesColumnsNetworkDetails
   | NetworkTopNFlowColumns
   | NetworkTopNFlowColumnsNetworkDetails
-  | NetworkHttpColumns
-  | RiskScoreColumns
+  | HostRiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns;
@@ -101,6 +98,7 @@ export interface BasicTableProps<T> {
   columns: T;
   dataTestSubj?: string;
   headerCount: number;
+  headerFilters?: string | React.ReactNode;
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
@@ -117,6 +115,8 @@ export interface BasicTableProps<T> {
   pageOfItems: any[];
   showMorePagesIndicator: boolean;
   sorting?: SortingBasicTable;
+  split?: boolean;
+  stackHeader?: boolean;
   totalCount: number;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
@@ -126,8 +126,7 @@ type Func<T> = (arg: T) => string | number;
 export interface Columns<T, U = T> {
   align?: string;
   field?: string;
-  hideForMobile?: boolean;
-  isMobileHeader?: boolean;
+  mobileOptions?: EuiTableRowCellProps['mobileOptions'];
   name: string | React.ReactNode;
   render?: (item: T, node: U) => React.ReactNode;
   sortable?: boolean | Func<T>;
@@ -140,6 +139,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   columns,
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
   headerCount,
+  headerFilters,
   headerSupplement,
   headerTitle,
   headerTooltip,
@@ -155,6 +155,8 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   pageOfItems,
   showMorePagesIndicator,
   sorting = null,
+  split,
+  stackHeader,
   totalCount,
   updateActivePage,
   updateLimitPagination,
@@ -255,7 +257,10 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
+          headerFilters={headerFilters}
           id={id}
+          split={split}
+          stackHeader={stackHeader}
           subtitle={
             !loadingInitial && headerSubtitle
               ? `${i18n.SHOWING}: ${headerSubtitle}`
@@ -298,12 +303,14 @@ const PaginatedTableComponent: FC<SiemTables> = ({
               </EuiFlexItem>
 
               <PaginationWrapper grow={false}>
-                <EuiPagination
-                  data-test-subj="numberedPagination"
-                  pageCount={pageCount}
-                  activePage={myActivePage}
-                  onPageClick={goToPage}
-                />
+                {totalCount > 0 && (
+                  <EuiPagination
+                    data-test-subj="numberedPagination"
+                    pageCount={pageCount}
+                    activePage={myActivePage}
+                    onPageClick={goToPage}
+                  />
+                )}
               </PaginationWrapper>
             </FooterAction>
             {(isInspect || myLoading) && (

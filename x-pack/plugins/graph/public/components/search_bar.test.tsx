@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
-import { SearchBar, SearchBarProps } from './search_bar';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { SearchBar, SearchBarProps, SearchBarComponent, SearchBarStateProps } from './search_bar';
 import React, { Component, ReactElement } from 'react';
-import { CoreStart } from 'src/core/public';
+import {
+  DocLinksStart,
+  HttpStart,
+  IUiSettingsClient,
+  NotificationsStart,
+  OverlayStart,
+  SavedObjectsStart,
+} from 'kibana/public';
 import { act } from 'react-dom/test-utils';
 import { IndexPattern, QueryStringInput } from '../../../../../src/plugins/data/public';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { I18nProvider, InjectedIntl } from '@kbn/i18n/react';
+import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 
 import { openSourceModal } from '../services/source_modal';
 
@@ -26,24 +33,24 @@ jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
 const waitForIndexPatternFetch = () => new Promise((r) => setTimeout(r));
 
-function wrapSearchBarInContext(testProps: SearchBarProps) {
-  const services = {
+function getServiceMocks() {
+  return {
     uiSettings: {
       get: (key: string) => {
         return 10;
       },
-    } as CoreStart['uiSettings'],
-    savedObjects: {} as CoreStart['savedObjects'],
-    notifications: {} as CoreStart['notifications'],
+    } as IUiSettingsClient,
+    savedObjects: {} as SavedObjectsStart,
+    notifications: {} as NotificationsStart,
     docLinks: {
       links: {
         query: {
           kueryQuerySyntax: '',
         },
       },
-    } as CoreStart['docLinks'],
-    http: {} as CoreStart['http'],
-    overlays: {} as CoreStart['overlays'],
+    } as DocLinksStart,
+    http: {} as HttpStart,
+    overlays: {} as OverlayStart,
     storage: {
       get: () => {},
     },
@@ -56,7 +63,10 @@ function wrapSearchBarInContext(testProps: SearchBarProps) {
       },
     },
   };
+}
 
+function wrapSearchBarInContext(testProps: SearchBarProps) {
+  const services = getServiceMocks();
   return (
     <I18nProvider>
       <KibanaContextProvider services={services}>
@@ -120,6 +130,21 @@ describe('search_bar', () => {
     });
   }
 
+  async function mountSearchBarWithExplicitContext(props: SearchBarProps & SearchBarStateProps) {
+    jest.clearAllMocks();
+    const services = getServiceMocks();
+
+    await act(async () => {
+      instance = mountWithIntl(
+        <I18nProvider>
+          <KibanaContextProvider services={services}>
+            <SearchBarComponent {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>
+      );
+    });
+  }
+
   it('should render search bar and fetch index pattern', async () => {
     await mountSearchBar();
 
@@ -174,5 +199,45 @@ describe('search_bar', () => {
     ).props.children.props.onClick();
 
     expect(openSourceModal).toHaveBeenCalled();
+  });
+
+  it('should disable the graph button when no data view is configured', async () => {
+    const stateProps = {
+      submit: jest.fn(),
+      onIndexPatternSelected: jest.fn(),
+      currentDatasource: undefined,
+      selectedFields: [],
+    };
+    await mountSearchBarWithExplicitContext({
+      urlQuery: null,
+      ...defaultProps,
+      ...stateProps,
+    });
+
+    expect(
+      instance.find('[data-test-subj="graph-explore-button"]').first().prop('disabled')
+    ).toBeTruthy();
+  });
+
+  it('should disable the graph button when no field is configured', async () => {
+    const stateProps = {
+      submit: jest.fn(),
+      onIndexPatternSelected: jest.fn(),
+      currentDatasource: {
+        type: 'indexpattern' as const,
+        id: '123',
+        title: 'test-index',
+      },
+      selectedFields: [],
+    };
+    await mountSearchBarWithExplicitContext({
+      urlQuery: null,
+      ...defaultProps,
+      ...stateProps,
+    });
+
+    expect(
+      instance.find('[data-test-subj="graph-explore-button"]').first().prop('disabled')
+    ).toBeTruthy();
   });
 });

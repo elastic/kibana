@@ -9,8 +9,6 @@
 import { schema, TypeOf, Type } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
 import { PluginConfigDescriptor } from 'kibana/server';
-import { TELEMETRY_ENDPOINT } from '../../common/constants';
-import { deprecateEndpointConfigs } from './deprecations';
 
 const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
   schema.literal('prod'),
@@ -36,34 +34,6 @@ const configSchema = schema.object({
     schema.oneOf(clusterEnvSchema, { defaultValue: 'staging' }),
     schema.oneOf(clusterEnvSchema, { defaultValue: 'prod' })
   ),
-  /**
-   * REMOVE IN 8.0 - INTERNAL CONFIG DEPRECATED IN 7.15
-   * REPLACED WITH `telemetry.sendUsageTo: staging | prod`
-   */
-  url: schema.conditional(
-    schema.contextRef('dist'),
-    schema.literal(false), // Point to staging if it's not a distributable release
-    schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.MAIN_CHANNEL.STAGING,
-    }),
-    schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.MAIN_CHANNEL.PROD,
-    })
-  ),
-  /**
-   * REMOVE IN 8.0 - INTERNAL CONFIG DEPRECATED IN 7.15
-   * REPLACED WITH `telemetry.sendUsageTo: staging | prod`
-   */
-  optInStatusUrl: schema.conditional(
-    schema.contextRef('dist'),
-    schema.literal(false), // Point to staging if it's not a distributable release
-    schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.STAGING,
-    }),
-    schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.PROD,
-    })
-  ),
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
     defaultValue: 'server',
   }),
@@ -81,5 +51,4 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
     sendUsageFrom: true,
     sendUsageTo: true,
   },
-  deprecations: () => [deprecateEndpointConfigs],
 };

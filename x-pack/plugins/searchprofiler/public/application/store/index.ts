@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { useStore, State } from './store';
-export { Action } from './reducer';
+export type { State } from './store';
+export { useStore } from './store';
+export type { Action } from './reducer';

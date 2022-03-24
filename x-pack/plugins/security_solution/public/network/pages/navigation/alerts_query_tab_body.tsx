@@ -7,68 +7,17 @@
 
 import React from 'react';
 
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsView } from '../../../common/components/alerts_viewer';
 import { NetworkComponentQueryProps } from './types';
-
-export const filterNetworkData: Filter[] = [
-  {
-    query: {
-      bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  bool: {
-                    should: [
-                      {
-                        exists: {
-                          field: 'source.ip',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        exists: {
-                          field: 'destination.ip',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
-      },
-    },
-    meta: {
-      alias: '',
-      disabled: false,
-      key: 'bool',
-      negate: false,
-      type: 'custom',
-      value:
-        '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"exists":{"field": "source.ip"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field": "destination.ip"}}],"minimum_should_match":1}}],"minimum_should_match":1}}]}}',
-    },
-  },
-];
+import { filterNetworkExternalAlertData } from '../../../common/components/visualization_actions/utils';
 
 export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => (
   <AlertsView
     entityType="events"
     timelineId={TimelineId.networkPageExternalAlerts}
     {...alertsProps}
-    pageFilters={filterNetworkData}
+    pageFilters={filterNetworkExternalAlertData}
   />
 ));
 

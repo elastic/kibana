@@ -9,14 +9,12 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'kibana/server';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   cache_refresh_interval: schema.duration({ defaultValue: '15m' }),
 });
 
 export type SavedObjectsTaggingConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<SavedObjectsTaggingConfigType> = {
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: configSchema,
   exposeToBrowser: {
     cache_refresh_interval: true,

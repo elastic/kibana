@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { FormattedDate, FormattedTime } from '@kbn/i18n/react';
+import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 
 interface Props {
   epochMs: number;

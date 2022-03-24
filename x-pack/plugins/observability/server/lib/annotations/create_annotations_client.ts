@@ -17,7 +17,7 @@ import {
 } from '../../../common/annotations';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { mappings } from './mappings';
-import { unwrapEsResponse } from '../../utils/unwrap_es_response';
+import { unwrapEsResponse } from '../../../common/utils/unwrap_es_response';
 
 type CreateParams = t.TypeOf<typeof createAnnotationRt>;
 type DeleteParams = t.TypeOf<typeof deleteAnnotationRt>;
@@ -57,9 +57,12 @@ export function createAnnotationsClient(params: {
         createParams: CreateParams
       ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
         const indexExists = await unwrapEsResponse(
-          esClient.indices.exists({
-            index,
-          })
+          esClient.indices.exists(
+            {
+              index,
+            },
+            { meta: true }
+          )
         );
 
         if (!indexExists) {
@@ -74,18 +77,24 @@ export function createAnnotationsClient(params: {
         };
 
         const body = await unwrapEsResponse(
-          esClient.index({
-            index,
-            body: annotation,
-            refresh: 'wait_for',
-          })
+          esClient.index(
+            {
+              index,
+              body: annotation,
+              refresh: 'wait_for',
+            },
+            { meta: true }
+          )
         );
 
         return (
-          await esClient.get<Annotation>({
-            index,
-            id: body._id,
-          })
+          await esClient.get<Annotation>(
+            {
+              index,
+              id: body._id,
+            },
+            { meta: true }
+          )
         ).body as { _id: string; _index: string; _source: Annotation };
       }
     ),
@@ -93,21 +102,27 @@ export function createAnnotationsClient(params: {
       const { id } = getByIdParams;
 
       return unwrapEsResponse(
-        esClient.get({
-          id,
-          index,
-        })
+        esClient.get(
+          {
+            id,
+            index,
+          },
+          { meta: true }
+        )
       );
     }),
     delete: ensureGoldLicense(async (deleteParams: DeleteParams) => {
       const { id } = deleteParams;
 
       return unwrapEsResponse(
-        esClient.delete({
-          index,
-          id,
-          refresh: 'wait_for',
-        })
+        esClient.delete(
+          {
+            index,
+            id,
+            refresh: 'wait_for',
+          },
+          { meta: true }
+        )
       );
     }),
   };

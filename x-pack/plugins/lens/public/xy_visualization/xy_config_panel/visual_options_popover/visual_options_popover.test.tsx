@@ -6,16 +6,17 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { Position } from '@elastic/charts';
 import type { FramePublicAPI } from '../../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { State } from '../../types';
 import { VisualOptionsPopover } from '.';
-import { ToolbarPopover } from '../../../shared_components';
+import { ToolbarPopover, ValueLabelsSettings } from '../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { FillOpacityOption } from './fill_opacity_option';
 import { layerTypes } from '../../../../common';
+import { XYDataLayerConfig } from '../../../../common/expressions';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;
@@ -52,7 +53,7 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_stacked' }],
+          layers: [{ ...state.layers[0], seriesType: 'bar_stacked' } as XYDataLayerConfig],
         }}
       />
     );
@@ -68,12 +69,14 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' }],
+          layers: [
+            { ...state.layers[0], seriesType: 'area_percentage_stacked' } as XYDataLayerConfig,
+          ],
         }}
       />
     );
 
-    expect(component.find(MissingValuesOptions).prop('isValueLabelsEnabled')).toEqual(false);
+    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(false);
     expect(component.find(MissingValuesOptions).prop('isFittingEnabled')).toEqual(false);
   });
 
@@ -85,7 +88,9 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' }],
+          layers: [
+            { ...state.layers[0], seriesType: 'area_percentage_stacked' } as XYDataLayerConfig,
+          ],
         }}
       />
     );
@@ -101,7 +106,9 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' }],
+          layers: [
+            { ...state.layers[0], seriesType: 'area_percentage_stacked' } as XYDataLayerConfig,
+          ],
         }}
       />
     );
@@ -138,7 +145,7 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }],
+          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
           fittingFunction: 'Carry',
         }}
       />
@@ -155,7 +162,7 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }],
+          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
           fittingFunction: 'Carry',
         }}
       />
@@ -172,7 +179,7 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'line' }],
+          layers: [{ ...state.layers[0], seriesType: 'line' } as XYDataLayerConfig],
           fittingFunction: 'Carry',
         }}
       />
@@ -190,13 +197,13 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }],
+          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
           fittingFunction: 'Carry',
         }}
       />
     );
 
-    expect(component.find(MissingValuesOptions).prop('isValueLabelsEnabled')).toEqual(true);
+    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(true);
   });
 
   it('should hide in the popover the display option for area and line series', () => {
@@ -207,13 +214,13 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area' }],
+          layers: [{ ...state.layers[0], seriesType: 'area' } as XYDataLayerConfig],
           fittingFunction: 'Carry',
         }}
       />
     );
 
-    expect(component.find(MissingValuesOptions).prop('isValueLabelsEnabled')).toEqual(false);
+    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(false);
   });
 
   it('should keep the display option for bar series with multiple layers', () => {
@@ -230,7 +237,7 @@ describe('Visual options popover', () => {
         state={{
           ...state,
           layers: [
-            { ...state.layers[0], seriesType: 'bar' },
+            { ...state.layers[0], seriesType: 'bar' } as XYDataLayerConfig,
             {
               seriesType: 'bar',
               layerType: layerTypes.DATA,
@@ -245,6 +252,6 @@ describe('Visual options popover', () => {
       />
     );
 
-    expect(component.find(MissingValuesOptions).prop('isValueLabelsEnabled')).toEqual(true);
+    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(true);
   });
 });

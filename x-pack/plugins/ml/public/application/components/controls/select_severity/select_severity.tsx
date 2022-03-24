@@ -10,7 +10,7 @@
  */
 import React, { Fragment, FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText, EuiSuperSelectProps } from '@elastic/eui';
 
@@ -82,7 +82,8 @@ export function optionValueToThreshold(value: number) {
 const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
 
 export const useTableSeverity = (): [TableSeverity, (v: TableSeverity) => void] => {
-  return usePageUrlState('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
+  const [severity, updateCallback] = usePageUrlState('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
+  return [severity, updateCallback];
 };
 
 export const getSeverityOptions = () =>

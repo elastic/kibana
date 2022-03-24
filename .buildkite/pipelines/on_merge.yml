@@ -4,6 +4,9 @@ env:
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
 
   - wait
 
@@ -11,14 +14,27 @@ steps:
     label: Default Build and Metrics
     agents:
       queue: c2-8
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: .buildkite/scripts/steps/on_merge_ts_refs_api_docs.sh
     label: Build TS Refs and Check Public API Docs
     agents:
       queue: c2-4
+    timeout_in_minutes: 80
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - wait: ~
     continue_on_failure: true
 
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default

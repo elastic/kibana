@@ -13,7 +13,6 @@ import { PathConfigType } from '@kbn/utils';
 
 import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
-import { KibanaConfigType } from '../kibana_config';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
@@ -216,7 +215,7 @@ export interface PluginManifest {
    * Specifies directory names that can be imported by other ui-plugins built
    * using the same instance of the @kbn/optimizer. A temporary measure we plan
    * to replace with better mechanisms for sharing static code between plugins
-   * @deprecated
+   * @deprecated To be deleted when https://github.com/elastic/kibana/issues/101948 is done.
    */
   readonly extraPublicDirs?: string[];
 
@@ -347,6 +346,7 @@ export interface Plugin<
  * A plugin with asynchronous lifecycle methods.
  *
  * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync {@link Plugin | plugin}
+ * @removeBy 8.8.0
  * @public
  */
 export interface AsyncPlugin<
@@ -364,7 +364,6 @@ export interface AsyncPlugin<
 
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
-  kibana: ['index'] as const,
   elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,
   savedObjects: ['maxImportPayloadBytes'] as const,
@@ -374,7 +373,6 @@ export const SharedGlobalConfigKeys = {
  * @public
  */
 export type SharedGlobalConfig = RecursiveReadonly<{
-  kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
   elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
   path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
   savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
@@ -420,7 +418,8 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
      * Provide access to Kibana legacy configuration values.
      *
      * @remarks Naming not final here, it may be renamed in a near future
-     * @deprecated Accessing configuration values outside of the plugin's config scope is highly discouraged
+     * @deprecated Accessing configuration values outside of the plugin's config scope is highly discouraged.
+     * Can be removed when https://github.com/elastic/kibana/issues/119862 is done.
      */
     legacy: {
       globalConfig$: Observable<SharedGlobalConfig>;

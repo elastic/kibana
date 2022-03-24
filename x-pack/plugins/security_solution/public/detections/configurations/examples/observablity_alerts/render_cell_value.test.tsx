@@ -17,7 +17,7 @@ import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../com
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { ColumnHeaderOptions } from '../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../common/types';
 
 import { RenderCellValue } from '.';
 
@@ -48,6 +48,7 @@ describe('RenderCellValue', () => {
       isExpanded: false,
       linkValues,
       rowIndex,
+      colIndex: 0,
       setCellProps: jest.fn(),
       timelineId,
     };

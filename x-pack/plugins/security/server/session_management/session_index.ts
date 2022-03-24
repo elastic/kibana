@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+import type {
+  BulkOperationContainer,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { ElasticsearchClient, Logger } from 'src/core/server';
 
 import type { AuthenticationProvider } from '../../common/model';
+import type { AuditLogger } from '../audit';
+import { sessionCleanupEvent } from '../audit';
 import type { ConfigType } from '../config';
 
 export interface SessionIndexOptions {
@@ -15,6 +22,7 @@ export interface SessionIndexOptions {
   readonly kibanaIndexName: string;
   readonly config: Pick<ConfigType, 'session' | 'authc'>;
   readonly logger: Logger;
+  readonly auditLogger: AuditLogger;
 }
 
 /**
@@ -35,33 +43,51 @@ export type InvalidateSessionsFilter =
 const SESSION_INDEX_TEMPLATE_VERSION = 1;
 
 /**
+ * Number of sessions to remove per batch during cleanup.
+ */
+const SESSION_INDEX_CLEANUP_BATCH_SIZE = 10_000;
+
+/**
+ * Maximum number of batches per cleanup.
+ * If the batch size is 10,000 and this limit is 10, then Kibana will remove up to 100k sessions per cleanup.
+ */
+const SESSION_INDEX_CLEANUP_BATCH_LIMIT = 10;
+
+/**
+ * How long the session cleanup search point-in-time should be kept alive.
+ */
+const SESSION_INDEX_CLEANUP_KEEP_ALIVE = '5m';
+
+/**
  * Returns index template that is used for the current version of the session index.
  */
-export function getSessionIndexTemplate(indexName: string) {
+export function getSessionIndexTemplate(templateName: string, indexName: string) {
   return Object.freeze({
+    name: templateName,
     index_patterns: [indexName],
-    order: 1000,
-    settings: {
-      index: {
-        number_of_shards: 1,
-        number_of_replicas: 0,
-        auto_expand_replicas: '0-1',
-        priority: 1000,
-        refresh_interval: '1s',
-        hidden: true,
+    template: {
+      settings: {
+        index: {
+          number_of_shards: 1,
+          number_of_replicas: 0,
+          auto_expand_replicas: '0-1',
+          priority: 1000,
+          refresh_interval: '1s',
+          hidden: true,
+        },
       },
+      mappings: {
+        dynamic: 'strict',
+        properties: {
+          usernameHash: { type: 'keyword' },
+          provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
+          idleTimeoutExpiration: { type: 'date' },
+          lifespanExpiration: { type: 'date' },
+          accessAgreementAcknowledged: { type: 'boolean' },
+          content: { type: 'binary' },
+        },
+      } as const,
     },
-    mappings: {
-      dynamic: 'strict',
-      properties: {
-        usernameHash: { type: 'keyword' },
-        provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
-        idleTimeoutExpiration: { type: 'date' },
-        lifespanExpiration: { type: 'date' },
-        accessAgreementAcknowledged: { type: 'boolean' },
-        content: { type: 'binary' },
-      },
-    } as const,
   });
 }
 
@@ -132,7 +158,7 @@ export class SessionIndex {
   /**
    * Name of the index to store session information in.
    */
-  private readonly indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
+  private readonly indexName: string;
 
   /**
    * Promise that tracks session index initialization process. We'll need to get rid of this as soon
@@ -142,7 +168,9 @@ export class SessionIndex {
    */
   private indexInitialization?: Promise<void>;
 
-  constructor(private readonly options: Readonly<SessionIndexOptions>) {}
+  constructor(private readonly options: Readonly<SessionIndexOptions>) {
+    this.indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
+  }
 
   /**
    * Retrieves session value with the specified ID from the index. If session value isn't found
@@ -154,7 +182,7 @@ export class SessionIndex {
       const { body: response, statusCode } =
         await this.options.elasticsearchClient.get<SessionIndexValue>(
           { id: sid, index: this.indexName },
-          { ignore: [404] }
+          { ignore: [404], meta: true }
         );
 
       const docNotFound = response.found === false;
@@ -189,18 +217,17 @@ export class SessionIndex {
 
     const { sid, ...sessionValueToStore } = sessionValue;
     try {
-      const {
-        body: { _primary_term: primaryTerm, _seq_no: sequenceNumber },
-      } = await this.options.elasticsearchClient.create({
-        id: sid,
-        // We cannot control whether index is created automatically during this operation or not.
-        // But we can reduce probability of getting into a weird state when session is being created
-        // while session index is missing for some reason. This way we'll recreate index with a
-        // proper name and alias. But this will only work if we still have a proper index template.
-        index: this.indexName,
-        body: sessionValueToStore,
-        refresh: 'wait_for',
-      });
+      const { _primary_term: primaryTerm, _seq_no: sequenceNumber } =
+        await this.options.elasticsearchClient.create({
+          id: sid,
+          // We cannot control whether index is created automatically during this operation or not.
+          // But we can reduce probability of getting into a weird state when session is being created
+          // while session index is missing for some reason. This way we'll recreate index with a
+          // proper name and alias. But this will only work if we still have a proper index template.
+          index: this.indexName,
+          body: sessionValueToStore,
+          refresh: 'wait_for',
+        });
 
       return { ...sessionValue, metadata: { primaryTerm, sequenceNumber } } as SessionIndexValue;
     } catch (err) {
@@ -225,7 +252,7 @@ export class SessionIndex {
           if_primary_term: metadata.primaryTerm,
           refresh: 'wait_for',
         },
-        { ignore: [409] }
+        { ignore: [409], meta: true }
       );
 
       // We don't want to override changes that were made after we fetched session value or
@@ -260,7 +287,7 @@ export class SessionIndex {
         // over any updates that could happen in the meantime.
         const { statusCode } = await this.options.elasticsearchClient.delete(
           { id: filter.sid, index: this.indexName, refresh: 'wait_for' },
-          { ignore: [404] }
+          { ignore: [404], meta: true }
         );
 
         // 404 means the session with such SID wasn't found and hence nothing was removed.
@@ -293,7 +320,7 @@ export class SessionIndex {
     }
 
     try {
-      const { body: response } = await this.options.elasticsearchClient.deleteByQuery({
+      const response = await this.options.elasticsearchClient.deleteByQuery({
         index: this.indexName,
         refresh: true,
         body: { query: deleteQuery },
@@ -316,14 +343,41 @@ export class SessionIndex {
     const sessionIndexTemplateName = `${this.options.kibanaIndexName}_security_session_index_template_${SESSION_INDEX_TEMPLATE_VERSION}`;
     return (this.indexInitialization = new Promise<void>(async (resolve, reject) => {
       try {
+        // Check if legacy index template exists, and remove it if it does.
+        let legacyIndexTemplateExists = false;
+        try {
+          legacyIndexTemplateExists = await this.options.elasticsearchClient.indices.existsTemplate(
+            {
+              name: sessionIndexTemplateName,
+            }
+          );
+        } catch (err) {
+          this.options.logger.error(
+            `Failed to check if session legacy index template exists: ${err.message}`
+          );
+          return reject(err);
+        }
+
+        if (legacyIndexTemplateExists) {
+          try {
+            await this.options.elasticsearchClient.indices.deleteTemplate({
+              name: sessionIndexTemplateName,
+            });
+            this.options.logger.debug('Successfully deleted session legacy index template.');
+          } catch (err) {
+            this.options.logger.error(
+              `Failed to delete session legacy index template: ${err.message}`
+            );
+            return reject(err);
+          }
+        }
+
         // Check if required index template exists.
         let indexTemplateExists = false;
         try {
-          indexTemplateExists = (
-            await this.options.elasticsearchClient.indices.existsTemplate({
-              name: sessionIndexTemplateName,
-            })
-          ).body;
+          indexTemplateExists = await this.options.elasticsearchClient.indices.existsIndexTemplate({
+            name: sessionIndexTemplateName,
+          });
         } catch (err) {
           this.options.logger.error(
             `Failed to check if session index template exists: ${err.message}`
@@ -336,10 +390,9 @@ export class SessionIndex {
           this.options.logger.debug('Session index template already exists.');
         } else {
           try {
-            await this.options.elasticsearchClient.indices.putTemplate({
-              name: sessionIndexTemplateName,
-              body: getSessionIndexTemplate(this.indexName),
-            });
+            await this.options.elasticsearchClient.indices.putIndexTemplate(
+              getSessionIndexTemplate(sessionIndexTemplateName, this.indexName)
+            );
             this.options.logger.debug('Successfully created session index template.');
           } catch (err) {
             this.options.logger.error(`Failed to create session index template: ${err.message}`);
@@ -351,9 +404,9 @@ export class SessionIndex {
         // always enabled, so we create session index explicitly.
         let indexExists = false;
         try {
-          indexExists = (
-            await this.options.elasticsearchClient.indices.exists({ index: this.indexName })
-          ).body;
+          indexExists = await this.options.elasticsearchClient.indices.exists({
+            index: this.indexName,
+          });
         } catch (err) {
           this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
           return reject(err);
@@ -391,8 +444,75 @@ export class SessionIndex {
    * Trigger a removal of any outdated session values.
    */
   async cleanUp() {
-    this.options.logger.debug(`Running cleanup routine.`);
+    const { auditLogger, elasticsearchClient, logger } = this.options;
+    logger.debug(`Running cleanup routine.`);
 
+    let error: Error | undefined;
+    let indexNeedsRefresh = false;
+    try {
+      for await (const sessionValues of this.getSessionValuesInBatches()) {
+        const operations: Array<Required<Pick<BulkOperationContainer, 'delete'>>> = [];
+        sessionValues.forEach(({ _id, _source }) => {
+          const { usernameHash, provider } = _source!;
+          auditLogger.log(sessionCleanupEvent({ sessionId: _id, usernameHash, provider }));
+          operations.push({ delete: { _id } });
+        });
+        if (operations.length > 0) {
+          const bulkResponse = await elasticsearchClient.bulk(
+            {
+              index: this.indexName,
+              operations,
+              refresh: false,
+            },
+            { ignore: [409, 404] }
+          );
+          if (bulkResponse.errors) {
+            const errorCount = bulkResponse.items.reduce(
+              (count, item) => (item.delete!.error ? count + 1 : count),
+              0
+            );
+            if (errorCount < bulkResponse.items.length) {
+              logger.warn(
+                `Failed to clean up ${errorCount} of ${bulkResponse.items.length} invalid or expired sessions. The remaining sessions were cleaned up successfully.`
+              );
+              indexNeedsRefresh = true;
+            } else {
+              logger.error(
+                `Failed to clean up ${bulkResponse.items.length} invalid or expired sessions.`
+              );
+            }
+          } else {
+            logger.debug(`Cleaned up ${bulkResponse.items.length} invalid or expired sessions.`);
+            indexNeedsRefresh = true;
+          }
+        }
+      }
+    } catch (err) {
+      logger.error(`Failed to clean up sessions: ${err.message}`);
+      error = err;
+    }
+
+    if (indexNeedsRefresh) {
+      // Only refresh the index if we have actually deleted one or more sessions. The index will auto-refresh eventually anyway, this just
+      // ensures that searches after the cleanup process are accurate, and this only impacts integration tests.
+      try {
+        await elasticsearchClient.indices.refresh({ index: this.indexName });
+        logger.debug(`Refreshed session index.`);
+      } catch (err) {
+        logger.error(`Failed to refresh session index: ${err.message}`);
+      }
+    }
+
+    if (error) {
+      // If we couldn't fetch or delete sessions, throw an error so the task will be retried.
+      throw error;
+    }
+  }
+
+  /**
+   * Fetches session values from session index in batches of 10,000.
+   */
+  private async *getSessionValuesInBatches() {
     const now = Date.now();
     const providersSessionConfig = this.options.config.authc.sortedProviders.map((provider) => {
       return {
@@ -452,24 +572,36 @@ export class SessionIndex {
       });
     }
 
-    try {
-      const { body: response } = await this.options.elasticsearchClient.deleteByQuery(
-        {
-          index: this.indexName,
-          refresh: true,
-          body: { query: { bool: { should: deleteQueries } } },
-        },
-        { ignore: [409, 404] }
-      );
+    const openPitResponse = await this.options.elasticsearchClient.openPointInTime({
+      index: this.indexName,
+      keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+    });
 
-      if (response.deleted! > 0) {
-        this.options.logger.debug(
-          `Cleaned up ${response.deleted} invalid or expired session values.`
-        );
+    try {
+      let searchAfter: SortResults | undefined;
+      for (let i = 0; i < SESSION_INDEX_CLEANUP_BATCH_LIMIT; i++) {
+        const searchResponse = await this.options.elasticsearchClient.search<SessionIndexValue>({
+          pit: { id: openPitResponse.id, keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE },
+          _source_includes: 'usernameHash,provider',
+          query: { bool: { should: deleteQueries } },
+          search_after: searchAfter,
+          size: SESSION_INDEX_CLEANUP_BATCH_SIZE,
+          sort: '_shard_doc',
+          track_total_hits: false, // for performance
+        });
+        const { hits } = searchResponse.hits;
+        if (hits.length > 0) {
+          yield hits;
+          searchAfter = hits[hits.length - 1].sort;
+        }
+        if (hits.length < SESSION_INDEX_CLEANUP_BATCH_SIZE) {
+          break;
+        }
       }
-    } catch (err) {
-      this.options.logger.error(`Failed to clean up sessions: ${err.message}`);
-      throw err;
+    } finally {
+      await this.options.elasticsearchClient.closePointInTime({
+        id: openPitResponse.id,
+      });
     }
   }
 }

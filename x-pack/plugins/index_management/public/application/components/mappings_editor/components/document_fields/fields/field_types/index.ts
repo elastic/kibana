@@ -6,7 +6,7 @@
  */
 
 import { ComponentType } from 'react';
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 
 import { MainType, SubType, DataType, NormalizedField, NormalizedFields } from '../../../../types';
 

@@ -15,4 +15,4 @@ import { KibanaOverviewPlugin } from './plugin';
 export function plugin() {
   return new KibanaOverviewPlugin();
 }
-export { KibanaOverviewPluginSetup, KibanaOverviewPluginStart } from './types';
+export type { KibanaOverviewPluginSetup, KibanaOverviewPluginStart } from './types';

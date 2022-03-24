@@ -32,7 +32,7 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'detectors_function_not_empty',
         status: 'success',
         text: 'Presence of detector functions validated in all detectors.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-finding-anomalies.html#ml-ad-detectors',
+        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-detectors',
       },
       {
         bucketSpan: '15m',
@@ -40,7 +40,7 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'success_bucket_span',
         status: 'success',
         text: 'Format of "15m" is valid and passed validation checks.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-finding-anomalies.html#ml-ad-bucket-span',
+        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-bucket-span',
       },
       {
         heading: 'Time range',
@@ -53,7 +53,7 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'success_mml',
         status: 'success',
         text: 'Valid and within the estimated model memory limit.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-finding-anomalies.html#ml-ad-model-memory-limits',
+        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-model-memory-limits',
       },
     ]);
   });
@@ -71,7 +71,7 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'detectors_function_not_empty',
         status: 'success',
         text: 'Presence of detector functions validated in all detectors.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-finding-anomalies.html#ml-ad-detectors',
+        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-detectors',
       },
       {
         bucketSpan: '15m',
@@ -103,7 +103,7 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'detectors_function_not_empty',
         status: 'success',
         text: 'Presence of detector functions validated in all detectors.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-finding-anomalies.html#ml-ad-detectors',
+        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-detectors',
       },
       {
         id: 'cardinality_model_plot_high',
@@ -115,14 +115,14 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'cardinality_partition_field',
         status: 'warning',
         text: 'Cardinality of partition_field "order_id" is above 1000 and might result in high memory usage.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-finding-anomalies.html#ml-ad-cardinality',
+        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-cardinality',
       },
       {
         heading: 'Bucket span',
         id: 'bucket_span_high',
         status: 'info',
         text: 'Bucket span is 1 day or more. Be aware that days are considered as UTC days, not local days.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-finding-anomalies.html#ml-ad-bucket-span',
+        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-bucket-span',
       },
       {
         bucketSpanCompareFactor: 25,
@@ -136,14 +136,14 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'success_influencers',
         status: 'success',
         text: 'Influencer configuration passed the validation checks.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-finding-anomalies.html#ml-ad-influencers',
+        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-influencers',
       },
       {
         id: 'half_estimated_mml_greater_than_mml',
         mml: '1MB',
         status: 'warning',
         text: 'The specified model memory limit is less than half of the estimated model memory limit and will likely hit the hard limit.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-finding-anomalies.html#ml-ad-model-memory-limits',
+        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-model-memory-limits',
       },
       {
         id: 'missing_summary_count_field_name',

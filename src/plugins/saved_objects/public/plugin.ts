@@ -15,6 +15,7 @@ import {
   SavedObjectDecoratorConfig,
 } from './saved_object';
 import { DataPublicPluginStart } from '../../data/public';
+import { DataViewsPublicPluginStart } from '../../data_views/public';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 import { SavedObject } from './types';
 
@@ -23,19 +24,32 @@ export interface SavedObjectSetup {
 }
 
 export interface SavedObjectsStart {
-  /** @deprecated */
+  /**
+   * @deprecated
+   * @removeBy 8.8.0
+   */
   SavedObjectClass: new (raw: Record<string, any>) => SavedObject;
-  /** @deprecated */
+  /**
+   * @deprecated
+   * @removeBy 8.8.0
+   */
   settings: {
-    /** @deprecated */
+    /**
+     * @deprecated
+     * @removeBy 8.8.0
+     */
     getPerPage: () => number;
-    /** @deprecated */
+    /**
+     * @deprecated
+     * @removeBy 8.8.0
+     */
     getListingLimit: () => number;
   };
 }
 
 export interface SavedObjectsStartDeps {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export class SavedObjectsPublicPlugin
@@ -48,11 +62,11 @@ export class SavedObjectsPublicPlugin
       registerDecorator: (config) => this.decoratorRegistry.register(config),
     };
   }
-  public start(core: CoreStart, { data }: SavedObjectsStartDeps) {
+  public start(core: CoreStart, { data, dataViews }: SavedObjectsStartDeps) {
     return {
       SavedObjectClass: createSavedObjectClass(
         {
-          indexPatterns: data.indexPatterns,
+          dataViews,
           savedObjectsClient: core.savedObjects.client,
           search: data.search,
           chrome: core.chrome,

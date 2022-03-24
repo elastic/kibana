@@ -1,12 +1,11 @@
 {
   "id": "eventLogFixture",
   "owner": {
-    "name": "Kibana Alerting",
-    "githubTeam": "kibana-alerting-services"
+    "name": "Response Ops",
+    "githubTeam": "response-ops"
   },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack"],
   "requiredPlugins": ["eventLog"],
   "server": true,
   "ui": false

@@ -15,7 +15,6 @@ import {
   loginAndWaitForPageWithoutDateRange,
   waitForPageWithoutDateRange,
 } from '../../tasks/login';
-import { waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createCustomRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown, dismissCallOut } from '../../tasks/common/callouts';
@@ -48,7 +47,6 @@ describe('Detections > Callouts', () => {
     // Otherwise the app will be disabled and show a "welcome"-like page.
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.platform_engineer);
-    waitForAlertsIndexToBeCreated();
 
     // After that we can login as a read-only user.
     login(ROLES.reader);
@@ -74,24 +72,7 @@ describe('Detections > Callouts', () => {
       });
     });
 
-    context('On Rules Management page', () => {
-      beforeEach(() => {
-        loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
-      });
-
-      it('We show one primary callout', () => {
-        waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
-      });
-
-      context('When a user clicks Dismiss on the callout', () => {
-        it('We hide it and persist the dismissal', () => {
-          waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
-          dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
-          reloadPage();
-          getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
-        });
-      });
-    });
+    // FYI: Rules Management check moved to ../detection_rules/all_rules_read_only.spec.ts
 
     context('On Rule Details page', () => {
       beforeEach(() => {

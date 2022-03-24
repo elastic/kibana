@@ -33,7 +33,7 @@ describe('EmptyEngineOverview', () => {
 
   it('renders a documentation link', () => {
     expect(getPageHeaderActions(wrapper).find(EuiButton).prop('href')).toEqual(
-      `${docLinks.appSearchBase}/index.html`
+      docLinks.appSearchGuide
     );
   });
 

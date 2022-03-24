@@ -7,28 +7,24 @@
 
 import React, { FC, useState, useEffect } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import {
-  DISCOVER_APP_URL_GENERATOR,
-  DiscoverUrlGeneratorState,
-} from '../../../../../../../../src/plugins/discover/public';
-import type { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../src/plugins/data_views/public';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { useUrlState } from '../../../common/util/url_state';
 import { LinkCard } from '../../../common/components/link_card';
 import { ResultLink } from '../../../common/components/results_links';
 
 interface Props {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   searchString?: string | { [key: string]: any };
   searchQueryLanguage?: string;
   additionalLinks: ResultLink[];
 }
 
 export const ActionsPanel: FC<Props> = ({
-  indexPattern,
+  dataView,
   searchString,
   searchQueryLanguage,
   additionalLinks,
@@ -42,50 +38,34 @@ export const ActionsPanel: FC<Props> = ({
     services: {
       data,
       application: { capabilities },
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
+      discover,
     },
   } = useDataVisualizerKibana();
 
   useEffect(() => {
     let unmounted = false;
 
-    const indexPatternId = indexPattern.id;
+    const indexPatternId = dataView.id;
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
-      if (!isDiscoverAvailable) {
+      if (!isDiscoverAvailable) return;
+      if (!discover.locator) {
+        // eslint-disable-next-line no-console
+        console.error('Discover locator not available');
         return;
       }
-
-      const state: DiscoverUrlGeneratorState = {
+      const discoverUrl = await discover.locator.getUrl({
         indexPatternId,
-      };
-
-      state.filters = data.query.filterManager.getFilters() ?? [];
-
-      if (searchString && searchQueryLanguage !== undefined) {
-        state.query = { query: searchString, language: searchQueryLanguage };
-      }
-      if (globalState?.time) {
-        state.timeRange = globalState.time;
-      }
-      if (globalState?.refreshInterval) {
-        state.refreshInterval = globalState.refreshInterval;
-      }
-
-      let discoverUrlGenerator;
-      try {
-        discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
-      } catch (error) {
-        // ignore error thrown when url generator is not available
-        return;
-      }
-
-      const discoverUrl = await discoverUrlGenerator.createUrl(state);
-      if (!unmounted) {
-        setDiscoverLink(discoverUrl);
-      }
+        filters: data.query.filterManager.getFilters() ?? [],
+        query:
+          searchString && searchQueryLanguage !== undefined
+            ? { query: searchString, language: searchQueryLanguage }
+            : undefined,
+        timeRange: globalState?.time ? globalState.time : undefined,
+        refreshInterval: globalState?.refreshInterval ? globalState.refreshInterval : undefined,
+      });
+      if (unmounted) return;
+      setDiscoverLink(discoverUrl);
     };
 
     Promise.all(
@@ -110,12 +90,12 @@ export const ActionsPanel: FC<Props> = ({
       unmounted = true;
     };
   }, [
-    indexPattern,
+    dataView,
     searchString,
     searchQueryLanguage,
     globalState,
     capabilities,
-    getUrlGenerator,
+    discover,
     additionalLinks,
     data.query,
   ]);

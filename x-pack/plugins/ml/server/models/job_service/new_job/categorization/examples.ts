@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { IScopedClusterClient } from 'kibana/server';
 import { chunk } from 'lodash';
@@ -62,7 +62,7 @@ export function categorizationExamplesProvider({
         }
       }
     }
-    const { body } = await asCurrentUser.search<estypes.SearchResponse<{ [id: string]: string }>>({
+    const body = await asCurrentUser.search<estypes.SearchResponse<{ [id: string]: string }>>({
       index: indexPatternTitle,
       size,
       body: {
@@ -126,9 +126,7 @@ export function categorizationExamplesProvider({
   }
 
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
-    const {
-      body: { tokens },
-    } = await asInternalUser.indices.analyze({
+    const { tokens } = await asInternalUser.indices.analyze({
       body: {
         ...getAnalyzer(analyzer),
         text: examples,

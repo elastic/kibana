@@ -21,14 +21,14 @@ import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { LicensePrompt } from '../../shared/license_prompt';
-import { Controls } from './Controls';
-import { Cytoscape } from './Cytoscape';
+import { Controls } from './controls';
+import { Cytoscape } from './cytoscape';
 import { getCytoscapeDivStyle } from './cytoscape_options';
-import { EmptyBanner } from './EmptyBanner';
+import { EmptyBanner } from './empty_banner';
 import { EmptyPrompt } from './empty_prompt';
-import { Popover } from './Popover';
+import { Popover } from './popover';
 import { TimeoutPrompt } from './timeout_prompt';
-import { useRefDimensions } from './useRefDimensions';
+import { useRefDimensions } from './use_ref_dimensions';
 import { SearchBar } from '../../shared/search_bar';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -67,7 +67,7 @@ function LoadingSpinner() {
 
 export function ServiceMapHome() {
   const {
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
   } = useApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   return (
@@ -76,6 +76,7 @@ export function ServiceMapHome() {
       kuery={kuery}
       start={start}
       end={end}
+      serviceGroupId={serviceGroup}
     />
   );
 }
@@ -100,11 +101,13 @@ export function ServiceMap({
   kuery,
   start,
   end,
+  serviceGroupId,
 }: {
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
+  serviceGroupId?: string;
 }) {
   const theme = useTheme();
   const license = useLicenseContext();
@@ -122,20 +125,20 @@ export function ServiceMap({
         return;
       }
 
-      return callApmApi({
+      return callApmApi('GET /internal/apm/service-map', {
         isCachable: false,
-        endpoint: 'GET /internal/apm/service-map',
         params: {
           query: {
             start,
             end,
             environment,
             serviceName,
+            serviceGroup: serviceGroupId,
           },
         },
       });
     },
-    [license, serviceName, environment, start, end]
+    [license, serviceName, environment, start, end, serviceGroupId]
   );
 
   const { ref, height } = useRefDimensions();
@@ -168,8 +171,8 @@ export function ServiceMap({
     status === FETCH_STATUS.FAILURE &&
     error &&
     'body' in error &&
-    error.body.statusCode === 500 &&
-    error.body.message === SERVICE_MAP_TIMEOUT_ERROR
+    error.body?.statusCode === 500 &&
+    error.body?.message === SERVICE_MAP_TIMEOUT_ERROR
   ) {
     return (
       <PromptContainer>
@@ -180,7 +183,7 @@ export function ServiceMap({
 
   return (
     <>
-      <SearchBar showKueryBar={false} />
+      <SearchBar showKueryBar={false} showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div
           data-test-subj="ServiceMap"

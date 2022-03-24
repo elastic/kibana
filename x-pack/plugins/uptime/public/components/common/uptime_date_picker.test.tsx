@@ -12,8 +12,13 @@ import { createMemoryHistory } from 'history';
 import { render } from '../../lib/helper/rtl_helpers';
 import { fireEvent } from '@testing-library/dom';
 
-// FLAKY: https://github.com/elastic/kibana/issues/114396
-describe.skip('UptimeDatePicker component', () => {
+describe('UptimeDatePicker component', () => {
+  jest.setTimeout(10_000);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders properly with mock data', async () => {
     const { findByText } = render(<UptimeDatePicker />);
     expect(await findByText('Last 15 minutes')).toBeInTheDocument();
@@ -86,7 +91,7 @@ describe.skip('UptimeDatePicker component', () => {
 
     // it should update shared state
 
-    expect(startPlugins.data.query.timefilter.timefilter.setTime).toHaveBeenCalledTimes(3);
+    expect(startPlugins.data.query.timefilter.timefilter.setTime).toHaveBeenCalledTimes(2);
 
     expect(startPlugins.data.query.timefilter.timefilter.setTime).toHaveBeenCalledWith({
       from: 'now-10m',

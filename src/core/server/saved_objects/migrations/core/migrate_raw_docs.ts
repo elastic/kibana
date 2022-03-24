@@ -25,13 +25,16 @@ export interface DocumentsTransformFailed {
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
 }
+
 export interface DocumentsTransformSuccess {
   readonly processedDocs: SavedObjectsRawDoc[];
 }
+
 export interface TransformErrorObjects {
   readonly rawId: string;
   readonly err: TransformSavedObjectDocumentError | Error;
 }
+
 type MigrateFn = (
   doc: SavedObjectUnsanitizedDoc<unknown>
 ) => Promise<Array<SavedObjectUnsanitizedDoc<unknown>>>;
@@ -83,7 +86,6 @@ export async function migrateRawDocs(
 
 interface MigrateRawDocsSafelyDeps {
   serializer: SavedObjectsSerializer;
-  knownTypes: ReadonlySet<string>;
   migrateDoc: MigrateAndConvertFn;
   rawDocs: SavedObjectsRawDoc[];
 }
@@ -97,7 +99,6 @@ interface MigrateRawDocsSafelyDeps {
  */
 export function migrateRawDocsSafely({
   serializer,
-  knownTypes,
   migrateDoc,
   rawDocs,
 }: MigrateRawDocsSafelyDeps): TaskEither.TaskEither<
@@ -111,10 +112,7 @@ export function migrateRawDocsSafely({
     const corruptSavedObjectIds: string[] = [];
     const options = { namespaceTreatment: 'lax' as const };
     for (const raw of rawDocs) {
-      // Do not transform documents of unknown types
-      if (raw?._source?.type && !knownTypes.has(raw._source.type)) {
-        processedDocs.push(raw);
-      } else if (serializer.isRawSavedObject(raw, options)) {
+      if (serializer.isRawSavedObject(raw, options)) {
         try {
           const savedObject = convertToRawAddMigrationVersion(raw, options, serializer);
           processedDocs.push(

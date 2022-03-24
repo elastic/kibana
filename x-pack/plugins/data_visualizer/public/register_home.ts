@@ -10,12 +10,11 @@ import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public'
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { FileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
 import {
-  featureDescription,
   featureTitle,
   FILE_DATA_VIS_TAB_ID,
   applicationPath,
   featureId,
-} from '../common';
+} from '../common/constants';
 
 export function registerHomeAddData(home: HomePublicPluginSetup) {
   home.addData.registerAddDataTab({
@@ -31,7 +30,9 @@ export function registerHomeFeatureCatalogue(home: HomePublicPluginSetup) {
   home.featureCatalogue.register({
     id: featureId,
     title: featureTitle,
-    description: featureDescription,
+    description: i18n.translate('xpack.dataVisualizer.description', {
+      defaultMessage: 'Import your own CSV, NDJSON, or log file.',
+    }),
     icon: 'document',
     path: applicationPath,
     showOnHomePage: true,

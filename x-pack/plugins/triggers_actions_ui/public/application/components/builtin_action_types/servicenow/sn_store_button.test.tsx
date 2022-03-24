@@ -7,21 +7,51 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { SNStoreButton } from './sn_store_button';
+import { SNStoreButton, SNStoreLink } from './sn_store_button';
+
+const appId = 'test';
 
 describe('SNStoreButton', () => {
-  test('it renders the button', () => {
-    render(<SNStoreButton color="warning" />);
+  it('should render the button', () => {
+    render(<SNStoreButton color="warning" appId={appId} />);
     expect(screen.getByText('Visit ServiceNow app store')).toBeInTheDocument();
   });
 
-  test('it renders a danger button', () => {
-    render(<SNStoreButton color="danger" />);
+  it('should render a danger button', () => {
+    render(<SNStoreButton color="danger" appId={appId} />);
     expect(screen.getByRole('link')).toHaveClass('euiButton--danger');
   });
 
-  test('it renders with correct href', () => {
-    render(<SNStoreButton color="warning" />);
-    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://store.servicenow.com/');
+  it('should render with correct href', () => {
+    render(<SNStoreButton color="warning" appId={appId} />);
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      'https://store.servicenow.com/sn_appstore_store.do#!/store/application/test'
+    );
+  });
+
+  it('should render with target blank', () => {
+    render(<SNStoreButton color="warning" appId={appId} />);
+    expect(screen.getByRole('link')).toHaveAttribute('target', '_blank');
+  });
+});
+
+describe('SNStoreLink', () => {
+  it('should render the link', () => {
+    render(<SNStoreLink appId={appId} />);
+    expect(screen.getByText('Visit ServiceNow app store')).toBeInTheDocument();
+  });
+
+  it('should render with correct href', () => {
+    render(<SNStoreLink appId={appId} />);
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      'https://store.servicenow.com/sn_appstore_store.do#!/store/application/test'
+    );
+  });
+
+  it('should render with target blank', () => {
+    render(<SNStoreLink appId={appId} />);
+    expect(screen.getByRole('link')).toHaveAttribute('target', '_blank');
   });
 });

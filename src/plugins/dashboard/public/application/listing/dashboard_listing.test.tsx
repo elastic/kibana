@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { DashboardAppServices } from '../../types';
 import { SimpleSavedObject } from '../../../../../core/public';
@@ -16,6 +16,7 @@ import { KibanaContextProvider } from '../../services/kibana_react';
 import { createKbnUrlStateStorage } from '../../services/kibana_utils';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { makeDefaultServices } from '../test_helpers';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 
 function makeDefaultProps(): DashboardListingProps {
   return {
@@ -64,6 +65,25 @@ describe('after fetch', () => {
         hits: [],
       });
     };
+    const { component } = mountWith({ services });
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  test('renders call to action with continue when no dashboards exist but one is in progress', async () => {
+    const services = makeDefaultServices();
+    services.savedDashboards.find = () => {
+      return Promise.resolve({
+        total: 0,
+        hits: [],
+      });
+    };
+    services.dashboardSessionStorage.getDashboardIdsWithUnsavedChanges = () => [
+      DASHBOARD_PANELS_UNSAVED_ID,
+    ];
     const { component } = mountWith({ services });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

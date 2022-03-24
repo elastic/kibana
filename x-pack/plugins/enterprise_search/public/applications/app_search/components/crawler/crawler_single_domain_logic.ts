@@ -16,7 +16,7 @@ import { EngineLogic, generateEnginePath } from '../engine';
 
 import { CrawlerLogic } from './crawler_logic';
 
-import { CrawlerDomain, EntryPoint, Sitemap, CrawlRule } from './types';
+import { CrawlerDomain, EntryPoint, Sitemap, CrawlRule, CrawlerDomainFromServer } from './types';
 import { crawlerDomainServerToClient, getDeleteDomainSuccessMessage } from './utils';
 
 export interface CrawlerSingleDomainValues {
@@ -92,7 +92,7 @@ export const CrawlerSingleDomainLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(
+        const response = await http.get<CrawlerDomainFromServer>(
           `/internal/app_search/engines/${engineName}/crawler/domains/${domainId}`
         );
 
@@ -113,7 +113,7 @@ export const CrawlerSingleDomainLogic = kea<
       };
 
       try {
-        const response = await http.put(
+        const response = await http.put<CrawlerDomainFromServer>(
           `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}`,
           {
             body: JSON.stringify(payload),

@@ -11,7 +11,7 @@ jest.mock('./api_keys_grid', () => ({
 
 import { act } from '@testing-library/react';
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 import type { Unmount } from 'src/plugins/management/public/types';
 
 import { securityMock } from '../../mocks';
@@ -52,11 +52,12 @@ describe('apiKeysManagementApp', () => {
           element: container,
           setBreadcrumbs,
           history: scopedHistoryMock.create(),
+          theme$: themeServiceMock.createTheme$(),
         });
     });
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: '/', text: 'API keys' }]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'API keys' }]);
     expect(docTitle.change).toHaveBeenCalledWith(['API keys']);
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`

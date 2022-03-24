@@ -7,9 +7,13 @@
  */
 
 jest.mock('@elastic/apm-rum');
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types/jest';
 import { init, apm } from '@elastic/apm-rum';
+import type { Transaction } from '@elastic/apm-rum';
 import { ApmSystem } from './apm_system';
+import { Subject } from 'rxjs';
+import { InternalApplicationStart } from './application/types';
+import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 const initMock = init as jest.Mocked<typeof init>;
 const apmMock = apm as DeeplyMockedKeys<typeof apm>;
@@ -37,6 +41,122 @@ describe('ApmSystem', () => {
       const apmSystem = new ApmSystem({ active: true, globalLabels: { alpha: 'one' } });
       await apmSystem.setup();
       expect(apm.addLabels).toHaveBeenCalledWith({ alpha: 'one' });
+    });
+
+    describe('manages the page load transaction', () => {
+      it('does nothing if theres no transaction', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        const mockTransaction: MockedKeys<Transaction> = {
+          type: 'wrong',
+          // @ts-expect-error 2345
+          block: jest.fn(),
+          mark: jest.fn(),
+        };
+        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
+        await apmSystem.setup();
+        expect(mockTransaction.mark).not.toHaveBeenCalled();
+        // @ts-expect-error 2345
+        expect(mockTransaction.block).not.toHaveBeenCalled();
+      });
+
+      it('blocks a page load transaction', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        const mockTransaction: MockedKeys<Transaction> = {
+          type: 'page-load',
+          // @ts-expect-error 2345
+          block: jest.fn(),
+          mark: jest.fn(),
+        };
+        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
+        await apmSystem.setup();
+        expect(mockTransaction.mark).toHaveBeenCalledTimes(1);
+        expect(mockTransaction.mark).toHaveBeenCalledWith('apm-setup');
+        // @ts-expect-error 2345
+        expect(mockTransaction.block).toHaveBeenCalledTimes(1);
+      });
+
+      it('marks apm start', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        const currentAppId$ = new Subject<string>();
+        const mark = jest.fn();
+        const mockTransaction: MockedKeys<Transaction> = {
+          type: 'page-load',
+          mark,
+          // @ts-expect-error 2345
+          block: jest.fn(),
+          end: jest.fn(),
+          addLabels: jest.fn(),
+        };
+
+        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
+        await apmSystem.setup();
+
+        mark.mockReset();
+
+        await apmSystem.start({
+          application: {
+            currentAppId$,
+          } as any as InternalApplicationStart,
+          executionContext: executionContextServiceMock.createInternalStartContract(),
+        });
+
+        expect(mark).toHaveBeenCalledWith('apm-start');
+      });
+
+      it('closes the page load transaction once', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        const currentAppId$ = new Subject<string>();
+        const mockTransaction: MockedKeys<Transaction> = {
+          type: 'page-load',
+          // @ts-expect-error 2345
+          block: jest.fn(),
+          mark: jest.fn(),
+          end: jest.fn(),
+          addLabels: jest.fn(),
+        };
+        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
+        await apmSystem.setup();
+        await apmSystem.start({
+          application: {
+            currentAppId$,
+          } as any as InternalApplicationStart,
+          executionContext: executionContextServiceMock.createInternalStartContract(),
+        });
+        currentAppId$.next('myapp');
+
+        expect(mockTransaction.end).toHaveBeenCalledTimes(1);
+
+        currentAppId$.next('another-app');
+
+        expect(mockTransaction.end).toHaveBeenCalledTimes(1);
+      });
+
+      it('adds resource load labels', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        const currentAppId$ = new Subject<string>();
+        const mockTransaction: Transaction = {
+          type: 'page-load',
+          // @ts-expect-error 2345
+          block: jest.fn(),
+          mark: jest.fn(),
+          end: jest.fn(),
+          addLabels: jest.fn(),
+        };
+        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
+        await apmSystem.setup();
+        await apmSystem.start({
+          application: {
+            currentAppId$,
+          } as any as InternalApplicationStart,
+          executionContext: executionContextServiceMock.createInternalStartContract(),
+        });
+        currentAppId$.next('myapp');
+
+        expect(mockTransaction.addLabels).toHaveBeenCalledWith({
+          'loaded-resources': 0,
+          'cached-resources': 0,
+        });
+      });
     });
 
     describe('http request normalization', () => {

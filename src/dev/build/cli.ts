@@ -41,12 +41,13 @@ if (showHelp) {
         --docker-images         {dim Only build the Docker images}
         --docker-contexts       {dim Only build the Docker build contexts}
         --skip-docker-ubi       {dim Don't build the docker ubi image}
-        --skip-docker-centos    {dim Don't build the docker centos image}
+        --skip-docker-ubuntu    {dim Don't build the docker ubuntu image}
         --release               {dim Produce a release-ready distributable}
         --version-qualifier     {dim Suffix version with a qualifier}
         --skip-node-download    {dim Reuse existing downloads of node.js}
         --verbose,-v            {dim Turn on verbose logging}
         --no-debug              {dim Turn off debug logging}
+        --epr-registry          {dim Specify the EPR registry to use for Fleet packages, 'production' or 'snapshot'}
     `) + '\n'
   );
   process.exit(1);

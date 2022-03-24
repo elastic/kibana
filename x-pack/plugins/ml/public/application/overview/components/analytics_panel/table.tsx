@@ -6,14 +6,7 @@
  */
 
 import React, { FC, useState } from 'react';
-import {
-  Direction,
-  EuiBadge,
-  EuiInMemoryTable,
-  EuiTableActionsColumnType,
-  EuiTableComputedColumnType,
-  EuiTableFieldDataColumnType,
-} from '@elastic/eui';
+import { Direction, EuiBadge, EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
 import {
@@ -24,18 +17,9 @@ import {
   getTaskStateBadge,
   progressColumn,
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
+import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
 
-import { ViewLink } from './actions';
-
-type DataFrameAnalyticsTableColumns = [
-  EuiTableFieldDataColumnType<DataFrameAnalyticsListRow>,
-  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
-  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
-  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
-  EuiTableFieldDataColumnType<DataFrameAnalyticsListRow>,
-  EuiTableActionsColumnType<DataFrameAnalyticsListRow>
-];
+import { useTableActions } from './actions';
 
 interface Props {
   items: DataFrameAnalyticsListRow[];
@@ -47,13 +31,12 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   const [sortField, setSortField] = useState<string>(DataFrameAnalyticsListColumn.id);
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
-  // id, type, status, progress, created time, view icon
-  const columns: DataFrameAnalyticsTableColumns = [
+  const columns: Array<EuiBasicTableColumn<DataFrameAnalyticsListRow>> = [
     {
       field: DataFrameAnalyticsListColumn.id,
       name: i18n.translate('xpack.ml.overview.analyticsList.id', { defaultMessage: 'ID' }),
       sortable: true,
-      truncateText: true,
+      truncateText: false,
       width: '20%',
     },
     {
@@ -81,22 +64,18 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
         defaultMessage: 'Creation time',
       }),
       dataType: 'date',
-      render: (time: number) => formatHumanReadableDateTimeSeconds(time),
+      render: (time: number) => formatHumanReadableDateTime(time),
       textOnly: true,
       truncateText: true,
       sortable: true,
-      width: '20%',
+      width: '25%',
     },
     {
       name: i18n.translate('xpack.ml.overview.analyticsList.tableActionLabel', {
         defaultMessage: 'Actions',
       }),
-      actions: [
-        {
-          render: (item: DataFrameAnalyticsListRow) => <ViewLink item={item} />,
-        },
-      ],
-      width: '100px',
+      actions: useTableActions(),
+      width: '80px',
     },
   ];
 
@@ -118,7 +97,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
     initialPageSize: pageSize,
     totalItemCount: items.length,
     pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   const sorting = {
@@ -129,11 +108,11 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   };
 
   return (
-    <EuiInMemoryTable
+    <EuiInMemoryTable<DataFrameAnalyticsListRow>
       allowNeutralSort={false}
       className="mlAnalyticsTable"
       columns={columns}
-      hasActions={false}
+      hasActions={true}
       isExpandable={false}
       isSelectable={false}
       items={items}

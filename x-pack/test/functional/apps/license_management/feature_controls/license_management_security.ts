@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global all privileges (aka kibana_admin)', () => {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin'], true);
+        await security.testUser.setRoles(['kibana_admin']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -47,10 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard read with license_management_user', () => {
       before(async () => {
-        await security.testUser.setRoles(
-          ['global_dashboard_read', 'license_management_user'],
-          true
-        );
+        await security.testUser.setRoles(['global_dashboard_read', 'license_management_user']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -68,7 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(sections).to.have.length(3);
           expect(sections[2]).to.eql({
             sectionId: 'stack',
-            sectionLinks: ['license_management', 'upgrade_assistant'],
+            sectionLinks: ['license_management'],
           });
         });
       });

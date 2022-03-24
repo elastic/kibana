@@ -5,18 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { EuiRange } from '@elastic/eui';
+import { withDebounceArg } from '../../../public/components/with_debounce_arg';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
 
 const { Percentage: strings } = ArgumentStrings;
 
 const PercentageArgInput = ({ onValueChange, argValue }) => {
-  const handleChange = (ev) => {
-    return onValueChange(ev.target.value / 100);
-  };
+  const [value, setValue] = useState(argValue);
+
+  const handleChange = useCallback(
+    (ev) => {
+      const { value } = ev.target;
+      const numberVal = Number(value) / 100;
+      setValue(numberVal);
+      onValueChange(numberVal);
+    },
+    [onValueChange]
+  );
 
   return (
     <EuiRange
@@ -25,7 +34,7 @@ const PercentageArgInput = ({ onValueChange, argValue }) => {
       max={100}
       showLabels
       showInput
-      value={argValue * 100}
+      value={value * 100}
       onChange={handleChange}
     />
   );
@@ -41,5 +50,5 @@ export const percentage = () => ({
   name: 'percentage',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  simpleTemplate: templateFromReactComponent(PercentageArgInput),
+  simpleTemplate: templateFromReactComponent(withDebounceArg(PercentageArgInput, 50)),
 });

@@ -35,6 +35,34 @@ export function validateSecrets<
   return validateWithSchema(actionType, 'secrets', value);
 }
 
+export function validateConnector<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
+  if (actionType.validate && actionType.validate.connector) {
+    try {
+      const connectorValue = value as { config: Config; secrets: Secrets };
+
+      // Connector config and secrets should be defined
+      if (connectorValue.config == null) {
+        throw new Error(`config must be defined`);
+      }
+      if (connectorValue.secrets == null) {
+        throw new Error(`secrets must be defined`);
+      }
+      const result = actionType.validate.connector(connectorValue.config, connectorValue.secrets);
+      if (result !== null) {
+        throw new Error(result);
+      }
+    } catch (err) {
+      throw Boom.badRequest(`error validating action type connector: ${err.message}`);
+    }
+  }
+  return null;
+}
+
 type ValidKeys = 'params' | 'config' | 'secrets';
 
 function validateWithSchema<
@@ -45,7 +73,7 @@ function validateWithSchema<
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   key: ValidKeys,
-  value: unknown
+  value: unknown | { config: unknown; secrets: unknown }
 ): Record<string, unknown> {
   if (actionType.validate) {
     let name;

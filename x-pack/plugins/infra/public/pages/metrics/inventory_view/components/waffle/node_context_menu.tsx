@@ -7,7 +7,7 @@
 
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { useMemo, useState } from 'react';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
@@ -27,7 +27,7 @@ import {
   SectionLink,
   ActionMenuDivider,
 } from '../../../../../../../observability/public';
-import { useLinkProps } from '../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../observability/public';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -64,16 +64,14 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
           return { label: <EuiCode>host.ip</EuiCode>, value: node.ip };
         }
       } else {
-        if (options.fields) {
-          const { id } = findInventoryFields(nodeType, options.fields);
-          return {
-            label: <EuiCode>{id}</EuiCode>,
-            value: node.id,
-          };
-        }
+        const { id } = findInventoryFields(nodeType);
+        return {
+          label: <EuiCode>{id}</EuiCode>,
+          value: node.id,
+        };
       }
       return { label: '', value: '' };
-    }, [nodeType, node.ip, node.id, options.fields]);
+    }, [nodeType, node.ip, node.id]);
 
     const nodeLogsMenuItemLinkProps = useLinkProps(
       getNodeLogsUrl({
@@ -184,11 +182,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
 
         {flyoutVisible && (
           <AlertFlyout
-            filter={
-              options.fields
-                ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
-                : ''
-            }
+            filter={`${findInventoryFields(nodeType).id}: "${node.id}"`}
             options={options}
             nodeType={nodeType}
             setVisible={setFlyoutVisible}

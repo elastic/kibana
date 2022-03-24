@@ -5,42 +5,65 @@
  * 2.0.
  */
 
+import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
+import uuid from 'uuid';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
-import userEvent from '@testing-library/user-event';
-import { HostIsolationExceptionsFormFlyout } from './form_flyout';
-import { act } from 'react-dom/test-utils';
-import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../common/constants';
-import uuid from 'uuid';
+import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utilts';
+import {
+  createHostIsolationExceptionItem,
+  getOneHostIsolationExceptionItem,
+  updateOneHostIsolationExceptionItem,
+} from '../../service';
 import { createEmptyHostIsolationException } from '../../utils';
+import { HostIsolationExceptionsFormFlyout } from './form_flyout';
 
 jest.mock('../../service.ts');
+jest.mock('../../../../../common/hooks/use_license');
+jest.mock('../../../../services/policies/policies');
+
+const createHostIsolationExceptionItemMock = createHostIsolationExceptionItem as jest.Mock;
+const updateOneHostIsolationExceptionItemMock = updateOneHostIsolationExceptionItem as jest.Mock;
+const getOneHostIsolationExceptionItemMock = getOneHostIsolationExceptionItem as jest.Mock;
+(sendGetEndpointSpecificPackagePolicies as jest.Mock).mockImplementation(
+  sendGetEndpointSpecificPackagePoliciesMock
+);
 
 describe('When on the host isolation exceptions flyout form', () => {
   let mockedContext: AppContextTestRender;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
-  let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
+  let onCancel: () => void;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    onCancel = jest.fn();
     mockedContext = createAppRootMockRenderer();
-    render = () => {
-      return mockedContext.render(<HostIsolationExceptionsFormFlyout />);
-    };
-    waitForAction = mockedContext.middlewareSpy.waitForAction;
+    mockedContext.history.push(getHostIsolationExceptionsListPath({ show: 'create' }));
+
+    createHostIsolationExceptionItemMock.mockReset();
+    updateOneHostIsolationExceptionItemMock.mockReset();
+    getOneHostIsolationExceptionItemMock.mockReset();
   });
 
   describe('When creating a new exception', () => {
     beforeEach(() => {
-      mockedContext.history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
+      render = () => {
+        return mockedContext.render(<HostIsolationExceptionsFormFlyout onCancel={onCancel} />);
+      };
     });
-
-    describe('with invalida data', () => {
-      it('should show disabled buttons when the form first load', () => {
+    describe('with invalid data', () => {
+      beforeEach(async () => {
         renderResult = render();
+        await waitForElementToBeRemoved(renderResult.queryByTestId('loading-spinner'));
+      });
+
+      it('should show disabled buttons when the form first load', async () => {
         expect(renderResult.getByTestId('add-exception-cancel-button')).not.toHaveAttribute(
           'disabled'
         );
@@ -48,11 +71,29 @@ describe('When on the host isolation exceptions flyout form', () => {
           'disabled'
         );
       });
+
+      it('should disable submit if the data is invalid', async () => {
+        const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
+        const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
+        const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
+        userEvent.type(nameInput, 'test name');
+        userEvent.clear(ipInput);
+        userEvent.type(ipInput, 'not an ip');
+        expect(confirmButton).toHaveAttribute('disabled');
+      });
+
+      it('should call onCancel when cancel is pressed', async () => {
+        const cancelButton = renderResult.getByTestId('add-exception-cancel-button');
+        userEvent.click(cancelButton);
+        expect(onCancel).toHaveBeenCalled();
+      });
     });
 
     describe('with valid data', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         renderResult = render();
+        await waitForElementToBeRemoved(renderResult.queryByTestId('loading-spinner'));
+
         const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
         const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
         userEvent.type(nameInput, 'test name');
@@ -71,60 +112,60 @@ describe('When on the host isolation exceptions flyout form', () => {
       it('should submit the entry data when submit is pressed with valid data', async () => {
         const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
         expect(confirmButton).not.toHaveAttribute('disabled');
-        const waiter = waitForAction('hostIsolationExceptionsCreateEntry');
         userEvent.click(confirmButton);
-        expect(await waiter).toBeTruthy();
+        await waitFor(() => {
+          expect(createHostIsolationExceptionItemMock).toHaveBeenCalled();
+        });
       });
 
-      it('should disable the submit button when an operation is in progress', () => {
-        act(() => {
-          mockedContext.store.dispatch({
-            type: 'hostIsolationExceptionsFormStateChanged',
-            payload: {
-              type: 'LoadingResourceState',
-              previousState: { type: 'UninitialisedResourceState' },
-            },
+      it('should disable the submit button when an operation is in progress', async () => {
+        // simulate a pending request
+        createHostIsolationExceptionItemMock.mockImplementationOnce(() => {
+          return new Promise((resolve) => {
+            setTimeout(resolve, 300);
           });
         });
         const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
-        expect(confirmButton).toHaveAttribute('disabled');
+        expect(confirmButton).not.toHaveAttribute('disabled');
+        userEvent.click(confirmButton);
+        await waitFor(() => {
+          expect(createHostIsolationExceptionItemMock).toHaveBeenCalled();
+          expect(confirmButton).toHaveAttribute('disabled');
+        });
       });
 
-      it('should show a toast and close the flyout when the operation is finished', () => {
-        mockedContext.history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
-        act(() => {
-          mockedContext.store.dispatch({
-            type: 'hostIsolationExceptionsFormStateChanged',
-            payload: {
-              type: 'LoadedResourceState',
-              previousState: { type: 'UninitialisedResourceState' },
-            },
-          });
+      it('should show a toast and close the flyout when the operation is finished calling onCancel', async () => {
+        const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
+        userEvent.click(confirmButton);
+        await waitFor(() => {
+          expect(mockedContext.coreStart.notifications.toasts.addSuccess).toHaveBeenCalled();
+          expect(onCancel).toHaveBeenCalled();
         });
-        expect(mockedContext.coreStart.notifications.toasts.addSuccess).toHaveBeenCalled();
-        expect(mockedContext.history.location.search).toBe('');
       });
 
       it('should show an error toast if operation fails and enable the submit button', async () => {
-        act(() => {
-          mockedContext.store.dispatch({
-            type: 'hostIsolationExceptionsFormStateChanged',
-            payload: {
-              type: 'FailedResourceState',
-              error: new Error('mocked error'),
-            },
-          });
-        });
-        expect(mockedContext.coreStart.notifications.toasts.addDanger).toHaveBeenCalled();
+        createHostIsolationExceptionItemMock.mockRejectedValue(new Error('not valid'));
         const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
-        expect(confirmButton).not.toHaveAttribute('disabled');
+        userEvent.click(confirmButton);
+        await waitFor(() => {
+          expect(mockedContext.coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+            'There was an error creating the exception: "not valid"'
+          );
+          expect(confirmButton).not.toHaveAttribute('disabled');
+        });
       });
     });
   });
+
   describe('When editing an existing exception', () => {
-    const fakeId = 'dc5d1d00-2766-11ec-981f-7f84cfc8764f';
+    const fakeId = uuid.v4();
     beforeEach(() => {
-      mockedContext.history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=edit&id=${fakeId}`);
+      mockedContext.history.push(getHostIsolationExceptionsListPath({ show: 'edit', id: fakeId }));
+      render = () => {
+        return mockedContext.render(
+          <HostIsolationExceptionsFormFlyout id={fakeId} onCancel={onCancel} />
+        );
+      };
     });
 
     describe('without loaded data', () => {
@@ -134,71 +175,38 @@ describe('When on the host isolation exceptions flyout form', () => {
       });
 
       it('should request to load data about the editing exception', async () => {
-        const waiter = waitForAction('hostIsolationExceptionsMarkToEdit', {
-          validate: ({ payload }) => {
-            return payload.id === fakeId;
-          },
-        });
         renderResult = render();
-        expect(await waiter).toBeTruthy();
-      });
-
-      it('should show a warning toast if the item fails to load', () => {
-        renderResult = render();
-        act(() => {
-          mockedContext.store.dispatch({
-            type: 'hostIsolationExceptionsFormEntryChanged',
-            payload: undefined,
-          });
-
-          mockedContext.store.dispatch({
-            type: 'hostIsolationExceptionsFormStateChanged',
-            payload: {
-              type: 'FailedResourceState',
-              error: new Error('mocked error'),
-            },
-          });
+        await waitFor(() => {
+          expect(getOneHostIsolationExceptionItemMock).toHaveBeenCalledWith(
+            mockedContext.coreStart.http,
+            fakeId
+          );
         });
-        expect(mockedContext.coreStart.notifications.toasts.addWarning).toHaveBeenCalled();
       });
     });
 
     describe('with loaded data', () => {
       beforeEach(async () => {
-        mockedContext.store.dispatch({
-          type: 'hostIsolationExceptionsFormEntryChanged',
-          payload: {
-            ...createEmptyHostIsolationException(),
-            name: 'name edit me',
-            description: 'initial description',
-            id: fakeId,
-            item_id: uuid.v4(),
-            entries: [
-              {
-                field: 'destination.ip',
-                operator: 'included',
-                type: 'match',
-                value: '10.0.0.5',
-              },
-            ],
-          },
+        getOneHostIsolationExceptionItemMock.mockReturnValueOnce({
+          ...createEmptyHostIsolationException(),
+          name: 'name edit me',
+          description: 'initial description',
+          id: fakeId,
+          item_id: fakeId,
+          entries: [
+            {
+              field: 'destination.ip',
+              operator: 'included',
+              type: 'match',
+              value: '10.0.0.5',
+            },
+          ],
         });
         renderResult = render();
+        await waitForElementToBeRemoved(renderResult.queryByTestId('loading-spinner'));
       });
 
-      it('should request data again if the url id is changed', async () => {
-        const otherId = 'd75fbd74-2a92-11ec-8d3d-0242ac130003';
-        act(() => {
-          mockedContext.history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=edit&id=${otherId}`);
-        });
-        await waitForAction('hostIsolationExceptionsMarkToEdit', {
-          validate: ({ payload }) => {
-            return payload.id === otherId;
-          },
-        });
-      });
-
-      it('should enable the buttons from the start', () => {
+      it('should enable the buttons after data is loaded', () => {
         expect(renderResult.getByTestId('add-exception-cancel-button')).not.toHaveAttribute(
           'disabled'
         );
@@ -207,12 +215,47 @@ describe('When on the host isolation exceptions flyout form', () => {
         );
       });
 
+      it('should disable submit if the data is invalid', async () => {
+        const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
+        const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
+        const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
+        userEvent.type(nameInput, 'test name');
+        userEvent.clear(ipInput);
+        userEvent.type(ipInput, 'not an ip');
+        expect(confirmButton).toHaveAttribute('disabled');
+      });
+
       it('should submit the entry data when submit is pressed with valid data', async () => {
         const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
         expect(confirmButton).not.toHaveAttribute('disabled');
-        const waiter = waitForAction('hostIsolationExceptionsSubmitEdit');
         userEvent.click(confirmButton);
-        expect(await waiter).toBeTruthy();
+        await waitFor(() => {
+          expect(updateOneHostIsolationExceptionItemMock).toHaveBeenCalledWith(
+            mockedContext.coreStart.http,
+            {
+              comments: [],
+              description: 'initial description',
+              entries: [
+                { field: 'destination.ip', operator: 'included', type: 'match', value: '10.0.0.5' },
+              ],
+              id: fakeId,
+              item_id: fakeId,
+              list_id: 'endpoint_host_isolation_exceptions',
+              name: 'name edit me',
+              namespace_type: 'agnostic',
+              os_types: ['windows', 'linux', 'macos'],
+              tags: ['policy:all'],
+              type: 'simple',
+            }
+          );
+        });
+        expect(confirmButton).toHaveAttribute('disabled');
+      });
+
+      it('should call onCancel when cancel is pressed', async () => {
+        const cancelButton = renderResult.getByTestId('add-exception-cancel-button');
+        userEvent.click(cancelButton);
+        expect(onCancel).toHaveBeenCalled();
       });
     });
   });

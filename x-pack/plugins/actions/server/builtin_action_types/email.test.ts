@@ -12,7 +12,7 @@ jest.mock('./lib/send_email', () => ({
 import { Logger } from '../../../../../src/core/server';
 
 import { actionsConfigMock } from '../actions_config.mock';
-import { validateConfig, validateSecrets, validateParams } from '../lib';
+import { validateConfig, validateConnector, validateParams, validateSecrets } from '../lib';
 import { createActionTypeRegistry } from './index.test';
 import { sendEmail } from './lib/send_email';
 import { actionsMock } from '../mocks';
@@ -303,6 +303,75 @@ describe('secrets validation', () => {
   });
 });
 
+describe('connector validation: secrets with config', () => {
+  test('connector validation succeeds when username/password was populated for hasAuth true', () => {
+    const secrets: Record<string, unknown> = {
+      user: 'bob',
+      password: 'supersecret',
+    };
+    const config: Record<string, unknown> = {
+      hasAuth: true,
+    };
+    expect(validateConnector(actionType, { config, secrets })).toBeNull();
+  });
+
+  test('connector validation succeeds when username/password not filled for hasAuth false', () => {
+    const secrets: Record<string, unknown> = {
+      user: null,
+      password: null,
+      clientSecret: null,
+    };
+    const config: Record<string, unknown> = {
+      hasAuth: false,
+    };
+    expect(validateConnector(actionType, { config, secrets })).toBeNull();
+    expect(validateConnector(actionType, { config, secrets: {} })).toBeNull();
+    expect(validateConnector(actionType, { config, secrets: { user: null } })).toBeNull();
+    expect(validateConnector(actionType, { config, secrets: { password: null } })).toBeNull();
+  });
+
+  test('connector validation fails when username/password was populated for hasAuth true', () => {
+    const secrets: Record<string, unknown> = {
+      password: null,
+      user: null,
+    };
+    const config: Record<string, unknown> = {
+      hasAuth: true,
+    };
+    // invalid user
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [user] is required"`
+    );
+  });
+
+  test('connector validation succeeds when service is exchange_server and clientSecret is populated', () => {
+    const secrets: Record<string, unknown> = {
+      clientSecret: '12345678',
+    };
+    const config: Record<string, unknown> = {
+      service: 'exchange_server',
+    };
+    expect(validateConnector(actionType, { config, secrets })).toBeNull();
+  });
+
+  test('connector validation fails when service is exchange_server and clientSecret is not populated', () => {
+    const secrets: Record<string, unknown> = {
+      clientSecret: null,
+    };
+    const config: Record<string, unknown> = {
+      service: 'exchange_server',
+    };
+    // invalid user
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [clientSecret] is required"`
+    );
+  });
+});
+
 describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
     const params: Record<string, unknown> = {
@@ -400,6 +469,7 @@ describe('execute()', () => {
           "isHostnameAllowed": [MockFunction],
           "isUriAllowed": [MockFunction],
         },
+        "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
 
@@ -462,6 +532,7 @@ describe('execute()', () => {
           "isHostnameAllowed": [MockFunction],
           "isUriAllowed": [MockFunction],
         },
+        "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
 
@@ -524,6 +595,7 @@ describe('execute()', () => {
           "isHostnameAllowed": [MockFunction],
           "isUriAllowed": [MockFunction],
         },
+        "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
 

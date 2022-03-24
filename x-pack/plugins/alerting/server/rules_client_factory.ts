@@ -17,8 +17,9 @@ import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import { IEventLogClientService } from '../../../plugins/event_log/server';
+import { IEventLogClientService, IEventLogger } from '../../../plugins/event_log/server';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { AlertingRulesConfig } from './config';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -32,6 +33,8 @@ export interface RulesClientFactoryOpts {
   eventLog: IEventLogClientService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   authorization: AlertingAuthorizationClientFactory;
+  eventLogger?: IEventLogger;
+  minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
 }
 
 export class RulesClientFactory {
@@ -48,6 +51,8 @@ export class RulesClientFactory {
   private eventLog!: IEventLogClientService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private authorization!: AlertingAuthorizationClientFactory;
+  private eventLogger?: IEventLogger;
+  private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -66,6 +71,8 @@ export class RulesClientFactory {
     this.eventLog = options.eventLog;
     this.kibanaVersion = options.kibanaVersion;
     this.authorization = options.authorization;
+    this.eventLogger = options.eventLogger;
+    this.minimumScheduleInterval = options.minimumScheduleInterval;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -82,6 +89,7 @@ export class RulesClientFactory {
       logger: this.logger,
       taskManager: this.taskManager,
       ruleTypeRegistry: this.ruleTypeRegistry,
+      minimumScheduleInterval: this.minimumScheduleInterval,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
         excludedWrappers: ['security'],
         includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
@@ -123,6 +131,7 @@ export class RulesClientFactory {
       async getEventLogClient() {
         return eventLog.getClient(request);
       },
+      eventLogger: this.eventLogger,
     });
   }
 }

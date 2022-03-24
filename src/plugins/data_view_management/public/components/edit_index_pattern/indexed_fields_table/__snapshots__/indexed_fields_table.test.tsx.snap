@@ -1,0 +1,390 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IndexedFieldsTable IndexedFieldsTable with rollup index pattern should render normally 1`] = `
+<div>
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getFormatterForFieldNoDefault": [Function],
+        "getNonScriptedFields": [Function],
+        "type": "rollup",
+        "typeMeta": Object {
+          "aggs": Object {
+            "avg": Object {
+              "amount": Object {
+                "agg": "avg",
+              },
+            },
+            "date_histogram": Object {
+              "timestamp": Object {
+                "agg": "date_histogram",
+                "delay": "30s",
+                "fixed_interval": "30s",
+                "time_zone": "UTC",
+              },
+            },
+            "histogram": Object {
+              "amount": Object {
+                "agg": "histogram",
+                "interval": 5,
+              },
+            },
+            "max": Object {
+              "amount": Object {
+                "agg": "max",
+              },
+            },
+            "min": Object {
+              "amount": Object {
+                "agg": "min",
+              },
+            },
+            "sum": Object {
+              "amount": Object {
+                "agg": "sum",
+              },
+            },
+            "terms": Object {
+              "Elastic": Object {
+                "agg": "terms",
+              },
+            },
+            "value_count": Object {
+              "amount": Object {
+                "agg": "value_count",
+              },
+            },
+          },
+          "params": Object {
+            "rollup-index": "rollup",
+          },
+        },
+      }
+    }
+    items={
+      Array [
+        Object {
+          "displayName": "Elastic",
+          "esTypes": Array [
+            "keyword",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": false,
+          "info": Array [
+            "Rollup aggregations:",
+            "terms",
+          ],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": undefined,
+          "name": "Elastic",
+          "searchable": true,
+          "type": "keyword",
+        },
+        Object {
+          "displayName": "timestamp",
+          "esTypes": Array [
+            "date",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": false,
+          "info": Array [
+            "Rollup aggregations:",
+            "date_histogram (interval: 30s, delay: 30s, UTC)",
+          ],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": undefined,
+          "name": "timestamp",
+          "type": "date",
+        },
+        Object {
+          "displayName": "conflictingField",
+          "esTypes": Array [
+            "keyword",
+            "long",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": false,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": undefined,
+          "name": "conflictingField",
+          "type": "keyword, long",
+        },
+        Object {
+          "displayName": "amount",
+          "esTypes": Array [
+            "long",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": false,
+          "info": Array [
+            "Rollup aggregations:",
+            "histogram (interval: 5)",
+            "avg",
+            "max",
+            "min",
+            "sum",
+            "value_count",
+          ],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": undefined,
+          "name": "amount",
+          "type": "long",
+        },
+        Object {
+          "displayName": "runtime",
+          "esTypes": Array [
+            "long",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": true,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": "number",
+          "name": "runtime",
+          "runtimeField": Object {
+            "script": Object {
+              "source": "emit('Hello');",
+            },
+            "type": "long",
+          },
+          "type": "long",
+        },
+      ]
+    }
+    openModal={[Function]}
+    theme={Object {}}
+  />
+</div>
+`;
+
+exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
+<div>
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getFormatterForFieldNoDefault": [Function],
+        "getNonScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "displayName": "Elastic",
+          "esTypes": Array [
+            "keyword",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": false,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": undefined,
+          "name": "Elastic",
+          "searchable": true,
+          "type": "keyword",
+        },
+      ]
+    }
+    openModal={[Function]}
+    theme={Object {}}
+  />
+</div>
+`;
+
+exports[`IndexedFieldsTable should filter based on the schema filter 1`] = `
+<div>
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getFormatterForFieldNoDefault": [Function],
+        "getNonScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "displayName": "runtime",
+          "esTypes": Array [
+            "long",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": true,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": "number",
+          "name": "runtime",
+          "runtimeField": Object {
+            "script": Object {
+              "source": "emit('Hello');",
+            },
+            "type": "long",
+          },
+          "type": "long",
+        },
+      ]
+    }
+    openModal={[Function]}
+    theme={Object {}}
+  />
+</div>
+`;
+
+exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
+<div>
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getFormatterForFieldNoDefault": [Function],
+        "getNonScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "displayName": "timestamp",
+          "esTypes": Array [
+            "date",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": false,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": undefined,
+          "name": "timestamp",
+          "type": "date",
+        },
+      ]
+    }
+    openModal={[Function]}
+    theme={Object {}}
+  />
+</div>
+`;
+
+exports[`IndexedFieldsTable should render normally 1`] = `
+<div>
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getFormatterForFieldNoDefault": [Function],
+        "getNonScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "displayName": "Elastic",
+          "esTypes": Array [
+            "keyword",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": false,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": undefined,
+          "name": "Elastic",
+          "searchable": true,
+          "type": "keyword",
+        },
+        Object {
+          "displayName": "timestamp",
+          "esTypes": Array [
+            "date",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": false,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": undefined,
+          "name": "timestamp",
+          "type": "date",
+        },
+        Object {
+          "displayName": "conflictingField",
+          "esTypes": Array [
+            "keyword",
+            "long",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": false,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": undefined,
+          "name": "conflictingField",
+          "type": "keyword, long",
+        },
+        Object {
+          "displayName": "amount",
+          "esTypes": Array [
+            "long",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": false,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": undefined,
+          "name": "amount",
+          "type": "long",
+        },
+        Object {
+          "displayName": "runtime",
+          "esTypes": Array [
+            "long",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": true,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": "number",
+          "name": "runtime",
+          "runtimeField": Object {
+            "script": Object {
+              "source": "emit('Hello');",
+            },
+            "type": "long",
+          },
+          "type": "long",
+        },
+      ]
+    }
+    openModal={[Function]}
+    theme={Object {}}
+  />
+</div>
+`;

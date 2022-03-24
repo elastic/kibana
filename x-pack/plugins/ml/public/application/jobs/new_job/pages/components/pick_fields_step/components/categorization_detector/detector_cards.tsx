@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiCard } from '@elastic/eui';
 

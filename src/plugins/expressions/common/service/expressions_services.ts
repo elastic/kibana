@@ -19,7 +19,11 @@ import { ExecutionContract, ExecutionResult } from '../execution';
 import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableStateService, VersionedState } from '../../../kibana_utils/common';
+import {
+  MigrateFunctionsObject,
+  PersistableStateService,
+  VersionedState,
+} from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common/adapters';
 import {
   clog,
@@ -36,6 +40,7 @@ import {
   math,
   mathColumn,
 } from '../expression_functions';
+import { ExpressionsServiceFork } from './expressions_fork';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -49,14 +54,14 @@ export interface ExpressionsServiceSetup {
    * service - do not mutate that object.
    * @deprecated Use start contract instead.
    */
-  getFunction(name: string): ReturnType<Executor['getFunction']>;
+  getFunction(name: string, namespace?: string): ReturnType<Executor['getFunction']>;
 
   /**
    * Returns POJO map of all registered expression functions, where keys are
    * names of the functions and values are `ExpressionFunction` instances.
    * @deprecated Use start contract instead.
    */
-  getFunctions(): ReturnType<Executor['getFunctions']>;
+  getFunctions(namespace?: string): ReturnType<Executor['getFunctions']>;
 
   /**
    * Returns POJO map of all registered expression types, where keys are
@@ -75,7 +80,7 @@ export interface ExpressionsServiceSetup {
    * service.
    * @param name A fork name that can be used to get fork instance later.
    */
-  fork(name?: string): ExpressionsService;
+  fork(namespace: string): ExpressionsServiceFork;
 
   /**
    * Register an expression function, which will be possible to execute as
@@ -120,6 +125,8 @@ export interface ExpressionsServiceSetup {
   registerRenderer(
     definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
   ): void;
+
+  getAllMigrations(): MigrateFunctionsObject;
 }
 
 export interface ExpressionExecutionParams {
@@ -149,7 +156,7 @@ export interface ExpressionExecutionParams {
 
   executionContext?: KibanaExecutionContext;
 
-  extraContext?: object;
+  namespace?: string;
 }
 
 /**
@@ -163,13 +170,13 @@ export interface ExpressionsServiceStart {
    * instance is an internal representation of the function in Expressions
    * service - do not mutate that object.
    */
-  getFunction(name: string): ReturnType<Executor['getFunction']>;
+  getFunction(name: string, namespace?: string): ReturnType<Executor['getFunction']>;
 
   /**
    * Returns POJO map of all registered expression functions, where keys are
    * names of the functions and values are `ExpressionFunction` instances.
    */
-  getFunctions(): ReturnType<Executor['getFunctions']>;
+  getFunctions(namespace?: string): ReturnType<Executor['getFunctions']>;
 
   /**
    * Get a registered `ExpressionRenderer` by its name, which was registered
@@ -240,6 +247,23 @@ export interface ExpressionsServiceStart {
     input: Input,
     params?: ExpressionExecutionParams
   ): ExecutionContract<Input, Output>;
+
+  extract(state: ExpressionAstExpression): {
+    state: ExpressionAstExpression;
+    references: SavedObjectReference[];
+  };
+
+  inject(
+    state: ExpressionAstExpression,
+    references: SavedObjectReference[]
+  ): ExpressionAstExpression;
+
+  telemetry(
+    state: ExpressionAstExpression,
+    telemetryData: Record<string, unknown>
+  ): Record<string, unknown>;
+
+  getAllMigrations(): MigrateFunctionsObject;
 }
 
 export interface ExpressionServiceParams {
@@ -276,9 +300,6 @@ export class ExpressionsService
    * @note Workaround since the expressions service is frozen.
    */
   private static started = new WeakSet<ExpressionsService>();
-  private children = new Map<string, ExpressionsService>();
-  private parent?: ExpressionsService;
-
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
@@ -291,7 +312,7 @@ export class ExpressionsService
   }
 
   private isStarted(): boolean {
-    return !!(ExpressionsService.started.has(this) || this.parent?.isStarted());
+    return ExpressionsService.started.has(this);
   }
 
   private assertSetup() {
@@ -306,11 +327,11 @@ export class ExpressionsService
     }
   }
 
-  public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
-    this.executor.getFunction(name);
+  public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name, namespace) =>
+    this.executor.getFunction(name, namespace);
 
-  public readonly getFunctions: ExpressionsServiceStart['getFunctions'] = () =>
-    this.executor.getFunctions();
+  public readonly getFunctions: ExpressionsServiceStart['getFunctions'] = (namespace) =>
+    this.executor.getFunctions(namespace);
 
   public readonly getRenderer: ExpressionsServiceStart['getRenderer'] = (name) => {
     this.assertStart();
@@ -344,16 +365,7 @@ export class ExpressionsService
 
   public readonly fork: ExpressionsServiceSetup['fork'] = (name) => {
     this.assertSetup();
-
-    const executor = this.executor.fork();
-    const renderers = this.renderers;
-    const fork = new (this.constructor as typeof ExpressionsService)({ executor, renderers });
-    fork.parent = this;
-
-    if (name) {
-      this.children.set(name, fork);
-    }
-
+    const fork = new ExpressionsServiceFork(name, this);
     return fork;
   };
 

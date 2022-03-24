@@ -7,12 +7,16 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { CoreTheme } from 'kibana/public';
+import { Observable } from 'rxjs';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { defaultTheme$ } from '../../../../../src/plugins/presentation_util/common/lib';
+import { StartInitializer } from '../plugin';
 import { Datatable as DatatableComponent } from '../../public/components/datatable';
 import { RendererStrings } from '../../i18n';
 import { RendererFactory, Style, Datatable } from '../../types';
 
 const { dropdownFilter: strings } = RendererStrings;
-
 export interface TableArguments {
   font?: Style;
   paginate: boolean;
@@ -21,26 +25,32 @@ export interface TableArguments {
   datatable: Datatable;
 }
 
-export const table: RendererFactory<TableArguments> = () => ({
-  name: 'table',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render(domNode, config, handlers) {
-    const { datatable, paginate, perPage, font = { spec: {} }, showHeader } = config;
-    ReactDOM.render(
-      <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
-        <DatatableComponent
-          datatable={datatable}
-          perPage={perPage}
-          paginate={paginate}
-          showHeader={showHeader}
-        />
-      </div>,
-      domNode,
-      () => handlers.done()
-    );
+export const getTableRenderer =
+  (theme$: Observable<CoreTheme> = defaultTheme$): RendererFactory<TableArguments> =>
+  () => ({
+    name: 'table',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render(domNode, config, handlers) {
+      const { datatable, paginate, perPage, font = { spec: {} }, showHeader } = config;
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={theme$}>
+          <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
+            <DatatableComponent
+              datatable={datatable}
+              perPage={perPage}
+              paginate={paginate}
+              showHeader={showHeader}
+            />
+          </div>
+        </KibanaThemeProvider>,
+        domNode,
+        () => handlers.done()
+      );
+      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    },
+  });
 
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
-  },
-});
+export const tableFactory: StartInitializer<RendererFactory<TableArguments>> = (core, plugins) =>
+  getTableRenderer(core.theme.theme$);

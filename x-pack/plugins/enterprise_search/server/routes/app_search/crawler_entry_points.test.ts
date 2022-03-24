@@ -28,7 +28,7 @@ describe('crawler entry point routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points',
+        path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/entry_points',
         params: {
           respond_with: 'index',
         },
@@ -69,7 +69,7 @@ describe('crawler entry point routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
+        path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
         params: {
           respond_with: 'index',
         },
@@ -110,7 +110,7 @@ describe('crawler entry point routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
+        path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
         params: {
           respond_with: 'index',
         },

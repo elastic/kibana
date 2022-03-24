@@ -103,63 +103,78 @@ describe('isUnsupportedChartData()', () => {
 
 describe('getLegendText()', () => {
   it('should return the chart legend text for unsupported chart types', () => {
-    expect(getLegendText(validUnsupportedChartData)).toBe('Chart not supported.');
+    expect(getLegendText(validUnsupportedChartData, 20)).toBe('Chart not supported.');
   });
   it('should return the chart legend text for empty datasets', () => {
-    expect(getLegendText(validNumericChartData)).toBe('0 documents contain field.');
+    expect(getLegendText(validNumericChartData, 20)).toBe('');
   });
   it('should return the chart legend text for boolean chart types', () => {
     const { getByText } = render(
       <>
-        {getLegendText({
-          cardinality: 2,
-          data: [
-            { key: 'true', key_as_string: 'true', doc_count: 10 },
-            { key: 'false', key_as_string: 'false', doc_count: 20 },
-          ],
-          id: 'the-id',
-          type: 'boolean',
-        })}
+        {getLegendText(
+          {
+            cardinality: 2,
+            data: [
+              { key: 'true', key_as_string: 'true', doc_count: 10 },
+              { key: 'false', key_as_string: 'false', doc_count: 20 },
+            ],
+            id: 'the-id',
+            type: 'boolean',
+          },
+          20
+        )}
       </>
     );
     expect(getByText('t')).toBeInTheDocument();
     expect(getByText('f')).toBeInTheDocument();
   });
   it('should return the chart legend text for ordinal chart data with less than max categories', () => {
-    expect(getLegendText({ ...validOrdinalChartData, data: [{ key: 'cat', doc_count: 10 }] })).toBe(
-      '10 categories'
-    );
+    expect(
+      getLegendText({ ...validOrdinalChartData, data: [{ key: 'cat', doc_count: 10 }] }, 20)
+    ).toBe('10 categories');
   });
   it('should return the chart legend text for ordinal chart data with more than max categories', () => {
     expect(
-      getLegendText({
-        ...validOrdinalChartData,
-        cardinality: 30,
-        data: [{ key: 'cat', doc_count: 10 }],
-      })
+      getLegendText(
+        {
+          ...validOrdinalChartData,
+          cardinality: 30,
+          data: [{ key: 'cat', doc_count: 10 }],
+        },
+        20
+      )
     ).toBe('top 20 of 30 categories');
   });
   it('should return the chart legend text for numeric datasets', () => {
     expect(
-      getLegendText({
-        ...validNumericChartData,
-        data: [{ key: 1, doc_count: 10 }],
-        stats: [1, 100],
-      })
+      getLegendText(
+        {
+          ...validNumericChartData,
+          data: [{ key: 1, doc_count: 10 }],
+          stats: [1, 100],
+        },
+        20
+      )
     ).toBe('1 - 100');
     expect(
-      getLegendText({
-        ...validNumericChartData,
-        data: [{ key: 1, doc_count: 10 }],
-        stats: [100, 100],
-      })
+      getLegendText(
+        {
+          ...validNumericChartData,
+          data: [{ key: 1, doc_count: 10 }],
+          stats: [100, 100],
+        },
+        20
+      )
     ).toBe('100');
     expect(
-      getLegendText({
-        ...validNumericChartData,
-        data: [{ key: 1, doc_count: 10 }],
-        stats: [1.2345, 6.3456],
-      })
+      getLegendText(
+        {
+          ...validNumericChartData,
+          data: [{ key: 1, doc_count: 10 }],
+          stats: [1.2345, 6.3456],
+        },
+        20
+      )
     ).toBe('1.23 - 6.35');
   });
 });
@@ -167,11 +182,11 @@ describe('getLegendText()', () => {
 describe('useColumnChart()', () => {
   it('should return the column chart hook data', () => {
     const { result } = renderHook(() =>
-      useColumnChart(validNumericChartData, { id: 'the-id', schema: 'numeric' })
+      useColumnChart(validNumericChartData, { id: 'the-id', schema: 'numeric' }, 20)
     );
 
     expect(result.current.data).toStrictEqual([]);
-    expect(result.current.legendText).toBe('0 documents contain field.');
+    expect(result.current.legendText).toBe('');
     expect(result.current.xScaleType).toBe('linear');
   });
 });

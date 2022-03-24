@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { lazyLoadModules } from '../../../lazy_load_bundle';
 import { GetTimeFieldRangeResponse } from '../../../../common/types/time_field_request';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
 
 export async function getTimeFieldRange({
   index,
@@ -18,7 +18,7 @@ export async function getTimeFieldRange({
 }: {
   index: string;
   timeFieldName?: string;
-  query?: Query;
+  query?: QueryDslQueryContainer;
   runtimeMappings?: estypes.MappingRuntimeFields;
 }) {
   const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings });

@@ -8,9 +8,10 @@
 import { Client } from '@elastic/elasticsearch';
 import { cloneDeep, merge } from 'lodash';
 import { AxiosResponse } from 'axios';
+import uuid from 'uuid';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Agent, CreatePackagePolicyResponse, GetPackagesResponse } from '../../../../fleet/common';
 import { EndpointDocGenerator } from '../generate_data';
 import { HostMetadata, HostPolicyResponse } from '../types';
@@ -21,17 +22,11 @@ import {
   indexFleetAgentForHost,
 } from './index_fleet_agent';
 import {
-  deleteIndexedFleetActions,
-  DeleteIndexedFleetActionsResponse,
-  IndexedFleetActionsForHostResponse,
-  indexFleetActionsForHost,
-} from './index_fleet_actions';
-import {
-  deleteIndexedEndpointActions,
-  DeleteIndexedEndpointActionsResponse,
-  IndexedEndpointActionsForHostResponse,
-  indexEndpointActionsForHost,
-} from './index_endpoint_actions';
+  deleteIndexedEndpointAndFleetActions,
+  DeleteIndexedEndpointFleetActionsResponse,
+  IndexedEndpointAndFleetActionsForHostResponse,
+  indexEndpointAndFleetActionsForHost,
+} from './index_endpoint_fleet_actions';
 
 import {
   deleteIndexedFleetEndpointPolicies,
@@ -44,8 +39,7 @@ import { EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
 
 export interface IndexedHostsResponse
   extends IndexedFleetAgentResponse,
-    IndexedFleetActionsForHostResponse,
-    IndexedEndpointActionsForHostResponse,
+    IndexedEndpointAndFleetActionsForHostResponse,
     IndexedFleetEndpointPolicyResponse {
   /**
    * The documents (1 or more) that were generated for the (single) endpoint host.
@@ -89,18 +83,16 @@ export async function indexEndpointHostDocs({
   metadataIndex,
   policyResponseIndex,
   enrollFleet,
-  addEndpointActions,
   generator,
 }: {
   numDocs: number;
   client: Client;
   kbnClient: KbnClient;
   realPolicies: Record<string, CreatePackagePolicyResponse['item']>;
-  epmEndpointPackage: GetPackagesResponse['response'][0];
+  epmEndpointPackage: GetPackagesResponse['items'][0];
   metadataIndex: string;
   policyResponseIndex: string;
   enrollFleet: boolean;
-  addEndpointActions: boolean;
   generator: EndpointDocGenerator;
 }): Promise<IndexedHostsResponse> {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
@@ -139,12 +131,13 @@ export async function indexEndpointHostDocs({
 
     if (enrollFleet) {
       const { id: appliedPolicyId, name: appliedPolicyName } = hostMetadata.Endpoint.policy.applied;
+      const uniqueAppliedPolicyName = `${appliedPolicyName}-${uuid.v4()}`;
 
       // If we don't yet have a "real" policy record, then create it now in ingest (package config)
       if (!realPolicies[appliedPolicyId]) {
         const createdPolicies = await indexFleetEndpointPolicy(
           kbnClient,
-          appliedPolicyName,
+          uniqueAppliedPolicyName,
           epmEndpointPackage.version
         );
 
@@ -192,14 +185,7 @@ export async function indexEndpointHostDocs({
       };
 
       // Create some fleet endpoint actions and .logs-endpoint actions for this Host
-      if (addEndpointActions) {
-        await Promise.all([
-          indexFleetActionsForHost(client, hostMetadata),
-          indexEndpointActionsForHost(client, hostMetadata),
-        ]);
-      } else {
-        await indexFleetActionsForHost(client, hostMetadata);
-      }
+      await indexEndpointAndFleetActionsForHost(client, hostMetadata, undefined);
     }
 
     hostMetadata = {
@@ -257,8 +243,7 @@ const fetchKibanaVersion = async (kbnClient: KbnClient) => {
 
 export interface DeleteIndexedEndpointHostsResponse
   extends DeleteIndexedFleetAgentsResponse,
-    DeleteIndexedFleetActionsResponse,
-    DeleteIndexedEndpointActionsResponse,
+    DeleteIndexedEndpointFleetActionsResponse,
     DeleteIndexedFleetEndpointPoliciesResponse {
   hosts: DeleteByQueryResponse | undefined;
   policyResponses: DeleteByQueryResponse | undefined;
@@ -290,15 +275,13 @@ export const deleteIndexedEndpointHosts = async (
       },
     };
 
-    response.hosts = (
-      await esClient
-        .deleteByQuery({
-          index: indexedData.metadataIndex,
-          wait_for_completion: true,
-          body,
-        })
-        .catch(wrapErrorAndRejectPromise)
-    ).body;
+    response.hosts = await esClient
+      .deleteByQuery({
+        index: indexedData.metadataIndex,
+        wait_for_completion: true,
+        body,
+      })
+      .catch(wrapErrorAndRejectPromise);
 
     // Delete from the transform destination index
     await esClient
@@ -311,34 +294,31 @@ export const deleteIndexedEndpointHosts = async (
   }
 
   if (indexedData.policyResponses.length) {
-    response.policyResponses = (
-      await esClient
-        .deleteByQuery({
-          index: indexedData.policyResponseIndex,
-          wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      'agent.id': indexedData.policyResponses.map(
-                        (policyResponse) => policyResponse.agent.id
-                      ),
-                    },
+    response.policyResponses = await esClient
+      .deleteByQuery({
+        index: indexedData.policyResponseIndex,
+        wait_for_completion: true,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'agent.id': indexedData.policyResponses.map(
+                      (policyResponse) => policyResponse.agent.id
+                    ),
                   },
-                ],
-              },
+                },
+              ],
             },
           },
-        })
-        .catch(wrapErrorAndRejectPromise)
-    ).body;
+        },
+      })
+      .catch(wrapErrorAndRejectPromise);
   }
 
   merge(response, await deleteIndexedFleetAgents(esClient, indexedData));
-  merge(response, await deleteIndexedFleetActions(esClient, indexedData));
-  merge(response, await deleteIndexedEndpointActions(esClient, indexedData));
+  merge(response, await deleteIndexedEndpointAndFleetActions(esClient, indexedData));
   merge(response, await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData));
 
   return response;

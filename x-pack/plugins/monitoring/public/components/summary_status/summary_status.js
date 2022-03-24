@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { StatusIcon } from '../status_icon';
 import { AlertsStatus } from '../../alerts/status';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import './summary_status.scss';
 
 const wrapChild = ({ label, value, ...props }, index) => (

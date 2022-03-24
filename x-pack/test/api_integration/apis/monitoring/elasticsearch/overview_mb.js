@@ -10,10 +10,12 @@ import expect from '@kbn/expect';
 import overviewFixtureGreenPlatinum from './fixtures/overview_green_platinum';
 import overviewFixtureRedPlatinum from './fixtures/overview_red_platinum';
 import overviewFixtureShardsRelocating from './fixtures/overview_shards_relocating';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('overview mb', () => {
     describe('with green platinum cluster', () => {
@@ -25,11 +27,11 @@ export default function ({ getService }) {
       };
 
       before('load clusters archive', () => {
-        return esArchiver.load(archive);
+        return setup(archive);
       });
 
-      after('unload clusters archive', () => {
-        return esArchiver.unload(archive);
+      after('unload clusters archive', async () => {
+        return tearDown();
       });
 
       it('should summarize elasticsearch with metrics', async () => {

@@ -495,5 +495,30 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('Map CSV to pipeline', () => {
+      it('should map to a pipeline', async () => {
+        const validCsv =
+          'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcip,,,,source.address,Copying srcip to source.address';
+        const { body } = await supertest
+          .post(`${API_BASE_PATH}/parse_csv`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            copyAction: 'copy',
+            file: validCsv,
+          })
+          .expect(200);
+
+        expect(body.processors).to.eql([
+          {
+            set: {
+              field: 'source.address',
+              value: '{{srcip}}',
+              if: 'ctx.srcip != null',
+            },
+          },
+        ]);
+      });
+    });
   });
 }

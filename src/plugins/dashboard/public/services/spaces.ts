@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
+export type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';

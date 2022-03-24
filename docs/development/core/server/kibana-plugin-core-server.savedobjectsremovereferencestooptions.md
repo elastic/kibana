@@ -10,10 +10,11 @@
 ```typescript
 export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions 
 ```
+<b>Extends:</b> SavedObjectsBaseOptions
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [refresh](./kibana-plugin-core-server.savedobjectsremovereferencestooptions.refresh.md) | <code>boolean</code> | The Elasticsearch Refresh setting for this operation. Defaults to <code>true</code> |
+|  [refresh?](./kibana-plugin-core-server.savedobjectsremovereferencestooptions.refresh.md) | boolean | <i>(Optional)</i> The Elasticsearch Refresh setting for this operation. Defaults to <code>true</code> |
 

@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110898
-/* eslint-disable @kbn/eslint/no_export_all */
-
-export * from './constants';
-export * from './types';
+/**
+ * @internal
+ */
+export type {
+  AnalysisResult,
+  FindFileStructureErrorResponse,
+  FindFileStructureResponse,
+  InputOverrides,
+  IngestPipeline,
+  Mappings,
+} from './types';

@@ -7,19 +7,24 @@
 
 import moment from 'moment-timezone';
 import React from 'react';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 
 import { useDateFormat, useTimeZone, useUiSetting$ } from '../../common/lib/kibana';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
 
-export const PreferenceFormattedDate = React.memo<{ dateFormat?: string; value: Date }>(
-  /* eslint-disable-next-line react-hooks/rules-of-hooks */
-  ({ value, dateFormat = useDateFormat() }) => (
-    <>{moment.tz(value, useTimeZone()).format(dateFormat)}</>
-  )
-);
+export const PreferenceFormattedDate = React.memo<{
+  dateFormat?: string;
+  value: Date;
+  stripMs?: boolean;
+}>(({ value, dateFormat, stripMs = false }) => {
+  const systemDateFormat = useDateFormat();
+  const toUseDateFormat = dateFormat ? dateFormat : systemDateFormat;
+  const strippedDateFormat =
+    toUseDateFormat && stripMs ? toUseDateFormat.replace(/\.?SSS/, '') : toUseDateFormat;
+  return <>{moment.tz(value, useTimeZone()).format(strippedDateFormat)}</>;
+});
 
 PreferenceFormattedDate.displayName = 'PreferenceFormattedDate';
 
@@ -93,7 +98,7 @@ PreferenceFormattedP1DTDate.displayName = 'PreferenceFormattedP1DTDate';
  * - the raw date value (e.g. 2019-03-22T00:47:46Z)
  */
 export const FormattedDate = React.memo<{
-  fieldName: string;
+  fieldName?: string;
   value?: string | number | null;
   className?: string;
 }>(({ value, fieldName, className = '' }): JSX.Element => {
@@ -121,9 +126,16 @@ FormattedDate.displayName = 'FormattedDate';
  * - a humanized relative date (e.g. 16 minutes ago)
  * - a long representation of the date that includes the day of the week (e.g. Thursday, March 21, 2019 6:47pm)
  * - the raw date value (e.g. 2019-03-22T00:47:46Z)
+ * @param value -  raw date
+ * @param  stripMs - strip milliseconds when formatting time (remove ".SSS" from the date format)
  */
-
-export const FormattedRelativePreferenceDate = ({ value }: { value?: string | number | null }) => {
+export const FormattedRelativePreferenceDate = ({
+  value,
+  stripMs = false,
+}: {
+  value?: string | number | null;
+  stripMs?: boolean;
+}) => {
   if (value == null) {
     return getOrEmptyTagFromValue(value);
   }
@@ -135,13 +147,14 @@ export const FormattedRelativePreferenceDate = ({ value }: { value?: string | nu
   return (
     <LocalizedDateTooltip date={date}>
       {moment(date).add(1, 'hours').isBefore(new Date()) ? (
-        <PreferenceFormattedDate data-test-subj="preference-time" value={date} />
+        <PreferenceFormattedDate data-test-subj="preference-time" value={date} stripMs={stripMs} />
       ) : (
         <FormattedRelative data-test-subj="relative-time" value={date} />
       )}
     </LocalizedDateTooltip>
   );
 };
+FormattedRelativePreferenceDate.displayName = 'FormattedRelativePreferenceDate';
 
 /**
  * Renders a preceding label according to under/over one hour
@@ -169,3 +182,4 @@ export const FormattedRelativePreferenceLabel = ({
     <>{relativeLabel}</>
   );
 };
+FormattedRelativePreferenceLabel.displayName = 'FormattedRelativePreferenceLabel';

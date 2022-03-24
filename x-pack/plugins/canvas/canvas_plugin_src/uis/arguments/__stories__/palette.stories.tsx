@@ -29,6 +29,7 @@ storiesOf('arguments/Palette', module).add('default', () => (
       }}
       onValueChange={action('onValueChange')}
       renderError={action('renderError')}
+      typeInstance={{}}
     />
   </div>
 ));

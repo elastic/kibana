@@ -1,7 +1,0 @@
-.kbnNoDataPageContents__item:only-child {
-  min-width: 400px;
-
-  @include euiBreakpoint('xs', 's') {
-    min-width: auto;
-  }
-}

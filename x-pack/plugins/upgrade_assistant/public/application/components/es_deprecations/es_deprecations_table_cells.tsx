@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { DEPRECATION_TYPE_MAP } from '../constants';
 import { DeprecationTableColumns } from '../types';
+import { DeprecationBadge } from '../shared';
 
 interface Props {
   resolutionTableCell?: React.ReactNode;
@@ -20,10 +21,16 @@ interface Props {
 }
 
 const i18nTexts = {
-  criticalBadgeLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.criticalBadgeLabel',
+  manualCellLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.manualCellLabel',
     {
-      defaultMessage: 'Critical',
+      defaultMessage: 'Manual',
+    }
+  ),
+  manualCellTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.reindex.manualCellTooltipLabel',
+    {
+      defaultMessage: 'This issue needs to be resolved manually.',
     }
   ),
 };
@@ -36,11 +43,7 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
 }) => {
   // "Status column"
   if (fieldName === 'isCritical') {
-    if (deprecation.isCritical === true) {
-      return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
-    }
-
-    return <>{''}</>;
+    return <DeprecationBadge isCritical={deprecation.isCritical} />;
   }
 
   // "Issue" column
@@ -66,7 +69,13 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
       return <>{resolutionTableCell}</>;
     }
 
-    return <>{''}</>;
+    return (
+      <EuiToolTip position="top" content={i18nTexts.manualCellTooltipLabel}>
+        <EuiText size="s" color="subdued">
+          {i18nTexts.manualCellLabel}
+        </EuiText>
+      </EuiToolTip>
+    );
   }
 
   // Default behavior: render value or empty string if undefined

@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { ExitFullScreenButton, ExitFullScreenButtonProps } from './exit_full_screen_button';
+export type { ExitFullScreenButtonProps } from './exit_full_screen_button';
+export { ExitFullScreenButton } from './exit_full_screen_button';

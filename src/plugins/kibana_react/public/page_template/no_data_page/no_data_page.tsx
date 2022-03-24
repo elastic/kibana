@@ -6,34 +6,14 @@
  * Side Public License, v 1.
  */
 
-import './no_data_page.scss';
-
 import React, { ReactNode, useMemo, FunctionComponent, MouseEventHandler } from 'react';
-import {
-  EuiFlexItem,
-  EuiCardProps,
-  EuiFlexGrid,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiCardProps, EuiSpacer, EuiText, EuiLink, CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { KibanaPageTemplateProps } from '../page_template';
+import { FormattedMessage } from '@kbn/i18n-react';
+import classNames from 'classnames';
 
-import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
-import { KibanaPageTemplateSolutionNavAvatar } from '../solution_nav';
-
-export const NO_DATA_PAGE_MAX_WIDTH = 950;
-export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
-  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
-  template: 'centeredBody',
-  pageContentProps: {
-    hasShadow: false,
-    color: 'transparent',
-  },
-};
+import { ElasticAgentCard, NoDataCard } from './no_data_card';
+import { NoDataPageBody } from './no_data_page_body/no_data_page_body';
 
 export const NO_DATA_RECOMMENDED = i18n.translate(
   'kibana-react.noDataPage.noDataPage.recommended',
@@ -55,11 +35,15 @@ export type NoDataPageActions = Partial<EuiCardProps> & {
    * Remapping `onClick` to any element
    */
   onClick?: MouseEventHandler<HTMLElement>;
+  /**
+   * Category to auto-select within Fleet
+   */
+  category?: string;
 };
 
 export type NoDataPageActionsProps = Record<string, NoDataPageActions>;
 
-export interface NoDataPageProps {
+export interface NoDataPageProps extends CommonProps {
   /**
    * Single name for the current solution, used to auto-generate the title, logo, description, and button label
    */
@@ -90,6 +74,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   actions,
   docsLink,
   pageTitle,
+  ...rest
 }) => {
   // Convert obj data into an iterable array
   const entries = Object.entries(actions);
@@ -105,76 +90,35 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   // Convert the iterated [[key, value]] array format back into an object
   const sortedData = Object.fromEntries(sortedEntries);
   const actionsKeys = Object.keys(sortedData);
-  const renderActions = useMemo(() => {
+
+  const actionCards = useMemo(() => {
     return Object.values(sortedData).map((action, i) => {
-      if (actionsKeys[i] === 'elasticAgent') {
-        return (
-          <EuiFlexItem key={`empty-page-agent-action`} className="kbnNoDataPageContents__item">
-            <ElasticAgentCard solution={solution} {...action} />
-          </EuiFlexItem>
-        );
-      } else if (actionsKeys[i] === 'beats') {
-        return (
-          <EuiFlexItem key={`empty-page-beats-action`} className="kbnNoDataPageContents__item">
-            <ElasticBeatsCard solution={solution} {...action} />
-          </EuiFlexItem>
-        );
-      } else {
-        return (
-          <EuiFlexItem
-            key={`empty-page-${actionsKeys[i]}-action`}
-            className="kbnNoDataPageContents__item"
-          >
-            <NoDataCard {...action} />
-          </EuiFlexItem>
-        );
-      }
+      const isAgent = actionsKeys[i] === 'elasticAgent' || actionsKeys[i] === 'beats';
+      const key = isAgent ? 'empty-page-agent-action' : `empty-page-${actionsKeys[i]}-action`;
+      return isAgent ? (
+        <ElasticAgentCard key={key} solution={solution} {...action} />
+      ) : (
+        <NoDataCard key={key} {...action} />
+      );
     });
   }, [actions, sortedData, actionsKeys]);
 
+  const title =
+    pageTitle ||
+    i18n.translate('kibana-react.noDataPage.welcomeTitle', {
+      defaultMessage: 'Welcome to Elastic {solution}!',
+      values: { solution },
+    });
+
   return (
-    <div className="kbnNoDataPageContents">
-      <EuiText textAlign="center">
-        <KibanaPageTemplateSolutionNavAvatar
-          name={solution}
-          iconType={logo || `logo${solution}`}
-          size="xxl"
-        />
-        <EuiSpacer />
-        <h1>
-          {pageTitle || (
-            <FormattedMessage
-              id="kibana-react.noDataPage.welcomeTitle"
-              defaultMessage="Welcome to Elastic {solution}!"
-              values={{ solution }}
-            />
-          )}
-        </h1>
-        <EuiTextColor color="subdued">
-          <p>
-            <FormattedMessage
-              id="kibana-react.noDataPage.intro"
-              defaultMessage="Add your data to get started, or {link} about {solution}."
-              values={{
-                solution,
-                link: (
-                  <EuiLink href={docsLink}>
-                    <FormattedMessage
-                      id="kibana-react.noDataPage.intro.link"
-                      defaultMessage="learn more"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiTextColor>
-      </EuiText>
-      <EuiSpacer size="xxl" />
-      <EuiSpacer size="l" />
-      <EuiFlexGrid columns={2} style={{ justifyContent: 'space-around' }}>
-        {renderActions}
-      </EuiFlexGrid>
+    <div {...rest} className={classNames('kbnNoDataPageContents', rest.className)}>
+      <NoDataPageBody
+        pageTitle={title}
+        actionCards={actionCards}
+        logo={logo}
+        solution={solution}
+        docsLink={docsLink}
+      />
       {actionsKeys.length > 1 ? (
         <>
           <EuiSpacer size="xxl" />

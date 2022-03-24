@@ -7,9 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { ExistsFilter } from '@kbn/es-query';
+import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
 import FieldValueSuggestions from '../../../field_value_suggestions';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
 import { PersistableFilter } from '../../../../../../../lens/common';
 import { buildPhrasesFilter } from '../../configurations/utils';
@@ -19,13 +19,26 @@ import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_valu
 interface Props {
   seriesId: number;
   series: SeriesUrl;
-  field: string;
+  singleSelection?: boolean;
+  keepHistory?: boolean;
+  field: string | { field: string; nested: string };
   seriesConfig: SeriesConfig;
   onChange: (field: string, value?: string[]) => void;
+  filters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
 }
 
-export function ReportDefinitionField({ series, field, seriesConfig, onChange }: Props) {
-  const { indexPattern } = useAppIndexPatternContext(series.dataType);
+export function ReportDefinitionField({
+  singleSelection,
+  keepHistory,
+  series,
+  field: fieldProp,
+  seriesConfig,
+  onChange,
+  filters,
+}: Props) {
+  const { dataView } = useAppDataViewContext(series.dataType);
+
+  const field = typeof fieldProp === 'string' ? fieldProp : fieldProp.field;
 
   const { reportDefinitions: selectedReportDefinitions = {} } = series;
 
@@ -33,23 +46,29 @@ export function ReportDefinitionField({ series, field, seriesConfig, onChange }:
 
   const queryFilters = useMemo(() => {
     const filtersN: ESFilter[] = [];
-    (baseFilters ?? []).forEach((qFilter: PersistableFilter | ExistsFilter) => {
-      if (qFilter.query) {
-        filtersN.push(qFilter.query);
-      }
-      const existFilter = qFilter as ExistsFilter;
-      if (existFilter.query.exists) {
-        filtersN.push({ exists: existFilter.query.exists });
-      }
-    });
+    (baseFilters ?? [])
+      .concat(filters ?? [])
+      .forEach((qFilter: PersistableFilter | ExistsFilter) => {
+        if (qFilter.query) {
+          filtersN.push(qFilter.query);
+        }
+        const existFilter = qFilter as ExistsFilter;
+        if (existFilter.query.exists) {
+          filtersN.push({ exists: existFilter.query.exists });
+        }
+      });
 
     if (!isEmpty(selectedReportDefinitions)) {
-      definitionFields.forEach((fieldT) => {
-        if (indexPattern && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
+      definitionFields.forEach((fieldObj) => {
+        const fieldT = typeof fieldObj === 'string' ? fieldObj : fieldObj.field;
+
+        if (dataView && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
           const values = selectedReportDefinitions?.[fieldT];
           if (!values.includes(ALL_VALUES_SELECTED)) {
-            const valueFilter = buildPhrasesFilter(fieldT, values, indexPattern)[0];
-            filtersN.push(valueFilter.query);
+            const valueFilter = buildPhrasesFilter(fieldT, values, dataView)[0];
+            if (valueFilter.query) {
+              filtersN.push(valueFilter.query);
+            }
           }
         }
       });
@@ -59,15 +78,15 @@ export function ReportDefinitionField({ series, field, seriesConfig, onChange }:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedReportDefinitions), JSON.stringify(baseFilters)]);
 
-  if (!indexPattern) {
+  if (!dataView) {
     return null;
   }
 
   return (
     <FieldValueSuggestions
-      label={labels[field]}
+      label={labels[field] ?? field}
       sourceField={field}
-      indexPatternTitle={indexPattern.title}
+      dataViewTitle={dataView.title}
       selectedValue={selectedReportDefinitions?.[field]}
       onChange={(val?: string[]) => onChange(field, val)}
       filters={queryFilters}
@@ -79,6 +98,8 @@ export function ReportDefinitionField({ series, field, seriesConfig, onChange }:
       usePrependLabel={false}
       compressed={false}
       required={isEmpty(selectedReportDefinitions)}
+      singleSelection={singleSelection}
+      keepHistory={keepHistory}
     />
   );
 }

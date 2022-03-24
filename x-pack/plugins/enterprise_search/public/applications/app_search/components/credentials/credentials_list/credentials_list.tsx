@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { HiddenText } from '../../../../shared/hidden_text';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
-import { DOCS_PREFIX } from '../../../routes';
+import { API_KEYS_DOCS_URL } from '../../../routes';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
 import { CredentialsLogic } from '../credentials_logic';
 import { ApiToken } from '../types';
@@ -141,12 +141,7 @@ export const CredentialsList: React.FC = () => {
             defaultMessage: 'Allow applications to access Elastic App Search on your behalf.',
           })}
           actions={
-            <EuiButton
-              size="s"
-              target="_blank"
-              iconType="popout"
-              href={`${DOCS_PREFIX}/authentication.html#authentication-api-keys`}
-            >
+            <EuiButton size="s" target="_blank" iconType="popout" href={API_KEYS_DOCS_URL}>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.buttonLabel', {
                 defaultMessage: 'Learn about API keys',
               })}
@@ -157,7 +152,7 @@ export const CredentialsList: React.FC = () => {
       loading={!isCredentialsDataComplete}
       pagination={{
         ...convertMetaToPagination(meta),
-        hidePerPageOptions: true,
+        showPerPageOptions: false,
       }}
       onChange={handlePageChange(onPaginate)}
     />

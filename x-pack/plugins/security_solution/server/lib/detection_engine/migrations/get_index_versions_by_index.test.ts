@@ -16,8 +16,7 @@ describe('getIndexVersionsByIndex', () => {
   });
 
   it('returns keys for each specified index', async () => {
-    // @ts-expect-error mocking only what we need
-    esClient.indices.getMapping.mockResolvedValue({ body: {} });
+    esClient.indices.getMapping.mockResponse({});
 
     const result = await getIndexVersionsByIndex({
       esClient,
@@ -28,8 +27,7 @@ describe('getIndexVersionsByIndex', () => {
   });
 
   it('returns undefined values if no mappings are found', async () => {
-    // @ts-expect-error mocking only what we need
-    esClient.indices.getMapping.mockResolvedValue({ body: {} });
+    esClient.indices.getMapping.mockResponse({});
 
     const result = await getIndexVersionsByIndex({
       esClient,
@@ -43,11 +41,8 @@ describe('getIndexVersionsByIndex', () => {
   });
 
   it('properly transforms the response', async () => {
-    // @ts-expect-error mocking only what we need
-    esClient.indices.getMapping.mockResolvedValue({
-      body: {
-        index1: { mappings: { _meta: { version: 3 } } },
-      },
+    esClient.indices.getMapping.mockResponse({
+      index1: { mappings: { _meta: { version: 3 } } },
     });
 
     const result = await getIndexVersionsByIndex({

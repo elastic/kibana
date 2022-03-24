@@ -7,38 +7,56 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { asyncForEach } from '../helpers';
 
-async function asyncForEach<T>(array: T[], callback: (item: T, index: number) => void) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index);
-  }
-}
+const ACTIVE_ALERTS_CELL_COUNT = 78;
+const RECOVERED_ALERTS_CELL_COUNT = 150;
+const TOTAL_ALERTS_CELL_COUNT = 200;
 
-const ACTIVE_ALERTS_CELL_COUNT = 48;
-const RECOVERED_ALERTS_CELL_COUNT = 24;
-const TOTAL_ALERTS_CELL_COUNT = 72;
+const DISABLED_ALERTS_CHECKBOX = 6;
+const ENABLED_ALERTS_CHECKBOX = 4;
 
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
+export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const find = getService('find');
 
   describe('Observability alerts', function () {
     this.tags('includeFirefox');
 
-    const pageObjects = getPageObjects(['common']);
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
     const observability = getService('observability');
+    const security = getService('security');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await observability.alerts.common.navigateToTimeWithData();
+      const setup = async () => {
+        await observability.alerts.common.setKibanaTimeZoneToUTC();
+        await observability.alerts.common.navigateToTimeWithData();
+      };
+      await setup();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
+    describe('With no data', () => {
+      it('Shows the no data screen', async () => {
+        await observability.alerts.common.getNoDataPageOrFail();
+      });
+    });
+
     describe('Alerts table', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await observability.alerts.common.navigateToTimeWithData();
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
       it('Renders the table', async () => {
         await observability.alerts.common.getTableOrFail();
       });
@@ -92,7 +110,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             // We shouldn't expect any data for the last 15 minutes
             await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
             await observability.alerts.common.getNoDataStateOrFail();
-            await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
           });
         });
       });
@@ -122,7 +139,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               const titleText = await (
                 await observability.alerts.common.getAlertsFlyoutTitle()
               ).getVisibleText();
-              expect(titleText).to.contain('Log threshold');
+              expect(titleText).to.contain('APM Failed Transaction Rate (one)');
             });
           });
 
@@ -142,11 +159,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             ];
             const expectedDescriptions = [
               'Active',
-              'Sep 2, 2021 @ 12:54:09.674',
-              '15 minutes',
-              '100.25',
-              '1957',
-              'Log threshold',
+              'Oct 19, 2021 @ 15:00:41.555',
+              '20 minutes',
+              '5',
+              '30.727896995708154',
+              'Failed transaction rate threshold',
             ];
 
             await asyncForEach(flyoutTitles, async (title, index) => {
@@ -161,10 +178,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('Displays a View in App button', async () => {
             await observability.alerts.common.getAlertsFlyoutViewInAppButtonOrFail();
           });
+
+          it('Displays a View rule details link', async () => {
+            await observability.alerts.common.getAlertsFlyoutViewRuleDetailsLinkOrFail();
+          });
         });
       });
 
-      describe('Cell actions', () => {
+      describe.skip('Cell actions', () => {
         beforeEach(async () => {
           await retry.try(async () => {
             const cells = await observability.alerts.common.getTableCells();
@@ -172,22 +193,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await alertStatusCell.moveMouseTo();
             await retry.waitFor(
               'cell actions visible',
-              async () => await observability.alerts.common.copyToClipboardButtonExists()
+              async () => await observability.alerts.common.filterForValueButtonExists()
             );
           });
         });
 
         afterEach(async () => {
           await observability.alerts.common.clearQueryBar();
+          // Reset the query bar by hiding the dropdown
+          await observability.alerts.common.submitQuery('');
         });
 
-        it('Copy button works', async () => {
-          // NOTE: We don't have access to the clipboard in a headless environment,
-          // so we'll just check the button is clickable in the functional tests.
-          await (await observability.alerts.common.getCopyToClipboardButton()).click();
-        });
-
-        it('Filter for value works', async () => {
+        it.skip('Filter for value works', async () => {
           await (await observability.alerts.common.getFilterForValueButton()).click();
           const queryBarValue = await (
             await observability.alerts.common.getQueryBar()
@@ -197,6 +214,75 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await retry.try(async () => {
             const cells = await observability.alerts.common.getTableCells();
             expect(cells.length).to.be(ACTIVE_ALERTS_CELL_COUNT);
+          });
+        });
+      });
+
+      describe('Actions Button', () => {
+        it('Opens rule details page when click on "View Rule Details"', async () => {
+          const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
+          await actionsButton.click();
+          await observability.alerts.common.viewRuleDetailsButtonClick();
+          expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
+        });
+      });
+
+      /*
+       * ATTENTION FUTURE DEVELOPER
+       *
+       * These tests should only be valid for 7.17.x
+       * You can run this test if you go to this file:
+       * x-pack/plugins/observability/public/pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid.tsx
+       * and at line 397 and change showCheckboxes to true
+       *
+       */
+      describe.skip('Bulk Actions', () => {
+        before(async () => {
+          await security.testUser.setRoles(['global_alerts_logs_all_else_read']);
+          await observability.alerts.common.submitQuery('kibana.alert.status: "active"');
+        });
+        after(async () => {
+          await observability.alerts.common.submitQuery('');
+          await security.testUser.restoreDefaults();
+        });
+
+        it('Only logs alert should be enable for bulk actions', async () => {
+          const disabledCheckBoxes =
+            await observability.alerts.common.getAllDisabledCheckBoxInTable();
+          const enabledCheckBoxes =
+            await observability.alerts.common.getAllEnabledCheckBoxInTable();
+
+          expect(disabledCheckBoxes.length).to.eql(DISABLED_ALERTS_CHECKBOX);
+          expect(enabledCheckBoxes.length).to.eql(ENABLED_ALERTS_CHECKBOX);
+        });
+
+        it('validate formatting of the bulk actions button', async () => {
+          const selectAll = await testSubjects.find('select-all-events');
+          await selectAll.click();
+          const bulkActionsButton = await testSubjects.find('selectedShowBulkActionsButton');
+          expect(await bulkActionsButton.getVisibleText()).to.be('Selected 4 alerts');
+          await selectAll.click();
+        });
+
+        it('validate functionality of the bulk actions button', async () => {
+          const selectAll = await testSubjects.find('select-all-events');
+          await selectAll.click();
+
+          const bulkActionsButton = await testSubjects.find('selectedShowBulkActionsButton');
+          await bulkActionsButton.click();
+
+          const bulkActionsAcknowledgedAlertStatusButton = await testSubjects.find(
+            'acknowledged-alert-status'
+          );
+          await bulkActionsAcknowledgedAlertStatusButton.click();
+          await observability.alerts.common.submitQuery(
+            'kibana.alert.workflow_status : "acknowledged"'
+          );
+
+          await retry.try(async () => {
+            const enabledCheckBoxes =
+              await observability.alerts.common.getAllEnabledCheckBoxInTable();
+            expect(enabledCheckBoxes.length).to.eql(1);
           });
         });
       });

@@ -48,13 +48,6 @@ const dataIndexSchema = schema.object({
 
 export type DataIndexSchema = TypeOf<typeof dataIndexSchema>;
 
-const appLinkSchema = schema.object({
-  path: schema.string(),
-  label: schema.string(),
-  icon: schema.string(),
-});
-export type AppLinkSchema = TypeOf<typeof appLinkSchema>;
-
 export const sampleDataSchema = schema.object({
   id: schema.string({
     validate(value: string) {
@@ -71,7 +64,6 @@ export const sampleDataSchema = schema.object({
 
   // saved object id of main dashboard for sample data set
   overviewDashboard: schema.string(),
-  appLinks: schema.arrayOf(appLinkSchema, { defaultValue: [] }),
 
   // saved object id of default index-pattern for sample data set
   defaultIndex: schema.string(),

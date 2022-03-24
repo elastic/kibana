@@ -16,39 +16,41 @@ import { getActionType as getSwimlaneActionType } from './swimlane';
 import { getActionType as getServerLogActionType } from './server_log';
 import { getActionType as getSlackActionType } from './slack';
 import { getActionType as getWebhookActionType } from './webhook';
-import { getServiceNowITSMActionType, getServiceNowSIRActionType } from './servicenow';
+import { getActionType as getXmattersActionType } from './xmatters';
+import {
+  getServiceNowITSMActionType,
+  getServiceNowSIRActionType,
+  getServiceNowITOMActionType,
+} from './servicenow';
 import { getActionType as getJiraActionType } from './jira';
 import { getActionType as getResilientActionType } from './resilient';
 import { getActionType as getTeamsActionType } from './teams';
-export { ActionParamsType as EmailActionParams, ActionTypeId as EmailActionTypeId } from './email';
+export type { ActionParamsType as EmailActionParams } from './email';
+export { ActionTypeId as EmailActionTypeId } from './email';
+export type { ActionParamsType as IndexActionParams } from './es_index';
+export { ActionTypeId as IndexActionTypeId } from './es_index';
+export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
+export { ActionTypeId as PagerDutyActionTypeId } from './pagerduty';
+export type { ActionParamsType as ServerLogActionParams } from './server_log';
+export { ActionTypeId as ServerLogActionTypeId } from './server_log';
+export type { ActionParamsType as SlackActionParams } from './slack';
+export { ActionTypeId as SlackActionTypeId } from './slack';
+export type { ActionParamsType as WebhookActionParams } from './webhook';
+export { ActionTypeId as WebhookActionTypeId } from './webhook';
+export type { ActionParamsType as XmattersActionParams } from './xmatters';
+export { ActionTypeId as XmattersActionTypeId } from './xmatters';
+export type { ActionParamsType as ServiceNowActionParams } from './servicenow';
 export {
-  ActionParamsType as IndexActionParams,
-  ActionTypeId as IndexActionTypeId,
-} from './es_index';
-export {
-  ActionParamsType as PagerDutyActionParams,
-  ActionTypeId as PagerDutyActionTypeId,
-} from './pagerduty';
-export {
-  ActionParamsType as ServerLogActionParams,
-  ActionTypeId as ServerLogActionTypeId,
-} from './server_log';
-export { ActionParamsType as SlackActionParams, ActionTypeId as SlackActionTypeId } from './slack';
-export {
-  ActionParamsType as WebhookActionParams,
-  ActionTypeId as WebhookActionTypeId,
-} from './webhook';
-export {
-  ActionParamsType as ServiceNowActionParams,
   ServiceNowITSMActionTypeId,
   ServiceNowSIRActionTypeId,
+  ServiceNowITOMActionTypeId,
 } from './servicenow';
-export { ActionParamsType as JiraActionParams, ActionTypeId as JiraActionTypeId } from './jira';
-export {
-  ActionParamsType as ResilientActionParams,
-  ActionTypeId as ResilientActionTypeId,
-} from './resilient';
-export { ActionParamsType as TeamsActionParams, ActionTypeId as TeamsActionTypeId } from './teams';
+export type { ActionParamsType as JiraActionParams } from './jira';
+export { ActionTypeId as JiraActionTypeId } from './jira';
+export type { ActionParamsType as ResilientActionParams } from './resilient';
+export { ActionTypeId as ResilientActionTypeId } from './resilient';
+export type { ActionParamsType as TeamsActionParams } from './teams';
+export { ActionTypeId as TeamsActionTypeId } from './teams';
 
 export function registerBuiltInActionTypes({
   actionsConfigUtils: configurationUtilities,
@@ -70,8 +72,10 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getServerLogActionType({ logger }));
   actionTypeRegistry.register(getSlackActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getWebhookActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(getXmattersActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServiceNowITSMActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServiceNowSIRActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(getServiceNowITOMActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getJiraActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getResilientActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getTeamsActionType({ logger, configurationUtilities }));

@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
 import { fatalErrors, toasts } from './notification';
 
-function createToastConfig(error: IHttpFetchError, errorTitle: string) {
+interface CommonErrorBody extends ResponseErrorBody {
+  error: string;
+  attributes: { causes: unknown[] };
+}
+
+function createToastConfig(error: IHttpFetchError<CommonErrorBody>, errorTitle: string) {
   if (error && error.body) {
     // Error body shape is defined by the API.
     const { error: errorString, statusCode, message: errorMessage, attributes } = error.body;
@@ -23,7 +28,7 @@ function createToastConfig(error: IHttpFetchError, errorTitle: string) {
   }
 }
 
-export function showApiWarning(error: IHttpFetchError, errorTitle: string) {
+export function showApiWarning(error: IHttpFetchError<CommonErrorBody>, errorTitle: string) {
   const toastConfig = createToastConfig(error, errorTitle);
 
   if (toastConfig) {
@@ -35,7 +40,7 @@ export function showApiWarning(error: IHttpFetchError, errorTitle: string) {
   return fatalErrors.add(error, errorTitle);
 }
 
-export function showApiError(error: IHttpFetchError, errorTitle: string) {
+export function showApiError(error: IHttpFetchError<CommonErrorBody>, errorTitle: string) {
   const toastConfig = createToastConfig(error, errorTitle);
 
   if (toastConfig) {

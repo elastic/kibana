@@ -7,131 +7,130 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiIconTip, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { fittingFunctionDefinitions } from '../../../../common/expressions';
-import type { FittingFunction, ValueLabelConfig } from '../../../../common/expressions';
+import { EuiFormRow, EuiIconTip, EuiSuperSelect, EuiSwitch, EuiText } from '@elastic/eui';
+import { fittingFunctionDefinitions, endValueDefinitions } from '../../../../common/expressions';
+import type { FittingFunction, EndValue } from '../../../../common/expressions';
 
 export interface MissingValuesOptionProps {
-  valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
-  onValueLabelChange: (newMode: ValueLabelConfig) => void;
   onFittingFnChange: (newMode: FittingFunction) => void;
-  isValueLabelsEnabled?: boolean;
+  emphasizeFitting?: boolean;
+  onEmphasizeFittingChange: (emphasize: boolean) => void;
+  endValue?: EndValue;
+  onEndValueChange: (endValue: EndValue) => void;
   isFittingEnabled?: boolean;
 }
 
-const valueLabelsOptions: Array<{
-  id: string;
-  value: 'hide' | 'inside' | 'outside';
-  label: string;
-  'data-test-subj': string;
-}> = [
-  {
-    id: `value_labels_hide`,
-    value: 'hide',
-    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.auto', {
-      defaultMessage: 'Hide',
-    }),
-    'data-test-subj': 'lnsXY_valueLabels_hide',
-  },
-  {
-    id: `value_labels_inside`,
-    value: 'inside',
-    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.inside', {
-      defaultMessage: 'Show',
-    }),
-    'data-test-subj': 'lnsXY_valueLabels_inside',
-  },
-];
-
 export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
-  onValueLabelChange,
   onFittingFnChange,
-  valueLabels,
   fittingFunction,
-  isValueLabelsEnabled = true,
+  emphasizeFitting,
+  onEmphasizeFittingChange,
+  onEndValueChange,
+  endValue,
   isFittingEnabled = true,
 }) => {
-  const valueLabelsVisibilityMode = valueLabels || 'hide';
-
   return (
     <>
-      {isValueLabelsEnabled && (
-        <EuiFormRow
-          display="columnCompressed"
-          label={
-            <span>
-              {i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-                defaultMessage: 'Labels',
-              })}
-            </span>
-          }
-        >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-              defaultMessage: 'Labels',
-            })}
-            data-test-subj="lnsValueLabelsDisplay"
-            name="valueLabelsDisplay"
-            buttonSize="compressed"
-            options={valueLabelsOptions}
-            idSelected={
-              valueLabelsOptions.find(({ value }) => value === valueLabelsVisibilityMode)!.id
-            }
-            onChange={(modeId) => {
-              const newMode = valueLabelsOptions.find(({ id }) => id === modeId)!.value;
-              onValueLabelChange(newMode);
-            }}
-          />
-        </EuiFormRow>
-      )}
       {isFittingEnabled && (
-        <EuiFormRow
-          display="columnCompressed"
-          label={
+        <>
+          <EuiFormRow
+            display="columnCompressed"
+            label={
+              <>
+                {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
+                  defaultMessage: 'Missing values',
+                })}{' '}
+                <EuiIconTip
+                  color="subdued"
+                  content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
+                    defaultMessage: `By default, area and line charts hide the gaps in the data. To fill the gap, make a selection.`,
+                  })}
+                  iconProps={{
+                    className: 'eui-alignTop',
+                  }}
+                  position="top"
+                  size="s"
+                  type="questionInCircle"
+                />
+              </>
+            }
+          >
+            <EuiSuperSelect
+              data-test-subj="lnsMissingValuesSelect"
+              compressed
+              options={fittingFunctionDefinitions.map(({ id, title, description }) => {
+                return {
+                  value: id,
+                  dropdownDisplay: (
+                    <>
+                      <strong>{title}</strong>
+                      <EuiText size="xs" color="subdued">
+                        <p>{description}</p>
+                      </EuiText>
+                    </>
+                  ),
+                  inputDisplay: title,
+                };
+              })}
+              valueOfSelected={fittingFunction || 'None'}
+              onChange={(value) => onFittingFnChange(value)}
+              itemLayoutAlign="top"
+              hasDividers
+            />
+          </EuiFormRow>
+          {fittingFunction && fittingFunction !== 'None' && (
             <>
-              {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                defaultMessage: 'Missing values',
-              })}{' '}
-              <EuiIconTip
-                color="subdued"
-                content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
-                  defaultMessage: `By default, Lens hides the gaps in the data. To fill the gap, make a selection.`,
+              <EuiFormRow
+                display="columnCompressed"
+                label={i18n.translate('xpack.lens.xyChart.endValuesLabel', {
+                  defaultMessage: 'End values',
                 })}
-                iconProps={{
-                  className: 'eui-alignTop',
-                }}
-                position="top"
-                size="s"
-                type="questionInCircle"
-              />
+              >
+                <EuiSuperSelect
+                  data-test-subj="lnsEndValuesSelect"
+                  compressed
+                  options={endValueDefinitions.map(({ id, title, description }) => {
+                    return {
+                      value: id,
+                      dropdownDisplay: (
+                        <>
+                          <strong>{title}</strong>
+                          <EuiText size="xs" color="subdued">
+                            <p>{description}</p>
+                          </EuiText>
+                        </>
+                      ),
+                      inputDisplay: title,
+                    };
+                  })}
+                  valueOfSelected={endValue || 'None'}
+                  onChange={(value) => onEndValueChange(value)}
+                  itemLayoutAlign="top"
+                  hasDividers
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate('xpack.lens.xyChart.missingValuesStyle', {
+                  defaultMessage: 'Show as dotted line',
+                })}
+                display="columnCompressedSwitch"
+              >
+                <EuiSwitch
+                  showLabel={false}
+                  label={i18n.translate('xpack.lens.xyChart.missingValuesStyle', {
+                    defaultMessage: 'Show as dotted line',
+                  })}
+                  checked={!emphasizeFitting}
+                  onChange={() => {
+                    onEmphasizeFittingChange(!emphasizeFitting);
+                  }}
+                  compressed
+                />
+              </EuiFormRow>
             </>
-          }
-        >
-          <EuiSuperSelect
-            data-test-subj="lnsMissingValuesSelect"
-            compressed
-            options={fittingFunctionDefinitions.map(({ id, title, description }) => {
-              return {
-                value: id,
-                dropdownDisplay: (
-                  <>
-                    <strong>{title}</strong>
-                    <EuiText size="xs" color="subdued">
-                      <p>{description}</p>
-                    </EuiText>
-                  </>
-                ),
-                inputDisplay: title,
-              };
-            })}
-            valueOfSelected={fittingFunction || 'None'}
-            onChange={(value) => onFittingFnChange(value)}
-            itemLayoutAlign="top"
-            hasDividers
-          />
-        </EuiFormRow>
+          )}
+        </>
       )}
     </>
   );

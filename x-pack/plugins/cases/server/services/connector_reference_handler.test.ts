@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { noneConnectorId } from '../../common';
+import { NONE_CONNECTOR_ID } from '../../common/api';
 import { ConnectorReferenceHandler } from './connector_reference_handler';
 
 describe('ConnectorReferenceHandler', () => {
@@ -60,7 +60,7 @@ describe('ConnectorReferenceHandler', () => {
 
     it('removes a reference when the id field is the none connector', () => {
       const handler = new ConnectorReferenceHandler([
-        { id: noneConnectorId, name: 'a', type: '1' },
+        { id: NONE_CONNECTOR_ID, name: 'a', type: '1' },
       ]);
 
       expect(handler.build([{ id: 'hello', type: '1', name: 'a' }])).toMatchInlineSnapshot(

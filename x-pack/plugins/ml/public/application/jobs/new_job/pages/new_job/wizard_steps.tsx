@@ -8,7 +8,7 @@
 import React, { Fragment, FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { WIZARD_STEPS } from '../components/step_types';
@@ -40,14 +40,11 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
         defaultMessage: 'New job from saved search {title}',
         values: { title: mlContext.currentSavedSearch.attributes.title as string },
       });
-    } else if (mlContext.currentIndexPattern.id !== undefined) {
-      return i18n.translate(
-        'xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleIndexPattern',
-        {
-          defaultMessage: 'New job from index pattern {title}',
-          values: { title: mlContext.currentIndexPattern.title },
-        }
-      );
+    } else if (mlContext.currentDataView.id !== undefined) {
+      return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleDataView', {
+        defaultMessage: 'New job from data view {dataViewName}',
+        values: { dataViewName: mlContext.currentDataView.title },
+      });
     }
     return '';
   }

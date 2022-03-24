@@ -20,24 +20,15 @@ export const SectionWrapper = styled.div`
   width: 100%;
 `;
 
-export const HeaderWrapper = styled.div`
-  ${({ theme }) =>
-    `
-      padding: ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 0 ${theme.eui.paddingSizes.l};
-      @media only screen and (max-width: ${theme.eui.euiBreakpoints.s}) {
-        padding: ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.s} 0
-          ${theme.eui.paddingSizes.s};
-      }
-    `};
-`;
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
 export const ContentWrapper = styled.div`
   ${({ theme }) =>
     `
-      padding: ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l};
-      @media only screen and (max-width: ${theme.eui.euiBreakpoints.s}) {
-        padding: ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.s} ${gutterTimeline}
-          ${theme.eui.paddingSizes.s};
-      }
+      padding: ${theme.eui.paddingSizes.l} 0 ${gutterTimeline} 0;
     `};
+`;
+
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
 `;

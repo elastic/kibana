@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
@@ -24,36 +25,43 @@ export interface RenderingMetadata {
   i18n: typeof i18n.translate;
   locale: string;
   darkMode: boolean;
-  themeVersion?: string;
+  themeVersion: ThemeVersion;
   stylesheetPaths: string[];
-  injectedMetadata: {
-    version: string;
-    buildNumber: number;
-    branch: string;
-    basePath: string;
-    serverBasePath: string;
-    publicBaseUrl?: string;
-    env: {
-      mode: EnvironmentMode;
-      packageInfo: PackageInfo;
-    };
-    anonymousStatusPage: boolean;
-    i18n: {
-      translationsUrl: string;
-    };
-    csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
-    externalUrl: { policy: IExternalUrlPolicy[] };
-    vars: Record<string, any>;
-    uiPlugins: Array<{
-      id: string;
-      plugin: DiscoveredPlugin;
-      config?: Record<string, unknown>;
-    }>;
-    legacyMetadata: {
-      uiSettings: {
-        defaults: Record<string, any>;
-        user: Record<string, UserProvidedValues<any>>;
-      };
+  injectedMetadata: InjectedMetadata;
+}
+
+/** @internal */
+export interface InjectedMetadata {
+  version: string;
+  buildNumber: number;
+  branch: string;
+  basePath: string;
+  serverBasePath: string;
+  publicBaseUrl?: string;
+  env: {
+    mode: EnvironmentMode;
+    packageInfo: PackageInfo;
+  };
+  anonymousStatusPage: boolean;
+  i18n: {
+    translationsUrl: string;
+  };
+  theme: {
+    darkMode: boolean;
+    version: ThemeVersion;
+  };
+  csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
+  externalUrl: { policy: IExternalUrlPolicy[] };
+  vars: Record<string, any>;
+  uiPlugins: Array<{
+    id: string;
+    plugin: DiscoveredPlugin;
+    config?: Record<string, unknown>;
+  }>;
+  legacyMetadata: {
+    uiSettings: {
+      defaults: Record<string, any>;
+      user: Record<string, UserProvidedValues<any>>;
     };
   };
 }
@@ -81,7 +89,7 @@ export interface IRenderOptions {
 
   /**
    * Inject custom vars into the page metadata.
-   * @deprecated for legacy use only, remove with ui_render_mixin
+   * @deprecated for legacy use only. Can be removed when https://github.com/elastic/kibana/issues/127733 is done.
    * @internal
    */
   vars?: Record<string, any>;

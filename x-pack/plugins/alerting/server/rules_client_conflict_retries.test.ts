@@ -52,6 +52,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  minimumScheduleInterval: { value: '1m', enforce: false },
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -101,7 +102,7 @@ async function update(success: boolean) {
     await rulesClient.update({
       id: MockAlertId,
       data: {
-        schedule: { interval: '5s' },
+        schedule: { interval: '1m' },
         name: 'cba',
         tags: ['bar'],
         params: { bar: true },
@@ -267,7 +268,7 @@ function setupRawAlertMocks(
       enabled: true,
       tags: ['foo'],
       alertTypeId: 'myType',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
       params: {},
@@ -294,7 +295,7 @@ function setupRawAlertMocks(
 
   // splitting this out as it's easier to set a breakpoint :-)
   // eslint-disable-next-line prettier/prettier
-  unsecuredSavedObjectsClient.get.mockImplementation(async () => 
+  unsecuredSavedObjectsClient.get.mockImplementation(async () =>
     cloneDeep(rawAlert)
   );
 
@@ -323,6 +324,22 @@ beforeEach(() => {
     ownerId: null,
     taskType: 'task-type',
     params: {},
+  });
+
+  taskManager.get.mockResolvedValue({
+    id: 'task-123',
+    taskType: 'alerting:123',
+    scheduledAt: new Date(),
+    attempts: 1,
+    status: TaskStatus.Idle,
+    runAt: new Date(),
+    startedAt: null,
+    retryAt: null,
+    state: {},
+    params: {
+      alertId: '1',
+    },
+    ownerId: null,
   });
 
   const actionsClient = actionsClientMock.create();

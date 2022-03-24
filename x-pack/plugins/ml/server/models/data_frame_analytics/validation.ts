@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from 'kibana/server';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import { ANALYSIS_CONFIG_TYPE } from '../../../common/constants/data_frame_analytics';
@@ -259,7 +259,7 @@ async function getValidationCheckMessages(
   }
 
   try {
-    const { body } = await asCurrentUser.search<ValidationSearchResult>({
+    const body = await asCurrentUser.search<ValidationSearchResult>({
       index,
       size: 0,
       track_total_hits: true,

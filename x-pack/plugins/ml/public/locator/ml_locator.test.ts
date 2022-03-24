@@ -290,7 +290,7 @@ describe('ML locator', () => {
         });
       });
 
-      it('should generate valid URL for the Index Data Visualizer select index pattern or saved search page', async () => {
+      it('should generate valid URL for the Index Data Visualizer select data view or saved search page', async () => {
         const location = await definition.getLocation({
           page: ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
         });

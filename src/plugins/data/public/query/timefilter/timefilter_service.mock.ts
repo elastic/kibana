@@ -9,6 +9,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { TimefilterService, TimeHistoryContract, TimefilterContract } from '.';
 import { Observable } from 'rxjs';
+import { TimeRange } from '../../../common';
 
 export type TimefilterServiceClientContract = PublicMethodsOf<TimefilterService>;
 
@@ -43,6 +44,7 @@ const createSetupContractMock = () => {
   const historyMock: jest.Mocked<TimeHistoryContract> = {
     add: jest.fn(),
     get: jest.fn(),
+    get$: jest.fn(() => new Observable<TimeRange[]>()),
   };
 
   const setupContract = {

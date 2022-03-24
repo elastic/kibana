@@ -7,27 +7,35 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { KibanaThemeProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { StartInitializer } from '../../../plugin';
 import { RendererFactory } from '../../../../types';
 import { AdvancedFilter } from './component';
 import { RendererStrings } from '../../../../i18n';
 
 const { advancedFilter: strings } = RendererStrings;
 
-export const advancedFilter: RendererFactory<{}> = () => ({
-  name: 'advanced_filter',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  height: 50,
-  render(domNode, _, handlers) {
-    ReactDOM.render(
-      <AdvancedFilter commit={handlers.setFilter} value={handlers.getFilter()} />,
-      domNode,
-      () => handlers.done()
-    );
+export const advancedFilterFactory: StartInitializer<RendererFactory<{}>> =
+  (core, plugins) => () => ({
+    name: 'advanced_filter',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    height: 50,
+    render(domNode, _, handlers) {
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <AdvancedFilter
+            commit={(filter) => handlers.event({ name: 'applyFilterAction', data: filter })}
+            value={handlers.getFilter()}
+          />
+        </KibanaThemeProvider>,
+        domNode,
+        () => handlers.done()
+      );
 
-    handlers.onDestroy(() => {
-      ReactDOM.unmountComponentAtNode(domNode);
-    });
-  },
-});
+      handlers.onDestroy(() => {
+        ReactDOM.unmountComponentAtNode(domNode);
+      });
+    },
+  });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import * as stories from './error_count_alert_trigger.stories';
 import { composeStories } from '@storybook/testing-react';
@@ -13,7 +13,9 @@ import { composeStories } from '@storybook/testing-react';
 const { CreatingInApmFromService } = composeStories(stories);
 
 describe('ErrorCountAlertTrigger', () => {
-  it('renders', () => {
-    expect(() => render(<CreatingInApmFromService />)).not.toThrowError();
+  it('renders', async () => {
+    render(<CreatingInApmFromService />);
+
+    expect(await screen.findByText('Service')).toBeInTheDocument();
   });
 });

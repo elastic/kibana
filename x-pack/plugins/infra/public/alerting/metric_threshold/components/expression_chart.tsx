@@ -7,10 +7,11 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
-import { first, last } from 'lodash';
 import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
+import { first, last } from 'lodash';
+
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';

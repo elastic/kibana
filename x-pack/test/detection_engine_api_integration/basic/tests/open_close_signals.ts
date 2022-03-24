@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import type { estypes } from '@elastic/elasticsearch';
-import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -18,7 +18,6 @@ import {
   createSignalsIndex,
   deleteSignalsIndex,
   setSignalStatus,
-  getSignalStatusEmptyResponse,
   getQuerySignalIds,
   deleteAllAlerts,
   createRule,
@@ -27,44 +26,15 @@ import {
   waitForRuleSuccessOrStatus,
   getRuleForSignalTesting,
 } from '../../utils';
+import { RACAlert } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('open_close_signals', () => {
-    describe('validation checks', () => {
-      it('should not give errors when querying and the signals index does not exist yet', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(setSignalStatus({ signalIds: ['123'], status: 'open' }))
-          .expect(200);
-
-        // remove any server generated items that are indeterministic
-        delete body.took;
-
-        expect(body).to.eql(getSignalStatusEmptyResponse());
-      });
-
-      it('should not give errors when querying and the signals index does exist and is empty', async () => {
-        await createSignalsIndex(supertest);
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(setSignalStatus({ signalIds: ['123'], status: 'open' }))
-          .expect(200);
-
-        // remove any server generated items that are indeterministic
-        delete body.took;
-
-        expect(body).to.eql(getSignalStatusEmptyResponse());
-
-        await deleteSignalsIndex(supertest);
-      });
-    });
-
     describe('tests with auditbeat data', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
@@ -75,42 +45,42 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await deleteAllAlerts(supertest);
-        await createSignalsIndex(supertest);
+        await deleteAllAlerts(supertest, log);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should be able to execute and get 10 signals', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
       });
 
       it('should be have set the signals in an open state initially', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         const everySignalOpen = signalsOpen.hits.hits.every(
-          (hit) => hit._source?.signal?.status === 'open'
+          (hit) => hit._source?.[ALERT_WORKFLOW_STATUS] === 'open'
         );
         expect(everySignalOpen).to.eql(true);
       });
 
       it('should be able to get a count of 10 closed signals when closing 10', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
         // set all of the signals to the state of closed. There is no reason to use a waitUntil here
@@ -122,21 +92,20 @@ export default ({ getService }: FtrProviderContext) => {
           .send(setSignalStatus({ signalIds, status: 'closed' }))
           .expect(200);
 
-        const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-          await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(signalIds))
-            .expect(200);
+        const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getQuerySignalIds(signalIds))
+          .expect(200);
         expect(signalsClosed.hits.hits.length).to.equal(10);
       });
 
       it('should be able close 10 signals immediately and they all should be closed', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
         // set all of the signals to the state of closed. There is no reason to use a waitUntil here
@@ -148,15 +117,14 @@ export default ({ getService }: FtrProviderContext) => {
           .send(setSignalStatus({ signalIds, status: 'closed' }))
           .expect(200);
 
-        const { body: signalsClosed }: { body: estypes.SearchResponse<{ signal: Signal }> } =
-          await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(signalIds))
-            .expect(200);
+        const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getQuerySignalIds(signalIds))
+          .expect(200);
 
         const everySignalClosed = signalsClosed.hits.hits.every(
-          (hit) => hit._source?.signal?.status === 'closed'
+          (hit) => hit._source?.[ALERT_WORKFLOW_STATUS] === 'closed'
         );
         expect(everySignalClosed).to.eql(true);
       });

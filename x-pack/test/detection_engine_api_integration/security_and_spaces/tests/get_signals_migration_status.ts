@@ -18,19 +18,20 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('Signals migration status', () => {
     let legacySignalsIndexName: string;
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
       legacySignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
+      await createSignalsIndex(supertest, log);
     });
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     it('returns no indexes if no signals exist in the specified range', async () => {

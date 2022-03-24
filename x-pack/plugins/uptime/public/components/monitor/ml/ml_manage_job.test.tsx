@@ -6,35 +6,97 @@
  */
 
 import React from 'react';
-import { coreMock } from 'src/core/public/mocks';
+import userEvent from '@testing-library/user-event';
 import { ManageMLJobComponent } from './manage_ml_job';
-import * as redux from 'react-redux';
-import { renderWithRouter, shallowWithRouter } from '../../../lib';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  render,
+  makeUptimePermissionsCore,
+  forNearestButton,
+} from '../../../lib/helper/rtl_helpers';
+import * as labels from './translations';
 
-const core = coreMock.createStart();
 describe('Manage ML Job', () => {
-  it('shallow renders without errors', () => {
-    jest.spyOn(redux, 'useSelector').mockReturnValue(true);
-    jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
+  const makeMlCapabilities = (mlCapabilities?: Partial<{ canDeleteJob: boolean }>) => {
+    return {
+      ml: {
+        mlCapabilities: { data: { capabilities: { canDeleteJob: true, ...mlCapabilities } } },
+      },
+    };
+  };
 
-    const wrapper = shallowWithRouter(
-      <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />
-    );
-    expect(wrapper).toMatchSnapshot();
+  describe('when users have write access to uptime', () => {
+    it('enables the button to create alerts', () => {
+      const { getByText } = render(
+        <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
+        {
+          state: makeMlCapabilities(),
+          core: makeUptimePermissionsCore({ save: true }),
+        }
+      );
+
+      const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
+      expect(anomalyDetectionBtn).toBeInTheDocument();
+      userEvent.click(anomalyDetectionBtn as HTMLElement);
+
+      expect(forNearestButton(getByText)(labels.ENABLE_ANOMALY_ALERT)).toBeEnabled();
+    });
+
+    it('does not display an informative tooltip', async () => {
+      const { getByText, findByText } = render(
+        <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
+        {
+          state: makeMlCapabilities(),
+          core: makeUptimePermissionsCore({ save: true }),
+        }
+      );
+
+      const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
+      expect(anomalyDetectionBtn).toBeInTheDocument();
+      userEvent.click(anomalyDetectionBtn as HTMLElement);
+
+      userEvent.hover(getByText(labels.ENABLE_ANOMALY_ALERT));
+
+      await expect(() =>
+        findByText('You need write access to Uptime to create anomaly alerts.')
+      ).rejects.toEqual(expect.anything());
+    });
   });
 
-  it('renders without errors', () => {
-    jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
-    jest.spyOn(redux, 'useSelector').mockReturnValue(true);
+  describe("when users don't have write access to uptime", () => {
+    it('disables the button to create alerts', () => {
+      const { getByText } = render(
+        <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
+        {
+          state: makeMlCapabilities(),
+          core: makeUptimePermissionsCore({ save: false }),
+        }
+      );
 
-    const wrapper = renderWithRouter(
-      <KibanaContextProvider
-        services={{ ...core, triggersActionsUi: { getEditAlertFlyout: jest.fn() } }}
-      >
-        <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />
-      </KibanaContextProvider>
-    );
-    expect(wrapper).toMatchSnapshot();
+      const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
+      expect(anomalyDetectionBtn).toBeInTheDocument();
+      userEvent.click(anomalyDetectionBtn as HTMLElement);
+
+      expect(forNearestButton(getByText)(labels.ENABLE_ANOMALY_ALERT)).toBeDisabled();
+    });
+
+    it('displays an informative tooltip', async () => {
+      const { getByText, findByText } = render(
+        <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
+        {
+          state: makeMlCapabilities(),
+          core: makeUptimePermissionsCore({ save: false }),
+        }
+      );
+
+      const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
+      expect(anomalyDetectionBtn).toBeInTheDocument();
+      userEvent.click(anomalyDetectionBtn as HTMLElement);
+
+      userEvent.hover(getByText(labels.ENABLE_ANOMALY_ALERT));
+
+      expect(
+        await findByText('You need read-write access to Uptime to create anomaly alerts.')
+      ).toBeInTheDocument();
+    });
   });
 });

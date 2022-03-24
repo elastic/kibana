@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsService } from '../../../../../../data/common';
-
+import { DataViewsService } from '../../../../../../data_views/common';
 import { from } from 'rxjs';
-import { AbstractSearchStrategy } from './abstract_search_strategy';
+
+import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
 import type { FieldSpec } from '../../../../../../data/common';
 import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 import type {
@@ -56,7 +56,7 @@ describe('AbstractSearchStrategy', () => {
       {
         getDefault: jest.fn(),
         getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),
-      } as unknown as IndexPatternsService,
+      } as unknown as DataViewsService,
       (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher
     );
 
@@ -64,7 +64,7 @@ describe('AbstractSearchStrategy', () => {
   });
 
   test('should return response', async () => {
-    const searches = [{ body: 'body', index: 'index' }];
+    const searches: EsSearchRequest[] = [{ body: {}, index: 'index' }];
 
     const responses = await abstractSearchStrategy.search(
       requestContext,
@@ -76,6 +76,9 @@ describe('AbstractSearchStrategy', () => {
             isStored: true,
           },
         },
+        events: {
+          aborted$: from([]),
+        },
       } as unknown as VisTypeTimeseriesVisDataRequest,
       searches
     );
@@ -84,12 +87,13 @@ describe('AbstractSearchStrategy', () => {
     expect(requestContext.search.search).toHaveBeenCalledWith(
       {
         params: {
-          body: 'body',
+          body: {},
           index: 'index',
         },
         indexType: undefined,
       },
       {
+        abortSignal: new AbortController().signal,
         sessionId: '1',
         isRestore: false,
         isStored: true,

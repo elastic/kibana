@@ -7,7 +7,6 @@
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-export { registerTestBed, TestBed } from '@kbn/test/jest';
-
+export type { TestBed } from '@kbn/test-jest-helpers';
 // eslint-disable-next-line import/no-extraneous-dependencies
-export { getRandomString } from '@kbn/test/jest';
+export { registerTestBed, getRandomString } from '@kbn/test-jest-helpers';

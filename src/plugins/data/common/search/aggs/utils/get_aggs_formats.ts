@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import {
   FieldFormat,
   FieldFormatInstanceType,
+  FieldFormatParams,
   FieldFormatsContentType,
   IFieldFormat,
   SerializedFieldFormat,
@@ -19,6 +20,7 @@ import {
 import { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
 import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
+import { MultiFieldKey } from '../buckets/multi_field_key';
 
 type GetFieldFormat = (mapping: SerializedFieldFormat) => IFieldFormat;
 
@@ -125,6 +127,35 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         }
 
         return format.convert(val, type);
+      };
+      getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
+    },
+    class AggsMultiTermsFieldFormat extends FieldFormat {
+      static id = 'multi_terms';
+      static hidden = true;
+
+      private formatCache: Map<SerializedFieldFormat<FieldFormatParams>, FieldFormat> = new Map();
+
+      convert = (val: unknown, type: FieldFormatsContentType) => {
+        const params = this._params;
+        const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) => {
+          const isCached = this.formatCache.has(fieldParams);
+          const cachedFormat = this.formatCache.get(fieldParams) || getFieldFormat(fieldParams);
+          if (!isCached) {
+            this.formatCache.set(fieldParams, cachedFormat);
+          }
+          return cachedFormat;
+        });
+
+        if (String(val) === '__other__') {
+          return params.otherBucketLabel;
+        }
+
+        const joinTemplate = params.separator ?? ' › ';
+
+        return (val as MultiFieldKey).keys
+          .map((valPart, i) => formats[i].convert(valPart, type))
+          .join(joinTemplate);
       };
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
     },

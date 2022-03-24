@@ -29,19 +29,19 @@ import { TimelineId } from '../../../common/types/timeline';
 import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
-import { inputsSelectors } from '../../common/store';
+import { inputsSelectors, State } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { esQuery } from '../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
-import { filterHostData } from './navigation';
-import { hostsModel } from '../store';
+import { hostsModel, hostsSelectors } from '../store';
+import { generateSeverityFilter } from '../store/helpers';
 import { HostsTableType } from '../store/model';
 import {
   onTimelineTabKeyPressed,
@@ -50,10 +50,12 @@ import {
 } from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { filterHostExternalAlertData } from '../../common/components/visualization_actions/utils';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -83,6 +85,13 @@ const HostsComponent = () => {
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const getHostRiskScoreFilterQuerySelector = useMemo(
+    () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
+    []
+  );
+  const severitySelection = useDeepEqualSelector((state: State) =>
+    getHostRiskScoreFilterQuerySelector(state, hostsModel.HostsType.page)
+  );
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -91,10 +100,18 @@ const HostsComponent = () => {
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters = React.useMemo(() => {
     if (tabName === HostsTableType.alerts) {
-      return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
+      return filters.length > 0
+        ? [...filters, ...filterHostExternalAlertData]
+        : filterHostExternalAlertData;
+    }
+
+    if (tabName === HostsTableType.risk) {
+      const severityFilter = generateSeverityFilter(severitySelection);
+
+      return [...severityFilter, ...filterHostExternalAlertData, ...filters];
     }
     return filters;
-  }, [tabName, filters]);
+  }, [severitySelection, tabName, filters]);
   const narrowDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
@@ -111,11 +128,11 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters,
@@ -125,13 +142,16 @@ const HostsComponent = () => {
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters: tabsFilters,
       }),
     [indexPattern, query, tabsFilters, uiSettings]
   );
+
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
@@ -179,6 +199,7 @@ const HostsComponent = () => {
                   />
                 }
                 title={i18n.PAGE_TITLE}
+                border
               />
 
               <HostsKpiComponent
@@ -194,7 +215,11 @@ const HostsComponent = () => {
               <EuiSpacer />
 
               <SecuritySolutionTabNavigation
-                navTabs={navTabsHosts(hasMlUserPermissions(capabilities))}
+                navTabs={navTabsHosts({
+                  hasMlUserPermissions: hasMlUserPermissions(capabilities),
+                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  isUsersEnabled: usersEnabled,
+                })}
               />
 
               <EuiSpacer />
@@ -216,8 +241,6 @@ const HostsComponent = () => {
         </StyledFullHeightContainer>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
-
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}

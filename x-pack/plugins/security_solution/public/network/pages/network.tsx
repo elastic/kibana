@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
@@ -13,7 +13,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isTab } from '../../../../timelines/public';
-import { esQuery } from '../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
@@ -36,7 +36,6 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Display } from '../../hosts/pages/display';
 import { networkModel } from '../store';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
-import { filterNetworkData } from './navigation/alerts_query_tab_body';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import * as i18n from './translations';
 import { NetworkComponentProps } from './types';
@@ -49,9 +48,10 @@ import {
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
+import { filterNetworkExternalAlertData } from '../../common/components/visualization_actions/utils';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -85,9 +85,13 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const kibana = useKibana();
     const { tabName } = useParams<{ tabName: string }>();
 
+    const canUseMaps = kibana.services.application.capabilities.maps.show;
+
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.alerts) {
-        return filters.length > 0 ? [...filters, ...filterNetworkData] : filterNetworkData;
+        return filters.length > 0
+          ? [...filters, ...filterNetworkExternalAlertData]
+          : filterNetworkExternalAlertData;
       }
       return filters;
     }, [tabName, filters]);
@@ -109,7 +113,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [dispatch]
     );
 
-    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -136,13 +140,13 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     );
 
     const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters,
     });
     const [tabsFilterQuery] = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters: tabsFilters,
@@ -170,17 +174,27 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     />
                   }
                   title={i18n.PAGE_TITLE}
+                  border
                 />
 
-                <EmbeddedMap
-                  query={query}
-                  filters={filters}
-                  startDate={from}
-                  endDate={to}
-                  setQuery={setQuery}
-                />
-
-                <EuiSpacer />
+                {canUseMaps && (
+                  <>
+                    <EuiPanel
+                      hasBorder
+                      paddingSize="none"
+                      data-test-subj="conditional-embeddable-map"
+                    >
+                      <EmbeddedMap
+                        query={query}
+                        filters={filters}
+                        startDate={from}
+                        endDate={to}
+                        setQuery={setQuery}
+                      />
+                    </EuiPanel>
+                    <EuiSpacer />
+                  </>
+                )}
 
                 <NetworkKpiComponent
                   filterQuery={filterQuery}
@@ -221,7 +235,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           </StyledFullHeightContainer>
         ) : (
           <SecuritySolutionPageWrapper>
-            <HeaderPage border title={i18n.PAGE_TITLE} />
             <OverviewEmpty />
           </SecuritySolutionPageWrapper>
         )}

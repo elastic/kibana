@@ -1,11 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set 1`] = `
+exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set: 
+        <DetailsPanel
+          browserFields={Object {}}
+          docValueFields={Array []}
+          handleOnPanelClosed={[MockFunction]}
+          isFlyoutView={false}
+          runtimeMappings={Object {}}
+          tabType="query"
+          timelineId="test"
+        />
+       1`] = `
 <DetailsPanel
   browserFields={Object {}}
   docValueFields={Array []}
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
+  runtimeMappings={Object {}}
   tabType="query"
   timelineId="test"
 />
@@ -17,12 +28,13 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
   docValueFields={Array []}
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
+  runtimeMappings={Object {}}
   tabType="query"
   timelineId="test"
 />
 `;
 
-exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should render the Details Panel when the panelView is set and the associated params are set 1`] = `
+exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should render the Event Details Panel when the panelView is set and the associated params are set 1`] = `
 .c0 {
   -webkit-flex: 0 1 auto;
   -ms-flex: 0 1 auto;
@@ -30,177 +42,29 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
   margin-top: 8px;
 }
 
-<DetailsPanel
+<EventDetailsPanelComponent
   browserFields={Object {}}
   docValueFields={Array []}
-  handleOnPanelClosed={[MockFunction]}
+  expandedEvent={
+    Object {
+      "eventId": "my-id",
+      "indexName": "my-index",
+    }
+  }
+  handleOnEventClosed={[Function]}
+  isDraggable={false}
   isFlyoutView={false}
+  runtimeMappings={Object {}}
   tabType="query"
   timelineId="test"
 >
-  <EventDetailsPanelComponent
-    browserFields={Object {}}
-    docValueFields={Array []}
-    expandedEvent={
-      Object {
-        "ecsData": Object {
-          "_id": "1",
-          "destination": Object {
-            "ip": Array [
-              "192.168.0.3",
-            ],
-            "port": Array [
-              6343,
-            ],
-          },
-          "event": Object {
-            "action": Array [
-              "Action",
-            ],
-            "category": Array [
-              "Access",
-            ],
-            "id": Array [
-              "1",
-            ],
-            "module": Array [
-              "nginx",
-            ],
-            "severity": Array [
-              3,
-            ],
-          },
-          "geo": Object {
-            "country_iso_code": Array [
-              "xx",
-            ],
-            "region_name": Array [
-              "xx",
-            ],
-          },
-          "host": Object {
-            "ip": Array [
-              "192.168.0.1",
-            ],
-            "name": Array [
-              "apache",
-            ],
-          },
-          "signal": Object {
-            "rule": Object {
-              "created_at": Array [
-                "2020-01-10T21:11:45.839Z",
-              ],
-              "created_by": Array [
-                "elastic",
-              ],
-              "description": Array [
-                "24/7",
-              ],
-              "enabled": Array [
-                true,
-              ],
-              "false_positives": Array [
-                "test-1",
-              ],
-              "filters": Array [],
-              "from": Array [
-                "now-300s",
-              ],
-              "id": Array [
-                "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-              ],
-              "immutable": Array [
-                false,
-              ],
-              "index": Array [
-                "auditbeat-*",
-              ],
-              "interval": Array [
-                "5m",
-              ],
-              "language": Array [
-                "kuery",
-              ],
-              "max_signals": Array [
-                100,
-              ],
-              "note": Array [
-                "# this is some markdown documentation",
-              ],
-              "output_index": Array [
-                ".siem-signals-default",
-              ],
-              "query": Array [
-                "user.name: root or user.name: admin",
-              ],
-              "references": Array [
-                "www.test.co",
-              ],
-              "risk_score": Array [
-                "21",
-              ],
-              "rule_id": Array [
-                "rule-id-1",
-              ],
-              "saved_id": Array [
-                "Garrett's IP",
-              ],
-              "severity": Array [
-                "low",
-              ],
-              "tags": Array [],
-              "threat": Array [],
-              "timeline_id": Array [
-                "1234-2136-11ea-9864-ebc8cc1cb8c2",
-              ],
-              "timeline_title": Array [
-                "Untitled timeline",
-              ],
-              "to": Array [
-                "now",
-              ],
-              "type": Array [
-                "saved_query",
-              ],
-              "updated_at": Array [
-                "2020-01-10T21:11:45.839Z",
-              ],
-              "updated_by": Array [
-                "elastic",
-              ],
-              "version": Array [
-                "1",
-              ],
-            },
-          },
-          "source": Object {
-            "ip": Array [
-              "192.168.0.1",
-            ],
-            "port": Array [
-              80,
-            ],
-          },
-          "timestamp": "2018-11-05T19:03:25.937Z",
-          "user": Object {
-            "id": Array [
-              "1",
-            ],
-            "name": Array [
-              "john.dee",
-            ],
-          },
-        },
-        "eventId": "my-id",
-        "indexName": "my-index",
-      }
+  <CasesContextMock
+    owner={
+      Array [
+        "securitySolution",
+      ]
     }
-    handleOnEventClosed={[Function]}
-    isDraggable={false}
-    isFlyoutView={false}
-    tabType="query"
-    timelineId="test"
+    userCanCrud={false}
   >
     <ExpandableEventTitle
       handleOnEventClosed={[Function]}
@@ -243,7 +107,6 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                   <button
                     aria-label="close"
                     className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -282,159 +145,11 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       detailsData={null}
       event={
         Object {
-          "ecsData": Object {
-            "_id": "1",
-            "destination": Object {
-              "ip": Array [
-                "192.168.0.3",
-              ],
-              "port": Array [
-                6343,
-              ],
-            },
-            "event": Object {
-              "action": Array [
-                "Action",
-              ],
-              "category": Array [
-                "Access",
-              ],
-              "id": Array [
-                "1",
-              ],
-              "module": Array [
-                "nginx",
-              ],
-              "severity": Array [
-                3,
-              ],
-            },
-            "geo": Object {
-              "country_iso_code": Array [
-                "xx",
-              ],
-              "region_name": Array [
-                "xx",
-              ],
-            },
-            "host": Object {
-              "ip": Array [
-                "192.168.0.1",
-              ],
-              "name": Array [
-                "apache",
-              ],
-            },
-            "signal": Object {
-              "rule": Object {
-                "created_at": Array [
-                  "2020-01-10T21:11:45.839Z",
-                ],
-                "created_by": Array [
-                  "elastic",
-                ],
-                "description": Array [
-                  "24/7",
-                ],
-                "enabled": Array [
-                  true,
-                ],
-                "false_positives": Array [
-                  "test-1",
-                ],
-                "filters": Array [],
-                "from": Array [
-                  "now-300s",
-                ],
-                "id": Array [
-                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                ],
-                "immutable": Array [
-                  false,
-                ],
-                "index": Array [
-                  "auditbeat-*",
-                ],
-                "interval": Array [
-                  "5m",
-                ],
-                "language": Array [
-                  "kuery",
-                ],
-                "max_signals": Array [
-                  100,
-                ],
-                "note": Array [
-                  "# this is some markdown documentation",
-                ],
-                "output_index": Array [
-                  ".siem-signals-default",
-                ],
-                "query": Array [
-                  "user.name: root or user.name: admin",
-                ],
-                "references": Array [
-                  "www.test.co",
-                ],
-                "risk_score": Array [
-                  "21",
-                ],
-                "rule_id": Array [
-                  "rule-id-1",
-                ],
-                "saved_id": Array [
-                  "Garrett's IP",
-                ],
-                "severity": Array [
-                  "low",
-                ],
-                "tags": Array [],
-                "threat": Array [],
-                "timeline_id": Array [
-                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                ],
-                "timeline_title": Array [
-                  "Untitled timeline",
-                ],
-                "to": Array [
-                  "now",
-                ],
-                "type": Array [
-                  "saved_query",
-                ],
-                "updated_at": Array [
-                  "2020-01-10T21:11:45.839Z",
-                ],
-                "updated_by": Array [
-                  "elastic",
-                ],
-                "version": Array [
-                  "1",
-                ],
-              },
-            },
-            "source": Object {
-              "ip": Array [
-                "192.168.0.1",
-              ],
-              "port": Array [
-                80,
-              ],
-            },
-            "timestamp": "2018-11-05T19:03:25.937Z",
-            "user": Object {
-              "id": Array [
-                "1",
-              ],
-              "name": Array [
-                "john.dee",
-              ],
-            },
-          },
           "eventId": "my-id",
           "indexName": "my-index",
         }
       }
+      handleOnEventClosed={[Function]}
       hostRisk={null}
       isAlert={false}
       isDraggable={false}
@@ -531,11 +246,79 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
         </span>
       </EuiLoadingContent>
     </ExpandableEvent>
-  </EventDetailsPanelComponent>
-</DetailsPanel>
+    <Connect(Component)
+      detailsData={null}
+      detailsEcsData={null}
+      expandedEvent={
+        Object {
+          "eventId": "my-id",
+          "indexName": "my-index",
+        }
+      }
+      handleOnEventClosed={[Function]}
+      isHostIsolationPanelOpen={false}
+      loadingEventDetails={true}
+      onAddIsolationStatusClick={[Function]}
+      refetchFlyoutData={[Function]}
+      timelineId="test"
+    >
+      <Memo()
+        detailsData={null}
+        detailsEcsData={null}
+        dispatch={[Function]}
+        expandedEvent={
+          Object {
+            "eventId": "my-id",
+            "indexName": "my-index",
+          }
+        }
+        globalQuery={Array []}
+        handleOnEventClosed={[Function]}
+        isHostIsolationPanelOpen={false}
+        loadingEventDetails={true}
+        onAddIsolationStatusClick={[Function]}
+        refetchFlyoutData={[Function]}
+        timelineId="test"
+        timelineQuery={
+          Object {
+            "id": "",
+            "inspect": null,
+            "isInspected": false,
+            "loading": false,
+            "refetch": null,
+            "selectedInspectIndex": 0,
+          }
+        }
+      >
+        <EuiFlyoutFooter
+          data-test-subj="side-panel-flyout-footer"
+        >
+          <div
+            className="euiFlyoutFooter"
+            data-test-subj="side-panel-flyout-footer"
+          >
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  />
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiFlyoutFooter>
+      </Memo()>
+    </Connect(Component)>
+  </CasesContextMock>
+</EventDetailsPanelComponent>
 `;
-
-exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should render the Event Details view in the Details Panel when the panelView is eventDetail and the eventId is set 1`] = `null`;
 
 exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should render the Event Details view of the Details Panel in the flyout when the panelView is eventDetail and the eventId is set 1`] = `
 Array [
@@ -577,6 +360,7 @@ Array [
       role="dialog"
     >
       <button
+        aria-label="Close this dialog"
         data-test-subj="euiFlyoutCloseButton"
         onClick={[Function]}
         type="button"
@@ -586,155 +370,6 @@ Array [
         docValueFields={Array []}
         expandedEvent={
           Object {
-            "ecsData": Object {
-              "_id": "1",
-              "destination": Object {
-                "ip": Array [
-                  "192.168.0.3",
-                ],
-                "port": Array [
-                  6343,
-                ],
-              },
-              "event": Object {
-                "action": Array [
-                  "Action",
-                ],
-                "category": Array [
-                  "Access",
-                ],
-                "id": Array [
-                  "1",
-                ],
-                "module": Array [
-                  "nginx",
-                ],
-                "severity": Array [
-                  3,
-                ],
-              },
-              "geo": Object {
-                "country_iso_code": Array [
-                  "xx",
-                ],
-                "region_name": Array [
-                  "xx",
-                ],
-              },
-              "host": Object {
-                "ip": Array [
-                  "192.168.0.1",
-                ],
-                "name": Array [
-                  "apache",
-                ],
-              },
-              "signal": Object {
-                "rule": Object {
-                  "created_at": Array [
-                    "2020-01-10T21:11:45.839Z",
-                  ],
-                  "created_by": Array [
-                    "elastic",
-                  ],
-                  "description": Array [
-                    "24/7",
-                  ],
-                  "enabled": Array [
-                    true,
-                  ],
-                  "false_positives": Array [
-                    "test-1",
-                  ],
-                  "filters": Array [],
-                  "from": Array [
-                    "now-300s",
-                  ],
-                  "id": Array [
-                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                  ],
-                  "immutable": Array [
-                    false,
-                  ],
-                  "index": Array [
-                    "auditbeat-*",
-                  ],
-                  "interval": Array [
-                    "5m",
-                  ],
-                  "language": Array [
-                    "kuery",
-                  ],
-                  "max_signals": Array [
-                    100,
-                  ],
-                  "note": Array [
-                    "# this is some markdown documentation",
-                  ],
-                  "output_index": Array [
-                    ".siem-signals-default",
-                  ],
-                  "query": Array [
-                    "user.name: root or user.name: admin",
-                  ],
-                  "references": Array [
-                    "www.test.co",
-                  ],
-                  "risk_score": Array [
-                    "21",
-                  ],
-                  "rule_id": Array [
-                    "rule-id-1",
-                  ],
-                  "saved_id": Array [
-                    "Garrett's IP",
-                  ],
-                  "severity": Array [
-                    "low",
-                  ],
-                  "tags": Array [],
-                  "threat": Array [],
-                  "timeline_id": Array [
-                    "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                  ],
-                  "timeline_title": Array [
-                    "Untitled timeline",
-                  ],
-                  "to": Array [
-                    "now",
-                  ],
-                  "type": Array [
-                    "saved_query",
-                  ],
-                  "updated_at": Array [
-                    "2020-01-10T21:11:45.839Z",
-                  ],
-                  "updated_by": Array [
-                    "elastic",
-                  ],
-                  "version": Array [
-                    "1",
-                  ],
-                },
-              },
-              "source": Object {
-                "ip": Array [
-                  "192.168.0.1",
-                ],
-                "port": Array [
-                  80,
-                ],
-              },
-              "timestamp": "2018-11-05T19:03:25.937Z",
-              "user": Object {
-                "id": Array [
-                  "1",
-                ],
-                "name": Array [
-                  "john.dee",
-                ],
-              },
-            },
             "eventId": "my-id",
             "indexName": "my-index",
           }
@@ -742,6 +377,7 @@ Array [
         handleOnEventClosed={[Function]}
         isDraggable={false}
         isFlyoutView={true}
+        runtimeMappings={Object {}}
         tabType="query"
         timelineId="test"
       >
@@ -755,6 +391,7 @@ Array [
               isAlert={false}
               loading={true}
               ruleName=""
+              timestamp=""
             >
               <Styled(EuiFlexGroup)
                 gutterSize="none"
@@ -802,159 +439,11 @@ Array [
                     detailsData={null}
                     event={
                       Object {
-                        "ecsData": Object {
-                          "_id": "1",
-                          "destination": Object {
-                            "ip": Array [
-                              "192.168.0.3",
-                            ],
-                            "port": Array [
-                              6343,
-                            ],
-                          },
-                          "event": Object {
-                            "action": Array [
-                              "Action",
-                            ],
-                            "category": Array [
-                              "Access",
-                            ],
-                            "id": Array [
-                              "1",
-                            ],
-                            "module": Array [
-                              "nginx",
-                            ],
-                            "severity": Array [
-                              3,
-                            ],
-                          },
-                          "geo": Object {
-                            "country_iso_code": Array [
-                              "xx",
-                            ],
-                            "region_name": Array [
-                              "xx",
-                            ],
-                          },
-                          "host": Object {
-                            "ip": Array [
-                              "192.168.0.1",
-                            ],
-                            "name": Array [
-                              "apache",
-                            ],
-                          },
-                          "signal": Object {
-                            "rule": Object {
-                              "created_at": Array [
-                                "2020-01-10T21:11:45.839Z",
-                              ],
-                              "created_by": Array [
-                                "elastic",
-                              ],
-                              "description": Array [
-                                "24/7",
-                              ],
-                              "enabled": Array [
-                                true,
-                              ],
-                              "false_positives": Array [
-                                "test-1",
-                              ],
-                              "filters": Array [],
-                              "from": Array [
-                                "now-300s",
-                              ],
-                              "id": Array [
-                                "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                              ],
-                              "immutable": Array [
-                                false,
-                              ],
-                              "index": Array [
-                                "auditbeat-*",
-                              ],
-                              "interval": Array [
-                                "5m",
-                              ],
-                              "language": Array [
-                                "kuery",
-                              ],
-                              "max_signals": Array [
-                                100,
-                              ],
-                              "note": Array [
-                                "# this is some markdown documentation",
-                              ],
-                              "output_index": Array [
-                                ".siem-signals-default",
-                              ],
-                              "query": Array [
-                                "user.name: root or user.name: admin",
-                              ],
-                              "references": Array [
-                                "www.test.co",
-                              ],
-                              "risk_score": Array [
-                                "21",
-                              ],
-                              "rule_id": Array [
-                                "rule-id-1",
-                              ],
-                              "saved_id": Array [
-                                "Garrett's IP",
-                              ],
-                              "severity": Array [
-                                "low",
-                              ],
-                              "tags": Array [],
-                              "threat": Array [],
-                              "timeline_id": Array [
-                                "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                              ],
-                              "timeline_title": Array [
-                                "Untitled timeline",
-                              ],
-                              "to": Array [
-                                "now",
-                              ],
-                              "type": Array [
-                                "saved_query",
-                              ],
-                              "updated_at": Array [
-                                "2020-01-10T21:11:45.839Z",
-                              ],
-                              "updated_by": Array [
-                                "elastic",
-                              ],
-                              "version": Array [
-                                "1",
-                              ],
-                            },
-                          },
-                          "source": Object {
-                            "ip": Array [
-                              "192.168.0.1",
-                            ],
-                            "port": Array [
-                              80,
-                            ],
-                          },
-                          "timestamp": "2018-11-05T19:03:25.937Z",
-                          "user": Object {
-                            "id": Array [
-                              "1",
-                            ],
-                            "name": Array [
-                              "john.dee",
-                            ],
-                          },
-                        },
                         "eventId": "my-id",
                         "indexName": "my-index",
                       }
                     }
+                    handleOnEventClosed={[Function]}
                     hostRisk={null}
                     isAlert={false}
                     isDraggable={false}
@@ -1058,157 +547,9 @@ Array [
         </Styled(EuiFlyoutBody)>
         <Connect(Component)
           detailsData={null}
+          detailsEcsData={null}
           expandedEvent={
             Object {
-              "ecsData": Object {
-                "_id": "1",
-                "destination": Object {
-                  "ip": Array [
-                    "192.168.0.3",
-                  ],
-                  "port": Array [
-                    6343,
-                  ],
-                },
-                "event": Object {
-                  "action": Array [
-                    "Action",
-                  ],
-                  "category": Array [
-                    "Access",
-                  ],
-                  "id": Array [
-                    "1",
-                  ],
-                  "module": Array [
-                    "nginx",
-                  ],
-                  "severity": Array [
-                    3,
-                  ],
-                },
-                "geo": Object {
-                  "country_iso_code": Array [
-                    "xx",
-                  ],
-                  "region_name": Array [
-                    "xx",
-                  ],
-                },
-                "host": Object {
-                  "ip": Array [
-                    "192.168.0.1",
-                  ],
-                  "name": Array [
-                    "apache",
-                  ],
-                },
-                "signal": Object {
-                  "rule": Object {
-                    "created_at": Array [
-                      "2020-01-10T21:11:45.839Z",
-                    ],
-                    "created_by": Array [
-                      "elastic",
-                    ],
-                    "description": Array [
-                      "24/7",
-                    ],
-                    "enabled": Array [
-                      true,
-                    ],
-                    "false_positives": Array [
-                      "test-1",
-                    ],
-                    "filters": Array [],
-                    "from": Array [
-                      "now-300s",
-                    ],
-                    "id": Array [
-                      "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                    ],
-                    "immutable": Array [
-                      false,
-                    ],
-                    "index": Array [
-                      "auditbeat-*",
-                    ],
-                    "interval": Array [
-                      "5m",
-                    ],
-                    "language": Array [
-                      "kuery",
-                    ],
-                    "max_signals": Array [
-                      100,
-                    ],
-                    "note": Array [
-                      "# this is some markdown documentation",
-                    ],
-                    "output_index": Array [
-                      ".siem-signals-default",
-                    ],
-                    "query": Array [
-                      "user.name: root or user.name: admin",
-                    ],
-                    "references": Array [
-                      "www.test.co",
-                    ],
-                    "risk_score": Array [
-                      "21",
-                    ],
-                    "rule_id": Array [
-                      "rule-id-1",
-                    ],
-                    "saved_id": Array [
-                      "Garrett's IP",
-                    ],
-                    "severity": Array [
-                      "low",
-                    ],
-                    "tags": Array [],
-                    "threat": Array [],
-                    "timeline_id": Array [
-                      "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                    ],
-                    "timeline_title": Array [
-                      "Untitled timeline",
-                    ],
-                    "to": Array [
-                      "now",
-                    ],
-                    "type": Array [
-                      "saved_query",
-                    ],
-                    "updated_at": Array [
-                      "2020-01-10T21:11:45.839Z",
-                    ],
-                    "updated_by": Array [
-                      "elastic",
-                    ],
-                    "version": Array [
-                      "1",
-                    ],
-                  },
-                },
-                "source": Object {
-                  "ip": Array [
-                    "192.168.0.1",
-                  ],
-                  "port": Array [
-                    80,
-                  ],
-                },
-                "timestamp": "2018-11-05T19:03:25.937Z",
-                "user": Object {
-                  "id": Array [
-                    "1",
-                  ],
-                  "name": Array [
-                    "john.dee",
-                  ],
-                },
-              },
               "eventId": "my-id",
               "indexName": "my-index",
             }
@@ -1217,162 +558,15 @@ Array [
           isHostIsolationPanelOpen={false}
           loadingEventDetails={true}
           onAddIsolationStatusClick={[Function]}
+          refetchFlyoutData={[Function]}
           timelineId="test"
         >
           <Memo()
             detailsData={null}
+            detailsEcsData={null}
             dispatch={[Function]}
             expandedEvent={
               Object {
-                "ecsData": Object {
-                  "_id": "1",
-                  "destination": Object {
-                    "ip": Array [
-                      "192.168.0.3",
-                    ],
-                    "port": Array [
-                      6343,
-                    ],
-                  },
-                  "event": Object {
-                    "action": Array [
-                      "Action",
-                    ],
-                    "category": Array [
-                      "Access",
-                    ],
-                    "id": Array [
-                      "1",
-                    ],
-                    "module": Array [
-                      "nginx",
-                    ],
-                    "severity": Array [
-                      3,
-                    ],
-                  },
-                  "geo": Object {
-                    "country_iso_code": Array [
-                      "xx",
-                    ],
-                    "region_name": Array [
-                      "xx",
-                    ],
-                  },
-                  "host": Object {
-                    "ip": Array [
-                      "192.168.0.1",
-                    ],
-                    "name": Array [
-                      "apache",
-                    ],
-                  },
-                  "signal": Object {
-                    "rule": Object {
-                      "created_at": Array [
-                        "2020-01-10T21:11:45.839Z",
-                      ],
-                      "created_by": Array [
-                        "elastic",
-                      ],
-                      "description": Array [
-                        "24/7",
-                      ],
-                      "enabled": Array [
-                        true,
-                      ],
-                      "false_positives": Array [
-                        "test-1",
-                      ],
-                      "filters": Array [],
-                      "from": Array [
-                        "now-300s",
-                      ],
-                      "id": Array [
-                        "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                      ],
-                      "immutable": Array [
-                        false,
-                      ],
-                      "index": Array [
-                        "auditbeat-*",
-                      ],
-                      "interval": Array [
-                        "5m",
-                      ],
-                      "language": Array [
-                        "kuery",
-                      ],
-                      "max_signals": Array [
-                        100,
-                      ],
-                      "note": Array [
-                        "# this is some markdown documentation",
-                      ],
-                      "output_index": Array [
-                        ".siem-signals-default",
-                      ],
-                      "query": Array [
-                        "user.name: root or user.name: admin",
-                      ],
-                      "references": Array [
-                        "www.test.co",
-                      ],
-                      "risk_score": Array [
-                        "21",
-                      ],
-                      "rule_id": Array [
-                        "rule-id-1",
-                      ],
-                      "saved_id": Array [
-                        "Garrett's IP",
-                      ],
-                      "severity": Array [
-                        "low",
-                      ],
-                      "tags": Array [],
-                      "threat": Array [],
-                      "timeline_id": Array [
-                        "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                      ],
-                      "timeline_title": Array [
-                        "Untitled timeline",
-                      ],
-                      "to": Array [
-                        "now",
-                      ],
-                      "type": Array [
-                        "saved_query",
-                      ],
-                      "updated_at": Array [
-                        "2020-01-10T21:11:45.839Z",
-                      ],
-                      "updated_by": Array [
-                        "elastic",
-                      ],
-                      "version": Array [
-                        "1",
-                      ],
-                    },
-                  },
-                  "source": Object {
-                    "ip": Array [
-                      "192.168.0.1",
-                    ],
-                    "port": Array [
-                      80,
-                    ],
-                  },
-                  "timestamp": "2018-11-05T19:03:25.937Z",
-                  "user": Object {
-                    "id": Array [
-                      "1",
-                    ],
-                    "name": Array [
-                      "john.dee",
-                    ],
-                  },
-                },
                 "eventId": "my-id",
                 "indexName": "my-index",
               }
@@ -1382,6 +576,7 @@ Array [
             isHostIsolationPanelOpen={false}
             loadingEventDetails={true}
             onAddIsolationStatusClick={[Function]}
+            refetchFlyoutData={[Function]}
             timelineId="test"
             timelineQuery={
               Object {
@@ -1394,9 +589,12 @@ Array [
               }
             }
           >
-            <EuiFlyoutFooter>
+            <EuiFlyoutFooter
+              data-test-subj="side-panel-flyout-footer"
+            >
               <div
                 className="euiFlyoutFooter"
+                data-test-subj="side-panel-flyout-footer"
               >
                 <EuiFlexGroup
                   justifyContent="flexEnd"
@@ -1409,171 +607,7 @@ Array [
                     >
                       <div
                         className="euiFlexItem euiFlexItem--flexGrowZero"
-                      >
-                        <Memo()
-                          detailsData={null}
-                          ecsData={
-                            Object {
-                              "_id": "1",
-                              "destination": Object {
-                                "ip": Array [
-                                  "192.168.0.3",
-                                ],
-                                "port": Array [
-                                  6343,
-                                ],
-                              },
-                              "event": Object {
-                                "action": Array [
-                                  "Action",
-                                ],
-                                "category": Array [
-                                  "Access",
-                                ],
-                                "id": Array [
-                                  "1",
-                                ],
-                                "module": Array [
-                                  "nginx",
-                                ],
-                                "severity": Array [
-                                  3,
-                                ],
-                              },
-                              "geo": Object {
-                                "country_iso_code": Array [
-                                  "xx",
-                                ],
-                                "region_name": Array [
-                                  "xx",
-                                ],
-                              },
-                              "host": Object {
-                                "ip": Array [
-                                  "192.168.0.1",
-                                ],
-                                "name": Array [
-                                  "apache",
-                                ],
-                              },
-                              "signal": Object {
-                                "rule": Object {
-                                  "created_at": Array [
-                                    "2020-01-10T21:11:45.839Z",
-                                  ],
-                                  "created_by": Array [
-                                    "elastic",
-                                  ],
-                                  "description": Array [
-                                    "24/7",
-                                  ],
-                                  "enabled": Array [
-                                    true,
-                                  ],
-                                  "false_positives": Array [
-                                    "test-1",
-                                  ],
-                                  "filters": Array [],
-                                  "from": Array [
-                                    "now-300s",
-                                  ],
-                                  "id": Array [
-                                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                                  ],
-                                  "immutable": Array [
-                                    false,
-                                  ],
-                                  "index": Array [
-                                    "auditbeat-*",
-                                  ],
-                                  "interval": Array [
-                                    "5m",
-                                  ],
-                                  "language": Array [
-                                    "kuery",
-                                  ],
-                                  "max_signals": Array [
-                                    100,
-                                  ],
-                                  "note": Array [
-                                    "# this is some markdown documentation",
-                                  ],
-                                  "output_index": Array [
-                                    ".siem-signals-default",
-                                  ],
-                                  "query": Array [
-                                    "user.name: root or user.name: admin",
-                                  ],
-                                  "references": Array [
-                                    "www.test.co",
-                                  ],
-                                  "risk_score": Array [
-                                    "21",
-                                  ],
-                                  "rule_id": Array [
-                                    "rule-id-1",
-                                  ],
-                                  "saved_id": Array [
-                                    "Garrett's IP",
-                                  ],
-                                  "severity": Array [
-                                    "low",
-                                  ],
-                                  "tags": Array [],
-                                  "threat": Array [],
-                                  "timeline_id": Array [
-                                    "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                                  ],
-                                  "timeline_title": Array [
-                                    "Untitled timeline",
-                                  ],
-                                  "to": Array [
-                                    "now",
-                                  ],
-                                  "type": Array [
-                                    "saved_query",
-                                  ],
-                                  "updated_at": Array [
-                                    "2020-01-10T21:11:45.839Z",
-                                  ],
-                                  "updated_by": Array [
-                                    "elastic",
-                                  ],
-                                  "version": Array [
-                                    "1",
-                                  ],
-                                },
-                              },
-                              "source": Object {
-                                "ip": Array [
-                                  "192.168.0.1",
-                                ],
-                                "port": Array [
-                                  80,
-                                ],
-                              },
-                              "timestamp": "2018-11-05T19:03:25.937Z",
-                              "user": Object {
-                                "id": Array [
-                                  "1",
-                                ],
-                                "name": Array [
-                                  "john.dee",
-                                ],
-                              },
-                            }
-                          }
-                          handleOnEventClosed={[Function]}
-                          indexName="my-index"
-                          isHostIsolationPanelOpen={false}
-                          loadingEventDetails={true}
-                          onAddEventFilterClick={[Function]}
-                          onAddExceptionTypeClick={[Function]}
-                          onAddIsolationStatusClick={[Function]}
-                          refetch={[Function]}
-                          timelineId="test"
-                        />
-                      </div>
+                      />
                     </EuiFlexItem>
                   </div>
                 </EuiFlexGroup>
@@ -1616,6 +650,7 @@ Array [
     role="dialog"
   >
     <button
+      aria-label="Close this dialog"
       data-test-subj="euiFlyoutCloseButton"
       onClick={[Function]}
       type="button"
@@ -1625,155 +660,6 @@ Array [
       docValueFields={Array []}
       expandedEvent={
         Object {
-          "ecsData": Object {
-            "_id": "1",
-            "destination": Object {
-              "ip": Array [
-                "192.168.0.3",
-              ],
-              "port": Array [
-                6343,
-              ],
-            },
-            "event": Object {
-              "action": Array [
-                "Action",
-              ],
-              "category": Array [
-                "Access",
-              ],
-              "id": Array [
-                "1",
-              ],
-              "module": Array [
-                "nginx",
-              ],
-              "severity": Array [
-                3,
-              ],
-            },
-            "geo": Object {
-              "country_iso_code": Array [
-                "xx",
-              ],
-              "region_name": Array [
-                "xx",
-              ],
-            },
-            "host": Object {
-              "ip": Array [
-                "192.168.0.1",
-              ],
-              "name": Array [
-                "apache",
-              ],
-            },
-            "signal": Object {
-              "rule": Object {
-                "created_at": Array [
-                  "2020-01-10T21:11:45.839Z",
-                ],
-                "created_by": Array [
-                  "elastic",
-                ],
-                "description": Array [
-                  "24/7",
-                ],
-                "enabled": Array [
-                  true,
-                ],
-                "false_positives": Array [
-                  "test-1",
-                ],
-                "filters": Array [],
-                "from": Array [
-                  "now-300s",
-                ],
-                "id": Array [
-                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                ],
-                "immutable": Array [
-                  false,
-                ],
-                "index": Array [
-                  "auditbeat-*",
-                ],
-                "interval": Array [
-                  "5m",
-                ],
-                "language": Array [
-                  "kuery",
-                ],
-                "max_signals": Array [
-                  100,
-                ],
-                "note": Array [
-                  "# this is some markdown documentation",
-                ],
-                "output_index": Array [
-                  ".siem-signals-default",
-                ],
-                "query": Array [
-                  "user.name: root or user.name: admin",
-                ],
-                "references": Array [
-                  "www.test.co",
-                ],
-                "risk_score": Array [
-                  "21",
-                ],
-                "rule_id": Array [
-                  "rule-id-1",
-                ],
-                "saved_id": Array [
-                  "Garrett's IP",
-                ],
-                "severity": Array [
-                  "low",
-                ],
-                "tags": Array [],
-                "threat": Array [],
-                "timeline_id": Array [
-                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                ],
-                "timeline_title": Array [
-                  "Untitled timeline",
-                ],
-                "to": Array [
-                  "now",
-                ],
-                "type": Array [
-                  "saved_query",
-                ],
-                "updated_at": Array [
-                  "2020-01-10T21:11:45.839Z",
-                ],
-                "updated_by": Array [
-                  "elastic",
-                ],
-                "version": Array [
-                  "1",
-                ],
-              },
-            },
-            "source": Object {
-              "ip": Array [
-                "192.168.0.1",
-              ],
-              "port": Array [
-                80,
-              ],
-            },
-            "timestamp": "2018-11-05T19:03:25.937Z",
-            "user": Object {
-              "id": Array [
-                "1",
-              ],
-              "name": Array [
-                "john.dee",
-              ],
-            },
-          },
           "eventId": "my-id",
           "indexName": "my-index",
         }
@@ -1781,6 +667,7 @@ Array [
       handleOnEventClosed={[Function]}
       isDraggable={false}
       isFlyoutView={true}
+      runtimeMappings={Object {}}
       tabType="query"
       timelineId="test"
     >
@@ -1794,6 +681,7 @@ Array [
             isAlert={false}
             loading={true}
             ruleName=""
+            timestamp=""
           >
             <Styled(EuiFlexGroup)
               gutterSize="none"
@@ -1841,159 +729,11 @@ Array [
                   detailsData={null}
                   event={
                     Object {
-                      "ecsData": Object {
-                        "_id": "1",
-                        "destination": Object {
-                          "ip": Array [
-                            "192.168.0.3",
-                          ],
-                          "port": Array [
-                            6343,
-                          ],
-                        },
-                        "event": Object {
-                          "action": Array [
-                            "Action",
-                          ],
-                          "category": Array [
-                            "Access",
-                          ],
-                          "id": Array [
-                            "1",
-                          ],
-                          "module": Array [
-                            "nginx",
-                          ],
-                          "severity": Array [
-                            3,
-                          ],
-                        },
-                        "geo": Object {
-                          "country_iso_code": Array [
-                            "xx",
-                          ],
-                          "region_name": Array [
-                            "xx",
-                          ],
-                        },
-                        "host": Object {
-                          "ip": Array [
-                            "192.168.0.1",
-                          ],
-                          "name": Array [
-                            "apache",
-                          ],
-                        },
-                        "signal": Object {
-                          "rule": Object {
-                            "created_at": Array [
-                              "2020-01-10T21:11:45.839Z",
-                            ],
-                            "created_by": Array [
-                              "elastic",
-                            ],
-                            "description": Array [
-                              "24/7",
-                            ],
-                            "enabled": Array [
-                              true,
-                            ],
-                            "false_positives": Array [
-                              "test-1",
-                            ],
-                            "filters": Array [],
-                            "from": Array [
-                              "now-300s",
-                            ],
-                            "id": Array [
-                              "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                            ],
-                            "immutable": Array [
-                              false,
-                            ],
-                            "index": Array [
-                              "auditbeat-*",
-                            ],
-                            "interval": Array [
-                              "5m",
-                            ],
-                            "language": Array [
-                              "kuery",
-                            ],
-                            "max_signals": Array [
-                              100,
-                            ],
-                            "note": Array [
-                              "# this is some markdown documentation",
-                            ],
-                            "output_index": Array [
-                              ".siem-signals-default",
-                            ],
-                            "query": Array [
-                              "user.name: root or user.name: admin",
-                            ],
-                            "references": Array [
-                              "www.test.co",
-                            ],
-                            "risk_score": Array [
-                              "21",
-                            ],
-                            "rule_id": Array [
-                              "rule-id-1",
-                            ],
-                            "saved_id": Array [
-                              "Garrett's IP",
-                            ],
-                            "severity": Array [
-                              "low",
-                            ],
-                            "tags": Array [],
-                            "threat": Array [],
-                            "timeline_id": Array [
-                              "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                            ],
-                            "timeline_title": Array [
-                              "Untitled timeline",
-                            ],
-                            "to": Array [
-                              "now",
-                            ],
-                            "type": Array [
-                              "saved_query",
-                            ],
-                            "updated_at": Array [
-                              "2020-01-10T21:11:45.839Z",
-                            ],
-                            "updated_by": Array [
-                              "elastic",
-                            ],
-                            "version": Array [
-                              "1",
-                            ],
-                          },
-                        },
-                        "source": Object {
-                          "ip": Array [
-                            "192.168.0.1",
-                          ],
-                          "port": Array [
-                            80,
-                          ],
-                        },
-                        "timestamp": "2018-11-05T19:03:25.937Z",
-                        "user": Object {
-                          "id": Array [
-                            "1",
-                          ],
-                          "name": Array [
-                            "john.dee",
-                          ],
-                        },
-                      },
                       "eventId": "my-id",
                       "indexName": "my-index",
                     }
                   }
+                  handleOnEventClosed={[Function]}
                   hostRisk={null}
                   isAlert={false}
                   isDraggable={false}
@@ -2097,157 +837,9 @@ Array [
       </Styled(EuiFlyoutBody)>
       <Connect(Component)
         detailsData={null}
+        detailsEcsData={null}
         expandedEvent={
           Object {
-            "ecsData": Object {
-              "_id": "1",
-              "destination": Object {
-                "ip": Array [
-                  "192.168.0.3",
-                ],
-                "port": Array [
-                  6343,
-                ],
-              },
-              "event": Object {
-                "action": Array [
-                  "Action",
-                ],
-                "category": Array [
-                  "Access",
-                ],
-                "id": Array [
-                  "1",
-                ],
-                "module": Array [
-                  "nginx",
-                ],
-                "severity": Array [
-                  3,
-                ],
-              },
-              "geo": Object {
-                "country_iso_code": Array [
-                  "xx",
-                ],
-                "region_name": Array [
-                  "xx",
-                ],
-              },
-              "host": Object {
-                "ip": Array [
-                  "192.168.0.1",
-                ],
-                "name": Array [
-                  "apache",
-                ],
-              },
-              "signal": Object {
-                "rule": Object {
-                  "created_at": Array [
-                    "2020-01-10T21:11:45.839Z",
-                  ],
-                  "created_by": Array [
-                    "elastic",
-                  ],
-                  "description": Array [
-                    "24/7",
-                  ],
-                  "enabled": Array [
-                    true,
-                  ],
-                  "false_positives": Array [
-                    "test-1",
-                  ],
-                  "filters": Array [],
-                  "from": Array [
-                    "now-300s",
-                  ],
-                  "id": Array [
-                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                  ],
-                  "immutable": Array [
-                    false,
-                  ],
-                  "index": Array [
-                    "auditbeat-*",
-                  ],
-                  "interval": Array [
-                    "5m",
-                  ],
-                  "language": Array [
-                    "kuery",
-                  ],
-                  "max_signals": Array [
-                    100,
-                  ],
-                  "note": Array [
-                    "# this is some markdown documentation",
-                  ],
-                  "output_index": Array [
-                    ".siem-signals-default",
-                  ],
-                  "query": Array [
-                    "user.name: root or user.name: admin",
-                  ],
-                  "references": Array [
-                    "www.test.co",
-                  ],
-                  "risk_score": Array [
-                    "21",
-                  ],
-                  "rule_id": Array [
-                    "rule-id-1",
-                  ],
-                  "saved_id": Array [
-                    "Garrett's IP",
-                  ],
-                  "severity": Array [
-                    "low",
-                  ],
-                  "tags": Array [],
-                  "threat": Array [],
-                  "timeline_id": Array [
-                    "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                  ],
-                  "timeline_title": Array [
-                    "Untitled timeline",
-                  ],
-                  "to": Array [
-                    "now",
-                  ],
-                  "type": Array [
-                    "saved_query",
-                  ],
-                  "updated_at": Array [
-                    "2020-01-10T21:11:45.839Z",
-                  ],
-                  "updated_by": Array [
-                    "elastic",
-                  ],
-                  "version": Array [
-                    "1",
-                  ],
-                },
-              },
-              "source": Object {
-                "ip": Array [
-                  "192.168.0.1",
-                ],
-                "port": Array [
-                  80,
-                ],
-              },
-              "timestamp": "2018-11-05T19:03:25.937Z",
-              "user": Object {
-                "id": Array [
-                  "1",
-                ],
-                "name": Array [
-                  "john.dee",
-                ],
-              },
-            },
             "eventId": "my-id",
             "indexName": "my-index",
           }
@@ -2256,162 +848,15 @@ Array [
         isHostIsolationPanelOpen={false}
         loadingEventDetails={true}
         onAddIsolationStatusClick={[Function]}
+        refetchFlyoutData={[Function]}
         timelineId="test"
       >
         <Memo()
           detailsData={null}
+          detailsEcsData={null}
           dispatch={[Function]}
           expandedEvent={
             Object {
-              "ecsData": Object {
-                "_id": "1",
-                "destination": Object {
-                  "ip": Array [
-                    "192.168.0.3",
-                  ],
-                  "port": Array [
-                    6343,
-                  ],
-                },
-                "event": Object {
-                  "action": Array [
-                    "Action",
-                  ],
-                  "category": Array [
-                    "Access",
-                  ],
-                  "id": Array [
-                    "1",
-                  ],
-                  "module": Array [
-                    "nginx",
-                  ],
-                  "severity": Array [
-                    3,
-                  ],
-                },
-                "geo": Object {
-                  "country_iso_code": Array [
-                    "xx",
-                  ],
-                  "region_name": Array [
-                    "xx",
-                  ],
-                },
-                "host": Object {
-                  "ip": Array [
-                    "192.168.0.1",
-                  ],
-                  "name": Array [
-                    "apache",
-                  ],
-                },
-                "signal": Object {
-                  "rule": Object {
-                    "created_at": Array [
-                      "2020-01-10T21:11:45.839Z",
-                    ],
-                    "created_by": Array [
-                      "elastic",
-                    ],
-                    "description": Array [
-                      "24/7",
-                    ],
-                    "enabled": Array [
-                      true,
-                    ],
-                    "false_positives": Array [
-                      "test-1",
-                    ],
-                    "filters": Array [],
-                    "from": Array [
-                      "now-300s",
-                    ],
-                    "id": Array [
-                      "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                    ],
-                    "immutable": Array [
-                      false,
-                    ],
-                    "index": Array [
-                      "auditbeat-*",
-                    ],
-                    "interval": Array [
-                      "5m",
-                    ],
-                    "language": Array [
-                      "kuery",
-                    ],
-                    "max_signals": Array [
-                      100,
-                    ],
-                    "note": Array [
-                      "# this is some markdown documentation",
-                    ],
-                    "output_index": Array [
-                      ".siem-signals-default",
-                    ],
-                    "query": Array [
-                      "user.name: root or user.name: admin",
-                    ],
-                    "references": Array [
-                      "www.test.co",
-                    ],
-                    "risk_score": Array [
-                      "21",
-                    ],
-                    "rule_id": Array [
-                      "rule-id-1",
-                    ],
-                    "saved_id": Array [
-                      "Garrett's IP",
-                    ],
-                    "severity": Array [
-                      "low",
-                    ],
-                    "tags": Array [],
-                    "threat": Array [],
-                    "timeline_id": Array [
-                      "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                    ],
-                    "timeline_title": Array [
-                      "Untitled timeline",
-                    ],
-                    "to": Array [
-                      "now",
-                    ],
-                    "type": Array [
-                      "saved_query",
-                    ],
-                    "updated_at": Array [
-                      "2020-01-10T21:11:45.839Z",
-                    ],
-                    "updated_by": Array [
-                      "elastic",
-                    ],
-                    "version": Array [
-                      "1",
-                    ],
-                  },
-                },
-                "source": Object {
-                  "ip": Array [
-                    "192.168.0.1",
-                  ],
-                  "port": Array [
-                    80,
-                  ],
-                },
-                "timestamp": "2018-11-05T19:03:25.937Z",
-                "user": Object {
-                  "id": Array [
-                    "1",
-                  ],
-                  "name": Array [
-                    "john.dee",
-                  ],
-                },
-              },
               "eventId": "my-id",
               "indexName": "my-index",
             }
@@ -2421,6 +866,7 @@ Array [
           isHostIsolationPanelOpen={false}
           loadingEventDetails={true}
           onAddIsolationStatusClick={[Function]}
+          refetchFlyoutData={[Function]}
           timelineId="test"
           timelineQuery={
             Object {
@@ -2433,9 +879,12 @@ Array [
             }
           }
         >
-          <EuiFlyoutFooter>
+          <EuiFlyoutFooter
+            data-test-subj="side-panel-flyout-footer"
+          >
             <div
               className="euiFlyoutFooter"
+              data-test-subj="side-panel-flyout-footer"
             >
               <EuiFlexGroup
                 justifyContent="flexEnd"
@@ -2448,171 +897,7 @@ Array [
                   >
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
-                    >
-                      <Memo()
-                        detailsData={null}
-                        ecsData={
-                          Object {
-                            "_id": "1",
-                            "destination": Object {
-                              "ip": Array [
-                                "192.168.0.3",
-                              ],
-                              "port": Array [
-                                6343,
-                              ],
-                            },
-                            "event": Object {
-                              "action": Array [
-                                "Action",
-                              ],
-                              "category": Array [
-                                "Access",
-                              ],
-                              "id": Array [
-                                "1",
-                              ],
-                              "module": Array [
-                                "nginx",
-                              ],
-                              "severity": Array [
-                                3,
-                              ],
-                            },
-                            "geo": Object {
-                              "country_iso_code": Array [
-                                "xx",
-                              ],
-                              "region_name": Array [
-                                "xx",
-                              ],
-                            },
-                            "host": Object {
-                              "ip": Array [
-                                "192.168.0.1",
-                              ],
-                              "name": Array [
-                                "apache",
-                              ],
-                            },
-                            "signal": Object {
-                              "rule": Object {
-                                "created_at": Array [
-                                  "2020-01-10T21:11:45.839Z",
-                                ],
-                                "created_by": Array [
-                                  "elastic",
-                                ],
-                                "description": Array [
-                                  "24/7",
-                                ],
-                                "enabled": Array [
-                                  true,
-                                ],
-                                "false_positives": Array [
-                                  "test-1",
-                                ],
-                                "filters": Array [],
-                                "from": Array [
-                                  "now-300s",
-                                ],
-                                "id": Array [
-                                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                                ],
-                                "immutable": Array [
-                                  false,
-                                ],
-                                "index": Array [
-                                  "auditbeat-*",
-                                ],
-                                "interval": Array [
-                                  "5m",
-                                ],
-                                "language": Array [
-                                  "kuery",
-                                ],
-                                "max_signals": Array [
-                                  100,
-                                ],
-                                "note": Array [
-                                  "# this is some markdown documentation",
-                                ],
-                                "output_index": Array [
-                                  ".siem-signals-default",
-                                ],
-                                "query": Array [
-                                  "user.name: root or user.name: admin",
-                                ],
-                                "references": Array [
-                                  "www.test.co",
-                                ],
-                                "risk_score": Array [
-                                  "21",
-                                ],
-                                "rule_id": Array [
-                                  "rule-id-1",
-                                ],
-                                "saved_id": Array [
-                                  "Garrett's IP",
-                                ],
-                                "severity": Array [
-                                  "low",
-                                ],
-                                "tags": Array [],
-                                "threat": Array [],
-                                "timeline_id": Array [
-                                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                                ],
-                                "timeline_title": Array [
-                                  "Untitled timeline",
-                                ],
-                                "to": Array [
-                                  "now",
-                                ],
-                                "type": Array [
-                                  "saved_query",
-                                ],
-                                "updated_at": Array [
-                                  "2020-01-10T21:11:45.839Z",
-                                ],
-                                "updated_by": Array [
-                                  "elastic",
-                                ],
-                                "version": Array [
-                                  "1",
-                                ],
-                              },
-                            },
-                            "source": Object {
-                              "ip": Array [
-                                "192.168.0.1",
-                              ],
-                              "port": Array [
-                                80,
-                              ],
-                            },
-                            "timestamp": "2018-11-05T19:03:25.937Z",
-                            "user": Object {
-                              "id": Array [
-                                "1",
-                              ],
-                              "name": Array [
-                                "john.dee",
-                              ],
-                            },
-                          }
-                        }
-                        handleOnEventClosed={[Function]}
-                        indexName="my-index"
-                        isHostIsolationPanelOpen={false}
-                        loadingEventDetails={true}
-                        onAddEventFilterClick={[Function]}
-                        onAddExceptionTypeClick={[Function]}
-                        onAddIsolationStatusClick={[Function]}
-                        refetch={[Function]}
-                        timelineId="test"
-                      />
-                    </div>
+                    />
                   </EuiFlexItem>
                 </div>
               </EuiFlexGroup>
@@ -2625,6 +910,1886 @@ Array [
 ]
 `;
 
-exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set 1`] = `null`;
+exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set 1`] = `
+.c3 {
+  color: #535966;
+}
 
-exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set 1`] = `null`;
+.c2 dt {
+  font-size: 12px !important;
+}
+
+.c2 dd {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c2 dd > div {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c1 .euiButtonIcon {
+  position: absolute;
+  right: 12px;
+  top: 6px;
+  z-index: 2;
+}
+
+.c0 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c0 > * {
+  max-width: 100%;
+}
+
+.c0 .inspectButtonComponent {
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity 250ms ease;
+  transition: opacity 250ms ease;
+}
+
+.c0:hover .inspectButtonComponent {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c4 {
+  padding: 16px;
+  background: rgba(250,251,253,0.9);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+.c5 {
+  height: 100%;
+}
+
+<ExpandableHostDetails
+  contextID="test-query"
+  hostName="woohoo!"
+  isDraggable={false}
+>
+  <AnomalyTableProvider
+    criteriaFields={Array []}
+    endDate="2020-07-08T08:20:18.966Z"
+    skip={false}
+    startDate="2020-07-07T08:20:18.966Z"
+  >
+    <HostOverview
+      anomaliesData={null}
+      contextID="test-query"
+      data={Object {}}
+      docValueFields={
+        Array [
+          Object {
+            "field": "@timestamp",
+            "format": "date_time",
+          },
+          Object {
+            "field": "event.end",
+            "format": "date_time",
+          },
+        ]
+      }
+      endDate="2020-07-08T08:20:18.966Z"
+      hostName="woohoo!"
+      id="hostsDetailsQuery"
+      indexNames={
+        Array [
+          "-*elastic-cloud-logs-*",
+          "apm-*-transaction*",
+          "auditbeat-*",
+          "endgame-*",
+          "filebeat-*",
+          "logs-*",
+          "packetbeat-*",
+          "traces-apm*",
+          "winlogbeat-*",
+        ]
+      }
+      isDraggable={false}
+      isInDetailsSidePanel={true}
+      isLoadingAnomaliesData={false}
+      loading={true}
+      narrowDateRange={[Function]}
+      startDate="2020-07-07T08:20:18.966Z"
+    >
+      <InspectButtonContainer>
+        <HoverVisibilityContainer
+          show={true}
+          targetClassNames={
+            Array [
+              "inspectButtonComponent",
+            ]
+          }
+        >
+          <styled.div
+            data-test-subj="hoverVisibilityContainer"
+            targetClassNames={
+              Array [
+                "inspectButtonComponent",
+              ]
+            }
+          >
+            <div
+              className="c0"
+              data-test-subj="hoverVisibilityContainer"
+            >
+              <OverviewWrapper
+                data-test-subj="host-overview"
+                direction="column"
+              >
+                <EuiFlexGroup
+                  className="c1"
+                  data-test-subj="host-overview"
+                  direction="column"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c1"
+                    data-test-subj="host-overview"
+                  >
+                    <OverviewDescriptionList
+                      descriptionList={
+                        Array [
+                          Object {
+                            "description": <EmptyWrapper>
+                              —
+                            </EmptyWrapper>,
+                            "title": "Host ID",
+                          },
+                          Object {
+                            "description": <EmptyWrapper>
+                              —
+                            </EmptyWrapper>,
+                            "title": "First seen",
+                          },
+                          Object {
+                            "description": <EmptyWrapper>
+                              —
+                            </EmptyWrapper>,
+                            "title": "Last seen",
+                          },
+                        ]
+                      }
+                      key="0"
+                    >
+                      <EuiFlexItem
+                        grow={true}
+                      >
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <DescriptionListStyled
+                            listItems={
+                              Array [
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Host ID",
+                                },
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "First seen",
+                                },
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Last seen",
+                                },
+                              ]
+                            }
+                          >
+                            <EuiDescriptionList
+                              className="c2"
+                              listItems={
+                                Array [
+                                  Object {
+                                    "description": <EmptyWrapper>
+                                      —
+                                    </EmptyWrapper>,
+                                    "title": "Host ID",
+                                  },
+                                  Object {
+                                    "description": <EmptyWrapper>
+                                      —
+                                    </EmptyWrapper>,
+                                    "title": "First seen",
+                                  },
+                                  Object {
+                                    "description": <EmptyWrapper>
+                                      —
+                                    </EmptyWrapper>,
+                                    "title": "Last seen",
+                                  },
+                                ]
+                              }
+                            >
+                              <dl
+                                className="euiDescriptionList euiDescriptionList--row c2"
+                              >
+                                <EuiDescriptionListTitle
+                                  key="title-0"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Host ID
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-0"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <EmptyWrapper>
+                                      <span
+                                        className="c3"
+                                      >
+                                        —
+                                      </span>
+                                    </EmptyWrapper>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-1"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    First seen
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-1"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <EmptyWrapper>
+                                      <span
+                                        className="c3"
+                                      >
+                                        —
+                                      </span>
+                                    </EmptyWrapper>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-2"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Last seen
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-2"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <EmptyWrapper>
+                                      <span
+                                        className="c3"
+                                      >
+                                        —
+                                      </span>
+                                    </EmptyWrapper>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                              </dl>
+                            </EuiDescriptionList>
+                          </DescriptionListStyled>
+                        </div>
+                      </EuiFlexItem>
+                    </OverviewDescriptionList>
+                    <OverviewDescriptionList
+                      descriptionList={
+                        Array [
+                          Object {
+                            "description": <Memo(DefaultFieldRenderer)
+                              attrName="host.ip"
+                              idPrefix="host-overview-test-query"
+                              isDraggable={false}
+                              render={[Function]}
+                              rowItems={Array []}
+                            />,
+                            "title": "IP addresses",
+                          },
+                          Object {
+                            "description": <Memo(DefaultFieldRenderer)
+                              attrName="host.mac"
+                              idPrefix="host-overview-test-query"
+                              isDraggable={false}
+                              rowItems={Array []}
+                            />,
+                            "title": "MAC addresses",
+                          },
+                          Object {
+                            "description": <Memo(DefaultFieldRenderer)
+                              attrName="host.os.platform"
+                              idPrefix="host-overview-test-query"
+                              isDraggable={false}
+                              rowItems={Array []}
+                            />,
+                            "title": "Platform",
+                          },
+                        ]
+                      }
+                      key="1"
+                    >
+                      <EuiFlexItem
+                        grow={true}
+                      >
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <DescriptionListStyled
+                            listItems={
+                              Array [
+                                Object {
+                                  "description": <Memo(DefaultFieldRenderer)
+                                    attrName="host.ip"
+                                    idPrefix="host-overview-test-query"
+                                    isDraggable={false}
+                                    render={[Function]}
+                                    rowItems={Array []}
+                                  />,
+                                  "title": "IP addresses",
+                                },
+                                Object {
+                                  "description": <Memo(DefaultFieldRenderer)
+                                    attrName="host.mac"
+                                    idPrefix="host-overview-test-query"
+                                    isDraggable={false}
+                                    rowItems={Array []}
+                                  />,
+                                  "title": "MAC addresses",
+                                },
+                                Object {
+                                  "description": <Memo(DefaultFieldRenderer)
+                                    attrName="host.os.platform"
+                                    idPrefix="host-overview-test-query"
+                                    isDraggable={false}
+                                    rowItems={Array []}
+                                  />,
+                                  "title": "Platform",
+                                },
+                              ]
+                            }
+                          >
+                            <EuiDescriptionList
+                              className="c2"
+                              listItems={
+                                Array [
+                                  Object {
+                                    "description": <Memo(DefaultFieldRenderer)
+                                      attrName="host.ip"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      render={[Function]}
+                                      rowItems={Array []}
+                                    />,
+                                    "title": "IP addresses",
+                                  },
+                                  Object {
+                                    "description": <Memo(DefaultFieldRenderer)
+                                      attrName="host.mac"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    />,
+                                    "title": "MAC addresses",
+                                  },
+                                  Object {
+                                    "description": <Memo(DefaultFieldRenderer)
+                                      attrName="host.os.platform"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    />,
+                                    "title": "Platform",
+                                  },
+                                ]
+                              }
+                            >
+                              <dl
+                                className="euiDescriptionList euiDescriptionList--row c2"
+                              >
+                                <EuiDescriptionListTitle
+                                  key="title-0"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    IP addresses
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-0"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <DefaultFieldRenderer
+                                      attrName="host.ip"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      render={[Function]}
+                                      rowItems={Array []}
+                                    >
+                                      <EmptyWrapper>
+                                        <span
+                                          className="c3"
+                                        >
+                                          —
+                                        </span>
+                                      </EmptyWrapper>
+                                    </DefaultFieldRenderer>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-1"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    MAC addresses
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-1"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <DefaultFieldRenderer
+                                      attrName="host.mac"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    >
+                                      <EmptyWrapper>
+                                        <span
+                                          className="c3"
+                                        >
+                                          —
+                                        </span>
+                                      </EmptyWrapper>
+                                    </DefaultFieldRenderer>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-2"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Platform
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-2"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <DefaultFieldRenderer
+                                      attrName="host.os.platform"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    >
+                                      <EmptyWrapper>
+                                        <span
+                                          className="c3"
+                                        >
+                                          —
+                                        </span>
+                                      </EmptyWrapper>
+                                    </DefaultFieldRenderer>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                              </dl>
+                            </EuiDescriptionList>
+                          </DescriptionListStyled>
+                        </div>
+                      </EuiFlexItem>
+                    </OverviewDescriptionList>
+                    <OverviewDescriptionList
+                      descriptionList={
+                        Array [
+                          Object {
+                            "description": <Memo(DefaultFieldRenderer)
+                              attrName="host.os.name"
+                              idPrefix="host-overview-test-query"
+                              isDraggable={false}
+                              rowItems={Array []}
+                            />,
+                            "title": "Operating system",
+                          },
+                          Object {
+                            "description": <Memo(DefaultFieldRenderer)
+                              attrName="host.os.family"
+                              idPrefix="host-overview-test-query"
+                              isDraggable={false}
+                              rowItems={Array []}
+                            />,
+                            "title": "Family",
+                          },
+                          Object {
+                            "description": <Memo(DefaultFieldRenderer)
+                              attrName="host.os.version"
+                              idPrefix="host-overview-test-query"
+                              isDraggable={false}
+                              rowItems={Array []}
+                            />,
+                            "title": "Version",
+                          },
+                          Object {
+                            "description": <Memo(DefaultFieldRenderer)
+                              attrName="host.architecture"
+                              idPrefix="host-overview-test-query"
+                              isDraggable={false}
+                              rowItems={Array []}
+                            />,
+                            "title": "Architecture",
+                          },
+                        ]
+                      }
+                      key="2"
+                    >
+                      <EuiFlexItem
+                        grow={true}
+                      >
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <DescriptionListStyled
+                            listItems={
+                              Array [
+                                Object {
+                                  "description": <Memo(DefaultFieldRenderer)
+                                    attrName="host.os.name"
+                                    idPrefix="host-overview-test-query"
+                                    isDraggable={false}
+                                    rowItems={Array []}
+                                  />,
+                                  "title": "Operating system",
+                                },
+                                Object {
+                                  "description": <Memo(DefaultFieldRenderer)
+                                    attrName="host.os.family"
+                                    idPrefix="host-overview-test-query"
+                                    isDraggable={false}
+                                    rowItems={Array []}
+                                  />,
+                                  "title": "Family",
+                                },
+                                Object {
+                                  "description": <Memo(DefaultFieldRenderer)
+                                    attrName="host.os.version"
+                                    idPrefix="host-overview-test-query"
+                                    isDraggable={false}
+                                    rowItems={Array []}
+                                  />,
+                                  "title": "Version",
+                                },
+                                Object {
+                                  "description": <Memo(DefaultFieldRenderer)
+                                    attrName="host.architecture"
+                                    idPrefix="host-overview-test-query"
+                                    isDraggable={false}
+                                    rowItems={Array []}
+                                  />,
+                                  "title": "Architecture",
+                                },
+                              ]
+                            }
+                          >
+                            <EuiDescriptionList
+                              className="c2"
+                              listItems={
+                                Array [
+                                  Object {
+                                    "description": <Memo(DefaultFieldRenderer)
+                                      attrName="host.os.name"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    />,
+                                    "title": "Operating system",
+                                  },
+                                  Object {
+                                    "description": <Memo(DefaultFieldRenderer)
+                                      attrName="host.os.family"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    />,
+                                    "title": "Family",
+                                  },
+                                  Object {
+                                    "description": <Memo(DefaultFieldRenderer)
+                                      attrName="host.os.version"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    />,
+                                    "title": "Version",
+                                  },
+                                  Object {
+                                    "description": <Memo(DefaultFieldRenderer)
+                                      attrName="host.architecture"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    />,
+                                    "title": "Architecture",
+                                  },
+                                ]
+                              }
+                            >
+                              <dl
+                                className="euiDescriptionList euiDescriptionList--row c2"
+                              >
+                                <EuiDescriptionListTitle
+                                  key="title-0"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Operating system
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-0"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <DefaultFieldRenderer
+                                      attrName="host.os.name"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    >
+                                      <EmptyWrapper>
+                                        <span
+                                          className="c3"
+                                        >
+                                          —
+                                        </span>
+                                      </EmptyWrapper>
+                                    </DefaultFieldRenderer>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-1"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Family
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-1"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <DefaultFieldRenderer
+                                      attrName="host.os.family"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    >
+                                      <EmptyWrapper>
+                                        <span
+                                          className="c3"
+                                        >
+                                          —
+                                        </span>
+                                      </EmptyWrapper>
+                                    </DefaultFieldRenderer>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-2"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Version
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-2"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <DefaultFieldRenderer
+                                      attrName="host.os.version"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    >
+                                      <EmptyWrapper>
+                                        <span
+                                          className="c3"
+                                        >
+                                          —
+                                        </span>
+                                      </EmptyWrapper>
+                                    </DefaultFieldRenderer>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-3"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Architecture
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-3"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <DefaultFieldRenderer
+                                      attrName="host.architecture"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    >
+                                      <EmptyWrapper>
+                                        <span
+                                          className="c3"
+                                        >
+                                          —
+                                        </span>
+                                      </EmptyWrapper>
+                                    </DefaultFieldRenderer>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                              </dl>
+                            </EuiDescriptionList>
+                          </DescriptionListStyled>
+                        </div>
+                      </EuiFlexItem>
+                    </OverviewDescriptionList>
+                    <OverviewDescriptionList
+                      descriptionList={
+                        Array [
+                          Object {
+                            "description": <Memo(DefaultFieldRenderer)
+                              attrName="cloud.provider"
+                              idPrefix="host-overview-test-query"
+                              isDraggable={false}
+                              rowItems={Array []}
+                            />,
+                            "title": "Cloud provider",
+                          },
+                          Object {
+                            "description": <Memo(DefaultFieldRenderer)
+                              attrName="cloud.region"
+                              idPrefix="host-overview-test-query"
+                              isDraggable={false}
+                              rowItems={Array []}
+                            />,
+                            "title": "Region",
+                          },
+                          Object {
+                            "description": <Memo(DefaultFieldRenderer)
+                              attrName="cloud.instance.id"
+                              idPrefix="host-overview-test-query"
+                              isDraggable={false}
+                              rowItems={Array []}
+                            />,
+                            "title": "Instance ID",
+                          },
+                          Object {
+                            "description": <Memo(DefaultFieldRenderer)
+                              attrName="cloud.machine.type"
+                              idPrefix="host-overview-test-query"
+                              isDraggable={false}
+                              rowItems={Array []}
+                            />,
+                            "title": "Machine type",
+                          },
+                        ]
+                      }
+                      key="3"
+                    >
+                      <EuiFlexItem
+                        grow={true}
+                      >
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <DescriptionListStyled
+                            listItems={
+                              Array [
+                                Object {
+                                  "description": <Memo(DefaultFieldRenderer)
+                                    attrName="cloud.provider"
+                                    idPrefix="host-overview-test-query"
+                                    isDraggable={false}
+                                    rowItems={Array []}
+                                  />,
+                                  "title": "Cloud provider",
+                                },
+                                Object {
+                                  "description": <Memo(DefaultFieldRenderer)
+                                    attrName="cloud.region"
+                                    idPrefix="host-overview-test-query"
+                                    isDraggable={false}
+                                    rowItems={Array []}
+                                  />,
+                                  "title": "Region",
+                                },
+                                Object {
+                                  "description": <Memo(DefaultFieldRenderer)
+                                    attrName="cloud.instance.id"
+                                    idPrefix="host-overview-test-query"
+                                    isDraggable={false}
+                                    rowItems={Array []}
+                                  />,
+                                  "title": "Instance ID",
+                                },
+                                Object {
+                                  "description": <Memo(DefaultFieldRenderer)
+                                    attrName="cloud.machine.type"
+                                    idPrefix="host-overview-test-query"
+                                    isDraggable={false}
+                                    rowItems={Array []}
+                                  />,
+                                  "title": "Machine type",
+                                },
+                              ]
+                            }
+                          >
+                            <EuiDescriptionList
+                              className="c2"
+                              listItems={
+                                Array [
+                                  Object {
+                                    "description": <Memo(DefaultFieldRenderer)
+                                      attrName="cloud.provider"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    />,
+                                    "title": "Cloud provider",
+                                  },
+                                  Object {
+                                    "description": <Memo(DefaultFieldRenderer)
+                                      attrName="cloud.region"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    />,
+                                    "title": "Region",
+                                  },
+                                  Object {
+                                    "description": <Memo(DefaultFieldRenderer)
+                                      attrName="cloud.instance.id"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    />,
+                                    "title": "Instance ID",
+                                  },
+                                  Object {
+                                    "description": <Memo(DefaultFieldRenderer)
+                                      attrName="cloud.machine.type"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    />,
+                                    "title": "Machine type",
+                                  },
+                                ]
+                              }
+                            >
+                              <dl
+                                className="euiDescriptionList euiDescriptionList--row c2"
+                              >
+                                <EuiDescriptionListTitle
+                                  key="title-0"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Cloud provider
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-0"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <DefaultFieldRenderer
+                                      attrName="cloud.provider"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    >
+                                      <EmptyWrapper>
+                                        <span
+                                          className="c3"
+                                        >
+                                          —
+                                        </span>
+                                      </EmptyWrapper>
+                                    </DefaultFieldRenderer>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-1"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Region
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-1"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <DefaultFieldRenderer
+                                      attrName="cloud.region"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    >
+                                      <EmptyWrapper>
+                                        <span
+                                          className="c3"
+                                        >
+                                          —
+                                        </span>
+                                      </EmptyWrapper>
+                                    </DefaultFieldRenderer>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-2"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Instance ID
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-2"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <DefaultFieldRenderer
+                                      attrName="cloud.instance.id"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    >
+                                      <EmptyWrapper>
+                                        <span
+                                          className="c3"
+                                        >
+                                          —
+                                        </span>
+                                      </EmptyWrapper>
+                                    </DefaultFieldRenderer>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-3"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Machine type
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-3"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <DefaultFieldRenderer
+                                      attrName="cloud.machine.type"
+                                      idPrefix="host-overview-test-query"
+                                      isDraggable={false}
+                                      rowItems={Array []}
+                                    >
+                                      <EmptyWrapper>
+                                        <span
+                                          className="c3"
+                                        >
+                                          —
+                                        </span>
+                                      </EmptyWrapper>
+                                    </DefaultFieldRenderer>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                              </dl>
+                            </EuiDescriptionList>
+                          </DescriptionListStyled>
+                        </div>
+                      </EuiFlexItem>
+                    </OverviewDescriptionList>
+                    <Loader
+                      overlay={true}
+                      overlayBackground="#fafbfd"
+                      size="xl"
+                    >
+                      <Aside
+                        overlay={true}
+                        overlayBackground="#fafbfd"
+                      >
+                        <aside
+                          className="c4"
+                        >
+                          <FlexGroup
+                            overlay={
+                              Object {
+                                "overlay": true,
+                              }
+                            }
+                          >
+                            <EuiFlexGroup
+                              alignItems="center"
+                              className="c5"
+                              direction="column"
+                              gutterSize="s"
+                              justifyContent="center"
+                              overlay={
+                                Object {
+                                  "overlay": true,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c5"
+                                overlay={
+                                  Object {
+                                    "overlay": true,
+                                  }
+                                }
+                              >
+                                <EuiFlexItem
+                                  grow={false}
+                                >
+                                  <div
+                                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                                  >
+                                    <EuiLoadingSpinner
+                                      data-test-subj="loading-spinner"
+                                      size="xl"
+                                    >
+                                      <span
+                                        className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                                        data-test-subj="loading-spinner"
+                                      />
+                                    </EuiLoadingSpinner>
+                                  </div>
+                                </EuiFlexItem>
+                              </div>
+                            </EuiFlexGroup>
+                          </FlexGroup>
+                        </aside>
+                      </Aside>
+                    </Loader>
+                  </div>
+                </EuiFlexGroup>
+              </OverviewWrapper>
+            </div>
+          </styled.div>
+        </HoverVisibilityContainer>
+      </InspectButtonContainer>
+    </HostOverview>
+  </AnomalyTableProvider>
+</ExpandableHostDetails>
+`;
+
+exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set 1`] = `
+.c3 {
+  color: #535966;
+}
+
+.c2 dt {
+  font-size: 12px !important;
+}
+
+.c2 dd {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c2 dd > div {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c1 .euiButtonIcon {
+  position: absolute;
+  right: 12px;
+  top: 6px;
+  z-index: 2;
+}
+
+.c0 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c0 > * {
+  max-width: 100%;
+}
+
+.c0 .inspectButtonComponent {
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity 250ms ease;
+  transition: opacity 250ms ease;
+}
+
+.c0:hover .inspectButtonComponent {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c4 {
+  padding: 16px;
+  background: rgba(250,251,253,0.9);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+.c5 {
+  height: 100%;
+}
+
+<ExpandableNetworkDetails
+  contextID="test-query"
+  expandedNetwork={
+    Object {
+      "flowTarget": "source",
+      "ip": "woohoo!",
+    }
+  }
+  isDraggable={false}
+>
+  <IpOverview
+    anomaliesData={null}
+    contextID="test-query"
+    data={Object {}}
+    endDate="2020-07-08T08:20:18.966Z"
+    flowTarget="source"
+    id="networkDetailsQuery"
+    ip="woohoo!"
+    isDraggable={false}
+    isInDetailsSidePanel={true}
+    isLoadingAnomaliesData={false}
+    loading={true}
+    narrowDateRange={[Function]}
+    startDate="2020-07-07T08:20:18.966Z"
+    type="details"
+  >
+    <InspectButtonContainer>
+      <HoverVisibilityContainer
+        show={true}
+        targetClassNames={
+          Array [
+            "inspectButtonComponent",
+          ]
+        }
+      >
+        <styled.div
+          data-test-subj="hoverVisibilityContainer"
+          targetClassNames={
+            Array [
+              "inspectButtonComponent",
+            ]
+          }
+        >
+          <div
+            className="c0"
+            data-test-subj="hoverVisibilityContainer"
+          >
+            <OverviewWrapper
+              direction="column"
+            >
+              <EuiFlexGroup
+                className="c1"
+                direction="column"
+              >
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c1"
+                >
+                  <OverviewDescriptionList
+                    descriptionList={
+                      Array [
+                        Object {
+                          "description": <EmptyWrapper>
+                            —
+                          </EmptyWrapper>,
+                          "title": "Location",
+                        },
+                        Object {
+                          "description": <EmptyWrapper>
+                            —
+                          </EmptyWrapper>,
+                          "title": "Autonomous system",
+                        },
+                      ]
+                    }
+                    key="0"
+                  >
+                    <EuiFlexItem
+                      grow={true}
+                    >
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <DescriptionListStyled
+                          listItems={
+                            Array [
+                              Object {
+                                "description": <EmptyWrapper>
+                                  —
+                                </EmptyWrapper>,
+                                "title": "Location",
+                              },
+                              Object {
+                                "description": <EmptyWrapper>
+                                  —
+                                </EmptyWrapper>,
+                                "title": "Autonomous system",
+                              },
+                            ]
+                          }
+                        >
+                          <EuiDescriptionList
+                            className="c2"
+                            listItems={
+                              Array [
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Location",
+                                },
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Autonomous system",
+                                },
+                              ]
+                            }
+                          >
+                            <dl
+                              className="euiDescriptionList euiDescriptionList--row c2"
+                            >
+                              <EuiDescriptionListTitle
+                                key="title-0"
+                              >
+                                <dt
+                                  className="euiDescriptionList__title"
+                                >
+                                  Location
+                                </dt>
+                              </EuiDescriptionListTitle>
+                              <EuiDescriptionListDescription
+                                key="description-0"
+                              >
+                                <dd
+                                  className="euiDescriptionList__description"
+                                >
+                                  <EmptyWrapper>
+                                    <span
+                                      className="c3"
+                                    >
+                                      —
+                                    </span>
+                                  </EmptyWrapper>
+                                </dd>
+                              </EuiDescriptionListDescription>
+                              <EuiDescriptionListTitle
+                                key="title-1"
+                              >
+                                <dt
+                                  className="euiDescriptionList__title"
+                                >
+                                  Autonomous system
+                                </dt>
+                              </EuiDescriptionListTitle>
+                              <EuiDescriptionListDescription
+                                key="description-1"
+                              >
+                                <dd
+                                  className="euiDescriptionList__description"
+                                >
+                                  <EmptyWrapper>
+                                    <span
+                                      className="c3"
+                                    >
+                                      —
+                                    </span>
+                                  </EmptyWrapper>
+                                </dd>
+                              </EuiDescriptionListDescription>
+                            </dl>
+                          </EuiDescriptionList>
+                        </DescriptionListStyled>
+                      </div>
+                    </EuiFlexItem>
+                  </OverviewDescriptionList>
+                  <OverviewDescriptionList
+                    descriptionList={
+                      Array [
+                        Object {
+                          "description": <EmptyWrapper>
+                            —
+                          </EmptyWrapper>,
+                          "title": "First seen",
+                        },
+                        Object {
+                          "description": <EmptyWrapper>
+                            —
+                          </EmptyWrapper>,
+                          "title": "Last seen",
+                        },
+                      ]
+                    }
+                    key="1"
+                  >
+                    <EuiFlexItem
+                      grow={true}
+                    >
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <DescriptionListStyled
+                          listItems={
+                            Array [
+                              Object {
+                                "description": <EmptyWrapper>
+                                  —
+                                </EmptyWrapper>,
+                                "title": "First seen",
+                              },
+                              Object {
+                                "description": <EmptyWrapper>
+                                  —
+                                </EmptyWrapper>,
+                                "title": "Last seen",
+                              },
+                            ]
+                          }
+                        >
+                          <EuiDescriptionList
+                            className="c2"
+                            listItems={
+                              Array [
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "First seen",
+                                },
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Last seen",
+                                },
+                              ]
+                            }
+                          >
+                            <dl
+                              className="euiDescriptionList euiDescriptionList--row c2"
+                            >
+                              <EuiDescriptionListTitle
+                                key="title-0"
+                              >
+                                <dt
+                                  className="euiDescriptionList__title"
+                                >
+                                  First seen
+                                </dt>
+                              </EuiDescriptionListTitle>
+                              <EuiDescriptionListDescription
+                                key="description-0"
+                              >
+                                <dd
+                                  className="euiDescriptionList__description"
+                                >
+                                  <EmptyWrapper>
+                                    <span
+                                      className="c3"
+                                    >
+                                      —
+                                    </span>
+                                  </EmptyWrapper>
+                                </dd>
+                              </EuiDescriptionListDescription>
+                              <EuiDescriptionListTitle
+                                key="title-1"
+                              >
+                                <dt
+                                  className="euiDescriptionList__title"
+                                >
+                                  Last seen
+                                </dt>
+                              </EuiDescriptionListTitle>
+                              <EuiDescriptionListDescription
+                                key="description-1"
+                              >
+                                <dd
+                                  className="euiDescriptionList__description"
+                                >
+                                  <EmptyWrapper>
+                                    <span
+                                      className="c3"
+                                    >
+                                      —
+                                    </span>
+                                  </EmptyWrapper>
+                                </dd>
+                              </EuiDescriptionListDescription>
+                            </dl>
+                          </EuiDescriptionList>
+                        </DescriptionListStyled>
+                      </div>
+                    </EuiFlexItem>
+                  </OverviewDescriptionList>
+                  <OverviewDescriptionList
+                    descriptionList={
+                      Array [
+                        Object {
+                          "description": <EmptyWrapper>
+                            —
+                          </EmptyWrapper>,
+                          "title": "Host ID",
+                        },
+                        Object {
+                          "description": <EmptyWrapper>
+                            —
+                          </EmptyWrapper>,
+                          "title": "Host name",
+                        },
+                      ]
+                    }
+                    key="2"
+                  >
+                    <EuiFlexItem
+                      grow={true}
+                    >
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <DescriptionListStyled
+                          listItems={
+                            Array [
+                              Object {
+                                "description": <EmptyWrapper>
+                                  —
+                                </EmptyWrapper>,
+                                "title": "Host ID",
+                              },
+                              Object {
+                                "description": <EmptyWrapper>
+                                  —
+                                </EmptyWrapper>,
+                                "title": "Host name",
+                              },
+                            ]
+                          }
+                        >
+                          <EuiDescriptionList
+                            className="c2"
+                            listItems={
+                              Array [
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Host ID",
+                                },
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Host name",
+                                },
+                              ]
+                            }
+                          >
+                            <dl
+                              className="euiDescriptionList euiDescriptionList--row c2"
+                            >
+                              <EuiDescriptionListTitle
+                                key="title-0"
+                              >
+                                <dt
+                                  className="euiDescriptionList__title"
+                                >
+                                  Host ID
+                                </dt>
+                              </EuiDescriptionListTitle>
+                              <EuiDescriptionListDescription
+                                key="description-0"
+                              >
+                                <dd
+                                  className="euiDescriptionList__description"
+                                >
+                                  <EmptyWrapper>
+                                    <span
+                                      className="c3"
+                                    >
+                                      —
+                                    </span>
+                                  </EmptyWrapper>
+                                </dd>
+                              </EuiDescriptionListDescription>
+                              <EuiDescriptionListTitle
+                                key="title-1"
+                              >
+                                <dt
+                                  className="euiDescriptionList__title"
+                                >
+                                  Host name
+                                </dt>
+                              </EuiDescriptionListTitle>
+                              <EuiDescriptionListDescription
+                                key="description-1"
+                              >
+                                <dd
+                                  className="euiDescriptionList__description"
+                                >
+                                  <EmptyWrapper>
+                                    <span
+                                      className="c3"
+                                    >
+                                      —
+                                    </span>
+                                  </EmptyWrapper>
+                                </dd>
+                              </EuiDescriptionListDescription>
+                            </dl>
+                          </EuiDescriptionList>
+                        </DescriptionListStyled>
+                      </div>
+                    </EuiFlexItem>
+                  </OverviewDescriptionList>
+                  <OverviewDescriptionList
+                    descriptionList={
+                      Array [
+                        Object {
+                          "description": <Memo(WhoIsLink)
+                            domain="woohoo!"
+                          >
+                            iana.org
+                          </Memo(WhoIsLink)>,
+                          "title": "WhoIs",
+                        },
+                        Object {
+                          "description": <Memo(ReputationLinkComponent)
+                            direction="column"
+                            domain="woohoo!"
+                          />,
+                          "title": "Reputation",
+                        },
+                      ]
+                    }
+                    key="3"
+                  >
+                    <EuiFlexItem
+                      grow={true}
+                    >
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <DescriptionListStyled
+                          listItems={
+                            Array [
+                              Object {
+                                "description": <Memo(WhoIsLink)
+                                  domain="woohoo!"
+                                >
+                                  iana.org
+                                </Memo(WhoIsLink)>,
+                                "title": "WhoIs",
+                              },
+                              Object {
+                                "description": <Memo(ReputationLinkComponent)
+                                  direction="column"
+                                  domain="woohoo!"
+                                />,
+                                "title": "Reputation",
+                              },
+                            ]
+                          }
+                        >
+                          <EuiDescriptionList
+                            className="c2"
+                            listItems={
+                              Array [
+                                Object {
+                                  "description": <Memo(WhoIsLink)
+                                    domain="woohoo!"
+                                  >
+                                    iana.org
+                                  </Memo(WhoIsLink)>,
+                                  "title": "WhoIs",
+                                },
+                                Object {
+                                  "description": <Memo(ReputationLinkComponent)
+                                    direction="column"
+                                    domain="woohoo!"
+                                  />,
+                                  "title": "Reputation",
+                                },
+                              ]
+                            }
+                          >
+                            <dl
+                              className="euiDescriptionList euiDescriptionList--row c2"
+                            >
+                              <EuiDescriptionListTitle
+                                key="title-0"
+                              >
+                                <dt
+                                  className="euiDescriptionList__title"
+                                >
+                                  WhoIs
+                                </dt>
+                              </EuiDescriptionListTitle>
+                              <EuiDescriptionListDescription
+                                key="description-0"
+                              >
+                                <dd
+                                  className="euiDescriptionList__description"
+                                >
+                                  <WhoIsLink
+                                    domain="woohoo!"
+                                  >
+                                    <ExternalLink
+                                      url="https://www.iana.org/whois?q=woohoo!"
+                                    >
+                                      <EuiToolTip
+                                        content="https://www.iana.org/whois?q=woohoo!"
+                                        data-test-subj="externalLinkTooltip"
+                                        delay="regular"
+                                        display="inlineBlock"
+                                        position="top"
+                                      >
+                                        <span
+                                          className="euiToolTipAnchor"
+                                          onMouseOut={[Function]}
+                                          onMouseOver={[Function]}
+                                        >
+                                          <EuiLink
+                                            data-test-subj="externalLink"
+                                            href="https://www.iana.org/whois?q=woohoo!"
+                                            rel="noopener"
+                                            target="_blank"
+                                          >
+                                            <a
+                                              className="euiLink euiLink--primary"
+                                              data-test-subj="externalLink"
+                                              href="https://www.iana.org/whois?q=woohoo!"
+                                              rel="noopener noreferrer"
+                                              target="_blank"
+                                            >
+                                              iana.org
+                                              <EuiIcon
+                                                aria-label="External link"
+                                                className="euiLink__externalIcon"
+                                                size="s"
+                                                type="popout"
+                                              >
+                                                <span
+                                                  aria-label="External link"
+                                                  className="euiLink__externalIcon"
+                                                  data-euiicon-type="popout"
+                                                  size="s"
+                                                />
+                                              </EuiIcon>
+                                              <EuiScreenReaderOnly>
+                                                <span
+                                                  className="euiScreenReaderOnly"
+                                                >
+                                                  <EuiI18n
+                                                    default="(opens in a new tab or window)"
+                                                    token="euiLink.newTarget.screenReaderOnlyText"
+                                                  >
+                                                    (opens in a new tab or window)
+                                                  </EuiI18n>
+                                                </span>
+                                              </EuiScreenReaderOnly>
+                                            </a>
+                                          </EuiLink>
+                                        </span>
+                                      </EuiToolTip>
+                                    </ExternalLink>
+                                  </WhoIsLink>
+                                </dd>
+                              </EuiDescriptionListDescription>
+                              <EuiDescriptionListTitle
+                                key="title-1"
+                              >
+                                <dt
+                                  className="euiDescriptionList__title"
+                                >
+                                  Reputation
+                                </dt>
+                              </EuiDescriptionListTitle>
+                              <EuiDescriptionListDescription
+                                key="description-1"
+                              >
+                                <dd
+                                  className="euiDescriptionList__description"
+                                >
+                                  <Memo(ReputationLinkComponent)
+                                    direction="column"
+                                    domain="woohoo!"
+                                  />
+                                </dd>
+                              </EuiDescriptionListDescription>
+                            </dl>
+                          </EuiDescriptionList>
+                        </DescriptionListStyled>
+                      </div>
+                    </EuiFlexItem>
+                  </OverviewDescriptionList>
+                  <Loader
+                    overlay={true}
+                    overlayBackground="#fafbfd"
+                    size="xl"
+                  >
+                    <Aside
+                      overlay={true}
+                      overlayBackground="#fafbfd"
+                    >
+                      <aside
+                        className="c4"
+                      >
+                        <FlexGroup
+                          overlay={
+                            Object {
+                              "overlay": true,
+                            }
+                          }
+                        >
+                          <EuiFlexGroup
+                            alignItems="center"
+                            className="c5"
+                            direction="column"
+                            gutterSize="s"
+                            justifyContent="center"
+                            overlay={
+                              Object {
+                                "overlay": true,
+                              }
+                            }
+                          >
+                            <div
+                              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c5"
+                              overlay={
+                                Object {
+                                  "overlay": true,
+                                }
+                              }
+                            >
+                              <EuiFlexItem
+                                grow={false}
+                              >
+                                <div
+                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  <EuiLoadingSpinner
+                                    data-test-subj="loading-spinner"
+                                    size="xl"
+                                  >
+                                    <span
+                                      className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                                      data-test-subj="loading-spinner"
+                                    />
+                                  </EuiLoadingSpinner>
+                                </div>
+                              </EuiFlexItem>
+                            </div>
+                          </EuiFlexGroup>
+                        </FlexGroup>
+                      </aside>
+                    </Aside>
+                  </Loader>
+                </div>
+              </EuiFlexGroup>
+            </OverviewWrapper>
+          </div>
+        </styled.div>
+      </HoverVisibilityContainer>
+    </InspectButtonContainer>
+  </IpOverview>
+</ExpandableNetworkDetails>
+`;

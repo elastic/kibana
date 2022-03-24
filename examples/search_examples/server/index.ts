@@ -13,4 +13,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new SearchExamplesPlugin(initializerContext);
 }
 
-export { SearchExamplesPluginSetup, SearchExamplesPluginStart } from './types';
+export type { SearchExamplesPluginSetup, SearchExamplesPluginStart } from './types';

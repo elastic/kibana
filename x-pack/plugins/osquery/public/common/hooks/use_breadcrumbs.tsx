@@ -101,54 +101,54 @@ const breadcrumbGetters: {
       text: savedQueryName,
     },
   ],
-  scheduled_query_groups: () => [
+  packs: () => [
     BASE_BREADCRUMB,
     {
-      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledQueryGroupsPageTitle', {
-        defaultMessage: 'Scheduled query groups',
+      text: i18n.translate('xpack.osquery.breadcrumbs.packsPageTitle', {
+        defaultMessage: 'Packs',
       }),
     },
   ],
-  scheduled_query_group_add: () => [
+  pack_add: () => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.scheduled_query_groups(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledQueryGroupsPageTitle', {
-        defaultMessage: 'Scheduled query groups',
+      href: pagePathGetters.packs(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.packsPageTitle', {
+        defaultMessage: 'Packs',
       }),
     },
     {
-      text: i18n.translate('xpack.osquery.breadcrumbs.addScheduledQueryGroupsPageTitle', {
+      text: i18n.translate('xpack.osquery.breadcrumbs.addpacksPageTitle', {
         defaultMessage: 'Add',
       }),
     },
   ],
-  scheduled_query_group_details: ({ scheduledQueryGroupName }) => [
+  pack_details: ({ packName }) => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.scheduled_query_groups(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledQueryGroupsPageTitle', {
-        defaultMessage: 'Scheduled query groups',
+      href: pagePathGetters.packs(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.packsPageTitle', {
+        defaultMessage: 'Packs',
       }),
     },
     {
-      text: scheduledQueryGroupName,
+      text: packName,
     },
   ],
-  scheduled_query_group_edit: ({ scheduledQueryGroupName, scheduledQueryGroupId }) => [
+  pack_edit: ({ packName, packId }) => [
     BASE_BREADCRUMB,
     {
-      href: pagePathGetters.scheduled_query_groups(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledQueryGroupsPageTitle', {
-        defaultMessage: 'Scheduled query groups',
+      href: pagePathGetters.packs(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.packsPageTitle', {
+        defaultMessage: 'Packs',
       }),
     },
     {
-      href: pagePathGetters.scheduled_query_group_details({ scheduledQueryGroupId }),
-      text: scheduledQueryGroupName,
+      href: pagePathGetters.pack_details({ packId }),
+      text: packName,
     },
     {
-      text: i18n.translate('xpack.osquery.breadcrumbs.editScheduledQueryGroupsPageTitle', {
+      text: i18n.translate('xpack.osquery.breadcrumbs.editpacksPageTitle', {
         defaultMessage: 'Edit',
       }),
     },
@@ -156,12 +156,27 @@ const breadcrumbGetters: {
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
-  const { chrome, http } = useKibana().services;
+  const { chrome, http, application } = useKibana().services;
+
   const breadcrumbs: ChromeBreadcrumb[] =
-    breadcrumbGetters[page]?.(values).map((breadcrumb) => ({
-      ...breadcrumb,
-      href: breadcrumb.href ? http.basePath.prepend(`${BASE_PATH}${breadcrumb.href}`) : undefined,
-    })) || [];
+    breadcrumbGetters[page]?.(values).map((breadcrumb) => {
+      const href = breadcrumb.href
+        ? http.basePath.prepend(`${BASE_PATH}${breadcrumb.href}`)
+        : undefined;
+      return {
+        ...breadcrumb,
+        href,
+        onClick: href
+          ? (ev: React.MouseEvent) => {
+              if (ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey) {
+                return;
+              }
+              ev.preventDefault();
+              application.navigateToUrl(href);
+            }
+          : undefined,
+      };
+    }) || [];
   const docTitle: string[] = [...breadcrumbs]
     .reverse()
     .map((breadcrumb) => breadcrumb.text as string);

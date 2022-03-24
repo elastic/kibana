@@ -13,14 +13,9 @@ import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import {
-  FilterManager,
-  IIndexPattern,
-  TimeRange,
-  Query,
-  Filter,
-  SavedQuery,
-} from 'src/plugins/data/public';
+
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { FilterManager, TimeRange, SavedQuery } from 'src/plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 
@@ -48,9 +43,12 @@ const APP_STATE_STORAGE_KEY = 'securitySolution.searchBar.appState';
 
 interface SiemSearchBarProps {
   id: InputsModelId;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
+  pollForSignalIndex?: () => void;
   timelineId?: string;
   dataTestSubj?: string;
+  hideFilterBar?: boolean;
+  hideQueryInput?: boolean;
 }
 
 const SearchBarContainer = styled.div`
@@ -64,9 +62,12 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     end,
     filterQuery,
     fromStr,
+    hideFilterBar = false,
+    hideQueryInput = false,
     id,
     indexPattern,
     isLoading = false,
+    pollForSignalIndex,
     queries,
     savedQuery,
     setSavedQuery,
@@ -100,6 +101,11 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
+        // if the function is there, call it to check if the signals index exists yet
+        // in order to update the index fields
+        if (pollForSignalIndex != null) {
+          pollForSignalIndex();
+        }
         const isQuickSelection =
           payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now');
         let updateSearchBar: UpdateReduxSearchBar = {
@@ -144,7 +150,18 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         window.setTimeout(() => updateSearch(updateSearchBar), 0);
       },
-      [id, toStr, end, fromStr, start, filterManager, filterQuery, queries, updateSearch]
+      [
+        id,
+        pollForSignalIndex,
+        toStr,
+        end,
+        fromStr,
+        start,
+        filterManager,
+        filterQuery,
+        queries,
+        updateSearch,
+      ]
     );
 
     const onRefresh = useCallback(
@@ -287,10 +304,10 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           onSaved={onSaved}
           onSavedQueryUpdated={onSavedQueryUpdated}
           savedQuery={savedQuery}
-          showFilterBar={true}
+          showFilterBar={!hideFilterBar}
           showDatePicker={true}
           showQueryBar={true}
-          showQueryInput={true}
+          showQueryInput={!hideQueryInput}
           showSaveQuery={true}
           dataTestSubj={dataTestSubj}
         />

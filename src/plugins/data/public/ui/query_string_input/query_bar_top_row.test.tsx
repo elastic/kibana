@@ -10,15 +10,14 @@ import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';
+import { EMPTY } from 'rxjs';
 
-import { QueryBarTopRow } from './';
-
+import QueryBarTopRow from './query_bar_top_row';
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '../../stubs';
 import { UI_SETTINGS } from '../../../common';
 const startMock = coreMock.createStart();
@@ -27,6 +26,7 @@ const mockTimeHistory = {
   get: () => {
     return [];
   },
+  get$: () => EMPTY,
 };
 
 startMock.uiSettings.get.mockImplementation((key: string) => {
@@ -112,7 +112,7 @@ describe('QueryBarTopRowTopRow', () => {
     jest.clearAllMocks();
   });
 
-  it('Should render query and time picker', async () => {
+  it('Should render query and time picker', () => {
     const { getByText, getByTestId } = render(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
@@ -123,8 +123,8 @@ describe('QueryBarTopRowTopRow', () => {
       })
     );
 
-    await waitFor(() => getByText(kqlQuery.query));
-    await waitFor(() => getByTestId('superDatePickerShowDatesButton'));
+    expect(getByText(kqlQuery.query)).toBeInTheDocument();
+    expect(getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {

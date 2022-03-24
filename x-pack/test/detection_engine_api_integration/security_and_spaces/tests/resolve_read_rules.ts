@@ -18,19 +18,20 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('resolve_read_rules', () => {
     describe('reading rules', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/resolve_read_rules/7_14'
         );
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/resolve_read_rules/7_14'
         );
@@ -41,6 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
         const URL = `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}?id=90e3ca0e-71f7-513a-b60a-ac678efd8887`;
         const readRulesAliasMatchRes = await supertest.get(URL).set('kbn-xsrf', 'true').send();
         expect(readRulesAliasMatchRes.body.outcome).to.eql('aliasMatch');
+        expect(readRulesAliasMatchRes.body.alias_purpose).to.eql('savedObjectConversion');
 
         // now that we have the migrated alias_target_id, let's attempt an 'exactMatch' query
         // the result of which should have the outcome as undefined when querying the read rules api.
@@ -67,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
                 '__internal_rule_id:82747bb8-bae0-4b59-8119-7f65ac564e14',
                 '__internal_immutable:false',
               ],
-              alertTypeId: 'siem.signals',
+              alertTypeId: 'siem.queryRule',
               consumer: 'siem',
               params: {
                 author: [],
@@ -77,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
                 from: 'now-3615s',
                 immutable: false,
                 license: '',
-                outputIndex: '.siem-signals-devin-hurley-714-space',
+                outputIndex: '',
                 meta: {
                   from: '1h',
                   kibana_siem_app_url: 'http://0.0.0.0:5601/s/714-space/app/security',

@@ -16,6 +16,6 @@ export interface MetricsServiceSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [collectionInterval](./kibana-plugin-core-server.metricsservicesetup.collectioninterval.md) | <code>number</code> | Interval metrics are collected in milliseconds |
-|  [getOpsMetrics$](./kibana-plugin-core-server.metricsservicesetup.getopsmetrics_.md) | <code>() =&gt; Observable&lt;OpsMetrics&gt;</code> | Retrieve an observable emitting the [OpsMetrics](./kibana-plugin-core-server.opsmetrics.md) gathered. The observable will emit an initial value during core's <code>start</code> phase, and a new value every fixed interval of time, based on the <code>opts.interval</code> configuration property. |
+|  [collectionInterval](./kibana-plugin-core-server.metricsservicesetup.collectioninterval.md) | number | Interval metrics are collected in milliseconds |
+|  [getOpsMetrics$](./kibana-plugin-core-server.metricsservicesetup.getopsmetrics_.md) | () =&gt; Observable&lt;OpsMetrics&gt; | Retrieve an observable emitting the [OpsMetrics](./kibana-plugin-core-server.opsmetrics.md) gathered. The observable will emit an initial value during core's <code>start</code> phase, and a new value every fixed interval of time, based on the <code>opts.interval</code> configuration property. |
 

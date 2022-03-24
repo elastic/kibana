@@ -9,7 +9,7 @@ import { useContext } from 'react';
 
 import type { ScopedHistory } from 'kibana/public';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { savedObjectsPluginMock } from '../../../../../../src/plugins/saved_objects/public/mocks';
 import { SharePluginStart } from '../../../../../../src/plugins/share/public';
@@ -19,6 +19,7 @@ import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import type { AppDependencies } from '../app_dependencies';
 import { MlSharedContext } from './shared_context';
 import type { GetMlSharedImportsReturnType } from '../../shared_imports';
+import type { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
 
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
@@ -38,11 +39,13 @@ const appDependencies: AppDependencies = {
   savedObjects: coreStart.savedObjects,
   storage: { get: jest.fn() } as unknown as Storage,
   overlays: coreStart.overlays,
+  theme: themeServiceMock.createStartContract(),
   http: coreSetup.http,
   history: {} as ScopedHistory,
   savedObjectsPlugin: savedObjectsPluginMock.createStartContract(),
   share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,
   ml: {} as GetMlSharedImportsReturnType,
+  triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
 };
 
 export const useAppDependencies = () => {

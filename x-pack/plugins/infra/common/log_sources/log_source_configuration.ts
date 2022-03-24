@@ -16,11 +16,6 @@ export const logSourceConfigurationOriginRT = rt.keyof({
 export type LogSourceConfigurationOrigin = rt.TypeOf<typeof logSourceConfigurationOriginRT>;
 
 const logSourceFieldsConfigurationRT = rt.strict({
-  container: rt.string,
-  host: rt.string,
-  pod: rt.string,
-  timestamp: rt.string,
-  tiebreaker: rt.string,
   message: rt.array(rt.string),
 });
 

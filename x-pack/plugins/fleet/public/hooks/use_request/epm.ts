@@ -67,9 +67,9 @@ export const useGetLimitedPackages = () => {
   });
 };
 
-export const useGetPackageInfoByKey = (pkgkey: string) => {
+export const useGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
   return useRequest<GetInfoResponse>({
-    path: epmRouteService.getInfoPath(pkgkey),
+    path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
   });
 };
@@ -81,9 +81,9 @@ export const useGetPackageStats = (pkgName: string) => {
   });
 };
 
-export const sendGetPackageInfoByKey = (pkgkey: string) => {
+export const sendGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
   return sendRequest<GetInfoResponse>({
-    path: epmRouteService.getInfoPath(pkgkey),
+    path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
   });
 };
@@ -102,23 +102,27 @@ export const sendGetFileByPath = (filePath: string) => {
   });
 };
 
-export const sendInstallPackage = (pkgkey: string) => {
+export const sendInstallPackage = (pkgName: string, pkgVersion: string) => {
   return sendRequest<InstallPackageResponse>({
-    path: epmRouteService.getInstallPath(pkgkey),
+    path: epmRouteService.getInstallPath(pkgName, pkgVersion),
     method: 'post',
   });
 };
 
-export const sendRemovePackage = (pkgkey: string) => {
+export const sendRemovePackage = (pkgName: string, pkgVersion: string) => {
   return sendRequest<DeletePackageResponse>({
-    path: epmRouteService.getRemovePath(pkgkey),
+    path: epmRouteService.getRemovePath(pkgName, pkgVersion),
     method: 'delete',
   });
 };
 
-export const sendUpdatePackage = (pkgkey: string, body: UpdatePackageRequest['body']) => {
+export const sendUpdatePackage = (
+  pkgName: string,
+  pkgVersion: string,
+  body: UpdatePackageRequest['body']
+) => {
   return sendRequest<UpdatePackageResponse>({
-    path: epmRouteService.getUpdatePath(pkgkey),
+    path: epmRouteService.getUpdatePath(pkgName, pkgVersion),
     method: 'put',
     body,
   });

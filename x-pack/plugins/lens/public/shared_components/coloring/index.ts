@@ -7,6 +7,7 @@
 
 export { CustomizablePalette } from './palette_configuration';
 export { PalettePanelContainer } from './palette_panel_container';
-export { CustomStops } from './color_stops';
+export { ColorRanges } from './color_ranges';
+
 export * from './utils';
 export * from './constants';

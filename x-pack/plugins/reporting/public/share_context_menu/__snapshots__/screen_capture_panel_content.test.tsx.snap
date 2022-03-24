@@ -259,6 +259,8 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     <EuiAccordion
       arrowDisplay="left"
       buttonContent="Advanced options"
+      buttonElement="button"
+      element="div"
       id="advanced-options"
       initialIsOpen={false}
       isLoading={false}
@@ -271,6 +273,42 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
         <div
           className="euiAccordion__triggerWrapper"
         >
+          <EuiButtonIcon
+            aria-controls="advanced-options"
+            aria-expanded={false}
+            aria-labelledby="generated-id"
+            className="euiAccordion__iconButton"
+            color="text"
+            iconType="arrowRight"
+            onClick={[Function]}
+            tabIndex={-1}
+          >
+            <button
+              aria-controls="advanced-options"
+              aria-expanded={false}
+              aria-labelledby="generated-id"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
+              onClick={[Function]}
+              tabIndex={-1}
+              type="button"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                color="inherit"
+                size="m"
+                type="arrowRight"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowRight"
+                  size="m"
+                />
+              </EuiIcon>
+            </button>
+          </EuiButtonIcon>
           <button
             aria-controls="advanced-options"
             aria-expanded={false}
@@ -280,22 +318,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
             type="button"
           >
             <span
-              className="euiAccordion__iconWrapper"
-            >
-              <EuiIcon
-                className="euiAccordion__icon"
-                size="m"
-                type="arrowRight"
-              >
-                <span
-                  className="euiAccordion__icon"
-                  data-euiicon-type="arrowRight"
-                  size="m"
-                />
-              </EuiIcon>
-            </span>
-            <span
-              className="euiIEFlexWrapFix"
+              className="euiAccordion__buttonContent"
             >
               Advanced options
             </span>
@@ -346,88 +369,88 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
                     className="euiSpacer euiSpacer--s"
                   />
                 </EuiSpacer>
-                <EuiCopy
-                  afterMessage="Copied"
-                  anchorClassName="eui-displayBlock"
-                  textToCopy="http://localhost/api/reporting/generate/Analytical%20App?jobParams=%28browserTimezone%3AAmerica%2FNew_York%2Clayout%3A%28dimensions%3A%28height%3A768%2Cwidth%3A1024%29%2Cid%3Apreserve_layout%29%2CobjectType%3Atest-object-type%2Ctitle%3A%27Test%20Report%20Title%27%2Cversion%3A%277.15.0%27%29"
-                >
-                  <EuiToolTip
-                    anchorClassName="eui-displayBlock"
-                    delay="regular"
-                    display="inlineBlock"
-                    onMouseOut={[Function]}
-                    position="top"
+                <ErrorUnsavedWorkPanel>
+                  <EuiCallOut
+                    color="danger"
+                    iconType="alert"
+                    size="s"
+                    title="Unsaved work"
                   >
-                    <span
-                      className="euiToolTipAnchor eui-displayBlock"
-                      onMouseOut={[Function]}
-                      onMouseOver={[Function]}
+                    <div
+                      className="euiCallOut euiCallOut--danger euiCallOut--small"
                     >
-                      <EuiButton
-                        fullWidth={true}
-                        onBlur={[Function]}
-                        onClick={[Function]}
-                        onFocus={[Function]}
-                        size="s"
+                      <div
+                        className="euiCallOutHeader"
                       >
-                        <EuiButtonDisplay
-                          baseClassName="euiButton"
-                          disabled={false}
-                          element="button"
-                          fullWidth={true}
-                          isDisabled={false}
-                          onBlur={[Function]}
-                          onClick={[Function]}
-                          onFocus={[Function]}
-                          size="s"
-                          type="button"
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiCallOutHeader__icon"
+                          color="inherit"
+                          size="m"
+                          type="alert"
                         >
-                          <button
-                            className="euiButton euiButton--primary euiButton--small euiButton--fullWidth"
-                            disabled={false}
-                            onBlur={[Function]}
-                            onClick={[Function]}
-                            onFocus={[Function]}
-                            style={
-                              Object {
-                                "minWidth": undefined,
-                              }
-                            }
-                            type="button"
+                          <span
+                            aria-hidden="true"
+                            className="euiCallOutHeader__icon"
+                            color="inherit"
+                            data-euiicon-type="alert"
+                            size="m"
+                          />
+                        </EuiIcon>
+                        <span
+                          className="euiCallOutHeader__title"
+                        >
+                          Unsaved work
+                        </span>
+                      </div>
+                      <EuiText
+                        color="default"
+                        size="xs"
+                      >
+                        <div
+                          className="euiText euiText--extraSmall"
+                        >
+                          <EuiTextColor
+                            color="default"
+                            component="div"
                           >
-                            <EuiButtonContent
-                              className="euiButton__content"
-                              iconSide="left"
-                              textProps={
-                                Object {
-                                  "className": "euiButton__text",
-                                }
-                              }
+                            <div
+                              className="euiTextColor euiTextColor--default"
+                              style={Object {}}
                             >
-                              <span
-                                className="euiButtonContent euiButton__content"
+                              <EuiText
+                                size="s"
                               >
-                                <span
-                                  className="euiButton__text"
+                                <div
+                                  className="euiText euiText--small"
                                 >
-                                  <FormattedMessage
-                                    defaultMessage="Copy POST URL"
-                                    id="xpack.reporting.panelContent.copyUrlButtonLabel"
-                                    values={Object {}}
-                                  >
-                                    <span>
-                                      Copy POST URL
-                                    </span>
-                                  </FormattedMessage>
-                                </span>
-                              </span>
-                            </EuiButtonContent>
-                          </button>
-                        </EuiButtonDisplay>
-                      </EuiButton>
-                    </span>
-                  </EuiToolTip>
-                </EuiCopy>
+                                  <p>
+                                    <FormattedMessage
+                                      defaultMessage="Save your work before copying this URL."
+                                      id="xpack.reporting.panelContent.unsavedStateErrorText"
+                                      values={Object {}}
+                                    >
+                                      <span>
+                                        Save your work before copying this URL.
+                                      </span>
+                                    </FormattedMessage>
+                                  </p>
+                                </div>
+                              </EuiText>
+                              <EuiSpacer
+                                size="s"
+                              >
+                                <div
+                                  className="euiSpacer euiSpacer--s"
+                                />
+                              </EuiSpacer>
+                            </div>
+                          </EuiTextColor>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiCallOut>
+                </ErrorUnsavedWorkPanel>
               </div>
             </div>
           </EuiResizeObserver>
@@ -697,6 +720,8 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     <EuiAccordion
       arrowDisplay="left"
       buttonContent="Advanced options"
+      buttonElement="button"
+      element="div"
       id="advanced-options"
       initialIsOpen={false}
       isLoading={false}
@@ -709,6 +734,42 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
         <div
           className="euiAccordion__triggerWrapper"
         >
+          <EuiButtonIcon
+            aria-controls="advanced-options"
+            aria-expanded={false}
+            aria-labelledby="generated-id"
+            className="euiAccordion__iconButton"
+            color="text"
+            iconType="arrowRight"
+            onClick={[Function]}
+            tabIndex={-1}
+          >
+            <button
+              aria-controls="advanced-options"
+              aria-expanded={false}
+              aria-labelledby="generated-id"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
+              onClick={[Function]}
+              tabIndex={-1}
+              type="button"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                color="inherit"
+                size="m"
+                type="arrowRight"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowRight"
+                  size="m"
+                />
+              </EuiIcon>
+            </button>
+          </EuiButtonIcon>
           <button
             aria-controls="advanced-options"
             aria-expanded={false}
@@ -718,22 +779,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
             type="button"
           >
             <span
-              className="euiAccordion__iconWrapper"
-            >
-              <EuiIcon
-                className="euiAccordion__icon"
-                size="m"
-                type="arrowRight"
-              >
-                <span
-                  className="euiAccordion__icon"
-                  data-euiicon-type="arrowRight"
-                  size="m"
-                />
-              </EuiIcon>
-            </span>
-            <span
-              className="euiIEFlexWrapFix"
+              className="euiAccordion__buttonContent"
             >
               Advanced options
             </span>
@@ -784,88 +830,88 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
                     className="euiSpacer euiSpacer--s"
                   />
                 </EuiSpacer>
-                <EuiCopy
-                  afterMessage="Copied"
-                  anchorClassName="eui-displayBlock"
-                  textToCopy="http://localhost/api/reporting/generate/Analytical%20App?jobParams=%28browserTimezone%3AAmerica%2FNew_York%2Clayout%3A%28dimensions%3A%28height%3A768%2Cwidth%3A1024%29%2Cid%3Apreserve_layout%29%2CobjectType%3Atest-object-type%2Ctitle%3A%27Test%20Report%20Title%27%2Cversion%3A%277.15.0%27%29"
-                >
-                  <EuiToolTip
-                    anchorClassName="eui-displayBlock"
-                    delay="regular"
-                    display="inlineBlock"
-                    onMouseOut={[Function]}
-                    position="top"
+                <ErrorUnsavedWorkPanel>
+                  <EuiCallOut
+                    color="danger"
+                    iconType="alert"
+                    size="s"
+                    title="Unsaved work"
                   >
-                    <span
-                      className="euiToolTipAnchor eui-displayBlock"
-                      onMouseOut={[Function]}
-                      onMouseOver={[Function]}
+                    <div
+                      className="euiCallOut euiCallOut--danger euiCallOut--small"
                     >
-                      <EuiButton
-                        fullWidth={true}
-                        onBlur={[Function]}
-                        onClick={[Function]}
-                        onFocus={[Function]}
-                        size="s"
+                      <div
+                        className="euiCallOutHeader"
                       >
-                        <EuiButtonDisplay
-                          baseClassName="euiButton"
-                          disabled={false}
-                          element="button"
-                          fullWidth={true}
-                          isDisabled={false}
-                          onBlur={[Function]}
-                          onClick={[Function]}
-                          onFocus={[Function]}
-                          size="s"
-                          type="button"
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiCallOutHeader__icon"
+                          color="inherit"
+                          size="m"
+                          type="alert"
                         >
-                          <button
-                            className="euiButton euiButton--primary euiButton--small euiButton--fullWidth"
-                            disabled={false}
-                            onBlur={[Function]}
-                            onClick={[Function]}
-                            onFocus={[Function]}
-                            style={
-                              Object {
-                                "minWidth": undefined,
-                              }
-                            }
-                            type="button"
+                          <span
+                            aria-hidden="true"
+                            className="euiCallOutHeader__icon"
+                            color="inherit"
+                            data-euiicon-type="alert"
+                            size="m"
+                          />
+                        </EuiIcon>
+                        <span
+                          className="euiCallOutHeader__title"
+                        >
+                          Unsaved work
+                        </span>
+                      </div>
+                      <EuiText
+                        color="default"
+                        size="xs"
+                      >
+                        <div
+                          className="euiText euiText--extraSmall"
+                        >
+                          <EuiTextColor
+                            color="default"
+                            component="div"
                           >
-                            <EuiButtonContent
-                              className="euiButton__content"
-                              iconSide="left"
-                              textProps={
-                                Object {
-                                  "className": "euiButton__text",
-                                }
-                              }
+                            <div
+                              className="euiTextColor euiTextColor--default"
+                              style={Object {}}
                             >
-                              <span
-                                className="euiButtonContent euiButton__content"
+                              <EuiText
+                                size="s"
                               >
-                                <span
-                                  className="euiButton__text"
+                                <div
+                                  className="euiText euiText--small"
                                 >
-                                  <FormattedMessage
-                                    defaultMessage="Copy POST URL"
-                                    id="xpack.reporting.panelContent.copyUrlButtonLabel"
-                                    values={Object {}}
-                                  >
-                                    <span>
-                                      Copy POST URL
-                                    </span>
-                                  </FormattedMessage>
-                                </span>
-                              </span>
-                            </EuiButtonContent>
-                          </button>
-                        </EuiButtonDisplay>
-                      </EuiButton>
-                    </span>
-                  </EuiToolTip>
-                </EuiCopy>
+                                  <p>
+                                    <FormattedMessage
+                                      defaultMessage="Save your work before copying this URL."
+                                      id="xpack.reporting.panelContent.unsavedStateErrorText"
+                                      values={Object {}}
+                                    >
+                                      <span>
+                                        Save your work before copying this URL.
+                                      </span>
+                                    </FormattedMessage>
+                                  </p>
+                                </div>
+                              </EuiText>
+                              <EuiSpacer
+                                size="s"
+                              >
+                                <div
+                                  className="euiSpacer euiSpacer--s"
+                                />
+                              </EuiSpacer>
+                            </div>
+                          </EuiTextColor>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiCallOut>
+                </ErrorUnsavedWorkPanel>
               </div>
             </div>
           </EuiResizeObserver>
@@ -1007,6 +1053,8 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     <EuiAccordion
       arrowDisplay="left"
       buttonContent="Advanced options"
+      buttonElement="button"
+      element="div"
       id="advanced-options"
       initialIsOpen={false}
       isLoading={false}
@@ -1019,6 +1067,42 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
         <div
           className="euiAccordion__triggerWrapper"
         >
+          <EuiButtonIcon
+            aria-controls="advanced-options"
+            aria-expanded={false}
+            aria-labelledby="generated-id"
+            className="euiAccordion__iconButton"
+            color="text"
+            iconType="arrowRight"
+            onClick={[Function]}
+            tabIndex={-1}
+          >
+            <button
+              aria-controls="advanced-options"
+              aria-expanded={false}
+              aria-labelledby="generated-id"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
+              onClick={[Function]}
+              tabIndex={-1}
+              type="button"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                color="inherit"
+                size="m"
+                type="arrowRight"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowRight"
+                  size="m"
+                />
+              </EuiIcon>
+            </button>
+          </EuiButtonIcon>
           <button
             aria-controls="advanced-options"
             aria-expanded={false}
@@ -1028,22 +1112,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
             type="button"
           >
             <span
-              className="euiAccordion__iconWrapper"
-            >
-              <EuiIcon
-                className="euiAccordion__icon"
-                size="m"
-                type="arrowRight"
-              >
-                <span
-                  className="euiAccordion__icon"
-                  data-euiicon-type="arrowRight"
-                  size="m"
-                />
-              </EuiIcon>
-            </span>
-            <span
-              className="euiIEFlexWrapFix"
+              className="euiAccordion__buttonContent"
             >
               Advanced options
             </span>
@@ -1094,88 +1163,88 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
                     className="euiSpacer euiSpacer--s"
                   />
                 </EuiSpacer>
-                <EuiCopy
-                  afterMessage="Copied"
-                  anchorClassName="eui-displayBlock"
-                  textToCopy="http://localhost/api/reporting/generate/Analytical%20App?jobParams=%28browserTimezone%3AAmerica%2FNew_York%2Clayout%3A%28dimensions%3A%28height%3A768%2Cwidth%3A1024%29%2Cid%3Apreserve_layout%29%2CobjectType%3Atest-object-type%2Ctitle%3A%27Test%20Report%20Title%27%2Cversion%3A%277.15.0%27%29"
-                >
-                  <EuiToolTip
-                    anchorClassName="eui-displayBlock"
-                    delay="regular"
-                    display="inlineBlock"
-                    onMouseOut={[Function]}
-                    position="top"
+                <ErrorUnsavedWorkPanel>
+                  <EuiCallOut
+                    color="danger"
+                    iconType="alert"
+                    size="s"
+                    title="Unsaved work"
                   >
-                    <span
-                      className="euiToolTipAnchor eui-displayBlock"
-                      onMouseOut={[Function]}
-                      onMouseOver={[Function]}
+                    <div
+                      className="euiCallOut euiCallOut--danger euiCallOut--small"
                     >
-                      <EuiButton
-                        fullWidth={true}
-                        onBlur={[Function]}
-                        onClick={[Function]}
-                        onFocus={[Function]}
-                        size="s"
+                      <div
+                        className="euiCallOutHeader"
                       >
-                        <EuiButtonDisplay
-                          baseClassName="euiButton"
-                          disabled={false}
-                          element="button"
-                          fullWidth={true}
-                          isDisabled={false}
-                          onBlur={[Function]}
-                          onClick={[Function]}
-                          onFocus={[Function]}
-                          size="s"
-                          type="button"
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiCallOutHeader__icon"
+                          color="inherit"
+                          size="m"
+                          type="alert"
                         >
-                          <button
-                            className="euiButton euiButton--primary euiButton--small euiButton--fullWidth"
-                            disabled={false}
-                            onBlur={[Function]}
-                            onClick={[Function]}
-                            onFocus={[Function]}
-                            style={
-                              Object {
-                                "minWidth": undefined,
-                              }
-                            }
-                            type="button"
+                          <span
+                            aria-hidden="true"
+                            className="euiCallOutHeader__icon"
+                            color="inherit"
+                            data-euiicon-type="alert"
+                            size="m"
+                          />
+                        </EuiIcon>
+                        <span
+                          className="euiCallOutHeader__title"
+                        >
+                          Unsaved work
+                        </span>
+                      </div>
+                      <EuiText
+                        color="default"
+                        size="xs"
+                      >
+                        <div
+                          className="euiText euiText--extraSmall"
+                        >
+                          <EuiTextColor
+                            color="default"
+                            component="div"
                           >
-                            <EuiButtonContent
-                              className="euiButton__content"
-                              iconSide="left"
-                              textProps={
-                                Object {
-                                  "className": "euiButton__text",
-                                }
-                              }
+                            <div
+                              className="euiTextColor euiTextColor--default"
+                              style={Object {}}
                             >
-                              <span
-                                className="euiButtonContent euiButton__content"
+                              <EuiText
+                                size="s"
                               >
-                                <span
-                                  className="euiButton__text"
+                                <div
+                                  className="euiText euiText--small"
                                 >
-                                  <FormattedMessage
-                                    defaultMessage="Copy POST URL"
-                                    id="xpack.reporting.panelContent.copyUrlButtonLabel"
-                                    values={Object {}}
-                                  >
-                                    <span>
-                                      Copy POST URL
-                                    </span>
-                                  </FormattedMessage>
-                                </span>
-                              </span>
-                            </EuiButtonContent>
-                          </button>
-                        </EuiButtonDisplay>
-                      </EuiButton>
-                    </span>
-                  </EuiToolTip>
-                </EuiCopy>
+                                  <p>
+                                    <FormattedMessage
+                                      defaultMessage="Save your work before copying this URL."
+                                      id="xpack.reporting.panelContent.unsavedStateErrorText"
+                                      values={Object {}}
+                                    >
+                                      <span>
+                                        Save your work before copying this URL.
+                                      </span>
+                                    </FormattedMessage>
+                                  </p>
+                                </div>
+                              </EuiText>
+                              <EuiSpacer
+                                size="s"
+                              >
+                                <div
+                                  className="euiSpacer euiSpacer--s"
+                                />
+                              </EuiSpacer>
+                            </div>
+                          </EuiTextColor>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiCallOut>
+                </ErrorUnsavedWorkPanel>
               </div>
             </div>
           </EuiResizeObserver>

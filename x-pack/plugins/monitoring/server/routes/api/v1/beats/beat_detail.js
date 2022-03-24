@@ -35,7 +35,7 @@ export function beatsDetailRoute(server) {
     async handler(req) {
       const clusterUuid = req.params.clusterUuid;
       const beatUuid = req.params.beatUuid;
-      const config = server.config();
+      const config = server.config;
       const ccs = req.payload.ccs;
       const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
@@ -49,9 +49,7 @@ export function beatsDetailRoute(server) {
       try {
         const [summary, metrics] = await Promise.all([
           getBeatSummary(req, beatsIndexPattern, summaryOptions),
-          getMetrics(req, beatsIndexPattern, metricSet, [
-            { term: { 'beats_stats.beat.uuid': beatUuid } },
-          ]),
+          getMetrics(req, 'beats', metricSet, [{ term: { 'beats_stats.beat.uuid': beatUuid } }]),
         ]);
 
         return {

@@ -59,6 +59,6 @@ describe('News', () => {
     );
     expect(getByText("What's new")).toBeInTheDocument();
     expect(getAllByText('Read full story').length).toEqual(3);
-    expect(queryAllByTestId('news_image').length).toEqual(1);
+    expect(queryAllByTestId('newsImage').length).toEqual(1);
   });
 });

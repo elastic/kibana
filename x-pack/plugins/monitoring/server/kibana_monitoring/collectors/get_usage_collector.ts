@@ -8,12 +8,9 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { IClusterClient } from 'src/core/server';
 import { MonitoringConfig } from '../../config';
-import { fetchAvailableCcs } from '../../lib/alerts/fetch_available_ccs';
 import { getStackProductsUsage } from './lib/get_stack_products_usage';
 import { fetchLicenseType } from './lib/fetch_license_type';
 import { MonitoringUsage, StackProductUsage, MonitoringClusterStackProductUsage } from './types';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../common/constants';
-import { getCcsIndexPattern } from '../../lib/alerts/get_ccs_index_pattern';
 import { fetchClusters } from '../../lib/alerts/fetch_clusters';
 
 export function getMonitoringUsageCollector(
@@ -21,7 +18,7 @@ export function getMonitoringUsageCollector(
   config: MonitoringConfig,
   getClient: () => IClusterClient
 ) {
-  return usageCollection.makeUsageCollector<MonitoringUsage, true>({
+  return usageCollection.makeUsageCollector<MonitoringUsage>({
     type: 'monitoring',
     isReady: () => true,
     schema: {
@@ -98,17 +95,11 @@ export function getMonitoringUsageCollector(
         },
       },
     },
-    extendFetchContext: {
-      kibanaRequest: true,
-    },
-    fetch: async ({ kibanaRequest }) => {
-      const callCluster = kibanaRequest
-        ? getClient().asScoped(kibanaRequest).asCurrentUser
-        : getClient().asInternalUser;
+    fetch: async () => {
+      const callCluster = getClient().asInternalUser;
       const usageClusters: MonitoringClusterStackProductUsage[] = [];
-      const availableCcs = config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
-      const elasticsearchIndex = getCcsIndexPattern(INDEX_PATTERN_ELASTICSEARCH, availableCcs);
-      const clusters = await fetchClusters(callCluster, elasticsearchIndex);
+      const availableCcs = config.ui.ccs.enabled;
+      const clusters = await fetchClusters(callCluster);
       for (const cluster of clusters) {
         const license = await fetchLicenseType(callCluster, availableCcs, cluster.clusterUuid);
         const stackProducts = await getStackProductsUsage(
@@ -127,12 +118,10 @@ export function getMonitoringUsageCollector(
         });
       }
 
-      const usage = {
+      return {
         hasMonitoringData: usageClusters.length > 0,
         clusters: usageClusters,
       };
-
-      return usage;
     },
   });
 }

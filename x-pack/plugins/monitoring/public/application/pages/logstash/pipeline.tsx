@@ -29,6 +29,7 @@ import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { PipelineVersions } from './pipeline_versions_dropdown';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => {
   const match = useRouteMatch<{ id: string | undefined; hash: string | undefined }>();
@@ -43,9 +44,9 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
   const ccs = globalState.ccs;
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
-  });
+  }) as any;
   const [data, setData] = useState({} as any);
-  const [detailVertexId, setDetailVertexId] = useState<string | null>(null);
+  const [detailVertexId, setDetailVertexId] = useState<string | null | undefined>(undefined);
   const { updateTotalItemCount } = useTable('logstash.pipelines');
 
   const title = i18n.translate('xpack.monitoring.logstash.pipeline.routeTitle', {
@@ -64,7 +65,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
       ? `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}/${pipelineHash}`
       : `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}`;
 
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<any>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
@@ -125,25 +126,37 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
   }, [data]);
 
   const timeseriesTooltipXValueFormatter = (xValue: any) => moment(xValue).format(dateFormat);
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
 
-  const onVertexChange = useCallback(
-    (vertex: any) => {
-      if (!vertex) {
-        setDetailVertexId(null);
-      } else {
-        setDetailVertexId(vertex.id);
-      }
+  const onVertexChange = useCallback((vertex: any) => {
+    if (!vertex) {
+      setDetailVertexId(null);
+    } else {
+      setDetailVertexId(vertex.id);
+    }
+  }, []);
 
+  useEffect(() => {
+    if (detailVertexId !== undefined) {
       getPageData();
+    }
+  }, [detailVertexId, getPageData]);
+
+  const onChangePipelineHash = useCallback(
+    (hash) => {
+      window.location.hash = getSafeForExternalLink(`#/logstash/pipelines/${pipelineId}/${hash}`);
     },
-    [getPageData]
+    [pipelineId]
   );
 
-  const onChangePipelineHash = useCallback(() => {
-    window.location.hash = getSafeForExternalLink(
-      `#/logstash/pipelines/${pipelineId}/${pipelineHash}`
-    );
-  }, [pipelineId, pipelineHash]);
+  useEffect(() => {
+    if (cluster) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inLogstash: true,
+        page: 'pipeline',
+      });
+    }
+  }, [cluster, data, generateBreadcrumbs]);
 
   return (
     <LogstashTemplate

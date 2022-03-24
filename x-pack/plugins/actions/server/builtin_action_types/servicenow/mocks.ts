@@ -12,6 +12,8 @@ import {
   ExternalServiceSIR,
   Observable,
   ObservableTypes,
+  ExternalServiceITOM,
+  ExecutorSubActionAddEventParams,
 } from './types';
 
 export const serviceNowCommonFields = [
@@ -151,12 +153,26 @@ const createSIRMock = (): jest.Mocked<ExternalServiceSIR> => {
   return service;
 };
 
+const createITOMMock = (): jest.Mocked<ExternalServiceITOM> => {
+  const serviceMock = createMock();
+  const service = {
+    getChoices: serviceMock.getChoices,
+    addEvent: jest.fn().mockImplementation(() => Promise.resolve()),
+  };
+
+  return service;
+};
+
 export const externalServiceMock = {
   create: createMock,
 };
 
 export const externalServiceSIRMock = {
   create: createSIRMock,
+};
+
+export const externalServiceITOMMock = {
+  create: createITOMMock,
 };
 
 export const executorParams: ExecutorSubActionPushParams = {
@@ -227,3 +243,17 @@ export const observables: Observable[] = [
 ];
 
 export const apiParams = executorParams;
+
+export const itomEventParams: ExecutorSubActionAddEventParams = {
+  source: 'A source',
+  event_class: 'An event class',
+  resource: 'C:',
+  node: 'node.example.com',
+  metric_name: 'Percentage Logical Disk Free Space',
+  type: 'Disk space',
+  severity: '4',
+  description: 'desc',
+  additional_info: '{"alert": "test"}',
+  message_key: 'a key',
+  time_of_event: '2021-10-13T10:51:44.981Z',
+};

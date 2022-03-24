@@ -9,8 +9,8 @@ import React, { useState, useEffect, ReactNode } from 'react';
 import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
+import { FieldIcon } from '@kbn/react-field';
 import { WorkspaceField } from '../../types';
-import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
 
 export interface FieldPickerProps {
   fieldMap: Record<string, WorkspaceField>;
@@ -56,7 +56,6 @@ export function FieldPicker({
         <EuiBadge
           data-test-subj="graph-add-field-button"
           className={classNames('gphFieldPicker__button', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'gphFieldPicker__button--disabled': !hasFields,
           })}
           color="hollow"

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { FieldVisConfig, FileBasedFieldVisConfig } from './field_vis_config';
-import { IndexPatternField } from '../../../../../../../../../src/plugins/data/common';
+import { DataViewField } from '../../../../../../../../../src/plugins/data_views/public';
+import {
+  FieldVisConfig,
+  FileBasedFieldVisConfig,
+} from '../../../../../../common/types/field_vis_config';
 
 export interface FieldDataRowProps {
   config: FieldVisConfig | FileBasedFieldVisConfig;
-  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }

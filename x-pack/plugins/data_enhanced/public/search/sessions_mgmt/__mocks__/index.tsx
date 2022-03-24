@@ -6,14 +6,8 @@
  */
 
 import React, { ReactNode } from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { UrlGeneratorsStart } from '../../../../../../../src/plugins/share/public/url_generators';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 export function LocaleWrapper({ children }: { children?: ReactNode }) {
   return <IntlProvider locale="en">{children}</IntlProvider>;
 }
-
-export const mockUrls = {
-  getUrlGenerator: (id: string) => ({ createUrl: () => `hello-cool-${id}-url` }),
-} as unknown as UrlGeneratorsStart;

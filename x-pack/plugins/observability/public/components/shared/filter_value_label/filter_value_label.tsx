@@ -6,29 +6,31 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
-import { esFilters, Filter, IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { injectI18n } from '@kbn/i18n-react';
+import { Filter, buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
+import { FilterItem } from '../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../src/plugins/data_views/common';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export function buildFilterLabel({
   field,
   value,
   label,
-  indexPattern,
+  dataView,
   negate,
 }: {
   label: string;
   value: string | string[];
   negate: boolean;
   field: string;
-  indexPattern: IndexPattern;
+  dataView: DataView;
 }) {
-  const indexField = indexPattern.getFieldByName(field)!;
+  const indexField = dataView.getFieldByName(field)!;
 
   const filter =
     value instanceof Array && value.length > 1
-      ? esFilters.buildPhrasesFilter(indexField, value, indexPattern)
-      : esFilters.buildPhraseFilter(indexField, value as string, indexPattern);
+      ? buildPhrasesFilter(indexField, value, dataView)
+      : buildPhraseFilter(indexField, value as string, dataView);
 
   filter.meta.type = value instanceof Array && value.length > 1 ? 'phrases' : 'phrase';
 
@@ -48,7 +50,7 @@ export interface FilterValueLabelProps {
   negate: boolean;
   removeFilter: (field: string, value: string | string[], notVal: boolean) => void;
   invertFilter: (val: { field: string; value: string | string[]; negate: boolean }) => void;
-  indexPattern: IndexPattern;
+  dataView: DataView;
   allowExclusion?: boolean;
 }
 export function FilterValueLabel({
@@ -56,22 +58,22 @@ export function FilterValueLabel({
   field,
   value,
   negate,
-  indexPattern,
+  dataView,
   invertFilter,
   removeFilter,
   allowExclusion = true,
 }: FilterValueLabelProps) {
-  const FilterItem = injectI18n(esFilters.FilterItem);
+  const FilterItemI18n = injectI18n(FilterItem);
 
-  const filter = buildFilterLabel({ field, value, label, indexPattern, negate });
+  const filter = buildFilterLabel({ field, value, label, dataView, negate });
 
   const {
     services: { uiSettings },
   } = useKibana();
 
-  return indexPattern ? (
-    <FilterItem
-      indexPatterns={[indexPattern]}
+  return dataView ? (
+    <FilterItemI18n
+      indexPatterns={[dataView]}
       id={`${field}-${value}-${negate}`}
       filter={filter}
       onRemove={() => {

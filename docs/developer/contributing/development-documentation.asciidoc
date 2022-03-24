@@ -4,18 +4,10 @@
 Docs should be written during development and accompany PRs when relevant. There are multiple types of documentation, and different places to add each.
 
 [discrete]
-=== Developer services documentation
-
-Documentation about specific services a plugin offers should be encapsulated in:
-
-* README.asciidoc at the base of the plugin folder.
-* Typescript comments for all public services.
-
-[discrete]
 === End user documentation
 
 Documentation about user facing features should be written in http://asciidoc.org/[asciidoc] at
-{kib-repo}/tree/master/docs[https://github.com/elastic/kibana/tree/master/docs]
+{kib-repo}/tree/master/docs[https://github.com/elastic/kibana/tree/main/docs]
 
 To build the docs, you must clone the https://github.com/elastic/docs[elastic/docs]
 repo as a sibling of your {kib} repo. Follow the instructions in that project's
@@ -31,11 +23,11 @@ node scripts/docs.js --open
 
 REST APIs should be documented using the following recommended formats:
 
-* https://raw.githubusercontent.com/elastic/docs/master/shared/api-ref-ex.asciidoc[API doc templaate]
+* https://raw.githubusercontent.com/elastic/docs/master/shared/api-ref-ex.asciidoc[API doc template]
 * https://raw.githubusercontent.com/elastic/docs/master/shared/api-definitions-ex.asciidoc[API object definition template]
 
 [discrete]
 === General developer documentation and guidelines
 
 General developer guildlines and documentation, like this right here, should be written in http://asciidoc.org/[asciidoc]
-at {kib-repo}/tree/master/docs/developer[https://github.com/elastic/kibana/tree/master/docs/developer]
+at {kib-repo}/tree/master/docs/developer[https://github.com/elastic/kibana/tree/main/docs/developer]

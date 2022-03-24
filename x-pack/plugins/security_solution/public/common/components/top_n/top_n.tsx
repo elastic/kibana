@@ -6,22 +6,23 @@
  */
 
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
-import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { InputsModelId } from '../../store/inputs/constants';
 import { TimelineEventsType } from '../../../../common/types/timeline';
-
-import { TopNOption } from './helpers';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import {
+  isDetectionsAlertsTable,
+  getSourcererScopeName,
+  removeIgnoredAlertFilters,
+  TopNOption,
+} from './helpers';
 import * as i18n from './translations';
-import { getIndicesSelector, IndicesSelector } from './selectors';
-import { State } from '../../store';
 import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const TopNContainer = styled.div`
@@ -53,7 +54,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   options: TopNOption[];
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
@@ -88,10 +89,8 @@ const TopNComponent: React.FC<Props> = ({
     (value: string) => setView(value as TimelineEventsType),
     [setView]
   );
-  const indicesSelector = useMemo(getIndicesSelector, []);
-  const { all: allIndices, raw: rawIndices } = useSelector<State, IndicesSelector>(
-    (state) => indicesSelector(state),
-    deepEqual
+  const { selectedPatterns, runtimeMappings } = useSourcererDataView(
+    getSourcererScopeName({ timelineId, view })
   );
 
   useEffect(() => {
@@ -102,17 +101,24 @@ const TopNComponent: React.FC<Props> = ({
     () => (
       <ViewSelect
         data-test-subj="view-select"
-        disabled={options.length === 1}
+        disabled={!isDetectionsAlertsTable(timelineId)}
         onChange={onViewSelected}
         options={options}
         valueOfSelected={view}
       />
     ),
-    [onViewSelected, options, view]
+    [onViewSelected, options, timelineId, view]
+  );
+
+  // alert workflow statuses (e.g. open | closed) and other alert-specific
+  // filters must be ignored when viewing raw alerts
+  const applicableFilters = useMemo(
+    () => removeIgnoredAlertFilters({ filters, timelineId, view }),
+    [filters, timelineId, view]
   );
 
   return (
-    <TopNContainer>
+    <TopNContainer data-test-subj="topN-container">
       <CloseButton
         aria-label={i18n.CLOSE}
         data-test-subj="close"
@@ -125,11 +131,12 @@ const TopNComponent: React.FC<Props> = ({
           <EventsByDataset
             combinedQueries={combinedQueries}
             deleteQuery={deleteQuery}
-            filters={filters}
+            filters={applicableFilters}
             from={from}
             headerChildren={headerChildren}
             indexPattern={indexPattern}
-            indexNames={view === 'raw' ? rawIndices : allIndices}
+            indexNames={selectedPatterns}
+            runtimeMappings={runtimeMappings}
             onlyField={field}
             paddingSize={paddingSize}
             query={query}
@@ -144,7 +151,7 @@ const TopNComponent: React.FC<Props> = ({
         ) : (
           <SignalsByCategory
             combinedQueries={combinedQueries}
-            filters={filters}
+            filters={applicableFilters}
             headerChildren={headerChildren}
             onlyField={field}
             paddingSize={paddingSize}
@@ -152,6 +159,7 @@ const TopNComponent: React.FC<Props> = ({
             showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             timelineId={timelineId}
+            runtimeMappings={runtimeMappings}
           />
         )}
       </TopNContent>

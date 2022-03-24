@@ -81,9 +81,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     const processorStatus = processorOutput?.status ?? 'inactive';
 
     const panelClasses = classNames('pipelineProcessorsEditor__item', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'pipelineProcessorsEditor__item--selected': isMovingThisProcessor || isEditingThisProcessor,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'pipelineProcessorsEditor__item--dimmed': isDimmed,
     });
 
@@ -94,7 +92,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     const inlineTextInputContainerClasses = classNames(
       'pipelineProcessorsEditor__item__descriptionContainer',
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'pipelineProcessorsEditor__item__descriptionContainer--displayNone':
           isInMoveMode && hasNoDescription,
       }
@@ -132,14 +129,13 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         : i18nTexts.cancelMoveButtonLabel;
       const dataTestSubj = !isMovingThisProcessor ? 'moveItemButton' : 'cancelMoveItemButton';
       const moveButtonClasses = classNames('pipelineProcessorsEditor__item__moveButton', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'pipelineProcessorsEditor__item__moveButton--cancel': isMovingThisProcessor,
       });
       const icon = isMovingThisProcessor ? 'cross' : 'sortable';
       const disabled = isEditorNotInIdleMode && !isMovingThisProcessor;
       const moveButton = (
         <EuiButtonIcon
-          color={isMovingThisProcessor ? 'primary' : 'subdued'}
+          color={isMovingThisProcessor ? 'primary' : 'text'}
           iconType={icon}
           data-test-subj={dataTestSubj}
           size="s"

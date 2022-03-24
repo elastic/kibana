@@ -22,7 +22,6 @@ How to add a recently accessed item to the sidebar:
 
 ```ts
 core.chrome.recentlyAccessed.add('/app/map/1234', 'Map 1234', '1234');
-
 ```
 
 ## Example 2
@@ -34,17 +33,16 @@ core.chrome.setHelpExtension(elem => {
   ReactDOM.render(<MyHelpComponent />, elem);
   return () => ReactDOM.unmountComponentAtNode(elem);
 });
-
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [docTitle](./kibana-plugin-core-public.chromestart.doctitle.md) | <code>ChromeDocTitle</code> | APIs for accessing and updating the document title. |
-|  [navControls](./kibana-plugin-core-public.chromestart.navcontrols.md) | <code>ChromeNavControls</code> | [APIs](./kibana-plugin-core-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
-|  [navLinks](./kibana-plugin-core-public.chromestart.navlinks.md) | <code>ChromeNavLinks</code> | [APIs](./kibana-plugin-core-public.chromenavlinks.md) for manipulating nav links. |
-|  [recentlyAccessed](./kibana-plugin-core-public.chromestart.recentlyaccessed.md) | <code>ChromeRecentlyAccessed</code> | [APIs](./kibana-plugin-core-public.chromerecentlyaccessed.md) for recently accessed history. |
+|  [docTitle](./kibana-plugin-core-public.chromestart.doctitle.md) | ChromeDocTitle | APIs for accessing and updating the document title. |
+|  [navControls](./kibana-plugin-core-public.chromestart.navcontrols.md) | ChromeNavControls | [APIs](./kibana-plugin-core-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
+|  [navLinks](./kibana-plugin-core-public.chromestart.navlinks.md) | ChromeNavLinks | [APIs](./kibana-plugin-core-public.chromenavlinks.md) for manipulating nav links. |
+|  [recentlyAccessed](./kibana-plugin-core-public.chromestart.recentlyaccessed.md) | ChromeRecentlyAccessed | [APIs](./kibana-plugin-core-public.chromerecentlyaccessed.md) for recently accessed history. |
 
 ## Methods
 

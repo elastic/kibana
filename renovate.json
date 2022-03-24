@@ -1,0 +1,146 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
+  "enabledManagers": ["npm"],
+  "baseBranches": ["main", "7.16", "7.15"],
+  "prConcurrentLimit": 0,
+  "prHourlyLimit": 0,
+  "separateMajorMinor": false,
+  "rangeStrategy": "bump",
+  "semanticCommits": "disabled",
+  "vulnerabilityAlerts": {
+    "enabled": false
+  },
+  "lockFileMaintenance": {
+    "enabled": false
+  },
+  "packageRules": [
+    {
+      "matchPackagePatterns": [".*"],
+      "enabled": false,
+      "prCreation": "not-pending"
+    },
+    {
+      "groupName": "@elastic/charts",
+      "matchPackageNames": ["@elastic/charts"],
+      "reviewers": ["team:datavis"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "auto-backport", "Team:DataVis", "v8.1.0", "v7.17.0"],
+      "draftPR": true,
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/elasticsearch",
+      "matchPackageNames": ["@elastic/elasticsearch"],
+      "reviewers": ["team:kibana-operations", "team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Operations", "Team:Core"],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/elasticsearch",
+      "matchPackageNames": ["@elastic/elasticsearch"],
+      "reviewers": ["team:kibana-operations", "team:kibana-core"],
+      "matchBaseBranches": ["8.1"],
+      "labels": ["release_note:skip", "Team:Operations", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/elasticsearch",
+      "matchPackageNames": ["@elastic/elasticsearch"],
+      "reviewers": ["team:kibana-operations", "team:kibana-core"],
+      "matchBaseBranches": ["7.17"],
+      "labels": ["release_note:skip", "Team:Operations", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "APM",
+      "matchPackageNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "babel",
+      "matchPackageNames": ["@types/babel__core"],
+      "matchPackagePatterns": ["^@babel", "^babel-plugin"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true,
+      "stabilityDays": 7
+    },
+    {
+      "groupName": "typescript",
+      "matchPackageNames": ["typescript", "prettier", "@types/jsdom"],
+      "matchPackagePatterns": ["^@typescript-eslint"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true,
+      "stabilityDays": 7
+    },
+    {
+      "groupName": "polyfills",
+      "matchPackageNames": ["core-js"],
+      "matchPackagePatterns": ["polyfill"],
+      "excludePackageNames": ["@loaders.gl/polyfills"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true,
+      "stabilityDays": 7
+    },
+    {
+      "groupName": "vega related modules",
+      "matchPackageNames": ["vega", "vega-lite", "vega-schema-url-parser", "vega-tooltip"],
+      "reviewers": ["team:kibana-vis-editors"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Feature:Vega", "Team:VisEditors"],
+      "enabled": true
+    },
+    {
+      "groupName": "cypress",
+      "matchPackageNames": ["eslint-plugin-cypress"],
+      "matchPackagePatterns": ["^cypress"],
+      "reviewers": ["Team:apm", "Team: SecuritySolution"],
+      "matchBaseBranches": ["main"],
+      "labels": ["buildkite-ci", "ci:all-cypress-suites"],
+      "enabled": true
+    },
+    {
+      "groupName": "platform security modules",
+      "matchPackageNames": [
+        "broadcast-channel",
+        "node-forge",
+        "@types/node-forge",
+        "require-in-the-middle",
+        "tough-cookie",
+        "@types/tough-cookie",
+        "xml-crypto",
+        "@types/xml-crypto"
+      ],
+      "reviewers": ["team:kibana-security"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Security", "release_note:skip", "auto-backport"],
+      "enabled": true
+    },
+    {
+      "groupName": "ftr",
+      "packageNames": [
+        "@types/chromedriver",
+        "@types/selenium-webdriver",
+        "chromedriver",
+        "geckodriver",
+        "ms-chromium-edge-driver",
+        "selenium-webdriver"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
+    }
+  ]
+}

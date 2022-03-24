@@ -16,6 +16,6 @@ export interface SavedObjectsImportMissingReferencesError
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [references](./kibana-plugin-core-public.savedobjectsimportmissingreferenceserror.references.md) | <code>Array&lt;{</code><br/><code>        type: string;</code><br/><code>        id: string;</code><br/><code>    }&gt;</code> |  |
-|  [type](./kibana-plugin-core-public.savedobjectsimportmissingreferenceserror.type.md) | <code>'missing_references'</code> |  |
+|  [references](./kibana-plugin-core-public.savedobjectsimportmissingreferenceserror.references.md) | Array&lt;{ type: string; id: string; }&gt; |  |
+|  [type](./kibana-plugin-core-public.savedobjectsimportmissingreferenceserror.type.md) | 'missing\_references' |  |
 

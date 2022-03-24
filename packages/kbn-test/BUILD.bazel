@@ -1,7 +1,7 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@npm//@babel/cli:index.bzl", "babel")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-test"
 PKG_REQUIRE_NAME = "@kbn/test"
@@ -27,9 +27,10 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "jest/package.json",
   "jest-preset.js",
   "jest_integration/jest-preset.js",
+  "jest_integration_node/jest-preset.js",
+  "jest_node/jest-preset.js",
   "jest.config.js",
   "README.md",
   "package.json",
@@ -37,18 +38,23 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
     "//packages/kbn-dev-utils",
-    "//packages/kbn-i18n",
+    "//packages/kbn-i18n-react",
     "//packages/kbn-std",
     "//packages/kbn-utils",
     "@npm//@elastic/elasticsearch",
-    "@npm//axios",
     "@npm//@babel/traverse",
+    "@npm//@jest/console",
+    "@npm//@jest/reporters",
+    "@npm//axios",
     "@npm//chance",
+    "@npm//dedent",
     "@npm//del",
     "@npm//enzyme",
     "@npm//execa",
     "@npm//exit-hook",
     "@npm//form-data",
+    "@npm//get-port",
+    "@npm//getopts",
     "@npm//globby",
     "@npm//he",
     "@npm//history",
@@ -56,9 +62,9 @@ RUNTIME_DEPS = [
     "@npm//jest-cli",
     "@npm//jest-snapshot",
     "@npm//jest-styled-components",
-    "@npm//@jest/reporters",
     "@npm//joi",
     "@npm//mustache",
+    "@npm//normalize-path",
     "@npm//parse-link-header",
     "@npm//prettier",
     "@npm//react-dom",
@@ -66,18 +72,27 @@ RUNTIME_DEPS = [
     "@npm//react-router-dom",
     "@npm//redux",
     "@npm//rxjs",
+    "@npm//semver",
     "@npm//strip-ansi",
     "@npm//xmlbuilder",
     "@npm//xml2js",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-i18n",
-  "//packages/kbn-utils",
+  "//packages/kbn-dev-utils:npm_module_types",
+  "//packages/kbn-i18n-react:npm_module_types",
+  "//packages/kbn-std:npm_module_types",
+  "//packages/kbn-utils:npm_module_types",
   "@npm//@elastic/elasticsearch",
+  "@npm//@jest/console",
+  "@npm//@jest/reporters",
+  "@npm//axios",
+  "@npm//elastic-apm-node",
   "@npm//del",
+  "@npm//exit-hook",
   "@npm//form-data",
+  "@npm//get-port",
+  "@npm//getopts",
   "@npm//jest",
   "@npm//jest-cli",
   "@npm//jest-snapshot",
@@ -85,6 +100,7 @@ TYPES_DEPS = [
   "@npm//rxjs",
   "@npm//xmlbuilder",
   "@npm//@types/chance",
+  "@npm//@types/dedent",
   "@npm//@types/enzyme",
   "@npm//@types/he",
   "@npm//@types/history",
@@ -92,12 +108,14 @@ TYPES_DEPS = [
   "@npm//@types/joi",
   "@npm//@types/lodash",
   "@npm//@types/mustache",
+  "@npm//@types/normalize-path",
   "@npm//@types/node",
   "@npm//@types/parse-link-header",
   "@npm//@types/prettier",
   "@npm//@types/react-dom",
   "@npm//@types/react-redux",
   "@npm//@types/react-router-dom",
+  "@npm//@types/semver",
   "@npm//@types/xml2js",
 ]
 
@@ -122,10 +140,8 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )
@@ -133,7 +149,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -149,6 +165,23 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

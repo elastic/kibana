@@ -7,6 +7,7 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
+import { savedQueryMigrations } from './migrations/query';
 
 export const querySavedObjectType: SavedObjectsType = {
   name: 'query',
@@ -38,5 +39,5 @@ export const querySavedObjectType: SavedObjectsType = {
       timefilter: { type: 'object', enabled: false },
     },
   },
-  migrations: {},
+  migrations: savedQueryMigrations,
 };

@@ -26,10 +26,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it('7.16.0 migrates action_task_params to use references array', async () => {
       // Inspect migration of non-preconfigured connector ID
-      const response = await es.get<SavedObject<ActionTaskParams>>({
-        index: '.kibana',
-        id: 'action_task_params:b9af6280-0052-11ec-917b-f7aa317691ed',
-      });
+      const response = await es.get<SavedObject<ActionTaskParams>>(
+        {
+          index: '.kibana',
+          id: 'action_task_params:b9af6280-0052-11ec-917b-f7aa317691ed',
+        },
+        { meta: true }
+      );
       expect(response.statusCode).to.eql(200);
       const { actionId, relatedSavedObjects, references } = getActionIdAndRelatedSavedObjects(
         response.body._source
@@ -49,10 +52,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       // Inspect migration of preconfigured connector ID
-      const preconfiguredConnectorResponse = await es.get<SavedObject<ActionTaskParams>>({
-        index: '.kibana',
-        id: 'action_task_params:0205a520-0054-11ec-917b-f7aa317691ed',
-      });
+      const preconfiguredConnectorResponse = await es.get<SavedObject<ActionTaskParams>>(
+        {
+          index: '.kibana',
+          id: 'action_task_params:0205a520-0054-11ec-917b-f7aa317691ed',
+        },
+        { meta: true }
+      );
       expect(preconfiguredConnectorResponse.statusCode).to.eql(200);
 
       const {

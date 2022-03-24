@@ -4,11 +4,11 @@ slug: /kibana-dev-docs/api/core-savedObjects
 title: "core.savedObjects"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the core.savedObjects plugin
-date: 2020-11-16
+date: 2022-03-15
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'core.savedObjects']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-import coreSavedObjectsObj from './core_saved_objects.json';
+import coreSavedObjectsObj from './core_saved_objects.devdocs.json';
 
 
 
@@ -16,9 +16,9 @@ Contact [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) for que
 
 **Code health stats**
 
-| Public API count  | Any count | Items lacking comments | Missing exports | 
+| Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 2298 | 27 | 1018 | 29 |
+| 2370 | 15 | 969 | 33 |
 
 ## Client
 
@@ -32,6 +32,9 @@ Contact [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) for que
 <DocDefinitionList data={coreSavedObjectsObj.client.misc}/>
 
 ## Server
+
+### Functions
+<DocDefinitionList data={coreSavedObjectsObj.server.functions}/>
 
 ### Classes
 <DocDefinitionList data={coreSavedObjectsObj.server.classes}/>

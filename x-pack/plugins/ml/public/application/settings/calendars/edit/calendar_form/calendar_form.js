@@ -18,33 +18,37 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiSwitch,
 } from '@elastic/eui';
 
 import { EventsTable } from '../events_table';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
+import { MlPageHeader } from '../../../../components/page_header';
 
 function EditHeader({ calendarId, description }) {
   return (
     <Fragment>
-      <EuiTitle data-test-subj="mlCalendarTitle">
-        <h1>
+      <MlPageHeader>
+        <span data-test-subj={'mlCalendarTitle'}>
           <FormattedMessage
             id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
             defaultMessage="Calendar {calendarId}"
             values={{ calendarId }}
           />
-        </h1>
-      </EuiTitle>
-      <EuiText data-test-subj={'mlCalendarDescriptionText'}>
-        <p>{description}</p>
-      </EuiText>
-      <EuiSpacer size="l" />
+        </span>
+      </MlPageHeader>
+      {description ? (
+        <>
+          <EuiText data-test-subj={'mlCalendarDescriptionText'}>
+            <p>{description}</p>
+          </EuiText>
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
     </Fragment>
   );
 }
@@ -97,15 +101,12 @@ export const CalendarForm = ({
         <EditHeader calendarId={calendarId} description={description} />
       ) : (
         <Fragment>
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
-                defaultMessage="Create new calendar"
-              />
-            </h1>
-          </EuiTitle>
-          <EuiSpacer size="m" />
+          <MlPageHeader>
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+              defaultMessage="Create new calendar"
+            />
+          </MlPageHeader>
           <EuiFormRow
             label={
               <FormattedMessage
@@ -142,10 +143,10 @@ export const CalendarForm = ({
               data-test-subj="mlCalendarDescriptionInput"
             />
           </EuiFormRow>
+
+          <EuiSpacer size="m" />
         </Fragment>
       )}
-
-      <EuiSpacer size="xl" />
 
       <EuiSwitch
         name="switch"

@@ -11,9 +11,9 @@ import { useActions, useValues } from 'kea';
 
 import { EuiCallOut, EuiLink, EuiPanel, EuiSwitch, EuiSpacer, EuiText } from '@elastic/eui';
 
+import { docLinks } from '../../../../../shared/doc_links';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV } from '../../../../constants';
-import { SYNCHRONIZATION_DOCS_URL } from '../../../../routes';
 import {
   LEARN_MORE_LINK,
   SOURCE_SYNCHRONIZATION_DESCRIPTION,
@@ -68,7 +68,7 @@ export const Synchronization: React.FC = () => {
         description={
           <>
             {SOURCE_SYNCHRONIZATION_DESCRIPTION}{' '}
-            <EuiLink href={SYNCHRONIZATION_DOCS_URL} external>
+            <EuiLink href={docLinks.workplaceSearchSynch} external>
               {LEARN_MORE_LINK}
             </EuiLink>
           </>

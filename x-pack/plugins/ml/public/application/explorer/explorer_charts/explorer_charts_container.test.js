@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { chartLimits } from '../../util/chart_utils';
 
@@ -48,6 +48,8 @@ const getUtilityProps = () => {
     timefilter: timefilterMock,
     timeBuckets: timeBucketsMock,
     kibana: kibanaContextMock,
+    onPointerUpdate: jest.fn(),
+    chartsService: kibanaContextMock.services.charts,
   };
 };
 

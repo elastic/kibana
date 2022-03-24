@@ -12,7 +12,6 @@ import {
   getDeleteRequest,
   getFindResultWithSingleHit,
   getDeleteRequestById,
-  getRuleExecutionStatuses,
   getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
@@ -32,7 +31,6 @@ describe.each([
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
-    clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses());
 
     deleteRulesRoute(server.router, isRuleRegistryEnabled);
   });
@@ -62,14 +60,6 @@ describe.each([
         message: 'rule_id: "rule-1" not found',
         status_code: 404,
       });
-    });
-
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting.getRulesClient = jest.fn();
-      const response = await server.inject(getDeleteRequest(), context);
-
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catches error if deletion throws error', async () => {

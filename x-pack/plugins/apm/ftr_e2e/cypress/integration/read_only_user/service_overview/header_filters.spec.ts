@@ -5,9 +5,11 @@
  * 2.0.
  */
 import url from 'url';
-import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
+import { synthtrace } from '../../../../synthtrace';
+import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 
-const { start, end } = archives_metadata['apm_8.0.0'];
+const start = '2021-10-10T00:00:00.000Z';
+const end = '2021-10-10T00:15:00.000Z';
 
 const serviceOverviewHref = url.format({
   pathname: '/app/apm/services/opbeans-node/overview',
@@ -46,7 +48,7 @@ const apisToIntercept = [
   },
   {
     endpoint:
-      '/internal/apm/services/opbeans-node/error_groups/main_statistics?*',
+      '/internal/apm/services/opbeans-node/errors/groups/main_statistics?*',
     name: 'errorGroupsMainStatisticsRequest',
   },
   {
@@ -62,6 +64,16 @@ const apisToIntercept = [
 ];
 
 describe('Service overview - header filters', () => {
+  before(async () => {
+    await synthtrace.index(
+      opbeans({ from: new Date(start).getTime(), to: new Date(end).getTime() })
+    );
+  });
+
+  after(async () => {
+    await synthtrace.clean();
+  });
+
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });

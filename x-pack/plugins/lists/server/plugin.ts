@@ -26,16 +26,23 @@ import { getSpaceId } from './get_space_id';
 import { getUser } from './get_user';
 import { initSavedObjects } from './saved_objects';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
+import {
+  ExtensionPointStorage,
+  ExtensionPointStorageClientInterface,
+  ExtensionPointStorageInterface,
+} from './services/extension_points';
 
 export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {}, PluginsStart> {
   private readonly logger: Logger;
   private readonly config: ConfigType;
+  private readonly extensionPoints: ExtensionPointStorageInterface;
   private spaces: SpacesServiceStart | undefined | null;
   private security: SecurityPluginStart | undefined | null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
     this.config = this.initializerContext.config.get<ConfigType>();
+    this.extensionPoints = new ExtensionPointStorage(this.logger);
   }
 
   public setup(core: CoreSetup): ListPluginSetup {
@@ -51,9 +58,15 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
     initRoutes(router, config);
 
     return {
-      getExceptionListClient: (savedObjectsClient, user): ExceptionListClient => {
+      getExceptionListClient: (
+        savedObjectsClient,
+        user,
+        enableServerExtensionPoints = true
+      ): ExceptionListClient => {
         return new ExceptionListClient({
+          enableServerExtensionPoints,
           savedObjectsClient,
+          serverExtensionsClient: this.extensionPoints.getClient(),
           user,
         });
       },
@@ -65,6 +78,9 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
           user,
         });
       },
+      registerExtension: (extension): void => {
+        this.extensionPoints.add(extension);
+      },
     };
   }
 
@@ -75,12 +91,13 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
   }
 
   public stop(): void {
+    this.extensionPoints.clear();
     this.logger.debug('Stopping plugin');
   }
 
   private createRouteHandlerContext = (): ContextProvider => {
     return async (context, request): ContextProviderReturn => {
-      const { spaces, config, security } = this;
+      const { spaces, config, security, extensionPoints } = this;
       const {
         core: {
           savedObjects: { client: savedObjectsClient },
@@ -97,9 +114,13 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
         return {
           getExceptionListClient: (): ExceptionListClient =>
             new ExceptionListClient({
+              request,
               savedObjectsClient,
+              serverExtensionsClient: this.extensionPoints.getClient(),
               user,
             }),
+          getExtensionPointClient: (): ExtensionPointStorageClientInterface =>
+            extensionPoints.getClient(),
           getListClient: (): ListClient =>
             new ListClient({
               config,

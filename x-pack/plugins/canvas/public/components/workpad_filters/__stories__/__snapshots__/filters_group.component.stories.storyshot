@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] = `
+<div
+  className="canvasLayout__sidebar"
+>
+  <div
+    className="canvasSidebar__expandable"
+  >
+    <div
+      className="euiAccordion euiAccordion-isOpen canvasSidebar__accordion filtersSidebar__accordion"
+      style={
+        Object {
+          "marginLeft": "0px",
+        }
+      }
+    >
+      <div
+        className="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="canvas-filter-group-0"
+          aria-expanded={true}
+          aria-labelledby="generated-id"
+          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
+          onClick={[Function]}
+          tabIndex={-1}
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+            size="m"
+          />
+        </button>
+        <button
+          aria-controls="canvas-filter-group-0"
+          aria-expanded={true}
+          className="euiAccordion__button"
+          id="generated-id"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiAccordion__buttonContent"
+          >
+            Group 1
+          </span>
+        </button>
+      </div>
+      <div
+        aria-labelledby="generated-id"
+        className="euiAccordion__childWrapper"
+        id="canvas-filter-group-0"
+        role="region"
+        tabIndex={-1}
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent empty group 1`] = `
+<div
+  className="canvasLayout__sidebar"
+>
+  <div
+    className="canvasSidebar__expandable"
+  >
+    <div
+      className="euiAccordion euiAccordion-isOpen canvasSidebar__accordion filtersSidebar__accordion"
+      style={
+        Object {
+          "marginLeft": "0px",
+        }
+      }
+    >
+      <div
+        className="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="canvas-filter-group-0"
+          aria-expanded={true}
+          aria-labelledby="generated-id"
+          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
+          onClick={[Function]}
+          tabIndex={-1}
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+            size="m"
+          />
+        </button>
+        <button
+          aria-controls="canvas-filter-group-0"
+          aria-expanded={true}
+          className="euiAccordion__button"
+          id="generated-id"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiAccordion__buttonContent"
+          >
+            Group 1
+          </span>
+        </button>
+      </div>
+      <div
+        aria-labelledby="generated-id"
+        className="euiAccordion__childWrapper"
+        id="canvas-filter-group-0"
+        role="region"
+        tabIndex={-1}
+      />
+    </div>
+  </div>
+</div>
+`;

@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
-import { getHttp, getIndexPatternService, getSearchService } from '../../../kibana_services';
+import {
+  getExecutionContext,
+  getHttp,
+  getIndexPatternService,
+  getSearchService,
+} from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
 import {
   ES_GEO_FIELD_TYPE,
@@ -53,7 +59,7 @@ describe('ESGeoGridSource', () => {
       metrics: [],
       resolution: GRID_RESOLUTION.COARSE,
       type: SOURCE_TYPES.ES_GEO_GRID,
-      requestType: RENDER_AS.HEATMAP,
+      requestType: RENDER_AS.POINT,
     },
     {}
   );
@@ -129,6 +135,13 @@ describe('ESGeoGridSource', () => {
         },
       },
     });
+
+    const coreStartMock = coreMock.createStart();
+    coreStartMock.executionContext.get.mockReturnValue({
+      name: 'some-app',
+    });
+    // @ts-expect-error
+    getExecutionContext.mockReturnValue(coreStartMock.executionContext);
   });
 
   afterEach(() => {
@@ -281,7 +294,7 @@ describe('ESGeoGridSource', () => {
     });
   });
 
-  describe('ITiledSingleLayerVectorSource', () => {
+  describe('IMvtVectorSource', () => {
     const mvtGeogridSource = new ESGeoGridSource(
       {
         id: 'foobar',
@@ -295,44 +308,16 @@ describe('ESGeoGridSource', () => {
       {}
     );
 
-    it('getLayerName', () => {
-      expect(mvtGeogridSource.getLayerName()).toBe('source_layer');
+    it('getTileSourceLayer', () => {
+      expect(mvtGeogridSource.getTileSourceLayer()).toBe('aggs');
     });
 
-    it('getMinZoom', () => {
-      expect(mvtGeogridSource.getMinZoom()).toBe(0);
-    });
+    it('getTileUrl', async () => {
+      const tileUrl = await mvtGeogridSource.getTileUrl(vectorSourceRequestMeta, '1234');
 
-    it('getMaxZoom', () => {
-      expect(mvtGeogridSource.getMaxZoom()).toBe(24);
-    });
-
-    it('getUrlTemplateWithMeta', async () => {
-      const urlTemplateWithMeta = await mvtGeogridSource.getUrlTemplateWithMeta(
-        vectorSourceRequestMeta
+      expect(tileUrl).toEqual(
+        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&gridPrecision=8&requestBody=(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'1'%3A('0'%3Asize%2C'1'%3A0)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A''))%2C'6'%3A('0'%3Aaggs%2C'1'%3A())))&renderAs=heatmap&token=1234"
       );
-
-      expect(urlTemplateWithMeta.layerName).toBe('source_layer');
-      expect(urlTemplateWithMeta.minSourceZoom).toBe(0);
-      expect(urlTemplateWithMeta.maxSourceZoom).toBe(24);
-      expect(urlTemplateWithMeta.urlTemplate).toEqual(
-        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:bar))),geotile_grid:(bounds:!n,field:bar,precision:!n,shard_size:65535,size:65535))))))&requestType=heatmap&geoFieldType=geo_point"
-      );
-    });
-
-    it('should include searchSourceId in urlTemplateWithMeta', async () => {
-      const urlTemplateWithMeta = await mvtGeogridSource.getUrlTemplateWithMeta({
-        ...vectorSourceRequestMeta,
-        searchSessionId: '1',
-      });
-
-      expect(
-        urlTemplateWithMeta.urlTemplate.startsWith(
-          "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:bar))),geotile_grid:(bounds:!n,field:bar,precision:!n,shard_size:65535,size:65535))))))&requestType=heatmap&geoFieldType=geo_point&searchSessionId=1"
-        )
-      ).toBe(true);
-
-      expect(urlTemplateWithMeta.urlTemplate.endsWith('&searchSessionId=1')).toBe(true);
     });
   });
 

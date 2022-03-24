@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
@@ -17,71 +19,78 @@ import {
 
 import { FleetPlugin } from './plugin';
 
-export { default as apm } from 'elastic-apm-node';
-export {
+export type {
   AgentService,
+  AgentClient,
   ESIndexPatternService,
-  getRegistryUrl,
   PackageService,
+  PackageClient,
   AgentPolicyServiceInterface,
   ArtifactsClientInterface,
   Artifact,
   ListArtifactsProps,
 } from './services';
+export { getRegistryUrl } from './services';
 
-export { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
+export type { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
 export type {
   ExternalCallback,
   PutPackagePolicyUpdateCallback,
   PostPackagePolicyDeleteCallback,
   PostPackagePolicyCreateCallback,
+  FleetRequestHandlerContext,
 } from './types';
-export { AgentNotFoundError } from './errors';
+export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
+
+const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
     agents: true,
   },
-  deprecations: ({ deprecate, renameFromRoot, unused, unusedFromRoot }) => [
-    deprecate('enabled', '8.0.0'),
-    // Fleet plugin was named ingestManager before
-    renameFromRoot('xpack.ingestManager.enabled', 'xpack.fleet.enabled'),
-    renameFromRoot('xpack.ingestManager.registryUrl', 'xpack.fleet.registryUrl'),
-    renameFromRoot('xpack.ingestManager.registryProxyUrl', 'xpack.fleet.registryProxyUrl'),
-    renameFromRoot('xpack.ingestManager.fleet', 'xpack.ingestManager.agents'),
-    renameFromRoot('xpack.ingestManager.agents.enabled', 'xpack.fleet.agents.enabled'),
-    renameFromRoot('xpack.ingestManager.agents.elasticsearch', 'xpack.fleet.agents.elasticsearch'),
-    renameFromRoot(
-      'xpack.ingestManager.agents.tlsCheckDisabled',
-      'xpack.fleet.agents.tlsCheckDisabled'
-    ),
-    renameFromRoot(
-      'xpack.ingestManager.agents.pollingRequestTimeout',
-      'xpack.fleet.agents.pollingRequestTimeout'
-    ),
-    renameFromRoot(
-      'xpack.ingestManager.agents.maxConcurrentConnections',
-      'xpack.fleet.agents.maxConcurrentConnections'
-    ),
-    renameFromRoot('xpack.ingestManager.agents.kibana', 'xpack.fleet.agents.kibana'),
-    renameFromRoot(
-      'xpack.ingestManager.agents.agentPolicyRolloutRateLimitIntervalMs',
-      'xpack.fleet.agents.agentPolicyRolloutRateLimitIntervalMs'
-    ),
-    renameFromRoot(
-      'xpack.ingestManager.agents.agentPolicyRolloutRateLimitRequestPerInterval',
-      'xpack.fleet.agents.agentPolicyRolloutRateLimitRequestPerInterval'
-    ),
-    unusedFromRoot('xpack.ingestManager'),
+  deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
-    unused('agents.kibana'),
-    unused('agents.maxConcurrentConnections'),
-    unused('agents.agentPolicyRolloutRateLimitIntervalMs'),
-    unused('agents.agentPolicyRolloutRateLimitRequestPerInterval'),
-    unused('agents.pollingRequestTimeout'),
-    unused('agents.tlsCheckDisabled'),
-    unused('agents.fleetServerEnabled'),
+    unused('agents.kibana', { level: 'critical' }),
+    unused('agents.maxConcurrentConnections', { level: 'critical' }),
+    unused('agents.agentPolicyRolloutRateLimitIntervalMs', { level: 'critical' }),
+    unused('agents.agentPolicyRolloutRateLimitRequestPerInterval', { level: 'critical' }),
+    unused('agents.pollingRequestTimeout', { level: 'critical' }),
+    unused('agents.tlsCheckDisabled', { level: 'critical' }),
+    unused('agents.fleetServerEnabled', { level: 'critical' }),
+    // Deprecate default policy flags
+    (fullConfig, fromPath, addDeprecation) => {
+      if (
+        (fullConfig?.xpack?.fleet?.agentPolicies || []).find((policy: any) => policy.is_default)
+      ) {
+        addDeprecation({
+          configPath: 'xpack.fleet.agentPolicies.is_default',
+          message: `Config key [xpack.fleet.agentPolicies.is_default] is deprecated.`,
+          correctiveActions: {
+            manualSteps: [`Create a dedicated policy instead through the UI or API.`],
+          },
+          level: 'warning',
+        });
+      }
+      return fullConfig;
+    },
+    (fullConfig, fromPath, addDeprecation) => {
+      if (
+        (fullConfig?.xpack?.fleet?.agentPolicies || []).find(
+          (policy: any) => policy.is_default_fleet_server
+        )
+      ) {
+        addDeprecation({
+          configPath: 'xpack.fleet.agentPolicies.is_default_fleet_server',
+          message: `Config key [xpack.fleet.agentPolicies.is_default_fleet_server] is deprecated.`,
+          correctiveActions: {
+            manualSteps: [`Create a dedicated fleet server policy instead through the UI or API.`],
+          },
+          level: 'warning',
+        });
+      }
+      return fullConfig;
+    },
     // Renaming elasticsearch.host => elasticsearch.hosts
     (fullConfig, fromPath, addDeprecation) => {
       const oldValue = fullConfig?.xpack?.fleet?.agents?.elasticsearch?.host;
@@ -96,6 +105,7 @@ export const config: PluginConfigDescriptor = {
               `Use [xpack.fleet.agents.elasticsearch.hosts] with an array of host instead.`,
             ],
           },
+          level: 'critical',
         });
       }
 
@@ -103,7 +113,6 @@ export const config: PluginConfigDescriptor = {
     },
   ],
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     agents: schema.object({
@@ -122,12 +131,17 @@ export const config: PluginConfigDescriptor = {
     agentPolicies: PreconfiguredAgentPoliciesSchema,
     outputs: PreconfiguredOutputsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+    developer: schema.object({
+      disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
+      allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
+      bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
+    }),
   }),
 };
 
 export type FleetConfigType = TypeOf<typeof config.schema>;
 
-export { PackagePolicyServiceInterface } from './services/package_policy';
+export type { PackagePolicyServiceInterface } from './services/package_policy';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 

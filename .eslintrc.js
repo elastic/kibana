@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
+const Path = require('path');
+const Fs = require('fs');
+
+const globby = require('globby');
+
 const APACHE_2_0_LICENSE_HEADER = `
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -89,22 +94,16 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
+const packagePkgJsons = globby.sync('*/package.json', {
+  cwd: Path.resolve(__dirname, 'packages'),
+  absolute: true,
+});
+
 /** Packages which should not be included within production code. */
-const DEV_PACKAGES = [
-  'kbn-babel-code-parser',
-  'kbn-dev-utils',
-  'kbn-cli-dev-mode',
-  'kbn-docs-utils',
-  'kbn-es*',
-  'kbn-eslint*',
-  'kbn-optimizer',
-  'kbn-plugin-generator',
-  'kbn-plugin-helpers',
-  'kbn-pm',
-  'kbn-storybook',
-  'kbn-telemetry-tools',
-  'kbn-test',
-];
+const DEV_PACKAGES = packagePkgJsons.flatMap((path) => {
+  const pkg = JSON.parse(Fs.readFileSync(path, 'utf8'));
+  return pkg.kibana && pkg.kibana.devOnly ? Path.dirname(Path.basename(path)) : [];
+});
 
 /** Directories (at any depth) which include dev-only code. */
 const DEV_DIRECTORIES = [
@@ -154,6 +153,78 @@ const DEV_PATTERNS = [
   'src/dev/**/*',
   'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
   'x-pack/plugins/*/server/scripts/**/*',
+];
+
+/** Restricted imports with suggested alternatives */
+const RESTRICTED_IMPORTS = [
+  {
+    name: 'lodash',
+    importNames: ['set', 'setWith'],
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash.set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash.setwith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/setWith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp',
+    importNames: ['set', 'setWith', 'assoc', 'assocPath'],
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/setWith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/assoc',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/assocPath',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash',
+    importNames: ['template'],
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash.template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/fp',
+    importNames: ['template'],
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/fp/template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'react-use',
+    message: 'Please use react-use/lib/{method} instead.',
+  },
 ];
 
 module.exports = {
@@ -628,6 +699,7 @@ module.exports = {
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
+        '**/jest.config.js',
       ],
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
@@ -668,81 +740,7 @@ module.exports = {
         'no-restricted-imports': [
           2,
           {
-            paths: [
-              {
-                name: 'lodash',
-                importNames: ['set', 'setWith'],
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.setwith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp',
-                importNames: ['set', 'setWith', 'assoc', 'assocPath'],
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/assoc',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/assocPath',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash',
-                importNames: ['template'],
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash.template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/fp',
-                importNames: ['template'],
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/fp/template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'react-use',
-                message: 'Please use react-use/lib/{method} instead.',
-              },
-            ],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
         'no-restricted-modules': [
@@ -835,14 +833,32 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ['**/common/**/*.{js,mjs,ts,tsx}', '**/public/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          2,
+          {
+            paths: [
+              ...RESTRICTED_IMPORTS,
+              {
+                name: 'semver',
+                message: 'Please use "semver/*/{function}" instead',
+              },
+            ],
+          },
+        ],
+      },
+    },
 
     /**
-     * APM and Observability overrides
+     * APM, UX and Observability overrides
      */
     {
       files: [
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -869,6 +885,18 @@ module.exports = {
         ],
       },
     },
+    {
+      // require explicit return types in route handlers for performance reasons
+      files: ['x-pack/plugins/apm/server/**/route.ts'],
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': [
+          'error',
+          {
+            allowTypedFunctionExpressions: false,
+          },
+        ],
+      },
+    },
 
     /**
      * Fleet overrides
@@ -888,17 +916,6 @@ module.exports = {
     },
 
     /**
-     * Cases overrides
-     */
-    {
-      files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
-      },
-    },
-
-    /**
      * Security Solution overrides. These rules below are maintained and owned by
      * the people within the security-solution-platform team. Please see ping them
      * or check with them if you are encountering issues, have suggestions, or would
@@ -913,6 +930,8 @@ module.exports = {
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/cases/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -934,10 +953,12 @@ module.exports = {
       files: [
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
+        'x-pack/plugins/cases/**/*.{ts,tsx}',
       ],
       excludedFiles: [
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'error',
@@ -948,6 +969,7 @@ module.exports = {
       files: [
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
+        'x-pack/plugins/cases/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-this-alias': 'error',
@@ -970,6 +992,7 @@ module.exports = {
       files: [
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -1057,6 +1080,13 @@ module.exports = {
         'symbol-description': 'error',
         'vars-on-top': 'error',
         '@typescript-eslint/no-duplicate-imports': ['error'],
+      },
+    },
+    {
+      files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
+      excludedFiles: ['x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      rules: {
+        'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
     },
 
@@ -1458,6 +1488,10 @@ module.exports = {
         'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-boolean-value': ['error', 'never'],
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
+        ],
       },
     },
     {
@@ -1554,7 +1588,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps-src/src/flot_charts/**/*.js'],
+      files: ['packages/kbn-flot-charts/lib/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1582,8 +1616,8 @@ module.exports = {
       plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        // 'arrow-body-style': ['error', 'as-needed'],
-        // 'prefer-arrow-callback': 'error',
+        'arrow-body-style': ['error', 'as-needed'],
+        'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -1598,28 +1632,6 @@ module.exports = {
         'react-perf/jsx-no-new-array-as-prop': 'error',
         'react-perf/jsx-no-new-function-as-prop': 'error',
         'react/jsx-no-bind': 'error',
-      },
-    },
-
-    /**
-     * Prettier disables all conflicting rules, listing as last override so it takes precedence
-     */
-    {
-      files: ['**/*'],
-      rules: {
-        ...require('eslint-config-prettier').rules,
-        ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
-      },
-    },
-    /**
-     * Enterprise Search Prettier override
-     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
-     */
-    {
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
-      rules: {
-        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
     },
 
@@ -1735,6 +1747,35 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/no_export_all': 'error',
+      },
+    },
+
+    {
+      files: ['packages/kbn-type-summarizer/**/*.ts'],
+      rules: {
+        'no-bitwise': 'off',
+      },
+    },
+
+    /**
+     * Prettier disables all conflicting rules, listing as last override so it takes precedence
+     */
+    {
+      files: ['**/*'],
+      rules: {
+        ...require('eslint-config-prettier').rules,
+        ...require('eslint-config-prettier/react').rules,
+        ...require('eslint-config-prettier/@typescript-eslint').rules,
+      },
+    },
+    /**
+     * Enterprise Search Prettier override
+     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
     },
   ],

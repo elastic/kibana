@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
 import { EuiFieldText, EuiFormRow, EuiCheckbox, EuiSpacer } from '@elastic/eui';
@@ -14,25 +14,28 @@ import {
   CombinedField,
   CombinedFieldsReadOnlyForm,
 } from '../../../common/components/combined_fields';
+import { CreateDataViewToolTip } from './create_data_view_tooltip';
 
 interface Props {
   index: string;
   initialized: boolean;
   onIndexChange(): void;
-  createIndexPattern: boolean;
-  onCreateIndexPatternChange(): void;
+  createDataView: boolean;
+  onCreateDataViewChange(): void;
   indexNameError: string;
   combinedFields: CombinedField[];
+  canCreateDataView: boolean;
 }
 
 export const SimpleSettings: FC<Props> = ({
   index,
   initialized,
   onIndexChange,
-  createIndexPattern,
-  onCreateIndexPatternChange,
+  createDataView,
+  onCreateDataViewChange,
   indexNameError,
   combinedFields,
+  canCreateDataView,
 }) => {
   return (
     <React.Fragment>
@@ -69,19 +72,21 @@ export const SimpleSettings: FC<Props> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiCheckbox
-        id="createIndexPattern"
-        label={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.simpleImportSettings.createIndexPatternLabel"
-            defaultMessage="Create index pattern"
-          />
-        }
-        checked={createIndexPattern === true}
-        disabled={initialized === true}
-        onChange={onCreateIndexPatternChange}
-        data-test-subj="dataVisualizerFileCreateIndexPatternCheckbox"
-      />
+      <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
+        <EuiCheckbox
+          id="createDataView"
+          label={
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.simpleImportSettings.createDataViewLabel"
+              defaultMessage="Create data view"
+            />
+          }
+          checked={createDataView === true}
+          disabled={initialized === true || canCreateDataView === false}
+          onChange={onCreateDataViewChange}
+          data-test-subj="dataVisualizerFileCreateDataViewCheckbox"
+        />
+      </CreateDataViewToolTip>
 
       <EuiSpacer size="m" />
 

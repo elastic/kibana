@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'src/core/server';
 
 export type ESLicense = estypes.LicenseGetLicenseInformation;
@@ -12,17 +12,15 @@ export type ESLicense = estypes.LicenseGetLicenseInformation;
 let cachedLicense: ESLicense | undefined;
 
 async function fetchLicense(esClient: ElasticsearchClient, local: boolean) {
-  const { body } = await esClient.license.get({
+  return await esClient.license.get({
     local,
-    // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
-    accept_enterprise: true,
   });
-  return body;
 }
+
 /**
  * Get the cluster's license from the connected node.
  *
- * This is the equivalent of GET /_license?local=true&accept_enterprise=true.
+ * This is the equivalent of GET /_license?local=true.
  *
  * Like any X-Pack related API, X-Pack must installed for this to work.
  *

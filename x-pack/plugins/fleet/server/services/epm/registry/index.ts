@@ -8,8 +8,11 @@
 import { URL } from 'url';
 
 import mime from 'mime-types';
-import semverValid from 'semver/functions/valid';
+import semverGte from 'semver/functions/gte';
+
 import type { Response } from 'node-fetch';
+
+import { splitPkgKey as split } from '../../../../common';
 
 import { KibanaAssetType } from '../../../types';
 import type {
@@ -19,7 +22,6 @@ import type {
   InstallSource,
   RegistryPackage,
   RegistrySearchResults,
-  RegistrySearchResult,
   GetCategoriesRequest,
 } from '../../../types';
 import {
@@ -31,12 +33,9 @@ import {
 } from '../archive';
 import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
-import {
-  PackageKeyInvalidError,
-  PackageNotFoundError,
-  PackageCacheError,
-  RegistryResponseError,
-} from '../../../errors';
+import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
+
+import { getBundledPackageByName } from '../packages/bundled_packages';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -46,33 +45,7 @@ export interface SearchParams {
   experimental?: boolean;
 }
 
-/**
- * Extract the package name and package version from a string.
- *
- * @param pkgkey a string containing the package name delimited by the package version
- */
-export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
-  // If no version is provided, use the provided package key as the
-  // package name and return an empty version value
-  if (!pkgkey.includes('-')) {
-    return { pkgName: pkgkey, pkgVersion: '' };
-  }
-
-  const pkgName = pkgkey.includes('-') ? pkgkey.substr(0, pkgkey.indexOf('-')) : pkgkey;
-
-  if (pkgName === '') {
-    throw new PackageKeyInvalidError('Package key parsing failed: package name was empty');
-  }
-
-  // this will return the entire string if `indexOf` return -1
-  const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
-  if (!semverValid(pkgVersion)) {
-    throw new PackageKeyInvalidError(
-      'Package key parsing failed: package version was not a valid semver'
-    );
-  }
-  return { pkgName, pkgVersion };
-}
+export const splitPkgKey = split;
 
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
   `${name}-${version}`;
@@ -94,20 +67,81 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
+interface FetchFindLatestPackageOptions {
+  ignoreConstraints?: boolean;
+}
+
+async function _fetchFindLatestPackage(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  const logger = appContextService.getLogger();
+  const { ignoreConstraints = false } = options ?? {};
+
+  const bundledPackage = await getBundledPackageByName(packageName);
+
   const registryUrl = getRegistryUrl();
-  const url = new URL(
-    `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
-  );
+  const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
 
-  setKibanaVersion(url);
+  if (!ignoreConstraints) {
+    setKibanaVersion(url);
+  }
 
-  const res = await fetchUrl(url.toString());
-  const searchResults = JSON.parse(res);
-  if (searchResults.length) {
-    return searchResults[0];
-  } else {
-    throw new PackageNotFoundError(`${packageName} not found`);
+  try {
+    const res = await fetchUrl(url.toString(), 1);
+    const searchResults: RegistryPackage[] = JSON.parse(res);
+
+    const latestPackageFromRegistry = searchResults[0] ?? null;
+
+    if (bundledPackage && semverGte(bundledPackage.version, latestPackageFromRegistry.version)) {
+      return bundledPackage;
+    }
+
+    return latestPackageFromRegistry;
+  } catch (error) {
+    logger.error(
+      `Failed to fetch latest version of ${packageName} from registry: ${error.message}`
+    );
+
+    // Fall back to the bundled version of the package if it exists
+    if (bundledPackage) {
+      return bundledPackage;
+    }
+
+    // Otherwise, return null and allow callers to determine whether they'll consider this an error or not
+    return null;
+  }
+}
+
+export async function fetchFindLatestPackageOrThrow(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  const latestPackage = await _fetchFindLatestPackage(packageName, options);
+
+  if (!latestPackage) {
+    throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
+  }
+
+  return latestPackage;
+}
+
+export async function fetchFindLatestPackageOrUndefined(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  const logger = appContextService.getLogger();
+
+  try {
+    const latestPackage = await _fetchFindLatestPackage(packageName, options);
+
+    if (!latestPackage) {
+      return undefined;
+    }
+    return latestPackage;
+  } catch (error) {
+    logger.warn(`Error fetching latest package for ${packageName}: ${error.message}`);
+    return undefined;
   }
 }
 
@@ -140,11 +174,15 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 function setKibanaVersion(url: URL) {
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
+  const disableVersionCheck =
+    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
+  if (disableVersionCheck) {
+    return;
+  }
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+
+  if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
 }
@@ -223,7 +261,7 @@ export async function ensureCachedArchiveInfo(
   }
 }
 
-async function fetchArchiveBuffer(
+export async function fetchArchiveBuffer(
   pkgName: string,
   pkgVersion: string
 ): Promise<{ archiveBuffer: Buffer; archivePath: string }> {

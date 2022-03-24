@@ -13,8 +13,8 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Hosts File Modified",
-  "note": "## Config\n\nFor Windows systems using Auditbeat, this rule requires adding 'C:/Windows/System32/drivers/etc' as an additional path in the 'file_integrity' module of auditbeat.yml.",
-  "query": "file where event.type in (\"change\", \"creation\") and\n  file.path : (\"/private/etc/hosts\", \"/etc/hosts\", \"?:\\\\Windows\\\\System32\\\\drivers\\\\etc\\\\hosts\") \n",
+  "note": "## Config\n\nFor Windows systems using Auditbeat, this rule requires adding `C:/Windows/System32/drivers/etc` as an additional path in the 'file_integrity' module of auditbeat.yml.",
+  "query": "any where\n\n  /* file events for creation; file change events are not captured by some of the included sources for linux and so may\n     miss this, which is the purpose of the process + command line args logic below */\n  (\n   event.category == \"file\" and event.type in (\"change\", \"creation\") and\n     file.path : (\"/private/etc/hosts\", \"/etc/hosts\", \"?:\\\\Windows\\\\System32\\\\drivers\\\\etc\\\\hosts\")\n  )\n  or\n\n  /* process events for change targeting linux only */\n  (\n   event.category == \"process\" and event.type in (\"start\") and\n     process.name in (\"nano\", \"vim\", \"vi\", \"emacs\", \"echo\", \"sed\") and\n     process.args : (\"/etc/hosts\")\n  )\n",
   "references": [
     "https://www.elastic.co/guide/en/beats/auditbeat/current/auditbeat-reference-yml.html"
   ],
@@ -56,5 +56,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 6
 }

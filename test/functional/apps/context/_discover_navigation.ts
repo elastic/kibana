@@ -55,26 +55,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    it('should open the context view with the selected document as anchor', async () => {
+    it('should open the context view with the selected document as anchor and allows selecting next anchor', async () => {
+      /**
+       * Helper function to get the first timestamp of the document table
+       * @param isAnchorRow - determins if just the anchor row of context should be selected
+       */
+      const getTimestamp = async (isAnchorRow: boolean = false) => {
+        const contextFields = await docTable.getFields({ isAnchorRow });
+        return contextFields[0][0];
+      };
+      // get the timestamp of the first row
+
+      const firstDiscoverTimestamp = await getTimestamp();
+
       // check the anchor timestamp in the context view
       await retry.waitFor('selected document timestamp matches anchor timestamp ', async () => {
-        // get the timestamp of the first row
-        const discoverFields = await docTable.getFields();
-        const firstTimestamp = discoverFields[0][0];
-
         // navigate to the context view
         await docTable.clickRowToggle({ rowIndex: 0 });
         const rowActions = await docTable.getRowActions({ rowIndex: 0 });
         await rowActions[0].click();
-        const contextFields = await docTable.getFields({ isAnchorRow: true });
-        const anchorTimestamp = contextFields[0][0];
-        return anchorTimestamp === firstTimestamp;
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
+        const anchorTimestamp = await getTimestamp(true);
+        return anchorTimestamp === firstDiscoverTimestamp;
+      });
+
+      await retry.waitFor('next anchor timestamp matches previous anchor timestamp', async () => {
+        // get the timestamp of the first row
+        const firstContextTimestamp = await getTimestamp(false);
+        await docTable.clickRowToggle({ rowIndex: 0 });
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        await rowActions[0].click();
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
+        const anchorTimestamp = await getTimestamp(true);
+        return anchorTimestamp === firstContextTimestamp;
       });
     });
 
     it('should open the context view with the same columns', async () => {
       const columnNames = await docTable.getHeaderFields();
-      expect(columnNames).to.eql(['Time', ...TEST_COLUMN_NAMES]);
+      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the filters disabled', async () => {

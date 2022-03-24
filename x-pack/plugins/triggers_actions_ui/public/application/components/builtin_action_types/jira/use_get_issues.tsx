@@ -7,25 +7,21 @@
 
 import { isEmpty, debounce } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, IToasts } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
+import { Issue } from './types';
 import { getIssues } from './api';
 import * as i18n from './translations';
 
-type Issues = Array<{ id: string; key: string; title: string }>;
-
 interface Props {
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: IToasts;
   actionConnector?: ActionConnector;
   query: string | null;
 }
 
 export interface UseGetIssues {
-  issues: Issues;
+  issues: Issue[];
   isLoading: boolean;
 }
 
@@ -36,7 +32,7 @@ export const useGetIssues = ({
   query,
 }: Props): UseGetIssues => {
   const [isLoading, setIsLoading] = useState(false);
-  const [issues, setIssues] = useState<Issues>([]);
+  const [issues, setIssues] = useState<Issue[]>([]);
   const abortCtrl = useRef(new AbortController());
 
   useEffect(() => {

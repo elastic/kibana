@@ -14,14 +14,17 @@ import {
   SavedObjectReference,
 } from 'kibana/public';
 import {
-  DataPublicPluginStart,
   IndexPattern,
-  IndexPatternsContract,
   ISearchSource,
-  SearchSourceFields,
+  ISearchStart,
+  SerializedSearchSourceFields,
 } from '../../data/public';
+import { DataViewsContract } from '../../data_views/public';
 
-/** @deprecated */
+/**
+ * @deprecated
+ * @removeBy 8.8.0
+ */
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;
@@ -43,7 +46,7 @@ export interface SavedObject {
   migrationVersion?: Record<string, any>;
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   searchSource?: ISearchSource;
-  searchSourceFields?: SearchSourceFields;
+  searchSourceFields?: SerializedSearchSourceFields;
   showInRecentlyAccessed: boolean;
   title: string;
   unresolvedIndexPatternReference?: SavedObjectReference;
@@ -63,8 +66,8 @@ export interface SavedObjectCreationOpts {
 
 export interface SavedObjectKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: IndexPatternsContract;
-  search: DataPublicPluginStart['search'];
+  dataViews: DataViewsContract;
+  search: ISearchStart;
   chrome: ChromeStart;
   overlays: OverlayStart;
 }

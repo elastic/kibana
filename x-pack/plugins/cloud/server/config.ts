@@ -28,30 +28,36 @@ const fullStoryConfigSchema = schema.object({
   ),
 });
 
+const chatConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  chatURL: schema.maybe(schema.string()),
+});
+
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-  id: schema.maybe(schema.string()),
   apm: schema.maybe(apmConfigSchema),
-  cname: schema.maybe(schema.string()),
   base_url: schema.maybe(schema.string()),
-  profile_url: schema.maybe(schema.string()),
+  chat: chatConfigSchema,
+  chatIdentitySecret: schema.maybe(schema.string()),
+  cname: schema.maybe(schema.string()),
   deployment_url: schema.maybe(schema.string()),
-  organization_url: schema.maybe(schema.string()),
   full_story: fullStoryConfigSchema,
+  id: schema.maybe(schema.string()),
+  organization_url: schema.maybe(schema.string()),
+  profile_url: schema.maybe(schema.string()),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<CloudConfigType> = {
   exposeToBrowser: {
-    id: true,
-    cname: true,
     base_url: true,
-    profile_url: true,
+    chat: true,
+    cname: true,
     deployment_url: true,
-    organization_url: true,
     full_story: true,
+    id: true,
+    organization_url: true,
+    profile_url: true,
   },
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: configSchema,
 };

@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf2_',
         indexPatternName: 'ft_module_sample_logs',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1585576710000,
       },
       expected: {
         responseCode: 200,
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf3_',
         indexPatternName: 'ft_module_apache',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1536933580000,
       },
       expected: {
         responseCode: 200,
@@ -152,59 +152,22 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix:
-        'for apm_nodejs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm',
-      indexPattern: { name: 'ft_module_apm', timeField: '@timestamp' },
-      module: 'apm_nodejs',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        prefix: 'pf4_',
-        indexPatternName: 'ft_module_apm',
-        startDatafeed: true,
-        end: Date.now(),
-      },
-      expected: {
-        responseCode: 200,
-        jobs: [
-          {
-            jobId: 'pf4_abnormal_span_durations_nodejs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf4_abnormal_trace_durations_nodejs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf4_decreased_throughput_nodejs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-        ],
-        searches: [] as string[],
-        visualizations: [] as string[],
-        dashboards: [] as string[],
-      },
-    },
-    {
-      testTitleSuffix:
         'for apm_transaction with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm',
-      indexPattern: { name: 'ft_module_apm', timeField: '@timestamp' },
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm_transaction',
+      indexPattern: { name: 'ft_module_apm_transaction', timeField: '@timestamp' },
       module: 'apm_transaction',
       user: USER.ML_POWERUSER,
       requestBody: {
         prefix: 'pf5_',
-        indexPatternName: 'ft_module_apm',
+        indexPatternName: 'ft_module_apm_transaction',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1632925220000,
       },
       expected: {
         responseCode: 200,
         jobs: [
           {
-            jobId: 'pf5_high_mean_transaction_duration',
+            jobId: 'pf5_apm_tx_metrics',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },
@@ -225,7 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf6_',
         indexPatternName: 'ft_module_logs',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1556570920000,
       },
       expected: {
         responseCode: 200,
@@ -252,7 +215,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf7_',
         indexPatternName: 'ft_module_logs',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1556570920000,
       },
       expected: {
         responseCode: 200,
@@ -278,7 +241,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf8_',
         indexPatternName: 'ft_module_nginx',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1542372260000,
       },
       expected: {
         responseCode: 200,
@@ -333,7 +296,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf9_',
         indexPatternName: 'ft_module_sample_ecommerce',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1585260210000,
       },
       expected: {
         responseCode: 200,
@@ -360,7 +323,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf11_',
         indexPatternName: 'ft_module_siem_auditbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1566403650000,
       },
       expected: {
         responseCode: 200,
@@ -387,7 +350,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf12_',
         indexPatternName: 'ft_module_siem_packetbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1588688580000,
       },
       expected: {
         responseCode: 200,
@@ -434,7 +397,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf13_',
         indexPatternName: 'ft_module_heartbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1584117860000,
       },
       expected: {
         responseCode: 200,
@@ -461,7 +424,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf14_',
         indexPatternName: 'ft_module_auditbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1597847410000,
       },
       expected: {
         responseCode: 200,
@@ -500,7 +463,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf15_',
         indexPatternName: 'ft_logs-endpoint.events.*',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1606858680000,
       },
       expected: {
         responseCode: 200,
@@ -552,7 +515,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf16_',
         indexPatternName: 'ft_logs-endpoint.events.*',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1606858580000,
       },
       expected: {
         responseCode: 200,
@@ -614,7 +577,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf17_',
         indexPatternName: 'ft_module_metricbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1554501720000,
       },
       expected: {
         responseCode: 200,
@@ -651,7 +614,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf18_',
         indexPatternName: 'ft_module_metrics_ui',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1599762970000,
       },
       expected: {
         responseCode: 200,
@@ -688,7 +651,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf19_',
         indexPatternName: 'ft_module_metrics_ui',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1599763000000,
       },
       expected: {
         responseCode: 200,
@@ -725,7 +688,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf20_',
         indexPatternName: 'ft_module_siem_cloudtrail',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1594231870000,
       },
       expected: {
         responseCode: 200,
@@ -772,7 +735,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf21_',
         indexPatternName: 'ft_module_siem_winlogbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1595382280000,
       },
       expected: {
         responseCode: 200,
@@ -849,7 +812,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf22_',
         indexPatternName: 'ft_module_siem_winlogbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1566321950000,
       },
       expected: {
         responseCode: 200,
@@ -876,7 +839,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf23_',
         indexPatternName: 'ft_module_apache_data_stream',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1536933580000,
       },
       expected: {
         responseCode: 200,
@@ -923,7 +886,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf24_',
         indexPatternName: 'ft_module_nginx_data_stream',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1542372260000,
       },
       expected: {
         responseCode: 200,
@@ -963,18 +926,18 @@ export default ({ getService }: FtrProviderContext) => {
 
   const testDataListNegative = [
     {
-      testTitleSuffix: 'for non existent index pattern',
+      testTitleSuffix: 'for non existent data view',
       module: 'sample_data_weblogs',
       user: USER.ML_POWERUSER,
       requestBody: {
-        indexPatternName: 'non-existent-index-pattern',
+        indexPatternName: 'non-existent-data-view',
         startDatafeed: false,
       },
       expected: {
         responseCode: 400,
         error: 'Bad Request',
         message:
-          "Module's jobs contain custom URLs which require a kibana index pattern (non-existent-index-pattern) which cannot be found.",
+          "Module's jobs contain custom URLs which require a Kibana data view (non-existent-data-view) which cannot be found.",
       },
     },
     {
@@ -1002,12 +965,12 @@ export default ({ getService }: FtrProviderContext) => {
     rqBody: object,
     rspCode: number
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/api/ml/modules/setup/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send(rqBody)
-      .expect(rspCode);
+      .send(rqBody);
+    ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;
   }
@@ -1052,6 +1015,7 @@ export default ({ getService }: FtrProviderContext) => {
             await ml.api.deleteAnomalyDetectionJobES(job.jobId);
           }
           await ml.api.cleanMlIndices();
+          await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
         });
 
         it(testData.testTitleSuffix, async () => {
@@ -1194,6 +1158,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         after(async () => {
           await ml.api.cleanMlIndices();
+          if (testData.hasOwnProperty('indexPattern')) {
+            await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern!.name);
+          }
         });
 
         it(testData.testTitleSuffix, async () => {

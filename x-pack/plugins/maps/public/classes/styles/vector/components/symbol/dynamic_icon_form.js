@@ -45,7 +45,7 @@ export function DynamicIconForm({
         {...styleOptions}
         styleProperty={styleProperty}
         onChange={onIconMapChange}
-        isCustomOnly={!field.supportsAutoDomain()}
+        isCustomOnly={!field.supportsFieldMetaFromLocalData() && !field.supportsFieldMetaFromEs()}
       />
     );
   }

@@ -145,7 +145,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
         })}
       >
         <EuiBadge
-          color="secondary"
+          color="success"
           iconType="flag"
           href={badgeClickLink}
           onClickAriaLabel={metricbeatCollection}

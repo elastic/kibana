@@ -2,8 +2,8 @@
 //
 // prepended to all .scss imports (from JS, when v8light theme selected)
 
-@import '@elastic/eui/src/themes/eui-amsterdam/eui_amsterdam_colors_light';
-@import '@elastic/eui/src/themes/eui-amsterdam/eui_amsterdam_globals';
+@import '@elastic/eui/src/themes/amsterdam/colors_light';
+@import '@elastic/eui/src/themes/amsterdam/globals';
 
 @import './mixins';
 

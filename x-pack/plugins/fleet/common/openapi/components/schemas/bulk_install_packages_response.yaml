@@ -1,0 +1,24 @@
+title: Bulk install packages response
+type: object
+properties:
+  response:
+    type: array
+    deprecated: true
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+  items:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+required:
+  - items

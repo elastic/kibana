@@ -11,15 +11,6 @@
         "count_total": {
           "type": "long"
         },
-        "count_active_total": {
-          "type": "long"
-        },
-        "count_active_alert_history_connectors": {
-          "type": "long",
-          "_meta": {
-            "description": "The total number of preconfigured alert history connectors used by rules."
-          }
-        },
         "count_by_type": {
           "properties": {
             "DYNAMIC_KEY": {
@@ -60,7 +51,173 @@
             }
           }
         },
+        "count_active_total": {
+          "type": "long"
+        },
+        "count_active_alert_history_connectors": {
+          "type": "long",
+          "_meta": {
+            "description": "The total number of preconfigured alert history connectors used by rules."
+          }
+        },
         "count_active_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "count_actions_executions_per_day": {
+          "type": "long"
+        },
+        "count_actions_executions_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "count_active_email_connectors_by_service_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "exchange_server": {
+              "type": "long"
+            },
+            "gmail": {
+              "type": "long"
+            },
+            "outlook365": {
+              "type": "long"
+            },
+            "elastic_cloud": {
+              "type": "long"
+            },
+            "other": {
+              "type": "long"
+            },
+            "ses": {
+              "type": "long"
+            }
+          }
+        },
+        "count_actions_namespaces": {
+          "type": "long"
+        },
+        "count_actions_executions_failed_per_day": {
+          "type": "long"
+        },
+        "count_actions_executions_failed_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "avg_execution_time_per_day": {
+          "type": "long"
+        },
+        "avg_execution_time_by_type_per_day": {
           "properties": {
             "DYNAMIC_KEY": {
               "type": "long"
@@ -136,6 +293,32 @@
             },
             "max": {
               "type": "keyword"
+            }
+          }
+        },
+        "throttle_time_number_s": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
+            }
+          }
+        },
+        "schedule_time_number_s": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
             }
           }
         },
@@ -215,6 +398,24 @@
               "type": "long"
             },
             "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
               "type": "long"
             },
             "xpack__uptime__alerts__monitorStatus": {
@@ -300,6 +501,1215 @@
               "type": "long"
             },
             "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_namespaces": {
+          "type": "long"
+        },
+        "count_rules_executions_per_day": {
+          "type": "long"
+        },
+        "count_rules_executions_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_executions_failured_per_day": {
+          "type": "long"
+        },
+        "count_rules_executions_failured_by_reason_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "read": {
+              "type": "long"
+            },
+            "decrypt": {
+              "type": "long"
+            },
+            "license": {
+              "type": "long"
+            },
+            "unknown": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_executions_failured_by_reason_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "read": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "decrypt": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "license": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "unknown": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "count_rules_executions_timeouts_per_day": {
+          "type": "long"
+        },
+        "count_rules_executions_timeouts_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "count_failed_and_unrecognized_rule_tasks_per_day": {
+          "type": "long"
+        },
+        "count_failed_and_unrecognized_rule_tasks_by_status_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "failed": {
+              "type": "long"
+            },
+            "unrecognized": {
+              "type": "long"
+            }
+          }
+        },
+        "count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "failed": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "unrecognized": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "avg_execution_time_per_day": {
+          "type": "long"
+        },
+        "avg_execution_time_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
               "type": "long"
             },
             "xpack__uptime__alerts__monitorStatus": {
@@ -2003,6 +3413,279 @@
         }
       }
     },
+    "cases": {
+      "properties": {
+        "cases": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "syncAlertsOn": {
+                  "type": "long"
+                },
+                "syncAlertsOff": {
+                  "type": "long"
+                },
+                "totalUsers": {
+                  "type": "long"
+                },
+                "totalParticipants": {
+                  "type": "long"
+                },
+                "totalTags": {
+                  "type": "long"
+                },
+                "totalWithAlerts": {
+                  "type": "long"
+                },
+                "totalWithConnectors": {
+                  "type": "long"
+                },
+                "latestDates": {
+                  "properties": {
+                    "createdAt": {
+                      "type": "keyword"
+                    },
+                    "updatedAt": {
+                      "type": "keyword"
+                    },
+                    "closedAt": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "userActions": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "comments": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "alerts": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "connectors": {
+          "properties": {
+            "all": {
+              "properties": {
+                "all": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "itsm": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "sir": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "jira": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "resilient": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "swimlane": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "maxAttachedToACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "pushes": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "configuration": {
+          "properties": {
+            "all": {
+              "properties": {
+                "closure": {
+                  "properties": {
+                    "manually": {
+                      "type": "long"
+                    },
+                    "automatic": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "cloud": {
       "properties": {
         "isCloudEnabled": {
@@ -2304,6 +3987,12 @@
                 "description": "Number of times the user opened the in-product formula help popover."
               }
             },
+            "toggle_autoapply": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled auto-apply."
+              }
+            },
             "toggle_fullscreen_formula": {
               "type": "long",
               "_meta": {
@@ -2549,6 +4238,12 @@
               "type": "long",
               "_meta": {
                 "description": "Number of times the user opened the in-product formula help popover."
+              }
+            },
+            "toggle_autoapply": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user toggled auto-apply."
               }
             },
             "toggle_fullscreen_formula": {
@@ -2947,6 +4642,72 @@
               "type": "long",
               "_meta": {
                 "description": "Number of saved lens visualizations which are using at least one formula"
+              }
+            }
+          }
+        },
+        "saved_multiterms_overall": {
+          "properties": {
+            "multiterms_docs": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one multiterms operation"
+              }
+            },
+            "multiterms_terms_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of terms used for multiterms operations of saved lens visualizations"
+              }
+            },
+            "multiterms_operations_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of operations using multiterms of saved lens visualizations"
+              }
+            }
+          }
+        },
+        "saved_multiterms_30_days": {
+          "properties": {
+            "multiterms_docs": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one multiterms operation"
+              }
+            },
+            "multiterms_terms_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of terms used for multiterms operations of saved lens visualizations"
+              }
+            },
+            "multiterms_operations_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of operations using multiterms of saved lens visualizations"
+              }
+            }
+          }
+        },
+        "saved_multiterms_90_days": {
+          "properties": {
+            "multiterms_docs": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one multiterms operation"
+              }
+            },
+            "multiterms_terms_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of terms used for multiterms operations of saved lens visualizations"
+              }
+            },
+            "multiterms_operations_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of operations using multiterms of saved lens visualizations"
               }
             }
           }
@@ -4046,73 +5807,6 @@
     },
     "reporting": {
       "properties": {
-        "csv": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
-            },
-            "deprecated": {
-              "type": "long"
-            },
-            "sizes": {
-              "properties": {
-                "1.0": {
-                  "type": "long"
-                },
-                "5.0": {
-                  "type": "long"
-                },
-                "25.0": {
-                  "type": "long"
-                },
-                "50.0": {
-                  "type": "long"
-                },
-                "75.0": {
-                  "type": "long"
-                },
-                "95.0": {
-                  "type": "long"
-                },
-                "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
         "csv_searchsource": {
           "properties": {
             "available": {
@@ -4124,7 +5818,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4165,16 +5859,23 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "csv_rows": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -4191,7 +5892,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4232,16 +5933,23 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "csv_rows": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -4258,7 +5966,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4299,16 +6007,39 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
+                "png_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "png_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -4325,7 +6056,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4366,16 +6097,39 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
+                "png_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "png_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -4392,7 +6146,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4443,6 +6197,58 @@
                 },
                 "preserve_layout": {
                   "type": "long"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "pdf_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_pages": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -4459,7 +6265,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -4510,6 +6316,58 @@
                 },
                 "preserve_layout": {
                   "type": "long"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "pdf_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_pages": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -4541,22 +6399,6 @@
           "properties": {
             "completed": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -4657,22 +6499,6 @@
             },
             "completed_with_warnings": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -4773,22 +6599,6 @@
             },
             "failed": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -4889,22 +6699,6 @@
             },
             "pending": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -5005,22 +6799,6 @@
             },
             "processing": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -5149,81 +6927,11 @@
         "available": {
           "type": "boolean"
         },
-        "browser_type": {
-          "type": "keyword"
-        },
         "enabled": {
           "type": "boolean"
         },
         "last7Days": {
           "properties": {
-            "csv": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
-                },
-                "deprecated": {
-                  "type": "long"
-                },
-                "sizes": {
-                  "properties": {
-                    "1.0": {
-                      "type": "long"
-                    },
-                    "5.0": {
-                      "type": "long"
-                    },
-                    "25.0": {
-                      "type": "long"
-                    },
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
             "csv_searchsource": {
               "properties": {
                 "available": {
@@ -5235,7 +6943,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5276,16 +6984,23 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "csv_rows": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -5302,7 +7017,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5343,16 +7058,23 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "csv_rows": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -5369,7 +7091,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5410,16 +7132,39 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
+                    "png_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "png_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -5436,7 +7181,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5477,16 +7222,39 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
+                    "png_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "png_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -5503,7 +7271,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5554,6 +7322,58 @@
                     },
                     "preserve_layout": {
                       "type": "long"
+                    }
+                  }
+                },
+                "metrics": {
+                  "properties": {
+                    "pdf_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_pages": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -5570,7 +7390,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -5621,6 +7441,58 @@
                     },
                     "preserve_layout": {
                       "type": "long"
+                    }
+                  }
+                },
+                "metrics": {
+                  "properties": {
+                    "pdf_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_pages": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -5652,22 +7524,6 @@
               "properties": {
                 "completed": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -5768,22 +7624,6 @@
                 },
                 "completed_with_warnings": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -5884,22 +7724,6 @@
                 },
                 "failed": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -6000,22 +7824,6 @@
                 },
                 "pending": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -6116,22 +7924,6 @@
                 },
                 "processing": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -6404,6 +8196,30 @@
                           "_meta": {
                             "description": "Number of cases attached to query detection rule alerts"
                           }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
                         }
                       }
                     },
@@ -6431,6 +8247,30 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of cases attached to threshold detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
                           }
                         }
                       }
@@ -6460,6 +8300,30 @@
                           "_meta": {
                             "description": "Number of cases attached to eql detection rule alerts"
                           }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
                         }
                       }
                     },
@@ -6487,6 +8351,30 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of cases attached to machine_learning detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
                           }
                         }
                       }
@@ -6516,6 +8404,30 @@
                           "_meta": {
                             "description": "Number of cases attached to threat_match detection rule alerts"
                           }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
                         }
                       }
                     },
@@ -6544,6 +8456,30 @@
                           "_meta": {
                             "description": "Number of cases attached to elastic detection rule alerts"
                           }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
                         }
                       }
                     },
@@ -6571,6 +8507,30 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of cases attached to custom detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
                           }
                         }
                       }
@@ -6639,6 +8599,18 @@
                         "type": "long",
                         "_meta": {
                           "description": "The number of total cases generated by a rule"
+                        }
+                      },
+                      "has_legacy_notification": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has a legacy notification"
+                        }
+                      },
+                      "has_notification": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has a notification"
                         }
                       }
                     }
@@ -6897,12 +8869,6 @@
           "type": "boolean",
           "_meta": {
             "description": "Indicates if audit logging is both enabled and supported by the current license."
-          }
-        },
-        "auditLoggingType": {
-          "type": "keyword",
-          "_meta": {
-            "description": "If auditLoggingEnabled is true, indicates what type is enabled (ECS or legacy)."
           }
         },
         "loginSelectorEnabled": {
@@ -7277,6 +9243,9 @@
           "items": {
             "type": "keyword"
           }
+        },
+        "failed_tasks": {
+          "type": "long"
         }
       }
     },
@@ -7293,44 +9262,6 @@
                   }
                 }
               }
-            }
-          }
-        },
-        "ui_open": {
-          "properties": {
-            "elasticsearch": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch deprecations."
-              }
-            },
-            "overview": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the Overview page."
-              }
-            },
-            "kibana": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Kibana deprecations"
-              }
-            }
-          }
-        },
-        "ui_reindex": {
-          "properties": {
-            "close": {
-              "type": "long"
-            },
-            "open": {
-              "type": "long"
-            },
-            "start": {
-              "type": "long"
-            },
-            "stop": {
-              "type": "long"
             }
           }
         }

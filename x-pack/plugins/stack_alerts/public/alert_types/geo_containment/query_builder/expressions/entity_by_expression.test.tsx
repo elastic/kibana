@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { EntityByExpression, getValidIndexPatternFields } from './entity_by_expression';
+import { DataViewField } from 'src/plugins/data_views/public';
 
 const defaultProps = {
   errors: {
@@ -68,7 +69,7 @@ const defaultProps = {
       aggregatable: true,
       readFromDocValues: true,
     },
-  ],
+  ] as DataViewField[],
   isInvalid: false,
 };
 
@@ -89,6 +90,6 @@ test('should only use valid index fields', async () => {
     aggregatable: false,
   }));
 
-  const noIndexFields = getValidIndexPatternFields(invalidIndexFields);
+  const noIndexFields = getValidIndexPatternFields(invalidIndexFields as DataViewField[]);
   expect(noIndexFields.length).toEqual(0);
 });

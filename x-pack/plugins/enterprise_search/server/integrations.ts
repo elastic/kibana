@@ -30,7 +30,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files and folders stored on Box with Workplace Search.',
       }
     ),
-    categories: ['document_storage'],
+    categories: ['file_storage'],
   },
   {
     id: 'confluence_cloud',
@@ -47,7 +47,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your organizational content on Confluence Cloud with Workplace Search.',
       }
     ),
-    categories: ['knowledge_platform'],
+    categories: ['productivity'],
   },
   {
     id: 'confluence_server',
@@ -64,7 +64,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your organizational content on Confluence Server with Workplace Search.',
       }
     ),
-    categories: ['knowledge_platform'],
+    categories: ['productivity'],
   },
   {
     id: 'dropbox',
@@ -78,7 +78,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your files and folders stored on Dropbox with Workplace Search.',
       }
     ),
-    categories: ['document_storage'],
+    categories: ['file_storage'],
   },
   {
     id: 'github',
@@ -91,7 +91,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your projects and repos on GitHub with Workplace Search.',
       }
     ),
-    categories: ['software_development'],
+    categories: ['productivity'],
   },
   {
     id: 'github_enterprise_server',
@@ -108,7 +108,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your projects and repos on GitHub Enterprise Server with Workplace Search.',
       }
     ),
-    categories: ['software_development'],
+    categories: ['productivity'],
   },
   {
     id: 'gmail',
@@ -121,7 +121,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your emails managed by Gmail with Workplace Search.',
       }
     ),
-    categories: ['communication'],
+    categories: ['communications'],
   },
   {
     id: 'google_drive',
@@ -134,7 +134,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your documents on Google Drive with Workplace Search.',
       }
     ),
-    categories: ['document_storage'],
+    categories: ['file_storage'],
   },
   {
     id: 'jira_cloud',
@@ -147,7 +147,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your project workflow on Jira Cloud with Workplace Search.',
       }
     ),
-    categories: ['project_management'],
+    categories: ['productivity'],
   },
   {
     id: 'jira_server',
@@ -160,7 +160,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your project workflow on Jira Server with Workplace Search.',
       }
     ),
-    categories: ['project_management'],
+    categories: ['productivity'],
   },
   {
     id: 'onedrive',
@@ -173,7 +173,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files stored on OneDrive with Workplace Search.',
       }
     ),
-    categories: ['document_storage'],
+    categories: ['file_storage'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/one_drive',
   },
   {
@@ -187,7 +187,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your content on Salesforce with Workplace Search.',
       }
     ),
-    categories: ['crm'],
+    categories: ['productivity'],
   },
   {
     id: 'salesforce_sandbox',
@@ -203,7 +203,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your content on Salesforce Sandbox with Workplace Search.',
       }
     ),
-    categories: ['crm'],
+    categories: ['productivity'],
   },
   {
     id: 'servicenow',
@@ -216,7 +216,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your content on ServiceNow with Workplace Search.',
       }
     ),
-    categories: ['enterprise_management'],
+    categories: ['productivity'],
   },
   {
     id: 'sharepoint_online',
@@ -232,8 +232,26 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files stored on SharePoint Online with Workplace Search.',
       }
     ),
-    categories: ['document_storage'],
+    categories: ['file_storage'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point',
+  },
+  {
+    id: 'sharepoint_server',
+    title: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.sharepointServerName',
+      {
+        defaultMessage: 'SharePoint Server',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.sharepointServerDescription',
+      {
+        defaultMessage:
+          'Search over your files stored on Microsoft SharePoint Server with Workplace Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'file_storage', 'microsoft_365'],
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/sharepoint_server',
   },
   {
     id: 'slack',
@@ -246,7 +264,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your messages on Slack with Workplace Search.',
       }
     ),
-    categories: ['communication'],
+    categories: ['communications'],
   },
   {
     id: 'zendesk',
@@ -259,7 +277,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your tickets on Zendesk with Workplace Search.',
       }
     ),
-    categories: ['customer_support'],
+    categories: ['communications'],
   },
   {
     id: 'custom_api_source',
@@ -300,5 +318,68 @@ export const registerEnterpriseSearchIntegrations = (
       shipper: 'enterprise_search',
       ...integration,
     });
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'app_search_web_crawler',
+    title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.webCrawlerName', {
+      defaultMessage: 'Web site crawler',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.integrations.webCrawlerDescription',
+      {
+        defaultMessage: 'Add search to your website with the App Search web crawler.',
+      }
+    ),
+    categories: ['website_search'],
+    uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=crawler',
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoAppSearch',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'app_search_json',
+    title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.jsonName', {
+      defaultMessage: 'JSON',
+    }),
+    description: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.jsonDescription', {
+      defaultMessage: 'Search over your JSON data with App Search.',
+    }),
+    categories: ['upload_file'],
+    uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=json',
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoAppSearch',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'app_search_api',
+    title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.apiName', {
+      defaultMessage: 'API',
+    }),
+    description: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.apiDescription', {
+      defaultMessage: "Add search to your application with App Search's robust APIs.",
+    }),
+    categories: ['custom'],
+    uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=api',
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoAppSearch',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
   });
 };

@@ -118,7 +118,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+        className="euiButton euiButton--success euiButton--small euiButton--fill"
         disabled={false}
         onClick={[Function]}
         style={

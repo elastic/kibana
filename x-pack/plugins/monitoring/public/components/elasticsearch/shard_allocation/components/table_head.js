@@ -8,24 +8,21 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 class IndexLabel extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showSystemIndices: props.scope.showSystemIndices,
+      showSystemIndices: props.showSystemIndices,
     };
     this.toggleShowSystemIndicesState = this.toggleShowSystemIndicesState.bind(this);
   }
 
-  // See also public/directives/index_listing/index
   toggleShowSystemIndicesState(e) {
     const isChecked = e.target.checked;
     this.setState({ showSystemIndices: isChecked });
-    this.props.scope.$evalAsync(() => {
-      this.props.toggleShowSystemIndices(isChecked);
-    });
+    this.props.toggleShowSystemIndices(isChecked);
   }
 
   render() {
@@ -70,7 +67,7 @@ export class TableHead extends React.Component {
   }
 
   render() {
-    const propLabels = this.props.scope.labels || [];
+    const propLabels = this.props.labels || [];
     const labelColumns = propLabels
       .map((label) => {
         const column = {
@@ -81,8 +78,8 @@ export class TableHead extends React.Component {
           // override text label content with a JSX component
           column.content = (
             <IndexLabel
-              scope={this.props.scope}
               toggleShowSystemIndices={this.props.toggleShowSystemIndices}
+              showSystemIndices={this.props.showSystemIndices}
             />
           );
         } else {

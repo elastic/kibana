@@ -87,7 +87,7 @@ function setup() {
     return Promise.resolve([
       core as CoreStart,
       deps as InfraClientStartDeps,
-      void 0 as InfraClientStartExports,
+      {} as InfraClientStartExports,
     ]) as Promise<[CoreStart, InfraClientStartDeps, InfraClientStartExports]>;
   });
   return { core, mockedGetStartServices, dataResponder };
@@ -150,7 +150,6 @@ describe('Logs UI Observability Homepage Functions', () => {
               type: 'index_pattern',
               indexPatternId: 'test-index-pattern',
             },
-            fields: { timestamp: '@timestamp', tiebreaker: '_doc' },
           },
         },
       } as GetLogSourceConfigurationSuccessResponsePayload);
