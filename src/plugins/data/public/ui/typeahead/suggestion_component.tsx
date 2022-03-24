@@ -79,7 +79,6 @@ export const SuggestionComponent = React.memo(function SuggestionComponent(props
         className={classNames({
           kbnSuggestionItem: true,
           ['kbnSuggestionItem--' + props.suggestion.type]: true,
-          'kbnSuggestionItem--withDescription': props.shouldDisplayDescription,
         })}
       >
         <div className="kbnSuggestionItem__type">

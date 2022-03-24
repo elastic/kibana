@@ -11,7 +11,7 @@ exports[`SuggestionComponent Should display the suggestion and use the provided 
   role="option"
 >
   <div
-    className="kbnSuggestionItem kbnSuggestionItem--value kbnSuggestionItem--withDescription"
+    className="kbnSuggestionItem kbnSuggestionItem--value"
   >
     <div
       className="kbnSuggestionItem__type"
@@ -47,7 +47,7 @@ exports[`SuggestionComponent Should make the element active if the selected prop
   role="option"
 >
   <div
-    className="kbnSuggestionItem kbnSuggestionItem--value kbnSuggestionItem--withDescription"
+    className="kbnSuggestionItem kbnSuggestionItem--value"
   >
     <div
       className="kbnSuggestionItem__type"
