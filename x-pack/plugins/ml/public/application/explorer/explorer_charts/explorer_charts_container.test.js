@@ -105,7 +105,6 @@ describe('ExplorerChartsContainer', () => {
         {
           ...seriesConfigRare,
           chartData,
-          // chartLimits: chartLimits(chartData),
         },
       ],
       chartsPerRow: 1,

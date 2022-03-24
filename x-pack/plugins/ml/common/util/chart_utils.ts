@@ -9,12 +9,6 @@ import { CHART_TYPE, ChartType } from '../constants/charts';
 import type { SeriesConfigWithMetadata } from '../types/results';
 
 /**
- * TODO check if these flags are still needed
- */
-const EVENT_DISTRIBUTION_ENABLED = true;
-const POPULATION_DISTRIBUTION_ENABLED = true;
-
-/**
  * Get the chart type based on its configuration
  * @param config
  */
@@ -26,13 +20,11 @@ export function getChartType(config: SeriesConfigWithMetadata): ChartType {
   }
 
   if (
-    EVENT_DISTRIBUTION_ENABLED &&
     config.functionDescription === 'rare' &&
     config.entityFields.some((f) => f.fieldType === 'over') === false
   ) {
     chartType = CHART_TYPE.EVENT_DISTRIBUTION;
   } else if (
-    POPULATION_DISTRIBUTION_ENABLED &&
     config.functionDescription !== 'rare' &&
     config.entityFields.some((f) => f.fieldType === 'over') &&
     config.metricFunction !== null // Event distribution chart relies on the ML function mapping to an ES aggregation
