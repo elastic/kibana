@@ -88,7 +88,7 @@ describe('Test pipeline', () => {
 
       // Verify request
       const latestRequest: any = httpSetup.post.mock.calls.pop() || [];
-      const requestBody: ReqBody = JSON.parse(latestRequest[1].body);
+      const requestBody: ReqBody = JSON.parse(latestRequest[1]?.body);
 
       const {
         documents: reqDocuments,
