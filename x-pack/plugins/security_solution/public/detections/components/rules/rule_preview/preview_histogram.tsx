@@ -25,7 +25,6 @@ import { usePreviewHistogram } from './use_preview_histogram';
 import { formatDate } from '../../../../common/components/super_date_picker';
 import { FieldValueThreshold } from '../threshold_input';
 import { alertsDefaultModel } from '../../alerts_table/default_config';
-import { RenderCellValue } from '../../../configurations/security_solution_detections';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { TimelineId } from '../../../../../common/types';
@@ -33,6 +32,7 @@ import { APP_ID, APP_UI_ID, DEFAULT_PREVIEW_INDEX } from '../../../../../common/
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { DetailsPanel } from '../../../../timelines/components/side_panel';
+import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -217,7 +217,7 @@ export const PreviewHistogram = ({
           itemsPerPageOptions,
           kqlMode,
           query: { query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' },
-          renderCellValue: RenderCellValue,
+          renderCellValue: PreviewRenderCellValue,
           rowRenderers: defaultRowRenderers,
           runtimeMappings,
           setQuery: () => {},
