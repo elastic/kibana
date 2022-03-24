@@ -248,8 +248,6 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       expect(response.status).to.eql(200);
 
       expect(response.body.total).to.eql(1);
-      expect(response.body.totalErrors).to.eql(0);
-      expect(response.body.errors).to.eql([]);
 
       const execLogs = response.body.data;
       expect(execLogs.length).to.eql(1);
@@ -257,6 +255,16 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       for (const log of execLogs) {
         expect(log.status).to.equal('success');
         expect(log.timed_out).to.equal(true);
+      }
+
+      expect(response.body.totalErrors).to.eql(1);
+      expect(response.body.errors.length).to.eql(1);
+
+      for (const errors of response.body.errors) {
+        expect(errors.type).to.equal('alerting');
+        expect(errors.message).to.equal(
+          `rule: test.patternLongRunning:${createdRule.id}: 'abc' execution cancelled due to timeout - exceeded rule type timeout of 3s`
+        );
       }
     });
 
