@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 
 import { useAllActions } from './use_all_actions';
 import { Direction } from '../../common/search_strategy';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 
 interface ActionTableResultsButtonProps {
   actionId: string;
@@ -28,6 +28,7 @@ const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ act
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -84,6 +85,10 @@ const ActionsTableComponent = () => {
       }),
     [push]
   );
+  const isPlayButtonAvailable = useCallback(
+    () => permissions.runSavedQueries || permissions.writeLiveQueries,
+    [permissions.runSavedQueries, permissions.writeLiveQueries]
+  );
 
   const columns = useMemo(
     () => [
@@ -128,6 +133,7 @@ const ActionsTableComponent = () => {
             type: 'icon',
             icon: 'play',
             onClick: handlePlayClick,
+            available: isPlayButtonAvailable,
           },
           {
             render: renderActionsColumn,
@@ -137,6 +143,7 @@ const ActionsTableComponent = () => {
     ],
     [
       handlePlayClick,
+      isPlayButtonAvailable,
       renderActionsColumn,
       renderAgentsColumn,
       renderCreatedByColumn,

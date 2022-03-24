@@ -241,7 +241,7 @@
     "deep-freeze-strict": "^1.1.1",
     "deepmerge": "^4.2.2",
     "del": "^5.1.0",
-    "elastic-apm-node": "^3.30.0",
+    "elastic-apm-node": "^3.31.0",
     "execa": "^4.0.2",
     "exit-hook": "^2.2.0",
     "expiry-js": "0.1.7",

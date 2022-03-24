@@ -202,7 +202,7 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
   step('edit http monitor and check breadcrumb', async () => {
     await uptime.editMonitor();
     // breadcrumb is available before edit page is loaded, make sure its edit view
-    await page.waitForSelector(byTestId('monitorManagementMonitorName'));
+    await page.waitForSelector(byTestId('monitorManagementMonitorName'), { timeout: 60 * 1000 });
     const breadcrumbs = await page.$$('[data-test-subj=breadcrumb]');
     expect(await breadcrumbs[1].textContent()).toEqual('Monitor management');
     const lastBreadcrumb = await (await uptime.findByTestSubj('"breadcrumb last"')).textContent();
