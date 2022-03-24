@@ -61,7 +61,7 @@ import { addBasePath } from '../index';
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { registerTransformNodesRoutes } from './transforms_nodes';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../src/plugins/data_views/common';
 import { isLatestTransform } from '../../../common/types/transform';
 import { isKeywordDuplicate } from '../../../common/utils/field_utils';
 import { transformHealthServiceProvider } from '../../lib/alerting/transform_health_rule_type/transform_health_service';
@@ -449,11 +449,8 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   registerTransformNodesRoutes(routeDependencies);
 }
 
-async function getIndexPatternId(
-  indexName: string,
-  savedObjectsClient: SavedObjectsClientContract
-) {
-  const response = await savedObjectsClient.find<IIndexPattern>({
+async function getDataViewId(indexName: string, savedObjectsClient: SavedObjectsClientContract) {
+  const response = await savedObjectsClient.find<DataView>({
     type: 'index-pattern',
     perPage: 1,
     search: `"${indexName}"`,
@@ -464,11 +461,11 @@ async function getIndexPatternId(
   return ip?.id;
 }
 
-async function deleteDestIndexPatternById(
-  indexPatternId: string,
+async function deleteDestDataViewById(
+  dataViewId: string,
   savedObjectsClient: SavedObjectsClientContract
 ) {
-  return await savedObjectsClient.delete('index-pattern', indexPatternId);
+  return await savedObjectsClient.delete('index-pattern', dataViewId);
 }
 
 async function deleteTransforms(
@@ -480,7 +477,7 @@ async function deleteTransforms(
 
   // Cast possible undefineds as booleans
   const deleteDestIndex = !!reqBody.deleteDestIndex;
-  const deleteDestIndexPattern = !!reqBody.deleteDestIndexPattern;
+  const deleteDestDataView = !!reqBody.deleteDestDataView;
   const shouldForceDelete = !!reqBody.forceDelete;
 
   const results: DeleteTransformsResponseSchema = {};
@@ -490,7 +487,7 @@ async function deleteTransforms(
 
     const transformDeleted: ResponseStatus = { success: false };
     const destIndexDeleted: ResponseStatus = { success: false };
-    const destIndexPatternDeleted: ResponseStatus = {
+    const destDataViewDeleted: ResponseStatus = {
       success: false,
     };
     const transformId = transformInfo.id;
@@ -516,7 +513,7 @@ async function deleteTransforms(
           results[transformId] = {
             transformDeleted,
             destIndexDeleted,
-            destIndexPatternDeleted,
+            destDataViewDeleted,
             destinationIndex,
           };
           // No need to perform further delete attempts
@@ -538,18 +535,15 @@ async function deleteTransforms(
       }
 
       // Delete the data view if there's a data view that matches the name of dest index
-      if (destinationIndex && deleteDestIndexPattern) {
+      if (destinationIndex && deleteDestDataView) {
         try {
-          const indexPatternId = await getIndexPatternId(
-            destinationIndex,
-            ctx.core.savedObjects.client
-          );
-          if (indexPatternId) {
-            await deleteDestIndexPatternById(indexPatternId, ctx.core.savedObjects.client);
-            destIndexPatternDeleted.success = true;
+          const dataViewId = await getDataViewId(destinationIndex, ctx.core.savedObjects.client);
+          if (dataViewId) {
+            await deleteDestDataViewById(dataViewId, ctx.core.savedObjects.client);
+            destDataViewDeleted.success = true;
           }
-        } catch (deleteDestIndexPatternError) {
-          destIndexPatternDeleted.error = deleteDestIndexPatternError.meta.body.error;
+        } catch (deleteDestDataViewError) {
+          destDataViewDeleted.error = deleteDestDataViewError.meta.body.error;
         }
       }
 
@@ -569,7 +563,7 @@ async function deleteTransforms(
       results[transformId] = {
         transformDeleted,
         destIndexDeleted,
-        destIndexPatternDeleted,
+        destDataViewDeleted,
         destinationIndex,
       };
     } catch (e) {
