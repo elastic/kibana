@@ -12,23 +12,25 @@ import type { SourceProviderProps, UseNodeMetricsTableOptions } from '../shared'
 const LazyIntegratedPodMetricsTable = lazy(() => import('./integrated_pod_metrics_table'));
 
 export function createLazyPodMetricsTable(getStartServices: () => InfraClientStartServices) {
-  const [core, plugins, pluginStart] = getStartServices();
-
   return ({
     timerange,
     filterClauseDsl,
     sourceId,
-  }: UseNodeMetricsTableOptions & Partial<SourceProviderProps>) => (
-    <Suspense fallback={null}>
-      <LazyIntegratedPodMetricsTable
-        core={core}
-        plugins={plugins}
-        pluginStart={pluginStart}
-        theme$={core.theme.theme$}
-        sourceId={sourceId || 'default'}
-        timerange={timerange}
-        filterClauseDsl={filterClauseDsl}
-      />
-    </Suspense>
-  );
+  }: UseNodeMetricsTableOptions & Partial<SourceProviderProps>) => {
+    const [core, plugins, pluginStart] = getStartServices();
+
+    return (
+      <Suspense fallback={null}>
+        <LazyIntegratedPodMetricsTable
+          core={core}
+          plugins={plugins}
+          pluginStart={pluginStart}
+          theme$={core.theme.theme$}
+          sourceId={sourceId || 'default'}
+          timerange={timerange}
+          filterClauseDsl={filterClauseDsl}
+        />
+      </Suspense>
+    );
+  };
 }

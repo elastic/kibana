@@ -14,23 +14,25 @@ const LazyIntegratedContainerMetricsTable = lazy(
 );
 
 export function createLazyContainerMetricsTable(getStartServices: () => InfraClientStartServices) {
-  const [core, plugins, pluginStart] = getStartServices();
-
   return ({
     timerange,
     filterClauseDsl,
     sourceId,
-  }: UseNodeMetricsTableOptions & Partial<SourceProviderProps>) => (
-    <Suspense fallback={null}>
-      <LazyIntegratedContainerMetricsTable
-        core={core}
-        plugins={plugins}
-        pluginStart={pluginStart}
-        theme$={core.theme.theme$}
-        sourceId={sourceId || 'default'}
-        timerange={timerange}
-        filterClauseDsl={filterClauseDsl}
-      />
-    </Suspense>
-  );
+  }: UseNodeMetricsTableOptions & Partial<SourceProviderProps>) => {
+    const [core, plugins, pluginStart] = getStartServices();
+
+    return (
+      <Suspense fallback={null}>
+        <LazyIntegratedContainerMetricsTable
+          core={core}
+          plugins={plugins}
+          pluginStart={pluginStart}
+          theme$={core.theme.theme$}
+          sourceId={sourceId || 'default'}
+          timerange={timerange}
+          filterClauseDsl={filterClauseDsl}
+        />
+      </Suspense>
+    );
+  };
 }
