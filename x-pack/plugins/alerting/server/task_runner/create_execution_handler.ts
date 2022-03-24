@@ -148,8 +148,6 @@ export function createExecutionHandler<
         continue;
       }
 
-      setNumberOfTriggeredActions(action.actionTypeId);
-
       if (
         !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
       ) {
@@ -158,6 +156,8 @@ export function createExecutionHandler<
         );
         continue;
       }
+
+      setNumberOfTriggeredActions(action.actionTypeId);
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 

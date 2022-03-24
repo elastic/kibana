@@ -1346,7 +1346,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.execute,
         outcome: 'success',
         status: 'active',
-        numberOfTriggeredActions: 2,
+        numberOfTriggeredActions: 0,
         task: true,
       })
     );
