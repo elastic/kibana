@@ -177,7 +177,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async waitForCasesToBeListed() {
-      retry.waitFor('cases to appear on the all cases table', async () => {
+      await retry.waitFor('cases to appear on the all cases table', async () => {
         await testSubjects.click('all-cases-refresh');
         return await testSubjects.exists('case-details-link');
       });
