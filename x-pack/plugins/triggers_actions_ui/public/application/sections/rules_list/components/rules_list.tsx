@@ -63,6 +63,8 @@ import {
   loadRuleTypes,
   disableRule,
   enableRule,
+  snoozeRule,
+  unsnoozeRule,
   deleteRules,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
@@ -86,7 +88,7 @@ import './rules_list.scss';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { ManageLicenseModal } from './manage_license_modal';
 import { checkRuleTypeEnabled } from '../../../lib/check_rule_type_enabled';
-import { RuleEnabledSwitch } from './rule_enabled_switch';
+import { RuleStatusDropdown } from './rule_status_dropdown';
 import { PercentileSelectablePopover } from './percentile_selectable_popover';
 import { RuleDurationFormat } from './rule_duration_format';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
@@ -336,6 +338,21 @@ export const RulesList: React.FunctionComponent = () => {
     }
   }
 
+  const renderRuleStatusDropdown = (ruleEnabled: boolean | undefined, item: RuleTableItem) => {
+    return (
+      <RuleStatusDropdown
+        disableRule={async () => await disableRule({ http, id: item.id })}
+        enableRule={async () => await enableRule({ http, id: item.id })}
+        snoozeRule={async (snoozeEndTime: string | -1) =>
+          await snoozeRule({ http, id: item.id, snoozeEndTime })
+        }
+        unsnoozeRule={async () => await unsnoozeRule({ http, id: item.id })}
+        item={item}
+        onRuleChanged={() => loadRulesData()}
+      />
+    );
+  };
+
   const renderAlertExecutionStatus = (
     executionStatus: AlertExecutionStatus,
     item: RuleTableItem
@@ -441,26 +458,6 @@ export const RulesList: React.FunctionComponent = () => {
   const getRulesTableColumns = () => {
     return [
       {
-        field: 'enabled',
-        name: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.enabledTitle',
-          { defaultMessage: 'Enabled' }
-        ),
-        width: '50px',
-        render(_enabled: boolean | undefined, item: RuleTableItem) {
-          return (
-            <RuleEnabledSwitch
-              disableRule={async () => await disableRule({ http, id: item.id })}
-              enableRule={async () => await enableRule({ http, id: item.id })}
-              item={item}
-              onRuleChanged={() => loadRulesData()}
-            />
-          );
-        },
-        sortable: true,
-        'data-test-subj': 'rulesTableCell-enabled',
-      },
-      {
         field: 'name',
         name: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.nameTitle',
@@ -509,19 +506,7 @@ export const RulesList: React.FunctionComponent = () => {
               </EuiFlexGroup>
             </>
           );
-          return (
-            <>
-              {link}
-              {rule.enabled && rule.muteAll && (
-                <EuiBadge data-test-subj="mutedActionsBadge" color="hollow">
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.mutedBadge"
-                    defaultMessage="Muted"
-                  />
-                </EuiBadge>
-              )}
-            </>
-          );
+          return <>{link}</>;
         },
       },
       {
@@ -757,15 +742,29 @@ export const RulesList: React.FunctionComponent = () => {
       {
         field: 'executionStatus.status',
         name: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastResponseTitle',
+          { defaultMessage: 'Last response' }
+        ),
+        sortable: true,
+        truncateText: false,
+        width: '120px',
+        'data-test-subj': 'rulesTableCell-lastResponse',
+        render: (_executionStatus: AlertExecutionStatus, item: RuleTableItem) => {
+          return renderAlertExecutionStatus(item.executionStatus, item);
+        },
+      },
+      {
+        field: 'enabled',
+        name: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.statusTitle',
           { defaultMessage: 'Status' }
         ),
         sortable: true,
         truncateText: false,
-        width: '120px',
+        width: '200px',
         'data-test-subj': 'rulesTableCell-status',
-        render: (_executionStatus: AlertExecutionStatus, item: RuleTableItem) => {
-          return renderAlertExecutionStatus(item.executionStatus, item);
+        render: (_enabled: boolean | undefined, item: RuleTableItem) => {
+          return renderRuleStatusDropdown(item.enabled, item);
         },
       },
       {
