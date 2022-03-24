@@ -237,6 +237,9 @@ export function getDataRequestDescriptor(state: MapStoreState, layerId: string, 
   });
 }
 
+const getEditModeActiveForLayer = ({ map }: MapStoreState, layerId: string) =>
+  map.mapState.editState?.layerId === layerId;
+
 export const getDataFilters = createSelector(
   getMapExtent,
   getMapBuffer,
@@ -248,6 +251,7 @@ export const getDataFilters = createSelector(
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getIsReadOnly,
+  getEditModeActiveForLayer,
   (
     mapExtent,
     mapBuffer,
@@ -258,7 +262,8 @@ export const getDataFilters = createSelector(
     filters,
     searchSessionId,
     searchSessionMapBuffer,
-    isReadOnly
+    isReadOnly,
+    editModeActiveForLayer
   ) => {
     return {
       extent: mapExtent,
@@ -270,6 +275,7 @@ export const getDataFilters = createSelector(
       filters,
       searchSessionId,
       isReadOnly,
+      editModeActiveForLayer,
     };
   }
 );

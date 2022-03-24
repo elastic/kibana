@@ -23,7 +23,6 @@ import { getLayerListRaw } from '../../../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../../../selectors/ui_selectors';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import { DRAW_MODE } from '../../../../../../../common/constants';
-import { updateSourceProp, setLayerQuery } from '../../../../../../actions';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -56,11 +55,6 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     showThisLayerOnly: (layerId: string) => {
       dispatch(showThisLayerOnly(layerId));
-    },
-    updateSourceProp: (id: string, propName: string, value: unknown) =>
-      dispatch(updateSourceProp(id, propName, value)),
-    setLayerQuery: (layerId: string, query: Query) => {
-      dispatch(setLayerQuery(layerId, query));
     },
   };
 }

@@ -125,7 +125,7 @@ function getDataRequestContext(
   isEditingFeatures?: boolean
 ): DataRequestContext {
   return {
-    dataFilters: getDataFilters(getState()),
+    dataFilters: getDataFilters(getState(), layerId),
     startLoading: (dataId: string, requestToken: symbol, meta: DataRequestMeta) =>
       dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
     stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataRequestMeta) =>

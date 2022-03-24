@@ -39,8 +39,6 @@ export interface Props {
   toggleVisible: (layerId: string) => void;
   editModeActiveForLayer: boolean;
   numLayers: number;
-  updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
-  setLayerQuery: (layerId: string, query: Query) => void;
 }
 
 interface State {
@@ -213,10 +211,6 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
             } else {
               this.props.enablePointEditing(this.props.layer.getId());
             }
-
-            this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', false);
-            this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalTime', false);
-            this.props.setLayerQuery(this.props.layer.getId(), { query: '', language: '' });
           },
         });
       }

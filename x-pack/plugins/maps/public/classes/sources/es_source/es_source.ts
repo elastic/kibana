@@ -230,7 +230,11 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
       allFilters.push(extentFilter);
     }
-    if (searchFilters.applyGlobalTime && (await this.isTimeAware())) {
+    if (
+      searchFilters.applyGlobalTime &&
+      (await this.isTimeAware()) &&
+      !searchFilters.editModeActiveForLayer
+    ) {
       const timeRange = searchFilters.timeslice
         ? {
             from: new Date(searchFilters.timeslice.from).toISOString(),
@@ -250,11 +254,11 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
-    if (searchFilters.applyGlobalQuery) {
+    if (searchFilters.applyGlobalQuery && !searchFilters.editModeActiveForLayer) {
       searchSource.setField('query', searchFilters.query);
     }
 
-    if (searchFilters.sourceQuery) {
+    if (searchFilters.sourceQuery && !searchFilters.editModeActiveForLayer) {
       const layerSearchSource = searchService.searchSource.createEmpty();
 
       layerSearchSource.setField('index', indexPattern);
