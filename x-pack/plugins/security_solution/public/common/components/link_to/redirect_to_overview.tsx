@@ -6,6 +6,9 @@
  */
 
 import { appendSearch } from './helpers';
+import { LANDING_PATH } from '../../../../common/constants';
 
 export const getAppOverviewUrl = (overviewPath: string, search?: string) =>
   `${overviewPath}${appendSearch(search)}`;
+
+export const getAppLandingUrl = (search?: string) => `${LANDING_PATH}${appendSearch(search)}`;

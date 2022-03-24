@@ -18,8 +18,8 @@ import { EuiSteps, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { ApiKey } from '../../../../components/shared/api_key';
 import { staticSourceData } from '../../source_data';
 
+import { ExternalConnectorFormFields } from './add_external_connector';
 import { ConfigDocsLinks } from './config_docs_links';
-import { ExternalConnectorFormFields } from './external_connector_form_fields';
 import { SaveConfig } from './save_config';
 
 describe('SaveConfig', () => {

@@ -385,12 +385,20 @@ export default function (providerContext: FtrProviderContext) {
             type: 'security-rule',
           },
           {
+            id: 'sample_csp_rule_template2',
+            type: 'csp-rule-template',
+          },
+          {
             id: 'sample_ml_module',
             type: 'ml-module',
           },
           {
             id: 'sample_tag',
             type: 'tag',
+          },
+          {
+            id: 'sample_osquery_pack_asset',
+            type: 'osquery-pack-asset',
           },
         ],
         installed_es: [
@@ -467,9 +475,11 @@ export default function (providerContext: FtrProviderContext) {
           { id: '5c3aa147-089c-5084-beca-53c00e72ac80', type: 'epm-packages-assets' },
           { id: '0c8c3c6a-90cb-5f0e-8359-d807785b046c', type: 'epm-packages-assets' },
           { id: '48e582df-b1d2-5f88-b6ea-ba1fafd3a569', type: 'epm-packages-assets' },
+          { id: '7f97600c-d983-53e0-ae2a-a59bf35d7f0d', type: 'epm-packages-assets' },
           { id: 'bf3b0b65-9fdc-53c6-a9ca-e76140e56490', type: 'epm-packages-assets' },
           { id: '7f4c5aca-b4f5-5f0a-95af-051da37513fc', type: 'epm-packages-assets' },
           { id: '4281a436-45a8-54ab-9724-fda6849f789d', type: 'epm-packages-assets' },
+          { id: 'cb0bbdd7-e043-508b-91c0-09e4cc0f5a3c', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
           { id: '4035007b-9c33-5227-9803-2de8a17523b5', type: 'epm-packages-assets' },
           { id: 'e6ae7d31-6920-5408-9219-91ef1662044b', type: 'epm-packages-assets' },
