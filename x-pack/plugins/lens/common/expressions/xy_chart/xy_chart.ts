@@ -193,7 +193,11 @@ export const xyChart: ExpressionFunctionDefinition<
   },
   fn(data: LensMultiTable, args: XYArgs, handlers) {
     if (handlers?.inspectorAdapters?.tables) {
-      args.layers.forEach(({ layerId, accessors, xAccessor, splitAccessor, layerType }) => {
+      args.layers.forEach((layer) => {
+        if (layer.layerType === 'annotations') {
+          return;
+        }
+        const { layerId, accessors, xAccessor, splitAccessor, layerType } = layer;
         const logTable = prepareLogTable(
           data.tables[layerId],
           [
