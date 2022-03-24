@@ -82,8 +82,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       before(async () => {
         await cases.api.createNthRandomCases(NUMBER_CASES);
-        await cases.api.createCaseWithData({ title: caseTitle, tags: ['one'] });
-        await cases.api.createCaseWithData({ tags: ['two'] });
+        await cases.api.createCase({ title: caseTitle, tags: ['one'] });
+        await cases.api.createCase({ tags: ['two'] });
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -121,6 +121,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.common.changeCaseStatusAndVerify(CaseStatuses['in-progress']);
         await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
         await cases.casesTable.validateCasesTableHasNthRows(1);
+      });
+
+      /**
+       * TODO: Improve the test by creating a case from a
+       * different user and filter by the new user
+       * and not the default one
+       */
+      it('filters cases by reporter', async () => {
+        await cases.casesTable.filterByReporter('elastic');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
       });
     });
 
