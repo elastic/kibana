@@ -25,7 +25,7 @@ import {
 } from './types';
 
 export interface ExecutionClaimMetrics extends TaskRunMetrics {
-  queueDuration: number;
+  queueDurationMs: number;
 }
 
 export interface ExecutionCompleteMetrics extends TaskRunMetrics {
@@ -147,13 +147,13 @@ export function reportingEventLoggerFactory(logger: Logger) {
       return event;
     }
 
-    logClaimTask({ queueDuration }: ExecutionClaimMetrics): ClaimedTask {
+    logClaimTask({ queueDurationMs }: ExecutionClaimMetrics): ClaimedTask {
       const message = `claimed report ${this.report._id}`;
       const event = deepMerge(
         {
           message,
           kibana: { reporting: { actionType: ActionType.CLAIM_TASK } },
-          event: { duration: queueDuration },
+          event: { duration: queueDurationMs },
         } as Partial<ClaimedTask>,
         this.eventObj
       );

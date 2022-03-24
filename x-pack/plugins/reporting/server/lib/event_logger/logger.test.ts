@@ -171,7 +171,7 @@ describe('Event Logger', () => {
 
   it(`logClaimTask`, () => {
     const logger = new factory(mockReport);
-    const result = logger.logClaimTask({ queueDuration: 5500 });
+    const result = logger.logClaimTask({ queueDurationMs: 5500 });
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {

@@ -298,8 +298,9 @@ export class ReportingStore {
     }
 
     // log the amount of time the report waited in "pending" status
-    const queueDuration = moment.utc().valueOf() - moment.utc(report.created_at).valueOf();
-    this.reportingCore.getEventLogger(report).logClaimTask({ queueDuration });
+    this.reportingCore.getEventLogger(report).logClaimTask({
+      queueDurationMs: moment.utc().valueOf() - moment.utc(report.created_at).valueOf(),
+    });
 
     return body;
   }
