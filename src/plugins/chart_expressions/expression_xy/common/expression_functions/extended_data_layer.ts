@@ -7,11 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  Datatable,
-  ExpressionFunctionDefinition,
-  PointSeriesColumnNames,
-} from '../../../../expressions/common';
+import { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
 import { ExtendedDataLayerArgs, ExtendedDataLayerConfigResult } from '../types';
 import {
   EXTENDED_DATA_LAYER,
