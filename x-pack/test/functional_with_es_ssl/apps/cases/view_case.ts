@@ -25,8 +25,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       before(async () => {
         await cases.navigation.navigateToApp();
         await cases.api.createNthRandomCases(1);
-        await cases.common.waitForCasesToBeListed();
-        await cases.common.goToFirstListedCase();
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
         await header.waitUntilLoadingHasFinished();
       });
 
@@ -171,8 +171,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       before(async () => {
         await cases.navigation.navigateToApp();
         await cases.api.createNthRandomCases(1);
-        await cases.common.waitForCasesToBeListed();
-        await cases.common.goToFirstListedCase();
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
         await header.waitUntilLoadingHasFinished();
       });
 
@@ -185,7 +185,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await common.clickAndValidate('property-actions-trash', 'confirmModalConfirmButton');
         await testSubjects.click('confirmModalConfirmButton');
         await testSubjects.existOrFail('cases-all-title', { timeout: 2000 });
-        await cases.common.validateCasesTableHasNthRows(0);
+        await cases.casesTable.validateCasesTableHasNthRows(0);
       });
     });
   });

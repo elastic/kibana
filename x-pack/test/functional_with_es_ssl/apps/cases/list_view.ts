@@ -38,7 +38,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       before(async () => {
         await cases.api.createNthRandomCases(NUMBER_CASES);
         await header.waitUntilLoadingHasFinished();
-        await cases.common.waitForCasesToBeListed();
+        await cases.casesTable.waitForCasesToBeListed();
       });
 
       after(async () => {
@@ -46,7 +46,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('lists cases correctly', async () => {
-        await cases.common.validateCasesTableHasNthRows(NUMBER_CASES);
+        await cases.casesTable.validateCasesTableHasNthRows(NUMBER_CASES);
       });
     });
 
@@ -56,7 +56,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       before(async () => {
         await cases.api.createNthRandomCases(NUMBER_CASES);
         await header.waitUntilLoadingHasFinished();
-        await cases.common.waitForCasesToBeListed();
+        await cases.casesTable.waitForCasesToBeListed();
       });
 
       after(async () => {
@@ -70,8 +70,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('bulk delete cases from the list', async () => {
-        await cases.common.selectAndDeleteAllCases();
-        await cases.common.validateCasesTableHasNthRows(0);
+        await cases.casesTable.selectAndDeleteAllCases();
+        await cases.casesTable.validateCasesTableHasNthRows(0);
       });
     });
 
@@ -85,7 +85,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.api.createCaseWithData({ title: caseTitle, tags: ['one'] });
         await cases.api.createCaseWithData({ tags: ['two'] });
         await header.waitUntilLoadingHasFinished();
-        await cases.common.waitForCasesToBeListed();
+        await cases.casesTable.waitForCasesToBeListed();
       });
 
       after(async () => {
@@ -101,26 +101,26 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await input.pressKeys(browser.keys.ENTER);
 
         await retry.tryForTime(20000, async () => {
-          await cases.common.validateCasesTableHasNthRows(1);
+          await cases.casesTable.validateCasesTableHasNthRows(1);
         });
 
         await testSubjects.click('clearSearchButton');
-        await cases.common.validateCasesTableHasNthRows(NUMBER_CASES);
+        await cases.casesTable.validateCasesTableHasNthRows(NUMBER_CASES);
       });
 
       it('filters cases by tags', async () => {
-        await cases.common.filterByTag('one');
-        await cases.common.refreshTable();
-        await cases.common.validateCasesTableHasNthRows(1);
-        const row = await cases.common.getCaseFromTable(0);
+        await cases.casesTable.filterByTag('one');
+        await cases.casesTable.refreshTable();
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        const row = await cases.casesTable.getCaseFromTable(0);
         const tags = await row.findByCssSelector('[data-test-subj="case-table-column-tags-one"]');
         expect(await tags.getVisibleText()).to.be('one');
       });
 
       it('filters cases by status', async () => {
         await cases.common.changeCaseStatusAndVerify(CaseStatuses['in-progress']);
-        await cases.common.filterByStatus(CaseStatuses['in-progress']);
-        await cases.common.validateCasesTableHasNthRows(1);
+        await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
       });
     });
 
@@ -130,7 +130,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       before(async () => {
         await cases.api.createNthRandomCases(NUMBER_CASES);
         await header.waitUntilLoadingHasFinished();
-        await cases.common.waitForCasesToBeListed();
+        await cases.casesTable.waitForCasesToBeListed();
       });
 
       after(async () => {
@@ -152,7 +152,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       before(async () => {
         await cases.api.createNthRandomCases(NUMBER_CASES);
         await header.waitUntilLoadingHasFinished();
-        await cases.common.waitForCasesToBeListed();
+        await cases.casesTable.waitForCasesToBeListed();
       });
 
       after(async () => {

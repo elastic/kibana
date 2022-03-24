@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('creates a case from the stack management page', async () => {
       const caseTitle = 'test-' + uuid.v4();
-      await cases.common.createCaseFromCreateCasePage({
+      await cases.create.createCaseFromCreateCasePage({
         title: caseTitle,
         description: 'test description',
         tag: 'tagme',
