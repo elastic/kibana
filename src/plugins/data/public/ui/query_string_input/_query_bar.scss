@@ -3,12 +3,6 @@
   z-index: $euiZContentMenu;
 }
 
-// Uses the append style, but no bordering
-.kqlQueryBar__languageSwitcherButton {
-  border-right: none !important;
-  border-left: $euiFormInputGroupBorder;
-}
-
 .kbnQueryBar__textareaWrap {
   overflow: visible !important; // Override EUI form control
   display: flex;
@@ -16,11 +10,6 @@
   position: relative;
   background-color: $euiFormBackgroundColor;
   border-radius: $euiFormControlBorderRadius;
-
-  &.kbnQueryBar__textareaWrap--hasAppend {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
 }
 
 .kbnQueryBar__textarea {
@@ -34,11 +23,6 @@
   box-shadow: 0 0 0 1px $euiFormBorderColor;
   // Firefox adds margin to textarea
   margin: 0;
-
-  &.kbnQueryBar__textarea--hasAppend {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
 
   &:not(.kbnQueryBar__textarea--autoHeight):not(:invalid) {
     height: 100%;
