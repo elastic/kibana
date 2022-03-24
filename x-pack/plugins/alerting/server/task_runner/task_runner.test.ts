@@ -42,6 +42,7 @@ import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '../../../actions/server/create_execute_function';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import moment from 'moment';
 import {
   generateActionSO,
@@ -66,6 +67,7 @@ import {
   DATE_1970_5_MIN,
 } from './fixtures';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import { IN_MEMORY_METRICS } from '../monitoring';
 import { translations } from '../constants/translations';
 
 jest.mock('uuid', () => ({
@@ -99,6 +101,7 @@ describe('Task Runner', () => {
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
+  const inMemoryMetrics = inMemoryMetricsMock.create();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -186,7 +189,8 @@ describe('Task Runner', () => {
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -288,7 +292,8 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner(
         ruleType,
         mockedTaskInstance,
-        customTaskRunnerFactoryInitializerParams
+        customTaskRunnerFactoryInitializerParams,
+        inMemoryMetrics
       );
       rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -383,7 +388,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
@@ -479,7 +485,8 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner(
         ruleType,
         mockedTaskInstance,
-        customTaskRunnerFactoryInitializerParams
+        customTaskRunnerFactoryInitializerParams,
+        inMemoryMetrics
       );
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
@@ -552,7 +559,8 @@ describe('Task Runner', () => {
             },
           },
         },
-        taskRunnerFactoryInitializerParams
+        taskRunnerFactoryInitializerParams,
+        inMemoryMetrics
       );
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
@@ -594,7 +602,8 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner(
         ruleType,
         mockedTaskInstance,
-        customTaskRunnerFactoryInitializerParams
+        customTaskRunnerFactoryInitializerParams,
+        inMemoryMetrics
       );
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
@@ -649,7 +658,8 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
@@ -730,7 +740,8 @@ describe('Task Runner', () => {
             },
           },
         },
-        customTaskRunnerFactoryInitializerParams
+        customTaskRunnerFactoryInitializerParams,
+        inMemoryMetrics
       );
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
@@ -801,7 +812,8 @@ describe('Task Runner', () => {
             },
           },
         },
-        customTaskRunnerFactoryInitializerParams
+        customTaskRunnerFactoryInitializerParams,
+        inMemoryMetrics
       );
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
@@ -854,7 +866,8 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner(
         ruleType,
         mockedTaskInstance,
-        customTaskRunnerFactoryInitializerParams
+        customTaskRunnerFactoryInitializerParams,
+        inMemoryMetrics
       );
       rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
@@ -987,7 +1000,8 @@ describe('Task Runner', () => {
             },
           },
         },
-        customTaskRunnerFactoryInitializerParams
+        customTaskRunnerFactoryInitializerParams,
+        inMemoryMetrics
       );
       rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -1124,7 +1138,8 @@ describe('Task Runner', () => {
             alertId,
           },
         },
-        customTaskRunnerFactoryInitializerParams
+        customTaskRunnerFactoryInitializerParams,
+        inMemoryMetrics
       );
       rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -1201,7 +1216,8 @@ describe('Task Runner', () => {
             },
           },
         },
-        customTaskRunnerFactoryInitializerParams
+        customTaskRunnerFactoryInitializerParams,
+        inMemoryMetrics
       );
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
@@ -1277,7 +1293,8 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -1348,7 +1365,8 @@ describe('Task Runner', () => {
           spaceId: 'foo',
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
@@ -1364,7 +1382,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
@@ -1391,7 +1410,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -1420,7 +1440,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     rulesClient.get.mockResolvedValueOnce(mockedRuleTypeSavedObject);
@@ -1455,7 +1476,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
@@ -1495,7 +1517,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
@@ -1535,7 +1558,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
@@ -1576,7 +1600,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
@@ -1610,7 +1635,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -1647,7 +1673,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       legacyTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
@@ -1683,7 +1710,8 @@ describe('Task Runner', () => {
         ...mockedTaskInstance,
         state: originalAlertSate,
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
@@ -1711,7 +1739,8 @@ describe('Task Runner', () => {
           spaceId: 'foo',
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -1740,7 +1769,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -1762,7 +1792,8 @@ describe('Task Runner', () => {
           interval: '1d',
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -1786,7 +1817,8 @@ describe('Task Runner', () => {
           spaceId: 'test space',
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -1832,7 +1864,8 @@ describe('Task Runner', () => {
           alertInstances: {},
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
@@ -1949,7 +1982,8 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
@@ -2039,7 +2073,8 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
@@ -2118,7 +2153,8 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
@@ -2204,7 +2240,8 @@ describe('Task Runner', () => {
           },
         },
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
@@ -2265,7 +2302,8 @@ describe('Task Runner', () => {
       {
         ...taskRunnerFactoryInitializerParams,
         supportsEphemeralTasks: true,
-      }
+      },
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -2336,7 +2374,8 @@ describe('Task Runner', () => {
         ...mockedTaskInstance,
         state,
       },
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
@@ -2374,7 +2413,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
@@ -2387,7 +2427,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
@@ -2412,7 +2453,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -2444,7 +2486,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -2455,7 +2498,6 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
     expect(runnerResult.monitoring?.execution.history.length).toBe(200);
   });
-
   test('Actions circuit breaker kicked in, should set status as warning and log a message in event log', async () => {
     const ruleTypeWithConfig = {
       ...ruleType,
@@ -2524,7 +2566,8 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleTypeWithConfig,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     const runnerResult = await taskRunner.run();
@@ -2629,5 +2672,52 @@ describe('Task Runner', () => {
         task: true,
       })
     );
+  });
+
+  test('increments monitoring metrics after execution', async () => {
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
+    );
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
+      },
+      references: [],
+    });
+
+    await taskRunner.run();
+    await taskRunner.run();
+    await taskRunner.run();
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        throw new Error('OMG');
+      }
+    );
+    await taskRunner.run();
+    await taskRunner.cancel();
+
+    expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(6);
+    expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+    expect(inMemoryMetrics.increment.mock.calls[1][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+    expect(inMemoryMetrics.increment.mock.calls[2][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+    expect(inMemoryMetrics.increment.mock.calls[3][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+    expect(inMemoryMetrics.increment.mock.calls[4][0]).toBe(IN_MEMORY_METRICS.RULE_FAILURES);
+    expect(inMemoryMetrics.increment.mock.calls[5][0]).toBe(IN_MEMORY_METRICS.RULE_TIMEOUTS);
   });
 });

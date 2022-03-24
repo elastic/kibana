@@ -24,6 +24,8 @@ const TabNameMappedToI18nKey: Record<UsersTableType, string> = {
   [UsersTableType.allUsers]: i18n.NAVIGATION_ALL_USERS_TITLE,
   [UsersTableType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
   [UsersTableType.risk]: i18n.NAVIGATION_RISK_TITLE,
+  [UsersTableType.events]: i18n.NAVIGATION_EVENTS_TITLE,
+  [UsersTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
 };
 
 export const getBreadcrumbs = (

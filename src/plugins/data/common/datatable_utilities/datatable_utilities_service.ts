@@ -7,7 +7,7 @@
  */
 
 import type { DataView, DataViewsContract, DataViewField } from 'src/plugins/data_views/common';
-import type { DatatableColumn } from 'src/plugins/expressions/common';
+import type { Datatable, DatatableColumn } from 'src/plugins/expressions/common';
 import type { FieldFormatsStartCommon, FieldFormat } from 'src/plugins/field_formats/common';
 import type { AggsCommonStart, AggConfig, CreateAggConfigParams, IAggType } from '../search';
 
@@ -75,6 +75,10 @@ export class DatatableUtilitiesService {
     const params = column.meta.sourceParams?.params as { interval: string } | undefined;
 
     return params?.interval;
+  }
+
+  getTotalCount(table: Datatable): number | undefined {
+    return table.meta?.statistics?.totalCount;
   }
 
   isFilterable(column: DatatableColumn): boolean {
