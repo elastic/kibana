@@ -28,7 +28,7 @@ const convertToVisDimension = (
   const column = columns.find((c) => c.id === accessor);
   if (!column) return;
   return {
-    accessor: Number(column.id),
+    accessor: column,
     format: {
       id: column.meta.params?.id,
       params: { ...column.meta.params?.params },
@@ -212,7 +212,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
           })
         );
       }
-      const logTable = prepareLogTable(data, argsTable);
+      const logTable = prepareLogTable(data, argsTable, true);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
     return {

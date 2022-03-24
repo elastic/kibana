@@ -63,7 +63,6 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
             : 'localKibanaIntegrationTestsUser'
         }`,
         `--xpack.uptime.service.password=${servicPassword}`,
-        '--xpack.uptime.ui.monitorManagement.enabled=true',
       ],
     },
   };
