@@ -89,7 +89,6 @@ export const useDetailPanel = ({
   );
 
   const handleOnDetailsPanelClosed = useCallback(() => {
-    console.log('ON PANEL CLOSE: ', onPanelClose.current); // eslint-disable-line
     if (onPanelClose.current) onPanelClose.current();
     dispatch(timelineActions.toggleDetailPanel({ tabType, timelineId }));
 
