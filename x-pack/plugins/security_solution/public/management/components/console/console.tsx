@@ -6,11 +6,11 @@
  */
 
 import React, { memo, useCallback, useRef } from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { HistoryOutput } from './components/history_output';
 import { CommandInput, CommandInputProps } from './components/command_input';
-import { CommandServiceInterface } from './types';
+import { ConsoleProps } from './types';
 import { ConsoleStateProvider } from './components/console_state';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
@@ -42,10 +42,6 @@ const ConsoleWindow = styled.div`
     }
   }
 `;
-
-export interface ConsoleProps extends CommonProps, Pick<CommandInputProps, 'prompt'> {
-  commandService: CommandServiceInterface;
-}
 
 export const Console = memo<ConsoleProps>(({ prompt, commandService, ...commonProps }) => {
   const consoleWindowRef = useRef<HTMLDivElement | null>(null);

@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { ConsoleProps } from '../../console';
+import { ConsoleProps } from '../../types';
 
 export interface ConsoleRegistrationInterface {
   id: string;
