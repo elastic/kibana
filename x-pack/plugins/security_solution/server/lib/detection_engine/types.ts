@@ -80,6 +80,7 @@ export interface RuleTypeParams extends AlertTypeParams {
   query?: QueryOrUndefined;
   filters?: unknown[];
   maxSignals: MaxSignals;
+  namespace?: string;
   riskScore: RiskScore;
   riskScoreMapping: RiskScoreMappingOrUndefined;
   ruleNameOverride: RuleNameOverrideOrUndefined;
