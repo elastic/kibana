@@ -25,7 +25,8 @@ export const useMonitorManagementBreadcrumbs = ({
   useBreadcrumbs([
     {
       text: MONITOR_MANAGEMENT_CRUMB,
-      href: isAddMonitor || isEditMonitor ? `${appPath}/${MONITOR_MANAGEMENT_ROUTE}` : undefined,
+      href:
+        isAddMonitor || isEditMonitor ? `${appPath}/${MONITOR_MANAGEMENT_ROUTE}/all` : undefined,
     },
     ...(isAddMonitor
       ? [
