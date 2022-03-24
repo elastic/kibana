@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import { Status } from '../../../common/detection_engine/schemas/common';
 import {
   STATUS_LOW_LABEL,
   STATUS_MEDIUM_LABEL,
   STATUS_HIGH_LABEL,
-} from '../../common/components/donut_chart/translations';
-import {
-  BucketResult,
-  Severity,
-  sortBucketWithGivenValue,
-  StatusBucket,
-  StatusBySeverity,
-} from './utils';
+} from '../components/alerts_by_status/translations';
+import { BucketResult, sortBucketWithGivenValue, StatusBucket } from './utils';
 
 const label = {
-  low: STATUS_LOW_LABEL,
-  medium: STATUS_MEDIUM_LABEL,
-  high: STATUS_HIGH_LABEL,
+  Low: STATUS_LOW_LABEL,
+  Medium: STATUS_MEDIUM_LABEL,
+  High: STATUS_HIGH_LABEL,
 };
 
 export const alertsData = () => {
@@ -82,65 +75,57 @@ export const alertsData = () => {
                   doc_count: 4,
                 },
                 {
-                  key: 'medium',
-                  doc_count: 0,
-                },
-                {
                   key: 'low',
                   doc_count: 0,
                 },
               ],
             },
           },
-          {
-            key: 'acknowledged',
-            doc_count: 2,
-            statusBySeverity: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
-              buckets: [
-                {
-                  key: 'high',
-                  doc_count: 2,
-                },
-                {
-                  key: 'medium',
-                  doc_count: 0,
-                },
-                {
-                  key: 'low',
-                  doc_count: 0,
-                },
-              ],
-            },
-          },
+          // {
+          //   key: 'acknowledged',
+          //   doc_count: 2,
+          //   statusBySeverity: {
+          //     doc_count_error_upper_bound: 0,
+          //     sum_other_doc_count: 0,
+          //     buckets: [
+          //       {
+          //         key: 'high',
+          //         doc_count: 2,
+          //       },
+          //     ],
+          //   },
+          // },
         ] as StatusBucket[],
       },
     },
   };
 
-  const statusSequence: Status[] = ['open', 'acknowledged', 'closed'];
-  const severitySequence: Severity[] = ['high', 'medium', 'low'];
+  const statusSequence = ['Open', 'Acknowledged', 'Closed'];
+  const severitySequence = ['High', 'Medium', 'Low'];
 
-  const resp: BucketResult<StatusBucket> = sortBucketWithGivenValue(
-    response.aggregations.alertsByStatus.buckets,
+  const statusBuckets: Array<BucketResult<StatusBucket>> = sortBucketWithGivenValue(
+    response.aggregations.alertsByStatus?.buckets ?? [],
     statusSequence,
     'key'
   );
-  resp.forEach((bucket, idx) => {
-    const temp = sortBucketWithGivenValue(bucket.statusBySeverity.buckets, severitySequence, 'key');
+  statusBuckets.forEach((statusBucket, idx) => {
+    const severityBuckets = sortBucketWithGivenValue(
+      statusBucket?.statusBySeverity?.buckets ?? [],
+      severitySequence,
+      'key'
+    );
 
-    resp[idx].buckets = temp.reduce((acc, curr) => {
+    statusBuckets[idx].buckets = severityBuckets.reduce((acc, severityBucket) => {
       return [
         ...acc,
         {
           ...acc,
-          name: bucket.key,
-          value: curr.doc_count,
-          label: label[curr.key],
+          name: statusBucket.key,
+          value: severityBucket.doc_count,
+          label: label[severityBucket.key],
         },
       ];
     }, []);
   });
-  return resp;
+  return statusBuckets;
 };

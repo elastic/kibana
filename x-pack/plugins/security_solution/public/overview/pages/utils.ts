@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash/fp';
 import { Status } from '../../../common/detection_engine/schemas/common';
 /**
  *
@@ -40,31 +39,18 @@ export type BucketResult<T extends StatusBucket | SeverityBucket> = T extends St
   ? StatusBucket
   : SeverityBucket;
 
-type SortBucketWithGivenValue<
-  T extends Status | Severity,
-  U extends StatusBucket | SeverityBucket
-> = (
-  buckets: Array<BucketResult<U>>,
+export const sortBucketWithGivenValue = <T extends string, U extends Bucket<T>>(
+  buckets: U[],
   sequence: T[],
   key: keyof Bucket<T>
-) => Array<BucketResult<U>>;
-
-export const sortBucketWithGivenValue = <
-  T extends Status | Severity,
-  U extends StatusBucket | SeverityBucket
->(
-  buckets: Array<BucketResult<U>>,
-  sequence: T[],
-  key: keyof Bucket<T>
-): Array<BucketResult<U>> => {
-  const temp = cloneDeep(buckets);
-  const bucketsResp: Array<BucketResult<U>> = [];
-  temp.forEach((b, i) => {
-    const itemKey = sequence.indexOf(b.key);
-
-    if (itemKey >= 0) {
-      bucketsResp[itemKey] = b;
-    }
+): U[] => {
+  return sequence.map((s) => {
+    const temp = buckets.find((b) => b[key].toLocaleLowerCase() === s.toLocaleLowerCase());
+    return temp
+      ? { ...temp, key: s }
+      : ({
+          key: s,
+          doc_count: 0,
+        } as U);
   });
-  return bucketsResp;
 };
