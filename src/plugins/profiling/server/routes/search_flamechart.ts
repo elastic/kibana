@@ -78,7 +78,11 @@ export function getSampledTraceEventsIndex(
   const maxExp = 11;
   const samplingFactor = 5;
   const fullEventsIndex: DownsampledEventsIndex = { name: index, sampleRate: 1 };
-  const downsampledIndex = index + '-5pow';
+  const downsampledIndexPrefix =
+    (index.endsWith('-all') ? index.replaceAll('-all', '') : index) + '-5pow';
+  const downsampledIndex = (i: number): string => {
+    return downsampledIndexPrefix + i.toString().padStart(2, '0');
+  };
 
   if (sampleCountFromInitialExp === 0) {
     // Take the shortcut to the full events index.
@@ -90,25 +94,31 @@ export function getSampledTraceEventsIndex(
     for (let i = initialExp + 1; i <= maxExp; i++) {
       sampleCountFromInitialExp /= samplingFactor;
       if (sampleCountFromInitialExp < samplingFactor * targetSampleSize) {
-        return { name: downsampledIndex + i, sampleRate: 1 / samplingFactor ** i };
+        return { name: downsampledIndex(i), sampleRate: 1 / samplingFactor ** i };
       }
     }
     // If we come here, it means that the most sparse index still holds too many items.
     // The only problem is the query time, the result set is good.
-    return { name: downsampledIndex + 11, sampleRate: 1 / samplingFactor ** maxExp };
+    return { name: downsampledIndex(11), sampleRate: 1 / samplingFactor ** maxExp };
   } else if (sampleCountFromInitialExp < targetSampleSize) {
     // Search in less down-sampled indexes.
     for (let i = initialExp - 1; i >= 1; i--) {
       sampleCountFromInitialExp *= samplingFactor;
       if (sampleCountFromInitialExp >= targetSampleSize) {
-        return { name: downsampledIndex + i, sampleRate: 1 / samplingFactor ** i };
+        return {
+          name: downsampledIndex(i),
+          sampleRate: 1 / samplingFactor ** i,
+        };
       }
     }
 
     return fullEventsIndex;
   }
 
-  return { name: downsampledIndex + initialExp, sampleRate: 1 / samplingFactor ** initialExp };
+  return {
+    name: downsampledIndex(initialExp),
+    sampleRate: 1 / samplingFactor ** initialExp,
+  };
 }
 
 function downsampleEventsRandomly(
@@ -168,8 +178,10 @@ async function queryFlameGraph(
   // Start with counting the results in the index down-sampled by 5^6.
   // That is in the middle of our down-sampled indexes.
   const initialExp = 6;
-  const downsampledIndex = index + '-5pow';
   const testing = index === 'profiling-events2';
+  const downsampledIndexPrefix =
+    (index.endsWith('-all') ? index.replaceAll('-all', '') : index) + '-5pow';
+  const initialDownsampledIndex = downsampledIndexPrefix + initialExp.toString().padStart(2, '0');
 
   const eventsIndex = await logExecutionLatency(
     logger,
@@ -178,7 +190,7 @@ async function queryFlameGraph(
       let sampleCountFromInitialExp = 0;
       try {
         const resp = await client.search({
-          index: downsampledIndex + initialExp,
+          index: initialDownsampledIndex,
           body: {
             query: filter,
             size: 0,
