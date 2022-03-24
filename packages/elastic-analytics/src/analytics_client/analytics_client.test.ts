@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { MockedLogger } from '@kbn/logging-mocks';
