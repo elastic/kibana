@@ -33,7 +33,7 @@ export function* fetchMonitorManagementEffect() {
   );
 }
 
-export function* fetchSyntheticsServiceEnabledEffect() {
+export function* fetchSyntheticsServiceAllowedEffect() {
   yield takeLeading(
     getSyntheticsServiceAllowed.get,
     fetchEffectFactory(

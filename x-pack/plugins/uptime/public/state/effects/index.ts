@@ -14,7 +14,7 @@ import {
 } from './monitor_list';
 import {
   fetchMonitorManagementEffect,
-  fetchSyntheticsServiceEnabledEffect,
+  fetchSyntheticsServiceAllowedEffect,
 } from './monitor_management';
 import { fetchMonitorStatusEffect } from './monitor_status';
 import { fetchDynamicSettingsEffect, setDynamicSettingsEffect } from './dynamic_settings';
@@ -51,5 +51,5 @@ export function* rootEffect() {
   yield fork(generateBlockStatsOnPut);
   yield fork(pruneBlockCache);
   yield fork(fetchRunNowMonitorEffect);
-  yield fork(fetchSyntheticsServiceEnabledEffect);
+  yield fork(fetchSyntheticsServiceAllowedEffect);
 }
