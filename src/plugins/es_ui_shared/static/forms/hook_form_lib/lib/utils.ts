@@ -19,6 +19,13 @@ export const unflattenObject = <T extends object = GenericObject>(object: object
     return acc;
   }, {} as T);
 
+/**
+ * Wrap the key with [] if it is a key from an Array
+ * @param key The object key
+ * @param isArrayItem Flag to indicate if it is the key of an Array
+ */
+const renderKey = (key: string, isArrayItem: boolean): string => (isArrayItem ? `[${key}]` : key);
+
 export const flattenObject = (
   obj: GenericObject,
   prefix: string[] = [],
@@ -36,14 +43,14 @@ export const flattenObject = (
           ...acc,
           ...flattenObject(
             nextValue,
-            [...prefix, isArrayItem ? `[${k}].` : `${k}${dotSuffix}`],
+            [...prefix, `${renderKey(k, isArrayItem)}${dotSuffix}`],
             isNextValueArray
           ),
         };
       }
     }
 
-    const fullPath = `${prefix.join('')}${isArrayItem ? `[${k}]` : k}`;
+    const fullPath = `${prefix.join('')}${renderKey(k, isArrayItem)}`;
     acc[fullPath] = nextValue;
 
     return acc;

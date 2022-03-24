@@ -22,6 +22,7 @@ describe('Form lib utils', () => {
             },
             'bar',
             true,
+            [1, 2, { 3: false }],
           ],
         },
       };
@@ -33,6 +34,9 @@ describe('Form lib utils', () => {
         'b.baz[1]': 'bar',
         'b.baz[2]': true,
         'b.foo': 'bar',
+        'b.baz[3][0]': 1,
+        'b.baz[3][1]': 2,
+        'b.baz[3][2].3': false,
       });
     });
   });
