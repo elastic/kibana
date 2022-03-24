@@ -2,7 +2,24 @@
 
 exports[`interpreter/functions#heatmap logs correct datatable to inspector 1`] = `
 Object {
-  "columns": Array [],
+  "columns": Array [
+    Object {
+      "id": "col-0-1",
+      "meta": Object {
+        "dimensionName": "Metric",
+        "type": "number",
+      },
+      "name": "Count",
+    },
+    Object {
+      "id": "col-1-2",
+      "meta": Object {
+        "dimensionName": "X axis",
+        "type": "string",
+      },
+      "name": "Dest",
+    },
+  ],
   "rows": Array [
     Object {
       "col-0-1": 0,

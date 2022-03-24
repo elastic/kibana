@@ -28,7 +28,7 @@ const convertToVisDimension = (
   const column = columns.find((c) => c.id === accessor);
   if (!column) return;
   return {
-    accessor: Number(column.id),
+    accessor: column,
     format: {
       id: column.meta.params?.id,
       params: { ...column.meta.params?.params },
