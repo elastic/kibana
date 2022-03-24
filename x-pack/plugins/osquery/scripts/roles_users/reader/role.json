@@ -10,7 +10,7 @@
   "kibana": [
     {
       "feature": {
-        "osquery": ["read", "run_saved_queries" ]
+        "osquery": ["read"]
       },
       "spaces": ["*"]
     }

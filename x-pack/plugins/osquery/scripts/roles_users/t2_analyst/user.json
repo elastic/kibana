@@ -1,6 +1,6 @@
 {
   "password": "changeme",
-  "roles": ["t1_analyst"],
-  "full_name": "T1 Analyst",
+  "roles": ["t2_analyst"],
+  "full_name": "T2 Analyst",
   "email": "osquery@example.com"
 }

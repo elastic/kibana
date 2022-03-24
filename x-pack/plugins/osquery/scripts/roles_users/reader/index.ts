@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const ADD_AGENT_BUTTON = 'addAgentButton';
+import * as readerUser from './user.json';
+import * as readerRole from './role.json';
 
-export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
-export const ENROLLMENT_TOKENS_TAB = 'fleet-enrollment-tokens-tab';
-export const DEFAULT_POLICY = 'Default Fleet Server policy';
+export { readerUser, readerRole };

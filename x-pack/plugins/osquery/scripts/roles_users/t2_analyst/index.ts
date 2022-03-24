@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const ADD_AGENT_BUTTON = 'addAgentButton';
+import * as t2AnalystUser from './user.json';
+import * as t2AnalystRole from './role.json';
 
-export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
-export const ENROLLMENT_TOKENS_TAB = 'fleet-enrollment-tokens-tab';
-export const DEFAULT_POLICY = 'Default Fleet Server policy';
+export { t2AnalystUser, t2AnalystRole };

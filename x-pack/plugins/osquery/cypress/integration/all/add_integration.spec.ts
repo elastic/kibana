@@ -11,8 +11,9 @@ import { addIntegration } from '../../tasks/integrations';
 import { login } from '../../tasks/login';
 // import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { DEFAULT_POLICY } from '../../screens/fleet';
 
-describe('Super User - Add Integration', () => {
+describe('ALL - Add Integration', () => {
   const integration = 'Osquery Manager';
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
@@ -65,7 +66,7 @@ describe('Super User - Add Integration', () => {
 
   it('add integration', () => {
     cy.visit(FLEET_AGENT_POLICIES);
-    cy.contains('Default Fleet Server policy').click();
+    cy.contains(DEFAULT_POLICY).click();
     cy.contains('Add integration').click();
     cy.contains(integration).click();
     addIntegration();
