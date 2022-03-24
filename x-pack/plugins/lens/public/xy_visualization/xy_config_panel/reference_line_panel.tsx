@@ -10,11 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYState, XYReferenceLineLayerConfig } from '../types';
+import { State, XYState } from '../types';
 import { FormatFactory } from '../../../common';
 import {
   FillStyle,
   YConfig,
+  XYReferenceLineLayerConfig,
 } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 import { ColorPicker } from './color_picker';

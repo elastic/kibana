@@ -8,17 +8,13 @@
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation, VisualizeEditorContext, Suggestion, OperationDescriptor } from '../types';
-import type {
-  State,
-  XYState,
-  XYSuggestion,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  XYReferenceLineLayerConfig,
-} from './types';
+import type { State, XYState, XYSuggestion } from './types';
 import type {
   DataLayerConfigResult,
   SeriesType,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';

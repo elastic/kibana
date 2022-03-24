@@ -10,7 +10,8 @@ import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { Position } from '@elastic/charts';
 import type { FramePublicAPI } from '../../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
-import { State, XYLayerConfig } from '../../types';
+import { XYLayerConfig } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { State } from '../../types';
 import { VisualOptionsPopover } from '.';
 import { ToolbarPopover, ValueLabelsSettings } from '../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
@@ -33,10 +34,6 @@ describe('Visual options popover', () => {
           splitAccessor: 'baz',
           xAccessor: 'foo',
           accessors: ['bar'],
-          xScaleType: 'linear',
-          yScaleType: 'linear',
-          isHistogram: false,
-          palette: { type: 'palette', name: 'default' },
         },
       ],
     };
@@ -242,10 +239,6 @@ describe('Visual options popover', () => {
               splitAccessor: 'baz',
               xAccessor: 'foo',
               accessors: ['bar'],
-              xScaleType: 'linear',
-              yScaleType: 'linear',
-              isHistogram: false,
-              palette: { type: 'palette', name: 'default' },
             },
           ],
           fittingFunction: 'Carry',

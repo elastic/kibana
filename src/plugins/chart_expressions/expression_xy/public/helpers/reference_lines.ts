@@ -7,7 +7,7 @@
  */
 
 import { partition } from 'lodash';
-import type { DataLayerConfigResult } from '../../common';
+import type { DataLayerConfigResult, YConfig } from '../../common';
 import type { FramePublicAPI } from '../types';
 import { isStackedChart } from './state';
 

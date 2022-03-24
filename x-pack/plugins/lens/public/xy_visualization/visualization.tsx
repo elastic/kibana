@@ -26,8 +26,10 @@ import {
   SeriesType,
   YAxisMode,
   YConfig,
+  XYLayerConfig,
+  XYDataLayerConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { State, visualizationTypes, XYSuggestion, XYLayerConfig } from './types';
+import { State, visualizationTypes, XYSuggestion } from './types';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
@@ -65,7 +67,7 @@ import {
   validateLayersForDimension,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
-import { XYState, XYDataLayerConfig } from './types';
+import { XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_panel';
 import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { AnnotationsPanel, defaultAnnotationLabel } from './annotations/config_panel';

@@ -8,20 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { DatasourcePublicAPI, OperationMetadata, VisualizationType } from '../types';
+import { State, visualizationTypes, XYState } from './types';
+import { isHorizontalChart } from './state_helpers';
 import {
-  State,
-  visualizationTypes,
-  XYState,
-  AnnotationLayerArgs,
-  DataLayerArgs,
+  SeriesType,
   XYAnnotationLayerConfig,
-  XYLayerArgs,
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from './types';
-import { isHorizontalChart } from './state_helpers';
-import { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '..';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
@@ -136,11 +131,8 @@ export function checkScaleOperation(
 export const isDataLayer = (layer: XYLayerConfig): layer is XYDataLayerConfig =>
   layer.layerType === layerTypes.DATA || !layer.layerType;
 
-export const getDataLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
+export const getDataLayers = (layers: XYLayerConfig[]) =>
   (layers || []).filter((layer): layer is XYDataLayerConfig => isDataLayer(layer));
-
-export const getDataLayersArgs = (layers: XYLayerArgs[]) =>
-  (layers || []).filter((layer): layer is DataLayerArgs => isDataLayer(layer));
 
 export const getFirstDataLayer = (layers: XYLayerConfig[]) =>
   (layers || []).find((layer): layer is XYDataLayerConfig => isDataLayer(layer));
@@ -158,9 +150,6 @@ export const isAnnotationsLayer = (
 
 export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
-
-export const getAnnotationsLayersArgs = (layers: XYLayerArgs[]) =>
-  (layers || []).filter((layer): layer is AnnotationLayerArgs => isAnnotationsLayer(layer));
 
 export interface LayerTypeToLayer {
   [layerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;

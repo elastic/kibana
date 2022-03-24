@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './expression.scss';
@@ -14,20 +15,20 @@ import {
   LineAnnotation,
   Position,
 } from '@elastic/charts';
-import type { FieldFormat } from 'src/plugins/field_formats/common';
-import type { EventAnnotationArgs } from 'src/plugins/event_annotation/common';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EventAnnotationArgs } from '../../../../event_annotation/common';
+import type { FieldFormat } from '../../../../field_formats/common';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
-import { hasIcon } from '../xy_config_panel/shared/icon_select';
-import { AnnotationLayerArgs } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../../common/types';
+import { hasIcon } from '../helpers';
 import {
   mapVerticalToHorizontalPlacement,
   LINES_MARKER_SIZE,
   MarkerBody,
   Marker,
   AnnotationIcon,
-} from '../annotations_helpers';
+} from '../helpers';
 
 const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInterval?: number) => {
   if (!firstTimestamp || !minInterval) {
@@ -123,7 +124,7 @@ const getCommonStyles = (configArr: EventAnnotationArgs[]) => {
 };
 
 export const getAnnotationsGroupedByInterval = (
-  layers: AnnotationLayerArgs[],
+  layers: AnnotationLayerConfigResult[],
   minInterval?: number,
   firstTimestamp?: number,
   formatter?: FieldFormat

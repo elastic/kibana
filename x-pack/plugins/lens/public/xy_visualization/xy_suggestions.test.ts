@@ -12,11 +12,14 @@ import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { eventAnnotationServiceMock } from '../../../../../src/plugins/event_annotation/public/mocks';
+import {
+  XYAnnotationLayerConfig,
+  XYDataLayerConfig,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
-import { XYAnnotationLayerConfig, XYDataLayerConfig } from './types';
 
 jest.mock('../id_generator');
 
@@ -201,10 +204,6 @@ describe('xy_suggestions', () => {
             seriesType: 'bar',
             accessors: ['bytes'],
             splitAccessor: undefined,
-            yScaleType: 'linear',
-            xScaleType: 'linear',
-            isHistogram: false,
-            palette: { type: 'palette', name: 'default' },
           },
           {
             layerId: 'second',
@@ -212,10 +211,6 @@ describe('xy_suggestions', () => {
             seriesType: 'bar',
             accessors: ['bytes'],
             splitAccessor: undefined,
-            yScaleType: 'linear',
-            xScaleType: 'linear',
-            isHistogram: false,
-            palette: { type: 'palette', name: 'default' },
           },
         ],
       },
@@ -316,10 +311,6 @@ describe('xy_suggestions', () => {
             xAccessor: 'date',
             accessors: ['bytes'],
             splitAccessor: undefined,
-            yScaleType: 'linear',
-            xScaleType: 'linear',
-            isHistogram: false,
-            palette: { type: 'palette', name: 'default' },
           },
         ],
       },
@@ -362,10 +353,6 @@ describe('xy_suggestions', () => {
             xAccessor: 'date',
             accessors: ['bytes'],
             splitAccessor: undefined,
-            yScaleType: 'linear',
-            xScaleType: 'linear',
-            isHistogram: false,
-            palette: { type: 'palette', name: 'default' },
           },
           {
             layerId: 'second',
@@ -374,10 +361,6 @@ describe('xy_suggestions', () => {
             xAccessor: undefined,
             accessors: [],
             splitAccessor: undefined,
-            yScaleType: 'linear',
-            xScaleType: 'linear',
-            isHistogram: false,
-            palette: { type: 'palette', name: 'default' },
           },
         ],
       },
@@ -661,10 +644,6 @@ describe('xy_suggestions', () => {
             seriesType: 'bar',
             splitAccessor: 'product',
             xAccessor: 'date',
-            yScaleType: 'linear',
-            xScaleType: 'linear',
-            isHistogram: false,
-            palette: { type: 'palette', name: 'default' },
           },
         ],
       },
@@ -720,10 +699,6 @@ describe('xy_suggestions', () => {
           seriesType: 'line',
           splitAccessor: undefined,
           xAccessor: '',
-          yScaleType: 'linear',
-          xScaleType: 'linear',
-          isHistogram: false,
-          palette: { type: 'palette', name: 'default' },
         },
       ],
     };
@@ -763,10 +738,6 @@ describe('xy_suggestions', () => {
           seriesType: 'bar',
           splitAccessor: undefined,
           xAccessor: 'date',
-          yScaleType: 'linear',
-          xScaleType: 'linear',
-          isHistogram: false,
-          palette: { type: 'palette', name: 'default' },
         },
       ],
     };
@@ -810,10 +781,6 @@ describe('xy_suggestions', () => {
           seriesType: 'bar',
           splitAccessor: 'product',
           xAccessor: 'date',
-          yScaleType: 'linear',
-          xScaleType: 'linear',
-          isHistogram: false,
-          palette: { type: 'palette', name: 'default' },
         },
       ],
     };
@@ -858,10 +825,6 @@ describe('xy_suggestions', () => {
           seriesType: 'bar',
           splitAccessor: 'dummyCol',
           xAccessor: 'product',
-          yScaleType: 'linear',
-          xScaleType: 'linear',
-          isHistogram: false,
-          palette: { type: 'palette', name: 'default' },
         },
       ],
     };
@@ -900,10 +863,6 @@ describe('xy_suggestions', () => {
           seriesType: 'bar',
           splitAccessor: 'date',
           xAccessor: 'product',
-          yScaleType: 'linear',
-          xScaleType: 'linear',
-          isHistogram: false,
-          palette: { type: 'palette', name: 'default' },
         },
       ],
     };
@@ -945,10 +904,6 @@ describe('xy_suggestions', () => {
           seriesType: 'bar',
           splitAccessor: 'dummyCol',
           xAccessor: 'product',
-          yScaleType: 'linear',
-          xScaleType: 'linear',
-          isHistogram: false,
-          palette: { type: 'palette', name: 'default' },
         },
       ],
     };
@@ -994,10 +949,6 @@ describe('xy_suggestions', () => {
           seriesType: 'bar',
           splitAccessor: 'category',
           xAccessor: 'product',
-          yScaleType: 'linear',
-          xScaleType: 'linear',
-          isHistogram: false,
-          palette: { type: 'palette', name: 'default' },
         },
       ],
     };
@@ -1044,10 +995,6 @@ describe('xy_suggestions', () => {
           seriesType: 'bar',
           splitAccessor: 'dummyCol',
           xAccessor: 'product',
-          yScaleType: 'linear',
-          xScaleType: 'linear',
-          isHistogram: false,
-          palette: { type: 'palette', name: 'default' },
         },
       ],
     };

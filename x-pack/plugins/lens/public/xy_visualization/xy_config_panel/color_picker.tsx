@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
+import { XYDataLayerConfig } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYDataLayerConfig } from '../types';
+import { State } from '../types';
 import { FormatFactory } from '../../../common';
 import { getSeriesColor } from '../state_helpers';
 import {

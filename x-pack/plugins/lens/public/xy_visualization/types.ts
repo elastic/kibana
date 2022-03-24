@@ -26,35 +26,10 @@ import type {
   AxesSettingsConfig,
   FittingFunction,
   LabelsOrientationConfig,
-  DataLayerArgs,
-  LayerType,
-  ReferenceLineLayerArgs,
-  YConfig,
-  XScaleType,
-  YScaleType,
   EndValue,
+  XYLayerConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import type { ValueLabelConfig } from '../../common/types';
-
-export interface XYDataLayerConfig
-  extends Omit<DataLayerArgs, 'yConfig' | 'palette' | 'isHistogram' | 'xScaleType' | 'yScaleType'> {
-  layerType: LayerType;
-  yConfig?: YConfig[];
-  palette?: PaletteOutput;
-  yScaleType?: YScaleType;
-  xScaleType?: XScaleType;
-  isHistogram?: boolean;
-}
-
-export interface XYReferenceLineLayerConfig
-  extends Omit<ReferenceLineLayerArgs, 'yConfig' | 'palette'> {
-  layerType: LayerType;
-  yConfig?: YConfig[];
-  palette?: PaletteOutput;
-}
-
-export type XYLayerConfig = XYDataLayerConfig | XYReferenceLineLayerConfig;
 
 // Persisted parts of the state
 export interface XYState {
@@ -81,6 +56,7 @@ export interface XYState {
 }
 
 export type State = XYState;
+
 const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
   defaultMessage: 'Bar',
 });

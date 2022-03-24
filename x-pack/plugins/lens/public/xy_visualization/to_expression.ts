@@ -10,18 +10,15 @@ import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 
 import { EventAnnotationServiceType } from 'src/plugins/event_annotation/public';
-import {
-  State,
-  XYDataLayerConfig,
-  XYReferenceLineLayerConfig,
-  XYAnnotationLayerConfig,
-} from './types';
+import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type {
-  ReferenceLineLayerConfigResult,
   ValidLayer,
   YConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYAnnotationLayerConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
@@ -34,6 +31,7 @@ import {
 } from './visualization_helpers';
 import { defaultAnnotationLabel } from './annotations/config_panel';
 import { getUniqueLabels } from './annotations/helpers';
+import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI,
@@ -383,7 +381,7 @@ export const buildExpression = (
 };
 
 const referenceLineLayerToExpression = (
-  layer: ReferenceLineLayerConfigResult,
+  layer: XYReferenceLineLayerConfig,
   datasourceLayer: DatasourcePublicAPI
 ): Ast => {
   return {

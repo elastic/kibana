@@ -11,9 +11,12 @@ import type { Datatable } from 'src/plugins/expressions';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { FormatFactory, LayerType } from '../../common';
+import { FormatFactory } from '../../common';
+import {
+  XYDataLayerConfig,
+  XYLayerConfig,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
-import { XYDataLayerConfig, XYLayerConfig, XYReferenceLineLayerConfig } from './types';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
 import { getReferenceLineAccessorColorConfig } from './reference_line_helpers';
 

@@ -16,8 +16,12 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, XYState, visualizationTypes, XYLayerConfig, XYDataLayerConfig } from './types';
-import type { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { State, XYState, visualizationTypes } from './types';
+import type {
+  SeriesType,
+  XYLayerConfig,
+  XYDataLayerConfig,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';

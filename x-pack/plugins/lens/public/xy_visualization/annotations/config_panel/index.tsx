@@ -15,7 +15,7 @@ import { EventAnnotationConfig } from 'src/plugins/event_annotation/common/types
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState } from '../../types';
 import { FormatFactory } from '../../../../common';
-import { XYAnnotationLayerConfig } from '../../../../common/expressions';
+import type { XYAnnotationLayerConfig } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { ColorPicker } from '../../xy_config_panel/color_picker';
 import { DimensionEditorSection, NameInput, useDebouncedValue } from '../../../shared_components';
 import { isHorizontalChart } from '../../state_helpers';

@@ -1,22 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import './expression_reference_lines.scss';
 import React from 'react';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import classnames from 'classnames';
-import {
-  IconPosition,
-  YAxisMode,
-  YConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { hasIcon } from './xy_config_panel/shared/icon_select';
-import { annotationsIconSet } from './annotations/config_panel/icon_set';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import type { IconPosition, YAxisMode, YConfig } from '../../common/types';
+import { hasIcon } from './icon';
+import { annotationsIconSet } from './annotations_icon_set';
+import type { XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../../common/types';
+import type { FramePublicAPI } from '../types';
+import { getAnnotationsLayersConfig } from './visualization';
+import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
+
+import './expression_reference_lines.scss';
 
 export const LINES_MARKER_SIZE = 20;
 
@@ -255,3 +259,78 @@ export function Marker({
   }
   return null;
 }
+
+const MAX_DATE = 8640000000000000;
+const MIN_DATE = -8640000000000000;
+
+export function getStaticDate(
+  dataLayers: XYDataLayerConfig[],
+  activeData: FramePublicAPI['activeData']
+) {
+  const fallbackValue = moment().toISOString();
+
+  const dataLayersId = dataLayers.map(({ layerId }) => layerId);
+  if (
+    !activeData ||
+    Object.entries(activeData)
+      .filter(([key]) => dataLayersId.includes(key))
+      .every(([, { rows }]) => !rows || !rows.length)
+  ) {
+    return fallbackValue;
+  }
+
+  const minDate = dataLayersId.reduce((acc, lId) => {
+    const xAccessor = dataLayers.find((dataLayer) => dataLayer.layerId === lId)?.xAccessor!;
+    const firstTimestamp = activeData[lId]?.rows?.[0]?.[xAccessor];
+    return firstTimestamp && firstTimestamp < acc ? firstTimestamp : acc;
+  }, MAX_DATE);
+
+  const maxDate = dataLayersId.reduce((acc, lId) => {
+    const xAccessor = dataLayers.find((dataLayer) => dataLayer.layerId === lId)?.xAccessor!;
+    const lastTimestamp = activeData[lId]?.rows?.[activeData?.[lId]?.rows?.length - 1]?.[xAccessor];
+    return lastTimestamp && lastTimestamp > acc ? lastTimestamp : acc;
+  }, MIN_DATE);
+  const middleDate = (minDate + maxDate) / 2;
+  return moment(middleDate).toISOString();
+}
+
+export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) => {
+  return layer.annotations.map((annotation) => {
+    return {
+      columnId: annotation.id,
+      triggerIcon: annotation.isHidden ? ('invisible' as const) : ('color' as const),
+      color: annotation?.color || defaultAnnotationColor,
+    };
+  });
+};
+
+export const getUniqueLabels = (layers: XYLayerConfig[]) => {
+  const annotationLayers = getAnnotationsLayersConfig(layers);
+  const columnLabelMap = {} as Record<string, string>;
+  const counts = {} as Record<string, number>;
+
+  const makeUnique = (label: string) => {
+    let uniqueLabel = label;
+
+    while (counts[uniqueLabel] >= 0) {
+      const num = ++counts[uniqueLabel];
+      uniqueLabel = i18n.translate('xpack.lens.uniqueLabel', {
+        defaultMessage: '{label} [{num}]',
+        values: { label, num },
+      });
+    }
+
+    counts[uniqueLabel] = 0;
+    return uniqueLabel;
+  };
+
+  annotationLayers.forEach((layer) => {
+    if (!layer.annotations) {
+      return;
+    }
+    layer.annotations.forEach((l) => {
+      columnLabelMap[l.id] = makeUnique(l.label);
+    });
+  });
+  return columnLabelMap;
+};

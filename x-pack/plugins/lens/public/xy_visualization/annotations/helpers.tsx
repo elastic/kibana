@@ -12,7 +12,7 @@ import type {
   XYDataLayerConfig,
   XYAnnotationLayerConfig,
   XYLayerConfig,
-} from '../../../common/expressions';
+} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import type { FramePublicAPI, Visualization } from '../../types';
 import { isHorizontalChart } from '../state_helpers';
 import type { XYState } from '../types';

@@ -10,6 +10,7 @@ import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/chart
 import { $Values } from '@kbn/utility-types';
 import { Datatable } from '../../../../expressions';
 import { PaletteOutput } from '../../../../charts/common';
+import { EventAnnotationConfig, EventAnnotationOutput } from '../../../../event_annotation/common';
 import {
   AxisExtentModes,
   FillStyles,
@@ -33,6 +34,7 @@ import {
   LEGEND_CONFIG,
   DATA_LAYER,
   AXIS_EXTENT_CONFIG,
+  ANNOTATION_LAYER,
   EndValues,
 } from '../constants';
 
@@ -82,18 +84,20 @@ export interface YConfig {
 export interface XYDataLayerConfig {
   layerId: string;
   accessors: string[];
+  layerType: typeof LayerTypes.DATA;
   seriesType: SeriesType;
   xAccessor?: string;
   hide?: boolean;
-  yConfig?: YConfigResult[];
+  yConfig?: YConfig[];
   splitAccessor?: string;
   palette?: PaletteOutput;
 }
+
 export interface ValidLayer extends DataLayerConfigResult {
   xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
 }
 
-export type DataLayerArgs = XYDataLayerConfig & {
+export type DataLayerArgs = Omit<XYDataLayerConfig, 'layerType'> & {
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;
   xScaleType: XScaleType;
@@ -180,17 +184,46 @@ export interface XYArgs {
   ariaLabel?: string;
 }
 
+export interface XYAnnotationLayerConfig {
+  layerId: string;
+  layerType: typeof LayerTypes.ANNOTATIONS;
+  annotations: EventAnnotationConfig[];
+  hide?: boolean;
+}
+
+export interface AnnotationLayerArgs {
+  annotations: EventAnnotationOutput[];
+  layerId: string;
+  hide?: boolean;
+}
+
+export type AnnotationLayerConfigResult = AnnotationLayerArgs & {
+  type: typeof ANNOTATION_LAYER;
+  layerType: typeof LayerTypes.ANNOTATIONS;
+};
+
 export interface XYReferenceLineLayerConfig {
   layerId: string;
   accessors: string[];
-  yConfig?: YConfigResult[];
+  yConfig?: YConfig[];
+  layerType: typeof LayerTypes.REFERENCELINE;
 }
 
-export type ReferenceLineLayerArgs = XYReferenceLineLayerConfig & {
+export type ReferenceLineLayerArgs = Omit<XYReferenceLineLayerConfig, 'layerType'> & {
   columnToLabel?: string;
 };
 
-export type XYLayerConfigResult = DataLayerConfigResult | ReferenceLineLayerConfigResult;
+export type XYLayerArgs = DataLayerArgs | ReferenceLineLayerArgs | AnnotationLayerArgs;
+
+export type XYLayerConfig =
+  | XYDataLayerConfig
+  | XYReferenceLineLayerConfig
+  | XYAnnotationLayerConfig;
+
+export type XYLayerConfigResult =
+  | DataLayerConfigResult
+  | ReferenceLineLayerConfigResult
+  | AnnotationLayerConfigResult;
 
 export interface LensMultiTable {
   type: typeof MULTITABLE;
@@ -201,14 +234,16 @@ export interface LensMultiTable {
   };
 }
 
-export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
+export type ReferenceLineLayerConfigResult = Omit<ReferenceLineLayerArgs, 'yConfig'> & {
   type: typeof REFERENCE_LINE_LAYER;
   layerType: typeof LayerTypes.REFERENCELINE;
+  yConfig?: YConfigResult[];
 };
 
-export type DataLayerConfigResult = DataLayerArgs & {
+export type DataLayerConfigResult = Omit<DataLayerArgs, 'yConfig'> & {
   type: typeof DATA_LAYER;
   layerType: typeof LayerTypes.DATA;
+  yConfig?: YConfigResult[];
 };
 
 export type YConfigResult = YConfig & { type: typeof Y_CONFIG };

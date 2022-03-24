@@ -43,22 +43,9 @@ import { RenderMode } from '../../../../expressions/common';
 import { FieldFormat } from '../../../../field_formats/common';
 import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
-import type { DataLayerConfigResult, SeriesType, XYChartProps } from '../../common';
-import { isHorizontalChart, getSeriesColor } from '../helpers';
-import { EventAnnotationServiceType } from '../../../../../src/plugins/event_annotation/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
-import type { LensMultiTable, FormatFactory } from '../../common';
-import type {
-  DataLayerArgs,
-  SeriesType,
-  XYChartProps,
-  XYLayerArgs,
-} from '../../common/expressions';
-import { visualizationTypes } from './types';
-import { VisualizationContainer } from '../visualization_container';
-import { isHorizontalChart, getSeriesColor } from './state_helpers';
-import { search } from '../../../../../src/plugins/data/public';
+import type { SeriesType, XYChartProps } from '../../common/types';
+import { isHorizontalChart, getSeriesColor, getAnnotationsLayers, getDataLayers } from '../helpers';
+import { EventAnnotationServiceType } from '../../../../event_annotation/public';
 import {
   ChartsPluginSetup,
   ChartsPluginStart,
@@ -70,8 +57,6 @@ import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../plugins/charts/common
 import {
   getFilteredLayers,
   getReferenceLayers,
-  getDataLayersArgs,
-  getAnnotationsLayersArgs,
   isDataLayer,
   getFitOptions,
   getAxesConfiguration,
@@ -79,14 +64,14 @@ import {
   validateExtent,
   computeOverallDataDomain,
   getColorAssignments,
+  getLinesCausedPaddings,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
-import { ReferenceLineAnnotations } from './reference_lines';
+import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { XYLayerConfigResult } from '../../common/types';
-import { computeChartMargins, getLinesCausedPaddings } from './annotations_helpers';
-import { Annotations, getAnnotationsGroupedByInterval } from './annotations/expression';
+import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
 
 import './xy_chart.scss';
 
@@ -192,9 +177,7 @@ export function XYChart({
   });
 
   if (filteredLayers.length === 0) {
-    const icon: IconType = getIconForSeriesType(
-      getDataLayersArgs(layers)?.[0]?.seriesType || 'bar'
-    );
+    const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]?.seriesType || 'bar');
     return <EmptyPlaceholder icon={icon} />;
   }
 
@@ -282,7 +265,7 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-  const annotationsLayers = getAnnotationsLayersArgs(layers);
+  const annotationsLayers = getAnnotationsLayers(layers);
   const firstTable = data.tables[filteredLayers[0].layerId];
 
   const xColumnId = firstTable.columns.find((col) => col.id === filteredLayers[0].xAccessor)?.id;
@@ -407,7 +390,7 @@ export function XYChart({
   const valueLabelsStyling =
     shouldShowValueLabels && valueLabels !== 'hide' && getValueLabelsStyling(shouldRotate);
 
-  const colorAssignments = getColorAssignments(getDataLayersArgs(args.layers), data, formatFactory);
+  const colorAssignments = getColorAssignments(getDataLayers(args.layers), data, formatFactory);
 
   const clickHandler: ElementClickListener = ([[geometry, series]]) => {
     // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
@@ -965,23 +948,6 @@ export function XYChart({
       ) : null}
     </Chart>
   );
-}
-
-function getFilteredLayers(layers: XYLayerArgs[], data: LensMultiTable) {
-  return getDataLayersArgs(layers).filter((layer) => {
-    const { layerId, xAccessor, accessors, splitAccessor } = layer;
-    return !(
-      !accessors.length ||
-      !data.tables[layerId] ||
-      data.tables[layerId].rows.length === 0 ||
-      (xAccessor &&
-        data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
-      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
-      (!xAccessor &&
-        splitAccessor &&
-        data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
-    );
-  });
 }
 
 function assertNever(x: never): never {
