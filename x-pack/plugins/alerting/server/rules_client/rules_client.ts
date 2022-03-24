@@ -1386,6 +1386,7 @@ export class RulesClient {
           filter,
           type: 'alert',
           perPage: 1000,
+          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
         }
       );
 

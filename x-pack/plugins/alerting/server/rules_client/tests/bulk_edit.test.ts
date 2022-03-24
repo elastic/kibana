@@ -485,7 +485,12 @@ describe('bulkEdit()', () => {
 
       expect(encryptedSavedObjects.createPointInTimeFinderAsInternalUser).toHaveBeenCalledWith(
         { namespace: 'default', type: 'alert' },
-        { filter: 'alert.attributes.tags: "APM"', perPage: 1000, type: 'alert' }
+        {
+          filter: 'alert.attributes.tags: "APM"',
+          perPage: 1000,
+          type: 'alert',
+          namespaces: ['default'],
+        }
       );
     });
 
