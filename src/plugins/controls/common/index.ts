@@ -12,3 +12,4 @@ export type { ControlWidth } from './types';
 
 export { OPTIONS_LIST_CONTROL } from './control_types/options_list/types';
 export { CONTROL_GROUP_TYPE } from './control_group/types';
+export { getDefaultControlGroupInput } from './control_group/control_group_constants';
