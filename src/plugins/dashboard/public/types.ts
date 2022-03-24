@@ -29,7 +29,11 @@ import { UrlForwardingStart } from '../../url_forwarding/public';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { NavigationPublicPluginStart } from './services/navigation';
 import { Query, RefreshInterval, TimeRange } from './services/data';
-import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
+import {
+  DashboardContainerControlGroupInput,
+  DashboardPanelState,
+  SavedDashboardPanel,
+} from '../common/types';
 import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, DataViewsContract } from './services/data';
 import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
@@ -40,7 +44,6 @@ import type { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
-import type { DashboardControlGroupInput } from './application/lib/dashboard_control_group';
 
 export type { SavedDashboardPanel };
 
@@ -71,7 +74,7 @@ export interface DashboardState {
   panels: DashboardPanelMap;
   timeRange?: TimeRange;
 
-  controlGroupInput?: DashboardControlGroupInput;
+  controlGroupInput?: DashboardContainerControlGroupInput;
 }
 
 /**
@@ -81,7 +84,7 @@ export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: Saved
 
 export interface DashboardContainerInput extends ContainerInput {
   dashboardCapabilities?: DashboardAppCapabilities;
-  controlGroupInput?: DashboardControlGroupInput;
+  controlGroupInput?: DashboardContainerControlGroupInput;
   refreshConfig?: RefreshInterval;
   isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;

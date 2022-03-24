@@ -33,6 +33,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags('ciGroup10');
 
       loadTestFile(require.resolve('./input_control_vis'));
+      loadTestFile(require.resolve('./controls'));
       loadTestFile(require.resolve('./_markdown_vis'));
       loadTestFile(require.resolve('./controls'));
     });

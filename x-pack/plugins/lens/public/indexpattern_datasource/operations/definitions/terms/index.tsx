@@ -60,7 +60,12 @@ const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLa
   defaultMessage: 'Missing field',
 });
 
-function ofName(name?: string, count: number = 0, rare: boolean = false) {
+function ofName(
+  name?: string,
+  secondaryFieldsCount: number = 0,
+  rare: boolean = false,
+  termsSize: number = 0
+) {
   if (rare) {
     return i18n.translate('xpack.lens.indexPattern.rareTermsOf', {
       defaultMessage: 'Rare values of {name}',
@@ -69,19 +74,22 @@ function ofName(name?: string, count: number = 0, rare: boolean = false) {
       },
     });
   }
-  if (count) {
+  if (secondaryFieldsCount) {
     return i18n.translate('xpack.lens.indexPattern.multipleTermsOf', {
       defaultMessage: 'Top values of {name} + {count} {count, plural, one {other} other {others}}',
       values: {
         name: name ?? missingFieldLabel,
-        count,
+        count: secondaryFieldsCount,
       },
     });
   }
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
-    defaultMessage: 'Top values of {name}',
+    defaultMessage:
+      'Top {numberOfTermsLabel}{termsCount, plural, one {value} other {values}} of {name}',
     values: {
       name: name ?? missingFieldLabel,
+      termsCount: termsSize,
+      numberOfTermsLabel: termsSize > 1 ? `${termsSize} ` : '',
     },
   });
 }
@@ -270,7 +278,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     ofName(
       indexPattern.getFieldByName(column.sourceField)?.displayName,
       column.params.secondaryFields?.length,
-      column.params.orderBy.type === 'rare'
+      column.params.orderBy.type === 'rare',
+      column.params.size
     ),
   onFieldChange: (oldColumn, field, params) => {
     const newParams = {
@@ -285,6 +294,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if (!supportsRarityRanking(field) && newParams.orderBy.type === 'rare') {
       newParams.orderBy = { type: 'alphabetical' };
     }
+
     return {
       ...oldColumn,
       dataType: field.type as DataType,
@@ -293,7 +303,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         : ofName(
             field.displayName,
             newParams.secondaryFields?.length,
-            newParams.orderBy.type === 'rare'
+            newParams.orderBy.type === 'rare',
+            newParams.size
           ),
       sourceField: field.name,
       params: newParams,
@@ -398,7 +409,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 : ofName(
                     mainField?.displayName,
                     fields.length - 1,
-                    newParams.orderBy.type === 'rare'
+                    newParams.orderBy.type === 'rare',
+                    newParams.size
                   ),
               params: {
                 ...newParams,
@@ -522,20 +534,37 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       });
     }
 
+    const secondaryFieldsCount = currentColumn.params.secondaryFields
+      ? currentColumn.params.secondaryFields.length
+      : 0;
+
     return (
       <>
         <ValuesInput
           value={currentColumn.params.size}
           disabled={currentColumn.params.orderBy.type === 'rare'}
           onChange={(value) => {
-            updateLayer(
-              updateColumnParam({
-                layer,
-                columnId,
-                paramName: 'size',
-                value,
-              })
-            );
+            updateLayer({
+              ...layer,
+              columns: {
+                ...layer.columns,
+                [columnId]: {
+                  ...currentColumn,
+                  label: currentColumn.customLabel
+                    ? currentColumn.label
+                    : ofName(
+                        indexPattern.getFieldByName(currentColumn.sourceField)?.displayName,
+                        secondaryFieldsCount,
+                        currentColumn.params.orderBy.type === 'rare',
+                        value
+                      ),
+                  params: {
+                    ...currentColumn.params,
+                    size: value,
+                  },
+                },
+              } as Record<string, TermsIndexPatternColumn>,
+            });
           }}
         />
         {currentColumn.params.orderBy.type === 'rare' && (
