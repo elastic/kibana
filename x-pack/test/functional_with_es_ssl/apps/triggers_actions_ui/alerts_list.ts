@@ -30,7 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  describe('alerts list', function () {
+  describe('rules list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -388,6 +388,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesTable-P95ColumnName');
         await testSubjects.existOrFail('P95Percentile');
       });
+    });
+
+    it('should render interval info icon when schedule interval is less than configured minimum', async () => {
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'b', schedule: { interval: '1s' } },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'c' },
+      });
+      await refreshAlertsList();
+
+      await testSubjects.existOrFail('ruleInterval-config-icon-0');
+      await testSubjects.missingOrFail('ruleInterval-config-icon-1');
+
+      // open edit flyout when icon is clicked
+      const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
+      await infoIcon.click();
+
+      await testSubjects.click('cancelSaveEditedRuleButton');
     });
 
     it('should delete all selection', async () => {
