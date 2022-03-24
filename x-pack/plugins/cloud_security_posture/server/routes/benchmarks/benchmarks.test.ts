@@ -17,9 +17,11 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaRequest } from 'src/core/server/http/router/request';
 import {
-  defineGetBenchmarksRoute,
   benchmarksInputSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
+} from '../../../common/schemas/benchmark';
+import {
+  defineGetBenchmarksRoute,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   getPackagePolicies,
   getAgentPolicies,
@@ -84,7 +86,7 @@ describe('benchmarks API', () => {
     };
     defineGetBenchmarksRoute(router, cspContext);
 
-    const [config, _] = router.get.mock.calls[0];
+    const [config] = router.get.mock.calls[0];
 
     expect(config.path).toEqual('/api/csp/benchmarks');
   });
@@ -180,7 +182,7 @@ describe('benchmarks API', () => {
 
   it('should not throw when sort_field is a string', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_field: 'name' });
+      benchmarksInputSchema.validate({ sort_field: 'package_policy.name' });
     }).not.toThrow();
   });
 
@@ -204,7 +206,7 @@ describe('benchmarks API', () => {
 
   it('should not throw when fields is a known string literal', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_field: 'name' });
+      benchmarksInputSchema.validate({ sort_field: 'package_policy.name' });
     }).not.toThrow();
   });
 
@@ -240,7 +242,7 @@ describe('benchmarks API', () => {
         await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
           page: 1,
           per_page: 100,
-          sort_field: 'name',
+          sort_field: 'package_policy.name',
           sort_order: 'desc',
         });
 
@@ -261,7 +263,7 @@ describe('benchmarks API', () => {
         await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
           page: 1,
           per_page: 100,
-          sort_field: 'name',
+          sort_field: 'package_policy.name',
           sort_order: 'asc',
         });
 

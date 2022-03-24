@@ -45,6 +45,9 @@ describe('useExpViewTimeRange', function () {
           monitorList: false,
           serviceLocations: loading,
         },
+        syntheticsService: {
+          loading: false,
+        },
       },
     };
 
