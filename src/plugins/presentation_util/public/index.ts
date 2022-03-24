@@ -50,11 +50,11 @@ export * from './components/types';
 
 export type { QuickButtonProps } from './components/solution_toolbar';
 
-/** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-components */
 export {
   AddFromLibraryButton,
   PrimaryActionButton,
   PrimaryActionPopover,
+/** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-components */
   QuickButtonGroup,
   SolutionToolbar,
   SolutionToolbarButton,
