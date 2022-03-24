@@ -14,13 +14,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const queryBar = getService('queryBar');
-  const pieChart = getService('pieChart');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const dashboardAddPanel = getService('dashboardAddPanel');
-  const { dashboardControls, timePicker, common, dashboard, header } = getPageObjects([
+  const { dashboardControls, timePicker, common, dashboard } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
@@ -172,8 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(upperBoundSelection.length).to.be(0);
       });
 
-      // skipped until fix for deleting controls
-      it.skip('deletes an existing control', async () => {
+      it('deletes an existing control', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.removeExistingControl(firstId);
         expect(await dashboardControls.getControlsCount()).to.be(1);
@@ -182,25 +178,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('validation', async () => {
       it('displays error message when upper bound selection is less than lower bound selection', async () => {
-        const secondId = (await dashboardControls.getAllControlIds())[1];
-        await dashboardControls.rangeSliderSetLowerBound(secondId, '500');
-        await dashboardControls.rangeSliderSetUpperBound(secondId, '400');
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.rangeSliderSetLowerBound(firstId, '500');
+        await dashboardControls.rangeSliderSetUpperBound(firstId, '400');
       });
 
       it('disables inputs when no data available', async () => {
         await dashboardControls.createRangeSliderControl({ fieldName: 'bytes', width: 'small' });
-        const thirdId = (await dashboardControls.getAllControlIds())[2];
+        const secondId = (await dashboardControls.getAllControlIds())[1];
         expect(
-          await dashboardControls.rangeSliderGetLowerBoundAttribute(thirdId, 'disabled')
+          await dashboardControls.rangeSliderGetLowerBoundAttribute(secondId, 'disabled')
         ).to.be('true');
         expect(
-          await dashboardControls.rangeSliderGetUpperBoundAttribute(thirdId, 'disabled')
+          await dashboardControls.rangeSliderGetUpperBoundAttribute(secondId, 'disabled')
         ).to.be('true');
-        await dashboardControls.rangeSliderOpenPopover(thirdId);
+        await dashboardControls.rangeSliderOpenPopover(secondId);
         await dashboardControls.rangeSliderPopoverAssertOpen();
-        expect(await dashboardControls.rangeSliderGetDualRangeAttribute(thirdId, 'disabled')).to.be(
-          'true'
-        );
+        expect(
+          await dashboardControls.rangeSliderGetDualRangeAttribute(secondId, 'disabled')
+        ).to.be('true');
         expect((await testSubjects.getVisibleText('rangeSlider__helpText')).length).to.be.above(0);
       });
     });

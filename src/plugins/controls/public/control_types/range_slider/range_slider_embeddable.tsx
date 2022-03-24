@@ -254,8 +254,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const max = get(resp, 'rawResponse.aggregations.maxAgg.value', '');
 
     this.updateComponentState({
-      min: `${min}` ?? '',
-      max: `${max}` ?? '',
+      min: `${min ?? ''}`,
+      max: `${max ?? ''}`,
     });
 
     // build filter with new min/max
