@@ -73,7 +73,6 @@ export enum KibanaAssetType {
   lens = 'lens',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
-  // cloudSecurityPostureRuleTemplate = 'cloud_security_posture_rule_template',
   mlModule = 'ml_module',
   tag = 'tag',
 }
