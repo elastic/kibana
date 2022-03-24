@@ -70,6 +70,7 @@ $a4PageContentWidth: $a4PageWidth;
       background-color: #FFF;
     }
 
+    // When printing it is good practice to show the full url
     a[href]:after {
       content: ' [' attr(href) ']';
     }
