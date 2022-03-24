@@ -51,4 +51,28 @@ describe('useGetEndpointSecurityPackage hook', () => {
     expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
     expect(onSuccessMock).toHaveBeenCalledTimes(1);
   });
+
+  it('throws when the service fails to retrieve the endpoint package', async () => {
+    const error = {
+      response: {
+        status: 500,
+      },
+    };
+    fakeHttpServices.get.mockRejectedValue(error);
+    const onErrorMock: jest.Mock = jest.fn();
+    options = {
+      enabled: true,
+      onError: onErrorMock,
+      retry: false,
+    };
+
+    result = await renderQuery(
+      () => useGetEndpointSecurityPackage({ customQueryOptions: options }),
+      'isError'
+    );
+
+    expect(result.error).toBe(error);
+    expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(1);
+  });
 });
