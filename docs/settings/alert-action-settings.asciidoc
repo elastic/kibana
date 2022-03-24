@@ -202,14 +202,14 @@ Specifies the behavior when a new or changed rule has a schedule interval less t
 Specifies the maximum number of actions that a rule can trigger each time detection checks run.
 
 `xpack.alerting.rules.execution.timeout`::
-Specifies the default timeout for the all rule types tasks. The time is formatted as:
+Specifies the default timeout for tasks associated with all types of rules. The time is formatted as:
 +
 `<count>[ms,s,m,h,d,w,M,Y]`
 +
 For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
 
 `xpack.alerting.rules.execution.ruleTypeOverrides`::
-Overrides the configs under `xpack.alerting.rules.execution` for the rule type with the given ID. The value is array of objects consists of the key(s) that are wanted to be overridden under execution object and the id of the specific rule type that is wanted to be modified.
+Overrides the configs under `xpack.alerting.rules.execution` for the rule type with the given ID. List the rule identifier and its settings in an array of objects.
 +
 For example:
 ```
