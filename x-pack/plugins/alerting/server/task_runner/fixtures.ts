@@ -29,6 +29,7 @@ export const SAVED_OBJECT = {
   type: 'alert',
   attributes: {
     apiKey: Buffer.from('123:abc').toString('base64'),
+    consumer: 'bar',
     enabled: true,
   },
   references: [],
@@ -169,6 +170,8 @@ export const mockTaskInstance = () => ({
   taskType: 'alerting:test',
   params: {
     alertId: RULE_ID,
+    spaceId: 'default',
+    consumer: 'bar',
   },
   ownerId: null,
 });
@@ -191,6 +194,7 @@ export const generateEventLog = ({
   action,
   task,
   duration,
+  consumer,
   start,
   end,
   outcome,
@@ -221,6 +225,7 @@ export const generateEventLog = ({
   kibana: {
     alert: {
       rule: {
+        ...(consumer && { consumer }),
         execution: {
           uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
           ...(!isNil(numberOfTriggeredActions) && {
@@ -232,6 +237,7 @@ export const generateEventLog = ({
             },
           }),
         },
+        rule_type_id: 'test',
       },
     },
     ...((actionSubgroup || actionGroupId || instanceId || status) && {
@@ -243,6 +249,7 @@ export const generateEventLog = ({
       },
     }),
     saved_objects: savedObjects,
+    space_ids: ['default'],
     ...(task && {
       task: {
         schedule_delay: 0,
@@ -359,6 +366,7 @@ export const generateEnqueueFunctionInput = () => ({
   params: {
     foo: true,
   },
+  consumer: 'bar',
   relatedSavedObjects: [
     {
       id: '1',
@@ -374,7 +382,7 @@ export const generateEnqueueFunctionInput = () => ({
     },
     type: 'SAVED_OBJECT',
   },
-  spaceId: undefined,
+  spaceId: 'default',
 });
 
 export const generateAlertInstance = ({ id, duration, start }: GeneratorParams = { id: 1 }) => ({

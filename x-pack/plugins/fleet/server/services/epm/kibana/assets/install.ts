@@ -55,6 +55,7 @@ const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectTyp
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
     KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
+  [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -252,7 +253,7 @@ export async function installKibanaSavedObjects({
     /*
     A reference error here means that a saved object reference in the references
     array cannot be found. This is an error in the package its-self but not a fatal
-    one. For example a dashboard may still refer to the legacy `metricbeat-*` index 
+    one. For example a dashboard may still refer to the legacy `metricbeat-*` index
     pattern. We ignore reference errors here so that legacy version of a package
     can still be installed, but if a warning is logged it should be reported to
     the integrations team. */

@@ -14,8 +14,9 @@ import {
   SyntheticsMonitor,
   ServiceLocationsApiResponseCodec,
   ServiceLocationErrors,
+  ThrottlingOptions,
 } from '../../../common/runtime_types';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { SyntheticsMonitorSavedObject, SyntheticsServiceAllowed } from '../../../common/types';
 import { apiService } from './utils';
 
 export const setMonitor = async ({
@@ -50,13 +51,16 @@ export const fetchMonitorManagementList = async (
   );
 };
 
-export const fetchServiceLocations = async (): Promise<ServiceLocations> => {
-  const { locations } = await apiService.get(
+export const fetchServiceLocations = async (): Promise<{
+  throttling: ThrottlingOptions | undefined;
+  locations: ServiceLocations;
+}> => {
+  const { throttling, locations } = await apiService.get(
     API_URLS.SERVICE_LOCATIONS,
     undefined,
     ServiceLocationsApiResponseCodec
   );
-  return locations;
+  return { throttling, locations };
 };
 
 export const runOnceMonitor = async ({
@@ -77,4 +81,8 @@ export interface TestNowResponse {
 
 export const testNowMonitor = async (configId: string): Promise<TestNowResponse | undefined> => {
   return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${configId}`);
+};
+
+export const fetchServiceAllowed = async (): Promise<SyntheticsServiceAllowed> => {
+  return await apiService.get(API_URLS.SERVICE_ALLOWED);
 };
