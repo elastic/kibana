@@ -461,7 +461,7 @@ describe('date_histogram', () => {
       );
       instance
         .find(EuiSwitch)
-        .last()
+        .at(2)
         .simulate('change', {
           target: { checked: false },
         });

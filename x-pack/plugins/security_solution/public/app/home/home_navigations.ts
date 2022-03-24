@@ -30,6 +30,7 @@ import {
   SecurityPageName,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
   APP_USERS_PATH,
+  APP_LANDING_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -39,6 +40,13 @@ export const navTabs: SecurityNav = {
     href: APP_OVERVIEW_PATH,
     disabled: false,
     urlKey: 'overview',
+  },
+  [SecurityPageName.landing]: {
+    id: SecurityPageName.landing,
+    name: i18n.GETTING_STARTED,
+    href: APP_LANDING_PATH,
+    disabled: false,
+    urlKey: 'get_started',
   },
   [SecurityPageName.detectionAndResponse]: {
     id: SecurityPageName.detectionAndResponse,
