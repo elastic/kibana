@@ -7,7 +7,6 @@
  */
 
 import expect from '@kbn/expect';
-import { OPTIONS_LIST_CONTROL } from '../../../../../src/plugins/controls/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
