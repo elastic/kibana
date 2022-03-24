@@ -23,15 +23,9 @@ image:images/api-keys.png["API Keys UI"]
 [[api-keys-service]]
 === {es} API key service
 
-The {es} API key service is automatically enabled when you configure
-{ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
-This ensures that clients are unable to send API keys in clear-text.
+The {es} API key service is automatically enabled. For instructions on disabling it, see {ref}/security-settings.html#api-key-service-settings[API key service settings].
 
-When HTTPS connections are not enabled between {kib} and {es},
-you cannot create or manage API keys, and you get an error message.
-For more information, see the
-{ref}/security-api-create-api-key.html[{es} API key documentation],
-or contact your system administrator.
+If the {es} API key service is disabled, you cannot create or manage API keys, and you will get an error message when trying to use API keys in {kib}.
 
 [float]
 [[api-keys-security-privileges]]
