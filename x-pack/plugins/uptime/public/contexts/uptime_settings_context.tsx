@@ -21,7 +21,7 @@ export interface UptimeSettingsContextValues {
   isLogsAvailable: boolean;
   config: UptimeUiConfig;
   commonlyUsedRanges?: CommonlyUsedRange[];
-  isDev: boolean;
+  isDev?: boolean;
 }
 
 const { BASE_PATH } = CONTEXT_DEFAULTS;
