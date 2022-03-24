@@ -8941,6 +8941,7 @@ const BootstrapCommand = {
     if (forceInstall) {
       await time('force install dependencies', async () => {
         await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["removeYarnIntegrityFileIfExists"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kibanaProjectPath, 'node_modules'));
+        await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['clean']);
         await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline, {
           env: {
             SASS_BINARY_SITE: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',

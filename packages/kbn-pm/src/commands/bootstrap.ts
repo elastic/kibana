@@ -71,6 +71,7 @@ export const BootstrapCommand: ICommand = {
     if (forceInstall) {
       await time('force install dependencies', async () => {
         await removeYarnIntegrityFileIfExists(resolve(kibanaProjectPath, 'node_modules'));
+        await runBazel(['clean']);
         await runBazel(['run', '@nodejs//:yarn'], runOffline, {
           env: {
             SASS_BINARY_SITE:
