@@ -104,7 +104,7 @@ export const ElasticsearchRuby: React.FC<{ cloudId?: string }> = ({ cloudId }) =
       <EuiSpacer size="s" />
       <EuiCodeBlock fontSize="m" isCopyable>
         {dedent`
-          gem 'elasticsearch', 'VERSION'
+          gem 'elasticsearch', '<ELASTICSEARCH_VERSION>'
         `}
       </EuiCodeBlock>
 

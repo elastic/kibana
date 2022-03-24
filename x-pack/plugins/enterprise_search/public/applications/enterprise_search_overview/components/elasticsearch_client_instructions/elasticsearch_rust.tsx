@@ -54,7 +54,7 @@ export const ElasticsearchRust: React.FC = () => {
       <EuiCodeBlock fontSize="m" isCopyable>
         {dedent`
           [dependencies]
-          elasticsearch = "8.0.0-alpha.1"
+          elasticsearch = "<ELASTICSEARCH_VERSION>"
         `}
       </EuiCodeBlock>
       <EuiSpacer size="s" />
