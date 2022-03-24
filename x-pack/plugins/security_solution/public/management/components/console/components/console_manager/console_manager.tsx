@@ -5,30 +5,13 @@
  * 2.0.
  */
 
-import React, {
-  memo,
-  PropsWithChildren,
-  ReactNode,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
-import { Immutable } from '../../../../../../common/endpoint/types';
+import React, { memo, PropsWithChildren, useCallback, useContext, useMemo, useState } from 'react';
 import { ConsolePopup } from './components/console_popup';
-
-interface ConsoleRegistrationInterface {
-  id: string;
-  title: ReactNode;
-  consoleProps: Record<string, unknown>; // FIXME:PT Use console props here once merged
-  onBeforeClose?: () => void;
-}
-
-interface RegisteredConsoleClient extends Pick<ConsoleRegistrationInterface, 'id' | 'title'> {
-  show(): void;
-  hide(): void;
-  terminate(): void;
-}
+import {
+  ConsoleManagerClient,
+  ConsoleRegistrationInterface,
+  RegisteredConsoleClient,
+} from './types';
 
 interface ManagedConsole {
   client: RegisteredConsoleClient;
@@ -36,21 +19,6 @@ interface ManagedConsole {
   console: JSX.Element; // actual console component
   isOpen: boolean;
   onBeforeClose?: ConsoleRegistrationInterface['onBeforeClose'];
-}
-
-interface ConsoleManagerClient {
-  /** Registers a new console */
-  register(console: ConsoleRegistrationInterface): Immutable<RegisteredConsoleClient>;
-  /** Opens console in a dialog */
-  show(id: string): void;
-  /** Hides the console (minimize) */
-  hide(id: string): void;
-  /** Removes the console from management and calls `onBeforeClose` if one was defined */
-  terminate(id: string): void;
-  /** Retrieve a running console */
-  getOne(id: string): Immutable<RegisteredConsoleClient> | undefined;
-  /** Get a list of running consoles */
-  getList(): Immutable<RegisteredConsoleClient[]>;
 }
 
 type RunningConsoleStorage = Record<string, ManagedConsole>;
@@ -64,97 +32,83 @@ export type ConsoleManagerProps = PropsWithChildren<{
 export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, children }) => {
   const [consoleStorage, setConsoleStorage] = useState<RunningConsoleStorage>(storage);
 
-  // NOTE: should try to keep the `useMemo()` array of dependencies empty so that it minimizes re-renders to
-  // components that use this client interface.
-  const consoleManagerClient = useMemo<ConsoleManagerClient>(() => {
-    const show: ConsoleManagerClient['show'] = (id) => {
-      setConsoleStorage((prevState) => {
-        if (!prevState[id]) {
-          throw new Error(`Unable to show Console with id ${id}. Not found.`);
-        }
+  const show = useCallback<ConsoleManagerClient['show']>((id) => {
+    setConsoleStorage((prevState) => {
+      if (!prevState[id]) {
+        throw new Error(`Unable to show Console with id ${id}. Not found.`);
+      }
 
-        const newState = { ...prevState };
+      const newState = { ...prevState };
 
-        // if any is visible, hide it
-        Object.entries(newState).forEach(([consoleId, managedConsole]) => {
-          if (managedConsole.isOpen) {
-            newState[consoleId] = {
-              ...managedConsole,
-              isOpen: false,
-            };
-          }
-        });
-
-        newState[id] = {
-          ...newState[id],
-          isOpen: true,
-        };
-
-        return newState;
-      });
-    };
-
-    const hide: ConsoleManagerClient['hide'] = (id) => {
-      setConsoleStorage((prevState) => {
-        if (!prevState[id]) {
-          throw new Error(`Unable to hide Console with id ${id}. Not found.`);
-        }
-
-        return {
-          ...prevState,
-          [id]: {
-            ...prevState[id],
+      // if any is visible, hide it
+      Object.entries(newState).forEach(([consoleId, managedConsole]) => {
+        if (managedConsole.isOpen) {
+          newState[consoleId] = {
+            ...managedConsole,
             isOpen: false,
-          },
-        };
-      });
-    };
-
-    const terminate: ConsoleManagerClient['terminate'] = (id) => {
-      setConsoleStorage((prevState) => {
-        if (!prevState[id]) {
-          throw new Error(`Unable to terminate console id ${id}. Not found`);
+          };
         }
-
-        const { onBeforeClose } = prevState[id];
-
-        if (onBeforeClose) {
-          onBeforeClose();
-        }
-
-        const newState = { ...prevState };
-        delete newState[id];
-
-        return newState;
-      });
-    };
-
-    const getOne: ConsoleManagerClient['getOne'] = (id) => {
-      let registeredConsoleClient: RegisteredConsoleClient | undefined;
-
-      setConsoleStorage((prevState) => {
-        if (prevState[id]) {
-          registeredConsoleClient = prevState[id].client;
-        }
-
-        return prevState;
       });
 
-      return registeredConsoleClient;
-    };
+      newState[id] = {
+        ...newState[id],
+        isOpen: true,
+      };
 
-    const getList: ConsoleManagerClient['getList'] = () => {
-      let list: RegisteredConsoleClient[] = [];
+      return newState;
+    });
+  }, []);
 
-      setConsoleStorage((prevState) => {
-        list = Object.values(prevState).map((managedConsole) => managedConsole.client);
-        return prevState;
-      });
+  const hide = useCallback<ConsoleManagerClient['hide']>((id) => {
+    setConsoleStorage((prevState) => {
+      if (!prevState[id]) {
+        throw new Error(`Unable to hide Console with id ${id}. Not found.`);
+      }
 
-      return list;
-    };
+      return {
+        ...prevState,
+        [id]: {
+          ...prevState[id],
+          isOpen: false,
+        },
+      };
+    });
+  }, []);
 
-    const register: ConsoleManagerClient['register'] = ({ id, title, ...otherRegisterProps }) => {
+  const terminate = useCallback<ConsoleManagerClient['terminate']>((id) => {
+    setConsoleStorage((prevState) => {
+      if (!prevState[id]) {
+        throw new Error(`Unable to terminate console id ${id}. Not found`);
+      }
+
+      const { onBeforeClose } = prevState[id];
+
+      if (onBeforeClose) {
+        onBeforeClose();
+      }
+
+      const newState = { ...prevState };
+      delete newState[id];
+
+      return newState;
+    });
+  }, []);
+
+  const getOne = useCallback<ConsoleManagerClient['getOne']>(
+    (id) => {
+      if (consoleStorage[id]) {
+        return consoleStorage[id].client;
+      }
+    },
+    [consoleStorage]
+  );
+
+  const getList = useCallback<ConsoleManagerClient['getList']>(() => {
+    return Object.values(consoleStorage).map((managedConsole) => managedConsole.client);
+  }, [consoleStorage]);
+
+  const register = useCallback<ConsoleManagerClient['register']>(
+    ({ id, title, ...otherRegisterProps }) => {
       const managedConsole: ManagedConsole = {
         ...otherRegisterProps,
         client: {
@@ -180,8 +134,11 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       });
 
       return managedConsole.client;
-    };
+    },
+    [hide, show, terminate]
+  );
 
+  const consoleManagerClient = useMemo<ConsoleManagerClient>(() => {
     return {
       register,
       show,
@@ -190,7 +147,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       getOne,
       getList,
     };
-  }, []); // << Try to keep this as an empty array for efficiency purposes
+  }, [getList, getOne, hide, register, show, terminate]);
 
   const visibleConsole = useMemo(() => {
     return Object.values(consoleStorage).find((managedConsole) => managedConsole.isOpen);
