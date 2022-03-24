@@ -69,6 +69,7 @@ describe('ServiceList', () => {
     describe('when small', () => {
       it('shows environment, transaction type and sparklines', () => {
         const renderedColumns = getServiceColumns({
+          comparisonDataLoading: false,
           showHealthStatusColumn: true,
           query,
           showTransactionTypeColumn: true,
@@ -96,6 +97,7 @@ describe('ServiceList', () => {
             color="green"
             comparisonSeriesColor="black"
             hideSeries={false}
+            isLoading={false}
             valueLabel="0 ms"
           />
         `);
@@ -105,6 +107,7 @@ describe('ServiceList', () => {
     describe('when Large', () => {
       it('hides environment, transaction type and sparklines', () => {
         const renderedColumns = getServiceColumns({
+          comparisonDataLoading: false,
           showHealthStatusColumn: true,
           query,
           showTransactionTypeColumn: true,
@@ -122,6 +125,7 @@ describe('ServiceList', () => {
             color="green"
             comparisonSeriesColor="black"
             hideSeries={true}
+            isLoading={false}
             valueLabel="0 ms"
           />
         `);
@@ -130,6 +134,7 @@ describe('ServiceList', () => {
       describe('when XL', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
+            comparisonDataLoading: false,
             showHealthStatusColumn: true,
             query,
             showTransactionTypeColumn: true,
@@ -156,6 +161,7 @@ describe('ServiceList', () => {
               color="green"
               comparisonSeriesColor="black"
               hideSeries={false}
+              isLoading={false}
               valueLabel="0 ms"
             />
           `);
@@ -165,6 +171,7 @@ describe('ServiceList', () => {
       describe('when XXL', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
+            comparisonDataLoading: false,
             showHealthStatusColumn: true,
             query,
             showTransactionTypeColumn: true,
@@ -192,6 +199,7 @@ describe('ServiceList', () => {
               color="green"
               comparisonSeriesColor="black"
               hideSeries={false}
+              isLoading={false}
               valueLabel="0 ms"
             />
           `);
@@ -203,6 +211,7 @@ describe('ServiceList', () => {
   describe('without ML data', () => {
     it('hides healthStatus column', () => {
       const renderedColumns = getServiceColumns({
+        comparisonDataLoading: false,
         showHealthStatusColumn: false,
         query,
         showTransactionTypeColumn: true,
@@ -219,6 +228,7 @@ describe('ServiceList', () => {
   describe('with ML data', () => {
     it('shows healthStatus column', () => {
       const renderedColumns = getServiceColumns({
+        comparisonDataLoading: false,
         showHealthStatusColumn: true,
         query,
         showTransactionTypeColumn: true,

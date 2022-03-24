@@ -8,29 +8,40 @@
 import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
+import { EventAnnotationServiceType } from 'src/plugins/event_annotation/public';
 import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type {
   ValidLayer,
-  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
   XYReferenceLineLayerConfig,
   YConfig,
+  XYDataLayerConfig,
 } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
-import { isDataLayer } from './visualization_helpers';
+import {
+  getLayerTypeOptions,
+  getDataLayers,
+  getReferenceLayers,
+  getAnnotationsLayers,
+} from './visualization_helpers';
+import { defaultAnnotationLabel } from './annotations/config_panel';
+import { getUniqueLabels } from './annotations/helpers';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI,
   layer: XYDataLayerConfig | XYReferenceLineLayerConfig
 ) => {
   const originalOrder = datasource
-    .getTableSpec()
-    .map(({ columnId }: { columnId: string }) => columnId)
-    .filter((columnId: string) => layer.accessors.includes(columnId));
+    ? datasource
+        .getTableSpec()
+        .map(({ columnId }: { columnId: string }) => columnId)
+        .filter((columnId: string) => layer.accessors.includes(columnId))
+    : layer.accessors;
   // When we add a column it could be empty, and therefore have no order
   return Array.from(new Set(originalOrder.concat(layer.accessors)));
 };
@@ -39,7 +50,8 @@ export const toExpression = (
   state: State,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {}
+  attributes: Partial<{ title: string; description: string }> = {},
+  eventAnnotationService: EventAnnotationServiceType
 ): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
@@ -49,38 +61,58 @@ export const toExpression = (
   state.layers.forEach((layer) => {
     metadata[layer.layerId] = {};
     const datasource = datasourceLayers[layer.layerId];
-    datasource.getTableSpec().forEach((column) => {
-      const operation = datasourceLayers[layer.layerId].getOperationForColumnId(column.columnId);
-      metadata[layer.layerId][column.columnId] = operation;
-    });
+    if (datasource) {
+      datasource.getTableSpec().forEach((column) => {
+        const operation = datasourceLayers[layer.layerId].getOperationForColumnId(column.columnId);
+        metadata[layer.layerId][column.columnId] = operation;
+      });
+    }
   });
 
-  return buildExpression(state, metadata, datasourceLayers, paletteService, attributes);
+  return buildExpression(
+    state,
+    metadata,
+    datasourceLayers,
+    paletteService,
+    attributes,
+    eventAnnotationService
+  );
+};
+
+const simplifiedLayerExpression = {
+  [layerTypes.DATA]: (layer: XYDataLayerConfig) => ({ ...layer, hide: true }),
+  [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => ({
+    ...layer,
+    hide: true,
+    yConfig: layer.yConfig?.map(({ lineWidth, ...rest }) => ({
+      ...rest,
+      lineWidth: 1,
+      icon: undefined,
+      textVisibility: false,
+    })),
+  }),
+  [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => ({
+    ...layer,
+    hide: true,
+    annotations: layer.annotations?.map(({ lineWidth, ...rest }) => ({
+      ...rest,
+      lineWidth: 1,
+      icon: undefined,
+      textVisibility: false,
+    })),
+  }),
 };
 
 export function toPreviewExpression(
   state: State,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  paletteService: PaletteRegistry
+  paletteService: PaletteRegistry,
+  eventAnnotationService: EventAnnotationServiceType
 ) {
   return toExpression(
     {
       ...state,
-      layers: state.layers.map((layer) =>
-        isDataLayer(layer)
-          ? { ...layer, hide: true }
-          : // cap the reference line to 1px
-            {
-              ...layer,
-              hide: true,
-              yConfig: layer.yConfig?.map(({ lineWidth, ...config }) => ({
-                ...config,
-                lineWidth: 1,
-                icon: undefined,
-                textVisibility: false,
-              })),
-            }
-      ),
+      layers: state.layers.map((layer) => getLayerTypeOptions(layer, simplifiedLayerExpression)),
       // hide legend for preview
       legend: {
         ...state.legend,
@@ -90,7 +122,8 @@ export function toPreviewExpression(
     },
     datasourceLayers,
     paletteService,
-    {}
+    {},
+    eventAnnotationService
   );
 }
 
@@ -125,23 +158,35 @@ export const buildExpression = (
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {}
+  attributes: Partial<{ title: string; description: string }> = {},
+  eventAnnotationService: EventAnnotationServiceType
 ): Ast | null => {
-  const validLayers = state.layers
+  const validDataLayers = getDataLayers(state.layers)
     .filter((layer): layer is ValidLayer => Boolean(layer.accessors.length))
-    .map((layer) => {
-      if (!datasourceLayers) {
-        return layer;
-      }
-      const sortedAccessors = getSortedAccessors(datasourceLayers[layer.layerId], layer);
+    .map((layer) => ({
+      ...layer,
+      accessors: getSortedAccessors(datasourceLayers[layer.layerId], layer),
+    }));
 
+  // sorting doesn't change anything so we don't sort reference layers (TODO: should we make it work?)
+  const validReferenceLayers = getReferenceLayers(state.layers).filter((layer) =>
+    Boolean(layer.accessors.length)
+  );
+
+  const uniqueLabels = getUniqueLabels(state.layers);
+  const validAnnotationsLayers = getAnnotationsLayers(state.layers)
+    .filter((layer) => Boolean(layer.annotations.length))
+    .map((layer) => {
       return {
         ...layer,
-        accessors: sortedAccessors,
+        annotations: layer.annotations.map((c) => ({
+          ...c,
+          label: uniqueLabels[c.id],
+        })),
       };
     });
 
-  if (!validLayers.length) {
+  if (!validDataLayers.length) {
     return null;
   }
 
@@ -309,20 +354,25 @@ export const buildExpression = (
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
           valuesInLegend: [state?.valuesInLegend || false],
-          layers: validLayers.map((layer) => {
-            if (isDataLayer(layer)) {
-              return dataLayerToExpression(
+          layers: [
+            ...validDataLayers.map((layer) =>
+              dataLayerToExpression(
                 layer,
                 datasourceLayers[layer.layerId],
                 metadata,
                 paletteService
-              );
-            }
-            return referenceLineLayerToExpression(
-              layer,
-              datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId]
-            );
-          }),
+              )
+            ),
+            ...validReferenceLayers.map((layer) =>
+              referenceLineLayerToExpression(
+                layer,
+                datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId]
+              )
+            ),
+            ...validAnnotationsLayers.map((layer) =>
+              annotationLayerToExpression(layer, eventAnnotationService)
+            ),
+          ],
         },
       },
     ],
@@ -349,6 +399,41 @@ const referenceLineLayerToExpression = (
           layerType: [layerTypes.REFERENCELINE],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
+        },
+      },
+    ],
+  };
+};
+
+const annotationLayerToExpression = (
+  layer: XYAnnotationLayerConfig,
+  eventAnnotationService: EventAnnotationServiceType
+): Ast => {
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'lens_xy_annotation_layer',
+        arguments: {
+          hide: [Boolean(layer.hide)],
+          layerId: [layer.layerId],
+          layerType: [layerTypes.ANNOTATIONS],
+          annotations: layer.annotations
+            ? layer.annotations.map(
+                (ann): Ast =>
+                  eventAnnotationService.toExpression({
+                    time: ann.key.timestamp,
+                    label: ann.label || defaultAnnotationLabel,
+                    textVisibility: ann.textVisibility,
+                    icon: ann.icon,
+                    lineStyle: ann.lineStyle,
+                    lineWidth: ann.lineWidth,
+                    color: ann.color,
+                    isHidden: Boolean(ann.isHidden),
+                  })
+              )
+            : [],
         },
       },
     ],
