@@ -16,6 +16,7 @@ import {
   createRangeSliderExtract,
   createRangeSliderInject,
 } from '../../../common/control_types/range_slider/range_slider_persistable_state';
+import { RangeSliderStrings } from './range_slider_strings';
 
 export class RangeSliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<RangeSliderEmbeddableInput>
@@ -49,8 +50,9 @@ export class RangeSliderEmbeddableFactory
 
   public isEditable = () => Promise.resolve(false);
 
-  public getDisplayName = () => 'Range slider';
+  public getDisplayName = () => RangeSliderStrings.getDisplayName();
   public getIconType = () => 'controlsHorizontal';
+  public getDescription = () => RangeSliderStrings.getDescription();
 
   public inject = createRangeSliderInject();
   public extract = createRangeSliderExtract();

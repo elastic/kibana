@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isEmpty } from 'lodash';
 import {
   compareFilters,
   buildRangeFilter,
@@ -106,11 +107,16 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
   private initialize = async () => {
     const initialValue = this.getInput().value;
-    if (initialValue) {
-      await this.fetchMinMax();
+    if (!initialValue) {
+      this.setInitializationFinished();
     }
-    this.setInitializationFinished();
-    this.setupSubscriptions();
+
+    this.fetchMinMax().then(async () => {
+      if (initialValue) {
+        this.setInitializationFinished();
+      }
+      this.setupSubscriptions();
+    });
   };
 
   private setupSubscriptions = () => {
@@ -123,7 +129,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         filters: newInput.filters,
         query: newInput.query,
       })),
-      distinctUntilChanged(diffDataFetchProps)
+      distinctUntilChanged(diffDataFetchProps),
+      skip(1)
     );
 
     // fetch available min/max when input changes
@@ -137,7 +144,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
           distinctUntilChanged((a, b) => isEqual(a.value, b.value)),
           skip(1) // skip the first input update because initial filters will be built by initialize.
         )
-        .subscribe(() => this.fetchMinMax())
+        .subscribe(this.buildFilter)
     );
   };
 
@@ -153,7 +160,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
           new Error(RangeSliderStrings.errors.getDataViewNotFoundError(dataViewId))
         );
       }
-      this.updateOutput({ dataViews: [this.dataView] });
     }
 
     if (!this.field || this.field.name !== fieldName) {
@@ -205,20 +211,24 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   };
 
   private fetchMinMax = async () => {
-    const { dataView, field } = await this.getCurrentDataViewAndField();
     this.updateComponentState({ loading: true });
-    this.updateOutput({ loading: true, dataViews: [dataView] });
+    this.updateOutput({ loading: true });
+    const { dataView, field } = await this.getCurrentDataViewAndField();
     const embeddableInput = this.getInput();
     const { ignoreParentSettings, fieldName, query, timeRange } = embeddableInput;
     let { filters = [] } = embeddableInput;
 
     if (!field) {
       this.updateComponentState({ loading: false });
-      this.updateOutput({ loading: false, filters: [] });
+      this.updateOutput({ loading: false });
       throw fieldMissingError(fieldName);
     }
 
-    if (timeRange) {
+    if (ignoreParentSettings?.ignoreFilters) {
+      filters = [];
+    }
+
+    if (!ignoreParentSettings?.ignoreTimerange && timeRange) {
       const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
       if (timeFilter) {
         filters = filters.concat(timeFilter);
@@ -232,8 +242,11 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const aggs = this.minMaxAgg(field);
     searchSource.setField('aggs', aggs);
 
-    searchSource.setField('filter', ignoreParentSettings?.ignoreFilters ? [] : filters);
-    searchSource.setField('query', ignoreParentSettings?.ignoreQuery ? undefined : query);
+    searchSource.setField('filter', filters);
+
+    if (!ignoreParentSettings?.ignoreQuery) {
+      searchSource.setField('query', query);
+    }
 
     const resp = await searchSource.fetch$().toPromise();
 
@@ -241,38 +254,42 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const max = get(resp, 'rawResponse.aggregations.maxAgg.value', '');
 
     this.updateComponentState({
-      min: min ?? '',
-      max: max ?? '',
-      loading: false,
+      min: `${min}` ?? '',
+      max: `${max}` ?? '',
     });
 
-    // public filter
-    const newFilters = await this.buildFilter();
-    this.updateOutput({ loading: false, filters: newFilters });
+    // build filter with new min/max
+    await this.buildFilter();
   };
 
   private buildFilter = async () => {
-    const { value: [selectedMin, selectedMax] = ['', ''] } = this.getInput();
+    const { value: [selectedMin, selectedMax] = ['', ''], ignoreParentSettings } = this.getInput();
 
-    if (
-      this.componentState.min === '' ||
-      this.componentState.max === '' ||
-      (selectedMin === '' && selectedMax === '')
-    ) {
-      return [];
-    }
-
+    const hasData = !isEmpty(this.componentState.min) && !isEmpty(this.componentState.max);
+    const hasLowerSelection = !isEmpty(selectedMin);
+    const hasUpperSelection = !isEmpty(selectedMax);
+    const hasEitherSelection = hasLowerSelection || hasUpperSelection;
+    const hasBothSelections = hasLowerSelection && hasUpperSelection;
+    const hasInvalidSelection =
+      !ignoreParentSettings?.ignoreValidations &&
+      hasBothSelections &&
+      parseFloat(selectedMin) > parseFloat(selectedMax);
+    const isLowerSelectionOutOfRange =
+      hasLowerSelection && parseFloat(selectedMin) > parseFloat(this.componentState.max);
+    const isUpperSelectionOutOfRange =
+      hasUpperSelection && parseFloat(selectedMax) < parseFloat(this.componentState.min);
+    const isSelectionOutOfRange =
+      (!ignoreParentSettings?.ignoreValidations && hasData && isLowerSelectionOutOfRange) ||
+      isUpperSelectionOutOfRange;
     const { dataView, field } = await this.getCurrentDataViewAndField();
 
-    if (!field) {
-      return [];
+    if (!hasData || !hasEitherSelection || hasInvalidSelection || isSelectionOutOfRange) {
+      this.updateComponentState({ loading: false });
+      this.updateOutput({ filters: [], dataViews: [dataView], loading: false });
+      return;
     }
 
     const params = {} as RangeFilterParams;
-
-    if (selectedMin && selectedMin && parseFloat(selectedMin) > parseFloat(selectedMax)) {
-      return [];
-    }
 
     if (selectedMin) {
       params.gte = selectedMin;
@@ -285,7 +302,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
     rangeFilter.meta.key = field?.name;
 
-    return [rangeFilter];
+    this.updateComponentState({ loading: false });
+    this.updateOutput({ filters: [rangeFilter], dataViews: [dataView], loading: false });
   };
 
   reload = () => {

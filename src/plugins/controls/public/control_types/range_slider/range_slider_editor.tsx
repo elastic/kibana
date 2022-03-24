@@ -72,7 +72,7 @@ export const RangeSliderEditor = ({
   const { dataView, fieldName } = state;
   return (
     <>
-      <EuiFormRow fullWidth label={RangeSliderStrings.editor.getDataViewTitle()}>
+      <EuiFormRow label={RangeSliderStrings.editor.getDataViewTitle()}>
         <DataViewPicker
           dataViews={state.dataViewListItems}
           selectedDataViewId={dataView?.id}
@@ -87,7 +87,7 @@ export const RangeSliderEditor = ({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow fullWidth label={RangeSliderStrings.editor.getFieldTitle()}>
+      <EuiFormRow label={RangeSliderStrings.editor.getFieldTitle()}>
         <FieldPicker
           filterPredicate={(field) => field.aggregatable && field.type === 'number'}
           selectedFieldName={fieldName}

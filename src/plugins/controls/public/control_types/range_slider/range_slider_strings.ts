@@ -9,6 +9,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const RangeSliderStrings = {
+  getDisplayName: () =>
+    i18n.translate('controls.rangeSlider.displayName', {
+      defaultMessage: 'Range slider',
+    }),
+  getDescription: () =>
+    i18n.translate('controls.rangeSlider.description', {
+      defaultMessage: 'Add a control for selecting a range of field values.',
+    }),
   editor: {
     getDataViewTitle: () =>
       i18n.translate('controls.rangeSlider.editor.dataViewTitle', {

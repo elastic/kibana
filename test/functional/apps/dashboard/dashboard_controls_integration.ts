@@ -29,13 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('Dashboard controls integration', () => {
-    const clearAllControls = async () => {
-      const controlIds = await dashboardControls.getAllControlIds();
-      for (const controlId of controlIds) {
-        await dashboardControls.removeExistingControl(controlId);
-      }
-    };
-
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -215,8 +208,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.editExistingControl(firstId);
 
-        await dashboardControls.optionsListEditorSetDataView('animals-*');
-        await dashboardControls.optionsListEditorSetfield('animal.keyword');
+        await dashboardControls.controlsEditorSetDataView('animals-*');
+        await dashboardControls.controlsEditorSetfield('animal.keyword');
         await dashboardControls.controlEditorSave();
 
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
@@ -236,7 +229,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await clearAllControls();
+        await dashboardControls.clearAllControls();
       });
     });
 
@@ -468,7 +461,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await filterBar.removeAllFilters();
-        await clearAllControls();
+        await dashboardControls.clearAllControls();
       });
     });
 

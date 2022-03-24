@@ -23,11 +23,18 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
     });
 
+    after(async () => {
+      await esArchiver.unload('test/functional/fixtures/es_archiver/empty_kibana');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
+    });
+
     describe('dashboard elements ciGroup10', function () {
       this.tags('ciGroup10');
 
       loadTestFile(require.resolve('./input_control_vis'));
       loadTestFile(require.resolve('./_markdown_vis'));
+      loadTestFile(require.resolve('./controls'));
     });
   });
 }
