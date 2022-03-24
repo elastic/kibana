@@ -18,14 +18,16 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
     defaultMessage: 'Blocklist',
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.blocklist.pageAboutInfo', {
-    defaultMessage: 'Add a blocklist to block applications or files from running on the endpoint.',
+    defaultMessage:
+      'The blocklist prevents selected applications from running on your hosts by extending the list of processes the Endpoint considers malicious.',
   }),
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageAddButtonTitle', {
     defaultMessage: 'Add blocklist entry',
   }),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.blocklist.showingTotal', {
-      defaultMessage: 'Showing {total} {total, plural, one {blocklist} other {blocklists}}',
+      defaultMessage:
+        'Showing {total} {total, plural, one {blocklist entry} other {blocklist entries}}',
       values: { total },
     }),
   cardActionEditLabel: i18n.translate('xpack.securitySolution.blocklist.cardActionEditLabel', {
