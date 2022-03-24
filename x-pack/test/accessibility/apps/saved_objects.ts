@@ -45,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.removeSampleDataSet('flights');
+
     });
 
     it('saved objects management page a11y validations', async () => {
@@ -86,6 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('share to space panel from actions meets a11y requirements ', async () => {
       await testSubjects.click('euiFlyoutCloseButton');
+      await this.find.byCssSelector('.euiContextMenuPanel');
       await testSubjects.click('euiCollapsedItemActionsButton');
       await testSubjects.click('savedObjectsTableAction-share_saved_objects_to_space');
       await retry.try(async () => {
@@ -101,6 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await (await find.byCssSelector('[title="Type"]')).click();
       await (await find.byCssSelector('[title="data view"]')).click();
       await browser.pressKeys(browser.keys.ESCAPE);
+      await this.find.byCssSelector('.euiContextMenuPanel');
       await retry.waitFor(
         'actions button visible',
         async () => await testSubjects.exists('euiCollapsedItemActionsButton')
@@ -114,16 +117,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('copy to space panel from actions menu meets a11y requirements ', async () => {
+      wait this.find.byCssSelector('.euiContextMenuPanel');
       await retry.waitFor(
         'actions button visible',
         async () => await testSubjects.exists('euiCollapsedItemActionsButton')
       );
       await testSubjects.click('euiCollapsedItemActionsButton');
       await PageObjects.common.sleep(1000);
+      await this.find.byCssSelector('.euiContextMenuPanel');
       await testSubjects.click('euiCollapsedItemActionsButton');
       await testSubjects.click('savedObjectsTableAction-copy_saved_objects_to_space');
       await a11y.testAppSnapshot();
     });
+
+
+
 
     // inspecting a different saved object than data views because the inspect screen is different
 
@@ -133,6 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await (await find.byCssSelector('[title="data view"]')).click();
       await (await find.byCssSelector('[title="config"]')).click();
       await browser.pressKeys(browser.keys.ESCAPE);
+      await this.find.byCssSelector('.euiContextMenuPanel');
       await testSubjects.click('euiCollapsedItemActionsButton');
       await testSubjects.click('savedObjectsTableAction-inspect');
       await retry.try(async () => {
