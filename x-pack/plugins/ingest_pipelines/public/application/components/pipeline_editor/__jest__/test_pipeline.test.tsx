@@ -244,7 +244,12 @@ describe('Test pipeline', () => {
           message: '[index_not_found_exception] no such index',
         };
 
-        httpRequestsMockHelpers.setFetchDocumentsResponse('foo', '1', undefined, error);
+        httpRequestsMockHelpers.setFetchDocumentsResponse(
+          nonExistentDoc.index,
+          nonExistentDoc.id,
+          undefined,
+          error
+        );
 
         // Open flyout
         actions.clickAddDocumentsButton();
