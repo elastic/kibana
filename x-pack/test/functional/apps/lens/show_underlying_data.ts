@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('discoverChart');
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
-        '( ( ip: "220.120.146.16" ) OR ( ip: "152.56.56.106" ) OR ( ip: "111.55.80.52" ) )'
+        '( ( ip: "86.252.46.140" ) OR ( ip: "155.34.86.215" ) OR ( ip: "133.198.170.210" ) )'
       );
       const filterPills = await filterBar.getFiltersLabel();
       expect(filterPills.length).to.be(1);
