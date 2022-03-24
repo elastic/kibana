@@ -23,7 +23,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ApplicationStart } from 'kibana/public';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../../kibana_react/public';
 
 interface Props {

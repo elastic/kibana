@@ -28,7 +28,6 @@ import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 
 import { createStateContainerReactHelpers } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import type { TimeRange } from '../../../../../../../../../../../src/plugins/data/public';
 import { LogStream } from '../../../../../../../../../infra/public';

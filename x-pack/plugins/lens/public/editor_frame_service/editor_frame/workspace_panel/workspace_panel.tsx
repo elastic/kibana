@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import type { CoreStart, ApplicationStart } from 'kibana/public';
 import type { DataPublicPluginStart, ExecutionContextSearch } from 'src/plugins/data/public';
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import type {
   ExpressionRendererEvent,

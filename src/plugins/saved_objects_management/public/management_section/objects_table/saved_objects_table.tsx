@@ -20,7 +20,6 @@ import {
   NotificationsStart,
   ApplicationStart,
 } from 'src/core/public';
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
 import { DataViewsContract } from '../../../../data_views/public';

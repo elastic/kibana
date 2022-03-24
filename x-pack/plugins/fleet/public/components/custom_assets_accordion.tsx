@@ -21,7 +21,6 @@ import {
 
 import { AssetTitleMap } from '../applications/integrations/sections/epm/constants';
 import { useStartServices } from '../hooks';
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 
 export interface CustomAssetsAccordionProps {

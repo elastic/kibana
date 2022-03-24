@@ -15,7 +15,6 @@ import { AppPluginStartDependencies } from './types';
 import { SearchExamplePage, ExampleLink } from './common/example_page';
 import { SearchExamplesApp } from './search/app';
 import { SearchSessionsExampleApp } from './search_sessions/app';
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../src/plugins/kibana_react/public';
 
 const LINKS: ExampleLink[] = [

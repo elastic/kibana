@@ -23,7 +23,6 @@ import { ApplicationStart } from 'kibana/public';
 import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
 import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 import { getUsageCollector } from '../../services';
