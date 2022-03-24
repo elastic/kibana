@@ -8,10 +8,14 @@
 import { CoreStart } from 'kibana/public';
 import { useQuery } from 'react-query';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { PackageInfo, epmRouteService } from '../../../../fleet/common';
+import {
+  epmRouteService,
+  type GetInfoResponse,
+  type DefaultPackagesInstallationError,
+} from '../../../../fleet/common';
 import { CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
 
-const CIS_KUBERNETES_INTEGRATION_VERSION = '0.0.1';
+export const CIS_KUBERNETES_INTEGRATION_VERSION = '0.0.1';
 
 /**
  * This hook will find our cis integration and return its PackageInfo
@@ -19,21 +23,10 @@ const CIS_KUBERNETES_INTEGRATION_VERSION = '0.0.1';
 export const useCisKubernetesIntegration = () => {
   const { http } = useKibana<CoreStart>().services;
 
-  const integrationQuery = useQuery(['integrations'], () =>
-    http.get<{ item: PackageInfo }>(
+  return useQuery<GetInfoResponse, DefaultPackagesInstallationError>(['integrations'], () =>
+    http.get<GetInfoResponse>(
       epmRouteService.getInfoPath(CIS_KUBERNETES_PACKAGE_NAME, CIS_KUBERNETES_INTEGRATION_VERSION),
-      {
-        query: { experimental: true },
-      }
+      { query: { experimental: true } }
     )
   );
-
-  if (integrationQuery.isError) throw new Error('Could not fetch integraions');
-
-  if (integrationQuery.isSuccess && !integrationQuery.data?.item)
-    throw new Error(
-      `name: ${CIS_KUBERNETES_PACKAGE_NAME}, version: ${CIS_KUBERNETES_INTEGRATION_VERSION}, was not found in integraions list`
-    );
-
-  return integrationQuery.data?.item;
 };

@@ -18,17 +18,21 @@ import type { CspNavigationItem } from '../common/navigation/types';
 import { CLOUD_SECURITY_POSTURE } from '../common/translations';
 import { CspLoadingState } from './csp_loading_state';
 import { LOADING, PACKAGE_NOT_INSTALLED_TEXT, DEFAULT_NO_DATA_TEXT } from './translations';
-import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
+import {
+  CIS_KUBERNETES_INTEGRATION_VERSION,
+  useCisKubernetesIntegration,
+} from '../common/api/use_cis_kubernetes_integration';
 import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
+import { CIS_KUBERNETES_PACKAGE_NAME } from '../../common/constants';
+import type { GetInfoResponse, DefaultPackagesInstallationError } from '../../../fleet/common';
 
-interface QueryError {
+type CommonError = Partial<{
   body: {
     error: string;
     message: string;
     statusCode: number;
   };
-  name: string;
-}
+}>;
 
 const activeItemStyle = { fontWeight: 700 };
 
@@ -68,7 +72,7 @@ export const DEFAULT_NO_DATA_CONFIG: KibanaPageTemplateProps['noDataConfig'] = {
   actions: {},
 };
 
-const getPackageNotInstalledConfig = (
+const getPackageNotInstalledNoDataConfig = (
   cisIntegrationLink: string
 ): KibanaPageTemplateProps['noDataConfig'] => ({
   pageTitle: PACKAGE_NOT_INSTALLED_TEXT.PAGE_TITLE,
@@ -87,7 +91,7 @@ const getPackageNotInstalledConfig = (
 
 const DefaultLoading = () => <CspLoadingState>{LOADING}</CspLoadingState>;
 
-const DefaultError = (error: QueryError) => (
+const DefaultError = (error: CommonError) => (
   <EuiEmptyPrompt
     color="danger"
     iconType="alert"
@@ -116,30 +120,31 @@ const DefaultError = (error: QueryError) => (
   />
 );
 
-export const CspPageTemplate: React.FC<
-  KibanaPageTemplateProps & {
-    loadingRender?: () => JSX.Element;
-    errorRender?: (error: QueryError) => JSX.Element;
-    query?: UseQueryResult;
-  }
-> = ({
+export const CspPageTemplate = <TData, TError = any>({
   query,
   children,
   loadingRender = DefaultLoading,
   errorRender = DefaultError,
   ...kibanaPageTemplateProps
+}: KibanaPageTemplateProps & {
+  loadingRender?: () => React.ReactNode;
+  errorRender?: (error: TError) => React.ReactNode;
+  query?: UseQueryResult<TData, TError>;
 }) => {
-  const cisKubernetesPackageInfo = useCisKubernetesIntegration();
+  const integrationQueryResult = useCisKubernetesIntegration();
+  const cisKubernetesPackageInfo = integrationQueryResult;
   const cisIntegrationLink = useCISIntegrationLink();
 
   const getNoDataConfig = (): KibanaPageTemplateProps['noDataConfig'] => {
-    // TODO: add 'installed_failed' configurations
-    if (cisKubernetesPackageInfo?.status === 'not_installed') {
-      return getPackageNotInstalledConfig(cisIntegrationLink);
+    if (
+      cisKubernetesPackageInfo?.isSuccess &&
+      cisKubernetesPackageInfo.data.item.status === 'not_installed'
+    ) {
+      return getPackageNotInstalledNoDataConfig(cisIntegrationLink);
     }
 
     // when query was successful, but data is undefined
-    if (query && query.isSuccess && !query.data) {
+    if (query?.isSuccess && !query?.data) {
       return kibanaPageTemplateProps.noDataConfig || DEFAULT_NO_DATA_CONFIG;
     }
 
@@ -150,13 +155,12 @@ export const CspPageTemplate: React.FC<
   const getTemplate = (): KibanaPageTemplateProps['template'] => {
     if (query?.isLoading || query?.isError) return 'centeredContent';
 
-    return 'default';
+    return kibanaPageTemplateProps.template || 'default';
   };
 
   const render = () => {
-    // TODO: pass query to render functions
-    if (query?.isLoading) return loadingRender();
-    if (query?.isError) return errorRender(query.error as QueryError);
+    if (query?.isLoading || integrationQueryResult.isLoading) return loadingRender();
+    if (query?.isError) return errorRender(query.error);
     if (query?.isSuccess) return children;
 
     return children;
@@ -169,7 +173,9 @@ export const CspPageTemplate: React.FC<
       template={getTemplate()}
       noDataConfig={getNoDataConfig()}
     >
-      <EuiErrorBoundary>{render()}</EuiErrorBoundary>
+      <EuiErrorBoundary>
+        {cisKubernetesPackageInfo?.data?.item.status === 'installed' && render()}
+      </EuiErrorBoundary>
     </KibanaPageTemplate>
   );
 };
