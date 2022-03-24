@@ -207,7 +207,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
   );
 
-  const _expression = useMemo(() => {
+  // if the expression is undefined, it means we hit an error that should be displayed to the user
+  const unappliedExpression = useMemo(() => {
     if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
       try {
         const ast = buildExpression({
@@ -260,20 +261,23 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   ]);
 
   useEffect(() => {
-    dispatchLens(setSaveable(Boolean(_expression)));
-  }, [_expression, dispatchLens]);
+    dispatchLens(setSaveable(Boolean(unappliedExpression)));
+  }, [unappliedExpression, dispatchLens]);
 
   useEffect(() => {
     if (!autoApplyEnabled) {
-      dispatchLens(setChangesApplied(_expression === localState.expressionToRender));
+      dispatchLens(setChangesApplied(unappliedExpression === localState.expressionToRender));
     }
   });
 
   useEffect(() => {
     if (shouldApplyExpression) {
-      setLocalState((s) => ({ ...s, expressionToRender: _expression }));
+      setLocalState((s) => ({
+        ...s,
+        expressionToRender: unappliedExpression,
+      }));
     }
-  }, [_expression, shouldApplyExpression]);
+  }, [unappliedExpression, shouldApplyExpression]);
 
   const expressionExists = Boolean(localState.expressionToRender);
   useEffect(() => {
@@ -338,12 +342,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, expressionExists, dispatchLens]);
 
-  const renderDragDropMessage = () => {
+  const renderDragDropPrompt = () => {
     return (
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
         textAlign="center"
-        data-test-subj="empty-workspace"
+        data-test-subj="workspace-drag-drop-prompt"
         size="s"
       >
         <DropIllustration
@@ -390,12 +394,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     );
   };
 
-  const renderApplyChangesMessage = () => {
+  const renderApplyChangesPrompt = () => {
     return (
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
         textAlign="center"
-        data-test-subj="empty-workspace"
+        data-test-subj="workspace-apply-changes-prompt"
         size="s"
       >
         <ApplyChangesIllustration
@@ -446,12 +450,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const dragDropContext = useContext(DragContext);
 
   const renderWorkspace = () => {
-    const renderWorkspaceContents = !changesApplied
-      ? renderApplyChangesMessage
-      : localState.expressionToRender === null
-      ? renderDragDropMessage
-      : renderVisualization;
-
     const customWorkspaceRenderer =
       activeDatasourceId &&
       datasourceMap[activeDatasourceId]?.getCustomWorkspaceRenderer &&
@@ -462,9 +460,19 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           )
         : undefined;
 
-    return customWorkspaceRenderer ? (
-      customWorkspaceRenderer()
-    ) : (
+    if (customWorkspaceRenderer) {
+      return customWorkspaceRenderer();
+    }
+
+    const hasSomethingToRender = localState.expressionToRender !== null;
+
+    const renderWorkspaceContents = hasSomethingToRender
+      ? renderVisualization
+      : !changesApplied && !hasSomethingToRender
+      ? renderApplyChangesPrompt
+      : renderDragDropPrompt;
+
+    return (
       <DragDrop
         className={classNames('lnsWorkspacePanel__dragDrop', {
           'lnsWorkspacePanel__dragDrop--fullscreen': isFullscreen,

@@ -276,7 +276,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async waitForEmptyWorkspace() {
       await retry.try(async () => {
-        await testSubjects.existOrFail(`empty-workspace`);
+        await testSubjects.existOrFail(`workspace-drag-drop-prompt`);
       });
     },
 

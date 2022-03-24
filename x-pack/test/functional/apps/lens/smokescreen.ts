@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
       await PageObjects.lens.removeLayer();
       await PageObjects.lens.removeLayer();
-      await testSubjects.existOrFail('empty-workspace');
+      await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
     it('should edit settings of xy line chart', async () => {
