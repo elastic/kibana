@@ -20,7 +20,7 @@ describe('NetworkRequestsTotal', () => {
     );
 
     expect(getByText('First 1000/1100 network requests')).toBeInTheDocument();
-    expect(getByLabelText('Info')).toBeInTheDocument();
+    expect(getByText('Info')).toBeInTheDocument();
   });
 
   it('message in case total is equal to fetched requests', () => {
