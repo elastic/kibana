@@ -265,6 +265,7 @@
 /x-pack/plugins/saved_objects_tagging/ @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test/saved_object_tagging/ @elastic/kibana-core
+/packages/elastic-analytics/ @elastic/kibana-core
 /packages/kbn-config-schema/ @elastic/kibana-core
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core
