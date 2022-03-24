@@ -29,41 +29,26 @@ const useCloudId = (): string | undefined => {
 export const ElasticsearchClientInstructions: React.FC<{ language: string }> = ({ language }) => {
   const cloudId = useCloudId();
 
-  if (language === 'dotnet') {
-    return <ElasticsearchDotnet />;
+  switch (language) {
+    case 'dotnet':
+      return <ElasticsearchDotnet />;
+    case 'go':
+      return <ElasticsearchGo cloudId={cloudId} />;
+    case 'java':
+      return <ElasticsearchJava />;
+    case 'javascript':
+      return <ElasticsearchJavascript cloudId={cloudId} />;
+    case 'perl':
+      return <ElasticsearchPerl />;
+    case 'php':
+      return <ElasticsearchPhp cloudId={cloudId} />;
+    case 'python':
+      return <ElasticsearchPython cloudId={cloudId} />;
+    case 'ruby':
+      return <ElasticsearchRuby cloudId={cloudId} />;
+    case 'rust':
+      return <ElasticsearchRust />;
+    default:
+      return null;
   }
-
-  if (language === 'go') {
-    return <ElasticsearchGo cloudId={cloudId} />;
-  }
-
-  if (language === 'java') {
-    return <ElasticsearchJava />;
-  }
-
-  if (language === 'javascript') {
-    return <ElasticsearchJavascript cloudId={cloudId} />;
-  }
-
-  if (language === 'perl') {
-    return <ElasticsearchPerl />;
-  }
-
-  if (language === 'php') {
-    return <ElasticsearchPhp />;
-  }
-
-  if (language === 'python') {
-    return <ElasticsearchPython cloudId={cloudId} />;
-  }
-
-  if (language === 'ruby') {
-    return <ElasticsearchRuby cloudId={cloudId} />;
-  }
-
-  if (language === 'rust') {
-    return <ElasticsearchRust />;
-  }
-
-  return null;
 };
