@@ -26,7 +26,7 @@ describe('ProcessTreeAlerts component', () => {
     isSelected: false,
     onClick: jest.fn(),
     selectAlert: jest.fn(),
-    handleOnAlertDetailsClosed: jest.fn(),
+    onShowAlertDetails: jest.fn(),
   };
 
   beforeEach(() => {
@@ -61,16 +61,16 @@ describe('ProcessTreeAlerts component', () => {
       expect(selectAlert).toHaveBeenCalledTimes(1);
     });
 
-    it('should execute loadAlertDetails callback when clicking on expand button', async () => {
-      const loadAlertDetails = jest.fn();
+    it('should execute onShowAlertDetails callback when clicking on expand button', async () => {
+      const onShowAlertDetails = jest.fn();
       renderResult = mockedContext.render(
-        <ProcessTreeAlert {...props} loadAlertDetails={loadAlertDetails} />
+        <ProcessTreeAlert {...props} onShowAlertDetails={onShowAlertDetails} />
       );
 
       const expandButton = renderResult.queryByTestId(EXPAND_BUTTON_TEST_ID);
       expect(expandButton).toBeTruthy();
       expandButton?.click();
-      expect(loadAlertDetails).toHaveBeenCalledTimes(1);
+      expect(onShowAlertDetails).toHaveBeenCalledTimes(1);
     });
   });
 });

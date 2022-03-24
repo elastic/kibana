@@ -16,6 +16,7 @@ import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { SharePluginSetup, SharePluginStart } from '../../../../../src/plugins/share/public';
+import { DiscoverStart } from '../../../../../src/plugins/discover/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
 
 import {
@@ -61,6 +62,7 @@ export interface ClientPluginsSetup {
 export interface ClientPluginsStart {
   fleet?: FleetStart;
   data: DataPublicPluginStart;
+  discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
   observability: ObservabilityPublicStart;
@@ -213,7 +215,14 @@ export class UptimePlugin
         const [coreStart, corePlugins] = await core.getStartServices();
 
         const { renderApp } = await import('./render_app');
-        return renderApp(coreStart, plugins, corePlugins, params, config);
+        return renderApp(
+          coreStart,
+          plugins,
+          corePlugins,
+          params,
+          config,
+          this.initContext.env.mode.dev
+        );
       },
     });
   }
