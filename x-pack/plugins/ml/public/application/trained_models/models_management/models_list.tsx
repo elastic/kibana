@@ -473,10 +473,10 @@ export const ModelsList: FC<Props> = ({
           },
         },
         {
-          name: i18n.translate('xpack.ml.inference.modelsList.analyticsMapActionLabel', {
+          name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
             defaultMessage: 'Test model',
           }),
-          description: i18n.translate('xpack.ml.inference.modelsList.analyticsMapActionLabel', {
+          description: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
             defaultMessage: 'Test model',
           }),
           icon: 'inputOutput',
