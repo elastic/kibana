@@ -63,25 +63,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
     pathname: 'settings',
   });
 
-  const metricsExploratoryViewLink = createExploratoryViewUrl(
-    {
-      reportType: 'kpi-over-time',
-      allSeries: [
-        {
-          dataType: 'infra_metrics',
-          seriesType: 'area',
-          time: { to: 'now', from: 'now-15m' },
-          reportDefinitions: {
-            'agent.hostname': ['ALL_VALUES'],
-          },
-          selectedMetricField: 'system.cpu.total.norm.pct',
-          name: 'Metrics-series',
-        },
-      ],
-    },
-    kibana.services.http?.basePath.get()
-  );
-
   return (
     <EuiErrorBoundary>
       <Source.Provider sourceId="default">
@@ -106,24 +87,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                   {setHeaderActionMenu && theme$ && (
                     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
                       <EuiHeaderLinks gutterSize="xs">
-                        <EuiToolTip position="top" content={<p>{EXPLORE_MESSAGE}</p>}>
-                          <RedirectAppLinks application={kibana.services.application!}>
-                            <EuiHeaderLink
-                              aria-label={i18n.translate(
-                                'xpack.infra.metrics.pageHeader.analyzeData.label',
-                                {
-                                  defaultMessage:
-                                    'Navigate to the "Explore Data" view to visualize infra metrics data',
-                                }
-                              )}
-                              href={metricsExploratoryViewLink}
-                              color="text"
-                              iconType="visBarVerticalStacked"
-                            >
-                              {EXPLORE_DATA}
-                            </EuiHeaderLink>
-                          </RedirectAppLinks>
-                        </EuiToolTip>
                         <EuiHeaderLink color={'text'} {...settingsLinkProps}>
                           {settingsTabTitle}
                         </EuiHeaderLink>
@@ -195,12 +158,3 @@ const PageContent = (props: {
     </SavedViewProvider>
   );
 };
-
-const EXPLORE_DATA = i18n.translate('xpack.infra.metrics.exploreDataButtonLabel', {
-  defaultMessage: 'Explore data',
-});
-
-const EXPLORE_MESSAGE = i18n.translate('xpack.infra.metrics.exploreDataButtonLabel.message', {
-  defaultMessage:
-    'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
-});
