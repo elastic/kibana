@@ -23,6 +23,7 @@ describe('Documents', () => {
   const values = {
     isMetaEngine: false,
     myRole: { canManageEngineDocuments: true },
+    engine: { elasticsearchIndexName: 'my-elasticsearch-index' },
   };
 
   beforeEach(() => {
