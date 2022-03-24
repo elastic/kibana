@@ -13978,7 +13978,6 @@
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.phaseDefinitionTitle": "フェーズ検知",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton": "フェーズ検知を表示",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionDescriptionTitle": "フェーズ検知",
-    "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton": "スタックトレース",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage": "インデックスライフサイクルエラー",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle": "インデックスライフサイクル管理",
     "xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.addPolicyButtonText": "ポリシーを追加",

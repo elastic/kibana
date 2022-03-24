@@ -14001,7 +14001,6 @@
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.phaseDefinitionTitle": "阶段定义",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton": "显示阶段定义",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionDescriptionTitle": "阶段定义",
-    "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton": "堆栈跟踪",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage": "索引生命周期错误",
     "xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle": "索引生命周期管理",
     "xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.addPolicyButtonText": "添加策略",
