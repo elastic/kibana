@@ -7,7 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
+import {
+  Datatable,
+  ExpressionFunctionDefinition,
+  PointSeriesColumnNames,
+} from '../../../../expressions/common';
 import { ExtendedDataLayerArgs, ExtendedDataLayerConfigResult } from '../types';
 import {
   EXTENDED_DATA_LAYER,
@@ -17,6 +21,7 @@ import {
   YScaleTypes,
   Y_CONFIG,
 } from '../constants';
+import { getAccessors } from './data_layer';
 
 export const extendedDataLayerFunction: ExpressionFunctionDefinition<
   typeof EXTENDED_DATA_LAYER,
@@ -114,11 +119,13 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
     },
   },
   fn(input, args) {
+    const table = args.table ?? input;
     return {
       type: EXTENDED_DATA_LAYER,
       ...args,
+      ...getAccessors(args, table),
       layerType: LayerTypes.DATA,
-      table: args.table ?? input,
+      table,
     };
   },
 };

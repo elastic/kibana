@@ -720,7 +720,7 @@ export function XYChart({
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: isStacked ? [xAccessor as string] : [],
-            id: `${splitAccessor}-${accessor}`,
+            id: splitAccessor ? `${splitAccessor}-${accessor}` : accessor,
             xAccessor: xAccessor || 'unifiedX',
             yAccessors: [accessor],
             data: rows,
@@ -813,7 +813,7 @@ export function XYChart({
                     ) {
                       return splitFormatter.convert(key);
                     }
-                    return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? '';
+                    return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? null;
                   })
                   .join(' - ');
                 return result;
@@ -830,7 +830,7 @@ export function XYChart({
               // This handles both split and single-y cases:
               // * If split series without formatting, show the value literally
               // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
-              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? '';
+              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? null;
             },
           };
 

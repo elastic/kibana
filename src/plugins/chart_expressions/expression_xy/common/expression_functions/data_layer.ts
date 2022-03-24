@@ -7,7 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
+import {
+  Datatable,
+  ExpressionFunctionDefinition,
+  PointSeriesColumnNames,
+} from '../../../../expressions/common';
 import { DataLayerArgs, DataLayerConfigResult } from '../types';
 import {
   DATA_LAYER,
@@ -17,6 +21,20 @@ import {
   YScaleTypes,
   Y_CONFIG,
 } from '../constants';
+
+export function getAccessors(args: DataLayerArgs, table: Datatable) {
+  let splitAccessor = args.splitAccessor;
+  let xAccessor = args.xAccessor;
+  let accessors = args.accessors;
+  if (!splitAccessor && !xAccessor && !(accessors && accessors.length)) {
+    const y = table.columns.find((column) => column.id === PointSeriesColumnNames.Y)?.id;
+    xAccessor = table.columns.find((column) => column.id === PointSeriesColumnNames.X)?.id;
+    splitAccessor = table.columns.find((column) => column.id === PointSeriesColumnNames.COLOR)?.id;
+    accessors = y ? [y] : [];
+  }
+
+  return { splitAccessor, xAccessor, accessors };
+}
 
 export const dataLayerFunction: ExpressionFunctionDefinition<
   typeof DATA_LAYER,
@@ -111,6 +129,7 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
     return {
       type: DATA_LAYER,
       ...args,
+      ...getAccessors(args, table),
       layerType: LayerTypes.DATA,
       table,
     };
