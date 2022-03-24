@@ -88,10 +88,17 @@ export class ControlGroupContainer extends Container<
    * @return If `buttonType == 'toolbar'`, returns `EuiContextMenuPanel` with input control types as items.
    *         Otherwise, if `buttonType == 'callout'` returns `EuiButton` with popover containing input control types.
    */
-  public getCreateControlButton = (
-    buttonType: CreateControlButtonTypes,
-    closePopover?: () => void
-  ) => {
+  public getCreateControlButton = ({
+    buttonType,
+    closePopover,
+    getRelevantDataViewId,
+    setLastUsedDataViewId,
+  }: {
+    setLastUsedDataViewId?: (newDataViewId: string) => void;
+    getRelevantDataViewId?: () => string | undefined;
+    buttonType: CreateControlButtonTypes;
+    closePopover?: () => void;
+  }) => {
     return (
       <CreateControlButton
         buttonType={buttonType}
@@ -99,6 +106,8 @@ export class ControlGroupContainer extends Container<
         updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
         addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
         closePopover={closePopover}
+        getRelevantDataViewId={getRelevantDataViewId}
+        setLastUsedDataViewId={setLastUsedDataViewId}
       />
     );
   };
@@ -126,7 +135,13 @@ export class ControlGroupContainer extends Container<
    * Returns the toolbar button that is used for creating controls and managing control settings
    * @return `SolutionToolbarPopover` button for input controls
    */
-  public getToolbarButtons = () => {
+  public getToolbarButtons = ({
+    getRelevantDataViewId,
+    setLastUsedDataViewId,
+  }: {
+    getRelevantDataViewId: () => string | undefined;
+    setLastUsedDataViewId: (newDataViewId: string) => void;
+  }) => {
     return (
       <SolutionToolbarPopover
         ownFocus
@@ -139,7 +154,12 @@ export class ControlGroupContainer extends Container<
         {({ closePopover }: { closePopover: () => void }) => (
           <EuiContextMenuPanel
             items={[
-              this.getCreateControlButton('toolbar', closePopover),
+              this.getCreateControlButton({
+                closePopover,
+                getRelevantDataViewId,
+                setLastUsedDataViewId,
+                buttonType: 'toolbar',
+              }),
               this.getEditControlGroupButton(closePopover),
             ]}
           />

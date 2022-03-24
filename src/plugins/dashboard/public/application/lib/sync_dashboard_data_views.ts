@@ -57,6 +57,9 @@ export const syncDashboardDataViews = ({
       ) {
         return;
       }
+      if (panelDataViews.length > 0 && panelDataViews[0].id) {
+        dashboardContainer.setRelevantDataViewId(panelDataViews[0].id);
+      }
       return panelDataViews;
     }),
     distinctUntilChanged((a, b) =>
