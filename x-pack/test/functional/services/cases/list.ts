@@ -89,9 +89,18 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
     },
 
     async filterByStatus(status: CaseStatuses) {
-      await common.clickAndValidate('case-status-filter', `status-badge-${status}`);
+      await common.clickAndValidate('case-status-filter', `case-status-filter-${status}`);
 
-      await testSubjects.click(`status-badge-${status}`);
+      await testSubjects.click(`case-status-filter-${status}`);
+    },
+
+    async filterByReporter(reporter: string) {
+      await common.clickAndValidate(
+        'options-filter-popover-button-Reporter',
+        `options-filter-popover-item-${reporter}`
+      );
+
+      await testSubjects.click(`options-filter-popover-item-${reporter}`);
     },
 
     async refreshTable() {
