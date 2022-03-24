@@ -64,6 +64,7 @@ async function getHasTransactions({
       events: [ProcessorEvent.transaction],
     },
     body: {
+      size: 0,
       query: {
         bool: {
           filter: [

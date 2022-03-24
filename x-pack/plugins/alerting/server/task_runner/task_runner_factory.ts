@@ -32,6 +32,7 @@ import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
 import { RulesClient } from '../rules_client';
 import { NormalizedRuleType } from '../rule_type_registry';
+import { InMemoryMetrics } from '../monitoring';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
 
 export interface TaskRunnerContext {
@@ -86,7 +87,8 @@ export class TaskRunnerFactory {
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    { taskInstance }: RunContext
+    { taskInstance }: RunContext,
+    inMemoryMetrics: InMemoryMetrics
   ) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
@@ -100,6 +102,6 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(ruleType, taskInstance, this.taskRunnerContext!);
+    >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
   }
 }

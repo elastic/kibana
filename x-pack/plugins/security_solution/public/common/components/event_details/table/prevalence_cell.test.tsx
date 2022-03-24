@@ -15,6 +15,7 @@ import { EventFieldsData } from '../types';
 import { TimelineId } from '../../../../../common/types';
 import { AlertSummaryRow } from '../helpers';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
+import { getEmptyValue } from '../../../components/empty_value';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../../containers/alerts/use_alert_prevalence', () => ({
@@ -75,10 +76,10 @@ describe('PrevalenceCellRenderer', () => {
   });
 
   describe('When an error was returned', () => {
-    test('it should return null', async () => {
+    test('it should return empty value placeholder', async () => {
       mockUseAlertPrevalence.mockImplementation(() => ({
         loading: false,
-        count: 123,
+        count: undefined,
         error: true,
       }));
       const { container } = render(
@@ -88,6 +89,7 @@ describe('PrevalenceCellRenderer', () => {
       );
       expect(container.getElementsByClassName('euiLoadingSpinner')).toHaveLength(0);
       expect(screen.queryByText('123')).toBeNull();
+      expect(screen.queryByText(getEmptyValue())).toBeTruthy();
     });
   });
 

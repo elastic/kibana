@@ -2587,7 +2587,7 @@ describe('create()', () => {
 
     await rulesClient.create({ data });
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
-      `Rule schedule interval (1s) is less than the minimum value (1m). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+      `Rule schedule interval (1s) for "123" rule type with ID "1" is less than the minimum value (1m). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
     );
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
     expect(taskManager.schedule).toHaveBeenCalled();
