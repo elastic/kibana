@@ -13,7 +13,7 @@ import type {
   YConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
-import type { AccessorConfig, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
+import type { DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
 import type { XYState, XYDataLayerConfig, XYReferenceLineLayerConfig } from './types';
@@ -26,6 +26,7 @@ import {
 } from './visualization_helpers';
 import { generateId } from '../id_generator';
 import { LensIconChartBarReferenceLine } from '../assets/chart_bar_reference_line';
+import { defaultReferenceLineColor } from './color_assignment';
 
 export interface ReferenceLineBase {
   label: 'x' | 'yRight' | 'yLeft';
@@ -363,18 +364,29 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   };
 };
 
+const getSingleColorConfig = (id: string, color = defaultReferenceLineColor) => ({
+  columnId: id,
+  triggerIcon: 'color' as const,
+  color,
+});
+
+export const getReferenceLineAccessorColorConfig = (layer: XYReferenceLineLayerConfig) => {
+  return layer.accessors.map((accessor) => {
+    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+    return getSingleColorConfig(accessor, currentYConfig?.color);
+  });
+};
+
 export const getReferenceConfiguration = ({
   state,
   frame,
   layer,
   sortedAccessors,
-  mappedAccessors,
 }: {
   state: XYState;
   frame: FramePublicAPI;
   layer: XYReferenceLineLayerConfig;
   sortedAccessors: string[];
-  mappedAccessors: AccessorConfig[];
 }) => {
   const idToIndex = sortedAccessors.reduce<Record<string, number>>((memo, id, index) => {
     memo[id] = index;
@@ -423,11 +435,7 @@ export const getReferenceConfiguration = ({
     groups: groupsToShow.map(({ config = [], id, label, dataTestSubj, valid }) => ({
       groupId: id,
       groupLabel: getAxisName(label, { isHorizontal }),
-      accessors: config.map(({ forAccessor, color }) => ({
-        columnId: forAccessor,
-        color: color || mappedAccessors.find(({ columnId }) => columnId === forAccessor)?.color,
-        triggerIcon: 'color' as const,
-      })),
+      accessors: config.map(({ forAccessor, color }) => getSingleColorConfig(forAccessor, color)),
       filterOperations: isNumericMetric,
       supportsMoreColumns: true,
       required: false,

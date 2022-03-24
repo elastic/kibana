@@ -45,6 +45,20 @@ import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import type { DataLayerConfigResult, SeriesType, XYChartProps } from '../../common';
 import { isHorizontalChart, getSeriesColor } from '../helpers';
+import { EventAnnotationServiceType } from '../../../../../src/plugins/event_annotation/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
+import type { LensMultiTable, FormatFactory } from '../../common';
+import type {
+  DataLayerArgs,
+  SeriesType,
+  XYChartProps,
+  XYLayerArgs,
+} from '../../common/expressions';
+import { visualizationTypes } from './types';
+import { VisualizationContainer } from '../visualization_container';
+import { isHorizontalChart, getSeriesColor } from './state_helpers';
+import { search } from '../../../../../src/plugins/data/public';
 import {
   ChartsPluginSetup,
   ChartsPluginStart,
@@ -56,6 +70,8 @@ import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../plugins/charts/common
 import {
   getFilteredLayers,
   getReferenceLayers,
+  getDataLayersArgs,
+  getAnnotationsLayersArgs,
   isDataLayer,
   getFitOptions,
   getAxesConfiguration,
@@ -66,13 +82,11 @@ import {
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
-import {
-  computeChartMargins,
-  getReferenceLineRequiredPaddings,
-  ReferenceLineAnnotations,
-} from './reference_lines';
+import { ReferenceLineAnnotations } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { XYLayerConfigResult } from '../../common/types';
+import { computeChartMargins, getLinesCausedPaddings } from './annotations_helpers';
+import { Annotations, getAnnotationsGroupedByInterval } from './annotations/expression';
 
 import './xy_chart.scss';
 
@@ -100,6 +114,7 @@ export type XYChartRenderProps = XYChartProps & {
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
+  eventAnnotationService: EventAnnotationServiceType;
 };
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
@@ -177,9 +192,9 @@ export function XYChart({
   });
 
   if (filteredLayers.length === 0) {
-    const dataLayers: DataLayerConfigResult[] = layers.filter(isDataLayer);
-    const icon: IconType =
-      dataLayers.length > 0 ? getIconForSeriesType(dataLayers[0].seriesType) : 'bar';
+    const icon: IconType = getIconForSeriesType(
+      getDataLayersArgs(layers)?.[0]?.seriesType || 'bar'
+    );
     return <EmptyPlaceholder icon={icon} />;
   }
 
@@ -267,7 +282,23 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-  const referenceLinePaddings = getReferenceLineRequiredPaddings(referenceLineLayers, yAxesMap);
+  const annotationsLayers = getAnnotationsLayersArgs(layers);
+  const firstTable = data.tables[filteredLayers[0].layerId];
+
+  const xColumnId = firstTable.columns.find((col) => col.id === filteredLayers[0].xAccessor)?.id;
+
+  const groupedAnnotations = getAnnotationsGroupedByInterval(
+    annotationsLayers,
+    minInterval,
+    xColumnId ? firstTable.rows[0]?.[xColumnId] : undefined,
+    xAxisFormatter
+  );
+  const visualConfigs = [
+    ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
+    ...groupedAnnotations,
+  ].filter(Boolean);
+
+  const linesPaddings = getLinesCausedPaddings(visualConfigs, yAxesMap);
 
   const getYAxesStyle = (groupId: 'left' | 'right') => {
     const tickVisible =
@@ -283,9 +314,9 @@ export function XYChart({
             ? args.labelsOrientation?.yRight || 0
             : args.labelsOrientation?.yLeft || 0,
         padding:
-          referenceLinePaddings[groupId] != null
+          linesPaddings[groupId] != null
             ? {
-                inner: referenceLinePaddings[groupId],
+                inner: linesPaddings[groupId],
               }
             : undefined,
       },
@@ -296,9 +327,9 @@ export function XYChart({
             : axisTitlesVisibilitySettings?.yLeft,
         // if labels are not visible add the padding to the title
         padding:
-          !tickVisible && referenceLinePaddings[groupId] != null
+          !tickVisible && linesPaddings[groupId] != null
             ? {
-                inner: referenceLinePaddings[groupId],
+                inner: linesPaddings[groupId],
               }
             : undefined,
       },
@@ -376,7 +407,7 @@ export function XYChart({
   const valueLabelsStyling =
     shouldShowValueLabels && valueLabels !== 'hide' && getValueLabelsStyling(shouldRotate);
 
-  const colorAssignments = getColorAssignments(args.layers, data, formatFactory);
+  const colorAssignments = getColorAssignments(getDataLayersArgs(args.layers), data, formatFactory);
 
   const clickHandler: ElementClickListener = ([[geometry, series]]) => {
     // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
@@ -509,16 +540,13 @@ export function XYChart({
         tickLabel: {
           visible: tickLabelsVisibilitySettings?.x,
           rotation: labelsOrientation?.x,
-          padding:
-            referenceLinePaddings.bottom != null
-              ? { inner: referenceLinePaddings.bottom }
-              : undefined,
+          padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
         },
         axisTitle: {
           visible: axisTitlesVisibilitySettings.x,
           padding:
-            !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
-              ? { inner: referenceLinePaddings.bottom }
+            !tickLabelsVisibilitySettings?.x && linesPaddings.bottom != null
+              ? { inner: linesPaddings.bottom }
               : undefined,
         },
       };
@@ -551,7 +579,7 @@ export function XYChart({
           chartMargins: {
             ...chartTheme.chartPaddings,
             ...computeChartMargins(
-              referenceLinePaddings,
+              linesPaddings,
               tickLabelsVisibilitySettings,
               axisTitlesVisibilitySettings,
               yAxesMap,
@@ -921,11 +949,39 @@ export function XYChart({
             right: Boolean(yAxesMap.right),
           }}
           isHorizontal={shouldRotate}
-          paddingMap={referenceLinePaddings}
+          paddingMap={linesPaddings}
+        />
+      ) : null}
+      {groupedAnnotations.length ? (
+        <Annotations
+          hide={annotationsLayers?.[0].hide}
+          groupedAnnotations={groupedAnnotations}
+          formatter={xAxisFormatter}
+          isHorizontal={shouldRotate}
+          paddingMap={linesPaddings}
+          isBarChart={filteredBarLayers.length > 0}
+          minInterval={minInterval}
         />
       ) : null}
     </Chart>
   );
+}
+
+function getFilteredLayers(layers: XYLayerArgs[], data: LensMultiTable) {
+  return getDataLayersArgs(layers).filter((layer) => {
+    const { layerId, xAccessor, accessors, splitAccessor } = layer;
+    return !(
+      !accessors.length ||
+      !data.tables[layerId] ||
+      data.tables[layerId].rows.length === 0 ||
+      (xAccessor &&
+        data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
+      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
+      (!xAccessor &&
+        splitAccessor &&
+        data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
+    );
+  });
 }
 
 function assertNever(x: never): never {

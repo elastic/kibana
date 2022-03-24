@@ -41,8 +41,8 @@ export const LineStyleSettings = ({
           defaultMessage: 'Line',
         })}
       >
-        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-          <EuiFlexItem grow={true}>
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem>
             <LineThicknessSlider
               value={currentConfig?.lineWidth || 1}
               onChange={(value) => {
@@ -50,9 +50,8 @@ export const LineStyleSettings = ({
               }}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={true}>
+          <EuiFlexItem grow={false}>
             <EuiButtonGroup
-              isFullWidth
               legend={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
                 defaultMessage: 'Line',
               })}

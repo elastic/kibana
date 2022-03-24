@@ -72,6 +72,7 @@ export const ReferenceLinePanel = (
 
   return (
     <>
+      {' '}
       <MarkerDecorationSettings
         isHorizontal={isHorizontal}
         setConfig={setConfig}

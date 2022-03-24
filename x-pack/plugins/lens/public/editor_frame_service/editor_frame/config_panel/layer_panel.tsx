@@ -81,10 +81,10 @@ export function LayerPanel(
     updateDatasourceAsync,
     visualizationState,
   } = props;
-  const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
-  const dateRange = useLensSelector(selectResolvedDateRange);
+
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
+  const dateRange = useLensSelector(selectResolvedDateRange);
 
   useEffect(() => {
     setActiveDimension(initialActiveDimensionState);
@@ -104,8 +104,10 @@ export function LayerPanel(
     activeData: props.framePublicAPI.activeData,
   };
 
-  const datasourceId = datasourcePublicAPI.datasourceId;
-  const layerDatasourceState = datasourceStates[datasourceId].state;
+  const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
+  const datasourceId = datasourcePublicAPI?.datasourceId;
+  const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
+  const layerDatasource = props.datasourceMap[datasourceId];
 
   const layerDatasourceDropProps = useMemo(
     () => ({
@@ -118,12 +120,9 @@ export function LayerPanel(
     [layerId, layerDatasourceState, datasourceId, updateDatasource]
   );
 
-  const layerDatasource = props.datasourceMap[datasourceId];
-
   const layerDatasourceConfigProps = {
     ...layerDatasourceDropProps,
     frame: props.framePublicAPI,
-    activeData: props.framePublicAPI.activeData,
     dateRange,
   };
 
@@ -138,10 +137,13 @@ export function LayerPanel(
     ]
   );
 
+  const columnLabelMap =
+    !layerDatasource && activeVisualization.getUniqueLabels
+      ? activeVisualization.getUniqueLabels(props.visualizationState)
+      : layerDatasource?.uniqueLabels?.(layerDatasourceConfigProps?.state);
+
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
-
-  const columnLabelMap = layerDatasource.uniqueLabels(layerDatasourceConfigProps.state);
 
   const { setDimension, removeDimension } = activeVisualization;
 
@@ -155,7 +157,7 @@ export function LayerPanel(
     registerNewRef: registerNewButtonRef,
   } = useFocusUpdate(allAccessors);
 
-  const layerDatasourceOnDrop = layerDatasource.onDrop;
+  const layerDatasourceOnDrop = layerDatasource?.onDrop;
 
   const onDrop = useMemo(() => {
     return (
@@ -181,16 +183,18 @@ export function LayerPanel(
 
       const filterOperations = group?.filterOperations || (() => false);
 
-      const dropResult = layerDatasourceOnDrop({
-        ...layerDatasourceDropProps,
-        droppedItem,
-        columnId,
-        layerId: targetLayerId,
-        filterOperations,
-        dimensionGroups: groups,
-        groupId,
-        dropType,
-      });
+      const dropResult = layerDatasource
+        ? layerDatasourceOnDrop({
+            ...layerDatasourceDropProps,
+            droppedItem,
+            columnId,
+            layerId: targetLayerId,
+            filterOperations,
+            dimensionGroups: groups,
+            groupId,
+            dropType,
+          })
+        : false;
       if (dropResult) {
         let previousColumn =
           typeof droppedItem.column === 'string' ? droppedItem.column : undefined;
@@ -243,6 +247,7 @@ export function LayerPanel(
     removeDimension,
     layerDatasourceDropProps,
     setNextFocusedButtonId,
+    layerDatasource,
   ]);
 
   const isDimensionPanelOpen = Boolean(activeId);
@@ -342,43 +347,45 @@ export function LayerPanel(
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="s" />
             {layerDatasource && (
-              <NativeRenderer
-                render={layerDatasource.renderLayerPanel}
-                nativeProps={{
-                  layerId,
-                  state: layerDatasourceState,
-                  activeData: props.framePublicAPI.activeData,
-                  setState: (updater: unknown) => {
-                    const newState =
-                      typeof updater === 'function' ? updater(layerDatasourceState) : updater;
-                    // Look for removed columns
-                    const nextPublicAPI = layerDatasource.getPublicAPI({
-                      state: newState,
-                      layerId,
-                    });
-                    const nextTable = new Set(
-                      nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
-                    );
-                    const removed = datasourcePublicAPI
-                      .getTableSpec()
-                      .map(({ columnId }) => columnId)
-                      .filter((columnId) => !nextTable.has(columnId));
-                    let nextVisState = props.visualizationState;
-                    removed.forEach((columnId) => {
-                      nextVisState = activeVisualization.removeDimension({
+              <>
+                <EuiSpacer size="s" />
+                <NativeRenderer
+                  render={layerDatasource.renderLayerPanel}
+                  nativeProps={{
+                    layerId,
+                    state: layerDatasourceState,
+                    activeData: props.framePublicAPI.activeData,
+                    setState: (updater: unknown) => {
+                      const newState =
+                        typeof updater === 'function' ? updater(layerDatasourceState) : updater;
+                      // Look for removed columns
+                      const nextPublicAPI = layerDatasource.getPublicAPI({
+                        state: newState,
                         layerId,
-                        columnId,
-                        prevState: nextVisState,
-                        frame: framePublicAPI,
                       });
-                    });
+                      const nextTable = new Set(
+                        nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
+                      );
+                      const removed = datasourcePublicAPI
+                        .getTableSpec()
+                        .map(({ columnId }) => columnId)
+                        .filter((columnId) => !nextTable.has(columnId));
+                      let nextVisState = props.visualizationState;
+                      removed.forEach((columnId) => {
+                        nextVisState = activeVisualization.removeDimension({
+                          layerId,
+                          columnId,
+                          prevState: nextVisState,
+                          frame: framePublicAPI,
+                        });
+                      });
 
-                    props.updateAll(datasourceId, newState, nextVisState);
-                  },
-                }}
-              />
+                      props.updateAll(datasourceId, newState, nextVisState);
+                    },
+                  }}
+                />
+              </>
             )}
           </header>
 
@@ -403,7 +410,6 @@ export function LayerPanel(
               : i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
                   defaultMessage: 'Requires field',
                 });
-
             const isOptional = !group.required && !group.suggestedValue;
             return (
               <EuiFormRow
@@ -457,7 +463,7 @@ export function LayerPanel(
                             groupIndex={groupIndex}
                             key={columnId}
                             layerDatasourceDropProps={layerDatasourceDropProps}
-                            label={columnLabelMap[columnId]}
+                            label={columnLabelMap?.[columnId]}
                             layerDatasource={layerDatasource}
                             layerIndex={layerIndex}
                             layerId={layerId}
@@ -468,7 +474,7 @@ export function LayerPanel(
                             <div className="lnsLayerPanel__dimension">
                               <DimensionButton
                                 accessorConfig={accessorConfig}
-                                label={columnLabelMap[accessorConfig.columnId]}
+                                label={columnLabelMap?.[accessorConfig.columnId]}
                                 group={group}
                                 onClick={(id: string) => {
                                   setActiveDimension({
@@ -479,42 +485,66 @@ export function LayerPanel(
                                 }}
                                 onRemoveClick={(id: string) => {
                                   trackUiEvent('indexpattern_dimension_removed');
-                                  props.updateAll(
-                                    datasourceId,
-                                    layerDatasource.removeColumn({
-                                      layerId,
-                                      columnId: id,
-                                      prevState: layerDatasourceState,
-                                    }),
-                                    activeVisualization.removeDimension({
-                                      layerId,
-                                      columnId: id,
-                                      prevState: props.visualizationState,
-                                      frame: framePublicAPI,
-                                    })
-                                  );
+                                  if (datasourceId && layerDatasource) {
+                                    props.updateAll(
+                                      datasourceId,
+                                      layerDatasource.removeColumn({
+                                        layerId,
+                                        columnId: id,
+                                        prevState: layerDatasourceState,
+                                      }),
+                                      activeVisualization.removeDimension({
+                                        layerId,
+                                        columnId: id,
+                                        prevState: props.visualizationState,
+                                        frame: framePublicAPI,
+                                      })
+                                    );
+                                  } else {
+                                    props.updateVisualization(
+                                      activeVisualization.removeDimension({
+                                        layerId,
+                                        columnId: id,
+                                        prevState: props.visualizationState,
+                                        frame: framePublicAPI,
+                                      })
+                                    );
+                                  }
                                   removeButtonRef(id);
                                 }}
                                 invalid={
-                                  !layerDatasource.isValidColumn(
+                                  layerDatasource &&
+                                  !layerDatasource?.isValidColumn(
                                     layerDatasourceState,
                                     layerId,
                                     columnId
                                   )
                                 }
                               >
-                                <NativeRenderer
-                                  render={layerDatasource.renderDimensionTrigger}
-                                  nativeProps={{
-                                    ...layerDatasourceConfigProps,
-                                    columnId: accessorConfig.columnId,
-                                    groupId: group.groupId,
-                                    filterOperations: group.filterOperations,
-                                    hideTooltip,
-                                    invalid: group.invalid,
-                                    invalidMessage: group.invalidMessage,
-                                  }}
-                                />
+                                {layerDatasource ? (
+                                  <NativeRenderer
+                                    render={layerDatasource.renderDimensionTrigger}
+                                    nativeProps={{
+                                      ...layerDatasourceConfigProps,
+                                      columnId: accessorConfig.columnId,
+                                      groupId: group.groupId,
+                                      filterOperations: group.filterOperations,
+                                      hideTooltip,
+                                      invalid: group.invalid,
+                                      invalidMessage: group.invalidMessage,
+                                    }}
+                                  />
+                                ) : (
+                                  <>
+                                    {activeVisualization?.renderDimensionTrigger?.({
+                                      columnId,
+                                      label: columnLabelMap[columnId],
+                                      hideTooltip,
+                                      invalid: group.invalid,
+                                      invalidMessage: group.invalidMessage,
+                                    })}
+                                  </>
+                                )}
                               </DimensionButton>
                             </div>
                           </DraggableDimensionButton>
@@ -537,7 +567,7 @@ export function LayerPanel(
                         setActiveDimension({
                           activeGroup: group,
                           activeId: id,
-                          isNew: !group.supportStaticValue,
+                          isNew: !group.supportStaticValue && Boolean(layerDatasource),
                         });
                       }}
                       onDrop={onDrop}
@@ -556,22 +586,25 @@ export function LayerPanel(
         isFullscreen={isFullscreen}
         groupLabel={activeGroup?.groupLabel || ''}
         handleClose={() => {
-          if (
-            layerDatasource.canCloseDimensionEditor &&
-            !layerDatasource.canCloseDimensionEditor(layerDatasourceState)
-          ) {
-            return false;
-          }
-          if (layerDatasource.updateStateOnCloseDimension) {
-            const newState = layerDatasource.updateStateOnCloseDimension({
-              state: layerDatasourceState,
-              layerId,
-              columnId: activeId!,
-            });
-            if (newState) {
-              props.updateDatasource(datasourceId, newState);
+          if (layerDatasource) {
+            if (
+              layerDatasource.canCloseDimensionEditor &&
+              !layerDatasource.canCloseDimensionEditor(layerDatasourceState)
+            ) {
+              return false;
+            }
+            if (layerDatasource.updateStateOnCloseDimension) {
+              const newState = layerDatasource.updateStateOnCloseDimension({
+                state: layerDatasourceState,
+                layerId,
+                columnId: activeId!,
+              });
+              if (newState) {
+                props.updateDatasource(datasourceId, newState);
+              }
             }
           }
+
           setActiveDimension(initialActiveDimensionState);
           if (isFullscreen) {
             toggleFullscreen();
@@ -580,7 +613,7 @@ export function LayerPanel(
         }}
         panel={
           <div>
-            {activeGroup && activeId && (
+            {activeGroup && activeId && layerDatasource && (
               <NativeRenderer
                 render={layerDatasource.renderDimensionEditor}
                 nativeProps={{
