@@ -64,7 +64,7 @@ export class FilterManager {
         item_count: 0,
       } as FilterStats;
     } catch (error) {
-      throw Boom.badRequest(error);
+      throw Boom.badRequest(error.stack);
     }
   }
 
@@ -73,7 +73,7 @@ export class FilterManager {
       const body = await this._mlClient.getFilters({ size: 1000 });
       return body.filters;
     } catch (error) {
-      throw Boom.badRequest(error);
+      throw Boom.badRequest(error.stack);
     }
   }
 
@@ -111,7 +111,7 @@ export class FilterManager {
 
       return filterStats;
     } catch (error) {
-      throw Boom.badRequest(error);
+      throw Boom.badRequest(error.stack);
     }
   }
 
@@ -121,7 +121,7 @@ export class FilterManager {
       // Returns the newly created filter.
       return await this._mlClient.putFilter({ filter_id: filterId, body });
     } catch (error) {
-      throw Boom.badRequest(error);
+      throw Boom.badRequest(error.stack);
     }
   }
 
@@ -145,7 +145,7 @@ export class FilterManager {
       });
       return resp;
     } catch (error) {
-      throw Boom.badRequest(error);
+      throw Boom.badRequest(error.stack);
     }
   }
 
