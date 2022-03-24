@@ -2,20 +2,29 @@
 /*
 Global print styling
 
-This styling should be usable by an plugin/app that wants to provide print functionality. The styling
-should be extremely unopinionated, util-like styling that sets consumers up with basic building blocks
-for styleing for print media.
+This styling should be usable by an plugin/app that wants to provide print
+functionality. The styling should be extremely unopinionated.
 
 Observations:
-1. It is possible to request a print before all ES searches have populated visualizations, this results
-   in a borked print preview with half-rendered visualisations. The user will have to close the print
-   dialog and re-open it. Not sure how to "fix" this UX.
-2. We currently do not control the user-agent's header and footer content (including the style of fonts)
-3. I could not see a way to get page numbering other than using the browser-provided footers :'(
-4. Page box model is quite different from what we have in browsers - page margins define where the "no-mans-land"
-   exists for actual content. Moving content into this space by, for example setting negative margins resulted in
-   slightly unpredictable behaviour because the browser wants to either move this content to another page or it just
-   looks broken/split across two pages
+
+1. It is possible to request a print before all ES searches have populated
+  visualizations, this results in a borked print preview with half-rendered
+  visualisations. The user will have to close the print dialog and re-open
+  it. Not sure how to "fix" this UX.
+
+2. We currently do not control the user-agent's header and footer content
+   (including the style of fonts)
+
+3. I could not see a way to get page numbering other than using the
+   browser-provided footers :'(
+
+4. Page box model is quite different from what we have in browsers - page
+   margins define where the "no-mans-land" exists for actual content. Moving
+   content into this space by, for example setting negative margins resulted
+   in slightly unpredictable behaviour because the browser wants to either
+   move this content to another page or it just looks broken/split across two
+   pages
+
 5. page-break-* is your friend!
 */
 $a4PageHeight: 297mm;
@@ -29,7 +38,8 @@ $a4PageMarginBottom: 9mm;
 $a4PageContentHeight: $a4PageHeight - $a4PageFooterHeight - $a4PageHeaderHeight - $a4PageMarginBottom;
 $a4PageContentWidth: $a4PageWidth;
 
-// Currently we cannot control or style the content the browser places in margins, this might change in the future:
+// Currently we cannot control or style the content the browser places in
+// margins, this might change in the future:
 // See https://drafts.csswg.org/css-page-3/#margin-boxes
 @page {
   size: A4;
