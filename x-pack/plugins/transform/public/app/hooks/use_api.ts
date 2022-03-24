@@ -226,14 +226,14 @@ export const useApi = () => {
         }
       },
       async getHistogramsForFields(
-        indexPatternTitle: string,
+        dataViewTitle: string,
         fields: FieldHistogramRequestConfig[],
         query: string | SavedSearchQuery,
         runtimeMappings?: FieldHistogramsRequestSchema['runtimeMappings'],
         samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
       ): Promise<FieldHistogramsResponseSchema | HttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}field_histograms/${indexPatternTitle}`, {
+          return await http.post(`${API_BASE_PATH}field_histograms/${dataViewTitle}`, {
             body: JSON.stringify({
               query,
               fields,

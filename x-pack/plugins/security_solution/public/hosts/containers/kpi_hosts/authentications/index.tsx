@@ -26,7 +26,7 @@ import * as i18n from './translations';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'hostsKpiAuthenticationsQuery';
+export const ID = 'hostsKpiAuthenticationsQuery';
 
 export interface HostsKpiAuthenticationsArgs
   extends Omit<HostsKpiAuthenticationsStrategyResponse, 'rawResponse'> {
@@ -164,6 +164,14 @@ export const useHostsKpiAuthentications = ({
       abortCtrl.current.abort();
     };
   }, [hostsKpiAuthenticationsRequest, hostsKpiAuthenticationsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, hostsKpiAuthenticationsResponse];
 };
