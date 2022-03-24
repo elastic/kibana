@@ -21,6 +21,12 @@ export const DEFAULT_BANDWIDTH_LIMIT = {
   [BandwidthLimitKey.LATENCY]: 1000,
 };
 
+export const DEFAULT_THROTTLING = {
+  [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
+  [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
+  [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
+};
+
 export const BandwidthLimitKeyCodec = tEnum<BandwidthLimitKey>(
   'BandwidthLimitKey',
   BandwidthLimitKey

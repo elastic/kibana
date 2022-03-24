@@ -14,7 +14,7 @@ import { useLocations } from './use_locations';
 import * as reactRedux from 'react-redux';
 import { getServiceLocations } from '../../../state/actions';
 
-import { BandwidthLimitKey, DEFAULT_BANDWIDTH_LIMIT } from '../../../../common/runtime_types';
+import { DEFAULT_THROTTLING } from '../../../../common/runtime_types';
 
 describe('useExpViewTimeRange', function () {
   const dispatch = jest.fn();
@@ -28,11 +28,7 @@ describe('useExpViewTimeRange', function () {
   });
 
   it('returns loading and error from redux store', async function () {
-    const throttling = {
-      [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
-      [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
-      [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
-    };
+    const throttling = DEFAULT_THROTTLING;
 
     const error = new Error('error');
     const loading = true;

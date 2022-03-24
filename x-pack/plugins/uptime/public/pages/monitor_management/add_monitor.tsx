@@ -34,6 +34,7 @@ export const AddMonitorPage: React.FC = () => {
       <SyntheticsProviders
         policyDefaultValues={{
           throttling,
+          runsOnService: true,
           isZipUrlSourceEnabled: false,
           allowedScheduleUnits: [ScheduleUnit.MINUTES],
         }}

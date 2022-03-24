@@ -11,8 +11,7 @@ import {
   ScheduleUnit,
   ServiceLocations,
   ThrottlingOptions,
-  BandwidthLimitKey,
-  DEFAULT_BANDWIDTH_LIMIT,
+  DEFAULT_THROTTLING,
 } from '../../../../common/runtime_types';
 import { DataStream } from '../types';
 
@@ -28,6 +27,7 @@ interface IPolicyConfigContext {
   isTLSEnabled?: boolean;
   isZipUrlTLSEnabled?: boolean;
   isZipUrlSourceEnabled?: boolean;
+  runsOnService?: boolean;
   defaultIsTLSEnabled?: boolean;
   defaultIsZipUrlTLSEnabled?: boolean;
   isEditable?: boolean;
@@ -44,6 +44,7 @@ interface IPolicyConfigContext {
 export interface IPolicyConfigContextProvider {
   children: React.ReactNode;
   defaultMonitorType?: DataStream;
+  runsOnService?: boolean;
   defaultIsTLSEnabled?: boolean;
   defaultIsZipUrlTLSEnabled?: boolean;
   defaultName?: string;
@@ -80,6 +81,7 @@ export const defaultContext: IPolicyConfigContext = {
   },
   monitorType: initialValue, // mutable
   defaultMonitorType: initialValue, // immutable,
+  runsOnService: false,
   defaultIsTLSEnabled: false,
   defaultIsZipUrlTLSEnabled: false,
   defaultName: '',
@@ -88,22 +90,14 @@ export const defaultContext: IPolicyConfigContext = {
   isZipUrlSourceEnabled: true,
   allowedScheduleUnits: [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
   defaultNamespace: DEFAULT_NAMESPACE_STRING,
-  throttling: {
-    [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
-    [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
-    [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
-  },
+  throttling: DEFAULT_THROTTLING,
 };
 
 export const PolicyConfigContext = createContext(defaultContext);
 
 export function PolicyConfigContextProvider<ExtraFields = unknown>({
   children,
-  throttling = {
-    [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
-    [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
-    [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
-  },
+  throttling = DEFAULT_THROTTLING,
   defaultMonitorType = initialValue,
   defaultIsTLSEnabled = false,
   defaultIsZipUrlTLSEnabled = false,
@@ -111,6 +105,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   defaultLocations = [],
   defaultNamespace = DEFAULT_NAMESPACE_STRING,
   isEditable = false,
+  runsOnService = false,
   isZipUrlSourceEnabled = true,
   allowedScheduleUnits = [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
 }: IPolicyConfigContextProvider) {
@@ -126,6 +121,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
       monitorType,
       setMonitorType,
       defaultMonitorType,
+      runsOnService,
       isTLSEnabled,
       isZipUrlTLSEnabled,
       setIsTLSEnabled,
@@ -148,6 +144,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   }, [
     monitorType,
     defaultMonitorType,
+    runsOnService,
     isTLSEnabled,
     isZipUrlSourceEnabled,
     isZipUrlTLSEnabled,

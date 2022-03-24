@@ -6,7 +6,7 @@
  */
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { BandwidthLimitKey, DEFAULT_BANDWIDTH_LIMIT } from '../../../common/runtime_types';
+import { DEFAULT_THROTTLING } from '../../../common/runtime_types';
 import { AppState } from '../../state';
 
 /**
@@ -63,11 +63,7 @@ export const mockState: AppState = {
     refreshedMonitorIds: [],
   },
   monitorManagementList: {
-    throttling: {
-      [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
-      [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
-      [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
-    },
+    throttling: DEFAULT_THROTTLING,
     list: {
       page: 1,
       perPage: 10,

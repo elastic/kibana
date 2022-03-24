@@ -220,7 +220,9 @@ describe('<ThrottlingFields />', () => {
 
     it('shows automatic throttling warnings only when throttling is disabled', () => {
       const { getByTestId, queryByText } = render(
-        <WrappedComponent policyConfigOverrides={{ throttling, defaultLocations }} />
+        <WrappedComponent
+          policyConfigOverrides={{ throttling, defaultLocations, runsOnService: true }}
+        />
       );
 
       expect(queryByText('Automatic cap')).not.toBeInTheDocument();
@@ -243,7 +245,9 @@ describe('<ThrottlingFields />', () => {
 
     it("shows throttling warnings when exceeding the node's download limits", () => {
       const { getByLabelText, queryByText } = render(
-        <WrappedComponent policyConfigOverrides={{ throttling, defaultLocations }} />
+        <WrappedComponent
+          policyConfigOverrides={{ throttling, defaultLocations, runsOnService: true }}
+        />
       );
 
       const downloadLimit = throttling[BandwidthLimitKey.DOWNLOAD];
@@ -289,7 +293,9 @@ describe('<ThrottlingFields />', () => {
 
     it("shows throttling warnings when exceeding the node's upload limits", () => {
       const { getByLabelText, queryByText } = render(
-        <WrappedComponent policyConfigOverrides={{ throttling, defaultLocations }} />
+        <WrappedComponent
+          policyConfigOverrides={{ throttling, defaultLocations, runsOnService: true }}
+        />
       );
 
       const uploadLimit = throttling[BandwidthLimitKey.UPLOAD];
@@ -335,7 +341,9 @@ describe('<ThrottlingFields />', () => {
 
     it("shows latency warnings when exceeding the node's latency limits", () => {
       const { getByLabelText, queryByText } = render(
-        <WrappedComponent policyConfigOverrides={{ throttling, defaultLocations }} />
+        <WrappedComponent
+          policyConfigOverrides={{ throttling, defaultLocations, runsOnService: true }}
+        />
       );
 
       const latencyLimit = throttling[BandwidthLimitKey.LATENCY];

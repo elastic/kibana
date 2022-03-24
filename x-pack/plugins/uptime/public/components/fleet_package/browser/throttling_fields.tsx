@@ -93,7 +93,7 @@ export const ThrottlingExceededMessage = ({
 
 export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onFieldBlur }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
-  const { throttling, locations: selectedLocations = [] } = usePolicyConfigContext();
+  const { runsOnService, throttling } = usePolicyConfigContext();
 
   const maxDownload = throttling[BandwidthLimitKey.DOWNLOAD];
   const maxUpload = throttling[BandwidthLimitKey.UPLOAD];
@@ -106,7 +106,6 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
     [setFields]
   );
 
-  const runsOnService = selectedLocations && selectedLocations.length > 0;
   const exceedsDownloadLimits =
     runsOnService && parseFloat(fields[ConfigKey.DOWNLOAD_SPEED]) > maxDownload;
   const exceedsUploadLimits =

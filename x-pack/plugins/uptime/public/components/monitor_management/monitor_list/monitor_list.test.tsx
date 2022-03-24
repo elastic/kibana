@@ -13,8 +13,7 @@ import {
   DataStream,
   HTTPFields,
   ScheduleUnit,
-  BandwidthLimitKey,
-  DEFAULT_BANDWIDTH_LIMIT,
+  DEFAULT_THROTTLING,
 } from '../../../../common/runtime_types';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
@@ -43,11 +42,7 @@ describe('<MonitorManagementList />', () => {
   }
   const state = {
     monitorManagementList: {
-      throttling: {
-        [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
-        [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
-        [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
-      },
+      throttling: DEFAULT_THROTTLING,
       list: {
         perPage: 5,
         page: 1,

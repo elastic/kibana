@@ -23,8 +23,7 @@ import {
   MonitorManagementListResult,
   ServiceLocations,
   ThrottlingOptions,
-  BandwidthLimitKey,
-  DEFAULT_BANDWIDTH_LIMIT,
+  DEFAULT_THROTTLING,
 } from '../../../common/runtime_types';
 
 export interface MonitorManagementList {
@@ -35,12 +34,6 @@ export interface MonitorManagementList {
   syntheticsService: { isAllowed?: boolean; loading: boolean };
   throttling: ThrottlingOptions;
 }
-
-const defaultThrottling = {
-  [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
-  [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
-  [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
-};
 
 export const initialState: MonitorManagementList = {
   list: {
@@ -61,7 +54,7 @@ export const initialState: MonitorManagementList = {
   syntheticsService: {
     loading: false,
   },
-  throttling: defaultThrottling,
+  throttling: DEFAULT_THROTTLING,
 };
 
 export const monitorManagementListReducer = createReducer(initialState, (builder) => {
@@ -131,7 +124,7 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
           serviceLocations: null,
         },
         locations: action.payload.locations,
-        throttling: action.payload.throttling || defaultThrottling,
+        throttling: action.payload.throttling || DEFAULT_THROTTLING,
       })
     )
     .addCase(
