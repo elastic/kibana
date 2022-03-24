@@ -14,6 +14,7 @@ import type { SortOrder } from '../../../services/saved_searches';
 import { SavedObjectSaveOpts } from '../../../../../saved_objects/public';
 import { DiscoverServices } from '../../../build_services';
 import { saveSavedSearch } from '../../../services/saved_searches';
+import { SavedSearchGridAttributes } from '../../../../common/types';
 
 /**
  * Helper function to update and persist the given savedSearch
@@ -46,7 +47,7 @@ export async function persistSavedSearch(
   savedSearch.columns = state.columns || [];
   savedSearch.sort = (state.sort as SortOrder[]) || [];
   if (state.grid) {
-    savedSearch.grid = state.grid;
+    savedSearch.grid = state.grid as SavedSearchGridAttributes;
   }
   if (typeof state.hideChart !== 'undefined') {
     savedSearch.hideChart = state.hideChart;

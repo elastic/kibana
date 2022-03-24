@@ -11,16 +11,17 @@ import type { ISearchSource } from '../../data/common';
 import { SavedObjectAttributes } from '../../../core/types';
 import { VIEW_MODE } from './constants';
 
+/** @internal **/
 export interface DiscoverGridSettingsColumn {
   width?: number;
 }
-
+/** @internal **/
 export interface DiscoverGridSavedSearch {
   columns?: {
     [key: string]: DiscoverGridSettingsColumn;
   };
 }
-
+/** @internal **/
 export interface SavedSearchGridAttributes extends SavedObjectAttributes {
   columns?: {
     [key: string]: {
