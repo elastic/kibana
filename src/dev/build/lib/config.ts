@@ -17,6 +17,7 @@ interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
   versionQualifier?: string;
+  dockerCrossCompile: boolean;
   dockerTagQualifier: string | null;
   dockerPush: boolean;
 }
@@ -35,6 +36,7 @@ export class Config {
     isRelease,
     targetAllPlatforms,
     versionQualifier,
+    dockerCrossCompile,
     dockerTagQualifier,
     dockerPush,
   }: Options) {
@@ -51,6 +53,7 @@ export class Config {
         versionQualifier,
         pkg,
       }),
+      dockerCrossCompile,
       dockerTagQualifier,
       dockerPush,
       isRelease
@@ -63,6 +66,7 @@ export class Config {
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
+    private readonly dockerCrossCompile: boolean,
     private readonly dockerTagQualifier: string | null,
     private readonly dockerPush: boolean,
     public readonly isRelease: boolean
@@ -94,6 +98,13 @@ export class Config {
    */
   getDockerPush() {
     return this.dockerPush;
+  }
+
+  /**
+   * Get docker cross compile
+   */
+  getDockerCrossCompile() {
+    return this.dockerCrossCompile;
   }
 
   /**
