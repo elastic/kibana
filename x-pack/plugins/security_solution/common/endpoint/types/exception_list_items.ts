@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { ConditionEntryField, EntryTypes } from '@kbn/securitysolution-utils';
+import { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 
 export type ConditionEntriesMap<T> = {
-  [K in ConditionEntryField]?: T;
+  [K in AllConditionEntryFields]?: T;
 };
 
-export interface ConditionEntry<
-  F extends ConditionEntryField = ConditionEntryField,
-  T extends EntryTypes = EntryTypes
-> {
-  field: F;
+export interface ConditionEntry<T extends EntryTypes = EntryTypes> {
+  field: AllConditionEntryFields;
   type: T;
   operator: 'included';
   value: string | string[];
