@@ -417,9 +417,7 @@ export const performBulkActionRoute = (
                 // This should only be hit if `rule` passed into `legacyMigrate`
                 // is `null` or `rule.id` is null which right now, as typed, should not occur
                 if (migratedRule == null) {
-                  throw new BadRequestError(
-                    `An error occurred duplicating rule with id:${rule.id}`
-                  );
+                  throw new BadRequestError(`An error occurred editing rule with id:${rule.id}`);
                 }
 
                 const editedRule = body[BulkAction.edit].reduce(

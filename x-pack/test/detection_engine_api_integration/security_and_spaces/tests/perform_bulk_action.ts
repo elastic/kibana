@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const fetchRule = (ruleId: string) =>
     supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`).set('kbn-xsrf', 'true');
 
-  describe.only('perform_bulk_action', () => {
+  describe('perform_bulk_action', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
     });

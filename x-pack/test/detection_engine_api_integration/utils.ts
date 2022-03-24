@@ -1985,8 +1985,8 @@ export const getSimpleThreatMatch = (
 });
 
 /**
- * Remove all timelines from the .kibana index
- * @param es The ElasticSearch handle
+ * Fetch all legacy action sidecar SOs from the .kibana index
+ * @param es The ElasticSearch service
  */
 export const getLegacyActionSO = async (es: Client): Promise<SearchResponse<LegacyRuleActions>> =>
   es.search({
