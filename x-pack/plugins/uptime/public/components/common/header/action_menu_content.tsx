@@ -85,7 +85,7 @@ export function ActionMenuContent({ config }: { config: UptimeConfig }): React.R
           color="text"
           data-test-subj="management-page-link"
           href={history.createHref({
-            pathname: MONITOR_MANAGEMENT_ROUTE,
+            pathname: MONITOR_MANAGEMENT_ROUTE + '/all',
           })}
         >
           <FormattedMessage

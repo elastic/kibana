@@ -176,3 +176,6 @@ export class ObservabilityDataViews {
     }
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export default ObservabilityDataViews;
