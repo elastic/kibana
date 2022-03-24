@@ -101,7 +101,7 @@ export const ElasticsearchGuide: React.FC = () => {
                       </p>
                       <EuiLink
                         href="https://www.elastic.co/guide/en/elasticsearch/client/index.html"
-                        external
+                        target="_blank"
                       >
                         {i18n.translate(
                           'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsLink',
@@ -155,7 +155,7 @@ export const ElasticsearchGuide: React.FC = () => {
                         <EuiText>
                           <EuiLink
                             href="https://www.elastic.co/enterprise-search/search-ui"
-                            external
+                            target="_blank"
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIMarketingLink',
@@ -166,7 +166,7 @@ export const ElasticsearchGuide: React.FC = () => {
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText>
-                          <EuiLink href="https://github.com/elastic/search-ui" external>
+                          <EuiLink href="https://github.com/elastic/search-ui" target="_blank">
                             {i18n.translate(
                               'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIGitHubLink',
                               { defaultMessage: 'Search UI on GitHub' }
