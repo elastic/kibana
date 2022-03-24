@@ -61,6 +61,7 @@ describe('APMEventClient', () => {
           apm: {
             events: [],
           },
+          body: { size: 0 },
         });
 
         return res.ok({ body: 'ok' });

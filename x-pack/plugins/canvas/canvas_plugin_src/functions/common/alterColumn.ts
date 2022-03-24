@@ -101,7 +101,7 @@ export function alterColumn(): ExpressionFunctionDefinition<
       }));
 
       return {
-        type: 'datatable',
+        ...input,
         columns,
         rows,
       };

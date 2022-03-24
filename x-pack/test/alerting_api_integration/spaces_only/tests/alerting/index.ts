@@ -27,6 +27,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./rule_types'));
     loadTestFile(require.resolve('./event_log'));
     loadTestFile(require.resolve('./execution_status'));
+    loadTestFile(require.resolve('./in_memory_metrics'));
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./mute_all'));
     loadTestFile(require.resolve('./mute_instance'));

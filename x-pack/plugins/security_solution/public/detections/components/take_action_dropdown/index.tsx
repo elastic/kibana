@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
@@ -23,6 +23,8 @@ import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_c
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
+import { useKibana } from '../../../common/lib/kibana';
+import { OsqueryActionItem } from '../osquery/osquery_action_item';
 
 interface ActionsData {
   alertStatus: Status;
@@ -45,6 +47,7 @@ export interface TakeActionDropdownProps {
   refetch: (() => void) | undefined;
   refetchFlyoutData: () => Promise<void>;
   timelineId: string;
+  onOsqueryClick: (id: string) => void;
 }
 
 export const TakeActionDropdown = React.memo(
@@ -61,6 +64,7 @@ export const TakeActionDropdown = React.memo(
     refetch,
     refetchFlyoutData,
     timelineId,
+    onOsqueryClick,
   }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
     const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
@@ -70,6 +74,7 @@ export const TakeActionDropdown = React.memo(
       () => !canAccessEndpointManagementLoading && canAccessEndpointManagement,
       [canAccessEndpointManagement, canAccessEndpointManagementLoading]
     );
+    const { osquery } = useKibana().services;
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -96,6 +101,11 @@ export const TakeActionDropdown = React.memo(
     const isAgentEndpoint = useMemo(() => ecsData?.agent?.type?.includes('endpoint'), [ecsData]);
 
     const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
+
+    const agentId = useMemo(
+      () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
+      [detailsData]
+    );
 
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
@@ -166,6 +176,23 @@ export const TakeActionDropdown = React.memo(
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });
 
+    const osqueryAvailable = osquery?.isOsqueryAvailable({
+      agentId,
+    });
+
+    const handleOnOsqueryClick = useCallback(() => {
+      onOsqueryClick(agentId);
+      setIsPopoverOpen(false);
+    }, [onOsqueryClick, setIsPopoverOpen, agentId]);
+
+    const osqueryActionItem = useMemo(
+      () =>
+        OsqueryActionItem({
+          handleClick: handleOnOsqueryClick,
+        }),
+      [handleOnOsqueryClick]
+    );
+
     const alertsActionItems = useMemo(
       () =>
         !isEvent && actionsData.ruleId
@@ -196,13 +223,16 @@ export const TakeActionDropdown = React.memo(
         ...(tGridEnabled ? addToCaseActionItems : []),
         ...alertsActionItems,
         ...hostIsolationActionItems,
+        ...(osqueryAvailable ? [osqueryActionItem] : []),
         ...investigateInTimelineActionItems,
       ],
       [
         tGridEnabled,
-        alertsActionItems,
         addToCaseActionItems,
+        alertsActionItems,
         hostIsolationActionItems,
+        osqueryAvailable,
+        osqueryActionItem,
         investigateInTimelineActionItems,
       ]
     );
@@ -220,7 +250,6 @@ export const TakeActionDropdown = React.memo(
         </EuiButton>
       );
     }, [togglePopoverHandler]);
-
     return items.length && !loadingEventDetails && ecsData ? (
       <EuiPopover
         id="AlertTakeActionPanel"

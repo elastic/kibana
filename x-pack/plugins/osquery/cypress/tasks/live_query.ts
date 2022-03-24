@@ -7,13 +7,14 @@
 
 import { LIVE_QUERY_EDITOR } from '../screens/live_query';
 
-export const DEFAULT_QUERY = 'select * from processes, users;';
+export const DEFAULT_QUERY = 'select * from processes;';
+export const BIG_QUERY = 'select * from processes, users;';
 
 export const selectAllAgents = () => {
   cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type('All agents');
   cy.react('EuiFilterSelectItem').contains('All agents').should('exist');
   cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type(
-    '{downArrow}{enter}'
+    '{downArrow}{enter}{esc}'
   );
 };
 

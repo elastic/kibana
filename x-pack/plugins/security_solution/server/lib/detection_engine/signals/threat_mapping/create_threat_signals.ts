@@ -7,13 +7,17 @@
 
 import chunk from 'lodash/fp/chunk';
 import { getThreatList, getThreatListCount } from './get_threat_list';
-
-import { CreateThreatSignalsOptions } from './types';
+import {
+  CreateThreatSignalsOptions,
+  CreateSignalInterface,
+  GetDocumentListInterface,
+} from './types';
 import { createThreatSignal } from './create_threat_signal';
+import { createEventSignal } from './create_event_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
-import { getEventCount } from './get_event_count';
+import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 
 export const createThreatSignals = async ({
@@ -85,7 +89,7 @@ export const createThreatSignals = async ({
     return results;
   }
 
-  let threatListCount = await getThreatListCount({
+  const threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
     threatFilters: allThreatFilters,
@@ -101,20 +105,6 @@ export const createThreatSignals = async ({
     _source: false,
   };
 
-  let threatList = await getThreatList({
-    esClient: services.scopedClusterClient.asCurrentUser,
-    exceptionItems,
-    threatFilters: allThreatFilters,
-    query: threatQuery,
-    language: threatLanguage,
-    index: threatIndex,
-    searchAfter: undefined,
-    logger,
-    buildRuleMessage,
-    perPage,
-    threatListConfig,
-  });
-
   const threatEnrichment = buildThreatEnrichment({
     buildRuleMessage,
     exceptionItems,
@@ -127,12 +117,124 @@ export const createThreatSignals = async ({
     threatQuery,
   });
 
-  while (threatList.hits.hits.length !== 0) {
-    verifyExecutionCanProceed();
-    const chunks = chunk(itemsPerSearch, threatList.hits.hits);
-    logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
-    const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
-      (slicedChunk) =>
+  const createSignals = async ({
+    getDocumentList,
+    createSignal,
+    totalDocumentCount,
+  }: {
+    getDocumentList: GetDocumentListInterface;
+    createSignal: CreateSignalInterface;
+    totalDocumentCount: number;
+  }) => {
+    let list = await getDocumentList({ searchAfter: undefined });
+    let documentCount = totalDocumentCount;
+
+    while (list.hits.hits.length !== 0) {
+      verifyExecutionCanProceed();
+      const chunks = chunk(itemsPerSearch, list.hits.hits);
+      logger.debug(
+        buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`)
+      );
+      const concurrentSearchesPerformed =
+        chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(createSignal);
+      const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
+      results = combineConcurrentResults(results, searchesPerformed);
+      documentCount -= list.hits.hits.length;
+      logger.debug(
+        buildRuleMessage(
+          `Concurrent indicator match searches completed with ${results.createdSignalsCount} signals found`,
+          `search times of ${results.searchAfterTimes}ms,`,
+          `bulk create times ${results.bulkCreateTimes}ms,`,
+          `all successes are ${results.success}`
+        )
+      );
+      if (results.createdSignalsCount >= params.maxSignals) {
+        logger.debug(
+          buildRuleMessage(
+            `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
+          )
+        );
+        break;
+      }
+      logger.debug(buildRuleMessage(`Documents items left to check are ${documentCount}`));
+
+      list = await getDocumentList({
+        searchAfter: list.hits.hits[list.hits.hits.length - 1].sort,
+      });
+    }
+  };
+
+  if (eventCount < threatListCount) {
+    await createSignals({
+      totalDocumentCount: eventCount,
+      getDocumentList: async ({ searchAfter }) =>
+        getEventList({
+          services,
+          exceptionItems,
+          filters: allEventFilters,
+          query,
+          language,
+          index: inputIndex,
+          searchAfter,
+          logger,
+          buildRuleMessage,
+          perPage,
+          tuple,
+        }),
+
+      createSignal: (slicedChunk) =>
+        createEventSignal({
+          alertId,
+          buildRuleMessage,
+          bulkCreate,
+          completeRule,
+          currentResult: results,
+          currentEventList: slicedChunk,
+          eventsTelemetry,
+          exceptionItems,
+          filters: allEventFilters,
+          inputIndex,
+          language,
+          listClient,
+          logger,
+          outputIndex,
+          query,
+          savedId,
+          searchAfterSize,
+          services,
+          threatEnrichment,
+          threatMapping,
+          tuple,
+          type,
+          wrapHits,
+          threatQuery,
+          threatFilters: allThreatFilters,
+          threatLanguage,
+          threatIndex,
+          threatListConfig,
+          threatIndicatorPath,
+          perPage,
+        }),
+    });
+  } else {
+    await createSignals({
+      totalDocumentCount: threatListCount,
+      getDocumentList: async ({ searchAfter }) =>
+        getThreatList({
+          esClient: services.scopedClusterClient.asCurrentUser,
+          exceptionItems,
+          threatFilters: allThreatFilters,
+          query: threatQuery,
+          language: threatLanguage,
+          index: threatIndex,
+          searchAfter,
+          logger,
+          buildRuleMessage,
+          perPage,
+          threatListConfig,
+        }),
+
+      createSignal: (slicedChunk) =>
         createThreatSignal({
           alertId,
           buildRuleMessage,
@@ -157,41 +259,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
-        })
-    );
-    const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
-    results = combineConcurrentResults(results, searchesPerformed);
-    threatListCount -= threatList.hits.hits.length;
-    logger.debug(
-      buildRuleMessage(
-        `Concurrent indicator match searches completed with ${results.createdSignalsCount} signals found`,
-        `search times of ${results.searchAfterTimes}ms,`,
-        `bulk create times ${results.bulkCreateTimes}ms,`,
-        `all successes are ${results.success}`
-      )
-    );
-    if (results.createdSignalsCount >= params.maxSignals) {
-      logger.debug(
-        buildRuleMessage(
-          `Indicator match has reached its max signals count ${params.maxSignals}. Additional indicator items not checked are ${threatListCount}`
-        )
-      );
-      break;
-    }
-    logger.debug(buildRuleMessage(`Indicator items left to check are ${threatListCount}`));
-
-    threatList = await getThreatList({
-      esClient: services.scopedClusterClient.asCurrentUser,
-      exceptionItems,
-      query: threatQuery,
-      language: threatLanguage,
-      threatFilters: allThreatFilters,
-      index: threatIndex,
-      searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
-      buildRuleMessage,
-      logger,
-      perPage,
-      threatListConfig,
+        }),
     });
   }
 

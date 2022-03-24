@@ -58,6 +58,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -67,6 +68,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -170,6 +172,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -179,6 +182,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -262,6 +266,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -271,6 +276,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -386,6 +392,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -395,6 +402,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
