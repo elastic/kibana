@@ -35,8 +35,10 @@ import {
   AXIS_EXTENT_CONFIG,
   EXTENDED_DATA_LAYER,
   EXTENDED_REFERENCE_LINE_LAYER,
+  EndValues,
 } from '../constants';
 
+export type EndValue = $Values<typeof EndValues>;
 export type LayerType = $Values<typeof LayerTypes>;
 export type YAxisMode = $Values<typeof YAxisModes>;
 export type LineStyle = $Values<typeof LineStyles>;
@@ -229,6 +231,8 @@ export interface XYProps {
   legend: LegendConfigResult;
   valueLabels: ValueLabelMode;
   layers: CommonXYLayerConfigResult[];
+  endValue?: EndValue;
+  emphasizeFitting?: boolean;
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;

@@ -116,6 +116,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         keepOpen?: boolean;
         palette?: string;
         formula?: string;
+        disableEmptyRows?: boolean;
       },
       layerIndex = 0
     ) {
@@ -158,6 +159,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       if (opts.palette) {
         await this.setPalette(opts.palette);
+      }
+
+      if (opts.disableEmptyRows) {
+        await testSubjects.setEuiSwitch('indexPattern-include-empty-rows', 'uncheck');
       }
 
       if (!opts.keepOpen) {
@@ -254,9 +259,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async waitForField(field: string) {
-      await retry.try(async () => {
-        await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
-      });
+      await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
     },
 
     async waitForMissingDataViewWarning() {

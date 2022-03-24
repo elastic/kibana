@@ -35,6 +35,12 @@ export const FittingFunctions = {
   LOOKAHEAD: 'Lookahead',
 } as const;
 
+export const EndValues = {
+  NONE: 'None',
+  ZERO: 'Zero',
+  NEAREST: 'Nearest',
+} as const;
+
 export const YAxisModes = {
   AUTO: 'auto',
   LEFT: 'left',

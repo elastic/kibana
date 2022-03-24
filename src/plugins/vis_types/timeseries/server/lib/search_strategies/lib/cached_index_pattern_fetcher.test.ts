@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern, IndexPatternsService } from 'src/plugins/data/server';
+import { DataView, DataViewsService } from 'src/plugins/data_views/common';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import {
   getCachedIndexPatternFetcher,
@@ -16,7 +16,7 @@ import {
 jest.mock('../../../../common/index_patterns_utils');
 
 describe('CachedIndexPatternFetcher', () => {
-  let mockedIndices: IndexPattern[] | [];
+  let mockedIndices: DataView[] | [];
   let cachedIndexPatternFetcher: CachedIndexPatternFetcher;
 
   beforeEach(() => {
@@ -26,7 +26,7 @@ describe('CachedIndexPatternFetcher', () => {
       getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
       get: jest.fn(() => Promise.resolve(mockedIndices[0])),
       find: jest.fn(() => Promise.resolve(mockedIndices || [])),
-    } as unknown as IndexPatternsService;
+    } as unknown as DataViewsService;
 
     (fetchIndexPattern as jest.Mock).mockClear();
 
@@ -74,7 +74,7 @@ describe('CachedIndexPatternFetcher', () => {
           id: 'indexId',
           title: 'indexTitle',
         },
-      ] as IndexPattern[];
+      ] as DataView[];
 
       const value = await cachedIndexPatternFetcher({ id: 'indexId' });
 
@@ -106,7 +106,7 @@ describe('CachedIndexPatternFetcher', () => {
           id: 'indexId',
           title: 'indexTitle',
         },
-      ] as IndexPattern[];
+      ] as DataView[];
 
       await cachedIndexPatternFetcher({ id: 'indexId' });
       await cachedIndexPatternFetcher({ id: 'indexId' });

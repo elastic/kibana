@@ -205,6 +205,8 @@ export const buildExpression = (
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
+          endValue: [state.endValue || 'None'],
+          emphasizeFitting: [state.emphasizeFitting || false],
           curveType: [state.curveType || 'LINEAR'],
           fillOpacity: [state.fillOpacity || 0.3],
           yLeftExtent: [

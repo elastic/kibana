@@ -73,6 +73,8 @@ describe('#toExpression', () => {
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
+          endValue: 'Nearest',
+          emphasizeFitting: true,
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
           labelsOrientation: {
             x: 0,
