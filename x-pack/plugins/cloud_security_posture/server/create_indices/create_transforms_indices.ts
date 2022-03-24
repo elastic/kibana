@@ -13,6 +13,7 @@ import {
   LATEST_FINDINGS_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_PATTERN,
 } from '../../common/constants';
+import { indexNameBeginsWithPeriod } from 'src/plugins/es_ui_shared/public/indices/validate';
 
 // TODO: Add integration tests
 export const initializeCspTransformsIndices = async (
@@ -26,7 +27,7 @@ export const initializeCspTransformsIndices = async (
 export const createIndexIfNotExists = async (
   esClient: ElasticsearchClient,
   index: string,
-  mapping: MappingTypeMapping,
+  mappings: MappingTypeMapping,
   logger: Logger
 ) => {
   try {
@@ -35,9 +36,17 @@ export const createIndexIfNotExists = async (
     });
 
     if (!isLatestIndexExists) {
+      await esClient.indices.putTemplate({
+        name: index,
+        create: true,
+        index_patterns: index,
+        mappings,
+        settings: { priority: 500 },
+      });
       await esClient.indices.create({
         index,
-        mappings: mapping,
+        mappings,
+        // settings: { priority: 500 },
       });
     }
   } catch (err) {
