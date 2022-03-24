@@ -133,7 +133,7 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
       id: columnId,
     });
   } else if (currentConfig && previousConfig) {
-    // reorder if both configs exist
+    // TODO: reordering should not live in setDimension, to be refactored
     resultAnnotations = inputAnnotations.filter((c) => c.id !== previousConfig.id);
     const targetPosition = resultAnnotations.findIndex((c) => c.id === currentConfig.id);
     const targetIndex = inputAnnotations.indexOf(previousConfig);

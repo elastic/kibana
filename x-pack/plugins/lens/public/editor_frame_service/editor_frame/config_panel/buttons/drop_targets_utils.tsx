@@ -155,7 +155,8 @@ export const getDropProps = (
   if (layerDatasource) {
     return layerDatasource.getDropProps(dropProps);
   } else {
-    // todo: allow moving operations between layers for annotations
+    // TODO: refactor & test this - it's too annotations specific
+    // TODO: allow moving operations between layers for annotations
     if (isOperationFromTheSameGroup(dropProps.dragging, dropProps)) {
       return { dropTypes: [isNew ? 'duplicate_compatible' : 'reorder'], nextLabel: '' };
     }
