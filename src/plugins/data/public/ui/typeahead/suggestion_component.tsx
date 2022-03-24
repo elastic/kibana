@@ -89,7 +89,12 @@ export const SuggestionComponent = React.memo(function SuggestionComponent(props
           {props.suggestion.text}
         </div>
         {props.shouldDisplayDescription && (
-          <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
+          <div
+            className="kbnSuggestionItem__description"
+            data-test-subj="autoCompleteSuggestionDescription"
+          >
+            {props.suggestion.description}
+          </div>
         )}
       </div>
     </div>
