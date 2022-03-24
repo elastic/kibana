@@ -187,14 +187,20 @@ export class PdfMaker {
   }
 
   public async generate(): Promise<Uint8Array> {
+    console.log('===================> start');
     if (this.worker) throw new Error('PDF generation already in progress!');
 
+    console.log('===================> logging info');
     this.logger.info(`Compiling PDF using "${this.layout.id}" layout...`);
 
     try {
+      console.log('===================> starting promise');
       return await new Promise<Uint8Array>((resolve, reject) => {
+        console.log('===================> creating message channel');
         const { port1: myPort, port2: theirPort } = new MessageChannel();
+        console.log('===================> creating new worker');
         this.worker = this.createWorker(theirPort);
+        console.log('===================> attaching listeners to worker');
         this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
           if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
             reject(new errors.PdfWorkerOutOfMemoryError(workerError.message));
@@ -204,14 +210,9 @@ export class PdfMaker {
         });
         this.worker.on('exit', () => {}); // do nothing on errors
 
-        // Send the initial request
-        const generatePdfRequest: GeneratePdfRequest = {
-          data: this.getGeneratePdfRequestData(),
-        };
-        myPort.postMessage(generatePdfRequest);
-
         // We expect one message from the worker generating the PDF buffer.
         myPort.on('message', ({ error, data }: GeneratePdfResponse) => {
+          console.log('===================> got result back');
           if (error) {
             reject(new Error(`PDF worker returned the following error: ${error}`));
             return;
@@ -223,6 +224,12 @@ export class PdfMaker {
           this.pageCount = data.metrics.pages;
           resolve(data.buffer);
         });
+        const generatePdfRequest: GeneratePdfRequest = {
+          data: this.getGeneratePdfRequestData(),
+        };
+        console.log('===================> sending new generate request');
+        // Send the request to generate
+        myPort.postMessage(generatePdfRequest);
       });
     } finally {
       await this.cleanupWorker();
