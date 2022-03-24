@@ -29,7 +29,7 @@ import { getInspectResponse } from '../../../helpers';
 import { FlowTargetSourceDest, PageInfoPaginated } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkTlsQuery';
+export const ID = 'networkTlsQuery';
 
 export interface NetworkTlsArgs {
   id: string;
@@ -195,6 +195,14 @@ export const useNetworkTls = ({
       abortCtrl.current.abort();
     };
   }, [networkTlsRequest, networkTlsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkTlsResponse];
 };

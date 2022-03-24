@@ -45,6 +45,7 @@ import type { AlertsStackByField } from '../common/types';
 import { KpiPanel, StackByComboBox } from '../common/components';
 
 import { useInspectButton } from '../common/hooks';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -116,6 +117,19 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       onlyField == null ? defaultStackByOption : onlyField
     );
 
+    const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_HISTOGRAM_ID);
+    const [querySkip, setQuerySkip] = useState(!toggleStatus);
+    useEffect(() => {
+      setQuerySkip(!toggleStatus);
+    }, [toggleStatus]);
+    const toggleQuery = useCallback(
+      (status: boolean) => {
+        setToggleStatus(status);
+        // toggle on = skipQuery false
+        setQuerySkip(!status);
+      },
+      [setQuerySkip, setToggleStatus]
+    );
     const {
       loading: isLoadingAlerts,
       data: alertsData,
@@ -132,6 +146,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         runtimeMappings
       ),
       indexName: signalIndexName,
+      skip: querySkip,
     });
 
     const kibana = useKibana();
@@ -270,17 +285,21 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     );
 
     return (
-      <InspectButtonContainer show={!isInitialLoading}>
+      <InspectButtonContainer show={!isInitialLoading && toggleStatus}>
         <KpiPanel
           height={PANEL_HEIGHT}
           hasBorder
           paddingSize={paddingSize}
           data-test-subj="alerts-histogram-panel"
+          $toggleStatus={toggleStatus}
         >
           <HeaderSection
             id={uniqueQueryId}
+            height={!toggleStatus ? 30 : undefined}
             title={titleText}
             titleSize={titleSize}
+            toggleStatus={toggleStatus}
+            toggleQuery={toggleQuery}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}
             hideSubtitle
@@ -301,21 +320,23 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             </EuiFlexGroup>
           </HeaderSection>
 
-          {isInitialLoading ? (
-            <MatrixLoader />
-          ) : (
-            <AlertsHistogram
-              chartHeight={chartHeight}
-              data={formattedAlertsData}
-              from={from}
-              legendItems={legendItems}
-              legendPosition={legendPosition}
-              loading={isLoadingAlerts}
-              to={to}
-              showLegend={showLegend}
-              updateDateRange={updateDateRange}
-            />
-          )}
+          {toggleStatus ? (
+            isInitialLoading ? (
+              <MatrixLoader />
+            ) : (
+              <AlertsHistogram
+                chartHeight={chartHeight}
+                data={formattedAlertsData}
+                from={from}
+                legendItems={legendItems}
+                legendPosition={legendPosition}
+                loading={isLoadingAlerts}
+                to={to}
+                showLegend={showLegend}
+                updateDateRange={updateDateRange}
+              />
+            )
+          ) : null}
         </KpiPanel>
       </InspectButtonContainer>
     );
