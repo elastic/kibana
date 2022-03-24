@@ -16,8 +16,7 @@ export interface ProcessTreeAlertsDeps {
   jumpToAlertID?: string;
   isProcessSelected?: boolean;
   onAlertSelected: (e: MouseEvent) => void;
-  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
-  handleOnAlertDetailsClosed: (alertUuid: string) => void;
+  onShowAlertDetails: (alertUuid: string) => void;
 }
 
 export function ProcessTreeAlerts({
@@ -25,8 +24,7 @@ export function ProcessTreeAlerts({
   jumpToAlertID,
   isProcessSelected = false,
   onAlertSelected,
-  loadAlertDetails,
-  handleOnAlertDetailsClosed,
+  onShowAlertDetails,
 }: ProcessTreeAlertsDeps) {
   const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(null);
   const styles = useStyles();
@@ -90,8 +88,7 @@ export function ProcessTreeAlerts({
             isSelected={isProcessSelected && selectedAlert?.uuid === alertUuid}
             onClick={handleAlertClick}
             selectAlert={selectAlert}
-            loadAlertDetails={loadAlertDetails}
-            handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
+            onShowAlertDetails={onShowAlertDetails}
           />
         );
       })}

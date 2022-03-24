@@ -17,8 +17,7 @@ export interface ProcessTreeAlertDeps {
   isSelected: boolean;
   onClick: (alert: ProcessEventAlert | null) => void;
   selectAlert: (alertUuid: string) => void;
-  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
-  handleOnAlertDetailsClosed: (alertUuid: string, status?: string) => void;
+  onShowAlertDetails: (alertUuid: string) => void;
 }
 
 export const ProcessTreeAlert = ({
@@ -27,8 +26,7 @@ export const ProcessTreeAlert = ({
   isSelected,
   onClick,
   selectAlert,
-  loadAlertDetails,
-  handleOnAlertDetailsClosed,
+  onShowAlertDetails,
 }: ProcessTreeAlertDeps) => {
   const styles = useStyles({ isInvestigated, isSelected });
 
@@ -41,10 +39,10 @@ export const ProcessTreeAlert = ({
   }, [isInvestigated, uuid, selectAlert]);
 
   const handleExpandClick = useCallback(() => {
-    if (loadAlertDetails && uuid) {
-      loadAlertDetails(uuid, () => handleOnAlertDetailsClosed(uuid));
+    if (uuid) {
+      onShowAlertDetails(uuid);
     }
-  }, [handleOnAlertDetailsClosed, loadAlertDetails, uuid]);
+  }, [onShowAlertDetails, uuid]);
 
   const handleClick = useCallback(() => {
     if (alert.kibana?.alert) {

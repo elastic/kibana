@@ -34,6 +34,7 @@ import { GetLensAttributes, LensAttributes } from '../visualization_actions/type
 import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
 import { APP_ID, SecurityPageName } from '../../../../common/constants';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { useQueryToggle } from '../../containers/query_toggle';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -148,6 +149,19 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     },
     [defaultStackByOption, stackByOptions]
   );
+  const { toggleStatus, setToggleStatus } = useQueryToggle(id);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
+  const toggleQuery = useCallback(
+    (status: boolean) => {
+      setToggleStatus(status);
+      // toggle on = skipQuery false
+      setQuerySkip(!status);
+    },
+    [setQuerySkip, setToggleStatus]
+  );
 
   const matrixHistogramRequest = {
     endDate,
@@ -161,9 +175,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     runtimeMappings,
     isPtrIncluded,
     docValueFields,
-    skip,
+    skip: querySkip,
   };
-
   const [loading, { data, inspect, totalCount, refetch }] =
     useMatrixHistogramCombined(matrixHistogramRequest);
   const [{ pageName }] = useRouteSpy();
@@ -225,7 +238,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
       >
         <HistogramPanel
           data-test-subj={`${id}Panel`}
-          height={panelHeight}
+          height={toggleStatus ? panelHeight : undefined}
           paddingSize={paddingSize}
         >
           {loading && !isInitialLoading && (
@@ -239,8 +252,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
           <HeaderSection
             id={id}
+            height={toggleStatus ? undefined : 0}
             title={titleWithStackByField}
             titleSize={titleSize}
+            toggleStatus={toggleStatus}
+            toggleQuery={toggleQuery}
             subtitle={subtitleWithCounts}
             inspectMultiple
             showInspectButton={showInspectButton || !onHostOrNetworkPage}
@@ -276,17 +292,18 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
               <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
             </EuiFlexGroup>
           </HeaderSection>
-
-          {isInitialLoading ? (
-            <MatrixLoader />
-          ) : (
-            <BarChart
-              barChart={barChartData}
-              configs={barchartConfigs}
-              stackByField={selectedStackByOption.value}
-              timelineId={timelineId}
-            />
-          )}
+          {toggleStatus ? (
+            isInitialLoading ? (
+              <MatrixLoader />
+            ) : (
+              <BarChart
+                barChart={barChartData}
+                configs={barchartConfigs}
+                stackByField={selectedStackByOption.value}
+                timelineId={timelineId}
+              />
+            )
+          ) : null}
         </HistogramPanel>
       </HoverVisibilityContainer>
       {showSpacer && <EuiSpacer data-test-subj="spacer" size="l" />}

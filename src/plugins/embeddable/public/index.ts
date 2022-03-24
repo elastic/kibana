@@ -36,6 +36,7 @@ export type {
   EmbeddablePackageState,
   EmbeddableRendererProps,
   EmbeddableContainerContext,
+  EmbeddableContainerSettings,
 } from './lib';
 export {
   ACTION_ADD_PANEL,
