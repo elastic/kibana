@@ -6,18 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { Observable, Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject, combineLatest, from } from 'rxjs';
 import {
   buffer,
   bufferCount,
   concatMap,
+  delay,
   filter,
   groupBy,
   map,
   mergeMap,
   share,
   shareReplay,
+  skipWhile,
   takeUntil,
   tap,
 } from 'rxjs/operators';
@@ -54,14 +56,17 @@ export class AnalyticsClient implements IAnalyticsClient {
   private readonly shipperRegistered$ = new Subject<void>();
   private readonly eventTypeRegistry = new Map<EventType, EventTypeOpts<unknown>>();
   private readonly context$ = new BehaviorSubject<Partial<EventContext>>({});
-  private readonly contextWithReplay$ = this.context$.pipe(shareReplay(1));
   private readonly contextProvidersRegistry = new Map<
     Observable<Partial<EventContext>>,
-    { subscription: Subscription; context: Partial<EventContext> }
+    Partial<EventContext>
   >();
   private readonly optInConfig$ = new BehaviorSubject<OptInConfig | undefined>(undefined);
   private readonly optInConfigWithReplay$ = this.optInConfig$.pipe(
     filter((optInConfig): optInConfig is OptInConfig => typeof optInConfig !== 'undefined'),
+    shareReplay(1)
+  );
+  private readonly contextWithReplay$ = this.context$.pipe(
+    skipWhile(() => !this.optInConfig$.value), // Do not forward the context events until we have an optInConfig value
     shareReplay(1)
   );
 
@@ -70,7 +75,7 @@ export class AnalyticsClient implements IAnalyticsClient {
 
     // Observer that will emit when both events occur: the OptInConfig is set + a shipper has been registered
     const configReceivedAndShipperReceivedObserver$ = combineLatest([
-      this.optInConfig$.pipe(filter((optInConfig) => typeof optInConfig !== 'undefined')),
+      this.optInConfigWithReplay$,
       this.shipperRegistered$,
     ]);
 
@@ -82,6 +87,20 @@ export class AnalyticsClient implements IAnalyticsClient {
 
         // Accumulate the events until we can send them
         buffer(configReceivedAndShipperReceivedObserver$),
+
+        // Minimal delay only to make this chain async and let the optIn operation to complete first.
+        delay(0),
+
+        // Re-emit the context to make sure all the shippers got it (only if opted-in)
+        tap(() => {
+          if (this.optInConfig$.value?.global.enabled) {
+            this.context$.next(this.context$.value);
+          }
+        }),
+
+        // Minimal delay only to make this chain async and let
+        // the context update operation to complete first.
+        delay(0),
 
         // Flatten the array of events
         concatMap((events) => from(events)),
@@ -181,7 +200,8 @@ export class AnalyticsClient implements IAnalyticsClient {
   };
 
   public registerContextProvider = <Context>(contextProviderOpts: ContextProviderOpts<Context>) => {
-    const subscription = contextProviderOpts.context$
+    // const contextProviderID = `context_provider_${Date.now()}`;
+    contextProviderOpts.context$
       .pipe(
         tap((ctx) => {
           if (this.initContext.isDev) {
@@ -191,7 +211,9 @@ export class AnalyticsClient implements IAnalyticsClient {
       )
       .subscribe({
         next: (ctx) => {
-          this.contextProvidersRegistry.get(contextProviderOpts.context$)!.context = ctx;
+          // We store each context linked to the context provider so they can increase and reduce
+          // the number of fields they report without having left-overs in the global context.
+          this.contextProvidersRegistry.set(contextProviderOpts.context$, ctx);
 
           // For every context change, we rebuild the global context.
           // It's better to do it here than to rebuild it for every reportEvent.
@@ -203,10 +225,6 @@ export class AnalyticsClient implements IAnalyticsClient {
           this.updateGlobalContext();
         },
       });
-
-    // We store each context linked to the context provider so they can increase and reduce
-    // the number of fields they report without having left-overs in the global context.
-    this.contextProvidersRegistry.set(contextProviderOpts.context$, { subscription, context: {} });
   };
 
   public registerShipper = <Shipper extends IShipper, ShipperConfig>(
@@ -320,7 +338,7 @@ export class AnalyticsClient implements IAnalyticsClient {
    */
   private updateGlobalContext() {
     this.context$.next(
-      [...this.contextProvidersRegistry.values()].reduce((acc, { context }) => {
+      [...this.contextProvidersRegistry.values()].reduce((acc, context) => {
         return {
           ...acc,
           ...context,

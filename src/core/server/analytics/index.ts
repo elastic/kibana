@@ -15,6 +15,8 @@ export type {
 
 export type {
   AnalyticsClient,
+  Event,
+  EventContext,
   EventType,
   EventTypeOpts,
   IShipper,

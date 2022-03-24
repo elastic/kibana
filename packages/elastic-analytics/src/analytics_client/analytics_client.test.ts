@@ -8,13 +8,15 @@
 
 // eslint-disable-next-line max-classes-per-file
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AnalyticsClient } from './analytics_client';
 import { take, toArray } from 'rxjs/operators';
 import { shippersMock } from '../shippers/mocks';
 import type { EventContext, TelemetryCounter } from '../events';
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('AnalyticsClient', () => {
   let analyticsClient: AnalyticsClient;
@@ -307,9 +309,12 @@ describe('AnalyticsClient', () => {
       expect(optIn).toHaveBeenCalledWith(true);
     });
 
-    test('Spreads the context updates to the shipper', () => {
+    test('Spreads the context updates to the shipper (only after opt-in)', async () => {
       const extendContextMock = jest.fn();
       analyticsClient.registerShipper(MockedShipper, { extendContextMock });
+      expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
+      analyticsClient.optIn({ global: { enabled: true } });
+      await delay(10);
       expect(extendContextMock).toHaveBeenCalledWith({}); // The initial context
 
       const context$ = new Subject<{ a_field: boolean }>();
@@ -329,11 +334,22 @@ describe('AnalyticsClient', () => {
       expect(extendContextMock).toHaveBeenCalledWith({ a_field: true }); // After update
     });
 
-    test('Handles errors in the shipper', () => {
+    test('Does not spread the context if opt-in === false', async () => {
+      const extendContextMock = jest.fn();
+      analyticsClient.registerShipper(MockedShipper, { extendContextMock });
+      expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
+      analyticsClient.optIn({ global: { enabled: false } });
+      await delay(10);
+      expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
+    });
+
+    test('Handles errors in the shipper', async () => {
       const extendContextMock = jest.fn().mockImplementation(() => {
         throw new Error('Something went terribly wrong');
       });
       analyticsClient.registerShipper(MockedShipper, { extendContextMock });
+      analyticsClient.optIn({ global: { enabled: true } });
+      await delay(10);
       expect(extendContextMock).toHaveBeenCalledWith({}); // The initial context
       expect(logger.warn).toHaveBeenCalledWith(
         `Shipper "${MockedShipper.shipperName}" failed to extend the context`,
@@ -369,6 +385,50 @@ describe('AnalyticsClient', () => {
       await expect(globalContextPromise).resolves.toEqual([
         {}, // Original empty state
         { a_field: true },
+      ]);
+    });
+
+    test('It does not break if context emits `undefined`', async () => {
+      const context$ = new Subject<{ a_field: boolean }>();
+      analyticsClient.registerContextProvider({
+        schema: {
+          a_field: {
+            type: 'boolean',
+            _meta: {
+              description: 'a_field description',
+            },
+          },
+        },
+        context$,
+      });
+
+      const globalContextPromise = globalContext$.pipe(take(3), toArray()).toPromise();
+      context$.next();
+      context$.next(undefined);
+      await expect(globalContextPromise).resolves.toEqual([
+        {}, // Original empty state
+        {},
+        {},
+      ]);
+    });
+
+    test('It does not break for BehaviourSubjects (emitting as soon as they connect)', async () => {
+      const context$ = new BehaviorSubject<{ a_field: boolean }>({ a_field: true });
+      analyticsClient.registerContextProvider({
+        schema: {
+          a_field: {
+            type: 'boolean',
+            _meta: {
+              description: 'a_field description',
+            },
+          },
+        },
+        context$,
+      });
+
+      const globalContextPromise = globalContext$.pipe(take(1), toArray()).toPromise();
+      await expect(globalContextPromise).resolves.toEqual([
+        { a_field: true }, // No original empty state
       ]);
     });
 
@@ -481,10 +541,11 @@ describe('AnalyticsClient', () => {
         context$,
       });
 
-      // The size of the registry grows
+      const globalContextPromise = globalContext$.pipe(take(4), toArray()).toPromise();
+      context$.next({ a_field: true });
+      // The size of the registry grows on the first emission
       expect(contextProvidersRegistry.size).toBe(1);
 
-      const globalContextPromise = globalContext$.pipe(take(3), toArray()).toPromise();
       context$.next({ a_field: true });
       // Still in the registry
       expect(contextProvidersRegistry.size).toBe(1);
@@ -493,6 +554,7 @@ describe('AnalyticsClient', () => {
       expect(contextProvidersRegistry.size).toBe(0);
       await expect(globalContextPromise).resolves.toEqual([
         {}, // Original empty state
+        { a_field: true },
         { a_field: true },
         {},
       ]);
@@ -687,6 +749,7 @@ describe('AnalyticsClient', () => {
       const reportEventsMock = jest.fn();
       analyticsClient.registerShipper(MockedShipper1, { reportEventsMock });
       analyticsClient.optIn({ global: { enabled: true } });
+      await delay(10);
 
       expect(reportEventsMock).toHaveBeenCalledTimes(2);
       expect(reportEventsMock).toHaveBeenNthCalledWith(1, [
@@ -810,6 +873,7 @@ describe('AnalyticsClient', () => {
         global: { enabled: true },
         event_types: { ['event-type-a']: { enabled: false } },
       });
+      await delay(10);
 
       expect(reportEventsMock).toHaveBeenCalledTimes(1);
       expect(reportEventsMock).toHaveBeenNthCalledWith(1, [
@@ -875,6 +939,7 @@ describe('AnalyticsClient', () => {
           ['event-type-a']: { enabled: true, shippers: { [MockedShipper2.shipperName]: false } },
         },
       });
+      await delay(10);
 
       expect(reportEventsMock1).toHaveBeenCalledTimes(2);
       expect(reportEventsMock1).toHaveBeenNthCalledWith(1, [
@@ -970,6 +1035,7 @@ describe('AnalyticsClient', () => {
           ['event-type-a']: { enabled: true },
         },
       });
+      await delay(10);
 
       expect(reportEventsMock1).toHaveBeenCalledTimes(2);
       expect(reportEventsMock1).toHaveBeenNthCalledWith(1, [

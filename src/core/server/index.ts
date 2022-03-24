@@ -452,6 +452,8 @@ export type {
   AnalyticsServicePreboot,
   AnalyticsServiceStart,
   AnalyticsClient,
+  Event,
+  EventContext,
   EventType,
   EventTypeOpts,
   IShipper,

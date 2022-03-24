@@ -19,3 +19,10 @@ checks-reporter-with-killswitch "Status Integration Tests" \
     --config test/server_integration/http/platform/config.status.ts \
     --bail \
     --debug \
+
+# Tests that must be run against source in order to build test plugins
+checks-reporter-with-killswitch "Analytics Integration Tests" \
+  node scripts/functional_tests \
+    --config test/server_integration/analytics/config.ts \
+    --bail \
+    --debug \
