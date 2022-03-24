@@ -36,7 +36,6 @@ import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/
 import { CloudSetup } from '../../cloud/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
-import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 import { configSchema, MonitoringConfig } from './config';
 
 export interface MonitoringLicenseService {
@@ -56,7 +55,6 @@ export interface PluginsSetup {
   alerting?: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
   cloud?: CloudSetup;
-  monitoringCollection?: MonitoringCollectionSetup;
 }
 
 export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerContext {
