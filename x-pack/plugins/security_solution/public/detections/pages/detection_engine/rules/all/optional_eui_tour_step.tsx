@@ -7,16 +7,15 @@
 
 import React, { FC } from 'react';
 
-import { EuiTourStepProps, EuiTourStep } from '@elastic/eui';
+import { EuiTourStepProps, EuiTourStep, DistributiveOmit } from '@elastic/eui';
 
 /**
  * This component can be used for tour steps, when tour step is optional
  * If stepProps are not supplied, step will not be rendered, only children component will be
  */
-export const OptionalEuiTourStep: FC<{ stepProps: EuiTourStepProps | undefined }> = ({
-  children,
-  stepProps,
-}) => {
+export const OptionalEuiTourStep: FC<{
+  stepProps: DistributiveOmit<EuiTourStepProps, 'anchor'> | undefined;
+}> = ({ children, stepProps }) => {
   if (!stepProps) {
     return <>{children}</>;
   }
