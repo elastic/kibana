@@ -9,7 +9,6 @@ import { Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
 import {
   map,
   distinctUntilChanged,
-  pluck,
   filter,
   debounceTime,
   bufferTime,
@@ -48,7 +47,7 @@ interface PluginStatus {
   [name: PluginName]: ServiceStatus;
 }
 
-interface PluginReportedStatus {
+interface ReportedStatusSubscriptions {
   [name: PluginName]: Subscription;
 }
 
@@ -60,7 +59,7 @@ export class PluginsStatusService {
   private pluginData$ = new ReplaySubject<PluginData>(1);
   private pluginStatus: PluginStatus = {};
   private pluginStatus$ = new ReplaySubject<PluginStatus>(1);
-  private pluginReportedStatus: PluginReportedStatus = {};
+  private reportedStatusSubscriptions: ReportedStatusSubscriptions = {};
   private updatePluginStatuses$ = new Subject<PluginName>();
   private newRegistrationsAllowed = true;
 
@@ -89,7 +88,7 @@ export class PluginsStatusService {
 
       this.rootPlugins.forEach((plugin) => {
         this.pluginData[plugin].derivedStatus = derivedStatus;
-        if (!this.pluginReportedStatus[plugin]) {
+        if (!this.reportedStatusSubscriptions[plugin]) {
           // this root plugin has NOT registered any status Observable. Thus, its status is derived from core
           this.pluginStatus[plugin] = derivedStatus;
         }
@@ -106,10 +105,10 @@ export class PluginsStatusService {
       );
     }
 
-    const subscription = this.pluginReportedStatus[plugin];
-    if (subscription) subscription.unsubscribe();
+    // unsubscribe from any previous subscriptions. Ideally plugins should register a status Observable only once
+    this.reportedStatusSubscriptions[plugin]?.unsubscribe();
 
-    this.pluginReportedStatus[plugin] = status$
+    this.reportedStatusSubscriptions[plugin] = status$
       // Set a timeout for custom status Observables
       .pipe(timeoutWith(STATUS_TIMEOUT_MS, status$.pipe(startWith(defaultStatus))))
       .subscribe((status) => {
@@ -142,24 +141,27 @@ export class PluginsStatusService {
     const directDependencies = this.pluginData[plugin].dependencies;
 
     return this.getAll$().pipe(
-      map((allStatus) =>
-        Object.keys(allStatus)
-          .filter((dep) => directDependencies.includes(dep))
-          .reduce((acc: PluginStatus, key: PluginName) => {
-            acc[key] = allStatus[key];
-            return acc;
-          }, {})
-      ),
+      map((allStatus) => {
+        const dependenciesStatus: Record<PluginName, ServiceStatus> = {};
+        directDependencies.forEach((dep) => (dependenciesStatus[dep] = allStatus[dep]));
+        return dependenciesStatus;
+      }),
       distinctUntilChanged()
     );
   }
 
   public getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus> {
     return this.pluginData$.asObservable().pipe(
-      pluck(plugin, 'derivedStatus'),
+      map((pluginData) => pluginData[plugin]?.derivedStatus),
       filter((status: ServiceStatus | undefined): status is ServiceStatus => !!status),
       distinctUntilChanged()
     );
+  }
+
+  public stop() {
+    Object.values(this.reportedStatusSubscriptions).forEach((subscription) => {
+      subscription.unsubscribe();
+    });
   }
 
   private initPluginData(pluginDependencies: ReadonlyMap<PluginName, PluginName[]>): PluginData {
@@ -214,7 +216,7 @@ export class PluginsStatusService {
     const pluginData = this.pluginData[plugin];
     pluginData.derivedStatus = newStatus;
 
-    if (!this.pluginReportedStatus[plugin]) {
+    if (!this.reportedStatusSubscriptions[plugin]) {
       // this plugin has NOT registered any status Observable. Thus, its status is derived from its dependencies + core
       this.pluginStatus[plugin] = newStatus;
     }
