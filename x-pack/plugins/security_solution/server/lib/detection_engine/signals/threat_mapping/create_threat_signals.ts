@@ -136,7 +136,6 @@ export const createThreatSignals = async ({
     threatIndicatorPath,
     threatLanguage,
     threatQuery,
-    getThreatList,
     pitId,
     reassignPitId,
   });
