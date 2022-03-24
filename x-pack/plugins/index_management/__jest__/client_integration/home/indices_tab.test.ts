@@ -255,6 +255,8 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('closeIndexMenuButton');
 
+      // After the index is closed, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
       expect(httpSetup.post).toHaveBeenCalledWith(
         `${API_BASE_PATH}/indices/close`,
         expect.anything()
@@ -276,6 +278,8 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('openIndexMenuButton');
 
+      // After the index is opened, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
       expect(httpSetup.post).toHaveBeenCalledWith(
         `${API_BASE_PATH}/indices/open`,
         expect.anything()
@@ -292,6 +296,8 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('flushIndexMenuButton');
 
+      // After the index is flushed, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
       expect(httpSetup.post).toHaveBeenCalledWith(
         `${API_BASE_PATH}/indices/flush`,
         expect.anything()
@@ -309,6 +315,8 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('clearCacheIndexMenuButton');
 
+      // After the index cache is cleared, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
       expect(httpSetup.post).toHaveBeenCalledWith(
         `${API_BASE_PATH}/indices/clear_cache`,
         expect.anything()
@@ -330,6 +338,8 @@ describe('<IndexManagementHome />', () => {
       expect(exists('unfreezeIndexMenuButton')).toBe(true);
       await actions.clickContextMenuOption('unfreezeIndexMenuButton');
 
+      // After the index is unfrozen, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
       expect(httpSetup.post).toHaveBeenCalledWith(
         `${API_BASE_PATH}/indices/unfreeze`,
         expect.anything()
@@ -358,6 +368,8 @@ describe('<IndexManagementHome />', () => {
 
       await actions.clickModalConfirm();
 
+      // After the index force merged, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
       expect(httpSetup.post).toHaveBeenCalledWith(
         `${API_BASE_PATH}/indices/forcemerge`,
         expect.anything()

@@ -443,7 +443,11 @@ describe('Index Templates tab', () => {
 
         expect(httpSetup.post).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/delete_index_templates`,
-          expect.anything()
+          expect.objectContaining({
+            body: JSON.stringify({
+              templates: [{ name: templates[0].name, isLegacy: false }],
+            }),
+          })
         );
       });
     });

@@ -98,9 +98,18 @@ describe('<TemplateClone />', () => {
         actions.clickNextButton();
       });
 
+      const { priority, version, _kbnMeta } = templateToClone;
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/index_templates`,
-        expect.anything()
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: `${templateToClone.name}-copy`,
+            indexPatterns: DEFAULT_INDEX_PATTERNS,
+            priority,
+            version,
+            _kbnMeta,
+          }),
+        })
       );
     });
   });
