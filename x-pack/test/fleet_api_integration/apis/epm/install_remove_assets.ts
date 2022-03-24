@@ -91,29 +91,17 @@ export default function (providerContext: FtrProviderContext) {
         expect(resMetricsTemplate.statusCode).equal(404);
       });
       it('should have uninstalled the component templates', async function () {
-        const resMappings = await es.transport.request(
+        const resPackage = await es.transport.request(
           {
             method: 'GET',
-            path: `/_component_template/${logsTemplateName}@mappings`,
+            path: `/_component_template/${logsTemplateName}@package`,
           },
           {
             ignore: [404],
             meta: true,
           }
         );
-        expect(resMappings.statusCode).equal(404);
-
-        const resSettings = await es.transport.request(
-          {
-            method: 'GET',
-            path: `/_component_template/${logsTemplateName}@settings`,
-          },
-          {
-            ignore: [404],
-            meta: true,
-          }
-        );
-        expect(resSettings.statusCode).equal(404);
+        expect(resPackage.statusCode).equal(404);
 
         const resUserSettings = await es.transport.request(
           {
@@ -372,22 +360,15 @@ const expectAssetsInstalled = ({
     expect(res.statusCode).equal(200);
   });
   it('should have installed the component templates', async function () {
-    const resMappings = await es.transport.request(
+    const resPackage = await es.transport.request(
       {
         method: 'GET',
-        path: `/_component_template/${logsTemplateName}@mappings`,
+        path: `/_component_template/${logsTemplateName}@package`,
       },
       { meta: true }
     );
-    expect(resMappings.statusCode).equal(200);
-    const resSettings = await es.transport.request(
-      {
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}@settings`,
-      },
-      { meta: true }
-    );
-    expect(resSettings.statusCode).equal(200);
+    expect(resPackage.statusCode).equal(200);
+
     const resUserSettings = await es.transport.request(
       {
         method: 'GET',
@@ -537,11 +518,7 @@ const expectAssetsInstalled = ({
       ],
       installed_es: [
         {
-          id: 'logs-all_assets.test_logs@mappings',
-          type: 'component_template',
-        },
-        {
-          id: 'logs-all_assets.test_logs@settings',
+          id: 'logs-all_assets.test_logs@package',
           type: 'component_template',
         },
         {
@@ -549,11 +526,7 @@ const expectAssetsInstalled = ({
           type: 'component_template',
         },
         {
-          id: 'metrics-all_assets.test_metrics@mappings',
-          type: 'component_template',
-        },
-        {
-          id: 'metrics-all_assets.test_metrics@settings',
+          id: 'metrics-all_assets.test_metrics@package',
           type: 'component_template',
         },
         {
