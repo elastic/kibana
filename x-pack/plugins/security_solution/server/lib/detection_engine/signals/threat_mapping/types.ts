@@ -124,8 +124,9 @@ export interface CreateEventSignalOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
-  threatListConfig: ThreatListConfig;
   perPage?: number;
+  threatPitId: OpenPointInTimeResponse['id'];
+  reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
 
 type EntryKey = 'field' | 'value';
