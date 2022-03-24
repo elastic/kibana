@@ -34,6 +34,8 @@ import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
 import { errors } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Event as Event_2 } from '@elastic/analytics';
+import { EventContext } from '@elastic/analytics';
 import { EventType } from '@elastic/analytics';
 import { EventTypeOpts } from '@elastic/analytics';
 import { IncomingHttpHeaders } from 'http';
@@ -1013,6 +1015,10 @@ export interface ErrorHttpResponseOptions {
     body?: ResponseError;
     headers?: ResponseHeaders;
 }
+
+export { Event_2 as Event }
+
+export { EventContext }
 
 // Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
