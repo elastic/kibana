@@ -12,6 +12,7 @@
     "public/**/*",
     "server/**/*",
     "static/**/*",
+    "../../../typings/**/*",
     ".storybook/**/*"
   ],
   "references": [
