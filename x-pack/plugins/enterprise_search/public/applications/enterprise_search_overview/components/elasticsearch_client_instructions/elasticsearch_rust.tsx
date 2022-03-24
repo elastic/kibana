@@ -54,7 +54,7 @@ export const ElasticsearchRust: React.FC = () => {
       <EuiCodeBlock fontSize="m" isCopyable>
         {dedent`
           [dependencies]
-          elasticsearch = "8.0.0-alpha.1"          
+          elasticsearch = "8.0.0-alpha.1"
         `}
       </EuiCodeBlock>
       <EuiSpacer size="s" />
@@ -68,7 +68,7 @@ export const ElasticsearchRust: React.FC = () => {
       <EuiCodeBlock fontSize="m" isCopyable>
         {dedent`
           serde = "~1"
-          serde_json = "~1"                  
+          serde_json = "~1"
         `}
       </EuiCodeBlock>
       <EuiSpacer size="s" />

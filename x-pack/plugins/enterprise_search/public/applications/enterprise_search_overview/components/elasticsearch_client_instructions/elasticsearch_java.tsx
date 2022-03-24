@@ -90,7 +90,7 @@ export const ElasticsearchJava: React.FC = () => {
               restClient, new JacksonJsonpMapper());
           
           // And create the API client
-          ElasticsearchClient client = new ElasticsearchClient(transport);          
+          ElasticsearchClient client = new ElasticsearchClient(transport);
         `}
       </EuiCodeBlock>
       <EuiSpacer size="s" />

@@ -142,7 +142,7 @@ export const ElasticsearchRuby: React.FC<{ cloudId?: string }> = ({ cloudId }) =
               client = Elasticsearch::Client.new( 
                 cloud_id: '${cloudId}', 
                 api_key: {id: '<Id>', api_key: '<APIKey>'} 
-              )                            
+              )
             `}
           </EuiCodeBlock>
         </>

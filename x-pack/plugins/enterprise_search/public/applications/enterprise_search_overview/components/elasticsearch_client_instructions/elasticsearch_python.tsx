@@ -143,7 +143,7 @@ export const ElasticsearchPython: React.FC<{ cloudId?: string }> = ({ cloudId })
               es = Elasticsearch([
                   {"scheme": "http", "host": "localhost", "port": 9200},
                   {"scheme": "http", "host": "localhost", "port": 9201},
-              ])                            
+              ])
             `}
           </EuiCodeBlock>
           <EuiSpacer size="s" />

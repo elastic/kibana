@@ -82,7 +82,7 @@ export const ElasticsearchGo: React.FC<{ cloudId?: string }> = ({ cloudId }) => 
           }
           
           defer res.Body.Close()
-          log.Println(res)          
+          log.Println(res)
         `}
       </EuiCodeBlock>
 
@@ -130,7 +130,7 @@ export const ElasticsearchGo: React.FC<{ cloudId?: string }> = ({ cloudId }) => 
                 Username: "<username>",
                 Password: "<password>",
               }
-              es, err := elasticsearch.NewClient(cfg)              
+              es, err := elasticsearch.NewClient(cfg)
             `}
           </EuiCodeBlock>
         </>
