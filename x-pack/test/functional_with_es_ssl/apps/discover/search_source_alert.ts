@@ -177,8 +177,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const [{ id: alertId }] = await getAlertsByName(RULE_NAME);
     await queryBar.setQuery(`alert_id:${alertId}`);
-    await queryBar.submitQuery();
-    await PageObjects.discover.waitUntilSearchingHasFinished();
+    await retry.waitForWithTimeout('doc table contains alert', 5000, async () => {
+      await queryBar.submitQuery();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      return (await dataGrid.getDocCount()) > 0;
+    });
   };
 
   const getResultsLink = async () => {
