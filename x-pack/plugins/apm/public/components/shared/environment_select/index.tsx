@@ -7,62 +7,82 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
-import { throttle } from 'lodash';
+import { debounce } from 'lodash';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getEnvironmentLabel } from '../../../../common/environment_filter_values';
-import { useEnvironmentCustomOptions } from '../../../hooks/use_environment_custom_options';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
+import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { Environment } from '../../../../common/environment_rt';
 
 export function EnvironmentSelect({
+  environment,
+  environmentOptions,
+  status,
+  serviceName,
+  start,
+  end,
   onChange,
 }: {
+  environment: Environment;
+  environmentOptions: Array<EuiComboBoxOptionOption<string>>;
+  status: FETCH_STATUS;
+  serviceName?: string;
+  start?: string;
+  end?: string;
   onChange: (value?: string) => void;
 }) {
-  let defaultOption: EuiComboBoxOptionOption<string> | undefined;
-  const {
-    setFieldValue,
-    environment,
-    serviceName,
-    environmentOptions,
-    start,
-    end,
-    status,
-  } = useEnvironmentsContext();
-
-  const customOptions = useEnvironmentCustomOptions({
-    serviceName,
-    start,
-    end,
-  });
-
-  if (environment) {
-    defaultOption = {
-      value: environment,
-      label: getEnvironmentLabel(environment),
-    };
-  }
+  const [searchValue, setSearchValue] = useState('');
+  const defaultOption: EuiComboBoxOptionOption<string> = {
+    value: environment,
+    label: getEnvironmentLabel(environment),
+  };
 
   const [selectedOptions, setSelectedOptions] = useState(
     defaultOption ? [defaultOption] : []
   );
 
-  const options: Array<EuiComboBoxOptionOption<string>> = [
-    ...(customOptions ? customOptions : []),
-    ...environmentOptions,
-  ];
-
   const handleChange = useCallback(
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedOptions(changedOptions);
 
+      if (changedOptions.length === 0) {
+        onChange('');
+      }
+
       if (changedOptions.length === 1) {
-        const [selectedOption] = changedOptions;
-        onChange(selectedOption.value);
+        const [changedOption] = changedOptions;
+        onChange(changedOption.value);
       }
     },
     [onChange]
   );
+
+  const { data, status: searchStatus } = useFetcher(
+    (callApmApi) => {
+      if (searchValue !== '') {
+        return callApmApi('GET /internal/apm/suggestions', {
+          params: {
+            query: {
+              fieldName: SERVICE_ENVIRONMENT,
+              fieldValue: searchValue ?? '',
+              serviceName,
+              start,
+              end,
+            },
+          },
+        });
+      }
+    },
+    [searchValue, start, end, serviceName]
+  );
+  const terms = data?.terms ?? [];
+
+  const options: Array<EuiComboBoxOptionOption<string>> = [
+    ...(searchValue === '' ? environmentOptions : []),
+    ...terms.map((name) => {
+      return { label: name, value: name };
+    }),
+  ];
 
   return (
     <EuiComboBox
@@ -79,8 +99,10 @@ export function EnvironmentSelect({
       options={options}
       selectedOptions={selectedOptions}
       onChange={(changedOptions) => handleChange(changedOptions)}
-      onSearchChange={throttle(setFieldValue, 500)}
-      isLoading={status === FETCH_STATUS.LOADING}
+      onSearchChange={debounce(setSearchValue, 500)}
+      isLoading={
+        status === FETCH_STATUS.LOADING || searchStatus === FETCH_STATUS.LOADING
+      }
     />
   );
 }

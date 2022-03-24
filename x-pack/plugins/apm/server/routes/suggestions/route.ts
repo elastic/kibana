@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { maxSuggestions } from '../../../../observability/common';
 import { getSuggestions } from '../suggestions/get_suggestions';
-import { getSuggestionsWithTermsAggregation } from '../suggestions/get_suggestions_with_terms';
+import { getSuggestionsWithTermsAggregation } from '../suggestions/get_suggestions_with_terms_aggregation';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
