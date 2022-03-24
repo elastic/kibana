@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ServiceName } from '../../types';
 import { ElasticsearchAssetType, KibanaAssetType } from '../../types';
 
-// only allow Kibana assets for the kibana key, ES asssets for elasticsearch, etc
+// only allow Kibana assets for the kibana key, ES assets for elasticsearch, etc
 type ServiceNameToAssetTypes = Record<Extract<ServiceName, 'kibana'>, KibanaAssetType[]> &
   Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetType[]>;
 
@@ -62,6 +62,9 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   security_rule: i18n.translate('xpack.fleet.epm.assetTitles.securityRules', {
     defaultMessage: 'Security rules',
   }),
+  osquery_pack_asset: i18n.translate('xpack.fleet.epm.assetTitles.osqueryPackAsset', {
+    defaultMessage: 'Osquery packs',
+  }),
   ml_module: i18n.translate('xpack.fleet.epm.assetTitles.mlModules', {
     defaultMessage: 'ML modules',
   }),
@@ -98,6 +101,7 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   csp_rule_template: 'securityApp', // TODO ICON
   ml_module: 'mlApp',
   tag: 'tagApp',
+  osquery_pack_asset: 'osqueryApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {
