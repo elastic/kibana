@@ -205,7 +205,6 @@ export const mockGlobalState: State = {
         [usersModel.UsersTableType.allUsers]: {
           activePage: 0,
           limit: 10,
-          // TODO sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
         },
         [usersModel.UsersTableType.anomalies]: null,
         [usersModel.UsersTableType.risk]: {
@@ -217,11 +216,15 @@ export const mockGlobalState: State = {
           },
           severitySelection: [],
         },
+        [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
+        [usersModel.UsersTableType.alerts]: { activePage: 0, limit: 10 },
       },
     },
     details: {
       queries: {
         [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
+        [usersModel.UsersTableType.alerts]: { activePage: 0, limit: 10 },
       },
     },
   },

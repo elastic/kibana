@@ -27,7 +27,7 @@ export const getAlertUrlErrorCount = (
       environment: serviceEnv ?? ENVIRONMENT_ALL.value,
     },
   });
-// This formatter is for TransactionDuration, TransactionErrorRate, and TransactionDurationAnomaly.
+// This formatter is for TransactionDuration, TransactionErrorRate, and Anomaly.
 export const getAlertUrlTransaction = (
   serviceName: string,
   serviceEnv: string | undefined,
