@@ -12,10 +12,10 @@ import React from 'react';
 import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
 import { OverlayRef } from '../../../../../core/public';
-import { DEFAULT_CONTROL_WIDTH } from './editor_constants';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlWidth, ControlInput, IEditableControlFactory } from '../../types';
 import { toMountPoint } from '../../../../kibana_react/public';
+import { DEFAULT_CONTROL_WIDTH } from '../../../common/control_group/control_group_constants';
 
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
 export interface CreateControlButtonProps {
