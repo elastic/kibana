@@ -197,10 +197,7 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
     getState: () => MapStoreState
   ) => {
     const { extent, zoom: nextZoom } = mapExtentState;
-    const { buffer: prevBuffer, zoom: prevZoom } = getDataFilters(
-      getState(),
-      getEditState(getState())?.layerId
-    );
+    const { buffer: prevBuffer, zoom: prevZoom } = getDataFilters(getState(), '');
 
     let doesPrevBufferContainNextExtent = true;
     if (prevBuffer) {
