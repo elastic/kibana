@@ -46,18 +46,18 @@ export_events() {
     "bool": {
       "filter": [
         {
-          "term": { 
+          "term": {
             "ProjectID": 5
-          }                       
-        },                       
-        {                             
+          }
+        },
+        {
           "range": {
             "@timestamp": {
               "gte": "'"$from"'",
               "lt": "'"$to"'",
               "format": "epoch_second"
             }
-          }                                                
+          }
         }
       ]
     }
@@ -104,11 +104,11 @@ done
 docker pull elasticdump/elasticsearch-dump:latest
 
 # Export full events table
-export_events "profiling-events" "$date_from" "$date_to"
+export_events "profiling-events-all" "$date_from" "$date_to"
 
 # Export down-sampled tables
 for ((i = 1; i <= 11; i++)); do
-  export_events "profiling-events-5pow$i" "$date_from" "$date_to"
+  export_events "profiling-events-5pow$(printf '%02d' i)" "$date_from" "$date_to"
 done
 
 # We need all stacktraces, stackframes and executables as 'LastSeen' may be outside [date_from, date_to].

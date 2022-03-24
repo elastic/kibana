@@ -25,7 +25,7 @@ export function getServices(core: CoreStart): Services {
       try {
         const unixTime = Math.floor(Date.now() / 1000);
         const query: HttpFetchQuery = {
-          index: 'profiling-events',
+          index: 'profiling-events-all',
           projectID: 5,
           timeFrom: unixTime - parseInt(seconds, 10),
           timeTo: unixTime,
@@ -41,7 +41,7 @@ export function getServices(core: CoreStart): Services {
     fetchElasticFlamechart: async (timeFrom: number, timeTo: number) => {
       try {
         const query: HttpFetchQuery = {
-          index: 'profiling-events',
+          index: 'profiling-events-all',
           projectID: 5,
           timeFrom,
           timeTo,
@@ -73,7 +73,7 @@ export function getServices(core: CoreStart): Services {
     fetchPixiFlamechart: async (timeFrom: number, timeTo: number) => {
       try {
         const query: HttpFetchQuery = {
-          index: 'profiling-events',
+          index: 'profiling-events-all',
           projectID: 5,
           timeFrom,
           timeTo,

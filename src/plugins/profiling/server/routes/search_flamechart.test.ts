@@ -23,27 +23,27 @@ describe('Using down-sampled indexes', () => {
       {
         // stay with the input downsampled index
         sampleCountFromPow6: targetSampleSize,
-        expected: { name: 'profiling-events-5pow6', sampleRate: 1 / 5 ** 6 },
+        expected: { name: 'profiling-events-5pow06', sampleRate: 1 / 5 ** 6 },
       },
       {
         // stay with the input downsampled index
         sampleCountFromPow6: targetSampleSize * 5 - 1,
-        expected: { name: 'profiling-events-5pow6', sampleRate: 1 / 5 ** 6 },
+        expected: { name: 'profiling-events-5pow06', sampleRate: 1 / 5 ** 6 },
       },
       {
         // go down one downsampling step
         sampleCountFromPow6: targetSampleSize * 5,
-        expected: { name: 'profiling-events-5pow7', sampleRate: 1 / 5 ** 7 },
+        expected: { name: 'profiling-events-5pow07', sampleRate: 1 / 5 ** 7 },
       },
       {
         // go up one downsampling step
         sampleCountFromPow6: targetSampleSize - 1,
-        expected: { name: 'profiling-events-5pow5', sampleRate: 1 / 5 ** 5 },
+        expected: { name: 'profiling-events-5pow05', sampleRate: 1 / 5 ** 5 },
       },
       {
         // go to the full events index
         sampleCountFromPow6: 0,
-        expected: { name: 'profiling-events', sampleRate: 1 },
+        expected: { name: 'profiling-events-all', sampleRate: 1 },
       },
       {
         // go to the most downsampled index
@@ -54,7 +54,12 @@ describe('Using down-sampled indexes', () => {
 
     for (const t of tests) {
       expect(
-        getSampledTraceEventsIndex(targetSampleSize, t.sampleCountFromPow6, initialExp)
+        getSampledTraceEventsIndex(
+          'profiling-events-all',
+          targetSampleSize,
+          t.sampleCountFromPow6,
+          initialExp
+        )
       ).toEqual(t.expected);
     }
   });
