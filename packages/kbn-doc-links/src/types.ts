@@ -82,6 +82,7 @@ export interface DocLinks {
     readonly crawlRules: string;
     readonly curations: string;
     readonly duplicateDocuments: string;
+    readonly elasticsearchEngine: string;
     readonly entryPoints: string;
     readonly guide: string;
     readonly indexingDocuments: string;

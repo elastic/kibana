@@ -33,6 +33,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../shared/doc_links';
 import { parseQueryParams } from '../../../shared/query_params';
 import { ENGINES_TITLE } from '../engines';
 import { AppSearchPageTemplate } from '../layout';
@@ -212,7 +213,11 @@ export const EngineCreation: React.FC = () => {
                             </p>
                             <p>
                               <small>
-                                <EuiLink href="#" target="_blank">
+                                <EuiLink
+                                  href={docLinks.appSearchElasticsearchEngine}
+                                  target="_blank"
+                                  external
+                                >
                                   {i18n.translate(
                                     'xpack.enterpriseSearch.engineCreation.elasticsearchIndexedLink',
                                     {

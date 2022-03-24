@@ -15,6 +15,7 @@ class DocLinks {
   public appSearchCrawlRules: string;
   public appSearchCurations: string;
   public appSearchDuplicateDocuments: string;
+  public appSearchElasticsearchEngine: string;
   public appSearchEntryPoints: string;
   public appSearchGuide: string;
   public appSearchIndexingDocs: string;
@@ -72,6 +73,7 @@ class DocLinks {
     this.appSearchCrawlRules = '';
     this.appSearchCurations = '';
     this.appSearchDuplicateDocuments = '';
+    this.appSearchElasticsearchEngine = '';
     this.appSearchEntryPoints = '';
     this.appSearchGuide = '';
     this.appSearchIndexingDocs = '';
@@ -130,6 +132,7 @@ class DocLinks {
     this.appSearchCrawlRules = docLinks.links.appSearch.crawlRules;
     this.appSearchCurations = docLinks.links.appSearch.curations;
     this.appSearchDuplicateDocuments = docLinks.links.appSearch.duplicateDocuments;
+    this.appSearchElasticsearchEngine = docLinks.links.appSearch.elasticsearchEngine;
     this.appSearchEntryPoints = docLinks.links.appSearch.entryPoints;
     this.appSearchGuide = docLinks.links.appSearch.guide;
     this.appSearchIndexingDocs = docLinks.links.appSearch.indexingDocuments;

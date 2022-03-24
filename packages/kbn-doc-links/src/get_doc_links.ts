@@ -93,6 +93,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       crawlRules: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-crawl-rules`,
       curations: `${APP_SEARCH_DOCS}curations-guide.html`,
       duplicateDocuments: `${APP_SEARCH_DOCS}web-crawler-reference.html#web-crawler-reference-content-deduplication`,
+      elasticsearchEngine: `${APP_SEARCH_DOCS}use-an-existing-elasticsearch-index.html`,
       entryPoints: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-entry-points`,
       guide: `${APP_SEARCH_DOCS}index.html`,
       indexingDocuments: `${APP_SEARCH_DOCS}indexing-documents-guide.html`,
