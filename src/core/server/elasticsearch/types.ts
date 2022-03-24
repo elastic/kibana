@@ -86,7 +86,7 @@ export interface ElasticsearchServiceSetup {
     /**
      * Provide direct access to the current elasticsearch configuration.
      *
-     * @deprecated this will be removed in a later version.
+     * @deprecated Can be removed when https://github.com/elastic/kibana/issues/119862 is done.
      */
     readonly config$: Observable<ElasticsearchConfig>;
   };

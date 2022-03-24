@@ -14,6 +14,7 @@ import { SecurityPageName } from '../types';
 import { AppDeepLink, AppNavLinkStatus, Capabilities } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
+  DETECTION_RESPONSE,
   DETECT,
   ALERTS,
   RULES,
@@ -31,9 +32,12 @@ import {
   TRUSTED_APPLICATIONS,
   POLICIES,
   ENDPOINTS,
+  GETTING_STARTED,
 } from '../translations';
 import {
   OVERVIEW_PATH,
+  LANDING_PATH,
+  DETECTION_RESPONSE_PATH,
   ALERTS_PATH,
   RULES_PATH,
   EXCEPTIONS_PATH,
@@ -81,6 +85,31 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
       }),
     ],
     order: 9000,
+  },
+  {
+    id: SecurityPageName.landing,
+    title: GETTING_STARTED,
+    path: LANDING_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    features: [FEATURE.general],
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.getStarted', {
+        defaultMessage: 'Getting started',
+      }),
+    ],
+  },
+  {
+    id: SecurityPageName.detectionAndResponse,
+    title: DETECTION_RESPONSE,
+    path: DETECTION_RESPONSE_PATH,
+    navLinkStatus: AppNavLinkStatus.hidden,
+    experimentalKey: 'detectionResponseEnabled',
+    features: [FEATURE.general],
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.detectionAndResponse', {
+        defaultMessage: 'Detection & Response',
+      }),
+    ],
   },
   {
     id: SecurityPageName.detections,

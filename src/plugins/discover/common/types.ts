@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsResolveResponse } from 'src/core/public';
 import type { ISearchSource } from '../../data/common';
 import { SavedObjectAttributes } from '../../../core/types';
 import { VIEW_MODE } from './constants';
+
+import type { ISearchSource } from '../../../../data/public';
+import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
+import { VIEW_MODE } from '../../components/view_mode_toggle';
 
 export interface DiscoverGridSettingsColumn {
   width?: number;
@@ -27,6 +32,7 @@ export interface SavedSearchGridAttributes extends SavedObjectAttributes {
     };
   };
 }
+
 
 /** @internal **/
 export interface SavedSearchAttributes extends SavedObjectAttributes {
@@ -60,8 +66,9 @@ export interface SavedSearch {
   };
   hideChart?: boolean;
   sharingSavedObjectProps?: {
-    outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-    aliasTargetId?: string;
+    outcome?: SavedObjectsResolveResponse['outcome'];
+    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
     errorJSON?: string;
   };
   viewMode?: VIEW_MODE;

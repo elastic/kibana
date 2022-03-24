@@ -31,18 +31,21 @@ describe('useSavedSearchAliasMatchRedirect', () => {
   test('should redirect in case of aliasMatch', () => {
     const savedSearch = {
       id: 'id',
+      title: 'my-title',
       sharingSavedObjectProps: {
         outcome: 'aliasMatch',
         aliasTargetId: 'aliasTargetId',
+        aliasPurpose: 'savedObjectConversion',
       },
     } as SavedSearch;
 
     renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch, history }));
 
-    expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      '#/view/aliasTargetId?_g=foo',
-      ' search'
-    );
+    expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      path: '#/view/aliasTargetId?_g=foo',
+      aliasPurpose: 'savedObjectConversion',
+      objectNoun: 'my-title search',
+    });
   });
 
   test('should not redirect if outcome !== aliasMatch', () => {

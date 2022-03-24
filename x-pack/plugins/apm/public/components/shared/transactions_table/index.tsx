@@ -57,7 +57,7 @@ interface Props {
   hideViewTransactionsLink?: boolean;
   isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
-  hidePerPageOptions?: boolean;
+  showPerPageOptions?: boolean;
   showAggregationAccurateCallout?: boolean;
   environment: string;
   fixedHeight?: boolean;
@@ -71,7 +71,7 @@ export function TransactionsTable({
   hideViewTransactionsLink = false,
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
-  hidePerPageOptions = false,
+  showPerPageOptions = true,
   showAggregationAccurateCallout = false,
   environment,
   kuery,
@@ -182,7 +182,10 @@ export function TransactionsTable({
     },
   } = data;
 
-  const { data: transactionGroupDetailedStatistics } = useFetcher(
+  const {
+    data: transactionGroupDetailedStatistics,
+    status: transactionGroupDetailedStatisticsStatus,
+  } = useFetcher(
     (callApmApi) => {
       if (
         transactionGroupsTotalItems &&
@@ -225,6 +228,9 @@ export function TransactionsTable({
   const columns = getColumns({
     serviceName,
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    transactionGroupDetailedStatisticsLoading:
+      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
+      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED,
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,
@@ -329,7 +335,7 @@ export function TransactionsTable({
                       defaultMessage: 'No transaction groups found',
                     })
               }
-              hidePerPageOptions={hidePerPageOptions}
+              showPerPageOptions={showPerPageOptions}
             />
           </OverviewTableContainer>
         </EuiFlexItem>

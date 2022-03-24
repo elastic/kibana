@@ -313,7 +313,7 @@ describe('IndexActionConnectorFields renders', () => {
 
     await act(async () => {
       const event = { target: { value: mockIndexName } };
-      fireEvent.change(screen.getByRole('textbox'), event);
+      fireEvent.change(screen.getByRole('combobox'), event);
     });
 
     expect(getIndexOptions).toHaveBeenCalledTimes(1);

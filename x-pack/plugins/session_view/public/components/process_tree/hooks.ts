@@ -8,6 +8,7 @@ import _ from 'lodash';
 import memoizeOne from 'memoize-one';
 import { useState, useEffect } from 'react';
 import {
+  AlertStatusEventEntityIdMap,
   EventAction,
   EventKind,
   Process,
@@ -15,13 +16,21 @@ import {
   ProcessMap,
   ProcessEventsPage,
 } from '../../../common/types/process_tree';
-import { processNewEvents, searchProcessTree, autoExpandProcessTree } from './helpers';
+import {
+  updateAlertEventStatus,
+  processNewEvents,
+  searchProcessTree,
+  autoExpandProcessTree,
+  updateProcessMap,
+} from './helpers';
 import { sortProcesses } from '../../../common/utils/sort_processes';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
   data: ProcessEventsPage[];
+  alerts: ProcessEvent[];
   searchQuery?: string;
+  updatedAlertsStatus: AlertStatusEventEntityIdMap;
 }
 
 export class ProcessImpl implements Process {
@@ -60,7 +69,6 @@ export class ProcessImpl implements Process {
     if (this.orphans.length) {
       children = [...children, ...this.orphans].sort(sortProcesses);
     }
-
     // When verboseMode is false, we filter out noise via a few techniques.
     // This option is driven by the "verbose mode" toggle in SessionView/index.tsx
     if (!verboseMode) {
@@ -104,6 +112,10 @@ export class ProcessImpl implements Process {
     return this.filterEventsByKind(this.events, EventKind.signal);
   }
 
+  updateAlertsStatus(updatedAlertsStatus: AlertStatusEventEntityIdMap) {
+    this.events = updateAlertEventStatus(this.events, updatedAlertsStatus);
+  }
+
   hasExec() {
     return !!this.findEventByAction(this.events, EventAction.exec);
   }
@@ -130,6 +142,7 @@ export class ProcessImpl implements Process {
   // only used to auto expand parts of the tree that could be of interest.
   isUserEntered() {
     const event = this.getDetails();
+
     const {
       pid,
       tty,
@@ -182,7 +195,13 @@ export class ProcessImpl implements Process {
   });
 }
 
-export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProcessTreeDeps) => {
+export const useProcessTree = ({
+  sessionEntityId,
+  data,
+  alerts,
+  searchQuery,
+  updatedAlertsStatus,
+}: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   // we add a fake session leader event, sourced from wide event data.
   // this is because we might not always have a session leader event
@@ -205,6 +224,7 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);
   const [processedPages, setProcessedPages] = useState<ProcessEventsPage[]>([]);
+  const [alertsProcessed, setAlertsProcessed] = useState(false);
   const [searchResults, setSearchResults] = useState<Process[]>([]);
   const [orphans, setOrphans] = useState<Process[]>([]);
 
@@ -242,6 +262,15 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
   }, [data, processMap, orphans, processedPages, sessionEntityId]);
 
   useEffect(() => {
+    // currently we are loading a single page of alerts, with no pagination
+    // so we only need to add these alert events to processMap once.
+    if (!alertsProcessed) {
+      updateProcessMap(processMap, alerts);
+      setAlertsProcessed(true);
+    }
+  }, [processMap, alerts, alertsProcessed]);
+
+  useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));
     autoExpandProcessTree(processMap);
   }, [searchQuery, processMap]);
@@ -250,6 +279,14 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
   const sessionLeader = processMap[sessionEntityId];
 
   sessionLeader.orphans = orphans;
+
+  // update alert status in processMap for alerts in updatedAlertsStatus
+  Object.keys(updatedAlertsStatus).forEach((alertUuid) => {
+    const process = processMap[updatedAlertsStatus[alertUuid].processEntityId];
+    if (process) {
+      process.updateAlertsStatus(updatedAlertsStatus);
+    }
+  });
 
   return { sessionLeader: processMap[sessionEntityId], processMap, searchResults };
 };

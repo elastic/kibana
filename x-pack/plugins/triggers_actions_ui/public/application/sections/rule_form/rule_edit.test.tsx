@@ -36,7 +36,9 @@ jest.mock('../../lib/rule_api', () => ({
 }));
 
 jest.mock('../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest.fn().mockResolvedValue({ minimumScheduleInterval: '1m' }),
+  triggersActionsUiConfig: jest
+    .fn()
+    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
 
 jest.mock('./rule_errors', () => ({
@@ -229,6 +231,6 @@ describe('rule_edit', () => {
     await setup();
     const lastCall = getRuleErrors.mock.calls[getRuleErrors.mock.calls.length - 1];
     expect(lastCall[2]).toBeDefined();
-    expect(lastCall[2]).toEqual({ minimumScheduleInterval: '1m' });
+    expect(lastCall[2]).toEqual({ minimumScheduleInterval: { value: '1m', enforce: false } });
   });
 });

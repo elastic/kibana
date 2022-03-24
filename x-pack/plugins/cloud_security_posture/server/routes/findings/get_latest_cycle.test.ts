@@ -22,39 +22,38 @@ describe('get latest cycle ids', () => {
     jest.resetAllMocks();
   });
 
-  it('expect to find empty bucket', async () => {
+  it('expect to throw when find empty bucket', async () => {
     mockEsClient.search.mockResolvedValueOnce(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           group: {
             buckets: [{}],
           },
         },
-      })
+      }
     );
-    const response = await getLatestCycleIds(mockEsClient, logger);
-    expect(response).toEqual(undefined);
+    expect(getLatestCycleIds(mockEsClient, logger)).rejects.toThrow();
   });
 
   it('expect to find 1 cycle id', async () => {
     mockEsClient.search.mockResolvedValueOnce(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           group: {
             buckets: [
               {
                 group_docs: {
                   hits: {
-                    hits: [{ fields: { 'run_id.keyword': ['randomId1'] } }],
+                    hits: [{ fields: { 'cycle_id.keyword': ['randomId1'] } }],
                   },
                 },
               },
             ],
           },
         },
-      })
+      }
     );
     const response = await getLatestCycleIds(mockEsClient, logger);
     expect(response).toEqual(expect.arrayContaining(['randomId1']));
@@ -63,35 +62,35 @@ describe('get latest cycle ids', () => {
   it('expect to find multiple cycle ids', async () => {
     mockEsClient.search.mockResolvedValueOnce(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           group: {
             buckets: [
               {
                 group_docs: {
                   hits: {
-                    hits: [{ fields: { 'run_id.keyword': ['randomId1'] } }],
+                    hits: [{ fields: { 'cycle_id.keyword': ['randomId1'] } }],
                   },
                 },
               },
               {
                 group_docs: {
                   hits: {
-                    hits: [{ fields: { 'run_id.keyword': ['randomId2'] } }],
+                    hits: [{ fields: { 'cycle_id.keyword': ['randomId2'] } }],
                   },
                 },
               },
               {
                 group_docs: {
                   hits: {
-                    hits: [{ fields: { 'run_id.keyword': ['randomId3'] } }],
+                    hits: [{ fields: { 'cycle_id.keyword': ['randomId3'] } }],
                   },
                 },
               },
             ],
           },
         },
-      })
+      }
     );
     const response = await getLatestCycleIds(mockEsClient, logger);
     expect(response).toEqual(expect.arrayContaining(['randomId1', 'randomId2', 'randomId3']));
