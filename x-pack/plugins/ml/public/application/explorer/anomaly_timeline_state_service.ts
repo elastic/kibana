@@ -41,6 +41,7 @@ import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import type { Refresh } from '../routing/use_refresh';
 import { StateService } from '../services/state_service';
+import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 
 interface SwimLanePagination {
   viewByFromPage: number;
@@ -51,9 +52,10 @@ interface SwimLanePagination {
  * Service for managing anomaly timeline state.
  */
 export class AnomalyTimelineStateService extends StateService {
-  private _explorerURLStateCallback:
-    | ((update: AnomalyExplorerSwimLaneUrlState, replaceState?: boolean) => void)
-    | null = null;
+  private readonly _explorerURLStateCallback: (
+    update: AnomalyExplorerSwimLaneUrlState,
+    replaceState?: boolean
+  ) => void;
 
   private _overallSwimLaneData$ = new BehaviorSubject<OverallSwimlaneData | null>(null);
   private _viewBySwimLaneData$ = new BehaviorSubject<ViewBySwimLaneData | undefined>(undefined);
@@ -81,6 +83,7 @@ export class AnomalyTimelineStateService extends StateService {
   private _refreshSubject$: Observable<Refresh>;
 
   constructor(
+    private anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService,
     private anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
     private anomalyTimelineService: AnomalyTimelineService,
     private timefilter: TimefilterContract
@@ -93,6 +96,19 @@ export class AnomalyTimelineStateService extends StateService {
     );
     this._refreshSubject$ = mlTimefilterRefresh$.pipe(startWith({ lastRefresh: 0 }));
 
+    this._explorerURLStateCallback = (
+      update: AnomalyExplorerSwimLaneUrlState,
+      replaceState?: boolean
+    ) => {
+      const explorerUrlState = this.anomalyExplorerUrlStateService.getPageUrlState();
+      const mlExplorerSwimLaneState = explorerUrlState?.mlExplorerSwimlane;
+      const resultUpdate = replaceState ? update : { ...mlExplorerSwimLaneState, ...update };
+      return this.anomalyExplorerUrlStateService.updateUrlState({
+        ...explorerUrlState,
+        mlExplorerSwimlane: resultUpdate,
+      });
+    };
+
     this._init();
   }
 
@@ -102,6 +118,16 @@ export class AnomalyTimelineStateService extends StateService {
    */
   protected _initSubscriptions(): Subscription {
     const subscription = new Subscription();
+
+    subscription.add(
+      this.anomalyExplorerUrlStateService
+        .getPageUrlState$()
+        .pipe(
+          map((v) => v?.mlExplorerSwimlane),
+          distinctUntilChanged(isEqual)
+        )
+        .subscribe(this._swimLaneUrlState$)
+    );
 
     subscription.add(this._initViewByData());
 
@@ -596,7 +622,7 @@ export class AnomalyTimelineStateService extends StateService {
     if (resultUpdate.viewByPerPage) {
       resultUpdate.viewByFromPage = 1;
     }
-    this._explorerURLStateCallback!(resultUpdate);
+    this._explorerURLStateCallback(resultUpdate);
   }
 
   public getSwimLaneCardinality$(): Observable<number | undefined> {
@@ -624,22 +650,6 @@ export class AnomalyTimelineStateService extends StateService {
   }
 
   /**
-   * Updates internal subject from the URL state.
-   * @param value
-   */
-  public updateFromUrlState(value: AnomalyExplorerSwimLaneUrlState | undefined) {
-    this._swimLaneUrlState$.next(value);
-  }
-
-  /**
-   * Updates callback for setting URL app state.
-   * @param callback
-   */
-  public updateSetStateCallback(callback: (update: AnomalyExplorerSwimLaneUrlState) => void) {
-    this._explorerURLStateCallback = callback;
-  }
-
-  /**
    * Sets container width
    * @param value
    */
@@ -653,7 +663,7 @@ export class AnomalyTimelineStateService extends StateService {
    * @param value
    */
   public setSeverity(value: number) {
-    this._explorerURLStateCallback!({ severity: value, viewByFromPage: 1 });
+    this._explorerURLStateCallback({ severity: value, viewByFromPage: 1 });
   }
 
   /**
@@ -688,14 +698,14 @@ export class AnomalyTimelineStateService extends StateService {
       mlExplorerSwimlane.selectedTimes = swimLaneSelectedCells.times;
       mlExplorerSwimlane.showTopFieldValues = swimLaneSelectedCells.showTopFieldValues;
 
-      this._explorerURLStateCallback!(mlExplorerSwimlane);
+      this._explorerURLStateCallback(mlExplorerSwimlane);
     } else {
       delete mlExplorerSwimlane.selectedType;
       delete mlExplorerSwimlane.selectedLanes;
       delete mlExplorerSwimlane.selectedTimes;
       delete mlExplorerSwimlane.showTopFieldValues;
 
-      this._explorerURLStateCallback!(mlExplorerSwimlane, true);
+      this._explorerURLStateCallback(mlExplorerSwimlane, true);
     }
   }
 
@@ -704,7 +714,7 @@ export class AnomalyTimelineStateService extends StateService {
    * @param fieldName - Influencer field name of job id.
    */
   public setViewBySwimLaneFieldName(fieldName: string) {
-    this._explorerURLStateCallback!(
+    this._explorerURLStateCallback(
       {
         viewByFromPage: 1,
         viewByPerPage: this._swimLanePaginations$.getValue().viewByPerPage,

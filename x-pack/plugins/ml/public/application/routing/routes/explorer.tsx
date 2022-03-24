@@ -44,7 +44,6 @@ import {
   AnomalyExplorerContext,
   useAnomalyExplorerContextValue,
 } from '../../explorer/anomaly_explorer_context';
-import type { AnomalyExplorerSwimLaneUrlState } from '../../../../common/types/locator';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -97,7 +96,7 @@ interface ExplorerUrlStateManagerProps {
 }
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
-  const [explorerUrlState, setExplorerUrlState, explorerUrlStateService] = useExplorerUrlState();
+  const [, , explorerUrlStateService] = useExplorerUrlState();
 
   const anomalyExplorerContext = useAnomalyExplorerContextValue(explorerUrlStateService);
 
@@ -150,30 +149,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       console.error(error);
     }
   }, []);
-
-  const updateSwimLaneUrlState = useCallback(
-    (update: AnomalyExplorerSwimLaneUrlState | undefined, replaceState = false) => {
-      const ccc = explorerUrlState?.mlExplorerSwimlane;
-      const resultUpdate = replaceState ? update : { ...ccc, ...update };
-      return setExplorerUrlState({
-        ...explorerUrlState,
-        mlExplorerSwimlane: resultUpdate,
-      });
-    },
-    [explorerUrlState, setExplorerUrlState]
-  );
-
-  useEffect(
-    // TODO URL state service should provide observable with updates
-    // and immutable method for updates
-    function updateAnomalyTimelineStateFromUrl() {
-      const { anomalyTimelineStateService } = anomalyExplorerContext;
-
-      anomalyTimelineStateService.updateSetStateCallback(updateSwimLaneUrlState);
-      anomalyTimelineStateService.updateFromUrlState(explorerUrlState?.mlExplorerSwimlane);
-    },
-    [explorerUrlState?.mlExplorerSwimlane, updateSwimLaneUrlState]
-  );
 
   useEffect(
     function handleJobSelection() {

@@ -73,6 +73,7 @@ export function useAnomalyExplorerContextValue(
     );
 
     const anomalyTimelineStateService = new AnomalyTimelineStateService(
+      anomalyExplorerUrlStateService,
       anomalyExplorerCommonStateService,
       anomalyTimelineService,
       timefilter
