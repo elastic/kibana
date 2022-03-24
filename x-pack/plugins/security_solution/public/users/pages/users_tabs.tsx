@@ -19,6 +19,9 @@ import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_
 import { UpdateDateRange } from '../../common/components/charts/common';
 
 import { UserRiskScoreQueryTabBody } from './navigation/user_risk_score_tab_body';
+import { EventsQueryTabBody } from '../../common/components/events_tab/events_query_tab_body';
+import { TimelineId } from '../../../common/types';
+import { AlertsView } from '../../common/components/alerts_viewer';
 
 export const UsersTabs = memo<UsersTabsProps>(
   ({
@@ -82,6 +85,17 @@ export const UsersTabs = memo<UsersTabsProps>(
         </Route>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.risk})`}>
           <UserRiskScoreQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.events})`}>
+          <EventsQueryTabBody {...tabProps} timelineId={TimelineId.usersPageEvents} />
+        </Route>
+        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.alerts})`}>
+          <AlertsView
+            entityType="events"
+            timelineId={TimelineId.usersPageExternalAlerts}
+            pageFilters={[]}
+            {...tabProps}
+          />
         </Route>
       </Switch>
     );
