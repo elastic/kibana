@@ -27,6 +27,7 @@ import {
   EXTENDED_DATA_LAYER,
   EXTENDED_REFERENCE_LINE_LAYER,
   LAYERED_XY_VIS,
+  EndValues,
 } from '../constants';
 
 const logDataTable = (tableAdapter: TablesAdapter, datatables: Record<string, Datatable> = {}) => {
@@ -97,6 +98,18 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Define how missing values are treated',
       }),
     },
+    endValue: {
+      types: ['string'],
+      options: [...Object.values(EndValues)],
+      help: i18n.translate('expressionXY.xyVis.endValue.help', {
+        defaultMessage: 'End value',
+      }),
+    },
+    emphasizeFitting: {
+      types: ['boolean'],
+      default: false,
+      help: '',
+    },
     valueLabels: {
       types: ['string'],
       options: [...Object.values(ValueLabelModes)],
@@ -130,7 +143,7 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
     },
     layers: {
       types: [EXTENDED_DATA_LAYER, EXTENDED_REFERENCE_LINE_LAYER],
-      help: i18n.translate('expressionXY.xyVis.layers.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.layers.help', {
         defaultMessage: 'Layers of visual series',
       }),
       multi: true,

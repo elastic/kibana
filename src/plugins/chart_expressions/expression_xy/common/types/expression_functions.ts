@@ -182,6 +182,8 @@ export interface XYArgs {
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
+  endValue?: EndValue;
+  emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   dataLayer?: DataLayerConfigResult;
   referenceLineLayer?: ReferenceLineLayerConfigResult;
@@ -206,6 +208,8 @@ export interface LayeredXYArgs {
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
+  endValue?: EndValue;
+  emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   layers: XYExtendedLayerConfigResult[];
   fittingFunction?: FittingFunction;
