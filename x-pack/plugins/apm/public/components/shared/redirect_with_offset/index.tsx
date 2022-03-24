@@ -14,40 +14,49 @@ import {
   TimeRangeComparisonEnum,
   dayAndWeekBeforeToOffsetMap,
 } from '../../../components/shared/time_comparison/get_comparison_options';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { getComparisonEnabled } from '../../../components/shared/time_comparison/get_comparison_enabled';
+import { toBoolean } from '../../../context/url_params_context/helpers';
 
 export function RedirectWithOffset({
   children,
 }: {
   children: React.ReactElement;
 }) {
+  const { core } = useApmPluginContext();
   const location = useLocation();
-  const query = qs.parse(location.search);
-
   const apmRouter = useApmRouter();
   const matchesRoute = isRouteWithTimeRange({ apmRouter, location });
+  const query = qs.parse(location.search);
 
   if (
-    'comparisonType' in query &&
-    'rangeFrom' in query &&
-    'rangeTo' in query &&
     matchesRoute &&
-    (query.comparisonType as TimeRangeComparisonEnum) in
-      dayAndWeekBeforeToOffsetMap
+    ('comparisonType' in query || !('comparisonEnabled' in query))
   ) {
-    const { comparisonType, ...queryRest } = query;
-    const offset =
-      dayAndWeekBeforeToOffsetMap[
-        query.comparisonType as
-          | TimeRangeComparisonEnum.DayBefore
-          | TimeRangeComparisonEnum.WeekBefore
-      ];
+    const {
+      comparisonType,
+      comparisonEnabled: urlComparisonEnabled,
+      ...queryRest
+    } = query;
+
+    const comparisonEnabled = getComparisonEnabled({
+      core,
+      urlComparisonEnabled: urlComparisonEnabled
+        ? toBoolean(urlComparisonEnabled as string)
+        : undefined,
+    }).toString();
+
+    const comparisonTypeEnumValue = comparisonType as
+      | TimeRangeComparisonEnum.DayBefore
+      | TimeRangeComparisonEnum.WeekBefore;
 
     return (
       <Redirect
         to={qs.stringifyUrl({
           url: location.pathname,
           query: {
-            offset,
+            comparisonEnabled,
+            offset: dayAndWeekBeforeToOffsetMap[comparisonTypeEnumValue] ?? '',
             ...queryRest,
           },
         })}

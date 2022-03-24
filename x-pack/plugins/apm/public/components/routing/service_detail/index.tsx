@@ -78,9 +78,9 @@ export const serviceDetail = {
             rangeTo: t.string,
             kuery: t.string,
             serviceGroup: t.string,
+            comparisonEnabled: toBooleanRt,
           }),
           t.partial({
-            comparisonEnabled: toBooleanRt,
             latencyAggregationType: t.string,
             transactionType: t.string,
             refreshPaused: t.union([t.literal('true'), t.literal('false')]),
@@ -129,11 +129,11 @@ export const serviceDetail = {
               query: t.intersection([
                 t.type({
                   transactionName: t.string,
+                  comparisonEnabled: toBooleanRt,
                 }),
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
-                  comparisonEnabled: toBooleanRt,
                 }),
                 offsetRt,
               ]),

@@ -133,11 +133,11 @@ export const home = {
           rangeFrom: t.string,
           rangeTo: t.string,
           kuery: t.string,
+          comparisonEnabled: toBooleanRt,
         }),
         t.partial({
           refreshPaused: t.union([t.literal('true'), t.literal('false')]),
           refreshInterval: t.string,
-          comparisonEnabled: toBooleanRt,
         }),
         offsetRt,
       ]),
@@ -172,7 +172,7 @@ export const home = {
         element: <Outlet />,
         params: t.partial({
           query: t.intersection([
-            t.partial({
+            t.type({
               comparisonEnabled: toBooleanRt,
             }),
             offsetRt,

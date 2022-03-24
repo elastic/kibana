@@ -97,6 +97,7 @@ const apmRoutes = {
             t.type({
               rangeFrom: t.string,
               rangeTo: t.string,
+              comparisonEnabled: toBooleanRt,
             }),
             t.partial({
               serviceGroup: t.string,
@@ -104,7 +105,6 @@ const apmRoutes = {
             t.partial({
               refreshPaused: t.union([t.literal('true'), t.literal('false')]),
               refreshInterval: t.string,
-              comparisonEnabled: toBooleanRt,
             }),
             offsetRt,
           ]),

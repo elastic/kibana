@@ -11,13 +11,10 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useUiTracker } from '../../../../../observability/public';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../../shared/links/url_helpers';
-import { getComparisonEnabled } from './get_comparison_enabled';
 import { getComparisonOptions } from './get_comparison_options';
 
 const PrependContainer = euiStyled.div`
@@ -30,38 +27,16 @@ const PrependContainer = euiStyled.div`
 `;
 
 export function TimeComparison() {
-  const { core } = useApmPluginContext();
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
   const { isSmall } = useBreakpoints();
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const {
-    urlParams: { comparisonEnabled, offset },
-  } = useLegacyUrlParams();
-
   const comparisonOptions = getComparisonOptions({ start, end });
-
-  // Sets default values
-  if (comparisonEnabled === undefined || offset === undefined) {
-    urlHelpers.replace(history, {
-      query: {
-        comparisonEnabled:
-          getComparisonEnabled({
-            core,
-            urlComparisonEnabled: comparisonEnabled,
-          }) === false
-            ? 'false'
-            : 'true',
-        offset: offset ? offset : comparisonOptions[0].value,
-      },
-    });
-    return null;
-  }
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(
     ({ value }) => value === offset
