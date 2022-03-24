@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpFetchOptions, HttpResponse, HttpSetup } from 'kibana/public';
+import type { HttpFetchOptions, HttpResponse, HttpSetup } from 'kibana/public';
 
 const esVersion: string[] = [];
 

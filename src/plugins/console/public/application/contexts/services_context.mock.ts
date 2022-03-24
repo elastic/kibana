@@ -37,7 +37,6 @@ export const serviceContextMock = {
         history: new HistoryMock(storage),
         notifications: notificationServiceMock.createSetupContract(),
         objectStorageClient: {} as unknown as ObjectStorageClient,
-        http,
       },
       docLinkVersion: 'NA',
       theme$: themeServiceMock.create().start().theme$,
