@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiToolTip,
+  htmlIdGenerator
 } from '@elastic/eui';
 
 import {
@@ -31,7 +32,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useMlKibana } from '../../contexts/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { AnomalySource } from '../../../maps/anomaly_source';
+import { CUSTOM_COLOR_RAMP } from '../../../maps/anomaly_layer_wizard_factory';
+import { LAYER_TYPE } from '../../../../../maps/common';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
@@ -53,6 +58,10 @@ const textViewButton = i18n.translate(
 const mapsPluginMessage = i18n.translate('xpack.ml.explorer.charts.mapsPluginMissingMessage', {
   defaultMessage: 'maps or embeddable start plugin not found',
 });
+const openInMapsPluginMessage = i18n.translate('xpack.ml.explorer.charts.openInMapsPluginMessage', {
+  defaultMessage: 'Open in Maps',
+});
+
 
 // create a somewhat unique ID
 // from charts metadata for React's key attribute
@@ -79,6 +88,72 @@ function ExplorerChartContainer({
   chartsService,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
+  const [mapsLink, setMapsLink] = useState('');
+
+  const {
+    services: { data, share,
+    application: { navigateToApp }, },
+  } = useMlKibana();
+
+  // TODO: pull in layer name constant and wrap in useCallback if poss
+  const getMapsLink = async () => {
+    const initialLayers = [{
+        id: htmlIdGenerator()(),
+        type: LAYER_TYPE.GEOJSON_VECTOR,
+        sourceDescriptor: AnomalySource.createDescriptor({
+          jobId: series.jobId,
+          typicalActual: 'actual',
+        }),
+        style: {
+          type: 'VECTOR',
+          properties: {
+            fillColor: CUSTOM_COLOR_RAMP,
+            lineColor: CUSTOM_COLOR_RAMP,
+          },
+          isTimeAware: false,
+        },
+      },
+      {
+        id: htmlIdGenerator()(),
+        type: LAYER_TYPE.GEOJSON_VECTOR,
+        sourceDescriptor: AnomalySource.createDescriptor({
+          jobId: series.jobId,
+          typicalActual: 'typical',
+        }),
+        style: {
+          type: 'VECTOR',
+          properties: {
+            fillColor: CUSTOM_COLOR_RAMP,
+            lineColor: CUSTOM_COLOR_RAMP,
+          },
+          isTimeAware: false,
+        },
+      },
+      {
+        id: htmlIdGenerator()(),
+        type: LAYER_TYPE.GEOJSON_VECTOR,
+        sourceDescriptor: AnomalySource.createDescriptor({
+          jobId: series.jobId,
+          typicalActual: 'typical to actual',
+        }),
+        style: {
+          type: 'VECTOR',
+          properties: {
+            fillColor: CUSTOM_COLOR_RAMP,
+            lineColor: CUSTOM_COLOR_RAMP,
+          },
+          isTimeAware: false,
+        },
+      }];
+
+    const locator = share.url.locators.get('MAPS_APP_LOCATOR');
+    const location = await locator.getLocation({
+      initialLayers: initialLayers,
+      timeRange: data.query.timefilter.timefilter.getTime(),
+    });
+
+    return location;
+  };
 
   useEffect(() => {
     let isCancelled = false;
@@ -97,6 +172,26 @@ function ExplorerChartContainer({
       isCancelled = true;
     };
   }, [mlLocator, series]);
+
+  useEffect(function getMapsPluginLink() {
+    if (!series) return;
+    let isCancelled = false;   
+    const generateLink = async () => {
+      if (!isCancelled) {
+        try {
+          const mapsLink = await getMapsLink();
+          setMapsLink(mapsLink?.path); 
+        } catch (error) {
+          console.error(error);
+          setMapsLink('');
+        }
+      }
+    };
+    generateLink().catch(console.error);;
+    return () => {
+      isCancelled = true;
+    };
+  }, [series]);
 
   const chartRef = useRef(null);
 
@@ -191,6 +286,20 @@ function ExplorerChartContainer({
                 </EuiButtonEmpty>
               </EuiToolTip>
             )}
+            {chartType === CHART_TYPE.GEO_MAP && mapsLink ? (
+              <EuiToolTip position="top" content={openInMapsPluginMessage}>
+                <EuiButtonEmpty
+                  iconSide="right"
+                  iconType="logoMaps"
+                  size="xs"
+                  onClick={async () => {
+                    await navigateToApp('maps', { path: mapsLink });
+                  }}
+                >
+                  <FormattedMessage id="xpack.ml.explorer.charts.viewInMapsLabel" defaultMessage="View" />
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            ) : null}
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

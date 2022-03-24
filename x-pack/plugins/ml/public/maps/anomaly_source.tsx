@@ -59,7 +59,7 @@ export class AnomalySource implements IVectorSource {
   constructor(sourceDescriptor: Partial<AnomalySourceDescriptor>, adapters?: Adapters) {
     this._descriptor = AnomalySource.createDescriptor(sourceDescriptor);
   }
-  // TODO: implement query awareness
+
   async getGeoJsonWithMeta(
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
@@ -77,7 +77,7 @@ export class AnomalySource implements IVectorSource {
       data: results,
       meta: {
         // Set this to true if data is incomplete (e.g. capping number of results to first 1k)
-        areResultsTrimmed: false,
+        areResultsTrimmed: results.features.length === 1000,
       },
     };
   }
@@ -147,8 +147,18 @@ export class AnomalySource implements IVectorSource {
     return null;
   }
 
-  getSourceStatus() {
-    return { tooltipContent: null, areResultsTrimmed: true };
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
+    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    const meta = sourceDataRequest
+      ? (sourceDataRequest.getMeta())
+      : null;
+    if (!featureCollection || !meta) {
+      return {
+        tooltipContent: null,
+        areResultsTrimmed: false,
+      };
+    }
+    return { tooltipContent: null, areResultsTrimmed: meta?.areEntitiesTrimmed ?? false };
   }
 
   getType(): string {
@@ -222,12 +232,15 @@ export class AnomalySource implements IVectorSource {
   }
 
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceStatus {
+    const meta = sourceDataRequest
+      ? (sourceDataRequest.getMeta())
+      : null;
     return {
       tooltipContent: i18n.translate('xpack.ml.maps.sourceTooltip', {
         defaultMessage: 'Shows anomalies',
       }),
       // set to true if data is incomplete (we limit to first 1000 results)
-      areResultsTrimmed: true,
+      areResultsTrimmed: meta?.areResultsTrimmed ?? false,
     };
   }
 
