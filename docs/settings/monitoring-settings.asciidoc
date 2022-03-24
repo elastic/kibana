@@ -71,7 +71,7 @@ both the {es} monitoring cluster and the {es} production cluster.
 If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.password`>> setting.
 
 `monitoring.ui.elasticsearch.serviceAccountToken`::
-Specifies a {ref}/security-api-create-service-token.html[service account token] for the {es} cluster where your monitoring data is stored when using `monitoring.ui.elasticsearch.hosts`.  This setting is an alternative to `monitoring.ui.elasticsearch.username` and `monitoring.ui.elasticsearch.password`. If not set, {kib} uses the value of <<elasticsearch-service-account-token, `elasticsearch.serviceAccountToken`>> setting.
+Specifies a {ref}/security-api-create-service-token.html[service account token] for the {es} cluster where your monitoring data is stored when using `monitoring.ui.elasticsearch.hosts`.  This setting is an alternative to `monitoring.ui.elasticsearch.username` and `monitoring.ui.elasticsearch.password`. 
 
 `monitoring.ui.elasticsearch.pingTimeout`::
 Specifies the time in milliseconds to wait for {es} to respond to internal
