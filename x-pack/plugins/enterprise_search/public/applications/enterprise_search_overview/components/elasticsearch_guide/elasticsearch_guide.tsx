@@ -18,7 +18,6 @@ import {
   EuiSteps,
   EuiSelect,
   EuiLink,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -56,19 +55,18 @@ export const ElasticsearchGuide: React.FC = () => {
   };
 
   return (
-    <EuiPageTemplate pageHeader={{ pageTitle: 'Elasticsearch' }}>
-      <ElasticsearchCloudId />
-      <EuiTitle>
-        <h2>
-          {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchTitle', {
-            defaultMessage: 'Getting started with Elasticsearch',
-          })}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={4}>
+    <EuiPageTemplate>
+      <EuiFlexGroup alignItems="flexStart">
+        <EuiFlexItem grow={3}>
           <EuiText>
+            <h2>
+              {i18n.translate(
+                'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchTitle',
+                {
+                  defaultMessage: 'Getting started with Elasticsearch',
+                }
+              )}
+            </h2>
             <p>
               {i18n.translate(
                 'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchDescription',
@@ -79,12 +77,9 @@ export const ElasticsearchGuide: React.FC = () => {
               )}
             </p>
           </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1} />
-      </EuiFlexGroup>
-      <EuiSpacer size="xl" />
-      <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={3}>
+
+          <EuiSpacer />
+
           <EuiSteps
             headingElement="h2"
             steps={[
@@ -182,6 +177,8 @@ export const ElasticsearchGuide: React.FC = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
+          <ElasticsearchCloudId />
+          <EuiSpacer />
           <ElasticsearchResources />
         </EuiFlexItem>
       </EuiFlexGroup>
