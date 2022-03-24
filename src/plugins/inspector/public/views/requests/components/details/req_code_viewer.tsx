@@ -80,48 +80,54 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
     >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" wrap>
           <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={json}>
-              {(copy) => (
-                <EuiButtonEmpty
-                  size="xs"
-                  flush="right"
-                  iconType="copyClipboard"
-                  onClick={copy}
-                  data-test-subj="inspectorRequestCopyClipboardButton"
-                >
-                  {copyToClipboardLabel}
-                </EuiButtonEmpty>
-              )}
-            </EuiCopy>
+            <div>
+              <EuiCopy textToCopy={json}>
+                {(copy) => (
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="right"
+                    iconType="copyClipboard"
+                    onClick={copy}
+                    data-test-subj="inspectorRequestCopyClipboardButton"
+                  >
+                    {copyToClipboardLabel}
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+            </div>
           </EuiFlexItem>
           {shouldShowDevToolsLink && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                flush="right"
-                iconType="wrench"
-                href={consoleHref}
-                onClick={handleDevToolsLinkClick}
-                data-test-subj="inspectorRequestOpenInConsoleButton"
-              >
-                {openInConsoleLabel}
-              </EuiButtonEmpty>
+              <div>
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="right"
+                  iconType="wrench"
+                  href={consoleHref}
+                  onClick={handleDevToolsLinkClick}
+                  data-test-subj="inspectorRequestOpenInConsoleButton"
+                >
+                  {openInConsoleLabel}
+                </EuiButtonEmpty>
+              </div>
             </EuiFlexItem>
           )}
           {shouldShowsearchProfilerLink && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                flush="right"
-                iconType="visBarHorizontal"
-                href={searchProfilerHref}
-                onClick={handleSearchProfilerLinkClick}
-                data-test-subj="inspectorRequestOpenInSearchProfilerButton"
-              >
-                {openInSearchProfilerLabel}
-              </EuiButtonEmpty>
+              <div>
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="right"
+                  iconType="visBarHorizontal"
+                  href={searchProfilerHref}
+                  onClick={handleSearchProfilerLinkClick}
+                  data-test-subj="inspectorRequestOpenInSearchProfilerButton"
+                >
+                  {openInSearchProfilerLabel}
+                </EuiButtonEmpty>
+              </div>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
