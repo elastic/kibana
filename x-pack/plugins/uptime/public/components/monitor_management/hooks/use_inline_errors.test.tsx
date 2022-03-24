@@ -67,9 +67,10 @@ describe('useInlineErrors', function () {
       [
         'heartbeat-8*,heartbeat-7*,synthetics-*',
         {
-          error: { monitorList: null, serviceLocations: null },
+          error: { monitorList: null, serviceLocations: null, enablement: null },
+          enablement: null,
           list: { monitors: [], page: 1, perPage: 10, total: null },
-          loading: { monitorList: false, serviceLocations: false },
+          loading: { monitorList: false, serviceLocations: false, enablement: false },
           locations: [],
         },
         1641081600000,
