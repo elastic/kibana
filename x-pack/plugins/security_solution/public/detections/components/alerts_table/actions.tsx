@@ -415,6 +415,7 @@ const createThresholdTimeline = async (
           },
         ];
       }, []) ?? [];
+
     const alertDoc = formattedAlertData[0];
     const params = getField(alertDoc, ALERT_RULE_PARAMETERS);
     const filters = getFiltersFromRule(params.filters ?? alertDoc.signal?.rule?.filters) ?? [];

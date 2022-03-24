@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 
 import { EuiContextMenuItem } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_EXCEPTIONS_LIST } from '@kbn/rule-data-utils';
 import {
   ExceptionListIdentifiers,
@@ -28,6 +29,7 @@ import { CreateTimelineProps } from '../types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { getField } from '../../../../helpers';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
@@ -42,6 +44,7 @@ export const useInvestigateInTimeline = ({
     data: { search: searchStrategyClient, query },
   } = useKibana().services;
   const dispatch = useDispatch();
+  const { addError } = useAppToasts();
 
   const { services } = useKibana();
   const { getExceptionListsItems } = useApi(services.http);
@@ -79,14 +82,21 @@ export const useInvestigateInTimeline = ({
               onSuccess: ({ exceptions }) => {
                 allExceptions.push(...exceptions);
               },
-              onError: () => {},
+              onError: (err: string[]) => {
+                addError(err, {
+                  title: i18n.translate(
+                    'xpack.securitySolution.detectionEngine.alerts.fetchExceptionsFailure',
+                    { defaultMessage: 'Error fetching exceptions.' }
+                  ),
+                });
+              },
             });
           }
         }
       }
       return allExceptions;
     },
-    [getExceptionListsItems]
+    [addError, getExceptionListsItems]
   );
 
   const filterManagerBackup = useMemo(() => query.filterManager, [query.filterManager]);
