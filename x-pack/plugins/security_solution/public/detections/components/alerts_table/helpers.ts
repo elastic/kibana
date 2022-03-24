@@ -6,14 +6,19 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+
 import { Filter, FilterStateStore, KueryNode, fromKueryExpression } from '@kbn/es-query';
+import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+
+import { Ecs } from '../../../../common/ecs';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { TimelineType } from '../../../../common/types/timeline';
 import {
   DataProvider,
   DataProviderType,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineType } from '../../../../common/types/timeline';
+import { getField } from '../../../helpers';
 
 interface FindValueToChangeInQuery {
   field: string;
@@ -242,3 +247,11 @@ export const buildTimeRangeFilter = (from: string, to: string): Filter[] => [
     },
   } as Filter,
 ];
+
+export const isThresholdRule = (ecsData: Ecs): boolean => {
+  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  return (
+    ruleType === 'threshold' ||
+    (Array.isArray(ruleType) && ruleType.length > 0 && ruleType[0] === 'threshold')
+  );
+};
