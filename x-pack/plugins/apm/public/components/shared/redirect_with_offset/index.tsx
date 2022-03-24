@@ -11,6 +11,7 @@ import React from 'react';
 import moment from 'moment';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { getDateRange } from '../../../context/url_params_context/helpers';
+import { isRouteWithTimeRange } from '../is_route_with_time_range';
 
 import {
   TimeRangeComparisonEnum,
@@ -26,19 +27,7 @@ export function RedirectWithOffset({
   const query = qs.parse(location.search);
 
   const apmRouter = useApmRouter();
-  const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
-  const matchesRoute = matchingRoutes.some((route) => {
-    return (
-      route.path === '/services' ||
-      route.path === '/traces' ||
-      route.path === '/service-map' ||
-      route.path === '/backends' ||
-      route.path === '/services/{serviceName}' ||
-      route.path === '/service-groups' ||
-      location.pathname === '/' ||
-      location.pathname === ''
-    );
-  });
+  const matchesRoute = isRouteWithTimeRange({ apmRouter, location });
 
   if (
     'comparisonType' in query &&
