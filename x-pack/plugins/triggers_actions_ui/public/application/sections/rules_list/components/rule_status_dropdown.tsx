@@ -301,7 +301,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           >
             <EuiIcon type="refresh" />{' '}
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.previousSnooze', {
-              defaultMessage: 'Previous ',
+              defaultMessage: 'Previous',
             })}
           </EuiLink>
         </EuiFlexItem>
