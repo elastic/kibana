@@ -178,7 +178,7 @@ exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
     className="kbnPageTemplateSolutionNav"
     heading={
       <React.Fragment>
-        <KibanaPageTemplateSolutionNavAvatar
+        <KibanaSolutionAvatar
           iconType="logoElastic"
           name="Solution"
         />
@@ -244,7 +244,7 @@ exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
     }
     mobileTitle={
       <React.Fragment>
-        <KibanaPageTemplateSolutionNavAvatar
+        <KibanaSolutionAvatar
           iconType="logoElastic"
           name="Solution"
         />
