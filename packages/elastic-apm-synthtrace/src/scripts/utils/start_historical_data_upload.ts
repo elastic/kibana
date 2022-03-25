@@ -5,105 +5,55 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Client } from '@elastic/elasticsearch';
-import pLimit from 'p-limit';
-import Path from 'path';
-import { Worker } from 'worker_threads';
-import { ElasticsearchOutputWriteTargets } from '../../lib/output/to_elasticsearch_output';
-import { Logger, LogLevel } from '../../lib/utils/create_logger';
+import { RunOptions } from './parse_run_cli_flags';
+import { getScenario } from './get_scenario';
+import { ApmSynthtraceEsClient } from '../../lib/apm';
+import { Logger } from '../../lib/utils/create_logger';
+import { StreamProcessor } from '../../lib/stream_processor';
 
-export async function startHistoricalDataUpload({
-  from,
-  to,
-  bucketSizeInMs,
-  workers,
-  clientWorkers,
-  batchSize,
-  writeTargets,
-  logLevel,
-  logger,
-  target,
-  file,
-}: {
-  from: number;
-  to: number;
-  bucketSizeInMs: number;
-  client: Client;
-  workers: number;
-  clientWorkers: number;
-  batchSize: number;
-  writeTargets: ElasticsearchOutputWriteTargets;
-  logger: Logger;
-  logLevel: LogLevel;
-  target: string;
-  file: string;
-}) {
-  let requestedUntil: number = from;
+export async function startHistoricalDataUpload(
+  esClient: ApmSynthtraceEsClient,
+  logger: Logger,
+  runOptions: RunOptions,
+  from: Date,
+  to: Date
+) {
+  const file = runOptions.file;
+  const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
 
-  function processNextBatch() {
-    const bucketFrom = requestedUntil;
-    const bucketTo = Math.min(to, bucketFrom + bucketSizeInMs);
+  const { generate, mapToIndex } = await scenario(runOptions);
 
-    if (bucketFrom === bucketTo) {
-      return;
-    }
+  // if we want to generate a maximum number of documents reverse generation to descend.
+  [from, to] = runOptions.maxDocs ? [to, from] : [from, to];
 
-    requestedUntil = bucketTo;
+  logger.info(`Generating data from ${from} to ${to}`);
 
-    logger.info(
-      `Starting worker for ${new Date(bucketFrom).toISOString()} to ${new Date(
-        bucketTo
-      ).toISOString()}`
-    );
+  const events = logger.perf('generate_scenario', () => generate({ from, to }));
 
-    const worker = new Worker(Path.join(__dirname, './upload_next_batch.js'), {
-      workerData: {
-        bucketFrom,
-        bucketTo,
-        logLevel,
-        writeTargets,
-        target,
-        file,
-        clientWorkers,
-        batchSize,
-      },
+  if (runOptions.dryRun) {
+    const maxDocs = runOptions.maxDocs;
+    const stream = new StreamProcessor({
+      processors: StreamProcessor.apmProcessors,
+      maxSourceEvents: maxDocs,
+      logger,
+    }).streamToDocument(StreamProcessor.toDocument, events);
+    logger.perf('enumerate_scenario', () => {
+      // @ts-ignore
+      // We just want to enumerate
+      let yielded = 0;
+      for (const _ of stream) {
+        yielded++;
+      }
     });
-
-    logger.perf('created_worker', () => {
-      return new Promise<void>((resolve, reject) => {
-        worker.on('online', () => {
-          resolve();
-        });
-      });
-    });
-
-    logger.perf('completed_worker', () => {
-      return new Promise<void>((resolve, reject) => {
-        worker.on('exit', () => {
-          resolve();
-        });
-      });
-    });
-
-    return new Promise<void>((resolve, reject) => {
-      worker.on('error', (err) => {
-        reject(err);
-      });
-
-      worker.on('exit', (code) => {
-        if (code !== 0) {
-          reject(new Error(`Worker stopped: exit code ${code}`));
-          return;
-        }
-        logger.debug('Worker completed');
-        resolve();
-      });
-    });
+    return;
   }
 
-  const numBatches = Math.ceil((to - from) / bucketSizeInMs);
-
-  const limiter = pLimit(workers);
-
-  return Promise.all(new Array(numBatches).fill(undefined).map((_) => limiter(processNextBatch)));
+  const clientWorkers = runOptions.clientWorkers;
+  await logger.perf('index_scenario', () =>
+    esClient.index(events, {
+      concurrency: clientWorkers,
+      maxDocs: runOptions.maxDocs,
+      mapToIndex,
+    })
+  );
 }

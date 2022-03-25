@@ -7,7 +7,7 @@
  */
 
 import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { getEnvOptions } from '../../config/mocks';
 import { startServers, stopServers } from './lib';
 import { docExistsSuite } from './doc_exists';

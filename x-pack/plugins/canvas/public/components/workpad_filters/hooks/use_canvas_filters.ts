@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { fromExpression } from '@kbn/interpreter/common';
+import { AstFunction, fromExpression } from '@kbn/interpreter';
 import { shallowEqual, useSelector } from 'react-redux';
 import { State } from '../../../../types';
+import { getFiltersByFilterExpressions } from '../../../lib/filter';
 import { adaptCanvasFilter } from '../../../lib/filter_adapters';
-import { getGlobalFilters } from '../../../state/selectors/workpad';
+import { useFiltersService } from '../../../services';
 
-const extractExpressionAST = (filtersExpressions: string[]) =>
-  fromExpression(filtersExpressions.join(' | '));
+const extractExpressionAST = (filters: string[]) => fromExpression(filters.join(' | '));
 
-export function useCanvasFilters() {
-  const filterExpressions = useSelector((state: State) => getGlobalFilters(state), shallowEqual);
-  const expression = extractExpressionAST(filterExpressions);
+export function useCanvasFilters(filterExprsToGroupBy: AstFunction[] = []) {
+  const filtersService = useFiltersService();
+  const filterExpressions = useSelector(
+    (state: State) => filtersService.getFilters(state),
+    shallowEqual
+  );
+  const filtersByGroups = getFiltersByFilterExpressions(filterExpressions, filterExprsToGroupBy);
+
+  const expression = extractExpressionAST(filtersByGroups);
   const filters = expression.chain.map(adaptCanvasFilter);
 
   return filters;

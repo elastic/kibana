@@ -11,9 +11,9 @@
 import { AlertsHealth } from './alert';
 
 export * from './alert';
-export * from './alert_type';
+export * from './rule_type';
 export * from './alert_instance';
-export * from './alert_task_instance';
+export * from './rule_task_instance';
 export * from './alert_navigation';
 export * from './alert_summary';
 export * from './builtin_action_groups';
@@ -24,10 +24,11 @@ export * from './parse_duration';
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;
-  alertingFrameworkHeath: AlertsHealth;
+  alertingFrameworkHealth: AlertsHealth;
 }
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
 export const ALERTS_FEATURE_ID = 'alerts';
+export const MONITORING_HISTORY_LIMIT = 200;

@@ -21,7 +21,7 @@ each element instead of updating them manually.
 .. Select the element you want to change, then open the expression editor. 
 .. Paste the variable.
 
-For example, to change the index pattern for a set of charts:
+For example, to change the {data-source} for a set of charts:
 
 . Specify the variable options.
 +

@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { first, isEmpty, last, meanBy } from 'lodash';
 import moment from 'moment';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 import { asPercent } from '../../../../plugins/apm/common/utils/formatters';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -84,17 +84,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const GO_PROD_RATE = 75;
         const GO_PROD_ERROR_RATE = 25;
         before(async () => {
-          const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
-            'instance-a'
-          );
+          const serviceGoProdInstance = apm
+            .service(serviceName, 'production', 'go')
+            .instance('instance-a');
 
           const transactionName = 'GET /api/product/list';
 
           await synthtraceEsClient.index([
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceGoProdInstance
                   .transaction(transactionName)
                   .timestamp(timestamp)
@@ -102,10 +102,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .success()
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_ERROR_RATE)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceGoProdInstance
                   .transaction(transactionName)
                   .duration(1000)

@@ -7,11 +7,11 @@
 
 import { Meta, Story } from '@storybook/react';
 import React, { useState } from 'react';
-import { AlertParams, ErrorCountAlertTrigger } from '.';
+import { RuleParams, ErrorCountAlertTrigger } from '.';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { createCallApmApi } from '../../../services/rest/createCallApmApi';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
 import { AlertMetadata } from '../helper';
 
@@ -24,7 +24,7 @@ const coreMock = {
 const KibanaReactContext = createKibanaReactContext(coreMock);
 
 interface Args {
-  alertParams: AlertParams;
+  ruleParams: RuleParams;
   metadata?: AlertMetadata;
 }
 
@@ -48,26 +48,26 @@ const stories: Meta<{}> = {
 export default stories;
 
 export const CreatingInApmFromInventory: Story<Args> = ({
-  alertParams,
+  ruleParams,
   metadata,
 }) => {
-  const [params, setParams] = useState<AlertParams>(alertParams);
+  const [params, setParams] = useState<RuleParams>(ruleParams);
 
-  function setAlertParams(property: string, value: any) {
+  function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });
   }
 
   return (
     <ErrorCountAlertTrigger
-      alertParams={params}
+      ruleParams={params}
       metadata={metadata}
-      setAlertParams={setAlertParams}
-      setAlertProperty={() => {}}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
     />
   );
 };
 CreatingInApmFromInventory.args = {
-  alertParams: {},
+  ruleParams: {},
   metadata: {
     end: '2021-09-10T14:14:04.789Z',
     environment: ENVIRONMENT_ALL.value,
@@ -77,26 +77,26 @@ CreatingInApmFromInventory.args = {
 };
 
 export const CreatingInApmFromService: Story<Args> = ({
-  alertParams,
+  ruleParams,
   metadata,
 }) => {
-  const [params, setParams] = useState<AlertParams>(alertParams);
+  const [params, setParams] = useState<RuleParams>(ruleParams);
 
-  function setAlertParams(property: string, value: any) {
+  function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });
   }
 
   return (
     <ErrorCountAlertTrigger
-      alertParams={params}
+      ruleParams={params}
       metadata={metadata}
-      setAlertParams={setAlertParams}
-      setAlertProperty={() => {}}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
     />
   );
 };
 CreatingInApmFromService.args = {
-  alertParams: {},
+  ruleParams: {},
   metadata: {
     end: '2021-09-10T14:14:04.789Z',
     environment: 'testEnvironment',
@@ -106,26 +106,26 @@ CreatingInApmFromService.args = {
 };
 
 export const EditingInStackManagement: Story<Args> = ({
-  alertParams,
+  ruleParams,
   metadata,
 }) => {
-  const [params, setParams] = useState<AlertParams>(alertParams);
+  const [params, setParams] = useState<RuleParams>(ruleParams);
 
-  function setAlertParams(property: string, value: any) {
+  function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });
   }
 
   return (
     <ErrorCountAlertTrigger
-      alertParams={params}
+      ruleParams={params}
       metadata={metadata}
-      setAlertParams={setAlertParams}
-      setAlertProperty={() => {}}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
     />
   );
 };
 EditingInStackManagement.args = {
-  alertParams: {
+  ruleParams: {
     environment: 'testEnvironment',
     serviceName: 'testServiceName',
     threshold: 25,
@@ -136,25 +136,25 @@ EditingInStackManagement.args = {
 };
 
 export const CreatingInStackManagement: Story<Args> = ({
-  alertParams,
+  ruleParams,
   metadata,
 }) => {
-  const [params, setParams] = useState<AlertParams>(alertParams);
+  const [params, setParams] = useState<RuleParams>(ruleParams);
 
-  function setAlertParams(property: string, value: any) {
+  function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });
   }
 
   return (
     <ErrorCountAlertTrigger
-      alertParams={params}
+      ruleParams={params}
       metadata={metadata}
-      setAlertParams={setAlertParams}
-      setAlertProperty={() => {}}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
     />
   );
 };
 CreatingInStackManagement.args = {
-  alertParams: {},
+  ruleParams: {},
   metadata: undefined,
 };

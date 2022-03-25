@@ -6,15 +6,47 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109893
-/* eslint-disable @kbn/eslint/no_export_all */
-
-export * from './defer';
-export * from './field_wildcard';
-export * from './of';
-export * from './ui';
-export * from './state_containers';
-export * from './errors';
+export { Defer, defer } from './defer';
+export { fieldWildcardMatcher, fieldWildcardFilter } from './field_wildcard';
+export type { UiComponent, UiComponentInstance } from './ui';
+export { of } from './of';
+export type {
+  BaseState,
+  BaseStateContainer,
+  StateContainer,
+  ReduxLikeStateContainer,
+  Dispatch,
+  Middleware,
+  Selector,
+  Comparator,
+  MapStateToProps,
+  Connect,
+  Reducer,
+  UnboxState,
+  PureSelectorToSelector,
+  PureSelectorsToSelectors,
+  EnsurePureSelector,
+  EnsurePureTransition,
+  PureSelector,
+  PureTransition,
+  CreateStateContainerOptions,
+} from './state_containers';
+export {
+  createStateContainerReactHelpers,
+  useContainerSelector,
+  useContainerState,
+  createStateContainer,
+} from './state_containers';
+export type { KibanaServerError } from './errors';
+export {
+  KbnError,
+  CharacterNotAllowedInField,
+  SavedFieldNotFound,
+  SavedObjectNotFound,
+  SavedFieldTypeInvalidForAgg,
+  InvalidJSONProperty,
+  DuplicateField,
+} from './errors';
 export { AbortError, abortSignalToPromise } from './abort_utils';
 export type { Get, Set } from './create_getter_setter';
 export { createGetterSetter } from './create_getter_setter';
@@ -22,4 +54,14 @@ export { distinctUntilChangedWithInitialValue } from './distinct_until_changed_w
 export { url } from './url';
 export { now } from './now';
 export { calculateObjectHash } from './calculate_object_hash';
-export * from './persistable_state';
+export type {
+  VersionedState,
+  PersistableStateService,
+  PersistableStateMigrateFn,
+  MigrateFunction,
+  MigrateFunctionsObject,
+  GetMigrationFunctionObjectFn,
+  PersistableState,
+  PersistableStateDefinition,
+} from './persistable_state';
+export { migrateToLatest, mergeMigrationFunctionMaps } from './persistable_state';

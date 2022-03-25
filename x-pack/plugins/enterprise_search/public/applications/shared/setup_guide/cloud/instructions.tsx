@@ -80,10 +80,7 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                   defaultMessage="After enabling Enterprise Search for your instance you can customize the instance, including fault tolerance, RAM, and other {optionsLink}."
                   values={{
                     optionsLink: (
-                      <EuiLink
-                        href={`${docLinks.enterpriseSearchBase}/configuration.html`}
-                        target="_blank"
-                      >
+                      <EuiLink href={docLinks.enterpriseSearchConfig} target="_blank">
                         {i18n.translate(
                           'xpack.enterpriseSearch.setupGuide.cloud.step3.instruction1LinkText',
                           { defaultMessage: 'configurable options' }
@@ -125,10 +122,7 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                   values={{
                     productName,
                     configurePolicyLink: (
-                      <EuiLink
-                        href={`${docLinks.cloudBase}/ec-configure-index-management.html`}
-                        target="_blank"
-                      >
+                      <EuiLink href={docLinks.cloudIndexManagement} target="_blank">
                         {i18n.translate(
                           'xpack.enterpriseSearch.setupGuide.cloud.step5.instruction1LinkText',
                           { defaultMessage: 'configure an index lifecycle policy' }
@@ -139,6 +133,37 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                 />
               </p>
             </EuiCallOut>
+          ),
+        },
+        {
+          title: i18n.translate('xpack.enterpriseSearch.setupGuide.cloud.step6.title', {
+            defaultMessage: 'Troubleshooting issues',
+          }),
+          children: (
+            <>
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.setupGuide.cloud.step6.instruction1"
+                    defaultMessage="For help with common setup issues, read our {link} guide."
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={docLinks.enterpriseSearchTroubleshootSetup}
+                          target="_blank"
+                          external
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.setupGuide.cloud.step6.instruction1LinkText',
+                            { defaultMessage: 'Troubleshoot Enterprise Search setup' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </>
           ),
         },
       ]}

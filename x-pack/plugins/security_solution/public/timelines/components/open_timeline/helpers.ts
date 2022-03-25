@@ -375,6 +375,7 @@ export const queryTimelineById = <TCache>({
           resolveTimelineConfig: {
             outcome: data.outcome,
             alias_target_id: data.alias_target_id,
+            alias_purpose: data.alias_purpose,
           },
           timeline: {
             ...timeline,
@@ -417,7 +418,6 @@ export const dispatchUpdateTimeline =
           id: SourcererScopeName.timeline,
           selectedDataViewId: timeline.dataViewId,
           selectedPatterns: timeline.indexNames,
-          eventType: timeline.eventType,
         })
       );
     }

@@ -5,27 +5,36 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import { EuiFieldNumber, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
-import { ConfigKeys, Validation } from '../types';
+import React, { memo, useCallback } from 'react';
+import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 import { useHTTPSimpleFieldsContext } from '../contexts';
 import { OptionalLabel } from '../optional_label';
 import { ScheduleField } from '../schedule_field';
-import { CommonFields } from '../common/common_fields';
+import { ConfigKey, Validation } from '../types';
 
 interface Props {
   validate: Validation;
+  onFieldBlur: (field: ConfigKey) => void; // To propagate blurred state up to parents
 }
 
-export const HTTPSimpleFields = memo<Props>(({ validate }) => {
+export const HTTPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   const { fields, setFields } = useHTTPSimpleFieldsContext();
-  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
-    setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
-  };
+  const handleInputChange = useCallback(
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
+      setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
+    },
+    [setFields]
+  );
 
   return (
-    <>
+    <SimpleFieldsWrapper
+      fields={fields}
+      validate={validate}
+      onInputChange={handleInputChange}
+      onFieldBlur={onFieldBlur}
+    >
       <EuiFormRow
         label={
           <FormattedMessage
@@ -33,7 +42,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="URL"
           />
         }
-        isInvalid={!!validate[ConfigKeys.URLS]?.(fields)}
+        isInvalid={!!validate[ConfigKey.URLS]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL.error"
@@ -42,10 +51,11 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
         }
       >
         <EuiFieldText
-          value={fields[ConfigKeys.URLS]}
+          value={fields[ConfigKey.URLS]}
           onChange={(event) =>
-            handleInputChange({ value: event.target.value, configKey: ConfigKeys.URLS })
+            handleInputChange({ value: event.target.value, configKey: ConfigKey.URLS })
           }
+          onBlur={() => onFieldBlur(ConfigKey.URLS)}
           data-test-subj="syntheticsUrlField"
         />
       </EuiFormRow>
@@ -54,14 +64,14 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
-            defaultMessage="Monitor interval"
+            defaultMessage="Frequency"
           />
         }
-        isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields)}
+        isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
-            defaultMessage="Monitor interval is required"
+            defaultMessage="Monitor frequency is required"
           />
         }
       >
@@ -69,11 +79,12 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
           onChange={(schedule) =>
             handleInputChange({
               value: schedule,
-              configKey: ConfigKeys.SCHEDULE,
+              configKey: ConfigKey.SCHEDULE,
             })
           }
-          number={fields[ConfigKeys.SCHEDULE].number}
-          unit={fields[ConfigKeys.SCHEDULE].unit}
+          onBlur={() => onFieldBlur(ConfigKey.SCHEDULE)}
+          number={fields[ConfigKey.SCHEDULE].number}
+          unit={fields[ConfigKey.SCHEDULE].unit}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -83,7 +94,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="Max redirects"
           />
         }
-        isInvalid={!!validate[ConfigKeys.MAX_REDIRECTS]?.(fields)}
+        isInvalid={!!validate[ConfigKey.MAX_REDIRECTS]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.error"
@@ -100,16 +111,16 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
       >
         <EuiFieldNumber
           min={0}
-          value={fields[ConfigKeys.MAX_REDIRECTS]}
+          value={fields[ConfigKey.MAX_REDIRECTS]}
           onChange={(event) =>
             handleInputChange({
               value: event.target.value,
-              configKey: ConfigKeys.MAX_REDIRECTS,
+              configKey: ConfigKey.MAX_REDIRECTS,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.MAX_REDIRECTS)}
         />
       </EuiFormRow>
-      <CommonFields fields={fields} onChange={handleInputChange} validate={validate} />
-    </>
+    </SimpleFieldsWrapper>
   );
 });

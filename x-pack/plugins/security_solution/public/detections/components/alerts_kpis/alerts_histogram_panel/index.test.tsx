@@ -12,9 +12,13 @@ import { mount } from 'enzyme';
 import type { Filter } from '@kbn/es-query';
 import { TestProviders } from '../../../../common/mock';
 import { SecurityPageName } from '../../../../app/types';
+import { MatrixLoader } from '../../../../common/components/matrix_histogram/matrix_loader';
 
 import { AlertsHistogramPanel } from './index';
 import * as helpers from './helpers';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+
+jest.mock('../../../../common/containers/query_toggle');
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -22,6 +26,7 @@ jest.mock('react-router-dom', () => {
     ...originalModule,
     createHref: jest.fn(),
     useHistory: jest.fn(),
+    useLocation: jest.fn().mockReturnValue({ pathname: '' }),
   };
 });
 
@@ -37,8 +42,20 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
           navigateToApp: mockNavigateToApp,
           getUrlForApp: jest.fn(),
         },
+        data: {
+          search: {
+            search: jest.fn(),
+          },
+        },
         uiSettings: {
           get: jest.fn(),
+        },
+        notifications: {
+          toasts: {
+            addWarning: jest.fn(),
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+          },
         },
       },
     }),
@@ -77,6 +94,12 @@ describe('AlertsHistogramPanel', () => {
     setQuery: jest.fn(),
     updateDateRange: jest.fn(),
   };
+
+  const mockSetToggle = jest.fn();
+  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  beforeEach(() => {
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -184,6 +207,7 @@ describe('AlertsHistogramPanel', () => {
               },
             },
           ],
+          undefined,
         ]);
       });
       wrapper.unmount();
@@ -237,6 +261,7 @@ describe('AlertsHistogramPanel', () => {
               },
             },
           ],
+          undefined,
         ]);
       });
       wrapper.unmount();
@@ -322,6 +347,42 @@ describe('AlertsHistogramPanel', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('toggleQuery', () => {
+    it('toggles', async () => {
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
+        expect(mockSetToggle).toBeCalledWith(false);
+      });
+    });
+    it('toggleStatus=true, render', async () => {
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+
+        expect(wrapper.find(MatrixLoader).exists()).toEqual(true);
+      });
+    });
+    it('toggleStatus=false, hide', async () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+      });
     });
   });
 });

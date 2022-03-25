@@ -23,6 +23,9 @@ jest.mock('../../../../../app_context', () => {
     useAppContext: () => {
       return {
         services: {
+          api: {
+            useLoadNodeDiskSpace: () => [],
+          },
           core: {
             docLinks: docLinksServiceMock.createStartContract(),
           },
@@ -54,6 +57,11 @@ describe('ChecklistFlyout', () => {
       errorMessage: null,
       reindexWarnings: [],
       hasRequiredPrivileges: true,
+      meta: {
+        indexName: 'myIndex',
+        reindexName: 'reindexed-myIndex',
+        aliases: [],
+      },
     } as ReindexState,
   };
 

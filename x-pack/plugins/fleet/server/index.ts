@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
@@ -19,8 +21,10 @@ import { FleetPlugin } from './plugin';
 
 export type {
   AgentService,
+  AgentClient,
   ESIndexPatternService,
   PackageService,
+  PackageClient,
   AgentPolicyServiceInterface,
   ArtifactsClientInterface,
   Artifact,
@@ -34,8 +38,11 @@ export type {
   PutPackagePolicyUpdateCallback,
   PostPackagePolicyDeleteCallback,
   PostPackagePolicyCreateCallback,
+  FleetRequestHandlerContext,
 } from './types';
-export { AgentNotFoundError } from './errors';
+export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
+
+const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -51,6 +58,39 @@ export const config: PluginConfigDescriptor = {
     unused('agents.pollingRequestTimeout', { level: 'critical' }),
     unused('agents.tlsCheckDisabled', { level: 'critical' }),
     unused('agents.fleetServerEnabled', { level: 'critical' }),
+    // Deprecate default policy flags
+    (fullConfig, fromPath, addDeprecation) => {
+      if (
+        (fullConfig?.xpack?.fleet?.agentPolicies || []).find((policy: any) => policy.is_default)
+      ) {
+        addDeprecation({
+          configPath: 'xpack.fleet.agentPolicies.is_default',
+          message: `Config key [xpack.fleet.agentPolicies.is_default] is deprecated.`,
+          correctiveActions: {
+            manualSteps: [`Create a dedicated policy instead through the UI or API.`],
+          },
+          level: 'warning',
+        });
+      }
+      return fullConfig;
+    },
+    (fullConfig, fromPath, addDeprecation) => {
+      if (
+        (fullConfig?.xpack?.fleet?.agentPolicies || []).find(
+          (policy: any) => policy.is_default_fleet_server
+        )
+      ) {
+        addDeprecation({
+          configPath: 'xpack.fleet.agentPolicies.is_default_fleet_server',
+          message: `Config key [xpack.fleet.agentPolicies.is_default_fleet_server] is deprecated.`,
+          correctiveActions: {
+            manualSteps: [`Create a dedicated fleet server policy instead through the UI or API.`],
+          },
+          level: 'warning',
+        });
+      }
+      return fullConfig;
+    },
     // Renaming elasticsearch.host => elasticsearch.hosts
     (fullConfig, fromPath, addDeprecation) => {
       const oldValue = fullConfig?.xpack?.fleet?.agents?.elasticsearch?.host;
@@ -92,8 +132,9 @@ export const config: PluginConfigDescriptor = {
     outputs: PreconfiguredOutputsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
     developer: schema.object({
-      // TODO: change default to false as soon as EPR issue fixed. Blocker for 8.0.
-      disableRegistryVersionCheck: schema.boolean({ defaultValue: true }),
+      disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
+      allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
+      bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
     }),
   }),
 };

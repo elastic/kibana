@@ -9,11 +9,11 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import { Query } from '../filters';
 import { fromKueryExpression, toElasticsearchQuery, nodeTypes, KueryNode } from '../kuery';
-import { BoolQuery, IndexPatternBase } from './types';
+import { BoolQuery, DataViewBase } from './types';
 
 /** @internal */
 export function buildQueryFromKuery(
-  indexPattern: IndexPatternBase | undefined,
+  indexPattern: DataViewBase | undefined,
   queries: Query[] = [],
   allowLeadingWildcards: boolean = false,
   dateFormatTZ?: string,
@@ -27,7 +27,7 @@ export function buildQueryFromKuery(
 }
 
 function buildQuery(
-  indexPattern: IndexPatternBase | undefined,
+  indexPattern: DataViewBase | undefined,
   queryASTs: KueryNode[],
   config: SerializableRecord = {}
 ): BoolQuery {

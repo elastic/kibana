@@ -42,6 +42,9 @@ export const NAV = {
   ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
     defaultMessage: 'Users and roles',
   }),
+  API_KEYS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.apiKeys', {
+    defaultMessage: 'API keys',
+  }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
   }),
@@ -57,10 +60,10 @@ export const NAV = {
       defaultMessage: 'Frequency',
     }
   ),
-  SYNCHRONIZATION_OBJECTS_AND_ASSETS: i18n.translate(
-    'xpack.enterpriseSearch.workplaceSearch.nav.synchronizationObjectsAndAssets',
+  SYNCHRONIZATION_ASSETS_AND_OBJECTS: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.synchronizationAssetsAndObjects',
     {
-      defaultMessage: 'Objects and assets',
+      defaultMessage: 'Assets and objects',
     }
   ),
   DISPLAY_SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.displaySettings', {
@@ -188,6 +191,10 @@ export const SOURCE_NAMES = {
   SHAREPOINT: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.sharePoint',
     { defaultMessage: 'SharePoint Online' }
+  ),
+  SHAREPOINT_SERVER: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.sharePointServer',
+    { defaultMessage: 'SharePoint Server' }
   ),
   SLACK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.slack', {
     defaultMessage: 'Slack',
@@ -329,6 +336,20 @@ export const SOURCE_OBJ_TYPES = {
   ),
 };
 
+export const API_KEYS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.apiKeysTitle',
+  {
+    defaultMessage: 'API keys',
+  }
+);
+
+export const API_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.apiKeyLabel',
+  {
+    defaultMessage: 'API key',
+  }
+);
+
 export const GITHUB_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.applicationLinkTitles.github',
   {
@@ -336,9 +357,11 @@ export const GITHUB_LINK_TITLE = i18n.translate(
   }
 );
 
-export const CUSTOM_SERVICE_TYPE = 'custom';
+export const GITHUB_VIA_APP_SERVICE_TYPE = 'github_via_app';
+export const GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE = 'github_enterprise_server_via_app';
 
-export const WORKPLACE_SEARCH_URL_PREFIX = '/app/enterprise_search/workplace_search';
+export const CUSTOM_SERVICE_TYPE = 'custom';
+export const EXTERNAL_SERVICE_TYPE = 'external';
 
 export const DOCUMENTATION_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.documentation',
@@ -453,6 +476,20 @@ export const BASE_URL_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.baseUrl.label',
   {
     defaultMessage: 'Base URL',
+  }
+);
+
+export const EXTERNAL_CONNECTOR_URL_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.externalConnectorUrl.label',
+  {
+    defaultMessage: 'Connector URL',
+  }
+);
+
+export const EXTERNAL_CONNECTOR_API_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.externalConnectorApiKey.label',
+  {
+    defaultMessage: 'Connector API key',
   }
 );
 
@@ -861,5 +898,16 @@ export const PLATINUM_FEATURE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.platinumFeature',
   {
     defaultMessage: 'Platinum feature',
+  }
+);
+
+export const COPY_TOOLTIP = i18n.translate('xpack.enterpriseSearch.workplaceSearch.copy.tooltip', {
+  defaultMessage: 'Copy to clipboard',
+});
+
+export const COPIED_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.copied.tooltip',
+  {
+    defaultMessage: 'Copied!',
   }
 );

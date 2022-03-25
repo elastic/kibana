@@ -142,11 +142,12 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
     }
   }, [detailVertexId, getPageData]);
 
-  const onChangePipelineHash = useCallback(() => {
-    window.location.hash = getSafeForExternalLink(
-      `#/logstash/pipelines/${pipelineId}/${pipelineHash}`
-    );
-  }, [pipelineId, pipelineHash]);
+  const onChangePipelineHash = useCallback(
+    (hash) => {
+      window.location.hash = getSafeForExternalLink(`#/logstash/pipelines/${pipelineId}/${hash}`);
+    },
+    [pipelineId]
+  );
 
   useEffect(() => {
     if (cluster) {

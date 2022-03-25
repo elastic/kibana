@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPatternsContract } from 'src/plugins/data/public';
+
+import type { DataViewsContract } from 'src/plugins/data_views/public';
 import { getIndexPatterns } from './utils';
 
 const indexPatternContractMock = {
@@ -22,7 +23,7 @@ const indexPatternContractMock = {
     ])
   ),
   get: jest.fn().mockReturnValue(Promise.resolve({})),
-} as unknown as jest.Mocked<IndexPatternsContract>;
+} as unknown as jest.Mocked<DataViewsContract>;
 
 test('getting index patterns', async () => {
   const indexPatterns = await getIndexPatterns('test', indexPatternContractMock);

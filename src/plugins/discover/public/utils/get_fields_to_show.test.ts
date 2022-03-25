@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern, IndexPatternField } from '../../../data/common';
+import { DataView, DataViewField } from '../../../data_views/public';
 import { getFieldsToShow } from './get_fields_to_show';
 
 describe('get fields to show', () => {
-  let indexPattern: IndexPattern;
-  const indexPatternFields: Record<string, IndexPatternField> = {
+  let indexPattern: DataView;
+  const indexPatternFields: Record<string, DataViewField> = {
     'machine.os': {
       name: 'machine.os',
       esTypes: ['text'],
@@ -19,7 +19,7 @@ describe('get fields to show', () => {
       aggregatable: false,
       searchable: false,
       filterable: true,
-    } as IndexPatternField,
+    } as DataViewField,
     'machine.os.raw': {
       name: 'machine.os.raw',
       type: 'string',
@@ -34,7 +34,7 @@ describe('get fields to show', () => {
           },
         },
       },
-    } as IndexPatternField,
+    } as DataViewField,
     acknowledged: {
       name: 'acknowledged',
       type: 'boolean',
@@ -42,7 +42,7 @@ describe('get fields to show', () => {
       aggregatable: true,
       searchable: true,
       filterable: true,
-    } as IndexPatternField,
+    } as DataViewField,
     bytes: {
       name: 'bytes',
       type: 'number',
@@ -50,7 +50,7 @@ describe('get fields to show', () => {
       aggregatable: true,
       searchable: true,
       filterable: true,
-    } as IndexPatternField,
+    } as DataViewField,
     clientip: {
       name: 'clientip',
       type: 'ip',
@@ -58,7 +58,7 @@ describe('get fields to show', () => {
       aggregatable: true,
       searchable: true,
       filterable: true,
-    } as IndexPatternField,
+    } as DataViewField,
   };
   const stubIndexPattern = {
     id: 'logstash-*',
@@ -69,7 +69,7 @@ describe('get fields to show', () => {
   };
 
   beforeEach(() => {
-    indexPattern = stubIndexPattern as IndexPattern;
+    indexPattern = stubIndexPattern as DataView;
     indexPattern.fields.getByName = (name) => indexPatternFields[name];
   });
 

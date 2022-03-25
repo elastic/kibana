@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IndexPatternField } from 'src/plugins/data/common';
+import type { DataViewField } from 'src/plugins/data_views/public';
 import type { Action } from 'src/plugins/ui_actions/public';
 import { getVisualizeInformation } from './visualize_trigger_utils';
 
@@ -20,7 +20,7 @@ const field = {
   aggregatable: true,
   readFromDocValues: true,
   visualizable: true,
-} as IndexPatternField;
+} as DataViewField;
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])
@@ -66,13 +66,13 @@ describe('visualize_trigger_utils', () => {
     it('should return undefined if no field has a compatible action', async () => {
       mockGetActions.mockResolvedValue([]);
       const information = await getVisualizeInformation(
-        { ...field, name: 'rootField' } as IndexPatternField,
+        { ...field, name: 'rootField' } as DataViewField,
         '1',
         [],
         [
           { ...field, name: 'multi1' },
           { ...field, name: 'multi2' },
-        ] as IndexPatternField[]
+        ] as DataViewField[]
       );
       expect(information).toBeUndefined();
     });
@@ -80,13 +80,13 @@ describe('visualize_trigger_utils', () => {
     it('should return information for the root field, when multi fields and root are having actions', async () => {
       mockGetActions.mockResolvedValue([action]);
       const information = await getVisualizeInformation(
-        { ...field, name: 'rootField' } as IndexPatternField,
+        { ...field, name: 'rootField' } as DataViewField,
         '1',
         [],
         [
           { ...field, name: 'multi1' },
           { ...field, name: 'multi2' },
-        ] as IndexPatternField[]
+        ] as DataViewField[]
       );
       expect(information).not.toBeUndefined();
       expect(information?.field).toHaveProperty('name', 'rootField');
@@ -100,14 +100,14 @@ describe('visualize_trigger_utils', () => {
         return [];
       });
       const information = await getVisualizeInformation(
-        { ...field, name: 'rootField' } as IndexPatternField,
+        { ...field, name: 'rootField' } as DataViewField,
         '1',
         [],
         [
           { ...field, name: 'multi1' },
           { ...field, name: 'multi2' },
           { ...field, name: 'multi3' },
-        ] as IndexPatternField[]
+        ] as DataViewField[]
       );
       expect(information).not.toBeUndefined();
       expect(information?.field).toHaveProperty('name', 'multi2');

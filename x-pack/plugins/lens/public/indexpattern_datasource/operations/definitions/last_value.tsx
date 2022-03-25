@@ -6,14 +6,21 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiSwitch,
+  EuiToolTip,
+} from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
-import { updateColumnParam } from '../layer_helpers';
+import { adjustColumnReferencesForChangedColumn, updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
 import {
   getFormatFromPreviousColumn,
@@ -22,6 +29,8 @@ import {
   getFilter,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { isScriptedField } from './terms/helpers';
 
 function ofName(name: string, timeShift: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -38,7 +47,16 @@ function ofName(name: string, timeShift: string | undefined) {
   );
 }
 
-const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
+const supportedTypes = new Set([
+  'string',
+  'boolean',
+  'number',
+  'ip',
+  'date',
+  'ip_range',
+  'number_range',
+  'date_range',
+]);
 
 export function getInvalidSortFieldMessage(sortField: string, indexPattern?: IndexPattern) {
   if (!indexPattern) {
@@ -88,6 +106,7 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
   operationType: 'last_value';
   params: {
     sortField: string;
+    showArrayValues: boolean;
     // last value on numeric fields can be formatted
     format?: {
       id: string;
@@ -98,7 +117,18 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
   };
 }
 
-export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn, 'field'> = {
+function getExistsFilter(field: string) {
+  return {
+    query: `${field}: *`,
+    language: 'kuery',
+  };
+}
+
+export const lastValueOperation: OperationDefinition<
+  LastValueIndexPatternColumn,
+  'field',
+  Partial<LastValueIndexPatternColumn['params']>
+> = {
   type: 'last_value',
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
     defaultMessage: 'Last value',
@@ -108,6 +138,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
+
+    newParams.showArrayValues = isScriptedField(field) || oldColumn.params.showArrayValues;
 
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
@@ -119,6 +151,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       sourceField: field.name,
       params: newParams,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
+      filter:
+        oldColumn.filter && isEqual(oldColumn.filter, getExistsFilter(oldColumn.sourceField))
+          ? getExistsFilter(field.name)
+          : oldColumn.filter,
     };
   },
   getPossibleOperationForField: ({ aggregationRestrictions, type }) => {
@@ -152,9 +188,11 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     if (invalidSortFieldMessage) {
       errorMessages = [invalidSortFieldMessage];
     }
+    errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
     return errorMessages.length ? errorMessages : undefined;
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {
+    const lastValueParams = columnParams as LastValueIndexPatternColumn['params'];
     const sortField = isTimeFieldNameDateField(indexPattern)
       ? indexPattern.timeFieldName
       : indexPattern.fields.find((f) => f.type === 'date')?.name;
@@ -167,6 +205,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       );
     }
 
+    const showArrayValues = isScriptedField(field) || lastValueParams?.showArrayValues;
+
     return {
       label: ofName(field.displayName, previousColumn?.timeShift),
       dataType: field.type as DataType,
@@ -174,29 +214,41 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       isBucketed: false,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
-      filter: getFilter(previousColumn, columnParams),
+      filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
-        sortField,
+        showArrayValues,
+        sortField: lastValueParams?.sortField || sortField,
         ...getFormatFromPreviousColumn(previousColumn),
       },
     };
   },
   filterable: true,
   shiftable: true,
-  toEsAggsFn: (column, columnId) => {
-    return buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
+  toEsAggsFn: (column, columnId, indexPattern) => {
+    const initialArgs = {
       id: columnId,
       enabled: true,
       schema: 'metric',
       field: column.sourceField,
-      aggregate: 'concat',
       size: 1,
       sortOrder: 'desc',
       sortField: column.params.sortField,
       // time shift is added to wrapping aggFilteredMetric if filter is set
       timeShift: column.filter ? undefined : column.timeShift,
-    }).toAst();
+    } as const;
+
+    return (
+      column.params.showArrayValues
+        ? buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
+            ...initialArgs,
+            aggregate: 'concat',
+          })
+        : buildExpressionFunction<AggFunctionsMapping['aggTopMetrics']>(
+            'aggTopMetrics',
+            initialArgs
+          )
+    ).toAst();
   },
 
   isTransferable: (column, newIndexPattern) => {
@@ -217,13 +269,34 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       currentColumn.params.sortField,
       indexPattern
     );
+
+    const usingTopValues = Object.keys(layer.columns).some(
+      (_columnId) => layer.columns[_columnId].operationType === 'terms'
+    );
+
+    const setShowArrayValues = (use: boolean) => {
+      let updatedLayer = updateColumnParam({
+        layer,
+        columnId,
+        paramName: 'showArrayValues',
+        value: use,
+      });
+
+      updatedLayer = {
+        ...updatedLayer,
+        columns: adjustColumnReferencesForChangedColumn(updatedLayer, columnId),
+      };
+
+      updateLayer(updatedLayer);
+    };
+
     return (
       <>
         <EuiFormRow
           label={i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
             defaultMessage: 'Sort by date field',
           })}
-          display="columnCompressed"
+          display="rowCompressed"
           fullWidth
           error={i18n.translate('xpack.lens.indexPattern.sortField.invalid', {
             defaultMessage: 'Invalid field. Check your data view or pick another field.',
@@ -274,6 +347,40 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
                 : []) as unknown as EuiComboBoxOptionOption[]
             }
           />
+        </EuiFormRow>
+        <EuiFormRow
+          error={i18n.translate(
+            'xpack.lens.indexPattern.lastValue.showArrayValuesWithTopValuesWarning',
+            {
+              defaultMessage:
+                'When you show array values, you are unable to use this field to rank Top values.',
+            }
+          )}
+          isInvalid={currentColumn.params.showArrayValues && usingTopValues}
+          display="rowCompressed"
+          fullWidth
+          data-test-subj="lns-indexPattern-lastValue-showArrayValues"
+        >
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.lens.indexPattern.lastValue.showArrayValuesExplanation',
+              {
+                defaultMessage:
+                  'Displays all values associated with this field in each last document.',
+              }
+            )}
+            position="left"
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.lens.indexPattern.lastValue.showArrayValues', {
+                defaultMessage: 'Show array values',
+              })}
+              compressed={true}
+              checked={Boolean(currentColumn.params.showArrayValues)}
+              disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
+              onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
+            />
+          </EuiToolTip>
         </EuiFormRow>
       </>
     );

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetAppSearchChrome } from '../../../shared/kibana_chrome';
-import { EnterpriseSearchPageTemplate, PageTemplateProps } from '../../../shared/layout';
+import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { SendAppSearchTelemetry } from '../../../shared/telemetry';
 
 import { useAppSearchNav } from './nav';
@@ -21,7 +21,7 @@ export const AppSearchPageTemplate: React.FC<PageTemplateProps> = ({
   ...pageTemplateProps
 }) => {
   return (
-    <EnterpriseSearchPageTemplate
+    <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
         name: APP_SEARCH_PLUGIN.NAME,
@@ -31,6 +31,6 @@ export const AppSearchPageTemplate: React.FC<PageTemplateProps> = ({
     >
       {pageViewTelemetry && <SendAppSearchTelemetry action="viewed" metric={pageViewTelemetry} />}
       {children}
-    </EnterpriseSearchPageTemplate>
+    </EnterpriseSearchPageTemplateWrapper>
   );
 };

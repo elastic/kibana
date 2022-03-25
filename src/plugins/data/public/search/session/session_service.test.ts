@@ -15,7 +15,7 @@ import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
-import { SearchSessionSavedObject, ISessionsClient } from './sessions_client';
+import type { SearchSessionSavedObject, ISessionsClient } from './sessions_client';
 import { SearchSessionStatus } from '../../../common';
 import { CoreStart } from 'kibana/public';
 

@@ -34,6 +34,7 @@ interface AccessItem {
 }
 
 interface SharedUser extends SingleUserRoleMapping<ASRoleMapping | WSRoleMapping> {
+  accessAll: ASRoleMapping['accessAllEngines'] | WSRoleMapping['allGroups'];
   accessItems: AccessItem[];
   username: string;
   email: string | null;
@@ -73,6 +74,9 @@ export const UsersTable: React.FC<Props> = ({
     roleType: user.roleMapping.roleType,
     id: user.roleMapping.id,
     accessItems: (user.roleMapping as SharedRoleMapping)[accessItemKey],
+    accessAll: (user.roleMapping as SharedRoleMapping)[
+      accessItemKey === 'engines' ? 'accessAllEngines' : 'allGroups'
+    ],
     invitation: user.invitation,
   })) as unknown as Users;
 
@@ -112,17 +116,9 @@ export const UsersTable: React.FC<Props> = ({
     {
       field: 'accessItems',
       name: accessItemKey === 'groups' ? GROUPS_LABEL : ENGINES_LABEL,
-      render: (_, { accessItems }: SharedUser) => {
-        // Design calls for showing the first 2 items followed by a +x after those 2.
-        // ['foo', 'bar', 'baz'] would display as: "foo, bar + 1"
-        const numItems = accessItems.length;
-        if (numItems === 0) return <span data-test-subj="AllItems">{ALL_LABEL}</span>;
-        const additionalItems = numItems > 2 ? ` + ${numItems - 2}` : '';
-        const names = accessItems.map((item) => item.name);
-        return (
-          <span data-test-subj="AccessItems">{names.slice(0, 2).join(', ') + additionalItems}</span>
-        );
-      },
+      render: (_, user: SharedUser) => (
+        <span data-test-subj="AccessItems">{getAccessItemsContent(user)}</span>
+      ),
     },
     {
       field: 'id',
@@ -138,8 +134,25 @@ export const UsersTable: React.FC<Props> = ({
     },
   ];
 
+  const getAccessItemsContent = ({ accessItems, accessAll }: SharedUser): string => {
+    const isAppSearch = accessItemKey === 'engines';
+    const numItems = accessItems.length;
+
+    if (numItems === 0) {
+      // There is a possibility to add users without setting an access. We should not show 'All' in that case.
+      return isAppSearch && !accessAll ? '-' : ALL_LABEL;
+    }
+
+    // Design calls for showing the first 2 items followed by a +x after those 2.
+    // ['foo', 'bar', 'baz'] would display as: "foo, bar + 1"
+    const additionalItems = numItems > 2 ? ` + ${numItems - 2}` : '';
+    const names = accessItems.map((item) => item.name);
+
+    return names.slice(0, 2).join(', ') + additionalItems;
+  };
+
   const pagination = {
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
     pageSize: 10,
   };
 

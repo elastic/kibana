@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -21,37 +22,72 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextColor,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { AppAction } from '../../../../../../common/store/actions';
 import { EventFiltersForm } from '../form';
 import { useEventFiltersSelector, useEventFiltersNotification } from '../../hooks';
 import {
+  getFormEntryStateMutable,
   getFormHasError,
   isCreationInProgress,
   isCreationSuccessful,
 } from '../../../store/selector';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { Ecs } from '../../../../../../../common/ecs';
-import { useKibana } from '../../../../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
+import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
+import { getLoadPoliciesError } from '../../../../../common/translations';
+import { useLicense } from '../../../../../../common/hooks/use_license';
+import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
 
 export interface EventFiltersFlyoutProps {
   type?: 'create' | 'edit';
   id?: string;
   data?: Ecs;
   onCancel(): void;
+  maskProps?: {
+    style?: string;
+  };
 }
 
 export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
-  ({ onCancel, id, type = 'create', data }) => {
+  ({ onCancel, id, type = 'create', data, ...flyoutProps }) => {
     useEventFiltersNotification();
     const [enrichedData, setEnrichedData] = useState<Ecs | null>();
+    const toasts = useToasts();
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const formHasError = useEventFiltersSelector(getFormHasError);
     const creationInProgress = useEventFiltersSelector(isCreationInProgress);
     const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
+    const exception = useEventFiltersSelector(getFormEntryStateMutable);
     const {
       data: { search },
+      docLinks,
     } = useKibana().services;
+
+    // load the list of policies>
+    const policiesRequest = useGetEndpointSpecificPolicies({
+      perPage: 1000,
+      onError: (error) => {
+        toasts.addWarning(getLoadPoliciesError(error));
+      },
+    });
+
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const isEditMode = useMemo(() => type === 'edit' && !!id, [type, id]);
+    const [wasByPolicy, setWasByPolicy] = useState<boolean | undefined>(undefined);
+
+    const showExpiredLicenseBanner = useMemo(() => {
+      return !isPlatinumPlus && isEditMode && wasByPolicy;
+    }, [isPlatinumPlus, isEditMode, wasByPolicy]);
+
+    useEffect(() => {
+      if (exception && wasByPolicy === undefined) {
+        setWasByPolicy(!isGlobalPolicyEffected(exception?.tags));
+      }
+    }, [exception, wasByPolicy]);
 
     useEffect(() => {
       if (creationSuccessful) {
@@ -141,7 +177,13 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         <EuiButton
           data-test-subj="add-exception-confirm-button"
           fill
-          disabled={formHasError || creationInProgress || (!!data && !enrichedData)}
+          disabled={
+            formHasError ||
+            creationInProgress ||
+            (!!data && !enrichedData) ||
+            policiesRequest.isLoading ||
+            policiesRequest.isRefetching
+          }
           onClick={() =>
             id
               ? dispatch({ type: 'eventFiltersUpdateStart' })
@@ -152,7 +194,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           {id ? (
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update"
-              defaultMessage="Update event filter"
+              defaultMessage="Save"
             />
           ) : data ? (
             <FormattedMessage
@@ -167,11 +209,16 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           )}
         </EuiButton>
       ),
-      [formHasError, creationInProgress, data, enrichedData, id, dispatch]
+      [formHasError, creationInProgress, data, enrichedData, id, dispatch, policiesRequest]
     );
 
     return (
-      <EuiFlyout size="l" onClose={handleOnCancel} data-test-subj="eventFiltersCreateEditFlyout">
+      <EuiFlyout
+        size="l"
+        onClose={handleOnCancel}
+        data-test-subj="eventFiltersCreateEditFlyout"
+        {...flyoutProps}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -203,8 +250,34 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           ) : null}
         </EuiFlyoutHeader>
 
+        {showExpiredLicenseBanner && (
+          <EuiCallOut
+            title={i18n.translate('xpack.securitySolution.eventFilters.expiredLicenseTitle', {
+              defaultMessage: 'Expired License',
+            })}
+            color="warning"
+            iconType="help"
+            data-test-subj="expired-license-callout"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.expiredLicenseMessage"
+              defaultMessage="Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies. For more information, see our "
+            />
+            <EuiLink target="_blank" href={`${docLinks.links.securitySolution.eventFilters}`}>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.docsLink"
+                defaultMessage="Event filters documentation."
+              />
+            </EuiLink>
+          </EuiCallOut>
+        )}
+
         <EuiFlyoutBody>
-          <EventFiltersForm allowSelectOs={!data} />
+          <EventFiltersForm
+            allowSelectOs={!data}
+            policies={policiesRequest?.data?.items ?? []}
+            arePoliciesLoading={policiesRequest.isLoading || policiesRequest.isRefetching}
+          />
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>

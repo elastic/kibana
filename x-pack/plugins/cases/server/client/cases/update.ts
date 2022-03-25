@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -21,90 +20,36 @@ import {
 import { nodeBuilder } from '@kbn/es-query';
 
 import {
-  AssociationType,
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
   CasePatchRequest,
   CasesPatchRequest,
   CasesPatchRequestRt,
   CasesResponse,
   CasesResponseRt,
   CaseStatuses,
-  CaseType,
   CommentAttributes,
   CommentType,
-  ENABLE_CASE_CONNECTOR,
   excess,
-  MAX_CONCURRENT_SEARCHES,
-  SUB_CASE_SAVED_OBJECT,
   throwErrors,
-  MAX_TITLE_LENGTH,
   CaseAttributes,
-} from '../../../common';
-import { buildCaseUserActions } from '../../services/user_actions/helpers';
+} from '../../../common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  MAX_TITLE_LENGTH,
+} from '../../../common/constants';
+
 import { getCaseToUpdate } from '../utils';
 
-import { CasesService } from '../../services';
+import { AlertService, CasesService } from '../../services';
+import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
-  createCaseError,
   flattenCaseSavedObject,
-  isCommentRequestTypeAlertOrGenAlert,
-} from '../../common';
+  isCommentRequestTypeAlert,
+} from '../../common/utils';
 import { UpdateAlertRequest } from '../alerts/types';
-import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';
-
-/**
- * Throws an error if any of the requests attempt to update a collection style cases' status field.
- */
-function throwIfUpdateStatusOfCollection(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsUpdatingStatusOfCollection = requests.filter(
-    ({ updateReq, originalCase }) =>
-      updateReq.status !== undefined && originalCase.attributes.type === CaseType.collection
-  );
-
-  if (requestsUpdatingStatusOfCollection.length > 0) {
-    const ids = requestsUpdatingStatusOfCollection.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `Updating the status of a collection is not allowed ids: [${ids.join(', ')}]`
-    );
-  }
-}
-
-/**
- * Throws an error if any of the requests attempt to update a collection style case to an individual one.
- */
-function throwIfUpdateTypeCollectionToIndividual(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsUpdatingTypeCollectionToInd = requests.filter(
-    ({ updateReq, originalCase }) =>
-      updateReq.type === CaseType.individual && originalCase.attributes.type === CaseType.collection
-  );
-
-  if (requestsUpdatingTypeCollectionToInd.length > 0) {
-    const ids = requestsUpdatingTypeCollectionToInd.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `Converting a collection to an individual case is not allowed ids: [${ids.join(', ')}]`
-    );
-  }
-}
-
-/**
- * Throws an error if any of the requests attempt to update the type of a case.
- */
-function throwIfUpdateType(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsUpdatingType = requests.filter(({ updateReq }) => updateReq.type !== undefined);
-
-  if (requestsUpdatingType.length > 0) {
-    const ids = requestsUpdatingType.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `Updating the type of a case when sub cases are disabled is not allowed ids: [${ids.join(
-        ', '
-      )}]`
-    );
-  }
-}
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -115,64 +60,6 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
   if (requestsUpdatingOwner.length > 0) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(`Updating the owner of a case  is not allowed ids: [${ids.join(', ')}]`);
-  }
-}
-
-/**
- * Throws an error if any of the requests attempt to update an individual style cases' type field to a collection
- * when alerts are attached to the case.
- */
-async function throwIfInvalidUpdateOfTypeWithAlerts({
-  requests,
-  caseService,
-  unsecuredSavedObjectsClient,
-}: {
-  requests: UpdateRequestWithOriginalCase[];
-  caseService: CasesService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
-}) {
-  const getAlertsForID = async ({ updateReq }: UpdateRequestWithOriginalCase) => {
-    const alerts = await caseService.getAllCaseComments({
-      unsecuredSavedObjectsClient,
-      id: updateReq.id,
-      options: {
-        fields: [],
-        // there should never be generated alerts attached to an individual case but we'll check anyway
-        filter: nodeBuilder.or([
-          nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
-          nodeBuilder.is(
-            `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
-            CommentType.generatedAlert
-          ),
-        ]),
-        page: 1,
-        perPage: 1,
-      },
-    });
-
-    return { id: updateReq.id, alerts };
-  };
-
-  const requestsUpdatingTypeField = requests.filter(
-    ({ updateReq }) => updateReq.type === CaseType.collection
-  );
-  const getAlertsMapper = async (caseToUpdate: UpdateRequestWithOriginalCase) =>
-    getAlertsForID(caseToUpdate);
-  // Ensuring we don't too many concurrent get running.
-  const casesAlertTotals = await pMap(requestsUpdatingTypeField, getAlertsMapper, {
-    concurrency: MAX_CONCURRENT_SEARCHES,
-  });
-
-  // grab the cases that have at least one alert comment attached to them
-  const typeUpdateWithAlerts = casesAlertTotals.filter((caseInfo) => caseInfo.alerts.total > 0);
-
-  if (typeUpdateWithAlerts.length > 0) {
-    const ids = typeUpdateWithAlerts.map((req) => req.id);
-    throw Boom.badRequest(
-      `Converting a case to a collection is not allowed when it has alert comments, ids: [${ids.join(
-        ', '
-      )}]`
-    );
   }
 }
 
@@ -199,7 +86,7 @@ function throwIfTitleIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
  */
 function getID(
   comment: SavedObject<CommentAttributes>,
-  type: typeof CASE_SAVED_OBJECT | typeof SUB_CASE_SAVED_OBJECT
+  type: typeof CASE_SAVED_OBJECT
 ): string | undefined {
   return comment.references.find((ref) => ref.type === type)?.id;
 }
@@ -210,92 +97,38 @@ function getID(
 async function getAlertComments({
   casesToSync,
   caseService,
-  unsecuredSavedObjectsClient,
 }: {
   casesToSync: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }): Promise<SavedObjectsFindResponse<CommentAttributes>> {
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
   // getAllCaseComments will by default get all the comments, unless page or perPage fields are set
   return caseService.getAllCaseComments({
-    unsecuredSavedObjectsClient,
     id: idsOfCasesToSync,
-    includeSubCaseComments: true,
     options: {
-      filter: nodeBuilder.or([
-        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
-        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.generatedAlert),
-      ]),
+      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
     },
   });
 }
 
 /**
- * Returns a map of sub case IDs to their status. This uses a group of alert comments to determine which sub cases should
- * be retrieved. This is based on whether the comment is associated to a sub case.
- */
-async function getSubCasesToStatus({
-  totalAlerts,
-  caseService,
-  unsecuredSavedObjectsClient,
-}: {
-  totalAlerts: SavedObjectsFindResponse<CommentAttributes>;
-  caseService: CasesService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
-}): Promise<Map<string, CaseStatuses>> {
-  const subCasesToRetrieve = totalAlerts.saved_objects.reduce((acc, alertComment) => {
-    if (
-      isCommentRequestTypeAlertOrGenAlert(alertComment.attributes) &&
-      alertComment.attributes.associationType === AssociationType.subCase
-    ) {
-      const id = getID(alertComment, SUB_CASE_SAVED_OBJECT);
-      if (id !== undefined) {
-        acc.add(id);
-      }
-    }
-    return acc;
-  }, new Set<string>());
-
-  const subCases = await caseService.getSubCases({
-    ids: Array.from(subCasesToRetrieve.values()),
-    unsecuredSavedObjectsClient,
-  });
-
-  return subCases.saved_objects.reduce((acc, subCase) => {
-    // log about the sub cases that we couldn't find
-    if (!subCase.error) {
-      acc.set(subCase.id, subCase.attributes.status);
-    }
-    return acc;
-  }, new Map<string, CaseStatuses>());
-}
-
-/**
- * Returns what status the alert comment should have based on whether it is associated to a case or sub case.
+ * Returns what status the alert comment should have based on whether it is associated to a case.
  */
 function getSyncStatusForComment({
   alertComment,
   casesToSyncToStatus,
-  subCasesToStatus,
 }: {
   alertComment: SavedObjectsFindResult<CommentAttributes>;
   casesToSyncToStatus: Map<string, CaseStatuses>;
-  subCasesToStatus: Map<string, CaseStatuses>;
 }): CaseStatuses {
-  let status: CaseStatuses = CaseStatuses.open;
-  if (alertComment.attributes.associationType === AssociationType.case) {
-    const id = getID(alertComment, CASE_SAVED_OBJECT);
-    // We should log if we can't find the status
-    // attempt to get the case status from our cases to sync map if we found the ID otherwise default to open
-    status =
-      id !== undefined ? casesToSyncToStatus.get(id) ?? CaseStatuses.open : CaseStatuses.open;
-  } else if (alertComment.attributes.associationType === AssociationType.subCase) {
-    const id = getID(alertComment, SUB_CASE_SAVED_OBJECT);
-    status = id !== undefined ? subCasesToStatus.get(id) ?? CaseStatuses.open : CaseStatuses.open;
+  const id = getID(alertComment, CASE_SAVED_OBJECT);
+
+  if (!id) {
+    return CaseStatuses.open;
   }
-  return status;
+
+  return casesToSyncToStatus.get(id) ?? CaseStatuses.open;
 }
 
 /**
@@ -306,13 +139,13 @@ async function updateAlerts({
   casesWithStatusChangedAndSynced,
   caseService,
   unsecuredSavedObjectsClient,
-  casesClientInternal,
+  alertsService,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  casesClientInternal: CasesClientInternal;
+  alertsService: AlertService;
 }) {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -321,36 +154,24 @@ async function updateAlerts({
   const casesToSync = [...casesWithSyncSettingChangedToOn, ...casesWithStatusChangedAndSynced];
 
   // build a map of case id to the status it has
-  // this will have collections in it but the alerts should be associated to sub cases and not collections so it shouldn't
-  // matter.
   const casesToSyncToStatus = casesToSync.reduce((acc, { updateReq, originalCase }) => {
     acc.set(updateReq.id, updateReq.status ?? originalCase.attributes.status ?? CaseStatuses.open);
     return acc;
   }, new Map<string, CaseStatuses>());
 
-  // get all the alerts for all the alert comments for all cases and collections. Collections themselves won't have any
-  // but their sub cases could
+  // get all the alerts for all the alert comments for all cases
   const totalAlerts = await getAlertComments({
     casesToSync,
-    caseService,
-    unsecuredSavedObjectsClient,
-  });
-
-  // get a map of sub case id to the sub case status
-  const subCasesToStatus = await getSubCasesToStatus({
-    totalAlerts,
-    unsecuredSavedObjectsClient,
     caseService,
   });
 
   // create an array of requests that indicate the id, index, and status to update an alert
   const alertsToUpdate = totalAlerts.saved_objects.reduce(
     (acc: UpdateAlertRequest[], alertComment) => {
-      if (isCommentRequestTypeAlertOrGenAlert(alertComment.attributes)) {
+      if (isCommentRequestTypeAlert(alertComment.attributes)) {
         const status = getSyncStatusForComment({
           alertComment,
           casesToSyncToStatus,
-          subCasesToStatus,
         });
 
         acc.push(...createAlertUpdateRequest({ comment: alertComment.attributes, status }));
@@ -361,7 +182,7 @@ async function updateAlerts({
     []
   );
 
-  await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
+  await alertsService.updateAlertsStatus(alertsToUpdate);
 }
 
 function partitionPatchRequest(
@@ -410,8 +231,7 @@ interface UpdateRequestWithOriginalCase {
  */
 export const update = async (
   cases: CasesPatchRequest,
-  clientArgs: CasesClientArgs,
-  casesClientInternal: CasesClientInternal
+  clientArgs: CasesClientArgs
 ): Promise<CasesResponse> => {
   const {
     unsecuredSavedObjectsClient,
@@ -420,6 +240,7 @@ export const update = async (
     user,
     logger,
     authorization,
+    alertsService,
   } = clientArgs;
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
@@ -428,7 +249,6 @@ export const update = async (
 
   try {
     const myCases = await caseService.getCases({
-      unsecuredSavedObjectsClient,
       caseIds: query.cases.map((q) => q.id),
     });
 
@@ -488,25 +308,13 @@ export const update = async (
       throw Boom.notAcceptable('All update fields are identical to current version.');
     }
 
-    if (!ENABLE_CASE_CONNECTOR) {
-      throwIfUpdateType(updateCases);
-    }
-
     throwIfUpdateOwner(updateCases);
     throwIfTitleIsInvalid(updateCases);
-    throwIfUpdateStatusOfCollection(updateCases);
-    throwIfUpdateTypeCollectionToIndividual(updateCases);
-    await throwIfInvalidUpdateOfTypeWithAlerts({
-      requests: updateCases,
-      caseService,
-      unsecuredSavedObjectsClient,
-    });
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
     const updatedDt = new Date().toISOString();
     const updatedCases = await caseService.patchCases({
-      unsecuredSavedObjectsClient,
       cases: updateCases.map(({ updateReq, originalCase }) => {
         // intentionally removing owner from the case so that we don't accidentally allow it to be updated
         const { id: caseId, version, owner, ...updateCaseAttributes } = updateReq;
@@ -568,7 +376,7 @@ export const update = async (
       casesWithSyncSettingChangedToOn,
       caseService,
       unsecuredSavedObjectsClient,
-      casesClientInternal,
+      alertsService,
     });
 
     const returnUpdatedCase = myCases.saved_objects
@@ -588,14 +396,11 @@ export const update = async (
         });
       });
 
-    await userActionService.bulkCreate({
+    await userActionService.bulkCreateUpdateCase({
       unsecuredSavedObjectsClient,
-      actions: buildCaseUserActions({
-        originalCases: myCases.saved_objects,
-        updatedCases: updatedCases.saved_objects,
-        actionDate: updatedDt,
-        actionBy: { email, full_name, username },
-      }),
+      originalCases: myCases.saved_objects,
+      updatedCases: updatedCases.saved_objects,
+      user,
     });
 
     return CasesResponseRt.encode(returnUpdatedCase);

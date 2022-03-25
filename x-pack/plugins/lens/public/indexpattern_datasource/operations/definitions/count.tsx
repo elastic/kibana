@@ -6,25 +6,39 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiSwitch } from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+import { OperationDefinition, ParamEditorProps } from './index';
+import { FieldBasedIndexPatternColumn, FormatParams } from './column_types';
 import { IndexPatternField } from '../../types';
-import { getInvalidFieldMessage, getFilter, isColumnFormatted } from './helpers';
+import {
+  getInvalidFieldMessage,
+  getFilter,
+  combineErrorMessages,
+  getFormatFromPreviousColumn,
+  isColumnOfType,
+} from './helpers';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
+import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { updateColumnParam } from '../layer_helpers';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
 });
 
-export type CountIndexPatternColumn = FormattedIndexPatternColumn &
-  FieldBasedIndexPatternColumn & {
-    operationType: 'count';
+export type CountIndexPatternColumn = FieldBasedIndexPatternColumn & {
+  operationType: 'count';
+  params?: {
+    emptyAsNull?: boolean;
+    format?: FormatParams;
   };
+};
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field'> = {
   type: 'count',
@@ -34,7 +48,10 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   }),
   input: 'field',
   getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    combineErrorMessages([
+      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]),
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
@@ -82,13 +99,56 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      params:
-        previousColumn?.dataType === 'number' &&
-        isColumnFormatted(previousColumn) &&
-        previousColumn.params
-          ? { format: previousColumn.params.format }
-          : undefined,
+      params: {
+        ...getFormatFromPreviousColumn(previousColumn),
+        emptyAsNull:
+          previousColumn && isColumnOfType<CountIndexPatternColumn>('count', previousColumn)
+            ? previousColumn.params?.emptyAsNull
+            : !columnParams?.usedInMath,
+      },
     };
+  },
+  getAdvancedOptions: ({
+    layer,
+    columnId,
+    currentColumn,
+    updateLayer,
+  }: ParamEditorProps<CountIndexPatternColumn>) => {
+    return [
+      {
+        dataTestSubj: 'hide-zero-values',
+        optionElement: (
+          <>
+            <EuiSwitch
+              label={i18n.translate('xpack.lens.indexPattern.hideZero', {
+                defaultMessage: 'Hide zero values',
+              })}
+              labelProps={{
+                style: {
+                  fontWeight: euiThemeVars.euiFontWeightMedium,
+                },
+              }}
+              checked={Boolean(currentColumn.params?.emptyAsNull)}
+              onChange={() => {
+                updateLayer(
+                  updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'emptyAsNull',
+                    value: !currentColumn.params?.emptyAsNull,
+                  })
+                );
+              }}
+              compressed
+            />
+          </>
+        ),
+        title: '',
+        showInPopover: true,
+        inlineElement: null,
+        onClick: () => {},
+      },
+    ];
   },
   onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
     adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(
@@ -103,6 +163,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       schema: 'metric',
       // time shift is added to wrapping aggFilteredMetric if filter is set
       timeShift: column.filter ? undefined : column.timeShift,
+      emptyAsNull: column.params?.emptyAsNull,
     }).toAst();
   },
   isTransferable: () => {

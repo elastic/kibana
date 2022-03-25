@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
@@ -53,6 +53,7 @@ describe('datatable cell renderer', () => {
       >
         <CellRenderer
           rowIndex={0}
+          colIndex={0}
           columnId="a"
           setCellProps={() => {}}
           isExpandable={false}
@@ -76,6 +77,7 @@ describe('datatable cell renderer', () => {
       >
         <CellRenderer
           rowIndex={0}
+          colIndex={0}
           columnId="a"
           setCellProps={() => {}}
           isExpandable={false}
@@ -84,7 +86,7 @@ describe('datatable cell renderer', () => {
         />
       </DataContext.Provider>
     );
-    expect(cell.find('.lnsTableCell').prop('className')).toContain('--right');
+    expect(cell.find('.lnsTableCell--right').exists()).toBeTruthy();
   });
 
   describe('dynamic coloring', () => {
@@ -125,6 +127,7 @@ describe('datatable cell renderer', () => {
         ],
         sortingColumnId: '',
         sortingDirection: 'none',
+        rowHeightLines: 1,
       };
     }
 
@@ -154,6 +157,7 @@ describe('datatable cell renderer', () => {
         >
           <CellRendererWithPalette
             rowIndex={0}
+            colIndex={0}
             columnId="a"
             setCellProps={setCellProps}
             isExpandable={false}

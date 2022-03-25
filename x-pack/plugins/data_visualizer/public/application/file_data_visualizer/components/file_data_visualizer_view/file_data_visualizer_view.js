@@ -30,6 +30,8 @@ import {
   processResults,
 } from '../../../common/components/utils';
 
+import { Chat } from '../../../../../../cloud/public';
+
 import { MODE } from './constants';
 
 export class FileDataVisualizerView extends Component {
@@ -362,7 +364,7 @@ export class FileDataVisualizerView extends Component {
               fileName={fileName}
               fileContents={fileContents}
               data={data}
-              indexPatterns={this.props.indexPatterns}
+              dataViewsContract={this.props.dataViewsContract}
               showBottomBar={this.showBottomBar}
               hideBottomBar={this.hideBottomBar}
               savedObjectsClient={this.savedObjectsClient}
@@ -383,6 +385,7 @@ export class FileDataVisualizerView extends Component {
             )}
           </>
         )}
+        <Chat />
       </div>
     );
   }

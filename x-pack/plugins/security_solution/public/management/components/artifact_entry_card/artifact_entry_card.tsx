@@ -91,7 +91,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
 
           {!hideComments ? (
             <>
-              <EuiSpacer size="l" />
+              {hideDescription && <EuiSpacer size="l" />}
               <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
             </>
           ) : null}

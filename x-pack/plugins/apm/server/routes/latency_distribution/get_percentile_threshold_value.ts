@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import { ProcessorEvent } from '../../../common/processor_event';
 
 import { getTransactionDurationPercentilesRequest } from '../correlations/queries/query_percentiles';
@@ -33,11 +31,13 @@ export async function getPercentileThresholdValue(
     {
       // TODO: add support for metrics
       apm: { events: [ProcessorEvent.transaction] },
-      body: transactionDurationPercentilesRequestBody,
+      body: { size: 0, ...transactionDurationPercentilesRequestBody },
     }
   )) as {
     aggregations?: {
-      transaction_duration_percentiles: estypes.AggregationsTDigestPercentilesAggregate;
+      transaction_duration_percentiles: {
+        values: Record<string, number>;
+      };
     };
   };
 

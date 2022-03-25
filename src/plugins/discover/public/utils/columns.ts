@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from '../../../data/common';
+import { DataView } from '../../../data_views/public';
 
 // We store this outside the function as a constant, so we're not creating a new array every time
 // the function is returning this. A changing array might cause the data grid to think it got
@@ -18,7 +18,7 @@ const SOURCE_ONLY = ['_source'];
  * 1) no columns are given
  * 2) Just one column is given, which is the configured timefields
  */
-export function getDisplayedColumns(stateColumns: string[] = [], indexPattern: IndexPattern) {
+export function getDisplayedColumns(stateColumns: string[] = [], indexPattern: DataView) {
   return stateColumns &&
     stateColumns.length > 0 &&
     // check if all columns where removed except the configured timeField (this can't be removed)

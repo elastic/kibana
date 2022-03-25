@@ -11,13 +11,13 @@ import { EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { Bucket, FieldDetails } from './types';
-import { IndexPatternField, IndexPattern } from '../../../../../../data/public';
+import { DataViewField, DataView } from '../../../../../../data_views/public';
 
 interface DiscoverFieldDetailsProps {
-  field: IndexPatternField;
-  indexPattern: IndexPattern;
+  field: DataViewField;
+  indexPattern: DataView;
   details: FieldDetails;
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export function DiscoverFieldDetails({

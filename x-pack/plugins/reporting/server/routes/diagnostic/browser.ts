@@ -6,12 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ReportingCore } from '../..';
+import type { Logger } from 'kibana/server';
+import type { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { browserStartLogs } from '../../browsers/chromium/driver_factory/start_logs';
-import { LevelLogger as Logger } from '../../lib';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { DiagnosticResponse } from './';
+import type { DiagnosticResponse } from './';
 
 const logsToHelpMap = {
   'error while loading shared libraries': i18n.translate(
@@ -52,7 +51,8 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
     },
     authorizedUserPreRouting(reporting, async (_user, _context, _req, res) => {
       try {
-        const logs = await browserStartLogs(reporting, logger).toPromise();
+        const { screenshotting } = await reporting.getPluginStartDeps();
+        const logs = await screenshotting.diagnose().toPromise();
         const knownIssues = Object.keys(logsToHelpMap) as Array<keyof typeof logsToHelpMap>;
 
         const boundSuccessfully = logs.includes(`DevTools listening on`);

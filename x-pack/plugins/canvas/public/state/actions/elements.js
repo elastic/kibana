@@ -7,8 +7,8 @@
 
 import { createAction } from 'redux-actions';
 import immutable from 'object-path-immutable';
-import { get, pick, cloneDeep, without } from 'lodash';
-import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
+import { get, pick, cloneDeep, without, last } from 'lodash';
+import { toExpression, safeElementFromExpression } from '@kbn/interpreter';
 import { createThunk } from '../../lib/create_thunk';
 import {
   getPages,
@@ -20,7 +20,6 @@ import {
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { ErrorStrings } from '../../../i18n';
-import { runInterpreter, interpretAst } from '../../lib/run_interpreter';
 import { subMultitree } from '../../lib/aeroelastic/functional';
 import { pluginServices } from '../../services';
 import { selectToplevelNodes } from './transient';
@@ -30,8 +29,8 @@ const { actionsElements: strings } = ErrorStrings;
 
 const { set, del } = immutable;
 
-export function getSiblingContext(state, elementId, checkIndex) {
-  const prevContextPath = [elementId, 'expressionContext', checkIndex];
+export function getSiblingContext(state, elementId, checkIndex, path = ['ast.chain']) {
+  const prevContextPath = [elementId, 'expressionContext', ...path, checkIndex];
   const prevContextValue = getResolvedArgsValue(state, prevContextPath);
 
   // if a value is found, return it, along with the index it was found at
@@ -49,7 +48,7 @@ export function getSiblingContext(state, elementId, checkIndex) {
   }
 
   // walk back up to find the closest cached context available
-  return getSiblingContext(state, elementId, prevContextIndex);
+  return getSiblingContext(state, elementId, prevContextIndex, path);
 }
 
 function getBareElement(el, includeId = false) {
@@ -71,8 +70,9 @@ export const flushContextAfterIndex = createAction('flushContextAfterIndex');
 
 export const fetchContext = createThunk(
   'fetchContext',
-  ({ dispatch, getState }, index, element, fullRefresh = false) => {
-    const chain = get(element, 'ast.chain');
+  ({ dispatch, getState }, index, element, fullRefresh = false, path) => {
+    const pathToTarget = [...path.split('.'), 'chain'];
+    const chain = get(element, pathToTarget);
     const invalidIndex = chain ? index >= chain.length : true;
 
     if (!element || !chain || invalidIndex) {
@@ -81,22 +81,18 @@ export const fetchContext = createThunk(
 
     // cache context as the previous index
     const contextIndex = index - 1;
-    const contextPath = [element.id, 'expressionContext', contextIndex];
+    const contextPath = [element.id, 'expressionContext', path, contextIndex];
 
     // set context state to loading
-    dispatch(
-      args.setLoading({
-        path: contextPath,
-      })
-    );
+    dispatch(args.setLoading({ path: contextPath }));
 
     // function to walk back up to find the closest context available
-    const getContext = () => getSiblingContext(getState(), element.id, contextIndex - 1);
+    const getContext = () => getSiblingContext(getState(), element.id, contextIndex - 1, [path]);
     const { index: prevContextIndex, context: prevContextValue } =
       fullRefresh !== true ? getContext() : {};
 
     // modify the ast chain passed to the interpreter
-    const astChain = element.ast.chain.filter((exp, i) => {
+    const astChain = chain.filter((exp, i) => {
       if (prevContextValue != null) {
         return i > prevContextIndex && i < index;
       }
@@ -105,22 +101,15 @@ export const fetchContext = createThunk(
 
     const variables = getWorkpadVariablesAsObject(getState());
 
+    const { expressions } = pluginServices.getServices();
+    const elementWithNewAst = set(element, pathToTarget, astChain);
+
     // get context data from a partial AST
-    return interpretAst(
-      {
-        ...element.ast,
-        chain: astChain,
-      },
-      variables,
-      prevContextValue
-    ).then((value) => {
-      dispatch(
-        args.setValue({
-          path: contextPath,
-          value,
-        })
-      );
-    });
+    return expressions
+      .interpretAst(elementWithNewAst.ast, variables, prevContextValue)
+      .then((value) => {
+        dispatch(args.setValue({ path: contextPath, value }));
+      });
   }
 );
 
@@ -139,14 +128,14 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
     });
 
   const variables = getWorkpadVariablesAsObject(getState());
-
-  return runInterpreter(ast, context, variables, { castToRender: true })
+  const { expressions, notify } = pluginServices.getServices();
+  return expressions
+    .runInterpreter(ast, context, variables, { castToRender: true })
     .then((renderable) => {
       dispatch(getAction(renderable));
     })
     .catch((err) => {
-      const notifyService = pluginServices.getServices().notify;
-      notifyService.error(err);
+      notify.error(err);
       dispatch(getAction(err));
     });
 };
@@ -186,12 +175,13 @@ export const fetchAllRenderables = createThunk(
         const argumentPath = [element.id, 'expressionRenderable'];
 
         const variables = getWorkpadVariablesAsObject(getState());
+        const { expressions, notify } = pluginServices.getServices();
 
-        return runInterpreter(ast, null, variables, { castToRender: true })
+        return expressions
+          .runInterpreter(ast, null, variables, { castToRender: true })
           .then((renderable) => ({ path: argumentPath, value: renderable }))
           .catch((err) => {
-            const notifyService = pluginServices.getServices().notify;
-            notifyService.error(err);
+            notify.error(err);
             return { path: argumentPath, value: err };
           });
       });
@@ -359,57 +349,71 @@ export const setAstAtIndex = createThunk(
   }
 );
 
-// index here is the top-level argument in the expression. for example in the expression
-// demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
-// argIndex is the index in multi-value arguments, and is optional. excluding it will cause
-// the entire argument from be set to the passed value
-export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch }, args) => {
-  const { index, argName, value, valueIndex, element, pageId } = args;
-  let selector = `ast.chain.${index}.arguments.${argName}`;
+/**
+ * Updating the value of the given argument of the element's expression.
+ * @param {string} args.path - the path to the argument at the AST. Example: "ast.chain.0.arguments.some_arg.chain.1.arguments".
+ * @param {string} args.argName - the argument name at the AST.
+ * @param {number} args.valueIndex - the index of the value in the array of argument's values.
+ * @param {any} args.value - the value to be set to the AST.
+ * @param {any} args.element - the element, which contains the expression.
+ * @param {any} args.pageId - the workpad's page, where element is located.
+ */
+export const setArgument = createThunk('setArgument', ({ dispatch }, args) => {
+  const { argName, value, valueIndex, element, pageId, path } = args;
+  let selector = `${path}.${argName}`;
   if (valueIndex != null) {
     selector += '.' + valueIndex;
   }
 
   const newElement = set(element, selector, value);
-  const newAst = get(newElement, ['ast', 'chain', index]);
-  dispatch(setAstAtIndex(index, newAst, element, pageId));
+  const pathTerms = path.split('.');
+  const argumentChainPath = pathTerms.slice(0, 3);
+  const argumnentChainIndex = last(argumentChainPath);
+  const newAst = get(newElement, argumentChainPath);
+  dispatch(setAstAtIndex(argumnentChainIndex, newAst, element, pageId));
 });
 
-// index here is the top-level argument in the expression. for example in the expression
-// demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
-export const addArgumentValueAtIndex = createThunk(
-  'addArgumentValueAtIndex',
-  ({ dispatch }, args) => {
-    const { index, argName, value, element } = args;
+/**
+ * Adding the value to the given argument of the element's expression.
+ * @param {string} args.path - the path to the argument at the AST. Example: "ast.chain.0.arguments.some_arg.chain.1.arguments".
+ * @param {string} args.argName - the argument name at the given path of the AST.
+ * @param {any} args.value - the value to be added to the array of argument's values at the AST.
+ * @param {any} args.element - the element, which contains the expression.
+ * @param {any} args.pageId - the workpad's page, where element is located.
+ */
+export const addArgumentValue = createThunk('addArgumentValue', ({ dispatch }, args) => {
+  const { argName, value, element, path } = args;
+  const values = get(element, [...path.split('.'), argName], []);
+  const newValue = values.concat(value);
+  dispatch(
+    setArgument({
+      ...args,
+      value: newValue,
+    })
+  );
+});
 
-    const values = get(element, ['ast', 'chain', index, 'arguments', argName], []);
-    const newValue = values.concat(value);
-
-    dispatch(
-      setArgumentAtIndex({
-        ...args,
-        value: newValue,
-      })
-    );
-  }
-);
-
-// index here is the top-level argument in the expression. for example in the expression
-// demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
-// argIndex is the index in multi-value arguments, and is optional. excluding it will remove
-// the entire argument from the expresion
 export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dispatch }, args) => {
-  const { index, element, pageId, argName, argIndex } = args;
-  const curVal = get(element, ['ast', 'chain', index, 'arguments', argName]);
-
-  const newElement =
+  const { element, pageId, argName, argIndex, path } = args;
+  const pathTerms = path.split('.');
+  const argumentChainPath = pathTerms.slice(0, 3);
+  const argumnentChainIndex = last(argumentChainPath);
+  const curVal = get(element, [...pathTerms, argName]);
+  let newElement =
     argIndex != null && curVal.length > 1
       ? // if more than one val, remove the specified val
-        del(element, `ast.chain.${index}.arguments.${argName}.${argIndex}`)
+        del(element, `${path}.${argName}.${argIndex}`)
       : // otherwise, remove the entire key
-        del(element, `ast.chain.${index}.arguments.${argName}`);
+        del(element, argName ? `${path}.${argName}` : path);
 
-  dispatch(setAstAtIndex(index, get(newElement, ['ast', 'chain', index]), element, pageId));
+  const parentPath = pathTerms.slice(0, pathTerms.length - 1);
+  const updatedArgument = get(newElement, parentPath);
+
+  if (Array.isArray(updatedArgument) && !updatedArgument.length) {
+    newElement = del(element, parentPath);
+  }
+
+  dispatch(setAstAtIndex(argumnentChainIndex, get(newElement, argumentChainPath), element, pageId));
 });
 
 /*

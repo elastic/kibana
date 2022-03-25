@@ -8,13 +8,18 @@
 import { Logger, ElasticsearchClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import {
-  AlertType,
+  RuleType,
   AlertExecutorOptions,
-  AlertInstance,
+  Alert,
   RulesClient,
   AlertServices,
 } from '../../../alerting/server';
-import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import {
+  Alert as Rule,
+  AlertTypeParams,
+  RawAlertInstance,
+  SanitizedAlert,
+} from '../../../alerting/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -28,10 +33,7 @@ import {
   CommonAlertParams,
 } from '../../common/types/alerts';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 
@@ -80,7 +82,7 @@ export class BaseRule {
     this.scopedLogger = Globals.app.getLogger(ruleOptions.id);
   }
 
-  public getRuleType(): AlertType<never, never, never, never, never, 'default'> {
+  public getRuleType(): RuleType<never, never, never, never, never, 'default'> {
     const { id, name, actionVariables } = this.ruleOptions;
     return {
       id,
@@ -124,7 +126,7 @@ export class BaseRule {
     });
 
     if (existingRuleData.total > 0) {
-      return existingRuleData.data[0] as Alert;
+      return existingRuleData.data[0] as Rule;
     }
 
     const ruleActions = [];
@@ -226,23 +228,14 @@ export class BaseRule {
     );
 
     const esClient = services.scopedClusterClient.asCurrentUser;
-    const availableCcs = Globals.app.config.ui.ccs.enabled;
-    const clusters = await this.fetchClusters(esClient, params as CommonAlertParams, availableCcs);
-    const data = await this.fetchData(params, esClient, clusters, availableCcs);
+    const clusters = await this.fetchClusters(esClient, params as CommonAlertParams);
+    const data = await this.fetchData(params, esClient, clusters);
     return await this.processData(data, clusters, services, state);
   }
 
-  protected async fetchClusters(
-    esClient: ElasticsearchClient,
-    params: CommonAlertParams,
-    ccs?: boolean
-  ) {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (ccs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
-    }
+  protected async fetchClusters(esClient: ElasticsearchClient, params: CommonAlertParams) {
     if (!params.limit) {
-      return await fetchClusters(esClient, esIndexPattern);
+      return await fetchClusters(esClient);
     }
     const limit = parseDuration(params.limit);
     const rangeFilter = this.ruleOptions.fetchClustersRange
@@ -253,14 +246,13 @@ export class BaseRule {
           },
         }
       : undefined;
-    return await fetchClusters(esClient, esIndexPattern, rangeFilter);
+    return await fetchClusters(esClient, rangeFilter);
   }
 
   protected async fetchData(
     params: CommonAlertParams | unknown,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: boolean
+    clusters: AlertCluster[]
   ): Promise<Array<AlertData & unknown>> {
     throw new Error('Child classes must implement `fetchData`');
   }
@@ -285,7 +277,7 @@ export class BaseRule {
       for (const node of nodes) {
         const newAlertStates: AlertNodeState[] = [];
         // quick fix for now so that non node level alerts will use the cluster id
-        const instance = services.alertInstanceFactory(
+        const instance = services.alertFactory.create(
           node.meta.nodeId || node.meta.instanceId || cluster.clusterUuid
         );
 
@@ -344,7 +336,7 @@ export class BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     instanceState: AlertInstanceState | AlertState | unknown,
     item: AlertData | unknown,
     cluster?: AlertCluster | unknown

@@ -36,7 +36,7 @@ export const tilemapConfigSchema = schema.object({
   options: tileMapConfigOptionsSchema,
 });
 
-export const emsConfigSchema = schema.object({
+export const mapConfigSchema = schema.object({
   tilemap: tilemapConfigSchema,
   includeElasticMapsService: schema.boolean({ defaultValue: true }),
   emsUrl: schema.string({ defaultValue: '' }),
@@ -53,5 +53,5 @@ export const emsConfigSchema = schema.object({
   }),
 });
 
-export type MapsEmsConfig = TypeOf<typeof emsConfigSchema>;
+export type MapConfig = TypeOf<typeof mapConfigSchema>;
 export type TileMapConfig = TypeOf<typeof tilemapConfigSchema>;

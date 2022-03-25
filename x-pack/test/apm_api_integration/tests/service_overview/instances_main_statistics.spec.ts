@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { pick, sortBy } from 'lodash';
 import moment from 'moment';
-import { service, timerange } from '@elastic/apm-synthtrace';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { apm, timerange } from '@elastic/apm-synthtrace';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
@@ -298,8 +298,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const rangeEnd = new Date('2021-01-01T12:15:00.000Z').getTime() - 1;
 
         before(async () => {
-          const goService = service('opbeans-go', 'production', 'go');
-          const javaService = service('opbeans-java', 'production', 'java');
+          const goService = apm.service('opbeans-go', 'production', 'go');
+          const javaService = apm.service('opbeans-java', 'production', 'java');
 
           const goInstanceA = goService.instance('go-instance-a');
           const goInstanceB = goService.instance('go-instance-b');
@@ -321,7 +321,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
 
           return synthtraceEsClient.index([
-            ...interval.rate(GO_A_INSTANCE_RATE_SUCCESS).flatMap((timestamp) =>
+            interval.rate(GO_A_INSTANCE_RATE_SUCCESS).spans((timestamp) =>
               goInstanceA
                 .transaction('GET /api/product/list')
                 .success()
@@ -330,7 +330,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .children(...withSpans(timestamp))
                 .serialize()
             ),
-            ...interval.rate(GO_A_INSTANCE_RATE_FAILURE).flatMap((timestamp) =>
+            interval.rate(GO_A_INSTANCE_RATE_FAILURE).spans((timestamp) =>
               goInstanceA
                 .transaction('GET /api/product/list')
                 .failure()
@@ -339,7 +339,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .children(...withSpans(timestamp))
                 .serialize()
             ),
-            ...interval.rate(GO_B_INSTANCE_RATE_SUCCESS).flatMap((timestamp) =>
+            interval.rate(GO_B_INSTANCE_RATE_SUCCESS).spans((timestamp) =>
               goInstanceB
                 .transaction('GET /api/product/list')
                 .success()
@@ -348,7 +348,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .children(...withSpans(timestamp))
                 .serialize()
             ),
-            ...interval.rate(JAVA_INSTANCE_RATE).flatMap((timestamp) =>
+            interval.rate(JAVA_INSTANCE_RATE).spans((timestamp) =>
               javaInstance
                 .transaction('GET /api/product/list')
                 .success()

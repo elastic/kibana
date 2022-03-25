@@ -18,20 +18,26 @@ import { migrations730 } from './migrations_730';
 import { SavedDashboardPanel } from '../../common/types';
 import { EmbeddableSetup } from '../../../embeddable/server';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
-import { DashboardDoc700To720, DashboardDoc730ToLatest } from '../../common';
+import {
+  serializableToRawAttributes,
+  DashboardDoc700To720,
+  DashboardDoc730ToLatest,
+  rawAttributesToSerializable,
+} from '../../common';
 import { injectReferences, extractReferences } from '../../common/saved_dashboard_references';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from '../../common/embeddable/embeddable_saved_object_converters';
 import { SavedObjectEmbeddableInput } from '../../../embeddable/common';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../data/common';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunction,
   MigrateFunctionsObject,
 } from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
+import { CONTROL_GROUP_TYPE } from '../../../controls/common';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -49,7 +55,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
-      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
       id: searchSource.index,
     });
     delete searchSource.index;
@@ -62,7 +68,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
       filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
-        type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
         id: filterRow.meta.index,
       });
       delete filterRow.meta.index;
@@ -163,12 +169,23 @@ const migrateByValuePanels =
   (migrate: MigrateFunction, version: string): SavedObjectMigrationFn =>
   (doc: any) => {
     const { attributes } = doc;
+
+    if (attributes?.controlGroupInput) {
+      const controlGroupInput = rawAttributesToSerializable(attributes.controlGroupInput);
+      const migratedControlGroupInput = migrate({
+        ...controlGroupInput,
+        type: CONTROL_GROUP_TYPE,
+      });
+      attributes.controlGroupInput = serializableToRawAttributes(migratedControlGroupInput);
+    }
+
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
     // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
     // object has panelsJSON in all previous versions of kibana.
     if (typeof attributes?.panelsJSON !== 'string') {
       return doc;
     }
+
     const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
     // Same here, prevent failing saved object import if ever panels aren't an array.
     if (!Array.isArray(panels)) {

@@ -23,8 +23,8 @@ const createObject = (type: string, id: string, originId?: string): SavedObject 
   attributes: {},
   references: [
     { name: 'name-1', type: 'other-type', id: 'other-id' }, // object that is not present
-    { name: 'name-2', type: MULTI_NS_TYPE, id: 'id-1' }, // object that is present, but does not have an importIdMap entry
-    { name: 'name-3', type: MULTI_NS_TYPE, id: 'id-3' }, // object that is present and has an importIdMap entry
+    { name: 'name-2', type: MULTI_NS_TYPE, id: 'id-1' }, // object that is present, but does not have an importStateMap entry
+    { name: 'name-3', type: MULTI_NS_TYPE, id: 'id-3' }, // object that is present and has an importStateMap entry
   ],
   ...(originId && { originId }),
 });
@@ -52,10 +52,10 @@ const obj13 = createObject(OTHER_TYPE, 'id-13'); // -> conflict
 const importId3 = 'id-foo';
 const importId4 = 'id-bar';
 const importId8 = 'id-baz';
-const importIdMap = new Map([
-  [`${obj3.type}:${obj3.id}`, { id: importId3, omitOriginId: true }],
-  [`${obj4.type}:${obj4.id}`, { id: importId4 }],
-  [`${obj8.type}:${obj8.id}`, { id: importId8 }],
+const importStateMap = new Map([
+  [`${obj3.type}:${obj3.id}`, { destinationId: importId3, omitOriginId: true }],
+  [`${obj4.type}:${obj4.id}`, { destinationId: importId4 }],
+  [`${obj8.type}:${obj8.id}`, { destinationId: importId8 }],
 ]);
 
 describe('#createSavedObjects', () => {
@@ -74,7 +74,7 @@ describe('#createSavedObjects', () => {
   }): CreateSavedObjectsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     bulkCreate = savedObjectsClient.bulkCreate;
-    return { accumulatedErrors: [], ...partial, savedObjectsClient, importIdMap };
+    return { accumulatedErrors: [], ...partial, savedObjectsClient, importStateMap };
   };
 
   const getExpectedBulkCreateArgsObjects = (objects: SavedObject[], retry?: boolean) =>
@@ -84,8 +84,8 @@ describe('#createSavedObjects', () => {
       attributes,
       references: [
         { name: 'name-1', type: 'other-type', id: 'other-id' }, // object that is not present
-        { name: 'name-2', type: MULTI_NS_TYPE, id: 'id-1' }, // object that is present, but does not have an importIdMap entry
-        { name: 'name-3', type: MULTI_NS_TYPE, id: 'id-foo' }, // object that is present and has an importIdMap entry
+        { name: 'name-2', type: MULTI_NS_TYPE, id: 'id-1' }, // object that is present, but does not have an importStateMap entry
+        { name: 'name-3', type: MULTI_NS_TYPE, id: 'id-foo' }, // object that is present and has an importStateMap entry
       ],
       // if the import object had an originId, and/or if we regenerated the id, expect an originId to be included in the create args
       ...((originId || retry) && { originId: originId || id }),
@@ -245,7 +245,7 @@ describe('#createSavedObjects', () => {
 
     await createSavedObjects(options);
     expect(bulkCreate).toHaveBeenCalledTimes(1);
-    // these three objects are transformed before being created, because they are included in the `importIdMap`
+    // these three objects are transformed before being created, because they are included in the `importStateMap`
     const x3 = { ...obj3, id: importId3, originId: undefined }; // this import object already has an originId, but the entry has omitOriginId=true
     const x4 = { ...obj4, id: importId4 }; // this import object already has an originId
     const x8 = { ...obj8, id: importId8, originId: obj8.id }; // this import object doesn't have an originId, so it is set before create

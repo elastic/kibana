@@ -6,6 +6,8 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
+
+import { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
 import {
   FullResponseSchema,
   fullResponseSchema,
@@ -15,24 +17,26 @@ import {
   rulesSchema,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { PartialAlert } from '../../../../../../alerting/server';
-import {
-  isAlertType,
-  IRuleStatusSOAttributes,
-  isRuleStatusSavedObjectAttributes,
-} from '../../rules/types';
+import { isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
-import { transform, transformAlertToRule } from './utils';
+import { transform } from './utils';
 import { RuleParams } from '../../schemas/rule_schemas';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 
 export const transformValidate = (
-  alert: PartialAlert<RuleParams>,
-  ruleStatus?: IRuleStatusSOAttributes,
+  rule: PartialAlert<RuleParams>,
+  ruleExecutionSummary: RuleExecutionSummary | null,
   isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [RulesSchema | null, string | null] => {
-  const transformed = transform(alert, ruleStatus, isRuleRegistryEnabled, legacyRuleActions);
+  const transformed = transform(
+    rule,
+    ruleExecutionSummary,
+    isRuleRegistryEnabled,
+    legacyRuleActions
+  );
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -41,12 +45,17 @@ export const transformValidate = (
 };
 
 export const newTransformValidate = (
-  alert: PartialAlert<RuleParams>,
-  ruleStatus?: IRuleStatusSOAttributes,
+  rule: PartialAlert<RuleParams>,
+  ruleExecutionSummary: RuleExecutionSummary | null,
   isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [FullResponseSchema | null, string | null] => {
-  const transformed = transform(alert, ruleStatus, isRuleRegistryEnabled, legacyRuleActions);
+  const transformed = transform(
+    rule,
+    ruleExecutionSummary,
+    isRuleRegistryEnabled,
+    legacyRuleActions
+  );
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -56,35 +65,21 @@ export const newTransformValidate = (
 
 export const transformValidateBulkError = (
   ruleId: string,
-  alert: PartialAlert<RuleParams>,
-  ruleStatus?: IRuleStatusSOAttributes,
+  rule: PartialAlert<RuleParams>,
+  ruleExecutionSummary: RuleExecutionSummary | null,
   isRuleRegistryEnabled?: boolean
 ): RulesSchema | BulkError => {
-  if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
-    if (ruleStatus && isRuleStatusSavedObjectAttributes(ruleStatus)) {
-      const transformed = transformAlertToRule(alert, ruleStatus);
-      const [validated, errors] = validateNonExact(transformed, rulesSchema);
-      if (errors != null || validated == null) {
-        return createBulkErrorObject({
-          ruleId,
-          statusCode: 500,
-          message: errors ?? 'Internal error transforming',
-        });
-      } else {
-        return validated;
-      }
+  if (isAlertType(isRuleRegistryEnabled ?? false, rule)) {
+    const transformed = internalRuleToAPIResponse(rule, ruleExecutionSummary);
+    const [validated, errors] = validateNonExact(transformed, rulesSchema);
+    if (errors != null || validated == null) {
+      return createBulkErrorObject({
+        ruleId,
+        statusCode: 500,
+        message: errors ?? 'Internal error transforming',
+      });
     } else {
-      const transformed = transformAlertToRule(alert);
-      const [validated, errors] = validateNonExact(transformed, rulesSchema);
-      if (errors != null || validated == null) {
-        return createBulkErrorObject({
-          ruleId,
-          statusCode: 500,
-          message: errors ?? 'Internal error transforming',
-        });
-      } else {
-        return validated;
-      }
+      return validated;
     }
   } else {
     return createBulkErrorObject({

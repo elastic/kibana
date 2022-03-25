@@ -19,13 +19,14 @@ export const metricElementInitializer: SetupInitializer<ElementFactory> = (core,
     width: 200,
     height: 100,
     icon: 'visMetric',
-    expression: `filters
-  | demodata
-  | math "unique(country)"
-  | metric "Countries"
-    metricFont={font size=48 family="${openSans.value}" color="#000000" align="center" lHeight=48}
-    labelFont={font size=14 family="${openSans.value}" color="#000000" align="center"}
-    metricFormat="${core.uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN)}"
-  | render`,
+    expression: `kibana
+| selectFilter
+| demodata
+| math "unique(country)"
+| metric "Countries"
+  metricFont={font size=48 family="${openSans.value}" color="#000000" align="center" lHeight=48}
+  labelFont={font size=14 family="${openSans.value}" color="#000000" align="center"}
+  metricFormat="${core.uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN)}"
+| render`,
   });
 };

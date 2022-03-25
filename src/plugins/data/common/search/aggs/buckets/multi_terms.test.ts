@@ -100,6 +100,9 @@ describe('Multi Terms Agg', () => {
                     "chain": Array [
                       Object {
                         "arguments": Object {
+                          "emptyAsNull": Array [
+                            false,
+                          ],
                           "enabled": Array [
                             true,
                           ],
@@ -127,7 +130,7 @@ describe('Multi Terms Agg', () => {
                   5,
                 ],
               },
-              "function": "aggTerms",
+              "function": "aggMultiTerms",
               "type": "function",
             },
           ],

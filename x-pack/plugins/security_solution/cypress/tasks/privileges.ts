@@ -66,10 +66,6 @@ export const secAll: Role = {
           securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
-          // TODO: Steph/sourcerer remove once we have our internal saved object client
-          // https://github.com/elastic/security-team/issues/1978
-          indexPatterns: ['read'],
-          savedObjectsManagement: ['read'],
         },
         spaces: ['*'],
       },
@@ -101,10 +97,6 @@ export const secReadCasesAll: Role = {
           securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
-          // TODO: Steph/sourcerer remove once we have our internal saved object client
-          // https://github.com/elastic/security-team/issues/1978
-          indexPatterns: ['read'],
-          savedObjectsManagement: ['read'],
         },
         spaces: ['*'],
       },

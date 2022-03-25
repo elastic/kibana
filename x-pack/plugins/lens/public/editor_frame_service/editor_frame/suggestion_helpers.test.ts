@@ -7,7 +7,12 @@
 
 import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
 import { createMockVisualization, createMockDatasource, DatasourceMock } from '../../mocks';
-import { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
+import {
+  TableSuggestion,
+  DatasourceSuggestion,
+  Visualization,
+  VisualizeEditorContext,
+} from '../../types';
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { DatasourceStates } from '../../state_management';
 
@@ -248,6 +253,166 @@ describe('suggestion helpers', () => {
     );
     expect(
       multiDatasourceMap.mock3.getDatasourceSuggestionsForVisualizeField
+    ).not.toHaveBeenCalled();
+  });
+
+  it('should call getDatasourceSuggestionsForVisualizeCharts when a visualizeChartTrigger is passed', () => {
+    datasourceMap.mock.getDatasourceSuggestionsForVisualizeCharts.mockReturnValue([
+      generateSuggestion(),
+    ]);
+
+    const visualizationMap = {
+      testVis: createMockVisualization(),
+    };
+    const triggerContext = {
+      layers: [
+        {
+          indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+          timeFieldName: 'order_date',
+          chartType: 'area',
+          axisPosition: 'left',
+          palette: {
+            type: 'palette',
+            name: 'default',
+          },
+          metrics: [
+            {
+              agg: 'count',
+              isFullReference: false,
+              fieldName: 'document',
+              params: {},
+              color: '#68BC00',
+            },
+          ],
+          timeInterval: 'auto',
+        },
+      ],
+      type: 'lnsXY',
+      configuration: {
+        fill: '0.5',
+        legend: {
+          isVisible: true,
+          position: 'right',
+          shouldTruncate: true,
+          maxLines: true,
+        },
+        gridLinesVisibility: {
+          x: true,
+          yLeft: true,
+          yRight: true,
+        },
+        extents: {
+          yLeftExtent: {
+            mode: 'full',
+          },
+          yRightExtent: {
+            mode: 'full',
+          },
+        },
+      },
+      isVisualizeAction: true,
+    } as VisualizeEditorContext;
+
+    getSuggestions({
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
+      visualizationState: {},
+      datasourceMap,
+      datasourceStates,
+      visualizeTriggerFieldContext: triggerContext,
+    });
+    expect(datasourceMap.mock.getDatasourceSuggestionsForVisualizeCharts).toHaveBeenCalledWith(
+      datasourceStates.mock.state,
+      triggerContext.layers
+    );
+  });
+
+  it('should call getDatasourceSuggestionsForVisualizeCharts from all datasources with a state', () => {
+    const multiDatasourceStates = {
+      mock: {
+        isLoading: false,
+        state: {},
+      },
+      mock2: {
+        isLoading: false,
+        state: {},
+      },
+    };
+    const multiDatasourceMap = {
+      mock: createMockDatasource('a'),
+      mock2: createMockDatasource('a'),
+      mock3: createMockDatasource('a'),
+    };
+    const triggerContext = {
+      layers: [
+        {
+          indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+          timeFieldName: 'order_date',
+          chartType: 'area',
+          axisPosition: 'left',
+          palette: {
+            type: 'palette',
+            name: 'default',
+          },
+          metrics: [
+            {
+              agg: 'count',
+              isFullReference: false,
+              fieldName: 'document',
+              params: {},
+              color: '#68BC00',
+            },
+          ],
+          timeInterval: 'auto',
+        },
+      ],
+      type: 'lnsXY',
+      configuration: {
+        fill: '0.5',
+        legend: {
+          isVisible: true,
+          position: 'right',
+          shouldTruncate: true,
+          maxLines: true,
+        },
+        gridLinesVisibility: {
+          x: true,
+          yLeft: true,
+          yRight: true,
+        },
+        extents: {
+          yLeftExtent: {
+            mode: 'full',
+          },
+          yRightExtent: {
+            mode: 'full',
+          },
+        },
+      },
+      isVisualizeAction: true,
+    } as VisualizeEditorContext;
+
+    const visualizationMap = {
+      testVis: createMockVisualization(),
+    };
+    getSuggestions({
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
+      visualizationState: {},
+      datasourceMap: multiDatasourceMap,
+      datasourceStates: multiDatasourceStates,
+      visualizeTriggerFieldContext: triggerContext,
+    });
+    expect(multiDatasourceMap.mock.getDatasourceSuggestionsForVisualizeCharts).toHaveBeenCalledWith(
+      datasourceStates.mock.state,
+      triggerContext.layers
+    );
+
+    expect(
+      multiDatasourceMap.mock2.getDatasourceSuggestionsForVisualizeCharts
+    ).toHaveBeenCalledWith(multiDatasourceStates.mock2.state, triggerContext.layers);
+    expect(
+      multiDatasourceMap.mock3.getDatasourceSuggestionsForVisualizeCharts
     ).not.toHaveBeenCalled();
   });
 
@@ -537,9 +702,12 @@ describe('suggestion helpers', () => {
       defaultParams = [
         {
           '1': {
-            getTableSpec: () => [{ columnId: 'col1' }],
+            getTableSpec: () => [{ columnId: 'col1', fields: [] }],
             datasourceId: '',
             getOperationForColumnId: jest.fn(),
+            getVisualDefaults: jest.fn(),
+            getSourceId: jest.fn(),
+            getFilters: jest.fn(),
           },
         },
         { activeId: 'testVis', state: {} },
@@ -597,6 +765,9 @@ describe('suggestion helpers', () => {
           getTableSpec: () => [],
           datasourceId: '',
           getOperationForColumnId: jest.fn(),
+          getVisualDefaults: jest.fn(),
+          getSourceId: jest.fn(),
+          getFilters: jest.fn(),
         },
       };
       mockVisualization1.getSuggestions.mockReturnValue([]);

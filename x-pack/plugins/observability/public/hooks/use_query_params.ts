@@ -9,15 +9,17 @@ import { useLocation } from 'react-router-dom';
 import { useMemo } from 'react';
 import { parse } from 'query-string';
 import { UI_SETTINGS, useKibanaUISettings } from './use_kibana_ui_settings';
-import { TimePickerTime } from '../components/shared/date_picker';
 import { getAbsoluteTime } from '../utils/date';
+import { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 
 const getParsedParams = (search: string) => {
   return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};
 };
 
 export function useQueryParams() {
-  const { from, to } = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
+  const { from, to } = useKibanaUISettings<TimePickerTimeDefaults>(
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+  );
 
   const { rangeFrom, rangeTo } = getParsedParams(useLocation().search);
 

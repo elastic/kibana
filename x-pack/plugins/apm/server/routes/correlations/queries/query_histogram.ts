@@ -37,26 +37,26 @@ export const getTransactionDurationHistogramRequest = (
   },
 });
 
+interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
+  buckets: HistogramItem[];
+}
+
 export const fetchTransactionDurationHistogram = async (
   esClient: ElasticsearchClient,
   params: CorrelationsParams,
   interval: number,
   termFilters?: FieldValuePair[]
 ): Promise<HistogramItem[]> => {
-  const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationHistogramRequest(params, interval, termFilters)
-  );
+  const resp = await esClient.search<
+    ResponseHit,
+    { transaction_duration_histogram: Aggs }
+  >(getTransactionDurationHistogramRequest(params, interval, termFilters));
 
-  if (resp.body.aggregations === undefined) {
+  if (resp.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationHistogram failed, did not return aggregations.'
     );
   }
 
-  return (
-    (
-      resp.body.aggregations
-        .transaction_duration_histogram as estypes.AggregationsMultiBucketAggregate<HistogramItem>
-    ).buckets ?? []
-  );
+  return resp.aggregations.transaction_duration_histogram.buckets ?? [];
 };

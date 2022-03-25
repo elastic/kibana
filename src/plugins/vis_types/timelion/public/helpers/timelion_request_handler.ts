@@ -9,7 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import type { KibanaExecutionContext } from 'kibana/public';
 import { DataView } from 'src/plugins/data/common';
-import { KibanaContext, TimeRange, Filter, esQuery, Query } from '../../../../data/public';
+import { Filter, buildEsQuery } from '@kbn/es-query';
+import { KibanaContext, TimeRange, Query, getEsQueryConfig } from '../../../../data/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';
@@ -53,7 +54,10 @@ export function getTimelionRequestHandler({
   uiSettings,
   http,
   timefilter,
-}: TimelionVisDependencies) {
+  expressionAbortSignal,
+}: TimelionVisDependencies & {
+  expressionAbortSignal: AbortSignal;
+}) {
   const timezone = getTimezone(uiSettings);
 
   return async function ({
@@ -73,6 +77,12 @@ export function getTimelionRequestHandler({
   }): Promise<TimelionSuccessResponse> {
     const dataSearch = getDataSearch();
     const expression = visParams.expression;
+    const abortController = new AbortController();
+    const expressionAbortHandler = function () {
+      abortController.abort();
+    };
+
+    expressionAbortSignal.addEventListener('abort', expressionAbortHandler);
 
     if (!expression) {
       throw new Error(
@@ -90,16 +100,14 @@ export function getTimelionRequestHandler({
         .catch(() => undefined);
     }
 
-    const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
+    const esQueryConfigs = getEsQueryConfig(uiSettings);
 
     // parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
     const untrackSearch =
       dataSearch.session.isCurrentSession(searchSessionId) &&
       dataSearch.session.trackSearch({
-        abort: () => {
-          // TODO: support search cancellations
-        },
+        abort: () => abortController.abort(),
       });
 
     try {
@@ -109,7 +117,7 @@ export function getTimelionRequestHandler({
           sheet: [expression],
           extended: {
             es: {
-              filter: esQuery.buildEsQuery(dataView, query, filters, esQueryConfigs),
+              filter: buildEsQuery(dataView, query, filters, esQueryConfigs),
             },
           },
           time: {
@@ -123,6 +131,7 @@ export function getTimelionRequestHandler({
           }),
         }),
         context: executionContext,
+        signal: abortController.signal,
       });
     } catch (e) {
       if (e && e.body) {
@@ -141,6 +150,7 @@ export function getTimelionRequestHandler({
         // call `untrack` if this search still belongs to current session
         untrackSearch();
       }
+      expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
     }
   };
 }

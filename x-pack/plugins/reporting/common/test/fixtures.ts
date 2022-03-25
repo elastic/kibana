@@ -11,7 +11,6 @@ import type { ReportMock } from './types';
 const buildMockReport = (baseObj: ReportMock) => ({
   index: '.reporting-2020.04.12',
   migration_version: '7.15.0',
-  browser_type: 'chromium',
   max_attempts: 1,
   timeout: 300000,
   created_by: 'elastic',

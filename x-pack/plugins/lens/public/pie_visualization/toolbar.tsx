@@ -6,7 +6,7 @@
  */
 
 import './toolbar.scss';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -14,38 +14,22 @@ import {
   EuiSuperSelect,
   EuiRange,
   EuiHorizontalRule,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
-import { DEFAULT_PERCENT_DECIMALS, CHART_NAMES } from './constants';
-import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
+import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { PartitionChartsMeta } from './partition_charts_meta';
+import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../common';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
-import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
-import { PalettePicker } from '../shared_components';
-
-const numberOptions: Array<{
-  value: SharedPieLayerState['numberDisplay'];
-  inputDisplay: string;
-}> = [
-  {
-    value: 'hidden',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.hiddenNumbersLabel', {
-      defaultMessage: 'Hide from chart',
-    }),
-  },
-  {
-    value: 'percent',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showPercentValuesLabel', {
-      defaultMessage: 'Show percent',
-    }),
-  },
-  {
-    value: 'value',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showFormatterValuesLabel', {
-      defaultMessage: 'Show value',
-    }),
-  },
-];
+import {
+  ToolbarPopover,
+  LegendSettingsPopover,
+  useDebouncedValue,
+  PalettePicker,
+} from '../shared_components';
+import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
+import { shouldShowValuesInLegend } from './render_helpers';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -54,44 +38,135 @@ const legendOptions: Array<{
 }> = [
   {
     id: 'pieLegendDisplay-default',
-    value: 'default',
+    value: LegendDisplay.DEFAULT,
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.auto', {
       defaultMessage: 'Auto',
     }),
   },
   {
     id: 'pieLegendDisplay-show',
-    value: 'show',
+    value: LegendDisplay.SHOW,
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.show', {
       defaultMessage: 'Show',
     }),
   },
   {
     id: 'pieLegendDisplay-hide',
-    value: 'hide',
+    value: LegendDisplay.HIDE,
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.hide', {
       defaultMessage: 'Hide',
     }),
   },
 ];
 
+const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.emptySizeRatioLabel', {
+  defaultMessage: 'Inner area size',
+});
+
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
-  const { state, setState } = props;
+  const { state, setState, frame } = props;
   const layer = state.layers[0];
+  const {
+    categoryOptions,
+    numberOptions,
+    emptySizeRatioOptions,
+    isDisabled: isToolbarPopoverDisabled,
+  } = PartitionChartsMeta[state.shape].toolbarPopover;
+
+  const onStateChange = useCallback(
+    (part: Record<string, unknown>) => {
+      setState({
+        ...state,
+        layers: [{ ...layer, ...part }],
+      });
+    },
+    [layer, state, setState]
+  );
+
+  const onCategoryDisplayChange = useCallback(
+    (option) => onStateChange({ categoryDisplay: option }),
+    [onStateChange]
+  );
+
+  const onNumberDisplayChange = useCallback(
+    (option) => onStateChange({ numberDisplay: option }),
+    [onStateChange]
+  );
+
+  const onPercentDecimalsChange = useCallback(
+    (option) => {
+      onStateChange({ percentDecimals: option });
+    },
+    [onStateChange]
+  );
+
+  const onLegendDisplayChange = useCallback(
+    (optionId) => {
+      onStateChange({ legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value });
+    },
+    [onStateChange]
+  );
+
+  const onLegendPositionChange = useCallback(
+    (id) => onStateChange({ legendPosition: id as Position }),
+    [onStateChange]
+  );
+
+  const onNestedLegendChange = useCallback(
+    (id) => onStateChange({ nestedLegend: !layer.nestedLegend }),
+    [layer, onStateChange]
+  );
+
+  const onTruncateLegendChange = useCallback(() => {
+    const current = layer.truncateLegend ?? true;
+    onStateChange({ truncateLegend: !current });
+  }, [layer, onStateChange]);
+
+  const onLegendMaxLinesChange = useCallback(
+    (val) => onStateChange({ legendMaxLines: val }),
+    [onStateChange]
+  );
+
+  const onLegendSizeChange = useCallback(
+    (val) => onStateChange({ legendSize: val }),
+    [onStateChange]
+  );
+
+  const onValueInLegendChange = useCallback(() => {
+    onStateChange({
+      showValuesInLegend: !shouldShowValuesInLegend(layer, state.shape),
+    });
+  }, [layer, state.shape, onStateChange]);
+
+  const onEmptySizeRatioChange = useCallback(
+    (sizeId) => {
+      const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === sizeId)?.value;
+      onStateChange({ emptySizeRatio });
+    },
+    [emptySizeRatioOptions, onStateChange]
+  );
+
   if (!layer) {
     return null;
   }
+
+  const defaultTruncationValue = getDefaultVisualValuesForLayer(
+    state,
+    frame.datasourceLayers
+  ).truncateText;
+
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
         })}
+        isDisabled={Boolean(isToolbarPopoverDisabled)}
         type="labels"
         groupPosition="left"
         buttonDataTestSubj="lnsLabelsButton"
       >
-        {state.shape && CHART_NAMES[state.shape].categoryOptions.length ? (
+        {categoryOptions.length ? (
           <EuiFormRow
             label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
               defaultMessage: 'Position',
@@ -102,37 +177,32 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
             <EuiSuperSelect
               compressed
               valueOfSelected={layer.categoryDisplay}
-              options={CHART_NAMES[state.shape].categoryOptions}
-              onChange={(option) => {
-                setState({
-                  ...state,
-                  layers: [{ ...layer, categoryDisplay: option }],
-                });
-              }}
+              options={categoryOptions}
+              onChange={onCategoryDisplayChange}
             />
           </EuiFormRow>
         ) : null}
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.pieChart.numberLabels', {
-            defaultMessage: 'Values',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <EuiSuperSelect
-            compressed
-            disabled={layer.categoryDisplay === 'hide'}
-            valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
-            options={numberOptions}
-            onChange={(option) => {
-              setState({
-                ...state,
-                layers: [{ ...layer, numberDisplay: option }],
-              });
-            }}
-          />
-        </EuiFormRow>
-        <EuiHorizontalRule margin="s" />
+
+        {numberOptions.length ? (
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.pieChart.numberLabels', {
+              defaultMessage: 'Values',
+            })}
+            fullWidth
+            display="columnCompressed"
+          >
+            <EuiSuperSelect
+              compressed
+              disabled={layer.categoryDisplay === 'hide'}
+              valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
+              options={numberOptions}
+              onChange={onNumberDisplayChange}
+            />
+          </EuiFormRow>
+        ) : null}
+
+        {numberOptions.length + categoryOptions.length ? <EuiHorizontalRule margin="s" /> : null}
+
         <EuiFormRow
           label={i18n.translate('xpack.lens.pieChart.percentDecimalsLabel', {
             defaultMessage: 'Maximum decimal places for percent',
@@ -142,59 +212,56 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         >
           <DecimalPlaceSlider
             value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-            setValue={(value) => {
-              setState({
-                ...state,
-                layers: [{ ...layer, percentDecimals: value }],
-              });
-            }}
+            setValue={onPercentDecimalsChange}
           />
         </EuiFormRow>
       </ToolbarPopover>
+      {emptySizeRatioOptions?.length ? (
+        <ToolbarPopover
+          title={i18n.translate('xpack.lens.pieChart.visualOptionsLabel', {
+            defaultMessage: 'Visual options',
+          })}
+          type="visualOptions"
+          groupPosition="center"
+          buttonDataTestSubj="lnsVisualOptionsButton"
+        >
+          <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
+            <EuiButtonGroup
+              isFullWidth
+              name="emptySizeRatio"
+              buttonSize="compressed"
+              legend={emptySizeRatioLabel}
+              options={emptySizeRatioOptions}
+              idSelected={
+                emptySizeRatioOptions.find(({ value }) => value === layer.emptySizeRatio)?.id ??
+                'emptySizeRatioOption-small'
+              }
+              onChange={onEmptySizeRatioChange}
+              data-test-subj="lnsEmptySizeRatioButtonGroup"
+            />
+          </EuiFormRow>
+        </ToolbarPopover>
+      ) : null}
       <LegendSettingsPopover
         legendOptions={legendOptions}
         mode={layer.legendDisplay}
-        onDisplayChange={(optionId) => {
-          setState({
-            ...state,
-            layers: [
-              {
-                ...layer,
-                legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value,
-              },
-            ],
-          });
-        }}
+        onDisplayChange={onLegendDisplayChange}
+        valueInLegend={shouldShowValuesInLegend(layer, state.shape)}
+        renderValueInLegendSwitch={
+          'showValues' in PartitionChartsMeta[state.shape]?.legend ?? false
+        }
+        onValueInLegendChange={onValueInLegendChange}
         position={layer.legendPosition}
-        onPositionChange={(id) => {
-          setState({
-            ...state,
-            layers: [{ ...layer, legendPosition: id as Position }],
-          });
-        }}
-        renderNestedLegendSwitch
-        nestedLegend={!!layer.nestedLegend}
-        onNestedLegendChange={() => {
-          setState({
-            ...state,
-            layers: [{ ...layer, nestedLegend: !layer.nestedLegend }],
-          });
-        }}
-        shouldTruncate={layer.truncateLegend ?? true}
-        onTruncateLegendChange={() => {
-          const current = layer.truncateLegend ?? true;
-          setState({
-            ...state,
-            layers: [{ ...layer, truncateLegend: !current }],
-          });
-        }}
+        onPositionChange={onLegendPositionChange}
+        renderNestedLegendSwitch={!PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch}
+        nestedLegend={Boolean(layer.nestedLegend)}
+        onNestedLegendChange={onNestedLegendChange}
+        shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}
+        onTruncateLegendChange={onTruncateLegendChange}
         maxLines={layer?.legendMaxLines}
-        onMaxLinesChange={(val) => {
-          setState({
-            ...state,
-            layers: [{ ...layer, legendMaxLines: val }],
-          });
-        }}
+        onMaxLinesChange={onLegendMaxLinesChange}
+        legendSize={layer.legendSize}
+        onLegendSizeChange={onLegendSizeChange}
       />
     </EuiFlexGroup>
   );
@@ -235,14 +302,12 @@ export function DimensionEditor(
   }
 ) {
   return (
-    <>
-      <PalettePicker
-        palettes={props.paletteService}
-        activePalette={props.state.palette}
-        setPalette={(newPalette) => {
-          props.setState({ ...props.state, palette: newPalette });
-        }}
-      />
-    </>
+    <PalettePicker
+      palettes={props.paletteService}
+      activePalette={props.state.palette}
+      setPalette={(newPalette) => {
+        props.setState({ ...props.state, palette: newPalette });
+      }}
+    />
   );
 }

@@ -3,7 +3,7 @@
     "Elastic",
     "Austin Songer"
   ],
-  "description": "Identifies the creation or patching of potential malicious rolebinding. You can assign these roles to Kubernetes subjects (users, groups, or service accounts) with role bindings and cluster role bindings.",
+  "description": "Identifies the creation or patching of potentially malicious role bindings. Users can use role bindings and cluster role bindings to assign roles to Kubernetes subjects (users, groups, or service accounts).",
   "from": "now-20m",
   "index": [
     "filebeat-*",
@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "GCP Kubernetes Rolebindings Created or Patched",
   "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:(io.k8s.authorization.rbac.v*.clusterrolebindings.create or \nio.k8s.authorization.rbac.v*.rolebindings.create or io.k8s.authorization.rbac.v*.clusterrolebindings.patch or \nio.k8s.authorization.rbac.v*.rolebindings.patch) and event.outcome:success\n",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:(io.k8s.authorization.rbac.v*.clusterrolebindings.create or \nio.k8s.authorization.rbac.v*.rolebindings.create or io.k8s.authorization.rbac.v*.clusterrolebindings.patch or \nio.k8s.authorization.rbac.v*.rolebindings.patch) and event.outcome:success and\nnot gcp.audit.authentication_info.principal_email:\"system:addon-manager\"\n",
   "references": [
     "https://cloud.google.com/kubernetes-engine/docs/how-to/audit-logging",
     "https://unofficial-kubernetes.readthedocs.io/en/latest/admin/authorization/rbac/",
@@ -43,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

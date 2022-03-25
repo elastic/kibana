@@ -11,7 +11,10 @@ import { AppMountParameters } from '../../../../../../../src/core/public';
 import { ActionMenuContent } from './action_menu_content';
 
 export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMountParameters }) => (
-  <HeaderMenuPortal setHeaderActionMenu={appMountParameters.setHeaderActionMenu}>
+  <HeaderMenuPortal
+    setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+    theme$={appMountParameters.theme$}
+  >
     <ActionMenuContent />
   </HeaderMenuPortal>
 );

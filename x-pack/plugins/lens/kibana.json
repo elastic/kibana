@@ -6,6 +6,7 @@
   "ui": true,
   "requiredPlugins": [
     "data",
+    "dataViews",
     "charts",
     "expressions",
     "fieldFormats",
@@ -18,14 +19,18 @@
     "embeddable",
     "share",
     "presentationUtil",
-    "dataViewFieldEditor"
+    "dataViewFieldEditor",
+    "expressionGauge",
+    "expressionHeatmap",
+    "eventAnnotation"
   ],
   "optionalPlugins": [
     "usageCollection",
     "taskManager",
     "globalSearch",
     "savedObjectsTagging",
-    "spaces"
+    "spaces",
+    "discover"
   ],
   "configPath": [
     "xpack",

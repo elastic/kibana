@@ -16,9 +16,11 @@ import React, {
   useRef,
   FunctionComponent,
 } from 'react';
+import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -44,8 +46,10 @@ const defaultParams: Params = {
   format: null,
 };
 
-export const defaultValueFormatter = (value: unknown) =>
-  `<span>${typeof value === 'object' ? JSON.stringify(value) : value ?? '-'}</span>`;
+export const defaultValueFormatter = (value: unknown) => {
+  const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
+  return renderToString(<>{content}</>);
+};
 
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const previewCount = useRef(0);
@@ -165,13 +169,21 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       if (format?.id) {
         const formatter = fieldFormats.getInstance(format.id, format.params);
         if (formatter) {
-          return formatter.convertObject?.html(value) ?? JSON.stringify(value);
+          return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
+        }
+      }
+
+      if (type) {
+        const fieldType = castEsToKbnFieldTypeName(type);
+        const defaultFormatterForType = fieldFormats.getDefaultInstance(fieldType);
+        if (defaultFormatterForType) {
+          return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
         }
       }
 
       return defaultValueFormatter(value);
     },
-    [format, fieldFormats]
+    [format, type, fieldFormats]
   );
 
   const fetchSampleDocuments = useCallback(
@@ -321,7 +333,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     const currentApiCall = ++previewCount.current;
 
     const response = await getFieldPreview({
-      index: currentDocIndex!,
+      index: dataView.title,
       document: document!,
       context: `${type!}_field` as PainlessExecuteContext,
       script: script!,
@@ -372,7 +384,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     type,
     script,
     document,
-    currentDocIndex,
     currentDocId,
     getFieldPreview,
     notifications.toasts,
@@ -380,6 +391,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     allParamsDefined,
     scriptEditorValidation,
     hasSomeParamsChanged,
+    dataView.title,
   ]);
 
   const goToNextDoc = useCallback(() => {

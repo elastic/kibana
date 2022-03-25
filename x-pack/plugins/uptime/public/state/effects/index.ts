@@ -7,7 +7,15 @@
 
 import { fork } from 'redux-saga/effects';
 import { fetchMonitorDetailsEffect } from './monitor';
-import { fetchMonitorListEffect } from './monitor_list';
+import {
+  fetchMonitorListEffect,
+  fetchRunNowMonitorEffect,
+  fetchUpdatedMonitorEffect,
+} from './monitor_list';
+import {
+  fetchMonitorManagementEffect,
+  fetchSyntheticsServiceAllowedEffect,
+} from './monitor_management';
 import { fetchMonitorStatusEffect } from './monitor_status';
 import { fetchDynamicSettingsEffect, setDynamicSettingsEffect } from './dynamic_settings';
 import { fetchPingsEffect, fetchPingHistogramEffect } from './ping';
@@ -26,6 +34,8 @@ import {
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
   yield fork(fetchMonitorListEffect);
+  yield fork(fetchUpdatedMonitorEffect);
+  yield fork(fetchMonitorManagementEffect);
   yield fork(fetchMonitorStatusEffect);
   yield fork(fetchDynamicSettingsEffect);
   yield fork(setDynamicSettingsEffect);
@@ -40,4 +50,6 @@ export function* rootEffect() {
   yield fork(fetchScreenshotBlocks);
   yield fork(generateBlockStatsOnPut);
   yield fork(pruneBlockCache);
+  yield fork(fetchRunNowMonitorEffect);
+  yield fork(fetchSyntheticsServiceAllowedEffect);
 }

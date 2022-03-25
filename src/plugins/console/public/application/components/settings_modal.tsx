@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,11 +23,39 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSwitch,
+  EuiSuperSelect,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
+
+const onceTimeInterval = () =>
+  i18n.translate('console.settingsPage.refreshInterval.onceTimeInterval', {
+    defaultMessage: 'Once, when console loads',
+  });
+
+const everyNMinutesTimeInterval = (value: number) =>
+  i18n.translate('console.settingsPage.refreshInterval.everyNMinutesTimeInterval', {
+    defaultMessage: 'Every {value} {value, plural, one {minute} other {minutes}}',
+    values: { value },
+  });
+
+const everyHourTimeInterval = () =>
+  i18n.translate('console.settingsPage.refreshInterval.everyHourTimeInterval', {
+    defaultMessage: 'Every hour',
+  });
+
+const PRESETS_IN_MINUTES = [0, 1, 10, 20, 60];
+const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
+  value: (value * 60000).toString(),
+  inputDisplay:
+    value === 0
+      ? onceTimeInterval()
+      : value === 60
+      ? everyHourTimeInterval()
+      : everyNMinutesTimeInterval(value),
+}));
 
 interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
@@ -42,7 +70,9 @@ export function DevToolsSettingsModal(props: Props) {
   const [fields, setFields] = useState(props.settings.autocomplete.fields);
   const [indices, setIndices] = useState(props.settings.autocomplete.indices);
   const [templates, setTemplates] = useState(props.settings.autocomplete.templates);
+  const [dataStreams, setDataStreams] = useState(props.settings.autocomplete.dataStreams);
   const [polling, setPolling] = useState(props.settings.polling);
+  const [pollInterval, setPollInterval] = useState(props.settings.pollInterval);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
   const [historyDisabled, setHistoryDisabled] = useState(props.settings.historyDisabled);
 
@@ -68,12 +98,20 @@ export function DevToolsSettingsModal(props: Props) {
       }),
       stateSetter: setTemplates,
     },
+    {
+      id: 'dataStreams',
+      label: i18n.translate('console.settingsPage.dataStreamsLabelText', {
+        defaultMessage: 'Data streams',
+      }),
+      stateSetter: setDataStreams,
+    },
   ];
 
   const checkboxIdToSelectedMap = {
     fields,
     indices,
     templates,
+    dataStreams,
   };
 
   const onAutocompleteChange = (optionId: AutocompleteOptions) => {
@@ -91,12 +129,21 @@ export function DevToolsSettingsModal(props: Props) {
         fields,
         indices,
         templates,
+        dataStreams,
       },
       polling,
+      pollInterval,
       tripleQuotes,
       historyDisabled,
     });
   }
+
+  const onPollingIntervalChange = useCallback((value: string) => {
+    const sanitizedValue = parseInt(value, 10);
+
+    setPolling(!!sanitizedValue);
+    setPollInterval(sanitizedValue);
+  }, []);
 
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
@@ -106,28 +153,21 @@ export function DevToolsSettingsModal(props: Props) {
           label={
             <FormattedMessage
               id="console.settingsPage.refreshingDataLabel"
-              defaultMessage="Refreshing autocomplete suggestions"
+              defaultMessage="Refresh frequency"
             />
           }
           helpText={
             <FormattedMessage
               id="console.settingsPage.refreshingDataDescription"
               defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
-              Automatic refreshes may be an issue if you have a large cluster or if you have network limitations."
+              Less frequent refresh is recommended to reduce bandwith costs."
             />
           }
         >
-          <EuiSwitch
-            checked={polling}
-            data-test-subj="autocompletePolling"
-            id="autocompletePolling"
-            label={
-              <FormattedMessage
-                defaultMessage="Automatically refresh autocomplete suggestions"
-                id="console.settingsPage.pollingLabelText"
-              />
-            }
-            onChange={(e) => setPolling(e.target.checked)}
+          <EuiSuperSelect
+            options={intervalOptions}
+            valueOfSelected={pollInterval.toString()}
+            onChange={onPollingIntervalChange}
           />
         </EuiFormRow>
 
@@ -140,6 +180,7 @@ export function DevToolsSettingsModal(props: Props) {
               fields,
               indices,
               templates,
+              dataStreams,
             });
           }}
         >

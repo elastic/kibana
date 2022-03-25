@@ -59,7 +59,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       truncateText: true,
       'data-test-subj': 'mlAllocatedModelsTableSize',
       render: (v: AllocatedModel) => {
-        return bytesFormatter(v.model_size_bytes);
+        return bytesFormatter(v.required_native_memory_bytes);
       },
     },
     {
@@ -164,7 +164,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
         'data-test-subj': `mlAllocatedModelTableRow row-${item.model_id}`,
       })}
       onTableChange={() => {}}
-      data-test-subj={'mlNodesTable'}
+      data-test-subj={'mlNodesAllocatedModels'}
     />
   );
 };

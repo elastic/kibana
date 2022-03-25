@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
-import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
+import { cloneDeep, flow } from 'lodash';
+import { fromExpression, toExpression, Ast, AstFunction } from '@kbn/interpreter';
 import {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
-import { Query, Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/plugins/data/public';
+import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
+import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,
@@ -24,12 +27,22 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  CustomVisualizationMigrations,
+  LensDocShape810,
 } from './types';
 import {
   commonRenameOperationsForFormula,
   commonRemoveTimezoneDateHistogramParam,
   commonUpdateVisLayerType,
   commonMakeReversePaletteAsCustom,
+  commonRenameFilterReferences,
+  getLensFilterMigrations,
+  getLensCustomVisualizationMigrations,
+  commonRenameRecordsField,
+  fixLensTopValuesCustomFormatting,
+  commonSetLastValueShowArrayValues,
+  commonEnhanceTableRowHeight,
+  commonSetIncludeEmptyRowsDateHistogram,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -136,7 +149,7 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShapePre710, LensDocShap
   }
   try {
     const ast = fromExpression(expression);
-    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
+    const newChain: AstFunction[] = ast.chain.map((topNode) => {
       if (topNode.function !== 'lens_merge_tables') {
         return topNode;
       }
@@ -197,7 +210,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShapePre710, LensDocSh
 
   try {
     const ast = fromExpression(expression);
-    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
+    const newChain: AstFunction[] = ast.chain.map((topNode) => {
       if (topNode.function !== 'lens_merge_tables') {
         return topNode;
       }
@@ -402,14 +415,16 @@ const transformTableState: SavedObjectMigrationFn<
   return newDoc;
 };
 
-const renameOperationsForFormula: SavedObjectMigrationFn<LensDocShapePre712, LensDocShapePost712> =
-  (doc) => {
-    const newDoc = cloneDeep(doc);
-    return {
-      ...newDoc,
-      attributes: commonRenameOperationsForFormula(newDoc.attributes),
-    };
+const renameOperationsForFormula: SavedObjectMigrationFn<
+  LensDocShapePre712,
+  LensDocShapePost712
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return {
+    ...newDoc,
+    attributes: commonRenameOperationsForFormula(newDoc.attributes),
   };
+};
 
 const removeTimezoneDateHistogramParam: SavedObjectMigrationFn<LensDocShape713, LensDocShape714> = (
   doc
@@ -437,7 +452,39 @@ const moveDefaultReversedPaletteToCustom: SavedObjectMigrationFn<
   return { ...newDoc, attributes: commonMakeReversePaletteAsCustom(newDoc.attributes) };
 };
 
-export const migrations: SavedObjectMigrationMap = {
+const renameFilterReferences: SavedObjectMigrationFn<LensDocShape715, LensDocShape810> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonRenameFilterReferences(newDoc.attributes) };
+};
+
+const renameRecordsField: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonRenameRecordsField(newDoc.attributes) };
+};
+
+const addParentFormatter: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: fixLensTopValuesCustomFormatting(newDoc.attributes) };
+};
+
+const setLastValueShowArrayValues: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => {
+  return { ...doc, attributes: commonSetLastValueShowArrayValues(doc.attributes) };
+};
+
+const enhanceTableRowHeight: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonEnhanceTableRowHeight(newDoc.attributes) };
+};
+
+const setIncludeEmptyRowsDateHistogram: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => {
+  return { ...doc, attributes: commonSetIncludeEmptyRowsDateHistogram(doc.attributes) };
+};
+
+const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
   // sitting directly on the esaggs as an argument and not a nested function (which lens_auto_date was).
@@ -450,4 +497,22 @@ export const migrations: SavedObjectMigrationMap = {
   '7.14.0': removeTimezoneDateHistogramParam,
   '7.15.0': addLayerTypeToVisualization,
   '7.16.0': moveDefaultReversedPaletteToCustom,
+  '8.1.0': flow(renameFilterReferences, renameRecordsField, addParentFormatter),
+  '8.2.0': flow(
+    setLastValueShowArrayValues,
+    setIncludeEmptyRowsDateHistogram,
+    enhanceTableRowHeight
+  ),
 };
+
+export const getAllMigrations = (
+  filterMigrations: MigrateFunctionsObject,
+  customVisualizationMigrations: CustomVisualizationMigrations
+): SavedObjectMigrationMap =>
+  mergeSavedObjectMigrationMaps(
+    mergeSavedObjectMigrationMaps(
+      lensMigrations,
+      getLensFilterMigrations(filterMigrations) as unknown as SavedObjectMigrationMap
+    ),
+    getLensCustomVisualizationMigrations(customVisualizationMigrations)
+  );

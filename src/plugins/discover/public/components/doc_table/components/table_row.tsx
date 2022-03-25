@@ -11,15 +11,17 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { formatFieldValue } from '../../../utils/format_value';
-import { flattenHit } from '../../../../../data/common';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer/doc_viewer';
-import { FilterManager, IndexPattern } from '../../../../../data/public';
+import { flattenHit } from '../../../../../data/public';
+import { DataView } from '../../../../../data_views/public';
+import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { TableCell } from './table_row/table_cell';
-import { ElasticSearchHit, DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
-import { getContextUrl } from '../../../utils/get_context_url';
-import { getSingleDocUrl } from '../../../utils/get_single_doc_url';
-import { TableRowDetails } from './table_row_details';
 import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
+import { useNavigationProps } from '../../../utils/use_navigation_props';
+import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
+import { ElasticSearchHit } from '../../../types';
+import { TableRowDetails } from './table_row_details';
+import { useDiscoverServices } from '../../../utils/use_discover_services';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -28,15 +30,12 @@ export type DocTableRow = ElasticSearchHit & {
 export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
-  indexPattern: IndexPattern;
   row: DocTableRow;
+  indexPattern: DataView;
+  useNewFieldsApi: boolean;
+  fieldsToShow: string[];
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
-  useNewFieldsApi: boolean;
-  hideTimeColumn: boolean;
-  filterManager: FilterManager;
-  addBasePath: (path: string) => string;
-  fieldsToShow: string[];
 }
 
 export const TableRow = ({
@@ -46,15 +45,19 @@ export const TableRow = ({
   indexPattern,
   useNewFieldsApi,
   fieldsToShow,
-  hideTimeColumn,
   onAddColumn,
   onRemoveColumn,
-  filterManager,
-  addBasePath,
 }: TableRowProps) => {
+  const { uiSettings, filterManager, fieldFormats, addBasePath } = useDiscoverServices();
+  const [maxEntries, hideTimeColumn] = useMemo(
+    () => [
+      uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
+      uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+    ],
+    [uiSettings]
+  );
   const [open, setOpen] = useState(false);
   const docTableRowClassName = classNames('kbnDocTable__row', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'kbnDocTable__row--highlight': row.isAnchor,
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
@@ -75,12 +78,13 @@ export const TableRow = ({
     // If we're formatting the _source column, don't use the regular field formatter,
     // but our Discover mechanism to format a hit in a better human-readable way.
     if (fieldName === '_source') {
-      return formatRow(row, indexPattern, fieldsToShow);
+      return formatRow(row, indexPattern, fieldsToShow, maxEntries, fieldFormats);
     }
 
     const formattedField = formatFieldValue(
       flattenedRow[fieldName],
       row,
+      fieldFormats,
       indexPattern,
       mapping(fieldName)
     );
@@ -99,13 +103,14 @@ export const TableRow = ({
     [filter, flattenedRow, indexPattern.fields]
   );
 
-  const getContextAppHref = () => {
-    return getContextUrl(row._id, indexPattern.id!, columns, filterManager, addBasePath);
-  };
-
-  const getSingleDocHref = () => {
-    return addBasePath(getSingleDocUrl(indexPattern.id!, row._index, row._id));
-  };
+  const { singleDocProps, surrDocsProps } = useNavigationProps({
+    indexPatternId: indexPattern.id!,
+    rowIndex: row._index,
+    rowId: row._id,
+    filterManager,
+    addBasePath,
+    columns,
+  });
 
   const rowCells = [
     <td className="kbnDocTableCell__toggleDetails" key="toggleDetailsCell">
@@ -141,7 +146,7 @@ export const TableRow = ({
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row, indexPattern, fieldsToShow);
+    const formatted = formatRow(row, indexPattern, fieldsToShow, maxEntries, fieldFormats);
 
     rowCells.push(
       <TableCell
@@ -168,7 +173,7 @@ export const TableRow = ({
             key={column}
             timefield={false}
             sourcefield={true}
-            formatted={formatTopLevelObject(row, innerColumns, indexPattern)}
+            formatted={formatTopLevelObject(row, innerColumns, indexPattern, maxEntries)}
             filterable={false}
             column={column}
             inlineFilter={inlineFilter}
@@ -207,8 +212,8 @@ export const TableRow = ({
           open={open}
           colLength={(columns.length || 1) + 2}
           isTimeBased={indexPattern.isTimeBased()}
-          getContextAppHref={getContextAppHref}
-          getSingleDocHref={getSingleDocHref}
+          singleDocProps={singleDocProps}
+          surrDocsProps={surrDocsProps}
         >
           <DocViewer
             columns={columns}

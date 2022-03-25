@@ -12,6 +12,7 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 async function ftrConfigRun({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaConfig = await readConfigFile(require.resolve('./ftr_config.ts'));
+
   return {
     ...kibanaConfig.getAll(),
     testRunner,

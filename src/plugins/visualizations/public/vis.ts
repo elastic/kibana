@@ -22,39 +22,19 @@ import { i18n } from '@kbn/i18n';
 
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedObjects, getSpaces } from './services';
-import {
-  IAggConfigs,
-  IndexPattern,
-  ISearchSource,
-  AggConfigSerialized,
-  SearchSourceFields,
-} from '../../data/public';
+import { IAggConfigs, ISearchSource, AggConfigSerialized } from '../../data/public';
+import type { DataView } from '../../data_views/public';
 import { BaseVisType } from './vis_types';
-import { VisParams } from '../common/types';
+import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
 
 import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '../../discover/public';
 
-export interface SerializedVisData {
-  expression?: string;
-  aggs: AggConfigSerialized[];
-  searchSource: SearchSourceFields;
-  savedSearchId?: string;
-}
-
-export interface SerializedVis<T = VisParams> {
-  id?: string;
-  title: string;
-  description?: string;
-  type: string;
-  params: T;
-  uiState?: any;
-  data: SerializedVisData;
-}
+export type { SerializedVis, SerializedVisData };
 
 export interface VisData {
   ast?: string;
   aggs?: IAggConfigs;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   searchSource?: ISearchSource;
   savedSearchId?: string;
 }
@@ -113,7 +93,19 @@ export class Vis<TVisParams = VisParams> {
     return defaults({}, cloneDeep(params ?? {}), cloneDeep(this.type.visConfig?.defaults ?? {}));
   }
 
-  async setState(state: PartialVisState) {
+  async setState(inState: PartialVisState) {
+    let state = inState;
+
+    const { updateVisTypeOnParamsChange } = this.type;
+    const newType = updateVisTypeOnParamsChange && updateVisTypeOnParamsChange(state.params);
+    if (newType) {
+      state = {
+        ...inState,
+        type: newType,
+        params: { ...inState.params, type: newType },
+      };
+    }
+
     let typeChanged = false;
     if (state.type && this.type.name !== state.type) {
       // @ts-ignore
@@ -177,7 +169,7 @@ export class Vis<TVisParams = VisParams> {
   }
 
   serialize(): SerializedVis {
-    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.toJSON()) : [];
+    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.serialize()) : [];
     return {
       id: this.id,
       title: this.title,
@@ -188,7 +180,7 @@ export class Vis<TVisParams = VisParams> {
       data: {
         aggs: aggs as any,
         searchSource: this.data.searchSource ? this.data.searchSource.getSerializedFields() : {},
-        savedSearchId: this.data.savedSearchId,
+        ...(this.data.savedSearchId ? { savedSearchId: this.data.savedSearchId } : {}),
       },
     };
   }

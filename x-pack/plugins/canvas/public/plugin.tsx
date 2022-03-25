@@ -36,7 +36,6 @@ import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
-import { pluginServiceRegistry } from './services/kibana';
 
 export type { CoreStart, CoreSetup };
 
@@ -123,6 +122,8 @@ export class CanvasPlugin
         srcPlugin.start(coreStart, startPlugins);
 
         const { pluginServices } = await import('./services');
+        const { pluginServiceRegistry } = await import('./services/kibana');
+
         pluginServices.setRegistry(
           pluginServiceRegistry.start({
             coreStart,
@@ -130,6 +131,11 @@ export class CanvasPlugin
             appUpdater: this.appUpdater,
             initContext: this.initContext,
           })
+        );
+
+        const { expressions, presentationUtil } = startPlugins;
+        await presentationUtil.registerExpressionsLanguage(
+          Object.values(expressions.getFunctions())
         );
 
         // Load application bundle

@@ -11,9 +11,9 @@ import {
 } from '../../../../../../../../src/core/server/mocks';
 import { createHttpServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
-import { createApmEventClient } from '.';
+import { APMEventClient } from '.';
 
-describe('createApmEventClient', () => {
+describe('APMEventClient', () => {
   let server: ReturnType<typeof createHttpServer>;
 
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe('createApmEventClient', () => {
     router.get(
       { path: '/', validate: false },
       async (context, request, res) => {
-        const eventClient = createApmEventClient({
+        const eventClient = new APMEventClient({
           esClient: {
             search: async (
               params: any,
@@ -61,6 +61,7 @@ describe('createApmEventClient', () => {
           apm: {
             events: [],
           },
+          body: { size: 0 },
         });
 
         return res.ok({ body: 'ok' });

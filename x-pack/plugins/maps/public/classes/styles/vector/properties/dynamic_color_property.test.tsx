@@ -233,13 +233,11 @@ test('Should pluck the categorical style-meta', async () => {
   const features = makeFeatures(['CN', 'CN', 'US', 'CN', 'US', 'IN']);
   const meta = colorStyle.pluckCategoricalStyleMetaFromFeatures(features);
 
-  expect(meta).toEqual({
-    categories: [
-      { key: 'CN', count: 3 },
-      { key: 'US', count: 2 },
-      { key: 'IN', count: 1 },
-    ],
-  });
+  expect(meta).toEqual([
+    { key: 'CN', count: 3 },
+    { key: 'US', count: 2 },
+    { key: 'IN', count: 1 },
+  ]);
 });
 
 test('Should pluck the categorical style-meta from fieldmeta', async () => {
@@ -262,13 +260,11 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
     },
   });
 
-  expect(meta).toEqual({
-    categories: [
-      { key: 'CN', count: 3 },
-      { key: 'US', count: 2 },
-      { key: 'IN', count: 1 },
-    ],
-  });
+  expect(meta).toEqual([
+    { key: 'CN', count: 3 },
+    { key: 'US', count: 2 },
+    { key: 'IN', count: 1 },
+  ]);
 });
 
 describe('supportsFieldMeta', () => {

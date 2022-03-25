@@ -24,6 +24,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 import type { DiscoverStart } from '../../../../src/plugins/discover/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type {
@@ -45,6 +46,8 @@ import { createNavigationRegistry, NavigationEntry } from './services/navigation
 import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+import { createUseRulesLink } from './hooks/create_use_rules_link';
+import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -60,6 +63,7 @@ export interface ObservabilityPublicPluginsStart {
   home?: HomePublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   discover: DiscoverStart;
 }
@@ -89,6 +93,16 @@ export class Plugin
       order: 8001,
       path: '/alerts',
       navLinkStatus: AppNavLinkStatus.hidden,
+      deepLinks: [
+        {
+          id: 'rules',
+          title: i18n.translate('xpack.observability.rulesLinkTitle', {
+            defaultMessage: 'Rules',
+          }),
+          path: '/alerts/rules',
+          navLinkStatus: AppNavLinkStatus.hidden,
+        },
+      ],
     },
     getCasesDeepLinks({
       basePath: casesPath,
@@ -240,6 +254,7 @@ export class Plugin
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
+      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
     };
   }
 
@@ -267,7 +282,9 @@ export class Plugin
         PageTemplate,
       },
       createExploratoryViewUrl,
+      getAppDataView: getAppDataView(pluginsStart.dataViews),
       ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
+      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
     };
   }
 }

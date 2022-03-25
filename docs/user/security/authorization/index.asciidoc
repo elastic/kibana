@@ -23,7 +23,7 @@ Whichever approach you use, be careful when granting cluster privileges and inde
 cluster, and {kib} spaces do not prevent you from granting users of two different tenants access to the same index.
 
 [role="xpack"]
-[[xpack-kibana-role-management]]
+[[kibana-role-management]]
 === {kib} role management
 
 Roles are a collection of privileges that allow you to perform actions in {kib} and {es}. Users are not directly granted privileges, but are instead assigned one or more roles that describe the desired level of access. When you assign a user multiple roles, the user receives a union of the roles’ privileges. This means that you cannot reduce the privileges of a user by assigning them an additional role. You must instead remove or edit one of their existing roles.

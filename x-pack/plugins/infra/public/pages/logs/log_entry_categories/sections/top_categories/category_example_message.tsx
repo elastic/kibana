@@ -26,8 +26,7 @@ import {
 } from '../../../../../components/logging/log_text_stream';
 import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 import { LogEntryContextMenu } from '../../../../../components/logging/log_text_stream/log_entry_context_menu';
-import { useLinkProps } from '../../../../../hooks/use_link_props';
-import { useUiTracker } from '../../../../../../../observability/public';
+import { useUiTracker, useLinkProps } from '../../../../../../../observability/public';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;

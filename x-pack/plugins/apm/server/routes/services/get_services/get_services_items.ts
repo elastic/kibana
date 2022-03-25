@@ -9,13 +9,14 @@ import { Logger } from '@kbn/logging';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
-import { getServicesFromMetricDocuments } from './get_services_from_metric_documents';
+import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
+import { ServiceGroup } from '../../../../common/service_groups';
 
 export type ServicesItemsSetup = Setup;
 
-const MAX_NUMBER_OF_SERVICES = 500;
+const MAX_NUMBER_OF_SERVICES = 50;
 
 export async function getServicesItems({
   environment,
@@ -25,6 +26,7 @@ export async function getServicesItems({
   logger,
   start,
   end,
+  serviceGroup,
 }: {
   environment: string;
   kuery: string;
@@ -33,6 +35,7 @@ export async function getServicesItems({
   logger: Logger;
   start: number;
   end: number;
+  serviceGroup: ServiceGroup | null;
 }) {
   return withApmSpan('get_services_items', async () => {
     const params = {
@@ -43,21 +46,25 @@ export async function getServicesItems({
       maxNumServices: MAX_NUMBER_OF_SERVICES,
       start,
       end,
+      serviceGroup,
     };
 
-    const [transactionStats, servicesFromMetricDocuments, healthStatuses] =
-      await Promise.all([
-        getServiceTransactionStats(params),
-        getServicesFromMetricDocuments(params),
-        getHealthStatuses(params).catch((err) => {
-          logger.error(err);
-          return [];
-        }),
-      ]);
+    const [
+      transactionStats,
+      servicesFromErrorAndMetricDocuments,
+      healthStatuses,
+    ] = await Promise.all([
+      getServiceTransactionStats(params),
+      getServicesFromErrorAndMetricDocuments(params),
+      getHealthStatuses(params).catch((err) => {
+        logger.error(err);
+        return [];
+      }),
+    ]);
 
     return mergeServiceStats({
       transactionStats,
-      servicesFromMetricDocuments,
+      servicesFromErrorAndMetricDocuments,
       healthStatuses,
     });
   });

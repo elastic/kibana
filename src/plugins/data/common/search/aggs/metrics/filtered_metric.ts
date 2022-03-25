@@ -52,5 +52,8 @@ export const getFilteredMetricAgg = () => {
       }
       return `${customBucket.getValueBucketPath()}>${customMetric.getValueBucketPath()}`;
     },
+    getResponseId(agg) {
+      return agg.params.customBucket.id;
+    },
   });
 };

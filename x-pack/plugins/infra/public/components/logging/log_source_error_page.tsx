@@ -14,7 +14,7 @@ import {
   FetchLogSourceStatusError,
   ResolveLogSourceConfigurationError,
 } from '../../../common/log_sources';
-import { useLinkProps } from '../../hooks/use_link_props';
+import { useLinkProps } from '../../../../observability/public';
 import { LogsPageTemplate } from '../../pages/logs/page_template';
 
 export const LogSourceErrorPage: React.FC<{

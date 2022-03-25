@@ -97,8 +97,7 @@ describe('migration v2', () => {
         { index: '.kibana_7.13.0_001' },
         { meta: true }
       );
-      const settings = response['.kibana_7.13.0_001']
-        .settings as estypes.IndicesIndexStatePrefixedSettings;
+      const settings = response['.kibana_7.13.0_001'].settings as estypes.IndicesIndexSettings;
       expect(settings.index).not.toBeUndefined();
       expect(settings.index!.blocks?.write).not.toEqual('true');
     }
@@ -125,6 +124,7 @@ function createRoot() {
         loggers: [
           {
             name: 'root',
+            level: 'info',
             appenders: ['file'],
           },
         ],

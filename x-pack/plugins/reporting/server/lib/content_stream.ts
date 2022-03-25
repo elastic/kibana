@@ -5,14 +5,13 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Duplex } from 'stream';
+import { ByteSizeValue } from '@kbn/config-schema';
+import type { ElasticsearchClient, Logger } from 'kibana/server';
 import { defaults, get } from 'lodash';
 import Puid from 'puid';
-import { ByteSizeValue } from '@kbn/config-schema';
-import type { ElasticsearchClient } from 'src/core/server';
-import { ReportingCore } from '..';
-import { ReportSource } from '../../common/types';
-import { LevelLogger } from './level_logger';
+import { Duplex } from 'stream';
+import type { ReportingCore } from '../';
+import type { ReportSource } from '../../common/types';
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
@@ -66,7 +65,9 @@ export class ContentStream extends Duplex {
     return Math.floor(max / 2);
   }
 
-  private buffer = Buffer.from('');
+  private buffers: Buffer[] = [];
+  private bytesBuffered = 0;
+
   private bytesRead = 0;
   private chunksRead = 0;
   private chunksWritten = 0;
@@ -85,7 +86,7 @@ export class ContentStream extends Duplex {
 
   constructor(
     private client: ElasticsearchClient,
-    private logger: LevelLogger,
+    private logger: Logger,
     private document: ContentStreamDocument,
     { encoding = 'base64' }: ContentStreamParameters = {}
   ) {
@@ -102,7 +103,7 @@ export class ContentStream extends Duplex {
   }
 
   private async getMaxContentSize() {
-    const { body } = await this.client.cluster.getSettings({ include_defaults: true });
+    const body = await this.client.cluster.getSettings({ include_defaults: true });
     const { persistent, transient, defaults: defaultSettings } = body;
     const settings = defaults({}, persistent, transient, defaultSettings);
     const maxContentSize = get(settings, 'http.max_content_length', '100mb');
@@ -144,7 +145,7 @@ export class ContentStream extends Duplex {
     this.logger.debug(`Reading report contents.`);
 
     const response = await this.client.search<ReportSource>({ body, index });
-    const hits = response?.body.hits?.hits?.[0];
+    const hits = response?.hits?.hits?.[0];
 
     this.jobSize = hits?._source?.output?.size;
 
@@ -170,7 +171,7 @@ export class ContentStream extends Duplex {
     this.logger.debug(`Reading chunk #${this.chunksRead}.`);
 
     const response = await this.client.search<ChunkSource>({ body, index });
-    const hits = response?.body.hits?.hits?.[0];
+    const hits = response?.hits?.hits?.[0];
 
     return hits?._source?.output.content;
   }
@@ -218,7 +219,7 @@ export class ContentStream extends Duplex {
   private async writeHead(content: string) {
     this.logger.debug(`Updating report contents.`);
 
-    const { body } = await this.client.update<ReportSource>({
+    const body = await this.client.update<ReportSource>({
       ...this.document,
       body: {
         doc: {
@@ -249,8 +250,43 @@ export class ContentStream extends Duplex {
     });
   }
 
-  private async flush(size = this.buffer.byteLength) {
-    const chunk = this.buffer.slice(0, size);
+  private async flush(size = this.bytesBuffered) {
+    const buffersToFlush: Buffer[] = [];
+    let bytesToFlush = 0;
+
+    /*
+     Loop over each buffer, keeping track of how many bytes we have added
+     to the array of buffers to be flushed. The array of buffers to be flushed
+     contains buffers by reference, not copies. This avoids putting pressure on
+     the CPU for copying buffers or for gc activity. Please profile performance
+     with a large byte configuration and a large number of records (900k+)
+     before changing this code. Config used at time of writing:
+
+      xpack.reporting:
+        csv.maxSizeBytes: 500000000
+        csv.scroll.size: 1000
+
+     At the moment this can put memory pressure on Kibana. Up to 1,1 GB in a dev
+     build. It is not recommended to have overly large max size bytes but we
+     need this code to be as performant as possible.
+    */
+    while (this.buffers.length) {
+      const remainder = size - bytesToFlush;
+      if (remainder <= 0) {
+        break;
+      }
+      const buffer = this.buffers.shift()!;
+      const chunkedBuffer = buffer.slice(0, remainder);
+      buffersToFlush.push(chunkedBuffer);
+      bytesToFlush += chunkedBuffer.byteLength;
+
+      if (buffer.byteLength > remainder) {
+        this.buffers.unshift(buffer.slice(remainder));
+      }
+    }
+
+    // We call Buffer.concat with the fewest number of buffers possible
+    const chunk = Buffer.concat(buffersToFlush);
     const content = this.encode(chunk);
 
     if (!this.chunksWritten) {
@@ -265,22 +301,21 @@ export class ContentStream extends Duplex {
     }
 
     this.bytesWritten += chunk.byteLength;
-    this.buffer = this.buffer.slice(size);
+    this.bytesBuffered -= bytesToFlush;
   }
 
   private async flushAllFullChunks() {
     const maxChunkSize = await this.getMaxChunkSize();
 
-    while (this.buffer.byteLength >= maxChunkSize) {
+    while (this.bytesBuffered >= maxChunkSize && this.buffers.length) {
       await this.flush(maxChunkSize);
     }
   }
 
   _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
-    this.buffer = Buffer.concat([
-      this.buffer,
-      Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
-    ]);
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
+    this.bytesBuffered += buffer.byteLength;
+    this.buffers.push(buffer);
 
     this.flushAllFullChunks()
       .then(() => callback())
@@ -312,7 +347,7 @@ export async function getContentStream(
 
   return new ContentStream(
     client,
-    logger.clone(['content_stream', document.id]),
+    logger.get('content_stream').get(document.id),
     document,
     parameters
   );

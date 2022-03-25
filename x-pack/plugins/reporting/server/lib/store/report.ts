@@ -38,7 +38,6 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly payload: ReportSource['payload'];
 
   public readonly meta: ReportSource['meta'];
-  public readonly browser_type: ReportSource['browser_type'];
 
   public readonly status: ReportSource['status'];
   public readonly attempts: ReportSource['attempts'];
@@ -51,6 +50,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly completed_at: ReportSource['completed_at'];
   public readonly timeout: ReportSource['timeout'];
   public readonly max_attempts: ReportSource['max_attempts'];
+  public readonly metrics?: ReportSource['metrics'];
 
   public process_expiration?: ReportSource['process_expiration'];
   public migration_version: string;
@@ -82,7 +82,6 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     this.max_attempts = opts.max_attempts;
     this.attempts = opts.attempts || 0;
     this.timeout = opts.timeout;
-    this.browser_type = opts.browser_type;
 
     this.process_expiration = opts.process_expiration;
     this.started_at = opts.started_at;
@@ -90,6 +89,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     this.created_at = opts.created_at || moment.utc().toISOString();
     this.created_by = opts.created_by || false;
     this.meta = opts.meta || { objectType: 'unknown' };
+    this.metrics = opts.metrics;
 
     this.status = opts.status || JOB_STATUSES.PENDING;
     this.output = opts.output || null;
@@ -125,13 +125,13 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       meta: this.meta,
       timeout: this.timeout,
       max_attempts: this.max_attempts,
-      browser_type: this.browser_type,
       status: this.status,
       attempts: this.attempts,
       started_at: this.started_at,
       completed_at: this.completed_at,
       process_expiration: this.process_expiration,
       output: this.output || null,
+      metrics: this.metrics,
     };
   }
 
@@ -170,7 +170,6 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       meta: this.meta,
       timeout: this.timeout,
       max_attempts: this.max_attempts,
-      browser_type: this.browser_type,
       status: this.status,
       attempts: this.attempts,
       started_at: this.started_at,
@@ -178,6 +177,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       migration_version: this.migration_version,
       payload: omit(this.payload, 'headers'),
       output: omit(this.output, 'content'),
+      metrics: this.metrics,
     };
   }
 }

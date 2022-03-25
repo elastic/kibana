@@ -20,15 +20,15 @@ import {
   EmbeddableOutput,
   IContainer,
 } from '../../../../../../../../src/plugins/embeddable/public';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
-import {
-  IndexPattern,
-  IndexPatternField,
-  Query,
-} from '../../../../../../../../src/plugins/data/common';
+import { Query } from '../../../../../../../../src/plugins/data/common';
+import { DataView, DataViewField } from '../../../../../../../../src/plugins/data_views/public';
 import { SavedSearch } from '../../../../../../../../src/plugins/discover/public';
 import {
   DataVisualizerTable,
@@ -36,23 +36,27 @@ import {
 } from '../../../common/components/stats_table';
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { getDefaultDataVisualizerListState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
-import { DataVisualizerTableState, SavedSearchSavedObject } from '../../../../../common';
+import type { DataVisualizerTableState, SavedSearchSavedObject } from '../../../../../common/types';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export interface DataVisualizerGridInput {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   savedSearch?: SavedSearch | SavedSearchSavedObject | null;
   query?: Query;
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
+  allowEditDataView?: boolean;
+  id?: string;
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  sessionId?: string;
+  fieldsToFetch?: string[];
 }
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
@@ -95,7 +99,7 @@ export const EmbeddableWrapper = ({
           m[fieldName] = (
             <IndexBasedDataVisualizerExpandedRow
               item={item}
-              indexPattern={input.indexPattern}
+              dataView={input.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={input.onAddFilter}
             />
@@ -152,7 +156,7 @@ export const IndexDataVisualizerViewWrapper = (props: {
   const { embeddableInput, onOutputChange } = props;
 
   const input = useObservable(embeddableInput);
-  if (input && input.indexPattern) {
+  if (input && input.dataView) {
     return <EmbeddableWrapper input={input} onOutputChange={onOutputChange} />;
   } else {
     return (
@@ -203,16 +207,18 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
 
     ReactDOM.render(
       <I18nContext>
-        <KibanaContextProvider services={{ ...this.services[0], ...this.services[1] }}>
-          <Suspense fallback={<EmbeddableLoading />}>
-            <IndexDataVisualizerViewWrapper
-              id={this.input.id}
-              embeddableContext={this}
-              embeddableInput={this.getInput$()}
-              onOutputChange={(output) => this.updateOutput(output)}
-            />
-          </Suspense>
-        </KibanaContextProvider>
+        <KibanaThemeProvider theme$={this.services[0].theme.theme$}>
+          <KibanaContextProvider services={{ ...this.services[0], ...this.services[1] }}>
+            <Suspense fallback={<EmbeddableLoading />}>
+              <IndexDataVisualizerViewWrapper
+                id={this.input.id}
+                embeddableContext={this}
+                embeddableInput={this.getInput$()}
+                onOutputChange={(output) => this.updateOutput(output)}
+              />
+            </Suspense>
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
       </I18nContext>,
       node
     );

@@ -20,11 +20,12 @@ export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
 };
 
-export interface PreconfiguredAgentPolicy extends Omit<NewAgentPolicy, 'namespace'> {
+export interface PreconfiguredAgentPolicy extends Omit<NewAgentPolicy, 'namespace' | 'id'> {
   id: string | number;
   namespace?: string;
   package_policies: Array<
     Partial<Omit<NewPackagePolicy, 'inputs' | 'package'>> & {
+      id?: string | number;
       name: string;
       package: Partial<PackagePolicyPackage> & { name: string };
       inputs?: InputsOverride[];

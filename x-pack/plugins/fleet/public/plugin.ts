@@ -24,6 +24,12 @@ import type {
 
 import type { SharePluginStart } from 'src/plugins/share/public';
 
+import { once } from 'lodash';
+
+import type { SpacesPluginStart } from '../../spaces/public';
+
+import type { CloudStart } from '../../cloud/public';
+
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
@@ -35,7 +41,7 @@ import type {
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
+import type { LicensingPluginStart } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import {
@@ -78,7 +84,6 @@ export interface FleetStart {
 }
 
 export interface FleetSetupDeps {
-  licensing: LicensingPluginSetup;
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
@@ -88,16 +93,19 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
+  licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
+  cloud?: CloudStart;
 }
 
-export interface FleetStartServices extends CoreStart, FleetStartDeps {
+export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
   storage: Storage;
   share: SharePluginStart;
-  cloud?: CloudSetup;
+  cloud?: CloudSetup & CloudStart;
+  spaces?: SpacesPluginStart;
   authz: FleetAuthz;
 }
 
@@ -124,9 +132,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     // Set up http client
     setHttpClient(core.http);
 
-    // Set up license service
-    licenseService.start(deps.licensing.license$);
-
     // Register Integrations app
     core.application.register({
       id: INTEGRATIONS_PLUGIN_ID,
@@ -139,12 +144,17 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       euiIconType: 'logoElastic',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
+        const cloud =
+          deps.cloud && startDepsServices.cloud
+            ? { ...deps.cloud, ...startDepsServices.cloud }
+            : undefined;
+
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
-          cloud: deps.cloud,
-          authz: fleetStart.authz,
+          cloud,
+          authz: await fleetStart.authz,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
 
@@ -176,12 +186,16 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       appRoute: '/app/fleet',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
+        const cloud =
+          deps.cloud && startDepsServices.cloud
+            ? { ...deps.cloud, ...startDepsServices.cloud }
+            : undefined;
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
-          cloud: deps.cloud,
-          authz: fleetStart.authz,
+          cloud,
+          authz: await fleetStart.authz,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
@@ -236,56 +250,53 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     return {};
   }
 
-  public start(core: CoreStart): FleetStart {
-    let successPromise: ReturnType<FleetStart['isInitialized']>;
+  public start(core: CoreStart, deps: FleetStartDeps): FleetStart {
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
+    const getPermissions = once(() =>
+      core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
+    );
+
+    // Set up license service
+    licenseService.start(deps.licensing.license$);
 
     registerExtension({
       package: CUSTOM_LOGS_INTEGRATION_NAME,
       view: 'package-detail-assets',
       Component: LazyCustomLogsAssetsExtension,
     });
-
     const { capabilities } = core.application;
-    const authz = calculateAuthz({
-      fleet: {
-        // Once we have a split privilege, this should be using fleetv2
-        // all: capabilities.fleetv2.all as boolean,
-        all: capabilities.fleet.all as boolean,
-        setup: false, // browser users will never have setup privileges
-      },
 
-      integrations: {
-        all: capabilities.fleet.all as boolean,
-        read: capabilities.fleet.read as boolean,
-      },
-    });
-
+    //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {
-      authz,
-      isInitialized: () => {
-        if (!successPromise) {
-          successPromise = Promise.resolve().then(async () => {
-            const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
-              appRoutesService.getCheckPermissionsPath()
-            );
+      authz: calculateAuthz({
+        fleet: {
+          all: capabilities.fleetv2.all as boolean,
+          setup: false,
+        },
+        integrations: {
+          all: capabilities.fleet.all as boolean,
+          read: capabilities.fleet.read as boolean,
+        },
+        isSuperuser: false,
+      }),
 
-            if (permissionsResponse?.success) {
-              return core.http
-                .post<PostFleetSetupResponse>(setupRouteService.getSetupPath())
-                .then(({ isInitialized }) =>
-                  isInitialized
-                    ? Promise.resolve(true)
-                    : Promise.reject(new Error('Unknown setup error'))
-                );
-            } else {
-              throw new Error(permissionsResponse?.error || 'Unknown permissions error');
-            }
-          });
+      isInitialized: once(async () => {
+        const permissionsResponse = await getPermissions();
+
+        if (permissionsResponse?.success) {
+          const { isInitialized } = await core.http.post<PostFleetSetupResponse>(
+            setupRouteService.getSetupPath()
+          );
+          if (!isInitialized) {
+            throw new Error('Unknown setup error');
+          }
+
+          return true;
+        } else {
+          throw new Error(permissionsResponse?.error || 'Unknown permissions error');
         }
+      }),
 
-        return successPromise;
-      },
       registerExtension,
     };
   }

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -14,7 +14,6 @@ import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/se
 import {
   CasesResponse,
   CaseStatuses,
-  CaseType,
   CommentType,
   ConnectorTypes,
 } from '../../../../../../plugins/cases/common/api';
@@ -23,9 +22,6 @@ import {
   getPostCaseRequest,
   postCaseReq,
   postCaseResp,
-  postCollectionReq,
-  postCommentAlertReq,
-  postCommentUserReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -125,16 +121,12 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(statusUserAction).to.eql({
-          action_field: ['status'],
+          type: 'status',
           action: 'update',
-          action_by: defaultUser,
-          new_value: CaseStatuses.closed,
-          new_val_connector_id: null,
-          old_val_connector_id: null,
-          old_value: CaseStatuses.open,
-          case_id: `${postedCase.id}`,
+          created_by: defaultUser,
+          payload: { status: CaseStatuses.closed },
+          case_id: postedCase.id,
           comment_id: null,
-          sub_case_id: '',
           owner: 'securitySolutionFixture',
         });
       });
@@ -165,16 +157,12 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(statusUserAction).to.eql({
-          action_field: ['status'],
+          type: 'status',
           action: 'update',
-          action_by: defaultUser,
-          new_value: CaseStatuses['in-progress'],
-          old_value: CaseStatuses.open,
-          old_val_connector_id: null,
-          new_val_connector_id: null,
-          case_id: `${postedCase.id}`,
+          created_by: defaultUser,
+          payload: { status: CaseStatuses['in-progress'] },
+          case_id: postedCase.id,
           comment_id: null,
-          sub_case_id: '',
           owner: 'securitySolutionFixture',
         });
       });
@@ -209,28 +197,6 @@ export default ({ getService }: FtrProviderContext): void => {
             fields: { issueType: 'Task', priority: null, parent: null },
           },
           updated_by: defaultUser,
-        });
-      });
-
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-      it.skip('should allow converting an individual case to a collection when it does not have alerts', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentUserReq,
-        });
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: patchedCase.id,
-                version: patchedCase.version,
-                type: CaseType.collection,
-              },
-            ],
-          },
         });
       });
     });
@@ -311,24 +277,6 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id: 'not-real',
                 status: CaseStatuses.closed,
-              },
-            ],
-          },
-          expectedHttpCode: 400,
-        });
-      });
-
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-      it.skip('should 400 and not allow converting a collection back to an individual case', async () => {
-        const postedCase = await createCase(supertest, postCollectionReq);
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                type: CaseType.individual,
               },
             ],
           },
@@ -450,64 +398,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should 400 when attempting to update an individual case to a collection when it has alerts attached to it', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentAlertReq,
-        });
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: patchedCase.id,
-                version: patchedCase.version,
-                type: CaseType.collection,
-              },
-            ],
-          },
-          expectedHttpCode: 400,
-        });
-      });
-
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed delete these tests
-      it('should 400 when attempting to update the case type when the case connector feature is disabled', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                type: CaseType.collection,
-              },
-            ],
-          },
-          expectedHttpCode: 400,
-        });
-      });
-
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-      it.skip("should 400 when attempting to update a collection case's status", async () => {
-        const postedCase = await createCase(supertest, postCollectionReq);
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                status: CaseStatuses.closed,
-              },
-            ],
-          },
-          expectedHttpCode: 400,
-        });
-      });
-
       it('400s if the title is too long', async () => {
         const longTitle =
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nulla enim, rutrum sit amet euismod venenatis, blandit et massa. Nulla id consectetur enim.';
@@ -615,7 +505,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 status: CaseStatuses['in-progress'],
               },
             ],
-            type: 'case',
           })) as CasesResponse;
 
           await es.indices.refresh({ index: defaultSignalsIndex });
@@ -724,6 +613,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           await es.indices.refresh({ index: defaultSignalsIndex });
+          await es.indices.refresh({ index: signalsIndex2 });
 
           let signals = await getSignals();
           // There should be no change in their status since syncing is disabled
@@ -743,10 +633,10 @@ export default ({ getService }: FtrProviderContext): void => {
                 status: CaseStatuses.closed,
               },
             ],
-            type: 'case',
           })) as CasesResponse;
 
           await es.indices.refresh({ index: defaultSignalsIndex });
+          await es.indices.refresh({ index: signalsIndex2 });
 
           signals = await getSignals();
 
@@ -772,6 +662,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
           await es.indices.refresh({ index: defaultSignalsIndex });
+          await es.indices.refresh({ index: signalsIndex2 });
 
           signals = await getSignals();
 

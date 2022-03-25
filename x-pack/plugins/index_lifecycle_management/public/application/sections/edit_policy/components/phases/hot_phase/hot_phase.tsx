@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiCallOut, EuiTextColor, EuiSwitch, EuiText } from '@elastic/eui';
 
-import { useFormData } from '../../../../../../shared_imports';
+import { useFormData, useKibana } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
@@ -52,6 +52,8 @@ export const HotPhase: FunctionComponent = () => {
 
   const showEmptyRolloverFieldsError = useRolloverValueRequiredValidation();
 
+  const { docLinks } = useKibana().services;
+
   return (
     <Phase phase="hot">
       <DescribedFormRow
@@ -89,7 +91,7 @@ export const HotPhase: FunctionComponent = () => {
                       defaultMessage="Learn more"
                     />
                   }
-                  docPath="ilm-rollover.html"
+                  docPath={docLinks.links.elasticsearch.ilmRollover}
                 />
               </p>
             </EuiTextColor>

@@ -8,7 +8,7 @@
 
 import { groupFields } from './group_fields';
 import { getDefaultFieldFilter } from './field_filter';
-import { IndexPatternField } from '../../../../../../../data/common';
+import { DataViewField } from '../../../../../../../data_views/public';
 
 const fields = [
   {
@@ -55,7 +55,7 @@ describe('group_fields', function () {
     const fieldFilterState = getDefaultFieldFilter();
 
     const actual = groupFields(
-      fields as IndexPatternField[],
+      fields as DataViewField[],
       ['currency'],
       5,
       fieldCounts,
@@ -167,7 +167,7 @@ describe('group_fields', function () {
       aggregatable: true,
       readFromDocValues: false,
     };
-    const fieldsToGroup = [category, currency, currencyKeyword] as IndexPatternField[];
+    const fieldsToGroup = [category, currency, currencyKeyword] as DataViewField[];
 
     const fieldFilterState = getDefaultFieldFilter();
 
@@ -182,7 +182,7 @@ describe('group_fields', function () {
     const fieldFilterState = getDefaultFieldFilter();
 
     const actual1 = groupFields(
-      fields as IndexPatternField[],
+      fields as DataViewField[],
       ['customer_birth_date', 'currency', 'unknown'],
       5,
       fieldCounts,
@@ -196,7 +196,7 @@ describe('group_fields', function () {
     ]);
 
     const actual2 = groupFields(
-      fields as IndexPatternField[],
+      fields as DataViewField[],
       ['currency', 'customer_birth_date', 'unknown'],
       5,
       fieldCounts,
@@ -214,7 +214,7 @@ describe('group_fields', function () {
     const fieldFilterState = { ...getDefaultFieldFilter(), ...{ name: 'curr' } };
 
     const actual1 = groupFields(
-      fields as IndexPatternField[],
+      fields as DataViewField[],
       ['customer_birth_date', 'currency', 'unknown'],
       5,
       fieldCounts,
@@ -239,7 +239,7 @@ describe('group_fields', function () {
     });
 
     const actual = groupFields(
-      fieldsWithUnmappedField as IndexPatternField[],
+      fieldsWithUnmappedField as DataViewField[],
       ['customer_birth_date', 'currency'],
       5,
       fieldCounts,
@@ -264,7 +264,7 @@ describe('group_fields', function () {
     });
 
     const actual = groupFields(
-      fieldsWithUnmappedField as IndexPatternField[],
+      fieldsWithUnmappedField as DataViewField[],
       ['customer_birth_date', 'currency'],
       5,
       fieldCounts,

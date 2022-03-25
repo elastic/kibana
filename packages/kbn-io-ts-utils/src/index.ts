@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+export type { NonEmptyStringBrand } from './non_empty_string_rt';
+
 export { deepExactRt } from './deep_exact_rt';
 export { jsonRt } from './json_rt';
 export { mergeRt } from './merge_rt';

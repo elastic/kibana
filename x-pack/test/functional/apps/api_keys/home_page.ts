@@ -6,9 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import clearAllApiKeys from './api_keys_helpers';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
+  const es = getService('es');
   const pageObjects = getPageObjects(['common', 'apiKeys']);
   const log = getService('log');
   const security = getService('security');
@@ -18,6 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Home page', function () {
     before(async () => {
+      await clearAllApiKeys(es, log);
       await security.testUser.setRoles(['kibana_admin']);
       await pageObjects.common.navigateToApp('apiKeys');
     });
@@ -39,13 +42,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('creates API key', function () {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin']);
-        await security.testUser.setRoles(['test_api_keys']);
+        await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
         await pageObjects.common.navigateToApp('apiKeys');
+
+        // Delete any API keys created outside of these tests
+        await pageObjects.apiKeys.bulkDeleteApiKeys();
       });
 
       afterEach(async () => {
         await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+      });
+
+      after(async () => {
+        await clearAllApiKeys(es, log);
       });
 
       it('when submitting form, close dialog and displays new api key', async () => {
@@ -92,8 +101,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('deletes API key(s)', function () {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin']);
-        await security.testUser.setRoles(['test_api_keys']);
+        await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
         await pageObjects.common.navigateToApp('apiKeys');
       });
 

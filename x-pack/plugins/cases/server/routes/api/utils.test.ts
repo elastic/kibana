@@ -6,8 +6,9 @@
  */
 
 import { isBoom, boomify } from '@hapi/boom';
-import { HTTPError } from '../../common';
-import { wrapError } from './utils';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { HTTPError } from '../../common/error';
+import { extractWarningValueFromWarningHeader, logDeprecatedEndpoint, wrapError } from './utils';
 
 describe('Utils', () => {
   describe('wrapError', () => {
@@ -53,6 +54,33 @@ describe('Utils', () => {
       const res = wrapError(error);
 
       expect(res.headers).toEqual({});
+    });
+  });
+
+  describe('logDeprecatedEndpoint', () => {
+    const logger = loggingSystemMock.createLogger();
+    const kibanaHeader = { 'kbn-version': '8.1.0', referer: 'test' };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('does NOT log when the request is from the kibana client', () => {
+      logDeprecatedEndpoint(logger, kibanaHeader, 'test');
+      expect(logger.warn).not.toHaveBeenCalledWith('test');
+    });
+
+    it('does log when the request is NOT from the kibana client', () => {
+      logDeprecatedEndpoint(logger, {}, 'test');
+      expect(logger.warn).toHaveBeenCalledWith('test');
+    });
+  });
+
+  describe('extractWarningValueFromWarningHeader', () => {
+    it('extracts the warning value from a warning header correctly', () => {
+      expect(extractWarningValueFromWarningHeader(`299 Kibana-8.1.0 "Deprecation endpoint"`)).toBe(
+        'Deprecation endpoint'
+      );
     });
   });
 });

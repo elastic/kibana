@@ -14,14 +14,14 @@ import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './moc
 
 describe('Machine learning deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
   const mlDeprecation = esDeprecationsMockResponse.deprecations[0];
-
-  afterAll(() => {
-    server.restore();
-  });
-
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
     httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({ mlUpgradeModeEnabled: false });
     httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
@@ -30,9 +30,19 @@ describe('Machine learning deprecation flyout', () => {
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
+    httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
+      reindexOp: null,
+      warnings: [],
+      hasRequiredPrivileges: true,
+      meta: {
+        indexName: 'foo',
+        reindexName: 'reindexed-foo',
+        aliases: [],
+      },
+    });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
     });
 
     const { actions, component } = testBed;
@@ -74,15 +84,15 @@ describe('Machine learning deprecation flyout', () => {
       await actions.mlDeprecationFlyout.clickUpgradeSnapshot();
 
       // First, we expect a POST request to upgrade the snapshot
-      const upgradeRequest = server.requests[server.requests.length - 2];
-      expect(upgradeRequest.method).toBe('POST');
-      expect(upgradeRequest.url).toBe('/api/upgrade_assistant/ml_snapshots');
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        '/api/upgrade_assistant/ml_snapshots',
+        expect.anything()
+      );
 
       // Next, we expect a GET request to check the status of the upgrade
-      const statusRequest = server.requests[server.requests.length - 1];
-      expect(statusRequest.method).toBe('GET');
-      expect(statusRequest.url).toBe(
-        `/api/upgrade_assistant/ml_snapshots/${MOCK_JOB_ID}/${MOCK_SNAPSHOT_ID}`
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `/api/upgrade_assistant/ml_snapshots/${MOCK_JOB_ID}/${MOCK_SNAPSHOT_ID}`,
+        expect.anything()
       );
 
       // Verify the "Resolution" column of the table is updated
@@ -118,9 +128,10 @@ describe('Machine learning deprecation flyout', () => {
 
       await actions.mlDeprecationFlyout.clickUpgradeSnapshot();
 
-      const upgradeRequest = server.requests[server.requests.length - 1];
-      expect(upgradeRequest.method).toBe('POST');
-      expect(upgradeRequest.url).toBe('/api/upgrade_assistant/ml_snapshots');
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        '/api/upgrade_assistant/ml_snapshots',
+        expect.anything()
+      );
 
       // Verify the "Resolution" column of the table is updated
       expect(find('mlActionResolutionCell').text()).toContain('Upgrade failed');
@@ -137,10 +148,12 @@ describe('Machine learning deprecation flyout', () => {
     });
 
     it('Disables actions if ml_upgrade_mode is enabled', async () => {
-      httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({ mlUpgradeModeEnabled: true });
+      httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({
+        mlUpgradeModeEnabled: true,
+      });
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
       });
 
       const { actions, exists, component } = testBed;
@@ -162,7 +175,9 @@ describe('Machine learning deprecation flyout', () => {
     it('successfully deletes snapshots', async () => {
       const { find, actions, exists } = testBed;
 
-      httpRequestsMockHelpers.setDeleteMlSnapshotResponse({
+      const jobId = (mlDeprecation.correctiveAction! as MlAction).jobId;
+      const snapshotId = (mlDeprecation.correctiveAction! as MlAction).snapshotId;
+      httpRequestsMockHelpers.setDeleteMlSnapshotResponse(jobId, snapshotId, {
         acknowledged: true,
       });
 
@@ -171,13 +186,9 @@ describe('Machine learning deprecation flyout', () => {
 
       await actions.mlDeprecationFlyout.clickDeleteSnapshot();
 
-      const request = server.requests[server.requests.length - 1];
-
-      expect(request.method).toBe('DELETE');
-      expect(request.url).toBe(
-        `/api/upgrade_assistant/ml_snapshots/${
-          (mlDeprecation.correctiveAction! as MlAction).jobId
-        }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
+      expect(httpSetup.delete).toHaveBeenLastCalledWith(
+        `/api/upgrade_assistant/ml_snapshots/${jobId}/${snapshotId}`,
+        expect.anything()
       );
 
       // Verify the "Resolution" column of the table is updated
@@ -202,17 +213,15 @@ describe('Machine learning deprecation flyout', () => {
         message: 'Upgrade snapshot error',
       };
 
-      httpRequestsMockHelpers.setDeleteMlSnapshotResponse(undefined, error);
+      const jobId = (mlDeprecation.correctiveAction! as MlAction).jobId;
+      const snapshotId = (mlDeprecation.correctiveAction! as MlAction).snapshotId;
+      httpRequestsMockHelpers.setDeleteMlSnapshotResponse(jobId, snapshotId, undefined, error);
 
       await actions.mlDeprecationFlyout.clickDeleteSnapshot();
 
-      const request = server.requests[server.requests.length - 1];
-
-      expect(request.method).toBe('DELETE');
-      expect(request.url).toBe(
-        `/api/upgrade_assistant/ml_snapshots/${
-          (mlDeprecation.correctiveAction! as MlAction).jobId
-        }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
+      expect(httpSetup.delete).toHaveBeenLastCalledWith(
+        `/api/upgrade_assistant/ml_snapshots/${jobId}/${snapshotId}`,
+        expect.anything()
       );
 
       // Verify the "Resolution" column of the table is updated

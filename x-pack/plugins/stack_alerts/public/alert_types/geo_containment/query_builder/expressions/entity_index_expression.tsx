@@ -14,14 +14,13 @@ import { HttpSetup } from 'kibana/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   IErrorObject,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
 } from '../../../../../../triggers_actions_ui/public';
 import { ES_GEO_FIELD_TYPES } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataViewField, DataView } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
   dateField: string;
@@ -29,9 +28,9 @@ interface Props {
   errors: IErrorObject;
   setAlertParamsDate: (date: string) => void;
   setAlertParamsGeoField: (geoField: string) => void;
-  setAlertProperty: AlertTypeParamsExpressionProps['setAlertProperty'];
-  setIndexPattern: (indexPattern: IIndexPattern) => void;
-  indexPattern: IIndexPattern;
+  setRuleProperty: RuleTypeParamsExpressionProps['setRuleProperty'];
+  setIndexPattern: (indexPattern: DataView) => void;
+  indexPattern: DataView;
   isInvalid: boolean;
   data: DataPublicPluginStart;
 }
@@ -64,8 +63,8 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
 
   const oldIndexPattern = usePrevious(indexPattern);
   const fields = useRef<{
-    dateFields: IFieldType[];
-    geoFields: IFieldType[];
+    dateFields: DataViewField[];
+    geoFields: DataViewField[];
   }>({
     dateFields: [],
     geoFields: [],
@@ -73,8 +72,9 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
   useEffect(() => {
     if (oldIndexPattern !== indexPattern) {
       fields.current.geoFields =
-        (indexPattern.fields.length &&
-          indexPattern.fields.filter((field: IFieldType) =>
+        (indexPattern.fields &&
+          indexPattern.fields.length &&
+          indexPattern.fields.filter((field: DataViewField) =>
             ES_GEO_FIELD_TYPES.includes(field.type)
           )) ||
         [];
@@ -83,8 +83,9 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
       }
 
       fields.current.dateFields =
-        (indexPattern.fields.length &&
-          indexPattern.fields.filter((field: IFieldType) => field.type === 'date')) ||
+        (indexPattern.fields &&
+          indexPattern.fields.length &&
+          indexPattern.fields.filter((field: DataViewField) => field.type === 'date')) ||
         [];
       if (fields.current.dateFields.length) {
         setAlertParamsDate(fields.current.dateFields[0].name);

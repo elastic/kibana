@@ -25,7 +25,7 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
-  useCapabilities,
+  useAuthz,
   useGetAgentPolicies,
   sendGetAgents,
   sendGetAgentStatus,
@@ -68,7 +68,7 @@ const RowActions = React.memo<{
   onUpgradeClick: () => void;
 }>(({ agent, agentPolicy, refresh, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
   const { getHref } = useLink();
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
@@ -99,7 +99,7 @@ const RowActions = React.memo<{
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem
-        disabled={!hasWriteCapabilites || !agent.active}
+        disabled={!hasFleetAllPrivileges || !agent.active}
         icon="trash"
         onClick={() => {
           onUnenrollClick();
@@ -152,7 +152,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('agent_list');
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
   const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();
 
@@ -241,7 +241,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         .join(' or ');
 
       if (kueryBuilder) {
-        kueryBuilder = `(${kueryBuilder}) and ${kueryStatus}`;
+        kueryBuilder = `(${kueryBuilder}) and (${kueryStatus})`;
       } else {
         kueryBuilder = kueryStatus;
       }
@@ -308,7 +308,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           inactive: agentsRequest.data.totalInactive,
         });
 
-        setAgents(agentsRequest.data.list);
+        setAgents(agentsRequest.data.items);
         setTotalAgents(agentsRequest.data.total);
         setTotalInactiveAgents(agentsRequest.data.totalInactive);
       } catch (error) {
@@ -380,10 +380,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
   const onClickAddFleetServer = useCallback(() => {
-    const defaultPolicy = agentPolicies.find((policy) => policy.is_default_fleet_server);
-    if (defaultPolicy) {
-      setEnrollmentFlyoutState({ isOpen: true, selectedPolicyId: defaultPolicy.id });
-    }
+    setEnrollmentFlyoutState({
+      isOpen: true,
+      selectedPolicyId: agentPolicies.length > 0 ? agentPolicies[0].id : undefined,
+    });
   }, [agentPolicies]);
 
   const columns = [
@@ -507,7 +507,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         </h2>
       }
       actions={
-        hasWriteCapabilites ? (
+        hasFleetAllPrivileges ? (
           <EuiButton
             fill
             iconType="plusInCircle"
@@ -525,7 +525,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {enrollmentFlyout.isOpen ? (
         <EuiPortal>
           <AgentEnrollmentFlyout
-            agentPolicies={agentPolicies}
             agentPolicy={agentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
             onClose={() => setEnrollmentFlyoutState({ isOpen: false })}
           />

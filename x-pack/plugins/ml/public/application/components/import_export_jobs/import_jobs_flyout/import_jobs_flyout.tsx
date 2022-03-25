@@ -52,7 +52,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const {
     services: {
       data: {
-        indexPatterns: { getTitles: getIndexPatternTitles },
+        dataViews: { getTitles: getDataViewTitles },
       },
       notifications: { toasts },
       mlServices: { mlUsageCollection },
@@ -131,7 +131,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
         loadedFile.jobType,
-        getIndexPatternTitles,
+        getDataViewTitles,
         getFilters
       );
 

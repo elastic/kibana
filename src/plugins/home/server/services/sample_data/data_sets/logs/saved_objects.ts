@@ -249,7 +249,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Part of count() / overall_sum(count())',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1': {
                     customLabel: true,
@@ -258,7 +258,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Part of count() / overall_sum(count())',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2': {
                     customLabel: true,

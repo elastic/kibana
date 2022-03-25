@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '@kbn/test/jest';
+import { renderWithIntl } from '@kbn/test-jest-helpers';
 import { MetricCell } from './cells';
 
 describe('Node Listing Metric Cell', () => {

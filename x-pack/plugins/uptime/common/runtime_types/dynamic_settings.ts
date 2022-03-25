@@ -7,12 +7,27 @@
 
 import * as t from 'io-ts';
 
-export const DynamicSettingsType = t.strict({
-  heartbeatIndices: t.string,
-  certAgeThreshold: t.number,
-  certExpirationThreshold: t.number,
-  defaultConnectors: t.array(t.string),
-});
+const DefaultEmailType = t.intersection([
+  t.type({
+    to: t.array(t.string),
+  }),
+  t.partial({
+    cc: t.array(t.string),
+    bcc: t.array(t.string),
+  }),
+]);
+
+export const DynamicSettingsType = t.intersection([
+  t.strict({
+    heartbeatIndices: t.string,
+    certAgeThreshold: t.number,
+    certExpirationThreshold: t.number,
+    defaultConnectors: t.array(t.string),
+  }),
+  t.partial({
+    defaultEmail: DefaultEmailType,
+  }),
+]);
 
 export const DynamicSettingsSaveType = t.intersection([
   t.type({
@@ -24,4 +39,5 @@ export const DynamicSettingsSaveType = t.intersection([
 ]);
 
 export type DynamicSettings = t.TypeOf<typeof DynamicSettingsType>;
+export type DefaultEmail = t.TypeOf<typeof DefaultEmailType>;
 export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveType>;

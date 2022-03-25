@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
-import { HttpStart } from 'kibana/public';
-import {
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
-} from '@kbn/securitysolution-list-constants';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -19,12 +12,19 @@ import {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+} from '@kbn/securitysolution-list-constants';
+import { HttpStart } from 'kibana/public';
+import pMap from 'p-map';
+import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
+import {
   DeleteTrustedAppsRequestParams,
   GetOneTrustedAppRequestParams,
   GetOneTrustedAppResponse,
   GetTrustedAppsListRequest,
   GetTrustedAppsListResponse,
-  GetTrustedAppsSummaryRequest,
   MaybeImmutable,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
@@ -33,16 +33,15 @@ import {
   PutTrustedAppUpdateResponse,
   TrustedApp,
 } from '../../../../../common/endpoint/types';
-import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
+import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../constants';
 import { isGlobalEffectScope } from '../state/type_guards';
-import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
-import { validateTrustedAppHttpRequestBody } from './validate_trusted_app_http_request_body';
 import {
   exceptionListItemToTrustedApp,
   newTrustedAppToCreateExceptionListItem,
   updatedTrustedAppToUpdateExceptionListItem,
 } from './mappers';
-import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../constants';
+import { validateTrustedAppHttpRequestBody } from './validate_trusted_app_http_request_body';
 
 export interface TrustedAppsService {
   getTrustedApp(params: GetOneTrustedAppRequestParams): Promise<GetOneTrustedAppResponse>;
@@ -195,11 +194,12 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     };
   }
 
-  async getTrustedAppsSummary(_: GetTrustedAppsSummaryRequest) {
+  async getTrustedAppsSummary(filter?: string) {
     return (await this.getHttpService()).get<ExceptionListSummarySchema>(
       `${EXCEPTION_LIST_URL}/summary`,
       {
         query: {
+          filter,
           list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
           namespace_type: 'agnostic',
         },

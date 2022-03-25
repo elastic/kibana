@@ -11,6 +11,7 @@ import type { KibanaExecutionContext } from 'src/core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
+import { TimeRange } from '../../services/data';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardState,
@@ -21,7 +22,7 @@ import {
 } from '../../types';
 import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_control_group';
-import { ControlGroupInput } from '../../../../presentation_util/public';
+import { ControlGroupInput } from '../../../../controls/public';
 
 interface SavedObjectToDashboardStateProps {
   version: string;
@@ -74,7 +75,9 @@ export const savedObjectToDashboardState = ({
     version,
     usageCollection
   );
-
+  if (rawState.timeRestore) {
+    rawState.timeRange = { from: savedDashboard.timeFrom, to: savedDashboard.timeTo } as TimeRange;
+  }
   rawState.controlGroupInput = deserializeControlGroupFromDashboardSavedObject(
     savedDashboard
   ) as ControlGroupInput;
@@ -106,6 +109,7 @@ export const stateToDashboardContainerInput = ({
     panels,
     query,
     title,
+    timeRestore,
   } = dashboardState;
 
   return {
@@ -127,6 +131,7 @@ export const stateToDashboardContainerInput = ({
     timeRange: {
       ..._.cloneDeep(timefilter.getTime()),
     },
+    timeRestore,
     executionContext,
   };
 };

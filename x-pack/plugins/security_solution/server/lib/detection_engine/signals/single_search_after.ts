@@ -17,17 +17,18 @@ import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 
 interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
-  searchAfterSortIds: estypes.SearchSortResults | undefined;
+  searchAfterSortIds: estypes.SortResults | undefined;
   index: string[];
   from: string;
   to: string;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   pageSize: number;
-  sortOrder?: estypes.SearchSortOrder;
+  sortOrder?: estypes.SortOrder;
   filter: estypes.QueryDslQueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
@@ -54,66 +55,69 @@ export const singleSearchAfter = async ({
   searchDuration: string;
   searchErrors: string[];
 }> => {
-  try {
-    const searchAfterQuery = buildEventsSearchQuery({
-      aggregations,
-      index,
-      from,
-      to,
-      filter,
-      size: pageSize,
-      sortOrder,
-      searchAfterSortIds,
-      timestampOverride,
-      trackTotalHits,
-    });
+  return withSecuritySpan('singleSearchAfter', async () => {
+    try {
+      const searchAfterQuery = buildEventsSearchQuery({
+        aggregations,
+        index,
+        from,
+        to,
+        filter,
+        size: pageSize,
+        sortOrder,
+        searchAfterSortIds,
+        timestampOverride,
+        trackTotalHits,
+      });
 
-    const start = performance.now();
-    const { body: nextSearchAfterResult } =
-      await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
-        searchAfterQuery as estypes.SearchRequest
-      );
-    const end = performance.now();
+      const start = performance.now();
+      const { body: nextSearchAfterResult } =
+        await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
+          searchAfterQuery as estypes.SearchRequest,
+          { meta: true }
+        );
+      const end = performance.now();
 
-    const searchErrors = createErrorsFromShard({
-      errors: nextSearchAfterResult._shards.failures ?? [],
-    });
+      const searchErrors = createErrorsFromShard({
+        errors: nextSearchAfterResult._shards.failures ?? [],
+      });
 
-    return {
-      searchResult: nextSearchAfterResult,
-      searchDuration: makeFloatString(end - start),
-      searchErrors,
-    };
-  } catch (exc) {
-    logger.error(buildRuleMessage(`[-] nextSearchAfter threw an error ${exc}`));
-    if (
-      exc.message.includes('No mapping found for [@timestamp] in order to sort on') ||
-      exc.message.includes(`No mapping found for [${timestampOverride}] in order to sort on`)
-    ) {
-      logger.error(buildRuleMessage(`[-] failure reason: ${exc.message}`));
-
-      const searchRes: SignalSearchResponse = {
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 1,
-          successful: 1,
-          failed: 0,
-          skipped: 0,
-        },
-        hits: {
-          total: 0,
-          max_score: 0,
-          hits: [],
-        },
-      };
       return {
-        searchResult: searchRes,
-        searchDuration: '-1.0',
-        searchErrors: exc.message,
+        searchResult: nextSearchAfterResult,
+        searchDuration: makeFloatString(end - start),
+        searchErrors,
       };
-    }
+    } catch (exc) {
+      logger.error(buildRuleMessage(`[-] nextSearchAfter threw an error ${exc}`));
+      if (
+        exc.message.includes('No mapping found for [@timestamp] in order to sort on') ||
+        exc.message.includes(`No mapping found for [${timestampOverride}] in order to sort on`)
+      ) {
+        logger.error(buildRuleMessage(`[-] failure reason: ${exc.message}`));
 
-    throw exc;
-  }
+        const searchRes: SignalSearchResponse = {
+          took: 0,
+          timed_out: false,
+          _shards: {
+            total: 1,
+            successful: 1,
+            failed: 0,
+            skipped: 0,
+          },
+          hits: {
+            total: 0,
+            max_score: 0,
+            hits: [],
+          },
+        };
+        return {
+          searchResult: searchRes,
+          searchDuration: '-1.0',
+          searchErrors: exc.message,
+        };
+      }
+
+      throw exc;
+    }
+  });
 };

@@ -8,11 +8,12 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 
-import { Config, createRunner } from './lib';
+import { Config, createRunner, Task, GlobalTask } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
+  dockerCrossCompile: boolean;
   dockerPush: boolean;
   dockerTagQualifier: string | null;
   downloadFreshNode: boolean;
@@ -24,20 +25,21 @@ export interface BuildOptions {
   createRpmPackage: boolean;
   createDebPackage: boolean;
   createDockerUBI: boolean;
-  createDockerCentOS: boolean;
+  createDockerUbuntu: boolean;
   createDockerCloud: boolean;
   createDockerContexts: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   createExamplePlugins: boolean;
+  eprRegistry: 'production' | 'snapshot';
 }
 
-export async function buildDistributables(log: ToolingLog, options: BuildOptions) {
+export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
   log.verbose('building distributables with options:', options);
 
-  const config = await Config.create(options);
+  const config: Config = await Config.create(options);
 
-  const run = createRunner({
+  const run: (task: Task | GlobalTask) => Promise<void> = createRunner({
     config,
     log,
   });
@@ -84,6 +86,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CleanTypescript);
     await run(Tasks.CleanExtraFilesFromModules);
     await run(Tasks.CleanEmptyFolders);
+    await run(Tasks.BundleFleetPackages);
   }
 
   /**
@@ -126,9 +129,9 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateDockerUBI);
   }
 
-  if (options.createDockerCentOS) {
-    // control w/ --docker-images or --skip-docker-centos or --skip-os-packages
-    await run(Tasks.CreateDockerCentOS);
+  if (options.createDockerUbuntu) {
+    // control w/ --docker-images or --skip-docker-ubuntu or --skip-os-packages
+    await run(Tasks.CreateDockerUbuntu);
   }
 
   if (options.createDockerCloud) {

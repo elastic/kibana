@@ -16,8 +16,8 @@ export let callObservabilityApi: ObservabilityClient = () => {
 };
 
 export function createCallObservabilityApi(http: HttpSetup) {
-  const client: AbstractObservabilityClient = (options) => {
-    const { params: { path, body, query } = {}, endpoint, ...rest } = options;
+  const client: AbstractObservabilityClient = (endpoint, options) => {
+    const { params: { path, body, query } = {}, ...rest } = options;
 
     const { method, pathname } = formatRequest(endpoint, path) as ReturnType<
       typeof formatRequestType

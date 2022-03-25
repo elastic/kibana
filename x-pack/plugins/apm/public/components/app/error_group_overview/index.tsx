@@ -19,12 +19,12 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
-import { ErrorDistribution } from '../error_group_details/Distribution';
+import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
 
 type ErrorGroupMainStatistics =
@@ -46,7 +46,7 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 };
 
 export function ErrorGroupOverview() {
-  const { serviceName, transactionType } = useApmServiceContext();
+  const { serviceName } = useApmServiceContext();
 
   const {
     query: {
@@ -68,7 +68,6 @@ export function ErrorGroupOverview() {
     comparisonType,
     comparisonEnabled,
   });
-
   const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
@@ -82,25 +81,25 @@ export function ErrorGroupOverview() {
         const normalizedSortDirection =
           sortDirection === 'asc' ? 'asc' : 'desc';
 
-        if (start && end && transactionType) {
-          return callApmApi({
-            endpoint:
-              'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
-            params: {
-              path: {
-                serviceName,
+        if (start && end) {
+          return callApmApi(
+            'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
+            {
+              params: {
+                path: {
+                  serviceName,
+                },
+                query: {
+                  environment,
+                  kuery,
+                  start,
+                  end,
+                  sortField,
+                  sortDirection: normalizedSortDirection,
+                },
               },
-              query: {
-                environment,
-                transactionType,
-                kuery,
-                start,
-                end,
-                sortField,
-                sortDirection: normalizedSortDirection,
-              },
-            },
-          }).then((response) => {
+            }
+          ).then((response) => {
             return {
               // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
               requestId: uuid(),
@@ -109,51 +108,37 @@ export function ErrorGroupOverview() {
           });
         }
       },
-      [
-        environment,
-        kuery,
-        serviceName,
-        transactionType,
-        start,
-        end,
-        sortField,
-        sortDirection,
-      ]
+      [environment, kuery, serviceName, start, end, sortField, sortDirection]
     );
 
   const { requestId, errorGroupMainStatistics } = errorGroupListData;
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
+    status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (
-        requestId &&
-        errorGroupMainStatistics.length &&
-        start &&
-        end &&
-        transactionType
-      ) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              numBuckets: 20,
-              transactionType,
-              groupIds: JSON.stringify(
-                errorGroupMainStatistics.map(({ groupId }) => groupId).sort()
-              ),
-              comparisonStart,
-              comparisonEnd,
+      if (requestId && errorGroupMainStatistics.length && start && end) {
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                numBuckets: 20,
+                groupIds: JSON.stringify(
+                  errorGroupMainStatistics.map(({ groupId }) => groupId).sort()
+                ),
+                comparisonStart,
+                comparisonEnd,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     // only fetches agg results when requestId changes
@@ -184,10 +169,7 @@ export function ErrorGroupOverview() {
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <FailedTransactionRateChart
-                kuery={kuery}
-                environment={environment}
-              />
+              <FailedTransactionRateChart kuery={kuery} />
             </EuiFlexItem>
           </ChartPointerEventContextProvider>
         </EuiFlexGroup>
@@ -208,6 +190,10 @@ export function ErrorGroupOverview() {
           <ErrorGroupList
             mainStatistics={errorGroupMainStatistics}
             serviceName={serviceName}
+            detailedStatisticsLoading={
+              errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
+              errorGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED
+            }
             detailedStatistics={errorGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}
           />

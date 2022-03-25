@@ -7,7 +7,7 @@
  */
 
 import { getDefaultFieldFilter, setFieldFilterProp, isFieldFiltered } from './field_filter';
-import { IndexPatternField } from '../../../../../../../data/public';
+import { DataViewField } from '../../../../../../../data_views/public';
 
 describe('field_filter', function () {
   it('getDefaultFieldFilter should return default filter state', function () {
@@ -66,7 +66,7 @@ describe('field_filter', function () {
         searchable: true,
         aggregatable: true,
       },
-    ] as IndexPatternField[];
+    ] as DataViewField[];
 
     [
       { filter: {}, result: ['bytes', 'extension'] },

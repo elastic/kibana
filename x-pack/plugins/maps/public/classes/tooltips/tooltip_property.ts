@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import { ReactNode } from 'react';
 import { GeoJsonProperties, Geometry } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { RawValue } from '../../../../../plugins/maps/common/constants';
 import type { TooltipFeature } from '../../../../../plugins/maps/common/descriptor_types';
@@ -40,14 +40,18 @@ export interface RenderTooltipContentParams {
   getFilterActions?: () => Promise<Action[]>;
   getLayerName: (layerId: string) => Promise<string | null>;
   isLocked: boolean;
+
+  /*
+   * Uses feature's layer to extend, filter, and format feature properties into tooltip properties.
+   * @param {string} layerId Use features[featureIndex].layerId
+   * @param {GeoJsonProperties} properties Use features[featureIndex].mbProperties or pass in a custom properties object
+   */
   loadFeatureProperties: ({
     layerId,
-    featureId,
-    mbProperties,
+    properties,
   }: {
     layerId: string;
-    featureId?: string | number;
-    mbProperties: GeoJsonProperties;
+    properties: GeoJsonProperties;
   }) => Promise<ITooltipProperty[]>;
   loadFeatureGeometry: ({
     layerId,

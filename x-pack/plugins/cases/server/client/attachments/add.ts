@@ -10,9 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { nodeBuilder } from '@kbn/es-query';
 import {
-  SavedObject,
   SavedObjectsClientContract,
   Logger,
   SavedObjectsUtils,
@@ -20,223 +18,26 @@ import {
 import { LensServerPluginSetup } from '../../../../lens/server';
 
 import {
-  AlertCommentRequestRt,
-  CASE_COMMENT_SAVED_OBJECT,
+  Actions,
+  ActionTypes,
   CaseResponse,
-  CaseStatuses,
-  CaseType,
   CommentRequest,
   CommentRequestRt,
   CommentType,
-  ENABLE_CASE_CONNECTOR,
-  MAX_GENERATED_ALERTS_PER_SUB_CASE,
-  SubCaseAttributes,
   throwErrors,
   User,
-} from '../../../common';
-import {
-  buildCaseUserActionItem,
-  buildCommentUserActionItem,
-} from '../../services/user_actions/helpers';
+} from '../../../common/api';
 
-import { AttachmentService, CasesService, CaseUserActionService } from '../../services';
-import {
-  createCaseError,
-  CommentableCase,
-  createAlertUpdateRequest,
-  isCommentRequestTypeGenAlert,
-} from '../../common';
+import { AttachmentService, CasesService } from '../../services';
+import { CommentableCase } from '../../common/models';
+import { createCaseError } from '../../common/error';
+import { createAlertUpdateRequest } from '../../common/utils';
 import { CasesClientArgs, CasesClientInternal } from '..';
 
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
 
-async function getSubCase({
-  caseService,
-  unsecuredSavedObjectsClient,
-  caseId,
-  createdAt,
-  userActionService,
-  user,
-}: {
-  caseService: CasesService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  caseId: string;
-  createdAt: string;
-  userActionService: CaseUserActionService;
-  user: User;
-}): Promise<SavedObject<SubCaseAttributes>> {
-  const mostRecentSubCase = await caseService.getMostRecentSubCase(
-    unsecuredSavedObjectsClient,
-    caseId
-  );
-  if (mostRecentSubCase && mostRecentSubCase.attributes.status !== CaseStatuses.closed) {
-    const subCaseAlertsAttachement = await caseService.getAllSubCaseComments({
-      unsecuredSavedObjectsClient,
-      id: mostRecentSubCase.id,
-      options: {
-        fields: [],
-        filter: nodeBuilder.is(
-          `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
-          CommentType.generatedAlert
-        ),
-        page: 1,
-        perPage: 1,
-      },
-    });
-
-    if (subCaseAlertsAttachement.total <= MAX_GENERATED_ALERTS_PER_SUB_CASE) {
-      return mostRecentSubCase;
-    }
-  }
-
-  const newSubCase = await caseService.createSubCase({
-    unsecuredSavedObjectsClient,
-    createdAt,
-    caseId,
-    createdBy: user,
-  });
-  await userActionService.bulkCreate({
-    unsecuredSavedObjectsClient,
-    actions: [
-      buildCaseUserActionItem({
-        action: 'create',
-        actionAt: createdAt,
-        actionBy: user,
-        caseId,
-        subCaseId: newSubCase.id,
-        fields: ['status', 'sub_case'],
-        newValue: { status: newSubCase.attributes.status },
-        owner: newSubCase.attributes.owner,
-      }),
-    ],
-  });
-  return newSubCase;
-}
-
-const addGeneratedAlerts = async (
-  { caseId, comment }: AddArgs,
-  clientArgs: CasesClientArgs,
-  casesClientInternal: CasesClientInternal
-): Promise<CaseResponse> => {
-  const {
-    unsecuredSavedObjectsClient,
-    attachmentService,
-    caseService,
-    userActionService,
-    logger,
-    lensEmbeddableFactory,
-    authorization,
-  } = clientArgs;
-
-  const query = pipe(
-    AlertCommentRequestRt.decode(comment),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
-
-  decodeCommentRequest(comment);
-
-  // This function only supports adding generated alerts
-  if (comment.type !== CommentType.generatedAlert) {
-    throw Boom.internal('Attempting to add a non generated alert in the wrong context');
-  }
-
-  try {
-    const createdDate = new Date().toISOString();
-    const savedObjectID = SavedObjectsUtils.generateId();
-
-    await authorization.ensureAuthorized({
-      entities: [{ owner: comment.owner, id: savedObjectID }],
-      operation: Operations.createComment,
-    });
-
-    const caseInfo = await caseService.getCase({
-      unsecuredSavedObjectsClient,
-      id: caseId,
-    });
-
-    if (
-      query.type === CommentType.generatedAlert &&
-      caseInfo.attributes.type !== CaseType.collection
-    ) {
-      throw Boom.badRequest('Sub case style alert comment cannot be added to an individual case');
-    }
-
-    const userDetails: User = {
-      username: caseInfo.attributes.created_by?.username,
-      full_name: caseInfo.attributes.created_by?.full_name,
-      email: caseInfo.attributes.created_by?.email,
-    };
-
-    const subCase = await getSubCase({
-      caseService,
-      unsecuredSavedObjectsClient,
-      caseId,
-      createdAt: createdDate,
-      userActionService,
-      user: userDetails,
-    });
-
-    const commentableCase = new CommentableCase({
-      logger,
-      collection: caseInfo,
-      subCase,
-      unsecuredSavedObjectsClient,
-      caseService,
-      attachmentService,
-      lensEmbeddableFactory,
-    });
-
-    const { comment: newComment, commentableCase: updatedCase } =
-      await commentableCase.createComment({
-        createdDate,
-        user: userDetails,
-        commentReq: query,
-        id: savedObjectID,
-      });
-
-    if (
-      (newComment.attributes.type === CommentType.alert ||
-        newComment.attributes.type === CommentType.generatedAlert) &&
-      caseInfo.attributes.settings.syncAlerts
-    ) {
-      const alertsToUpdate = createAlertUpdateRequest({
-        comment: query,
-        status: subCase.attributes.status,
-      });
-      await casesClientInternal.alerts.updateStatus({
-        alerts: alertsToUpdate,
-      });
-    }
-
-    await userActionService.bulkCreate({
-      unsecuredSavedObjectsClient,
-      actions: [
-        buildCommentUserActionItem({
-          action: 'create',
-          actionAt: createdDate,
-          actionBy: { ...userDetails },
-          caseId: updatedCase.caseId,
-          subCaseId: updatedCase.subCaseId,
-          commentId: newComment.id,
-          fields: ['comment'],
-          newValue: query,
-          owner: newComment.attributes.owner,
-        }),
-      ],
-    });
-
-    return updatedCase.encode();
-  } catch (error) {
-    throw createCaseError({
-      message: `Failed while adding a generated alert to case id: ${caseId} error: ${error}`,
-      error,
-      logger,
-    });
-  }
-};
-
-async function getCombinedCase({
+async function createCommentableCase({
   caseService,
   attachmentService,
   unsecuredSavedObjectsClient,
@@ -251,53 +52,18 @@ async function getCombinedCase({
   logger: Logger;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }): Promise<CommentableCase> {
-  const [casePromise, subCasePromise] = await Promise.allSettled([
-    caseService.getCase({
-      unsecuredSavedObjectsClient,
-      id,
-    }),
-    ...(ENABLE_CASE_CONNECTOR
-      ? [
-          caseService.getSubCase({
-            unsecuredSavedObjectsClient,
-            id,
-          }),
-        ]
-      : [Promise.reject(new Error('case connector feature is disabled'))]),
-  ]);
+  const caseInfo = await caseService.getCase({
+    id,
+  });
 
-  if (subCasePromise.status === 'fulfilled') {
-    if (subCasePromise.value.references.length > 0) {
-      const caseValue = await caseService.getCase({
-        unsecuredSavedObjectsClient,
-        id: subCasePromise.value.references[0].id,
-      });
-      return new CommentableCase({
-        logger,
-        collection: caseValue,
-        subCase: subCasePromise.value,
-        caseService,
-        attachmentService,
-        unsecuredSavedObjectsClient,
-        lensEmbeddableFactory,
-      });
-    } else {
-      throw Boom.badRequest('Sub case found without reference to collection');
-    }
-  }
-
-  if (casePromise.status === 'rejected') {
-    throw casePromise.reason;
-  } else {
-    return new CommentableCase({
-      logger,
-      collection: casePromise.value,
-      caseService,
-      attachmentService,
-      unsecuredSavedObjectsClient,
-      lensEmbeddableFactory,
-    });
-  }
+  return new CommentableCase({
+    logger,
+    caseInfo,
+    caseService,
+    attachmentService,
+    unsecuredSavedObjectsClient,
+    lensEmbeddableFactory,
+  });
 }
 
 /**
@@ -339,17 +105,8 @@ export const addComment = async (
     logger,
     lensEmbeddableFactory,
     authorization,
+    alertsService,
   } = clientArgs;
-
-  if (isCommentRequestTypeGenAlert(comment)) {
-    if (!ENABLE_CASE_CONNECTOR) {
-      throw Boom.badRequest(
-        'Attempting to add a generated alert when case connector feature is disabled'
-      );
-    }
-
-    return addGeneratedAlerts(addArgs, clientArgs, casesClientInternal);
-  }
 
   decodeCommentRequest(comment);
   try {
@@ -362,7 +119,7 @@ export const addComment = async (
 
     const createdDate = new Date().toISOString();
 
-    const combinedCase = await getCombinedCase({
+    const combinedCase = await createCommentableCase({
       caseService,
       attachmentService,
       unsecuredSavedObjectsClient,
@@ -392,26 +149,20 @@ export const addComment = async (
         status: updatedCase.status,
       });
 
-      await casesClientInternal.alerts.updateStatus({
-        alerts: alertsToUpdate,
-      });
+      await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
-    await userActionService.bulkCreate({
+    await userActionService.createUserAction({
+      type: ActionTypes.comment,
+      action: Actions.create,
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCommentUserActionItem({
-          action: 'create',
-          actionAt: createdDate,
-          actionBy: { username, full_name, email },
-          caseId: updatedCase.caseId,
-          subCaseId: updatedCase.subCaseId,
-          commentId: newComment.id,
-          fields: ['comment'],
-          newValue: query,
-          owner: newComment.attributes.owner,
-        }),
-      ],
+      caseId,
+      attachmentId: newComment.id,
+      payload: {
+        attachment: query,
+      },
+      user,
+      owner: newComment.attributes.owner,
     });
 
     return updatedCase.encode();

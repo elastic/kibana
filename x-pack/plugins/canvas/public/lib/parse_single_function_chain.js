@@ -6,7 +6,7 @@
  */
 
 import { get, mapValues, map } from 'lodash';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 
 export function parseSingleFunctionChain(filterString) {
   const ast = fromExpression(filterString);

@@ -10,6 +10,7 @@ import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-g
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
 import type { TimelineEventsType } from '../../../common/types/timeline';
+import type { ViewSelection } from './event_rendered_view/selector';
 
 import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';
@@ -281,7 +282,7 @@ export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width 
 }))<WidthProp>``;
 
 export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsTable__trSupplement ${className}`,
+  className: `siemEventsTable__trSupplement ${className}` as string,
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
@@ -409,7 +410,7 @@ export const EventsHeadingTitleSpan = styled.span.attrs(({ className }) => ({
 `;
 
 export const EventsHeadingExtra = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsHeading__extra ${className}`,
+  className: `siemEventsHeading__extra ${className}` as string,
 }))`
   margin-left: auto;
   margin-right: 2px;
@@ -466,7 +467,9 @@ export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
   display: ${({ $visible = true }) => ($visible ? 'flex' : 'none')};
 `;
 
-export const UpdatedFlexGroup = styled(EuiFlexGroup)`
+export const UpdatedFlexGroup = styled(EuiFlexGroup)<{ $view?: ViewSelection }>`
+  ${({ $view, theme }) =>
+    $view === 'gridView' ? `margin-right: ${theme.eui.paddingSizes.xl};` : ''}
   position: absolute;
   z-index: ${({ theme }) => theme.eui.euiZLevel1};
   right: 0px;

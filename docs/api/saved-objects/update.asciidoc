@@ -54,7 +54,7 @@ WARNING: When you update, attributes are not validated, which allows you to pass
 [[saved-objects-api-update-example]]
 ==== Example
 
-Update an existing index pattern object,`my-pattern`, with a different title:
+Update an existing {data-source} object,`my-pattern`, with a different title:
 
 [source,sh]
 --------------------------------------------------

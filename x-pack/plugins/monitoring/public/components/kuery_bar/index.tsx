@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-
 import React, { useEffect, useState } from 'react';
-import { WithKueryAutocompletion } from './with_kuery_autocompletion';
+import { IIndexPattern, QuerySuggestion } from '../../../../../../src/plugins/data/public';
 import { AutocompleteField } from './autocomplete_field';
-import { esKuery, IIndexPattern, QuerySuggestion } from '../../../../../../src/plugins/data/public';
+import { WithKueryAutocompletion } from './with_kuery_autocompletion';
 
 type LoadSuggestionsFn = (
   e: string,
@@ -31,7 +31,7 @@ interface Props {
 
 function validateQuery(query: string) {
   try {
-    esKuery.fromKueryExpression(query);
+    fromKueryExpression(query);
   } catch (err) {
     return false;
   }

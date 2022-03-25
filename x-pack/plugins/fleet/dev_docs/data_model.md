@@ -127,12 +127,10 @@ used for other types of outputs like separate monitoring clusters, Logstash, etc
   - `installed_es` - array of assets installed into Elasticsearch
     - `installed_es.id` - ID in Elasticsearch of an asset (eg. `logs-system.application-1.1.2`)
     - `installed_es.type` - type of Elasticsearch asset (eg. `ingest_pipeline`)
+  - `installed_kibana_space_id` - the id of the space the assets were installed in (eg. `default`)
   - `installed_kibana` - array of assets that were installed into Kibana
     - `installed_kibana.id` - Saved Object ID (eg. `system-01c54730-fee6-11e9-8405-516218e3d268`)
     - `installed_kibana.type` - Saved Object type name (eg. `dashboard`)
-    - One caveat with this array is that the IDs are currently space-specific so if a package's assets were installed in
-      one space, they may not be visible in other spaces. We also do not keep track of which space these assets were
-      installed into.
   - `package_assets` - array of original file contents of the package as it was installed
     - `package_assets.id` - Saved Object ID for a `epm-package-assets` type
     - `package_assets.type` - Saved Object type for the asset. As of now, only `epm-packages-assets` are supported.

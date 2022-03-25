@@ -31,6 +31,7 @@ const initialState = {
   isPopoverOpen: false,
   isOverlayOpen: false,
   isAlertFlyoutVisible: false,
+  isToolTipOpen: false,
 };
 
 type State = Readonly<typeof initialState>;
@@ -49,7 +50,7 @@ export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
     const { nodeType, node, options, squareSize, bounds, formatter, currentTime } = this.props;
-    const { isPopoverOpen, isAlertFlyoutVisible } = this.state;
+    const { isPopoverOpen, isAlertFlyoutVisible, isToolTipOpen } = this.state;
     const metric = first(node.metrics);
     const valueMode = squareSize > 70;
     const ellipsisMode = squareSize > 30;
@@ -63,56 +64,81 @@ export class Node extends React.PureComponent<Props, State> {
 
     const nodeBorder = this.state.isOverlayOpen ? { border: 'solid 4px #000' } : undefined;
 
-    const button = (
-      <EuiToolTip
-        delay="regular"
-        position="right"
-        content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
+    const bigSquare = (
+      <NodeContainer
+        data-test-subj="nodeContainer"
+        style={{ width: squareSize || 0, height: squareSize || 0 }}
+        onClick={this.togglePopover}
+        onMouseOver={this.showToolTip}
+        onMouseLeave={this.hideToolTip}
+        className="buttonContainer"
       >
-        <NodeContainer
-          data-test-subj="nodeContainer"
-          style={{ width: squareSize || 0, height: squareSize || 0 }}
-          onClick={this.togglePopover}
-        >
-          <SquareOuter color={color} style={nodeBorder}>
-            <SquareInner color={color}>
-              {valueMode ? (
+        <SquareOuter color={color} style={nodeBorder}>
+          <SquareInner color={color}>
+            {valueMode ? (
+              <ValueInner aria-label={nodeAriaLabel}>
+                <Label data-test-subj="nodeName" color={color}>
+                  {node.name}
+                </Label>
+                <Value data-test-subj="nodeValue" color={color}>
+                  {value}
+                </Value>
+              </ValueInner>
+            ) : (
+              ellipsisMode && (
                 <ValueInner aria-label={nodeAriaLabel}>
-                  <Label data-test-subj="nodeName" color={color}>
-                    {node.name}
-                  </Label>
-                  <Value data-test-subj="nodeValue" color={color}>
-                    {value}
-                  </Value>
+                  <Label color={color}>...</Label>
                 </ValueInner>
-              ) : (
-                ellipsisMode && (
-                  <ValueInner aria-label={nodeAriaLabel}>
-                    <Label color={color}>...</Label>
-                  </ValueInner>
-                )
-              )}
-            </SquareInner>
-          </SquareOuter>
-        </NodeContainer>
-      </EuiToolTip>
+              )
+            )}
+          </SquareInner>
+        </SquareOuter>
+      </NodeContainer>
     );
+
+    const smallSquare = (
+      <NodeContainerSmall
+        data-test-subj="nodeContainer"
+        style={{ width: squareSize || 0, height: squareSize || 0, ...nodeBorder }}
+        onClick={this.togglePopover}
+        onMouseOver={this.showToolTip}
+        onMouseLeave={this.hideToolTip}
+        color={color}
+      />
+    );
+
+    const nodeSquare = valueMode || ellipsisMode ? bigSquare : smallSquare;
 
     return (
       <>
-        <EuiPopover
-          button={button}
-          isOpen={isPopoverOpen}
-          closePopover={this.closePopover}
-          anchorPosition="downCenter"
-        >
-          <NodeContextMenu
-            node={node}
-            nodeType={nodeType}
-            options={options}
-            currentTime={currentTime}
-          />
-        </EuiPopover>
+        {isPopoverOpen ? (
+          <EuiPopover
+            button={nodeSquare}
+            isOpen={isPopoverOpen}
+            closePopover={this.closePopover}
+            anchorPosition="downCenter"
+            style={{ height: squareSize }}
+          >
+            <NodeContextMenu
+              node={node}
+              nodeType={nodeType}
+              options={options}
+              currentTime={currentTime}
+            />
+          </EuiPopover>
+        ) : isToolTipOpen ? (
+          <EuiToolTip
+            delay="regular"
+            position="right"
+            content={
+              <ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />
+            }
+          >
+            {nodeSquare}
+          </EuiToolTip>
+        ) : (
+          nodeSquare
+        )}
 
         {this.state.isOverlayOpen && (
           <NodeContextPopover
@@ -173,10 +199,25 @@ export class Node extends React.PureComponent<Props, State> {
       this.setState({ isPopoverOpen: false });
     }
   };
+  private showToolTip = () => {
+    this.setState({ isToolTipOpen: true });
+  };
+  private hideToolTip = () => {
+    this.setState({ isToolTipOpen: false });
+  };
 }
 
 const NodeContainer = euiStyled.div`
   position: relative;
+  cursor: pointer;
+`;
+const NodeContainerSmall = euiStyled.div<ColorProps>`
+  cursor: pointer;
+  position: relative;
+  background-color: ${(props) => darken(0.1, props.color)};
+  border-radius: 3px;
+  margin: 2px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
 
 interface ColorProps {
@@ -195,7 +236,6 @@ const SquareOuter = euiStyled.div<ColorProps>`
 `;
 
 const SquareInner = euiStyled.div<ColorProps>`
-  cursor: pointer;
   position: absolute;
   top: 0;
   right: 0;

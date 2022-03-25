@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { WithAppDependencies } from './setup_environment';
 import { ComponentTemplateDetailsFlyoutContent } from '../../../component_template_details';
 
@@ -43,9 +44,9 @@ const createActions = (testBed: TestBed<ComponentTemplateDetailsTestSubjects>) =
   };
 };
 
-export const setup = (props: any): ComponentTemplateDetailsTestBed => {
+export const setup = (httpSetup: HttpSetup, props: any): ComponentTemplateDetailsTestBed => {
   const setupTestBed = registerTestBed<ComponentTemplateDetailsTestSubjects>(
-    WithAppDependencies(ComponentTemplateDetailsFlyoutContent),
+    WithAppDependencies(ComponentTemplateDetailsFlyoutContent, httpSetup),
     {
       memoryRouter: {
         wrapComponent: false,

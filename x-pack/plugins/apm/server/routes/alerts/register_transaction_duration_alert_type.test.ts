@@ -7,8 +7,6 @@
 
 import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
 import { createRuleTypeMocks } from './test_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('registerTransactionDurationAlertType', () => {
   it('sends alert when value is greater than threashold', async () => {
@@ -17,30 +15,28 @@ describe('registerTransactionDurationAlertType', () => {
 
     registerTransactionDurationAlertType(dependencies);
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [],
-          total: {
-            relation: 'eq',
-            value: 2,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 2,
         },
-        aggregations: {
-          latency: {
-            value: 5500000,
-          },
+      },
+      aggregations: {
+        latency: {
+          value: 5500000,
         },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     const params = {
       threshold: 3000,
@@ -48,6 +44,7 @@ describe('registerTransactionDurationAlertType', () => {
       windowUnit: 'm',
       transactionType: 'request',
       serviceName: 'opbeans-java',
+      aggregationType: 'avg',
     };
     await executor({ params });
     expect(scheduleActions).toHaveBeenCalledTimes(1);
@@ -58,6 +55,10 @@ describe('registerTransactionDurationAlertType', () => {
       threshold: 3000000,
       triggerValue: '5,500 ms',
       interval: `5m`,
+      reason:
+        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java. Alert when > 3,000 ms.',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=ENVIRONMENT_ALL',
     });
   });
 });

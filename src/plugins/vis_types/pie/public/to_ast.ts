@@ -8,8 +8,14 @@
 
 import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { PieVisParams, LabelsParams } from './types';
-import { vislibPieName, VisTypePieExpressionFunctionDefinition } from './pie_fn';
+import { PaletteOutput } from '../../../charts/common';
+import {
+  PIE_VIS_EXPRESSION_NAME,
+  PARTITION_LABELS_FUNCTION,
+  PieVisExpressionFunctionDefinition,
+  PartitionVisParams,
+  LabelsParams,
+} from '../../../chart_expressions/expression_partition_vis/common';
 import { getEsaggsFn } from './to_ast_esaggs';
 
 const prepareDimension = (params: SchemaConfig) => {
@@ -23,10 +29,17 @@ const prepareDimension = (params: SchemaConfig) => {
   return buildExpression([visdimension]);
 };
 
+const preparePalette = (palette?: PaletteOutput) => {
+  const paletteExpressionFunction = buildExpressionFunction('system_palette', {
+    name: palette?.name,
+  });
+  return buildExpression([paletteExpressionFunction]);
+};
+
 const prepareLabels = (params: LabelsParams) => {
-  const pieLabels = buildExpressionFunction('pielabels', {
+  const pieLabels = buildExpressionFunction(PARTITION_LABELS_FUNCTION, {
     show: params.show,
-    lastLevel: params.last_level,
+    last_level: params.last_level,
     values: params.values,
     truncate: params.truncate,
   });
@@ -42,28 +55,31 @@ const prepareLabels = (params: LabelsParams) => {
   return buildExpression([pieLabels]);
 };
 
-export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, params) => {
+export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
   const args = {
     // explicitly pass each param to prevent extra values trapping
     addTooltip: vis.params.addTooltip,
-    addLegend: vis.params.addLegend,
+    legendDisplay: vis.params.legendDisplay,
     legendPosition: vis.params.legendPosition,
-    nestedLegend: vis.params?.nestedLegend,
+    nestedLegend: vis.params?.nestedLegend ?? false,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
+    legendSize: vis.params.legendSize,
     distinctColors: vis.params?.distinctColors,
-    isDonut: vis.params.isDonut,
-    palette: vis.params?.palette?.name,
+    isDonut: vis.params.isDonut ?? false,
+    emptySizeRatio: vis.params.emptySizeRatio,
+    palette: preparePalette(vis.params?.palette),
     labels: prepareLabels(vis.params.labels),
     metric: schemas.metric.map(prepareDimension),
     buckets: schemas.segment?.map(prepareDimension),
     splitColumn: schemas.split_column?.map(prepareDimension),
     splitRow: schemas.split_row?.map(prepareDimension),
+    startFromSecondLargestSlice: false,
   };
 
-  const visTypePie = buildExpressionFunction<VisTypePieExpressionFunctionDefinition>(
-    vislibPieName,
+  const visTypePie = buildExpressionFunction<PieVisExpressionFunctionDefinition>(
+    PIE_VIS_EXPRESSION_NAME,
     args
   );
 

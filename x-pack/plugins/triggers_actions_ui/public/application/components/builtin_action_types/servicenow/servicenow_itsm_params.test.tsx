@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 
 import { ActionConnector } from '../../../../types';
 import { useGetChoices } from './use_get_choices';
 import ServiceNowITSMParamsFields from './servicenow_itsm_params';
 import { Choice } from './types';
+import { merge } from 'lodash';
 
 jest.mock('./use_get_choices');
 jest.mock('../../../../common/lib/kibana');
@@ -72,6 +73,12 @@ const useGetChoicesResponse = {
       value: 'os',
       element: 'subcategory',
     },
+    {
+      dependent_value: '',
+      label: 'Failed Login',
+      value: 'failed_login',
+      element: 'category',
+    },
     ...['severity', 'urgency', 'impact']
       .map((element) => [
         {
@@ -116,6 +123,10 @@ describe('ServiceNowITSMParamsFields renders', () => {
 
   test('all params fields is rendered', () => {
     const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...defaultProps} />);
+    act(() => {
+      onChoices(useGetChoicesResponse.choices);
+    });
+    wrapper.update();
     expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="impactSelect"]').exists()).toBeTruthy();
@@ -131,7 +142,6 @@ describe('ServiceNowITSMParamsFields renders', () => {
   test('If short_description has errors, form row is invalid', () => {
     const newProps = {
       ...defaultProps,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       errors: { 'subActionParams.incident.short_description': ['error'] },
     };
     const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
@@ -191,6 +201,10 @@ describe('ServiceNowITSMParamsFields renders', () => {
         value: 'software',
         text: 'Software',
       },
+      {
+        value: 'failed_login',
+        text: 'Failed Login',
+      },
     ]);
   });
 
@@ -227,6 +241,26 @@ describe('ServiceNowITSMParamsFields renders', () => {
     );
   });
 
+  it('should hide subcategory if selecting a category without subcategories', async () => {
+    const newProps = merge({}, defaultProps, {
+      actionParams: {
+        subActionParams: {
+          incident: {
+            category: 'failed_login',
+            subcategory: null,
+          },
+        },
+      },
+    });
+    const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
+    act(() => {
+      onChoices(useGetChoicesResponse.choices);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeFalsy();
+  });
+
   describe('UI updates', () => {
     const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
     const simpleFields = [
@@ -247,6 +281,10 @@ describe('ServiceNowITSMParamsFields renders', () => {
     simpleFields.forEach((field) =>
       test(`${field.key} update triggers editAction :D`, () => {
         const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...defaultProps} />);
+        act(() => {
+          onChoices(useGetChoicesResponse.choices);
+        });
+        wrapper.update();
         const theField = wrapper.find(field.dataTestSubj).first();
         theField.prop('onChange')!(changeEvent);
         expect(editAction.mock.calls[0][1].incident[field.key]).toEqual(changeEvent.target.value);

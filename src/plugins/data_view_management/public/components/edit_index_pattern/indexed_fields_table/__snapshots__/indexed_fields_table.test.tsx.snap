@@ -116,7 +116,7 @@ exports[`IndexedFieldsTable IndexedFieldsTable with rollup index pattern should 
           "isUserEditable": false,
           "kbnType": undefined,
           "name": "conflictingField",
-          "type": "conflict",
+          "type": "keyword, long",
         },
         Object {
           "displayName": "amount",
@@ -141,8 +141,31 @@ exports[`IndexedFieldsTable IndexedFieldsTable with rollup index pattern should 
           "name": "amount",
           "type": "long",
         },
+        Object {
+          "displayName": "runtime",
+          "esTypes": Array [
+            "long",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": true,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": "number",
+          "name": "runtime",
+          "runtimeField": Object {
+            "script": Object {
+              "source": "emit('Hello');",
+            },
+            "type": "long",
+          },
+          "type": "long",
+        },
       ]
     }
+    openModal={[Function]}
+    theme={Object {}}
   />
 </div>
 `;
@@ -178,6 +201,50 @@ exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
         },
       ]
     }
+    openModal={[Function]}
+    theme={Object {}}
+  />
+</div>
+`;
+
+exports[`IndexedFieldsTable should filter based on the schema filter 1`] = `
+<div>
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getFormatterForFieldNoDefault": [Function],
+        "getNonScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "displayName": "runtime",
+          "esTypes": Array [
+            "long",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": true,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": "number",
+          "name": "runtime",
+          "runtimeField": Object {
+            "script": Object {
+              "source": "emit('Hello');",
+            },
+            "type": "long",
+          },
+          "type": "long",
+        },
+      ]
+    }
+    openModal={[Function]}
+    theme={Object {}}
   />
 </div>
 `;
@@ -212,6 +279,8 @@ exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
         },
       ]
     }
+    openModal={[Function]}
+    theme={Object {}}
   />
 </div>
 `;
@@ -274,7 +343,7 @@ exports[`IndexedFieldsTable should render normally 1`] = `
           "isUserEditable": false,
           "kbnType": undefined,
           "name": "conflictingField",
-          "type": "conflict",
+          "type": "keyword, long",
         },
         Object {
           "displayName": "amount",
@@ -291,8 +360,31 @@ exports[`IndexedFieldsTable should render normally 1`] = `
           "name": "amount",
           "type": "long",
         },
+        Object {
+          "displayName": "runtime",
+          "esTypes": Array [
+            "long",
+          ],
+          "excluded": false,
+          "format": "",
+          "hasRuntime": true,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": "number",
+          "name": "runtime",
+          "runtimeField": Object {
+            "script": Object {
+              "source": "emit('Hello');",
+            },
+            "type": "long",
+          },
+          "type": "long",
+        },
       ]
     }
+    openModal={[Function]}
+    theme={Object {}}
   />
 </div>
 `;

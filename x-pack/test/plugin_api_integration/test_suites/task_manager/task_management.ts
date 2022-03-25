@@ -56,7 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
-  describe('scheduling and running tasks', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/128065
+  describe.skip('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
       return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
@@ -614,7 +615,7 @@ export default function ({ getService }: FtrProviderContext) {
         // include a schedule so that the task isn't deleted after completion
         schedule: { interval: `30m` },
         params: {
-          waitForEvent: 'releaseRunningTaskWithSingleConcurrency',
+          waitForEvent: 'releaseRunningTaskWithSingleConcurrencyFirst',
         },
       });
 
@@ -622,7 +623,7 @@ export default function ({ getService }: FtrProviderContext) {
       const secondWithSingleConcurrency = await scheduleTask({
         taskType: 'sampleTaskWithSingleConcurrency',
         params: {
-          waitForEvent: 'releaseRunningTaskWithSingleConcurrency',
+          waitForEvent: 'releaseRunningTaskWithSingleConcurrencySecond',
         },
       });
 
@@ -631,7 +632,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs(firstWithSingleConcurrency.id)).length).to.eql(1);
       });
-      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrency');
+      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrencyFirst');
 
       // wait for second task to stall
       await retry.try(async () => {
@@ -649,7 +650,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // release the second task
-      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrency');
+      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrencySecond');
     });
 
     it('should return a task run error result when running a task now fails', async () => {
@@ -689,14 +690,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ensureTasksIndexRefreshed();
 
-      // third run should fail
-      const failedRunNowResult = await runTaskNow({
-        id: originalTask.id,
-      });
+      // flaky: runTaskNow() sometimes fails with the following error, so retrying
+      // error: Failed to run task "<id>" as it is currently running
+      await retry.try(async () => {
+        const failedRunNowResult = await runTaskNow({
+          id: originalTask.id,
+        });
 
-      expect(failedRunNowResult).to.eql({
-        id: originalTask.id,
-        error: `Error: Failed to run task \"${originalTask.id}\": Error: this task was meant to fail!`,
+        expect(failedRunNowResult).to.eql({
+          id: originalTask.id,
+          error: `Error: Failed to run task \"${originalTask.id}\": Error: this task was meant to fail!`,
+        });
       });
 
       await retry.try(async () => {

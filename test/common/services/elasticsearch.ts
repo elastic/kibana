@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { format as formatUrl } from 'url';
-import fs from 'fs';
-import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { Client } from '@elastic/elasticsearch';
 
+import { systemIndicesSuperuser, createEsClientForFtrConfig } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 /*
@@ -19,20 +17,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function ElasticsearchProvider({ getService }: FtrProviderContext): Client {
   const config = getService('config');
 
-  if (process.env.TEST_CLOUD) {
-    return new Client({
-      nodes: [formatUrl(config.get('servers.elasticsearch'))],
-      requestTimeout: config.get('timeouts.esRequestTimeout'),
-      Connection: HttpConnection,
-    });
-  } else {
-    return new Client({
-      tls: {
-        ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
-      },
-      nodes: [formatUrl(config.get('servers.elasticsearch'))],
-      requestTimeout: config.get('timeouts.esRequestTimeout'),
-      Connection: HttpConnection,
-    });
-  }
+  return createEsClientForFtrConfig(config, {
+    // Use system indices user so tests can write to system indices
+    authOverride: systemIndicesSuperuser,
+  });
 }

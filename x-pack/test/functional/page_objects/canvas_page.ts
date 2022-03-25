@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderContext) {
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
@@ -44,6 +45,11 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       expect(text).to.be(workpadName);
       await elem.click();
       await testSubjects.existOrFail('canvasWorkpadPage');
+    },
+
+    async createNewWorkpad() {
+      log.debug('CanvasPage.createNewWorkpad');
+      await testSubjects.click('create-workpad-button');
     },
 
     async fillOutCustomElementForm(name: string, description: string) {
@@ -102,7 +108,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
 
       const filters = JSON.parse(content);
 
-      return filters.and.filter((f: any) => f.filterType === 'time');
+      return filters.filters.filter((f: any) => f.query?.range);
     },
 
     async getMatchFiltersFromDebug() {
@@ -113,7 +119,43 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
 
       const filters = JSON.parse(content);
 
-      return filters.and.filter((f: any) => f.filterType === 'exactly');
+      return filters.filters.filter((f: any) => f.query?.term);
+    },
+
+    async clickAddFromLibrary() {
+      log.debug('CanvasPage.clickAddFromLibrary');
+      await testSubjects.click('canvas-add-from-library-button');
+      await testSubjects.existOrFail('dashboardAddPanel');
+    },
+
+    async setWorkpadName(name: string) {
+      log.debug('CanvasPage.setWorkpadName');
+      await testSubjects.setValue('canvas-workpad-name-text-field', name);
+      const lastBreadcrumb = await testSubjects.getVisibleText('breadcrumb last');
+      expect(lastBreadcrumb).to.eql(name);
+    },
+
+    async goToListingPageViaBreadcrumbs() {
+      log.debug('CanvasPage.goToListingPageViaBreadcrumbs');
+      await testSubjects.click('breadcrumb first');
+    },
+
+    async createNewVis(visType: string) {
+      log.debug('CanvasPage.createNewVisType', visType);
+      await testSubjects.click('canvasEditorMenuButton');
+      await testSubjects.click(`visType-${visType}`);
+    },
+
+    async getEmbeddableCount() {
+      log.debug('CanvasPage.getEmbeddableCount');
+      const panels = await testSubjects.findAll('embeddablePanel');
+      return panels.length;
+    },
+
+    async deleteSelectedElement() {
+      log.debug('CanvasPage.deleteSelectedElement');
+      await testSubjects.click('canvasWorkpadEditMenuButton');
+      await testSubjects.click('canvasEditMenuDeleteButton');
     },
   };
 }

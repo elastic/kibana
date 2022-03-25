@@ -16,6 +16,7 @@ import {
   FormSubmitHandler,
   OnUpdateHandler,
   FormHook,
+  FieldHook,
   ValidationFunc,
   FieldConfig,
   VALIDATION_TYPES,
@@ -37,6 +38,14 @@ const onFormHook = (_form: FormHook<any>) => {
 };
 
 describe('useForm() hook', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     formHook = null;
   });
@@ -539,6 +548,8 @@ describe('useForm() hook', () => {
     });
 
     test('should invalidate a field with a blocking arrayItem validation when validating a form', async () => {
+      let fieldHook: FieldHook;
+
       const TestComp = () => {
         const { form } = useForm();
         formHook = form;
@@ -556,7 +567,12 @@ describe('useForm() hook', () => {
                   },
                 ],
               }}
-            />
+            >
+              {(field) => {
+                fieldHook = field;
+                return null;
+              }}
+            </UseField>
           </Form>
         );
       };
@@ -564,6 +580,12 @@ describe('useForm() hook', () => {
       registerTestBed(TestComp)();
 
       let isValid: boolean = false;
+
+      act(() => {
+        // We need to call the field validation to mark this field as invalid.
+        // This will then mark the form as invalid when calling formHook.validate() below
+        fieldHook.validate({ validationType: VALIDATION_TYPES.ARRAY_ITEM });
+      });
 
       await act(async () => {
         isValid = await formHook!.validate();

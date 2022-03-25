@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { SavedObjectWithMetadata, SavedObjectManagementTypeInfo } from '../../../../common';
 import { DeleteConfirmModal } from './delete_confirm_modal';
 

@@ -10,7 +10,7 @@ import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { getEuiGridColumns } from './discover_grid_columns';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
 
-describe('Discover grid columns ', function () {
+describe('Discover grid columns', function () {
   it('returns eui grid columns without time column', async () => {
     const actual = getEuiGridColumns(
       ['extension', 'message'],
@@ -24,6 +24,21 @@ describe('Discover grid columns ', function () {
       Array [
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": Object {
               "iconType": "cross",
               "label": "Remove column",
@@ -39,6 +54,21 @@ describe('Discover grid columns ', function () {
         },
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": Object {
               "iconType": "cross",
               "label": "Remove column",
@@ -68,6 +98,21 @@ describe('Discover grid columns ', function () {
       Array [
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": false,
             "showMoveLeft": false,
             "showMoveRight": false,
@@ -83,6 +128,21 @@ describe('Discover grid columns ', function () {
         },
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": false,
             "showMoveLeft": false,
             "showMoveRight": false,
@@ -109,6 +169,21 @@ describe('Discover grid columns ', function () {
       Array [
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": false,
             "showMoveLeft": true,
             "showMoveRight": true,
@@ -123,6 +198,11 @@ describe('Discover grid columns ', function () {
             <EuiIconTip
               aria-label="Primary time field."
               content="This field represents the time that events occurred."
+              iconProps={
+                Object {
+                  "tabIndex": -1,
+                }
+              }
               type="clock"
             />
           </React.Fragment>,
@@ -133,6 +213,21 @@ describe('Discover grid columns ', function () {
         },
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": Object {
               "iconType": "cross",
               "label": "Remove column",
@@ -151,6 +246,21 @@ describe('Discover grid columns ', function () {
         },
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": Object {
               "iconType": "cross",
               "label": "Remove column",

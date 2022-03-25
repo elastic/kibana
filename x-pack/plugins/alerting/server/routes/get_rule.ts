@@ -14,6 +14,7 @@ import {
   AlertTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
+  INTERNAL_BASE_ALERTING_API_PATH,
   SanitizedAlert,
 } from '../types';
 
@@ -34,6 +35,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   executionStatus,
   actions,
   scheduledTaskId,
+  snoozeEndTime,
   ...rest
 }) => ({
   ...rest,
@@ -46,6 +48,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   notify_when: notifyWhen,
   mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
+  // Remove this object spread boolean check after snoozeEndTime is added to the public API
+  ...(snoozeEndTime !== undefined ? { snooze_end_time: snoozeEndTime } : {}),
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {
     ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
@@ -60,13 +64,21 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   })),
 });
 
-export const getRuleRoute = (
-  router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
-) => {
+interface BuildGetRulesRouteParams {
+  licenseState: ILicenseState;
+  path: string;
+  router: IRouter<AlertingRequestHandlerContext>;
+  excludeFromPublicApi?: boolean;
+}
+const buildGetRuleRoute = ({
+  licenseState,
+  path,
+  router,
+  excludeFromPublicApi = false,
+}: BuildGetRulesRouteParams) => {
   router.get(
     {
-      path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
+      path,
       validate: {
         params: paramSchema,
       },
@@ -75,7 +87,7 @@ export const getRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
-        const rule = await rulesClient.get({ id });
+        const rule = await rulesClient.get({ id, excludeFromPublicApi });
         return res.ok({
           body: rewriteBodyRes(rule),
         });
@@ -83,3 +95,25 @@ export const getRuleRoute = (
     )
   );
 };
+
+export const getRuleRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildGetRuleRoute({
+    excludeFromPublicApi: true,
+    licenseState,
+    path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
+    router,
+  });
+
+export const getInternalRuleRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildGetRuleRoute({
+    excludeFromPublicApi: false,
+    licenseState,
+    path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}`,
+    router,
+  });

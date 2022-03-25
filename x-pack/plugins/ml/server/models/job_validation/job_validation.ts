@@ -66,7 +66,7 @@ export async function validateJob(
       if (typeof duration === 'undefined' && (await isValidTimeField(client, job))) {
         const fs = fieldsServiceProvider(client);
         const index = job.datafeed_config.indices.join(',');
-        const timeField = job.data_description.time_field;
+        const timeField = job.data_description.time_field!;
         const timeRange = await fs.getTimeFieldRange(
           index,
           timeField,

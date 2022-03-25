@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import {
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '../../../../../../../../../../src/core/server';
+import { elasticsearchServiceMock } from '../../../../../../../../../../src/core/server/mocks';
 import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 
 import {
   Direction,
@@ -14,6 +20,8 @@ import {
   HostsQueries,
   HostsRequestOptions,
 } from '../../../../../../../common/search_strategy';
+import { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
+import { EndpointAppContext } from '../../../../../../endpoint/types';
 
 export const mockOptions: HostsRequestOptions = {
   defaultIndex: [
@@ -832,4 +840,20 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
+};
+
+export const mockDeps = {
+  esClient: elasticsearchServiceMock.createScopedClusterClient(),
+  savedObjectsClient: {} as SavedObjectsClientContract,
+  endpointContext: {
+    logFactory: {
+      get: jest.fn(),
+    },
+    config: jest.fn().mockResolvedValue({}),
+    experimentalFeatures: {
+      ...allowedExperimentalValues,
+    },
+    service: {} as EndpointAppContextService,
+  } as EndpointAppContext,
+  request: {} as KibanaRequest,
 };

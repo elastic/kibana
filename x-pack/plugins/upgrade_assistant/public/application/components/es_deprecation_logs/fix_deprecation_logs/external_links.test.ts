@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getDeprecationIndexPatternId } from './external_links';
+import { getDeprecationDataView } from './external_links';
 
 import { DEPRECATION_LOGS_INDEX_PATTERN } from '../../../../../common/constants';
 import { dataPluginMock, Start } from '../../../../../../../../src/plugins/data/public/mocks';
@@ -17,14 +17,14 @@ describe('External Links', () => {
     dataService = dataPluginMock.createStartContract();
   });
 
-  describe('getDeprecationIndexPatternId', () => {
-    it('creates new index pattern if doesnt exist', async () => {
+  describe('getDeprecationDataView', () => {
+    it('creates new data view if doesnt exist', async () => {
       dataService.dataViews.find = jest.fn().mockResolvedValue([]);
       dataService.dataViews.createAndSave = jest.fn().mockResolvedValue({ id: '123-456' });
 
-      const indexPatternId = await getDeprecationIndexPatternId(dataService);
+      const dataViewId = (await getDeprecationDataView(dataService)).id;
 
-      expect(indexPatternId).toBe('123-456');
+      expect(dataViewId).toBe('123-456');
       // prettier-ignore
       expect(dataService.dataViews.createAndSave).toHaveBeenCalledWith({
         title: DEPRECATION_LOGS_INDEX_PATTERN,
@@ -32,7 +32,7 @@ describe('External Links', () => {
       }, false, true);
     });
 
-    it('uses existing index pattern if it already exists', async () => {
+    it('uses existing data view if it already exists', async () => {
       dataService.dataViews.find = jest.fn().mockResolvedValue([
         {
           id: '123-456',
@@ -40,9 +40,9 @@ describe('External Links', () => {
         },
       ]);
 
-      const indexPatternId = await getDeprecationIndexPatternId(dataService);
+      const dataViewId = await (await getDeprecationDataView(dataService)).id;
 
-      expect(indexPatternId).toBe('123-456');
+      expect(dataViewId).toBe('123-456');
       expect(dataService.dataViews.find).toHaveBeenCalledWith(DEPRECATION_LOGS_INDEX_PATTERN);
     });
   });

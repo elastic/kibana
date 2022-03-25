@@ -36,6 +36,7 @@ import { lastValueOperation } from './last_value';
 import { FrameDatasourceAPI, OperationMetadata, ParamEditorCustomProps } from '../../../types';
 import type {
   BaseIndexPatternColumn,
+  IncompleteColumn,
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
@@ -44,7 +45,7 @@ import { DateRange, LayerType } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { rangeOperation } from './ranges';
-import { IndexPatternDimensionEditorProps } from '../../dimension_panel';
+import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 
 export type {
   IncompleteColumn,
@@ -54,7 +55,7 @@ export type {
 } from './column_types';
 
 export type { TermsIndexPatternColumn } from './terms';
-export type { FiltersIndexPatternColumn } from './filters';
+export type { FiltersIndexPatternColumn, Filter } from './filters';
 export type { CardinalityIndexPatternColumn } from './cardinality';
 export type { PercentileIndexPatternColumn } from './percentile';
 export type {
@@ -158,6 +159,30 @@ export interface ParamEditorProps<C> {
   paramEditorCustomProps?: ParamEditorCustomProps;
 }
 
+export interface FieldInputProps<C> {
+  layer: IndexPatternLayer;
+  selectedColumn?: C;
+  columnId: string;
+  indexPattern: IndexPattern;
+  updateLayer: (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  ) => void;
+  onDeleteColumn?: () => void;
+  currentFieldIsInvalid: boolean;
+  incompleteField: IncompleteColumn['sourceField'] | null;
+  incompleteOperation: IncompleteColumn['operationType'];
+  incompleteParams: Omit<IncompleteColumn, 'sourceField' | 'operationType'>;
+  dimensionGroups: IndexPatternDimensionEditorProps['dimensionGroups'];
+  groupId: IndexPatternDimensionEditorProps['groupId'];
+  /**
+   * indexPatternId -> fieldName -> boolean
+   */
+  existingFields: Record<string, Record<string, boolean>>;
+  operationSupportMatrix: OperationSupportMatrix;
+  helpMessage?: React.ReactNode;
+  operationDefinitionMap: Record<string, GenericOperationDefinition>;
+}
+
 export interface HelpProps<C> {
   currentColumn: C;
   uiSettings: IUiSettingsClient;
@@ -166,7 +191,17 @@ export interface HelpProps<C> {
 
 export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
-interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
+export interface AdvancedOption {
+  title: string;
+  optionElement?: React.ReactElement;
+  dataTestSubj: string;
+  onClick: () => void;
+  showInPopover: boolean;
+  inlineElement: React.ReactElement | null;
+  helpPopup?: string | null;
+}
+
+interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}> {
   type: C['operationType'];
   /**
    * The priority of the operation. If multiple operations are possible in
@@ -199,9 +234,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     changedColumnId: string
   ) => C;
   /**
-   * React component for operation specific settings shown in the popover editor
+   * React component for operation specific settings shown in the flyout editor
    */
   paramEditor?: React.ComponentType<ParamEditorProps<C>>;
+  getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
@@ -268,7 +304,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * This flag is used by the formula to assign the kql= and lucene= named arguments and set up
    * autocomplete.
    */
-  filterable?: boolean;
+  filterable?: boolean | { helpMessage: string };
   shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
@@ -281,6 +317,42 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     description: string;
     section: 'elasticsearch' | 'calculation';
   };
+  /**
+   * React component for operation field specific behaviour
+   */
+  renderFieldInput?: React.ComponentType<FieldInputProps<C>>;
+  /**
+   * Builds the correct parameter for field additions
+   */
+  getParamsForMultipleFields?: (props: {
+    targetColumn: C;
+    sourceColumn?: GenericIndexPatternColumn;
+    field?: IndexPatternField;
+    indexPattern: IndexPattern;
+  }) => Partial<P>;
+  /**
+   * Verify if the a new field can be added to the column
+   */
+  canAddNewField?: (props: {
+    targetColumn: C;
+    sourceColumn?: GenericIndexPatternColumn;
+    field?: IndexPatternField;
+    indexPattern: IndexPattern;
+  }) => boolean;
+  /**
+   * Returns the list of current fields for a multi field operation
+   */
+  getCurrentFields?: (targetColumn: C) => string[];
+  /**
+   * Operation can influence some visual default settings. This function is used to collect default values offered
+   */
+  getDefaultVisualSettings?: (column: C) => { truncateText?: boolean };
+
+  /**
+   * Utility function useful for multi fields operation in order to get fields
+   * are not pass the transferable checks
+   */
+  getNonTransferableFields?: (column: C, indexPattern: IndexPattern) => string[];
 }
 
 interface BaseBuildColumnArgs {
@@ -355,6 +427,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       kql?: string;
       lucene?: string;
       shift?: string;
+      usedInMath?: boolean;
     }
   ) => C;
   /**
@@ -371,8 +444,9 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
    *
    * @param oldColumn The column before the user changed the field.
    * @param field The field that the user changed to.
+   * @param params An additional set of params
    */
-  onFieldChange: (oldColumn: C, field: IndexPatternField) => C;
+  onFieldChange: (oldColumn: C, field: IndexPatternField, params?: Partial<P>) => C;
   /**
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.

@@ -53,6 +53,16 @@
         "type": "flattened",
         "ignore_above": 4096
       },
+      "mapped_params": {
+        "properties": {
+          "risk_score": {
+            "type": "float"
+          },
+          "severity": {
+            "type": "keyword"
+          }
+        }
+      },
       "scheduledTaskId": {
         "type": "keyword"
       },
@@ -93,8 +103,48 @@
           }
         }
       },
+      "monitoring": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "history": {
+                "properties": {
+                  "duration": {
+                    "type": "long"
+                  },
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "timestamp": {
+                    "type": "date"
+                  }
+                }
+              },
+              "calculated_metrics": {
+                "properties": {
+                  "p50": {
+                    "type": "long"
+                  },
+                  "p95": {
+                    "type": "long"
+                  },
+                  "p99": {
+                    "type": "long"
+                  },
+                  "success_ratio": {
+                    "type": "float"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "executionStatus": {
         "properties": {
+          "numberOfTriggeredActions": {
+            "type": "long"
+          },
           "status": {
             "type": "keyword"
           },
@@ -113,8 +163,22 @@
                 "type": "keyword"
               }
             }
+          },
+          "warning": {
+            "properties": {
+              "reason": {
+                "type": "keyword"
+              },
+              "message": {
+                "type": "keyword"
+              }
+            }
           }
         }
+      },
+      "snoozeEndTime": {
+        "type": "date",
+        "format": "strict_date_time"
       }
     }
   }

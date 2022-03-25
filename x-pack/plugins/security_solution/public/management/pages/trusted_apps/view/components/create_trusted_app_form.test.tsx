@@ -9,11 +9,8 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { fireEvent, getByTestId } from '@testing-library/dom';
 
-import {
-  ConditionEntryField,
-  NewTrustedApp,
-  OperatingSystem,
-} from '../../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { NewTrustedApp } from '../../../../../../common/endpoint/types';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
@@ -136,6 +133,7 @@ describe('When using the Trusted App Form', () => {
       trustedApp: latestUpdatedTrustedApp,
       isEditMode: false,
       isDirty: false,
+      wasByPolicy: false,
       onChange: jest.fn((updates) => {
         latestUpdatedTrustedApp = updates.item;
       }),
@@ -301,7 +299,7 @@ describe('When using the Trusted App Form', () => {
 
       expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
       expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual('false');
-      expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual('true');
+      expect(renderResult.getByTestId('policy-123').getAttribute('aria-checked')).toEqual('true');
     });
     it('should show loader when setting `policies.isLoading` to true and scope is per-policy', () => {
       formProps.policies.isLoading = true;
@@ -310,10 +308,7 @@ describe('When using the Trusted App Form', () => {
         policies: ['123'],
       };
       render();
-      expect(
-        renderResult.getByTestId(`${dataTestSubjForForm}-effectedPolicies-policiesSelectable`)
-          .textContent
-      ).toEqual('Loading options');
+      expect(renderResult.queryByTestId('loading-spinner')).not.toBeNull();
     });
   });
 
@@ -432,6 +427,18 @@ describe('When using the Trusted App Form', () => {
       rerenderWithLatestTrustedApp();
 
       expect(renderResult.getByText('[2] Field entry must have a value'));
+    });
+
+    it('should validate duplicated conditions', () => {
+      const andButton = getConditionBuilderAndButton();
+      reactTestingLibrary.act(() => {
+        fireEvent.click(andButton, { button: 1 });
+      });
+
+      setTextFieldValue(getConditionValue(getCondition()), '');
+      rerenderWithLatestTrustedApp();
+
+      expect(renderResult.getByText('Hash cannot be added more than once'));
     });
 
     it('should validate multiple errors in form', () => {

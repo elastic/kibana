@@ -1,5 +1,81 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`LoginPage disabled form states renders CTA and browser settings warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are allowed 1`] = `
+<div
+  style={
+    Object {
+      "margin": "auto",
+      "maxWidth": "36em",
+      "textAlign": "center",
+    }
+  }
+>
+  <EuiText
+    color="subdued"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="To view this content, open it in a new window or adjust your browser settings to allow third-party cookies."
+        id="xpack.security.loginPage.openInNewWindowOrChangeBrowserSettingsTitle"
+        values={Object {}}
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer />
+  <EuiButton
+    fill={true}
+    href="http://some-host/bar"
+    iconSide="right"
+    iconType="popout"
+    target="_blank"
+  >
+    <FormattedMessage
+      defaultMessage="Open in new window"
+      id="xpack.security.loginPage.openInNewWindowButton"
+      values={Object {}}
+    />
+  </EuiButton>
+</div>
+`;
+
+exports[`LoginPage disabled form states renders CTA and cross-origin cookie warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are blocked 1`] = `
+<div
+  style={
+    Object {
+      "margin": "auto",
+      "maxWidth": "36em",
+      "textAlign": "center",
+    }
+  }
+>
+  <EuiText
+    color="subdued"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="To view this content, open it in a new window or ask your administrator to allow cross-origin cookies."
+        id="xpack.security.loginPage.openInNewWindowOrChangeKibanaConfigTitle"
+        values={Object {}}
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer />
+  <EuiButton
+    fill={true}
+    href="http://some-host/bar"
+    iconSide="right"
+    iconType="popout"
+    target="_blank"
+  >
+    <FormattedMessage
+      defaultMessage="Open in new window"
+      id="xpack.security.loginPage.openInNewWindowButton"
+      values={Object {}}
+    />
+  </EuiButton>
+</div>
+`;
+
 exports[`LoginPage disabled form states renders as expected when a connection to ES is not available 1`] = `
 <DisabledLoginForm
   message={
@@ -89,6 +165,25 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
     <FormattedMessage
       defaultMessage="Cannot connect to the Elasticsearch cluster currently configured for Kibana."
       id="xpack.security.loginPage.xpackUnavailableTitle"
+      values={Object {}}
+    />
+  }
+/>
+`;
+
+exports[`LoginPage disabled form states renders warning when cookies are disabled and document is not embedded inside iframe 1`] = `
+<DisabledLoginForm
+  message={
+    <FormattedMessage
+      defaultMessage="Enable cookies in your browser settings to continue."
+      id="xpack.security.loginPage.requiresCookiesMessage"
+      values={Object {}}
+    />
+  }
+  title={
+    <FormattedMessage
+      defaultMessage="Cookies are required to log in to Elastic"
+      id="xpack.security.loginPage.requiresCookiesTitle"
       values={Object {}}
     />
   }

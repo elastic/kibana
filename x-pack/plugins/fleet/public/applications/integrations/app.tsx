@@ -21,6 +21,9 @@ import {
   RedirectAppLinks,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { Chat } from '../../../../cloud/public';
+
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import { AgentPolicyContextProvider } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
@@ -30,6 +33,8 @@ import type { UIExtensionsStorage } from './types';
 import { EPMApp } from './sections/epm';
 import { PackageInstallProvider, UIExtensionsContext } from './hooks';
 import { IntegrationsHeader } from './components/header';
+
+const EmptyContext = () => <></>;
 
 /**
  * Fleet Application context all the way down to the Router, but with no permissions or setup checks
@@ -43,6 +48,7 @@ export const IntegrationsAppContext: React.FC<{
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
 }> = memo(
@@ -54,8 +60,10 @@ export const IntegrationsAppContext: React.FC<{
     kibanaVersion,
     extensions,
     setHeaderActionMenu,
+    theme$,
   }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
       <RedirectAppLinks application={startServices.application}>
@@ -64,22 +72,30 @@ export const IntegrationsAppContext: React.FC<{
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider>
-                        <startServices.customIntegrations.ContextProvider>
-                          <Router history={history}>
-                            <AgentPolicyContextProvider>
-                              <PackageInstallProvider notifications={startServices.notifications}>
-                                <IntegrationsHeader {...{ setHeaderActionMenu }} />
-                                {children}
-                              </PackageInstallProvider>
-                            </AgentPolicyContextProvider>
-                          </Router>
-                        </startServices.customIntegrations.ContextProvider>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
-                  </EuiThemeProvider>
+                  <KibanaThemeProvider theme$={theme$}>
+                    <EuiThemeProvider darkMode={isDarkMode}>
+                      <UIExtensionsContext.Provider value={extensions}>
+                        <FleetStatusProvider>
+                          <startServices.customIntegrations.ContextProvider>
+                            <CloudContext>
+                              <Router history={history}>
+                                <AgentPolicyContextProvider>
+                                  <PackageInstallProvider
+                                    notifications={startServices.notifications}
+                                    theme$={theme$}
+                                  >
+                                    <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
+                                    {children}
+                                    <Chat />
+                                  </PackageInstallProvider>
+                                </AgentPolicyContextProvider>
+                              </Router>
+                            </CloudContext>
+                          </startServices.customIntegrations.ContextProvider>
+                        </FleetStatusProvider>
+                      </UIExtensionsContext.Provider>
+                    </EuiThemeProvider>
+                  </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>
               </ConfigContext.Provider>
             </EuiErrorBoundary>

@@ -36,6 +36,7 @@ export type {
   EmbeddablePackageState,
   EmbeddableRendererProps,
   EmbeddableContainerContext,
+  EmbeddableContainerSettings,
 } from './lib';
 export {
   ACTION_ADD_PANEL,
@@ -65,6 +66,8 @@ export {
   VALUE_CLICK_TRIGGER,
   ViewMode,
   withEmbeddableSubscription,
+  genericEmbeddableInputIsEqual,
+  omitGenericEmbeddableInput,
   isSavedObjectEmbeddableInput,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,

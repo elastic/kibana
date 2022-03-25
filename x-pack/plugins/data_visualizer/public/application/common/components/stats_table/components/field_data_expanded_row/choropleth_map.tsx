@@ -87,7 +87,7 @@ export const getChoroplethTopValuesLayer = (
       },
       isTimeAware: true,
     },
-    type: LAYER_TYPE.VECTOR,
+    type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 };
 

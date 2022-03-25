@@ -23,6 +23,8 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
   mlApi: MlApi
 ) {
   const headerPage = getPageObject('header');
+  const commonPage = getPageObject('common');
+
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -31,6 +33,10 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
   return {
     async assertJobTypeSelectExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardJobTypeSelect');
+    },
+
+    async scrollJobTypeSelectionIntoView() {
+      await testSubjects.scrollIntoView('mlAnalyticsCreateJobWizardJobTypeSelect');
     },
 
     async assertJobTypeSelection(jobTypeAttribute: string) {
@@ -146,7 +152,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     ) {
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(10000, async () => {
         for (const expected of expectedHistogramCharts.values()) {
           const id = expected.id;
           await testSubjects.existOrFail(`mlDataGridChart-${id}`);
@@ -179,16 +185,6 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect');
       });
     },
-
-    // async assertIncludedFieldsSelection(expectedSelection: string[]) {
-    //   const includesTable = await testSubjects.find('mlAnalyticsCreateJobWizardIncludesSelect');
-    //   const actualSelection = await includesTable.findByClassName('euiTableRow-isSelected');
-
-    //   expect(actualSelection).to.eql(
-    //     expectedSelection,
-    //     `Included fields should be '${expectedSelection}' (got '${actualSelection}')`
-    //   );
-    // },
 
     async assertDestIndexInputExists() {
       await retry.tryForTime(4000, async () => {
@@ -324,16 +320,24 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertDependentVariableSelection([dependentVariable]);
     },
 
-    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+    async assertScatterplotMatrixLoaded() {
       await testSubjects.existOrFail(
         'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded',
         {
           timeout: 5000,
         }
       );
+    },
+
+    async scrollScatterplotMatrixIntoView() {
       await testSubjects.scrollIntoView(
         'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded'
       );
+    },
+
+    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+      await this.assertScatterplotMatrixLoaded();
+      await this.scrollScatterplotMatrixIntoView();
       await mlCommonUI.assertColorsInCanvasElement(
         'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
         expectedValue,
@@ -532,15 +536,15 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertCreateIndexPatternSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateIndexPatternSwitch`, {
+      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox`, {
         allowHidden: true,
       });
     },
 
     async getCreateIndexPatternSwitchCheckState(): Promise<boolean> {
       const state = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardCreateIndexPatternSwitch',
-        'aria-checked'
+        'mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox',
+        'checked'
       );
       return state === 'true';
     },
@@ -584,7 +588,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async setCreateIndexPatternSwitchState(checkState: boolean) {
       if ((await this.getCreateIndexPatternSwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlAnalyticsCreateJobWizardCreateIndexPatternSwitch');
+        await testSubjects.click('mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox');
       }
       await this.assertCreateIndexPatternSwitchCheckState(checkState);
     },
@@ -671,6 +675,22 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       });
       await testSubjects.click('analyticsWizardCardManagement');
       await testSubjects.existOrFail('mlPageDataFrameAnalytics');
+    },
+
+    async assertQueryBarValue(expectedValue: string) {
+      const actualQuery = await testSubjects.getAttribute('mlDFAnalyticsQueryInput', 'value');
+      expect(actualQuery).to.eql(
+        expectedValue,
+        `Query should be '${expectedValue}' (got '${actualQuery}')`
+      );
+    },
+
+    async setQueryBarValue(query: string) {
+      await mlCommonUI.setValueWithChecks('mlDFAnalyticsQueryInput', query, {
+        clearWithKeyboard: true,
+      });
+      await commonPage.pressEnterKey();
+      await this.assertQueryBarValue(query);
     },
   };
 }

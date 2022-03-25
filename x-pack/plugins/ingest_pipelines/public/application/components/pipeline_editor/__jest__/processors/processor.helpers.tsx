@@ -13,8 +13,8 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
 
-import { registerTestBed, TestBed } from '@kbn/test/jest';
-import { stubWebWorker } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { stubWebWorker } from '@kbn/test-jest-helpers';
 import { uiMetricService, apiService } from '../../../../services';
 import { Props } from '../../';
 import { initHttpRequests } from '../http_requests.helpers';

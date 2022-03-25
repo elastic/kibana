@@ -15,6 +15,7 @@ import {
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
 import { ConfigType } from '../config';
+import { TelemetryEventsSender } from './telemetry/sender';
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<
@@ -72,6 +73,7 @@ export interface OsqueryAppContext {
   config(): ConfigType;
   security: SecurityPluginStart;
   getStartServices: CoreSetup['getStartServices'];
+  telemetryEventsSender: TelemetryEventsSender;
   /**
    * Object readiness is tied to plugin start method
    */

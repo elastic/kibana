@@ -9,26 +9,18 @@ import { PluginInitializerContext } from 'kibana/server';
 import { ReportingConfigType } from './config';
 import { ReportingPlugin } from './plugin';
 
+export { config } from './config';
+
+/**
+ * Common types that are documented in the Public API
+ */
+export type { ReportingSetup, ReportingStart } from './types';
+
+// @internal
 export const plugin = (initContext: PluginInitializerContext<ReportingConfigType>) =>
   new ReportingPlugin(initContext);
 
-export { config } from './config';
+// @internal
 export type { ReportingConfig } from './config/config';
-
-export type {
-  JobParamsCSV,
-  JobParamsDownloadCSV,
-  JobParamsPNG,
-  JobParamsPNGV2,
-  JobParamsPDF,
-  JobParamsPDFV2,
-} from '../common/types';
-
-// internal imports
+// @internal
 export { ReportingCore } from './core';
-export type {
-  ReportingSetup,
-  ReportingSetupDeps as PluginSetup,
-  ReportingStartDeps as PluginStart,
-} from './types';
-export { ReportingPlugin as Plugin };

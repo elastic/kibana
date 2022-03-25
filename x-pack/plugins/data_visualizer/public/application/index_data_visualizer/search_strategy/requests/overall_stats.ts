@@ -21,7 +21,7 @@ import { AggregatableField, NonAggregatableField } from '../../types/overall_sta
 import { AggCardinality, Aggs } from '../../../../../common/types/field_stats';
 
 export const checkAggregatableFieldsExistRequest = (
-  indexPatternTitle: string,
+  dataViewTitle: string,
   query: Query['query'],
   aggregatableFields: string[],
   samplerShardSize: number,
@@ -31,7 +31,7 @@ export const checkAggregatableFieldsExistRequest = (
   datafeedConfig?: estypes.MlDatafeed,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
-  const index = indexPatternTitle;
+  const index = dataViewTitle;
   const size = 0;
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
   const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
@@ -168,7 +168,7 @@ export const processAggregatableFieldsExistResponse = (
 };
 
 export const checkNonAggregatableFieldExistsRequest = (
-  indexPatternTitle: string,
+  dataViewTitle: string,
   query: Query['query'],
   field: string,
   timeFieldName: string | undefined,
@@ -176,7 +176,7 @@ export const checkNonAggregatableFieldExistsRequest = (
   latestMs: number | undefined,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
-  const index = indexPatternTitle;
+  const index = dataViewTitle;
   const size = 0;
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
@@ -196,6 +196,9 @@ export const checkNonAggregatableFieldExistsRequest = (
     index,
     size,
     body: searchBody,
+    // Small es optimization
+    // Since we only need to know if at least 1 doc exists for the query
+    track_total_hits: 1,
   };
 };
 

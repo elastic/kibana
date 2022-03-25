@@ -7,7 +7,7 @@
  */
 
 import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
-import { IndexPattern } from '../../../../../data/common';
+import { DataView } from '../../../../../data_views/public';
 
 /**
  * Helper function returning an index pattern
@@ -32,7 +32,7 @@ const getIndexPattern = (id: string, timeFieldName: string, fields: string[]) =>
           .find((field) => field.name === name);
       },
     },
-  } as IndexPattern;
+  } as DataView;
 };
 
 const currentIndexPattern = getIndexPattern('curr', '', ['category', 'name']);

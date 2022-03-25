@@ -24,12 +24,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment-timezone';
 
-import {
+import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   PieVisualizationState,
   TermsIndexPatternColumn,
 } from '../../../lens/public';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '../../../lens/common/constants';
 import { FilterStateStore, DataView } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
@@ -91,7 +92,7 @@ function getLensAttributes(
         },
       } as TermsIndexPatternColumn,
       'ed999e9d-204c-465b-897f-fe1a125b39ed': {
-        sourceField: 'Records',
+        sourceField: RECORDS_FIELD,
         isBucketed: false,
         dataType: 'number',
         scale: 'ratio',
@@ -131,12 +132,12 @@ function getLensAttributes(
     references: [
       {
         id: 'logs-*',
-        name: 'dataView-datasource-current-dataView',
+        name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
         id: 'logs-*',
-        name: 'dataView-datasource-layer-layer1',
+        name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
       {
@@ -157,7 +158,7 @@ function getLensAttributes(
         {
           $state: { store: FilterStateStore.APP_STATE },
           meta: {
-            indexRefName: 'filter-index-pattern-0',
+            index: 'filter-index-pattern-0',
             negate: false,
             alias: null,
             disabled: false,
@@ -180,7 +181,7 @@ function getLensAttributes(
                 meta: {
                   alias: 'agent IDs',
                   disabled: false,
-                  indexRefName: 'filter-index-pattern-0',
+                  index: 'filter-index-pattern-0',
                   key: 'query',
                   negate: false,
                   type: 'custom',
@@ -206,6 +207,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   mode,
 }) => {
   const lensService = useKibana().services.lens;
+  const isLensAvailable = lensService?.canUseEditor();
 
   const handleClick = useCallback(
     (event) => {
@@ -229,14 +231,12 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
     [actionId, agentIds, endDate, lensService, mode, startDate]
   );
 
+  if (!isLensAvailable) {
+    return null;
+  }
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty
-        size="xs"
-        iconType="lensApp"
-        onClick={handleClick}
-        disabled={!lensService?.canUseEditor()}
-      >
+      <EuiButtonEmpty size="xs" iconType="lensApp" onClick={handleClick} disabled={false}>
         {VIEW_IN_LENS}
       </EuiButtonEmpty>
     );
@@ -246,7 +246,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
     <EuiToolTip content={VIEW_IN_LENS}>
       <EuiButtonIcon
         iconType="lensApp"
-        disabled={!lensService?.canUseEditor()}
+        disabled={false}
         onClick={handleClick}
         aria-label={VIEW_IN_LENS}
       />
@@ -263,12 +263,15 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   endDate,
   startDate,
 }) => {
-  const urlGenerator = useKibana().services.discover?.urlGenerator;
+  const { discover, application } = useKibana().services;
+  const locator = discover?.locator;
+  const discoverPermissions = application.capabilities.discover;
+
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {
     const getDiscoverUrl = async () => {
-      if (!urlGenerator?.createUrl) return;
+      if (!locator) return;
 
       const agentIdsQuery = agentIds?.length
         ? {
@@ -279,7 +282,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
           }
         : null;
 
-      const newUrl = await urlGenerator.createUrl({
+      const newUrl = await locator.getUrl({
         indexPatternId: 'logs-*',
         filters: [
           {
@@ -333,8 +336,11 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
       setDiscoverUrl(newUrl);
     };
     getDiscoverUrl();
-  }, [actionId, agentIds, endDate, startDate, urlGenerator]);
+  }, [actionId, agentIds, endDate, startDate, locator]);
 
+  if (!discoverPermissions.show) {
+    return null;
+  }
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
       <EuiButtonEmpty size="xs" iconType="discoverApp" href={discoverUrl} target="_blank">
@@ -391,13 +397,13 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   toggleErrors,
   expanded,
 }) => {
-  const { data: lastResultsData, isFetched } = usePackQueryLastResults({
+  const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
     logsDataView,
   });
 
-  const { data: errorsData, isFetched: errorsFetched } = usePackQueryErrors({
+  const { data: errorsData, isLoading: errorsLoading } = usePackQueryErrors({
     actionId,
     interval,
     logsDataView,
@@ -408,7 +414,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
     [queryId, interval, toggleErrors]
   );
 
-  if (!isFetched || !errorsFetched) {
+  if (isLoading || errorsLoading) {
     return <EuiLoadingSpinner />;
   }
 

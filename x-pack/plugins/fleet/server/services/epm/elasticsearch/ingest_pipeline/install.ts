@@ -6,7 +6,7 @@
  */
 
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference, RegistryDataStream, InstallablePackage } from '../../../../types';
@@ -21,6 +21,8 @@ import {
 } from '../../../../constants';
 
 import { appendMetadataToIngestPipeline } from '../meta';
+
+import { retryTransientEsErrors } from '../retry';
 
 import { deletePipelineRefs } from './remove';
 
@@ -41,7 +43,8 @@ export const installPipelines = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger
 ) => {
   // unlike other ES assets, pipeline names are versioned so after a template is updated
   // it can be created pointing to the new template, without removing the old one and effecting data
@@ -105,6 +108,7 @@ export const installPipelines = async (
             installAllPipelines({
               dataStream,
               esClient,
+              logger,
               paths: pipelinePaths,
               installablePackage,
             })
@@ -119,6 +123,7 @@ export const installPipelines = async (
       installAllPipelines({
         dataStream: undefined,
         esClient,
+        logger,
         paths: topLevelPipelinePaths,
         installablePackage,
       })
@@ -151,11 +156,13 @@ export function rewriteIngestPipeline(
 
 export async function installAllPipelines({
   esClient,
+  logger,
   paths,
   dataStream,
   installablePackage,
 }: {
   esClient: ElasticsearchClient;
+  logger: Logger;
   paths: string[];
   dataStream?: RegistryDataStream;
   installablePackage: InstallablePackage;
@@ -195,7 +202,7 @@ export async function installAllPipelines({
   });
 
   const installationPromises = pipelines.map(async (pipeline) => {
-    return installPipeline({ esClient, pipeline, installablePackage });
+    return installPipeline({ esClient, pipeline, installablePackage, logger });
   });
 
   return Promise.all(installationPromises);
@@ -203,10 +210,12 @@ export async function installAllPipelines({
 
 async function installPipeline({
   esClient,
+  logger,
   pipeline,
   installablePackage,
 }: {
   esClient: ElasticsearchClient;
+  logger: Logger;
   pipeline: any;
   installablePackage?: InstallablePackage;
 }): Promise<EsAssetReference> {
@@ -233,7 +242,10 @@ async function installPipeline({
     };
   }
 
-  await esClient.ingest.putPipeline(esClientParams, esClientRequestOptions);
+  await retryTransientEsErrors(
+    () => esClient.ingest.putPipeline(esClientParams, esClientRequestOptions),
+    { logger }
+  );
 
   return {
     id: pipelineWithMetadata.nameForInstallation,
@@ -241,13 +253,16 @@ async function installPipeline({
   };
 }
 
-export async function ensureFleetFinalPipelineIsInstalled(esClient: ElasticsearchClient) {
+export async function ensureFleetFinalPipelineIsInstalled(
+  esClient: ElasticsearchClient,
+  logger: Logger
+) {
   const esClientRequestOptions: TransportRequestOptions = {
     ignore: [404],
   };
   const res = await esClient.ingest.getPipeline(
     { id: FLEET_FINAL_PIPELINE_ID },
-    esClientRequestOptions
+    { ...esClientRequestOptions, meta: true }
   );
 
   const installedVersion = res?.body[FLEET_FINAL_PIPELINE_ID]?.version;
@@ -258,6 +273,7 @@ export async function ensureFleetFinalPipelineIsInstalled(esClient: Elasticsearc
   ) {
     await installPipeline({
       esClient,
+      logger,
       pipeline: {
         nameForInstallation: FLEET_FINAL_PIPELINE_ID,
         contentForInstallation: FLEET_FINAL_PIPELINE_CONTENT,

@@ -13,10 +13,17 @@ import { ESGeoGridSource, heatmapTitle } from './es_geo_grid_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { HeatmapLayer } from '../../layers/heatmap_layer';
 import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
-import { LAYER_WIZARD_CATEGORY, RENDER_AS } from '../../../../common/constants';
+import {
+  GRID_RESOLUTION,
+  LAYER_WIZARD_CATEGORY,
+  RENDER_AS,
+  WIZARD_ID,
+} from '../../../../common/constants';
 import { HeatmapLayerIcon } from '../../layers/wizards/icons/heatmap_layer_icon';
 
 export const heatmapLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.HEATMAP,
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esGridHeatmapDescription', {
     defaultMessage: 'Geospatial data grouped in grids to show density',
@@ -30,7 +37,10 @@ export const heatmapLayerWizardConfig: LayerWizard = {
       }
 
       const layerDescriptor = HeatmapLayer.createDescriptor({
-        sourceDescriptor: ESGeoGridSource.createDescriptor(sourceConfig),
+        sourceDescriptor: ESGeoGridSource.createDescriptor({
+          ...sourceConfig,
+          resolution: GRID_RESOLUTION.SUPER_FINE,
+        }),
       });
       previewLayers([layerDescriptor]);
     };

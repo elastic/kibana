@@ -7,7 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern, IndexPatternsContract, ISearchSource } from 'src/plugins/data/common';
+import type { DataView, DataViewsContract } from 'src/plugins/data_views/public';
+import type { ISearchSource } from 'src/plugins/data/public';
 import type { IUiSettingsClient, SavedObject, ToastsStart } from 'kibana/public';
 export type IndexPatternSavedObject = SavedObject & { title: string };
 
@@ -19,7 +20,7 @@ interface IndexPatternData {
   /**
    * Loaded index pattern (might be default index pattern if requested was not found)
    */
-  loaded: IndexPattern;
+  loaded: DataView;
   /**
    * Id of the requested index pattern
    */
@@ -75,7 +76,7 @@ export function getIndexPatternId(
  */
 export async function loadIndexPattern(
   id: string,
-  indexPatterns: IndexPatternsContract,
+  indexPatterns: DataViewsContract,
   config: IUiSettingsClient
 ): Promise<IndexPatternData> {
   const indexPatternList = (await indexPatterns.getCache()) as unknown as IndexPatternSavedObject[];

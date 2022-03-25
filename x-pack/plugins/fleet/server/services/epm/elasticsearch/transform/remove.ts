@@ -28,17 +28,8 @@ export const deleteTransforms = async (esClient: ElasticsearchClient, transformI
   }
   await Promise.all(
     transformIds.map(async (transformId) => {
-      interface TransformResponse {
-        count: number;
-        transforms?: Array<{
-          dest: {
-            index: string;
-          };
-        }>;
-      }
-
       // get the index the transform
-      const { body: transformResponse } = await esClient.transform.getTransform<TransformResponse>(
+      const transformResponse = await esClient.transform.getTransform(
         { transform_id: transformId },
         { ignore: [404] }
       );
@@ -55,7 +46,6 @@ export const deleteTransforms = async (esClient: ElasticsearchClient, transformI
           await esClient.transport.request(
             {
               method: 'DELETE',
-              // @ts-expect-error @elastic/elasticsearch Transform is empty interface
               path: `/${transform?.dest?.index}`,
             },
             {

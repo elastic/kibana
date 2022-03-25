@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiHorizontalRule,
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiSpacer,
@@ -37,9 +38,10 @@ import {
 } from './cti_details/helpers';
 import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
-
 import { InvestigationGuideView } from './investigation_guide_view';
-import { HostRisk } from '../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
+import { Overview } from './overview';
+import { HostRisk } from '../../../risk_score/containers';
+import { RelatedCases } from './related_cases';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -59,12 +61,14 @@ interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   id: string;
+  indexName: string;
   isAlert: boolean;
   isDraggable?: boolean;
   rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
   hostRisk: HostRisk | null;
+  handleOnEventClosed: () => void;
 }
 
 export const Indent = styled.div`
@@ -105,18 +109,21 @@ const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
   data,
   id,
+  indexName,
   isAlert,
   isDraggable,
   rawEventData,
   timelineId,
   timelineTabType,
   hostRisk,
+  handleOnEventClosed,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
-    [setSelectedTabId]
+    []
   );
+  const goToTableTab = useCallback(() => setSelectedTabId(EventsViewType.tableView), []);
 
   const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
   const existingEnrichments = useMemo(
@@ -152,7 +159,20 @@ const EventDetailsComponent: React.FC<Props> = ({
             name: i18n.OVERVIEW,
             content: (
               <>
+                <EuiSpacer size="m" />
+                <Overview
+                  browserFields={browserFields}
+                  contextId={timelineId}
+                  data={data}
+                  eventId={id}
+                  indexName={indexName}
+                  timelineId={timelineId}
+                  handleOnEventClosed={handleOnEventClosed}
+                />
+                <EuiSpacer size="l" />
                 <Reason eventId={id} data={data} />
+                <RelatedCases eventId={id} />
+                <EuiHorizontalRule />
                 <AlertSummaryView
                   {...{
                     data,
@@ -160,8 +180,9 @@ const EventDetailsComponent: React.FC<Props> = ({
                     browserFields,
                     isDraggable,
                     timelineId,
-                    title: i18n.DUCOMENT_SUMMARY,
+                    title: i18n.HIGHLIGHTED_FIELDS,
                   }}
+                  goToTable={goToTableTab}
                 />
 
                 {(enrichmentCount > 0 || hostRisk) && (
@@ -188,8 +209,9 @@ const EventDetailsComponent: React.FC<Props> = ({
           }
         : undefined,
     [
-      isAlert,
       id,
+      indexName,
+      isAlert,
       data,
       browserFields,
       isDraggable,
@@ -198,6 +220,8 @@ const EventDetailsComponent: React.FC<Props> = ({
       allEnrichments,
       isEnrichmentsLoading,
       hostRisk,
+      goToTableTab,
+      handleOnEventClosed,
     ]
   );
 

@@ -13,17 +13,14 @@ import {
   TABLE_ROWS,
 } from '../../screens/alerts_details';
 
-import {
-  expandFirstAlert,
-  refreshAlerts,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { expandFirstAlert } from '../../tasks/alerts';
 import { openJsonView, openTable } from '../../tasks/alerts_details';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
+import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { refreshPage } from '../../tasks/security_header';
 
 import { getUnmappedRule } from '../../objects/rule';
 
@@ -34,12 +31,9 @@ describe('Alert details with unmapped fields', () => {
     cleanKibana();
     esArchiverLoad('unmapped_fields');
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(getUnmappedRule());
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    refreshAlerts();
+    createCustomRuleEnabled(getUnmappedRule());
+    refreshPage();
+    waitForAlertsToPopulate();
     expandFirstAlert();
   });
 
@@ -55,9 +49,9 @@ describe('Alert details with unmapped fields', () => {
   });
 
   // This test needs to be updated to not look for the field in a specific row, as it prevents us from adding/removing fields
-  it('Displays the unmapped field on the table', () => {
+  it.skip('Displays the unmapped field on the table', () => {
     const expectedUnmmappedField = {
-      row: 82,
+      row: 83,
       field: 'unmapped',
       text: 'This is the unmapped field',
     };

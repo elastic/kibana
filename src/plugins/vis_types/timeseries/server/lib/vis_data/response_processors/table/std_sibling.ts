@@ -12,7 +12,7 @@ import type { TableResponseProcessorsFunction } from './types';
 import type { PanelDataArray } from '../../../../../common/types/vis_data';
 
 export const stdSibling: TableResponseProcessorsFunction =
-  ({ bucket, panel, series, meta, extractFields }) =>
+  ({ response, panel, series, meta, extractFields }) =>
   (next) =>
   async (results) => {
     const metric = getLastMetric(series);
@@ -20,8 +20,7 @@ export const stdSibling: TableResponseProcessorsFunction =
     if (!/_bucket$/.test(metric.type)) return next(results);
     if (metric.type === 'std_deviation_bucket' && metric.mode === 'band') return next(results);
 
-    const fakeResp = { aggregations: bucket };
-    (await getSplits(fakeResp, panel, series, meta, extractFields)).forEach((split) => {
+    (await getSplits(response, panel, series, meta, extractFields)).forEach((split) => {
       const data: PanelDataArray[] = split.timeseries.buckets.map((b) => {
         return [b.key, getSiblingAggValue(split, metric)];
       });

@@ -13,14 +13,12 @@ import * as i18n from '../../common/translations';
 import { CreateCase } from '../create';
 
 export interface CreateCaseModalProps {
-  hideConnectorServiceNowSir?: boolean;
   isModalOpen: boolean;
   onCloseCaseModal: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
 }
 
 const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
-  hideConnectorServiceNowSir,
   isModalOpen,
   onCloseCaseModal,
   onSuccess,
@@ -28,18 +26,14 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
   isModalOpen ? (
     <EuiModal onClose={onCloseCaseModal} data-test-subj="create-case-modal">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{i18n.CREATE_CASE_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <CreateCase
-          onCancel={onCloseCaseModal}
-          onSuccess={onSuccess}
-          withSteps={false}
-          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-        />
+        <CreateCase onCancel={onCloseCaseModal} onSuccess={onSuccess} withSteps={false} />
       </EuiModalBody>
     </EuiModal>
   ) : null;
+CreateModalComponent.displayName = 'CreateModal';
 
 export const CreateCaseModal = memo(CreateModalComponent);
 

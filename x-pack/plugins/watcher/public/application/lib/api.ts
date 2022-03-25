@@ -151,12 +151,10 @@ export const executeWatch = async (executeWatchDetails: ExecutedWatchDetails, wa
 };
 
 export const loadIndexPatterns = async () => {
-  const { savedObjects } = await getSavedObjectsClient().find({
-    type: 'index-pattern',
-    fields: ['title'],
-    perPage: 10000,
+  return sendRequest({
+    path: `${basePath}/indices/index_patterns`,
+    method: 'get',
   });
-  return savedObjects;
 };
 
 const getWatchVisualizationDataDeserializer = (data: { visualizeData: any }) => data?.visualizeData;

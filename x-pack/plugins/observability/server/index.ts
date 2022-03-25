@@ -17,7 +17,7 @@ import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
-export { rangeQuery, kqlQuery, termQuery } from './utils/queries';
+export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
 export * from './types';
@@ -33,7 +33,9 @@ export const config: PluginConfigDescriptor = {
     }),
     unsafe: schema.object({
       alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+      rules: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
       cases: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+      overviewNext: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     }),
   }),
 };

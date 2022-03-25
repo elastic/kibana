@@ -101,7 +101,15 @@ export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
      */
     simulateElementResize(target: Element, contentRect: DOMRect) {
       if (this.elements.has(target)) {
-        const entries: ResizeObserverEntry[] = [{ target, contentRect }];
+        const entries: ResizeObserverEntry[] = [
+          {
+            target,
+            contentRect,
+            borderBoxSize: [{ inlineSize: 0, blockSize: 0 }],
+            contentBoxSize: [{ inlineSize: 0, blockSize: 0 }],
+            devicePixelContentBoxSize: [],
+          },
+        ];
         this.callback(entries, this);
       }
     }

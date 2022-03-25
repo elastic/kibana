@@ -71,14 +71,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             }
             const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
             await advOpt.click();
+            // Workaround for: https://github.com/elastic/kibana/issues/126540
+            const isUrlTooLong = await testSubjects.exists('urlTooLongErrorMessage');
+            if (isUrlTooLong) {
+              // Save dashboard
+              await PageObjects.dashboard.switchToEditMode();
+              await PageObjects.dashboard.clickQuickSave();
+              await PageObjects.share.openShareMenuItem(link);
+              if (type === 'pdf_optimize') {
+                await testSubjects.click('usePrintLayout');
+              }
+              const advOpt2 = await find.byXPath(
+                `//button[descendant::*[text()='Advanced options']]`
+              );
+              await advOpt2.click();
+            }
             const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
             await postUrl.click();
             const url = await browser.getClipboardValue();
-            await reportingAPI.expectAllJobsToFinishSuccessfully(
-              await Promise.all([
-                reportingAPI.postJob(parse(url).pathname + '?' + parse(url).query),
-              ])
-            );
+            await reportingAPI.expectAllJobsToFinishSuccessfully([
+              await reportingAPI.postJob(parse(url).pathname + '?' + parse(url).query),
+            ]);
             usage = (await usageAPI.getUsageStats()) as UsageStats;
             reportingAPI.expectCompletedReportCount(usage, completedReportCount + 1);
           });

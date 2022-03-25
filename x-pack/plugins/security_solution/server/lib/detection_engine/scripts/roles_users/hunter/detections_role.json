@@ -16,7 +16,7 @@
         "privileges": ["read", "write"]
       },
       {
-        "names": [".siem-signals-*"],
+        "names": [".alerts-security*", ".siem-signals-*"],
         "privileges": ["read", "write"]
       },
       {
@@ -24,11 +24,7 @@
         "privileges": ["read", "write"]
       },
       {
-        "names": [
-          "metrics-endpoint.metadata_current_*",
-          ".fleet-agents*",
-          ".fleet-actions*"
-        ],
+        "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
         "privileges": ["read"]
       }
     ]
@@ -39,8 +35,6 @@
         "ml": ["read"],
         "siem": ["all", "read_alerts", "crud_alerts"],
         "securitySolutionCases": ["all"],
-        "indexPatterns": ["read"],
-        "savedObjectsManagement": ["read"],
         "actions": ["read"],
         "builtInAlerts": ["all"]
       },

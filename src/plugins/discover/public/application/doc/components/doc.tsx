@@ -9,11 +9,11 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
-import { getServices } from '../../../kibana_services';
+import type { DataView } from 'src/plugins/data_views/public';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../utils/use_es_doc_search';
+import { useDiscoverServices } from '../../../utils/use_discover_services';
 
 export interface DocProps {
   /**
@@ -25,9 +25,9 @@ export interface DocProps {
    */
   index: string;
   /**
-   * IndexPattern entity
+   * DataView entity
    */
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   /**
    * If set, will always request source, regardless of the global `fieldsFromSource` setting
    */
@@ -37,7 +37,8 @@ export interface DocProps {
 export function Doc(props: DocProps) {
   const { indexPattern } = props;
   const [reqState, hit] = useEsDocSearch(props);
-  const indexExistsLink = getServices().docLinks.links.apis.indexExists;
+  const { docLinks } = useDiscoverServices();
+  const indexExistsLink = docLinks.links.apis.indexExists;
   return (
     <EuiPage>
       <EuiPageContent>

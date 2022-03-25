@@ -17,7 +17,7 @@ export default function ({ getPageObjects, getService }) {
     before(async () => {
       await security.testUser.setRoles(
         ['global_maps_all', 'test_logstash_reader', 'geoshape_data_reader'],
-        false
+        { skipBrowserRefresh: true }
       );
     });
 
@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }) {
           geometryFieldName: 'geometry',
           index: 'geo_shapes*',
           requestBody:
-            '(_source:!(geometry),docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))',
+            '(_source:!f,docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))',
         });
       });
 

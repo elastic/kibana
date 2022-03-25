@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { chunk } from 'lodash';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
@@ -21,7 +23,7 @@ const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
-const ACTION_COLUMN_INDEX = 1;
+const ACTION_COLUMN_INDEX = 0;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -71,6 +73,14 @@ export function ObservabilityAlertsCommonProvider({
   const getTableCells = async () => {
     // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
     return await testSubjects.findAll('dataGridRowCell');
+  };
+
+  const getAllDisabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:disabled');
+  };
+
+  const getAllEnabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:enabled');
   };
 
   const getExperimentalDisclaimer = async () => {
@@ -192,7 +202,6 @@ export function ObservabilityAlertsCommonProvider({
   const viewRuleDetailsLinkClick = async () => {
     return await (await testSubjects.find(VIEW_RULE_DETAILS_FLYOUT_SELECTOR)).click();
   };
-
   // Workflow status
   const setWorkflowStatusForRow = async (rowIndex: number, workflowStatus: WorkflowStatus) => {
     await openActionsMenuForRow(rowIndex);
@@ -220,6 +229,30 @@ export function ObservabilityAlertsCommonProvider({
     return await selectedWorkflowStatusButton.getVisibleText();
   };
 
+  // Alert status
+  const setAlertStatusFilter = async (alertStatus?: AlertStatus) => {
+    let buttonSubject = 'alert-status-filter-show-all-button';
+    if (alertStatus === ALERT_STATUS_ACTIVE) {
+      buttonSubject = 'alert-status-filter-active-button';
+    }
+    if (alertStatus === ALERT_STATUS_RECOVERED) {
+      buttonSubject = 'alert-status-filter-recovered-button';
+    }
+    const buttonGroupButton = await testSubjects.find(buttonSubject);
+    await buttonGroupButton.click();
+  };
+
+  const alertDataIsBeingLoaded = async () => {
+    return testSubjects.existOrFail('events-container-loading-true');
+  };
+
+  const alertDataHasLoaded = async () => {
+    await retry.waitFor(
+      'Alert Table is loaded',
+      async () => await testSubjects.exists('events-container-loading-false', { timeout: 2500 })
+    );
+  };
+
   // Date picker
   const getTimeRange = async () => {
     const isAbsoluteRange = await testSubjects.exists('superDatePickerstartDatePopoverButton');
@@ -232,7 +265,7 @@ export function ObservabilityAlertsCommonProvider({
 
     const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
     const buttonText = await datePickerButton.getVisibleText();
-    return buttonText.substring(0, buttonText.indexOf('\n'));
+    return buttonText;
   };
 
   const getActionsButtonByIndex = async (index: number) => {
@@ -240,6 +273,15 @@ export function ObservabilityAlertsCommonProvider({
       '[data-test-subj="alertsTableRowActionMore"]'
     );
     return actionsOverflowButtons[index] || null;
+  };
+
+  const getRuleStatValue = async (testSubj: string) => {
+    const stat = await testSubjects.find(testSubj);
+    const title = await stat.findByCssSelector('.euiStat__title');
+    const count = await title.getVisibleText();
+    const value = Number.parseInt(count, 10);
+    expect(Number.isNaN(value)).to.be(false);
+    return value;
   };
 
   return {
@@ -253,6 +295,8 @@ export function ObservabilityAlertsCommonProvider({
     getAlertsFlyoutOrFail,
     getAlertsFlyoutTitle,
     getAlertsFlyoutViewInAppButtonOrFail,
+    getAllDisabledCheckBoxInTable,
+    getAllEnabledCheckBoxInTable,
     getFilterForValueButton,
     getNoDataPageOrFail,
     getNoDataStateOrFail,
@@ -266,6 +310,9 @@ export function ObservabilityAlertsCommonProvider({
     setWorkflowStatusForRow,
     setWorkflowStatusFilter,
     getWorkflowStatusFilterValue,
+    setAlertStatusFilter,
+    alertDataIsBeingLoaded,
+    alertDataHasLoaded,
     submitQuery,
     typeInQueryBar,
     openActionsMenuForRow,
@@ -276,5 +323,6 @@ export function ObservabilityAlertsCommonProvider({
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
+    getRuleStatValue,
   };
 }

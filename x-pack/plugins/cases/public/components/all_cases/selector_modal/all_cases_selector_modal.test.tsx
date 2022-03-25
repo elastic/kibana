@@ -11,9 +11,8 @@ import { mount } from 'enzyme';
 import { AllCasesSelectorModal } from '.';
 import { TestProviders } from '../../../common/mock';
 import { AllCasesList } from '../all_cases_list';
-import { SECURITY_SOLUTION_OWNER } from '../../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 
-jest.mock('../../../methods');
 jest.mock('../all_cases_list');
 
 const onRowClick = jest.fn();

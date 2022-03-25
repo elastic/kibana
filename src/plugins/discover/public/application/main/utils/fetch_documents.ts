@@ -6,34 +6,19 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { filter } from 'rxjs/operators';
-import { Adapters } from '../../../../../inspector/common';
-import { isCompleteResponse, ISearchSource } from '../../../../../data/common';
-import { FetchStatus } from '../../types';
-import { SavedSearchData } from './use_saved_search';
-import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
+import { filter, map } from 'rxjs/operators';
+import { isCompleteResponse, ISearchSource } from '../../../../../data/public';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
-import { DiscoverServices } from '../../../build_services';
+import { FetchDeps } from './fetch_all';
 
+/**
+ * Requests the documents for Discover. This will return a promise that will resolve
+ * with the documents.
+ */
 export const fetchDocuments = (
-  data$: SavedSearchData,
   searchSource: ISearchSource,
-  {
-    abortController,
-    inspectorAdapters,
-    onResults,
-    searchSessionId,
-    services,
-  }: {
-    abortController: AbortController;
-    inspectorAdapters: Adapters;
-    onResults: (foundDocuments: boolean) => void;
-    searchSessionId: string;
-    services: DiscoverServices;
-  }
+  { abortController, inspectorAdapters, searchSessionId, services, savedSearch }: FetchDeps
 ) => {
-  const { documents$, totalHits$ } = data$;
-
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
@@ -46,14 +31,8 @@ export const fetchDocuments = (
     searchSource.setOverwriteDataViewType(undefined);
   }
 
-  sendLoadingMsg(documents$);
-
   const executionContext = {
-    type: 'application',
-    name: 'discover',
     description: 'fetch documents',
-    url: window.location.pathname,
-    id: '',
   };
 
   const fetch$ = searchSource
@@ -71,34 +50,10 @@ export const fetchDocuments = (
       },
       executionContext,
     })
-    .pipe(filter((res) => isCompleteResponse(res)));
+    .pipe(
+      filter((res) => isCompleteResponse(res)),
+      map((res) => res.rawResponse.hits.hits)
+    );
 
-  fetch$.subscribe(
-    (res) => {
-      const documents = res.rawResponse.hits.hits;
-
-      // If the total hits query is still loading for hits, emit a partial
-      // hit count that's at least our document count
-      if (totalHits$.getValue().fetchStatus === FetchStatus.LOADING) {
-        totalHits$.next({
-          fetchStatus: FetchStatus.PARTIAL,
-          result: documents.length,
-        });
-      }
-
-      documents$.next({
-        fetchStatus: FetchStatus.COMPLETE,
-        result: documents,
-      });
-      onResults(documents.length > 0);
-    },
-    (error) => {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return;
-      }
-
-      sendErrorMsg(documents$, error);
-    }
-  );
-  return fetch$;
+  return fetch$.toPromise();
 };

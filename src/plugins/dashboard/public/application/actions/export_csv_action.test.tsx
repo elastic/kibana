@@ -25,6 +25,7 @@ import { DataPublicPluginStart } from '../../../../data/public/types';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { LINE_FEED_CHARACTER } from 'src/plugins/data/common/exports/export_csv';
 import { getStubPluginServices } from '../../../../presentation_util/public';
+import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
 
 describe('Export CSV action', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -60,7 +61,9 @@ describe('Export CSV action', () => {
       uiActions: {} as any,
       uiSettings: uiSettingsServiceMock.createStartContract(),
       http: coreStart.http,
+      theme: coreStart.theme,
       presentationUtil: getStubPluginServices(),
+      screenshotMode: screenshotModePluginMock.createSetupContract(),
     };
     const input = getSampleDashboardInput({
       panels: {

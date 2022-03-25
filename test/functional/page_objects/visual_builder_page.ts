@@ -450,19 +450,27 @@ export class VisualBuilderPageObject extends FtrService {
     return await tableView.getVisibleText();
   }
 
+  private async switchTab(visType: string, tab: string) {
+    const testSubj = `${visType}Editor${tab}Btn`;
+    await this.retry.try(async () => {
+      await this.testSubjects.click(testSubj);
+      await this.header.waitUntilLoadingHasFinished();
+      if (!(await (await this.testSubjects.find(testSubj)).elementHasClass('euiTab-isSelected'))) {
+        throw new Error('tab not active');
+      }
+    });
+  }
+
   public async clickPanelOptions(tabName: string) {
-    await this.testSubjects.click(`${tabName}EditorPanelOptionsBtn`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab(tabName, 'PanelOptions');
   }
 
   public async clickDataTab(tabName: string) {
-    await this.testSubjects.click(`${tabName}EditorDataBtn`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab(tabName, 'Data');
   }
 
   public async clickAnnotationsTab() {
-    await this.testSubjects.click('timeSeriesEditorAnnotationsBtn');
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab('timeSeries', 'Annotations');
   }
 
   public async clickAnnotationsAddDataSourceButton() {
@@ -483,26 +491,6 @@ export class VisualBuilderPageObject extends FtrService {
   public async setAnnotationRowTemplate(template: string) {
     const annotationRowTemplateInput = await this.testSubjects.find('annotationRowTemplateInput');
     await annotationRowTemplateInput.type(template);
-  }
-
-  public async getAnnotationsCount() {
-    const annotationsIcons = (await this.find.allByCssSelector('.echAnnotation')) ?? [];
-    return annotationsIcons.length;
-  }
-
-  public async clickAnnotationIcon(nth: number = 0) {
-    const annotationsIcons = (await this.find.allByCssSelector('.echAnnotation')) ?? [];
-    await annotationsIcons[nth].click();
-  }
-
-  public async getAnnotationTooltipHeader() {
-    const annotationTooltipHeader = await this.find.byClassName('echAnnotation__header');
-    return await annotationTooltipHeader.getVisibleText();
-  }
-
-  public async getAnnotationTooltipDetails() {
-    const annotationTooltipDetails = await this.find.byClassName('echAnnotation__details');
-    return await annotationTooltipDetails.getVisibleText();
   }
 
   public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
@@ -731,7 +719,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async checkPreviewIsDisabled(): Promise<void> {
     this.log.debug(`Check no data message is present`);
-    await this.testSubjects.existOrFail('timeseriesVis > visNoResult', { timeout: 5000 });
+    await this.testSubjects.existOrFail('visualization-error', { timeout: 5000 });
   }
 
   public async cloneSeries(nth: number = 0): Promise<void> {
@@ -814,9 +802,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async checkSelectedMetricsGroupByValue(value: string) {
-    const groupBy = await this.find.byCssSelector(
-      '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
-    );
+    const groupBy = await this.testSubjects.find('groupBySelect');
     return await this.comboBox.isOptionSelected(groupBy, value);
   }
 
@@ -900,7 +886,11 @@ export class VisualBuilderPageObject extends FtrService {
     return legendItems.map(({ name }) => name);
   }
 
-  public async getChartItems(chartData?: DebugState, itemType: 'areas' | 'bars' = 'areas') {
+  public async getChartItems(
+    chartData?: DebugState,
+    itemType: 'areas' | 'bars' | 'annotations' = 'areas'
+  ) {
+    await this.header.waitUntilLoadingHasFinished();
     return (await this.getChartDebugState(chartData))?.[itemType];
   }
 
@@ -912,6 +902,14 @@ export class VisualBuilderPageObject extends FtrService {
   public async getAreaChartData(chartData?: DebugState, nth: number = 0) {
     const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
     return areas?.[nth]?.lines.y1.points.map(({ x, y }) => [x, y]);
+  }
+
+  public async getAnnotationsData(chartData?: DebugState) {
+    const annotations = (await this.getChartItems(
+      chartData,
+      'annotations'
+    )) as DebugState['annotations'];
+    return annotations?.map(({ data }) => data);
   }
 
   public async getVisualizeError() {

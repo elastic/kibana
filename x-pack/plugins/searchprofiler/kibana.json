@@ -9,6 +9,6 @@
     "name": "Stack Management",
     "githubTeam": "kibana-stack-management"
   },
-  "requiredPlugins": ["devTools", "home", "licensing"],
-  "requiredBundles": ["esUiShared"]
+  "requiredPlugins": ["devTools", "home", "licensing", "share"],
+  "requiredBundles": ["esUiShared", "kibanaReact"]
 }

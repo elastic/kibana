@@ -7,6 +7,7 @@
 
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
+import { checkA11y } from '../../../support/commands';
 import { generateData } from './generate_data';
 
 const start = '2021-10-10T00:00:00.000Z';
@@ -39,8 +40,15 @@ describe('Error details', () => {
       await synthtrace.clean();
     });
 
+    it('has no detectable a11y violations on load', () => {
+      cy.visit(errorDetailsPageHref);
+      cy.contains('Error group 00000');
+      // set skipFailures to true to not fail the test when there are accessibility failures
+      checkA11y({ skipFailures: true });
+    });
+
     describe('when error has no occurrences', () => {
-      it('shows empty an message', () => {
+      it('shows an empty message', () => {
         cy.visit(
           url.format({
             pathname:

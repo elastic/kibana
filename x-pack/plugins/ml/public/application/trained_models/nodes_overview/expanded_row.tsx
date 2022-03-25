@@ -15,6 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { cloneDeep } from 'lodash';
 import { NodeItem } from './nodes_list';
 import { formatToListItems } from '../models_management/expanded_row';
 import { AllocatedModels } from './allocated_models';
@@ -32,13 +33,13 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     allocated_models: allocatedModels,
     attributes,
     memory_overview: memoryOverview,
+    id,
     ...details
-  } = item;
+  } = cloneDeep(item);
 
   // Process node attributes
   attributes['ml.machine_memory'] = bytesFormatter(attributes['ml.machine_memory']);
   attributes['ml.max_jvm_size'] = bytesFormatter(attributes['ml.max_jvm_size']);
-  delete attributes['xpack.installed'];
 
   return (
     <>

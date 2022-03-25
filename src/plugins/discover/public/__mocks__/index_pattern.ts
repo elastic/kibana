@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPatternFieldList } from '../../../data/common';
-import { IndexPattern } from '../../../data/common';
+import { IIndexPatternFieldList, DataView } from '../../../data_views/public';
 
 const fields = [
   {
@@ -84,7 +83,7 @@ const indexPattern = {
   timeFieldName: '',
   docvalueFields: [],
   getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
 

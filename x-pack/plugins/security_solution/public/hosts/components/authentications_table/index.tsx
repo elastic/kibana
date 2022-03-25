@@ -18,12 +18,17 @@ import {
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import { HostDetailsLink, NetworkDetailsLink } from '../../../common/components/links';
+import {
+  HostDetailsLink,
+  NetworkDetailsLink,
+  UserDetailsLink,
+} from '../../../common/components/links';
 import { Columns, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 
@@ -38,6 +43,7 @@ interface AuthenticationTableProps {
   loadPage: (newActivePage: number) => void;
   id: string;
   isInspect: boolean;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
@@ -73,6 +79,7 @@ const AuthenticationTableComponent: React.FC<AuthenticationTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   showMorePagesIndicator,
   totalCount,
   type,
@@ -107,7 +114,11 @@ const AuthenticationTableComponent: React.FC<AuthenticationTableProps> = ({
     [type, dispatch]
   );
 
-  const columns = useMemo(() => getAuthenticationColumnsCurated(type), [type]);
+  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
+  const columns = useMemo(
+    () => getAuthenticationColumnsCurated(type, usersEnabled),
+    [type, usersEnabled]
+  );
 
   return (
     <PaginatedTable
@@ -124,6 +135,7 @@ const AuthenticationTableComponent: React.FC<AuthenticationTableProps> = ({
       loading={loading}
       loadPage={loadPage}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={showMorePagesIndicator}
       totalCount={fakeTotalCount}
       updateLimitPagination={updateLimitPagination}
@@ -136,7 +148,7 @@ AuthenticationTableComponent.displayName = 'AuthenticationTableComponent';
 
 export const AuthenticationTable = React.memo(AuthenticationTableComponent);
 
-const getAuthenticationColumns = (): AuthTableColumns => [
+const getAuthenticationColumns = (usersEnabled: boolean): AuthTableColumns => [
   {
     name: i18n.USER,
     truncateText: false,
@@ -146,6 +158,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
         rowItems: node.user.name,
         attrName: 'user.name',
         idPrefix: `authentications-table-${node._id}-userName`,
+        render: (item) => (usersEnabled ? <UserDetailsLink userName={item} /> : <>{item}</>),
       }),
   },
   {
@@ -297,9 +310,10 @@ const getAuthenticationColumns = (): AuthTableColumns => [
 ];
 
 export const getAuthenticationColumnsCurated = (
-  pageType: hostsModel.HostsType
+  pageType: hostsModel.HostsType,
+  usersEnabled: boolean
 ): AuthTableColumns => {
-  const columns = getAuthenticationColumns();
+  const columns = getAuthenticationColumns(usersEnabled);
 
   // Columns to exclude from host details pages
   if (pageType === hostsModel.HostsType.details) {

@@ -18,7 +18,8 @@ jest.mock('uuid/v4', () => {
 });
 
 const defaultProps = {
-  currentLayerType: LAYER_TYPE.VECTOR,
+  currentLayerType: LAYER_TYPE.GEOJSON_VECTOR,
+  geoFieldName: 'myLocation',
   indexPatternId: 'foobar',
   onChange: async () => {},
   metrics: [],

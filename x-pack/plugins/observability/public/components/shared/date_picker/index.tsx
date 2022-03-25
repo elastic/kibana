@@ -6,46 +6,27 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import React, { useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useHasData } from '../../../hooks/use_has_data';
+import React, { useCallback } from 'react';
 import { UI_SETTINGS, useKibanaUISettings } from '../../../hooks/use_kibana_ui_settings';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { fromQuery, toQuery } from '../../../utils/url';
+import { TimePickerQuickRange } from './typings';
+import { useDatePickerContext } from '../../../hooks/use_date_picker_context';
 
-export interface TimePickerTime {
-  from: string;
-  to: string;
+export interface DatePickerProps {
+  rangeFrom?: string;
+  rangeTo?: string;
+  refreshPaused?: boolean;
+  refreshInterval?: number;
+  onTimeRangeRefresh?: (range: { start: string; end: string }) => void;
 }
 
-export interface TimePickerQuickRange extends TimePickerTime {
-  display: string;
-}
-
-export interface TimePickerRefreshInterval {
-  pause: boolean;
-  value: number;
-}
-
-interface Props {
-  rangeFrom: string;
-  rangeTo: string;
-  refreshPaused: boolean;
-  refreshInterval: number;
-}
-
-export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval }: Props) {
-  const location = useLocation();
-  const history = useHistory();
-  const { plugins } = usePluginContext();
-  const { onRefreshTimeRange } = useHasData();
-
-  useEffect(() => {
-    plugins.data.query.timefilter.timefilter.setTime({
-      from: rangeFrom,
-      to: rangeTo,
-    });
-  }, [plugins, rangeFrom, rangeTo]);
+export function DatePicker({
+  rangeFrom,
+  rangeTo,
+  refreshPaused,
+  refreshInterval,
+  onTimeRangeRefresh,
+}: DatePickerProps) {
+  const { updateTimeRange, updateRefreshInterval } = useDatePickerContext();
 
   const timePickerQuickRanges = useKibanaUISettings<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
@@ -57,21 +38,6 @@ export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval 
     label: display,
   }));
 
-  function updateUrl(nextQuery: {
-    rangeFrom?: string;
-    rangeTo?: string;
-    refreshPaused?: boolean;
-    refreshInterval?: number;
-  }) {
-    history.push({
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        ...nextQuery,
-      }),
-    });
-  }
-
   function onRefreshChange({
     isPaused,
     refreshInterval: interval,
@@ -79,23 +45,32 @@ export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval 
     isPaused: boolean;
     refreshInterval: number;
   }) {
-    updateUrl({ refreshPaused: isPaused, refreshInterval: interval });
+    updateRefreshInterval({ isPaused, interval });
   }
 
-  function onTimeChange({ start, end }: { start: string; end: string }) {
-    updateUrl({ rangeFrom: start, rangeTo: end });
-  }
+  const onRefresh = useCallback(
+    (newRange: { start: string; end: string }) => {
+      if (onTimeRangeRefresh) {
+        onTimeRangeRefresh(newRange);
+      }
+      updateTimeRange(newRange);
+    },
+    [onTimeRangeRefresh, updateTimeRange]
+  );
 
   return (
     <EuiSuperDatePicker
       start={rangeFrom}
       end={rangeTo}
-      onTimeChange={onTimeChange}
+      onTimeChange={onRefresh}
+      onRefresh={onRefresh}
       isPaused={refreshPaused}
       refreshInterval={refreshInterval}
       onRefreshChange={onRefreshChange}
       commonlyUsedRanges={commonlyUsedRanges}
-      onRefresh={onRefreshTimeRange}
     />
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default DatePicker;

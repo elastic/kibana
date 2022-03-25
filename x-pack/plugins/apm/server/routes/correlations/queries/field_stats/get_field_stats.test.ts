@@ -20,7 +20,6 @@ const params = {
   includeFrozen: false,
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
-  samplerShardSize: 5000,
 };
 
 export const getExpectedQuery = (aggs: any) => {
@@ -46,6 +45,7 @@ export const getExpectedQuery = (aggs: any) => {
     },
     index: 'apm-*',
     size: 0,
+    track_total_hits: false,
   };
 };
 
@@ -55,28 +55,16 @@ describe('field_stats', () => {
       const req = getNumericFieldStatsRequest(params, 'url.path');
 
       const expectedAggs = {
-        sample: {
-          aggs: {
-            sampled_field_stats: {
-              aggs: { actual_stats: { stats: { field: 'url.path' } } },
-              filter: { exists: { field: 'url.path' } },
-            },
-            sampled_percentiles: {
-              percentiles: {
-                field: 'url.path',
-                keyed: false,
-                percents: [50],
-              },
-            },
-            sampled_top: {
-              terms: {
-                field: 'url.path',
-                order: { _count: 'desc' },
-                size: 10,
-              },
-            },
+        sampled_field_stats: {
+          aggs: { actual_stats: { stats: { field: 'url.path' } } },
+          filter: { exists: { field: 'url.path' } },
+        },
+        sampled_top: {
+          terms: {
+            field: 'url.path',
+            order: { _count: 'desc' },
+            size: 10,
           },
-          sampler: { shard_size: 5000 },
         },
       };
       expect(req).toEqual(getExpectedQuery(expectedAggs));
@@ -87,13 +75,8 @@ describe('field_stats', () => {
       const req = getKeywordFieldStatsRequest(params, 'url.path');
 
       const expectedAggs = {
-        sample: {
-          sampler: { shard_size: 5000 },
-          aggs: {
-            sampled_top: {
-              terms: { field: 'url.path', size: 10, order: { _count: 'desc' } },
-            },
-          },
+        sampled_top: {
+          terms: { field: 'url.path', size: 10 },
         },
       };
       expect(req).toEqual(getExpectedQuery(expectedAggs));
@@ -104,15 +87,10 @@ describe('field_stats', () => {
       const req = getBooleanFieldStatsRequest(params, 'url.path');
 
       const expectedAggs = {
-        sample: {
-          sampler: { shard_size: 5000 },
-          aggs: {
-            sampled_value_count: {
-              filter: { exists: { field: 'url.path' } },
-            },
-            sampled_values: { terms: { field: 'url.path', size: 2 } },
-          },
+        sampled_value_count: {
+          filter: { exists: { field: 'url.path' } },
         },
+        sampled_values: { terms: { field: 'url.path', size: 2 } },
       };
       expect(req).toEqual(getExpectedQuery(expectedAggs));
     });
@@ -121,31 +99,23 @@ describe('field_stats', () => {
   describe('fetchFieldsStats', () => {
     it('returns field candidates and total hits', async () => {
       const fieldsCaps = {
-        body: {
-          fields: {
-            myIpFieldName: { ip: {} },
-            myKeywordFieldName: { keyword: {} },
-            myMultiFieldName: { keyword: {}, text: {} },
-            myHistogramFieldName: { histogram: {} },
-            myNumericFieldName: { number: {} },
-          },
+        fields: {
+          myIpFieldName: { ip: {} },
+          myKeywordFieldName: { keyword: {} },
+          myMultiFieldName: { keyword: {}, text: {} },
+          myHistogramFieldName: { histogram: {} },
+          myNumericFieldName: { number: {} },
         },
       };
       const esClientFieldCapsMock = jest.fn(() => fieldsCaps);
 
-      const fieldsToSample = Object.keys(fieldsCaps.body.fields);
+      const fieldsToSample = Object.keys(fieldsCaps.fields);
 
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              aggregations: { sample: {} },
-            } as unknown as estypes.SearchResponse,
-          };
+            aggregations: { sample: {} },
+          } as unknown as estypes.SearchResponse;
         }
       );
 

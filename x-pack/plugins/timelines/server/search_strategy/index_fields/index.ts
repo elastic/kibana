@@ -15,14 +15,13 @@ import {
   SearchStrategyDependencies,
 } from '../../../../../../src/plugins/data/server';
 
-// TODO cleanup path
+import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';
 import {
   IndexFieldsStrategyResponse,
   IndexField,
   IndexFieldsStrategyRequest,
   BeatFields,
-  DELETED_SECURITY_SOLUTION_DATA_VIEW,
-} from '../../../common';
+} from '../../../common/search_strategy';
 import { StartPlugins } from '../../types';
 import type { FieldSpec } from '../../../../../../src/plugins/data_views/common';
 
@@ -58,7 +57,7 @@ export const findExistingIndices = async (
             index,
             body: { query: { match_all: {} }, size: 0 },
           });
-          return get(searchResponse, 'body.hits.total.value', 0) > 0;
+          return get(searchResponse, 'hits.total.value', 0) > 0;
         }
         const searchResponse = await esClient.fieldCaps({
           index,
@@ -66,14 +65,14 @@ export const findExistingIndices = async (
           ignore_unavailable: true,
           allow_no_indices: false,
         });
-        return searchResponse.body.indices.length > 0;
+        return searchResponse.indices.length > 0;
       })
       .map((p) => p.catch((e) => false))
   );
 
 export const requestIndexFieldSearch = async (
   request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
-  { savedObjectsClient, esClient }: SearchStrategyDependencies,
+  { savedObjectsClient, esClient, request: kRequest }: SearchStrategyDependencies,
   beatFields: BeatFields,
   getStartServices: StartServicesAccessor<StartPlugins>
 ): Promise<IndexFieldsStrategyResponse> => {
@@ -88,9 +87,12 @@ export const requestIndexFieldSearch = async (
       data: { indexPatterns },
     },
   ] = await getStartServices();
-  const dataViewService = await indexPatterns.indexPatternsServiceFactory(
+
+  const dataViewService = await indexPatterns.dataViewsServiceFactory(
     savedObjectsClient,
-    esClient.asCurrentUser
+    esClient.asCurrentUser,
+    kRequest,
+    true
   );
 
   let indicesExist: string[] = [];
@@ -120,6 +122,7 @@ export const requestIndexFieldSearch = async (
       (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
       []
     );
+
     if (!request.onlyCheckIfIndicesExist) {
       const dataViewSpec = dataView.toSpec();
       const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {})];
@@ -168,7 +171,6 @@ export const requestIndexFieldSearch = async (
         hits: [
           {
             _index: '',
-            _type: '',
             _id: '',
             _score: -1,
             _source: null,

@@ -22,20 +22,14 @@ import {
   AlertMemoryUsageNodeStats,
   CommonAlertFilter,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
-import {
-  INDEX_PATTERN_ELASTICSEARCH,
-  RULE_MEMORY_USAGE,
-  RULE_DETAILS,
-} from '../../common/constants';
+import { Alert } from '../../../alerting/server';
+import { RULE_MEMORY_USAGE, RULE_DETAILS } from '../../common/constants';
 // @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerting/common/parse_duration';
 import { Globals } from '../static_globals';
 
@@ -64,13 +58,8 @@ export class MemoryUsageRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: boolean
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
     const { duration, threshold } = params;
     const parsedDuration = parseDuration(duration as string);
     const endMs = +new Date();
@@ -79,7 +68,6 @@ export class MemoryUsageRule extends BaseRule {
     const stats = await fetchMemoryUsageNodeStats(
       esClient,
       clusters,
-      esIndexPattern,
       startMs,
       endMs,
       Globals.app.config.ui.max_bucket_size,
@@ -170,7 +158,7 @@ export class MemoryUsageRule extends BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

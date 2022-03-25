@@ -31,6 +31,9 @@ import {
   ENRICHMENT_QUERY_RANGE_PICKER,
   ENRICHMENT_QUERY_START_INPUT,
   THREAT_INTEL_TAB,
+  CELL_EXPAND_VALUE,
+  CELL_EXPANSION_POPOVER,
+  USER_DETAILS_LINK,
 } from '../screens/alerts_details';
 
 export const addExceptionFromFirstAlert = () => {
@@ -60,13 +63,17 @@ export const closeAlerts = () => {
     .should('not.be.visible');
 };
 
+export const expandFirstAlertActions = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+};
+
 export const expandFirstAlert = () => {
   cy.get(EXPAND_ALERT_BTN).should('exist');
 
   cy.get(EXPAND_ALERT_BTN)
     .first()
-    .pipe(($el) => $el.trigger('click'))
-    .should('exist');
+    .should('exist')
+    .pipe(($el) => $el.trigger('click'));
 };
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
@@ -148,22 +155,25 @@ export const waitForAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
 };
 
-export const waitForAlertsIndexToBeCreated = () => {
-  cy.request({
-    url: '/api/detection_engine/index',
-    failOnStatusCode: false,
-  }).then((response) => {
-    if (response.status !== 200) {
-      cy.request({
-        method: 'POST',
-        url: `/api/detection_engine/index`,
-        headers: { 'kbn-xsrf': 'create-signals-index' },
-      });
-    }
-  });
-};
-
 export const waitForAlertsPanelToBeLoaded = () => {
   cy.get(LOADING_ALERTS_PANEL).should('exist');
   cy.get(LOADING_ALERTS_PANEL).should('not.exist');
+};
+
+export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
+  cy.get(columnSelector).eq(1).focus().find(CELL_EXPAND_VALUE).click({ force: true });
+};
+
+export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
+  cy.get(columnSelector).eq(0).scrollIntoView();
+
+  // Wait for data grid to populate column
+  cy.waitUntil(() => cy.get(columnSelector).then(($el) => $el.length > 1), {
+    interval: 500,
+    timeout: 12000,
+  });
+};
+
+export const openUserDetailsFlyout = () => {
+  cy.get(CELL_EXPANSION_POPOVER).find(USER_DETAILS_LINK).click();
 };

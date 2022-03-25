@@ -13,20 +13,22 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
 import realHits from '../../../../__fixtures__/real_hits.js';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
+import { DataViewAttributes } from '../../../../../../data_views/public';
+import { flattenHit } from '../../../../../../data/public';
 import { SavedObject } from '../../../../../../../core/types';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
-import { ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
 import { FetchStatus } from '../../../types';
-import { DataDocuments$ } from '../../utils/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { ElasticSearchHit } from '../../../../types';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 const mockServices = {
   history: () => ({
@@ -62,7 +64,6 @@ jest.mock('../../../../kibana_services', () => ({
       getTriggerCompatibleActions: jest.fn(() => []),
     };
   }),
-  getServices: () => mockServices,
 }));
 
 jest.mock('../../utils/calc_field_counts', () => ({
@@ -78,9 +79,9 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   > as ElasticSearchHit[];
 
   const indexPatternList = [
-    { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
-    { id: '1', attributes: { title: 'a' } } as SavedObject<IndexPatternAttributes>,
-    { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
+    { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
+    { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
+    { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
   ];
 
   for (const hit of hits) {
@@ -88,23 +89,28 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
       mockfieldCounts[key] = (mockfieldCounts[key] || 0) + 1;
     }
   }
+
   return {
     columns: ['extension'],
     documents$: new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: hits as ElasticSearchHit[],
     }) as DataDocuments$,
+    availableFields$: new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      fields: [] as string[],
+    }) as AvailableFields$,
     indexPatternList,
     onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
-    services: mockServices,
     state: {},
     trackUiMetric: jest.fn(),
     onEditRuntimeField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    onDataViewCreated: jest.fn(),
   };
 }
 
@@ -114,7 +120,11 @@ describe('discover responsive sidebar', function () {
 
   beforeAll(() => {
     props = getCompProps();
-    comp = mountWithIntl(<DiscoverSidebarResponsive {...props} />);
+    comp = mountWithIntl(
+      <KibanaContextProvider services={mockServices}>
+        <DiscoverSidebarResponsive {...props} />
+      </KibanaContextProvider>
+    );
   });
 
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
@@ -122,7 +132,7 @@ describe('discover responsive sidebar', function () {
     const selected = findTestSubject(comp, 'fieldList-selected');
     const unpopular = findTestSubject(comp, 'fieldList-unpopular');
     expect(popular.children().length).toBe(1);
-    expect(unpopular.children().length).toBe(7);
+    expect(unpopular.children().length).toBe(6);
     expect(selected.children().length).toBe(1);
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
@@ -140,7 +150,7 @@ describe('discover responsive sidebar', function () {
     expect(props.onAddFilter).toHaveBeenCalled();
   });
   it('should allow filtering by string, and calcFieldCount should just be executed once', function () {
-    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(7);
+    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(6);
     act(() => {
       findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
         target: { value: 'abc' },

@@ -6,19 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import {
-  isEmpty,
-  set,
-  unset,
-  has,
-  difference,
-  filter,
-  find,
-  map,
-  mapKeys,
-  pickBy,
-  uniq,
-} from 'lodash';
+import { set, unset, has, difference, filter, find, map, mapKeys, uniq } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import {
@@ -33,6 +21,8 @@ import { packSavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
 import { convertSOQueriesToPack, convertPackQueriesToSO } from './utils';
+import { getInternalSavedObjectsClient } from '../../usage/collector';
+import { PackSavedObjectAttributes } from '../../common/types';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
@@ -82,6 +72,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
+      const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+        osqueryContext.getStartServices
+      );
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
@@ -95,60 +88,73 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       );
 
       if (name) {
-        const conflictingEntries = await savedObjectsClient.find({
+        const conflictingEntries = await savedObjectsClient.find<PackSavedObjectAttributes>({
           type: packSavedObjectType,
           filter: `${packSavedObjectType}.attributes.name: "${name}"`,
         });
 
         if (
-          filter(conflictingEntries.saved_objects, (packSO) => packSO.id !== currentPackSO.id)
-            .length
+          filter(
+            conflictingEntries.saved_objects,
+            (packSO) =>
+              packSO.id !== currentPackSO.id && packSO.attributes.name.length === name.length
+          ).length
         ) {
           return response.conflict({ body: `Pack with name "${name}" already exists.` });
         }
       }
 
-      const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsClient, {
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-        perPage: 1000,
-        page: 1,
-      })) ?? { items: [] };
+      const { items: packagePolicies } = (await packagePolicyService?.list(
+        internalSavedObjectsClient,
+        {
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+          perPage: 1000,
+          page: 1,
+        }
+      )) ?? { items: [] };
       const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
         has(packagePolicy, `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`)
       );
       const agentPolicies = policy_ids
-        ? mapKeys(await agentPolicyService?.getByIds(savedObjectsClient, policy_ids), 'id')
+        ? mapKeys(await agentPolicyService?.getByIds(internalSavedObjectsClient, policy_ids), 'id')
         : {};
       const agentPolicyIds = Object.keys(agentPolicies);
+
+      const nonAgentPolicyReferences = filter(
+        currentPackSO.references,
+        (reference) => reference.type !== AGENT_POLICY_SAVED_OBJECT_TYPE
+      );
+
+      const getUpdatedReferences = () => {
+        if (policy_ids) {
+          return [
+            ...nonAgentPolicyReferences,
+            ...policy_ids.map((id) => ({
+              id,
+              name: agentPolicies[id].name,
+              type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            })),
+          ];
+        }
+
+        return currentPackSO.references;
+      };
 
       await savedObjectsClient.update(
         packSavedObjectType,
         request.params.id,
         {
           enabled,
-          ...pickBy(
-            {
-              name,
-              description,
-              queries: queries && convertPackQueriesToSO(queries),
-              updated_at: moment().toISOString(),
-              updated_by: currentUser,
-            },
-            (value) => !isEmpty(value)
-          ),
+          name,
+          description: description || '',
+          queries: queries && convertPackQueriesToSO(queries),
+          updated_at: moment().toISOString(),
+          updated_by: currentUser,
         },
-        policy_ids
-          ? {
-              refresh: 'wait_for',
-              references: policy_ids.map((id) => ({
-                id,
-                name: agentPolicies[id].name,
-                type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-              })),
-            }
-          : {
-              refresh: 'wait_for',
-            }
+        {
+          refresh: 'wait_for',
+          references: getUpdatedReferences(),
+        }
       );
 
       const currentAgentPolicyIds = map(
@@ -178,7 +184,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
               if (packagePolicy) {
                 return packagePolicyService?.update(
-                  savedObjectsClient,
+                  internalSavedObjectsClient,
                   esClient,
                   packagePolicy.id,
                   produce<PackagePolicy>(packagePolicy, (draft) => {
@@ -206,7 +212,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               if (!packagePolicy) return;
 
               return packagePolicyService?.update(
-                savedObjectsClient,
+                internalSavedObjectsClient,
                 esClient,
                 packagePolicy.id,
                 produce<PackagePolicy>(packagePolicy, (draft) => {
@@ -233,7 +239,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             const packagePolicy = find(currentPackagePolicies, ['policy_id', agentPolicyId]);
             if (packagePolicy) {
               return packagePolicyService?.update(
-                savedObjectsClient,
+                internalSavedObjectsClient,
                 esClient,
                 packagePolicy.id,
                 produce<PackagePolicy>(packagePolicy, (draft) => {
@@ -255,7 +261,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
             if (packagePolicy) {
               return packagePolicyService?.update(
-                savedObjectsClient,
+                internalSavedObjectsClient,
                 esClient,
                 packagePolicy.id,
                 produce<PackagePolicy>(packagePolicy, (draft) => {
@@ -287,7 +293,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
             if (packagePolicy) {
               return packagePolicyService?.update(
-                savedObjectsClient,
+                internalSavedObjectsClient,
                 esClient,
                 packagePolicy.id,
                 produce<PackagePolicy>(packagePolicy, (draft) => {

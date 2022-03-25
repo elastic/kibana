@@ -23,6 +23,9 @@ export const FIRST_SEEN = 'indicator.first_seen';
 export const LAST_SEEN = 'indicator.last_seen';
 export const PROVIDER = 'indicator.provider';
 export const REFERENCE = 'indicator.reference';
+export const FEED_NAME = 'feed.name';
+
+export const FEED_NAME_PATH = `threat.${FEED_NAME}`;
 
 export const INDICATOR_FIRSTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${FIRST_SEEN}`;
 export const INDICATOR_LASTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${LAST_SEEN}`;
@@ -58,14 +61,5 @@ export const EVENT_ENRICHMENT_INDICATOR_FIELD_MAP = {
 export const DEFAULT_EVENT_ENRICHMENT_FROM = 'now-30d';
 export const DEFAULT_EVENT_ENRICHMENT_TO = 'now';
 
-export const CTI_DATASET_KEY_MAP: { [key: string]: string } = {
-  'AbuseCH URL': 'ti_abusech.url',
-  'AbuseCH Malware': 'ti_abusech.malware',
-  'AbuseCH MalwareBazaar': 'ti_abusech.malwarebazaar',
-  'AlienVault OTX': 'ti_otx.threat',
-  'Anomali Limo': 'ti_anomali.limo',
-  'Anomali Threatstream': 'ti_anomali.threatstream',
-  MISP: 'ti_misp.threat',
-  ThreatQuotient: 'ti_threatq.threat',
-  Cybersixgill: 'ti_cybersixgill.threat',
-};
+export const TI_INTEGRATION_PREFIX = 'ti';
+export const OTHER_TI_DATASET_KEY = '_others_ti_';

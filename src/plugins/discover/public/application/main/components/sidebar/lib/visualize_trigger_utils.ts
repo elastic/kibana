@@ -13,7 +13,9 @@ import {
   visualizeGeoFieldTrigger,
 } from '../../../../../../../ui_actions/public';
 import { getUiActions } from '../../../../../kibana_services';
-import { IndexPatternField, KBN_FIELD_TYPES } from '../../../../../../../data/public';
+import type { DataViewField } from '../../../../../../../data_views/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../data/public';
+import { APP_ID } from '../../../../../../common';
 
 function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
@@ -42,7 +44,7 @@ async function getCompatibleActions(
 }
 
 export function triggerVisualizeActions(
-  field: IndexPatternField,
+  field: DataViewField,
   indexPatternId: string | undefined,
   contextualFields: string[]
 ) {
@@ -52,12 +54,13 @@ export function triggerVisualizeActions(
     indexPatternId,
     fieldName: field.name,
     contextualFields,
+    originatingApp: APP_ID,
   };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
 
 export interface VisualizeInformation {
-  field: IndexPatternField;
+  field: DataViewField;
   href?: string;
 }
 
@@ -66,10 +69,10 @@ export interface VisualizeInformation {
  * that has a compatible visualize uiAction.
  */
 export async function getVisualizeInformation(
-  field: IndexPatternField,
+  field: DataViewField,
   indexPatternId: string | undefined,
   contextualFields: string[],
-  multiFields: IndexPatternField[] = []
+  multiFields: DataViewField[] = []
 ): Promise<VisualizeInformation | undefined> {
   if (field.name === '_id' || !indexPatternId) {
     // _id fields are not visualizeable in ES

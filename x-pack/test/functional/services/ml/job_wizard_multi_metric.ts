@@ -33,6 +33,10 @@ export function MachineLearningJobWizardMultiMetricProvider({ getService }: FtrP
       await this.assertSplitFieldSelection([identifier]);
     },
 
+    async scrollSplitFieldIntoView() {
+      await testSubjects.scrollIntoView('mlMultiMetricSplitFieldSelect');
+    },
+
     async assertDetectorSplitExists(splitField: string) {
       await testSubjects.existOrFail(`mlDataSplit > mlDataSplitTitle ${splitField}`);
       await testSubjects.existOrFail(`mlDataSplit > mlSplitCard front`);

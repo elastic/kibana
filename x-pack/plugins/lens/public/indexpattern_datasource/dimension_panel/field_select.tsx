@@ -18,14 +18,14 @@ import {
   EuiComboBoxProps,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { OperationType } from '../indexpattern';
 import { LensFieldIcon } from '../lens_field_icon';
-import { DataType } from '../../types';
-import { OperationSupportMatrix } from './operation_support';
-import { IndexPattern, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
 import { TruncatedLabel } from './truncated_label';
+import type { OperationType } from '../indexpattern';
+import type { DataType } from '../../types';
+import type { OperationSupportMatrix } from './operation_support';
+import type { IndexPattern, IndexPatternPrivateState } from '../types';
 export interface FieldChoice {
   type: 'field';
   field: string;
@@ -37,12 +37,13 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   selectedOperationType?: OperationType;
   selectedField?: string;
   incompleteOperation?: OperationType;
-  operationSupportMatrix: OperationSupportMatrix;
+  operationByField: OperationSupportMatrix['operationByField'];
   onChoose: (choice: FieldChoice) => void;
   onDeleteColumn?: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
   fieldIsInvalid: boolean;
   markAllFieldsCompatible?: boolean;
+  'data-test-subj'?: string;
 }
 
 const DEFAULT_COMBOBOX_WIDTH = 305;
@@ -54,15 +55,15 @@ export function FieldSelect({
   incompleteOperation,
   selectedOperationType,
   selectedField,
-  operationSupportMatrix,
+  operationByField,
   onChoose,
   onDeleteColumn,
   existingFields,
   fieldIsInvalid,
   markAllFieldsCompatible,
+  ['data-test-subj']: dataTestSub,
   ...rest
 }: FieldSelectProps) {
-  const { operationByField } = operationSupportMatrix;
   const memoizedFieldOptions = useMemo(() => {
     const fields = Object.keys(operationByField).sort();
 
@@ -85,6 +86,9 @@ export function FieldSelect({
       return items
         .filter((field) => currentIndexPattern.getFieldByName(field)?.displayName)
         .map((field) => {
+          const compatible =
+            markAllFieldsCompatible || isCompatibleWithCurrentOperation(field) ? 1 : 0;
+          const exists = containsData(field);
           return {
             label: currentIndexPattern.getFieldByName(field)?.displayName,
             value: {
@@ -99,30 +103,16 @@ export function FieldSelect({
                   ? currentOperationType
                   : operationByField[field]!.values().next().value,
             },
-            exists: containsData(field),
-            compatible: markAllFieldsCompatible || isCompatibleWithCurrentOperation(field),
+            exists,
+            compatible,
+            className: classNames({
+              'lnFieldSelect__option--incompatible': !compatible,
+              'lnFieldSelect__option--nonExistant': !exists,
+            }),
+            'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${field}`,
           };
         })
-        .sort((a, b) => {
-          if (a.compatible && !b.compatible) {
-            return -1;
-          }
-          if (!a.compatible && b.compatible) {
-            return 1;
-          }
-          return 0;
-        })
-        .map(({ label, value, compatible, exists }) => ({
-          label,
-          value,
-          className: classNames({
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            'lnFieldSelect__option--incompatible': !compatible,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            'lnFieldSelect__option--nonExistant': !exists,
-          }),
-          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${value.field}`,
-        }));
+        .sort((a, b) => b.compatible - a.compatible);
     }
 
     const [metaFields, nonMetaFields] = partition(
@@ -207,7 +197,7 @@ export function FieldSelect({
         fullWidth
         compressed
         isClearable={false}
-        data-test-subj="indexPattern-dimension-field"
+        data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
         placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
           defaultMessage: 'Field',
         })}
@@ -219,7 +209,8 @@ export function FieldSelect({
                 {
                   label: fieldIsInvalid
                     ? selectedField
-                    : currentIndexPattern.getFieldByName(selectedField)?.displayName,
+                    : currentIndexPattern.getFieldByName(selectedField)?.displayName ??
+                      selectedField,
                   value: { type: 'field', field: selectedField },
                 },
               ]

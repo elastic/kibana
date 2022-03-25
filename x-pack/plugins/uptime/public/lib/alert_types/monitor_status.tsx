@@ -12,12 +12,12 @@ import {
   ALERT_END,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_REASON,
-} from '@kbn/rule-data-utils/technical_field_names';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
+} from '@kbn/rule-data-utils';
 
 import { AlertTypeInitializer } from '.';
-import { getMonitorRouteFromMonitorId } from './common';
+import { getMonitorRouteFromMonitorId } from '../../../common/utils/get_monitor_url';
 import { MonitorStatusTranslations } from '../../../common/translations';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
@@ -27,7 +27,7 @@ const { defaultActionMessage, description } = MonitorStatusTranslations;
 
 const MonitorStatusAlert = React.lazy(() => import('./lazy_wrapper/monitor_status'));
 
-let validateFunc: (alertParams: any) => ValidationResult;
+let validateFunc: (ruleParams: any) => ValidationResult;
 
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   core,
@@ -39,10 +39,10 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   documentationUrl(docLinks) {
     return `${docLinks.links.observability.monitorStatus}`;
   },
-  alertParamsExpression: (params: any) => (
+  ruleParamsExpression: (params: any) => (
     <MonitorStatusAlert core={core} plugins={plugins} params={params} />
   ),
-  validate: (alertParams: any) => {
+  validate: (ruleParams: any) => {
     if (!validateFunc) {
       (async function loadValidate() {
         const { validateMonitorStatusParams } = await import(
@@ -51,7 +51,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
         validateFunc = validateMonitorStatusParams;
       })();
     }
-    return validateFunc ? validateFunc(alertParams) : ({} as ValidationResult);
+    return validateFunc ? validateFunc(ruleParams) : ({} as ValidationResult);
   },
   defaultActionMessage,
   requiresAppContext: false,

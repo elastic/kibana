@@ -11,8 +11,7 @@ import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 // @ts-ignore
 import { aggToComponent } from '../lib/agg_to_component';
-// @ts-ignore
-import { isMetricEnabled } from '../../lib/check_ui_restrictions';
+import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
 import { getInvalidAggComponent } from './invalid_agg';
 // @ts-expect-error not typed yet
 import { seriesChangeHandler } from '../lib/series_change_handler';

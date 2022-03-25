@@ -7,7 +7,16 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { AgentPolicy, FullAgentPolicy, NewAgentPolicy } from '../types';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
+
+import type {
+  AgentPolicy,
+  FullAgentPolicy,
+  NewAgentPolicy,
+  PreconfiguredAgentPolicy,
+} from '../types';
+
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -56,6 +65,7 @@ jest.mock('./agents');
 jest.mock('./package_policy');
 jest.mock('./app_context');
 jest.mock('./agent_policies/full_agent_policy');
+jest.mock('uuid/v5');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
@@ -194,6 +204,59 @@ describe('agent policy', () => {
     });
   });
 
+  describe('removeOutputFromAll', () => {
+    let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
+      ReturnType<typeof agentPolicyService['update']>
+    >;
+    beforeEach(() => {
+      mockedAgentPolicyServiceUpdate = jest
+        .spyOn(agentPolicyService, 'update')
+        .mockResolvedValue({} as any);
+    });
+
+    afterEach(() => {
+      mockedAgentPolicyServiceUpdate.mockRestore();
+    });
+    it('should update policies using deleted output', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test1',
+            attributes: {
+              data_output_id: 'output-id-123',
+              monitoring_output_id: 'output-id-another-output',
+            },
+          },
+          {
+            id: 'test2',
+            attributes: {
+              data_output_id: 'output-id-another-output',
+              monitoring_output_id: 'output-id-123',
+            },
+          },
+        ],
+      } as any);
+
+      await agentPolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
+
+      expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
+      expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test1',
+        { data_output_id: null, monitoring_output_id: 'output-id-another-output' }
+      );
+      expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test2',
+        { data_output_id: 'output-id-another-output', monitoring_output_id: null }
+      );
+    });
+  });
+
   describe('update', () => {
     it('should update is_managed property, if given', async () => {
       // ignore unrelated unique name constraint
@@ -227,7 +290,7 @@ describe('agent policy', () => {
     });
   });
 
-  describe('createFleetServerPolicy', () => {
+  describe('deployPolicy', () => {
     beforeEach(() => {
       mockedGetFullAgentPolicy.mockReset();
     });
@@ -244,7 +307,7 @@ describe('agent policy', () => {
         type: 'mocked',
         references: [],
       });
-      await agentPolicyService.createFleetServerPolicy(soClient, 'policy123');
+      await agentPolicyService.deployPolicy(soClient, 'policy123');
 
       expect(esClient.create).not.toBeCalled();
     });
@@ -270,7 +333,7 @@ describe('agent policy', () => {
         type: 'mocked',
         references: [],
       });
-      await agentPolicyService.createFleetServerPolicy(soClient, 'policy123');
+      await agentPolicyService.deployPolicy(soClient, 'policy123');
 
       expect(esClient.create).toBeCalledWith(
         expect.objectContaining({
@@ -284,6 +347,49 @@ describe('agent policy', () => {
           }),
         })
       );
+    });
+
+    describe('ensurePreconfiguredAgentPolicy', () => {
+      it('should use preconfigured id if provided for policy', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        const preconfiguredAgentPolicy: PreconfiguredAgentPolicy = {
+          id: 'my-unique-id',
+          name: 'My Preconfigured Policy',
+          package_policies: [
+            {
+              name: 'my-package-policy',
+              id: 'my-package-policy-id',
+              package: {
+                name: 'test-package',
+              },
+            },
+          ],
+        };
+
+        soClient.find.mockResolvedValueOnce({ total: 0, saved_objects: [], page: 1, per_page: 10 });
+        soClient.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+        soClient.create.mockResolvedValueOnce({
+          id: 'my-unique-id',
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {},
+          references: [],
+        });
+
+        await agentPolicyService.ensurePreconfiguredAgentPolicy(
+          soClient,
+          esClient,
+          preconfiguredAgentPolicy
+        );
+
+        expect(soClient.create).toHaveBeenCalledWith(
+          AGENT_POLICY_SAVED_OBJECT_TYPE,
+          expect.anything(),
+          expect.objectContaining({ id: 'my-unique-id' })
+        );
+      });
     });
   });
 });

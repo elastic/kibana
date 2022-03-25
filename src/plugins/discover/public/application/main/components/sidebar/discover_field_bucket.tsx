@@ -11,13 +11,13 @@ import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@e
 import { i18n } from '@kbn/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
 import { Bucket } from './types';
-import { IndexPatternField } from '../../../../../../data/public';
+import { DataViewField } from '../../../../../../data_views/public';
 import './discover_field_bucket.scss';
 
 interface Props {
   bucket: Bucket;
-  field: IndexPatternField;
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  field: DataViewField;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {

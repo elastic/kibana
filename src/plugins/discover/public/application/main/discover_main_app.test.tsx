@@ -6,35 +6,41 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DiscoverMainApp } from './discover_main_app';
-import { discoverServiceMock } from '../../__mocks__/services';
 import { savedSearchMock } from '../../__mocks__/saved_search';
-import { createSearchSessionMock } from '../../__mocks__/search_session';
 import { SavedObject } from '../../../../../core/types';
-import { IndexPatternAttributes } from '../../../../data/common';
+import type { DataViewAttributes } from '../../../../data_views/public';
 import { setHeaderActionMenuMounter } from '../../kibana_services';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { discoverServiceMock } from '../../__mocks__/services';
+import { Router } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 
 setHeaderActionMenuMounter(jest.fn());
 
 describe('DiscoverMainApp', () => {
   test('renders', () => {
-    const { history } = createSearchSessionMock();
     const indexPatternList = [indexPatternMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
-    }) as unknown as Array<SavedObject<IndexPatternAttributes>>;
-
+    }) as unknown as Array<SavedObject<DataViewAttributes>>;
     const props = {
       indexPatternList,
-      services: discoverServiceMock,
       savedSearch: savedSearchMock,
-      navigateTo: jest.fn(),
-      history,
     };
+    const history = createMemoryHistory({
+      initialEntries: ['/'],
+    });
 
-    const component = mountWithIntl(<DiscoverMainApp {...props} />);
+    const component = mountWithIntl(
+      <Router history={history}>
+        <KibanaContextProvider services={discoverServiceMock}>
+          <DiscoverMainApp {...props} />
+        </KibanaContextProvider>
+      </Router>
+    );
 
     expect(findTestSubject(component, 'indexPattern-switch-link').text()).toBe(
       indexPatternMock.title

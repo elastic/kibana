@@ -11,9 +11,6 @@ import { TelemetryReceiver } from '../receiver';
 import { SecurityTelemetryTaskConfig } from '../task';
 import { PackagePolicy } from '../../../../../fleet/common/types/models/package_policy';
 
-/**
- * Creates a mocked Telemetry Events Sender
- */
 export const createMockTelemetryEventsSender = (
   enableTelemetry?: boolean
 ): jest.Mocked<TelemetryEventsSender> => {
@@ -37,6 +34,7 @@ export const createMockTelemetryReceiver = (
 ): jest.Mocked<TelemetryReceiver> => {
   return {
     start: jest.fn(),
+    fetchClusterInfo: jest.fn(),
     fetchLicenseInfo: jest.fn(),
     copyLicenseFields: jest.fn(),
     fetchFleetAgents: jest.fn(),
@@ -46,12 +44,10 @@ export const createMockTelemetryReceiver = (
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
     fetchDetectionRules: jest.fn().mockReturnValue({ body: null }),
+    fetchEndpointMetadata: jest.fn(),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };
 
-/**
- * Creates a mocked package policy
- */
 export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> => {
   return {
     id: jest.fn(),
@@ -65,9 +61,6 @@ export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> => {
   } as unknown as jest.Mocked<PackagePolicy>;
 };
 
-/**
- * Creates a mocked Security Telemetry Task Config
- */
 export const createMockSecurityTelemetryTask = (
   testType?: string,
   testLastTimestamp?: string
@@ -83,9 +76,6 @@ export const createMockSecurityTelemetryTask = (
   } as unknown as jest.Mocked<SecurityTelemetryTaskConfig>;
 };
 
-/**
- * Creates a mocked Task Instance
- */
 export const createMockTaskInstance = (testId: string, testType: string): ConcreteTaskInstance => {
   return {
     id: testId,

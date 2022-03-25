@@ -48,6 +48,7 @@ import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
 import { SerializedMapState, SerializedUiState } from './types';
+import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
@@ -62,6 +63,7 @@ export class SavedMap {
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
   private _tags: string[] = [];
+  private _defaultLayerWizard: string;
 
   constructor({
     defaultLayers = [],
@@ -71,6 +73,7 @@ export class SavedMap {
     originatingApp,
     stateTransfer,
     originatingPath,
+    defaultLayerWizard,
   }: {
     defaultLayers?: LayerDescriptor[];
     mapEmbeddableInput?: MapEmbeddableInput;
@@ -79,6 +82,7 @@ export class SavedMap {
     originatingApp?: string;
     stateTransfer?: EmbeddableStateTransfer;
     originatingPath?: string;
+    defaultLayerWizard?: string;
   }) {
     this._defaultLayers = defaultLayers;
     this._mapEmbeddableInput = mapEmbeddableInput;
@@ -88,6 +92,7 @@ export class SavedMap {
     this._originatingPath = originatingPath;
     this._stateTransfer = stateTransfer;
     this._store = createMapStore();
+    this._defaultLayerWizard = defaultLayerWizard || '';
   }
 
   public getStore() {
@@ -103,11 +108,13 @@ export class SavedMap {
         description: '',
       };
     } else {
-      const doc = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
-      const { references, sharingSavedObjectProps, ...savedObjectAttributes } = doc;
+      const { attributes: doc, metaInfo } = await getMapAttributeService().unwrapAttributes(
+        this._mapEmbeddableInput
+      );
+      const { references, ...savedObjectAttributes } = doc;
       this._attributes = savedObjectAttributes;
-      if (sharingSavedObjectProps) {
-        this._sharingSavedObjectProps = sharingSavedObjectProps;
+      if (metaInfo?.sharingSavedObjectProps) {
+        this._sharingSavedObjectProps = metaInfo.sharingSavedObjectProps;
       }
       const savedObjectsTagging = getSavedObjectsTagging();
       if (savedObjectsTagging && references && references.length) {
@@ -202,6 +209,10 @@ export class SavedMap {
       this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
     }
     this._initialLayerListConfig = copyPersistentState(layerList);
+
+    if (this._defaultLayerWizard) {
+      this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));
+    }
   }
 
   hasUnsavedChanges = () => {

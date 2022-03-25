@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { ColumnHeaderOptions } from '../../../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../../../common/types';
 import { getIconFromType } from '../../../../../../common/components/event_details/helpers';
 import * as i18n from '../translations';
 

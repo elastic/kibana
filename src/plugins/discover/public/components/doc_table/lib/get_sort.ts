@@ -7,22 +7,19 @@
  */
 
 import { isPlainObject } from 'lodash';
-import { IndexPattern } from '../../../../../data/public';
+import { DataView } from '../../../../../data_views/public';
 
 export type SortPairObj = Record<string, string>;
 export type SortPairArr = [string, string];
 export type SortPair = SortPairArr | SortPairObj;
 export type SortInput = SortPair | SortPair[];
 
-export function isSortable(fieldName: string, indexPattern: IndexPattern): boolean {
+export function isSortable(fieldName: string, indexPattern: DataView): boolean {
   const field = indexPattern.getFieldByName(fieldName);
   return !!(field && field.sortable);
 }
 
-function createSortObject(
-  sortPair: SortInput,
-  indexPattern: IndexPattern
-): SortPairObj | undefined {
+function createSortObject(sortPair: SortInput, indexPattern: DataView): SortPairObj | undefined {
   if (
     Array.isArray(sortPair) &&
     sortPair.length === 2 &&
@@ -48,7 +45,7 @@ export function isLegacySort(sort: SortPair[] | SortPair): sort is SortPair {
  * @param {object} indexPattern used for determining default sort
  * @returns Array<{object}> an array of sort objects
  */
-export function getSort(sort: SortPair[] | SortPair, indexPattern: IndexPattern): SortPairObj[] {
+export function getSort(sort: SortPair[] | SortPair, indexPattern: DataView): SortPairObj[] {
   if (Array.isArray(sort)) {
     if (isLegacySort(sort)) {
       // To stay compatible with legacy sort, which just supported a single sort field
@@ -65,7 +62,7 @@ export function getSort(sort: SortPair[] | SortPair, indexPattern: IndexPattern)
  * compared to getSort it doesn't return an array of objects, it returns an array of arrays
  * [[fieldToSort: directionToSort]]
  */
-export function getSortArray(sort: SortPair[], indexPattern: IndexPattern): SortPairArr[] {
+export function getSortArray(sort: SortPair[], indexPattern: DataView): SortPairArr[] {
   return getSort(sort, indexPattern).reduce((acc: SortPairArr[], sortPair) => {
     const entries = Object.entries(sortPair);
     if (entries && entries[0]) {

@@ -1,7 +1,7 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-ui-shared-deps-src"
 PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-src"
@@ -23,8 +23,6 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "flot_charts/package.json",
-  "theme/package.json",
   "package.json",
   "README.md"
 ]
@@ -34,24 +32,25 @@ RUNTIME_DEPS = [
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-analytics",
   "//packages/kbn-babel-preset",
+  "//packages/kbn-flot-charts",
   "//packages/kbn-i18n",
   "//packages/kbn-i18n-react",
   "//packages/kbn-monaco",
   "//packages/kbn-std",
   "//packages/kbn-ui-shared-deps-npm",
+  "//packages/kbn-ui-theme",
 ]
 
 TYPES_DEPS = [
   "//packages/elastic-datemath:npm_module_types",
-  "//packages/elastic-safer-lodash-set",
-  "//packages/kbn-analytics",
-  "//packages/kbn-babel-preset",
+  "//packages/elastic-safer-lodash-set:npm_module_types",
+  "//packages/kbn-analytics:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/kbn-monaco",
-  "//packages/kbn-std",
-  "//packages/kbn-ui-shared-deps-npm",
-  "@npm//@elastic/eui",
+  "//packages/kbn-monaco:npm_module_types",
+  "//packages/kbn-std:npm_module_types",
+  "//packages/kbn-ui-shared-deps-npm:npm_module_types",
+  "//packages/kbn-ui-theme:npm_module_types",
   "@npm//webpack",
 ]
 
@@ -77,11 +76,9 @@ ts_project(
   deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
 )
 
@@ -106,7 +103,7 @@ webpack(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types", ":shared_built_assets"],
+  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -122,6 +119,23 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

@@ -29,7 +29,11 @@ interface TestResult {
   context: TransformHealthAlertContext;
 }
 
-type Transform = estypes.Transform & { id: string; description?: string; sync: object };
+type Transform = estypes.TransformGetTransformTransformSummary & {
+  id: string;
+  description?: string;
+  sync: object;
+};
 
 type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthAlertRule[] };
 
@@ -64,7 +68,7 @@ export function transformHealthServiceProvider(
           allow_no_match: true,
           size: 1000,
         })
-      ).body.transforms as Transform[];
+      ).transforms as Transform[];
 
       transformsResponse.forEach((t) => {
         transformsDict.set(t.id, t);
@@ -94,7 +98,7 @@ export function transformHealthServiceProvider(
         await esClient.transform.getTransformStats({
           transform_id: transformIds.join(','),
         })
-      ).body.transforms;
+      ).transforms;
 
       return transformsStats
         .filter((t) => t.state !== 'started' && t.state !== 'indexing')

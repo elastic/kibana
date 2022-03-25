@@ -6,11 +6,10 @@
  */
 
 import * as Rx from 'rxjs';
-import { CoreSetup, HttpServerInfo, PluginInitializerContext } from 'src/core/server';
-import { coreMock } from 'src/core/server/mocks';
-import { LevelLogger } from '../lib/level_logger';
-import { createMockConfigSchema, createMockLevelLogger } from '../test_helpers';
-import { ReportingConfigType } from './';
+import type { CoreSetup, HttpServerInfo, Logger, PluginInitializerContext } from 'kibana/server';
+import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
+import { createMockConfigSchema } from '../test_helpers';
+import type { ReportingConfigType } from './';
 import { createConfig$ } from './create_config';
 
 const createMockConfig = (
@@ -20,14 +19,14 @@ const createMockConfig = (
 describe('Reporting server createConfig$', () => {
   let mockCoreSetup: CoreSetup;
   let mockInitContext: PluginInitializerContext;
-  let mockLogger: jest.Mocked<LevelLogger>;
+  let mockLogger: jest.Mocked<Logger>;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockInitContext = coreMock.createPluginInitializerContext(
       createMockConfigSchema({ kibanaServer: {} })
     );
-    mockLogger = createMockLevelLogger();
+    mockLogger = loggingSystemMock.createLogger();
   });
 
   afterEach(() => {
@@ -78,11 +77,14 @@ describe('Reporting server createConfig$', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "capture": Object {
-          "browser": Object {
-            "chromium": Object {
-              "disableSandbox": true,
-            },
+          "loadDelay": 1,
+          "maxAttempts": 1,
+          "timeouts": Object {
+            "openUrl": 100,
+            "renderComplete": 100,
+            "waitForElements": 100,
           },
+          "zoom": 1,
         },
         "csv": Object {},
         "encryptionKey": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
@@ -103,47 +105,6 @@ describe('Reporting server createConfig$', () => {
         },
       }
     `);
-    expect(mockLogger.warn).not.toHaveBeenCalled();
-  });
-
-  it('uses user-provided disableSandbox: false', async () => {
-    mockInitContext = coreMock.createPluginInitializerContext(
-      createMockConfigSchema({
-        encryptionKey: '888888888888888888888888888888888',
-        capture: { browser: { chromium: { disableSandbox: false } } },
-      })
-    );
-    const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
-
-    expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: false });
-    expect(mockLogger.warn).not.toHaveBeenCalled();
-  });
-
-  it('uses user-provided disableSandbox: true', async () => {
-    mockInitContext = coreMock.createPluginInitializerContext(
-      createMockConfigSchema({
-        encryptionKey: '888888888888888888888888888888888',
-        capture: { browser: { chromium: { disableSandbox: true } } },
-      })
-    );
-    const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
-
-    expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: true });
-    expect(mockLogger.warn).not.toHaveBeenCalled();
-  });
-
-  it('provides a default for disableSandbox', async () => {
-    mockInitContext = coreMock.createPluginInitializerContext(
-      createMockConfigSchema({
-        encryptionKey: '888888888888888888888888888888888',
-      })
-    );
-    const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
-
-    expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: expect.any(Boolean) });
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 

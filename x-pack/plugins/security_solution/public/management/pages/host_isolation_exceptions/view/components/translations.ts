@@ -60,7 +60,7 @@ export const IP_LABEL = i18n.translate(
 export const IP_ERROR = i18n.translate(
   'xpack.securitySolution.hostIsolationExceptions.form.ip.error',
   {
-    defaultMessage: 'The ip is invalid. Only IPv4 with optional CIDR is supported',
+    defaultMessage: 'The IP is invalid. Only IPv4 with optional CIDR is supported',
   }
 );
 

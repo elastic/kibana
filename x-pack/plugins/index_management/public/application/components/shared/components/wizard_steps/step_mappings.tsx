@@ -28,12 +28,13 @@ import {
 interface Props {
   onChange: (content: Forms.Content) => void;
   esDocsBase: string;
+  esNodesPlugins: string[];
   defaultValue?: { [key: string]: any };
   indexSettings?: IndexSettings;
 }
 
 export const StepMappings: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue = {}, onChange, indexSettings, esDocsBase }) => {
+  ({ defaultValue = {}, onChange, indexSettings, esDocsBase, esNodesPlugins }) => {
     const [mappings, setMappings] = useState(defaultValue);
     const { docLinks } = useAppContext();
 
@@ -82,7 +83,7 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
-                <LoadMappingsFromJsonButton onJson={onJsonLoaded} />
+                <LoadMappingsFromJsonButton onJson={onJsonLoaded} esNodesPlugins={esNodesPlugins} />
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
@@ -111,6 +112,7 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
           onChange={onMappingsEditorUpdate}
           indexSettings={indexSettings}
           docLinks={docLinks}
+          esNodesPlugins={esNodesPlugins}
         />
 
         <EuiSpacer size="m" />

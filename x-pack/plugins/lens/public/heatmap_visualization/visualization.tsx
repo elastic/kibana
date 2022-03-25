@@ -9,11 +9,12 @@ import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import { HeatmapIcon } from '../../../../../src/plugins/chart_expressions/expression_heatmap/public';
 import type { OperationMetadata, Visualization } from '../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
@@ -28,8 +29,7 @@ import {
   LENS_HEATMAP_ID,
 } from './constants';
 import { HeatmapToolbar } from './toolbar_component';
-import { LensIconChartHeatmap } from '../assets/chart_heatmap';
-import { CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
+import { CUSTOM_PALETTE } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import type { CustomPaletteParams } from '../../common';
@@ -58,7 +58,7 @@ function getAxisName(axis: 'x' | 'y') {
 }
 
 export const isBucketed = (op: OperationMetadata) => op.isBucketed && op.scale === 'ordinal';
-const isNumericMetric = (op: OperationMetadata) => op.dataType === 'number';
+const isNumericMetric = (op: OperationMetadata) => op.dataType === 'number' && !op.isStaticValue;
 
 export const filterOperationsAxis = (op: OperationMetadata) =>
   isBucketed(op) || op.scale === 'interval';
@@ -74,7 +74,6 @@ function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerTy
       isVisible: true,
       position: Position.Right,
       maxLines: 1,
-      shouldTruncate: true,
       type: LEGEND_FUNCTION,
     },
     gridConfig: {
@@ -82,6 +81,8 @@ function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerTy
       isCellLabelVisible: false,
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
+      isYAxisTitleVisible: true,
+      isXAxisTitleVisible: true,
     },
   };
 }
@@ -105,12 +106,12 @@ export const getHeatmapVisualization = ({
   visualizationTypes: [
     {
       id: 'heatmap',
-      icon: LensIconChartHeatmap,
+      icon: HeatmapIcon,
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
-        defaultMessage: 'Heatmap',
+        defaultMessage: 'Heat map',
       }),
       groupLabel: groupLabelForHeatmap,
-      showExperimentalBadge: true,
+      showExperimentalBadge: false,
       sortPriority: 1,
     },
   ],
@@ -206,10 +207,7 @@ export const getHeatmapVisualization = ({
                   ? {
                       columnId: state.valueAccessor,
                       triggerIcon: 'colorBy',
-                      palette: getStopsForFixedMode(
-                        displayStops,
-                        activePalette?.params?.colorStops
-                      ),
+                      palette: displayStops.map(({ color }) => color),
                     }
                   : {
                       columnId: state.valueAccessor,
@@ -287,7 +285,7 @@ export const getHeatmapVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.heatmap.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
       },
     ];
@@ -315,11 +313,14 @@ export const getHeatmapVisualization = ({
           type: 'function',
           function: FUNCTION_NAME,
           arguments: {
-            title: [attributes?.title ?? ''],
-            description: [attributes?.description ?? ''],
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],
+            lastRangeIsRightOpen: [
+              state.palette?.params?.continuity
+                ? ['above', 'all'].includes(state.palette.params.continuity)
+                : true,
+            ],
             palette: state.palette?.params
               ? [
                   paletteService
@@ -339,6 +340,7 @@ export const getHeatmapVisualization = ({
                     arguments: {
                       isVisible: [state.legend.isVisible],
                       position: [state.legend.position],
+                      legendSize: state.legend.legendSize ? [state.legend.legendSize] : [],
                     },
                   },
                 ],
@@ -359,22 +361,18 @@ export const getHeatmapVisualization = ({
                       strokeColor: state.gridConfig.strokeColor
                         ? [state.gridConfig.strokeColor]
                         : [],
-                      cellHeight: state.gridConfig.cellHeight ? [state.gridConfig.cellHeight] : [],
-                      cellWidth: state.gridConfig.cellWidth ? [state.gridConfig.cellWidth] : [],
                       // cells
                       isCellLabelVisible: [state.gridConfig.isCellLabelVisible],
                       // Y-axis
                       isYAxisLabelVisible: [state.gridConfig.isYAxisLabelVisible],
-                      yAxisLabelWidth: state.gridConfig.yAxisLabelWidth
-                        ? [state.gridConfig.yAxisLabelWidth]
-                        : [],
-                      yAxisLabelColor: state.gridConfig.yAxisLabelColor
-                        ? [state.gridConfig.yAxisLabelColor]
-                        : [],
+                      isYAxisTitleVisible: [state.gridConfig.isYAxisTitleVisible ?? false],
+                      yTitle: state.gridConfig.yTitle ? [state.gridConfig.yTitle] : [],
                       // X-axis
                       isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible
                         ? [state.gridConfig.isXAxisLabelVisible]
                         : [],
+                      isXAxisTitleVisible: [state.gridConfig.isXAxisTitleVisible ?? false],
+                      xTitle: state.gridConfig.xTitle ? [state.gridConfig.xTitle] : [],
                     },
                   },
                 ],
@@ -403,8 +401,6 @@ export const getHeatmapVisualization = ({
           type: 'function',
           function: FUNCTION_NAME,
           arguments: {
-            title: [''],
-            description: [''],
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],
@@ -446,8 +442,12 @@ export const getHeatmapVisualization = ({
                       isCellLabelVisible: [false],
                       // Y-axis
                       isYAxisLabelVisible: [false],
+                      isYAxisTitleVisible: [state.gridConfig.isYAxisTitleVisible],
+                      yTitle: [state.gridConfig.yTitle ?? ''],
                       // X-axis
                       isXAxisLabelVisible: [false],
+                      isXAxisTitleVisible: [state.gridConfig.isXAxisTitleVisible],
+                      xTitle: [state.gridConfig.xTitle ?? ''],
                     },
                   },
                 ],

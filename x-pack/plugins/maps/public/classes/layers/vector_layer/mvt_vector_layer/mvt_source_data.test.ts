@@ -13,12 +13,12 @@ jest.mock('uuid/v4', () => {
 
 import sinon from 'sinon';
 import { MockSyncContext } from '../../__fixtures__/mock_sync_context';
-import { ITiledSingleLayerVectorSource } from '../../../sources/tiled_single_layer_vector_source';
+import { IMvtVectorSource } from '../../../sources/vector_source';
 import { DataRequest } from '../../../util/data_request';
 import { syncMvtSourceData } from './mvt_source_data';
 
 const mockSource = {
-  getLayerName: () => {
+  getTileSourceLayer: () => {
     return 'aggs';
   },
   getMinZoom: () => {
@@ -27,14 +27,8 @@ const mockSource = {
   getMaxZoom: () => {
     return 14;
   },
-  getUrlTemplateWithMeta: () => {
-    return {
-      refreshTokenParamName: 'token',
-      layerName: 'aggs',
-      minSourceZoom: 4,
-      maxSourceZoom: 14,
-      urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',
-    };
+  getTileUrl: () => {
+    return 'https://example.com/{x}/{y}/{z}.pbf';
   },
   isTimeAware: () => {
     return true;
@@ -48,7 +42,7 @@ const mockSource = {
   isGeoGridPrecisionAware: () => {
     return false;
   },
-} as unknown as ITiledSingleLayerVectorSource;
+} as unknown as IMvtVectorSource;
 
 describe('syncMvtSourceData', () => {
   test('Should sync source data when there are no previous data request', async () => {
@@ -78,12 +72,11 @@ describe('syncMvtSourceData', () => {
     const call = syncContext.stopLoading.getCall(0);
     const sourceData = call.args[2];
     expect(sourceData).toEqual({
-      minSourceZoom: 4,
-      maxSourceZoom: 14,
-      layerName: 'aggs',
-      refreshTokenParamName: 'token',
-      urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
-      urlToken: '12345',
+      tileMinZoom: 4,
+      tileMaxZoom: 14,
+      tileSourceLayer: 'aggs',
+      tileUrl: 'https://example.com/{x}/{y}/{z}.pbf',
+      refreshToken: '12345',
     });
   });
 
@@ -107,12 +100,11 @@ describe('syncMvtSourceData', () => {
         },
         getData: () => {
           return {
-            minSourceZoom: 4,
-            maxSourceZoom: 14,
-            layerName: 'aggs',
-            refreshTokenParamName: 'token',
-            urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
-            urlToken: '12345',
+            tileMinZoom: 4,
+            tileMaxZoom: 14,
+            tileSourceLayer: 'aggs',
+            tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
+            refreshToken: '12345',
           };
         },
       } as unknown as DataRequest,
@@ -124,6 +116,47 @@ describe('syncMvtSourceData', () => {
     sinon.assert.notCalled(syncContext.startLoading);
     // @ts-expect-error
     sinon.assert.notCalled(syncContext.stopLoading);
+  });
+
+  test('Should re-sync with forceRefreshDueToDrawing when there are no changes in source state or search state', async () => {
+    const syncContext = {
+      ...new MockSyncContext({ dataFilters: {} }),
+      forceRefreshDueToDrawing: true,
+    };
+    const prevRequestMeta = {
+      ...syncContext.dataFilters,
+      applyGlobalQuery: true,
+      applyGlobalTime: true,
+      applyForceRefresh: true,
+      fieldNames: [],
+      sourceMeta: {},
+      isForceRefresh: false,
+    };
+
+    await syncMvtSourceData({
+      layerId: 'layer1',
+      prevDataRequest: {
+        getMeta: () => {
+          return prevRequestMeta;
+        },
+        getData: () => {
+          return {
+            tileMinZoom: 4,
+            tileMaxZoom: 14,
+            tileSourceLayer: 'aggs',
+            tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
+            refreshToken: '12345',
+          };
+        },
+      } as unknown as DataRequest,
+      requestMeta: { ...prevRequestMeta },
+      source: mockSource,
+      syncContext,
+    });
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.startLoading);
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.stopLoading);
   });
 
   test('Should re-sync when there are changes to search state', async () => {
@@ -146,12 +179,11 @@ describe('syncMvtSourceData', () => {
         },
         getData: () => {
           return {
-            minSourceZoom: 4,
-            maxSourceZoom: 14,
-            layerName: 'aggs',
-            refreshTokenParamName: 'token',
-            urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
-            urlToken: '12345',
+            tileMinZoom: 4,
+            tileMaxZoom: 14,
+            tileSourceLayer: 'aggs',
+            tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
+            refreshToken: '12345',
           };
         },
       } as unknown as DataRequest,
@@ -173,7 +205,7 @@ describe('syncMvtSourceData', () => {
     sinon.assert.calledOnce(syncContext.stopLoading);
   });
 
-  test('Should re-sync when layerName source state changes: ', async () => {
+  test('Should re-sync when tileSourceLayer source state changes: ', async () => {
     const syncContext = new MockSyncContext({ dataFilters: {} });
     const prevRequestMeta = {
       ...syncContext.dataFilters,
@@ -193,12 +225,11 @@ describe('syncMvtSourceData', () => {
         },
         getData: () => {
           return {
-            minSourceZoom: 4,
-            maxSourceZoom: 14,
-            layerName: 'barfoo', // layerName is different then mockSource
-            refreshTokenParamName: 'token',
-            urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
-            urlToken: '12345',
+            tileMinZoom: 4,
+            tileMaxZoom: 14,
+            tileSourceLayer: 'barfoo', // tileSourceLayer is different then mockSource
+            tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
+            refreshToken: '12345',
           };
         },
       } as unknown as DataRequest,
@@ -232,12 +263,11 @@ describe('syncMvtSourceData', () => {
         },
         getData: () => {
           return {
-            minSourceZoom: 2, // minSourceZoom is different then mockSource
-            maxSourceZoom: 14,
-            layerName: 'aggs',
-            refreshTokenParamName: 'token',
-            urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
-            urlToken: '12345',
+            tileMinZoom: 2, // tileMinZoom is different then mockSource
+            tileMaxZoom: 14,
+            tileSourceLayer: 'aggs',
+            tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
+            refreshToken: '12345',
           };
         },
       } as unknown as DataRequest,
@@ -271,12 +301,11 @@ describe('syncMvtSourceData', () => {
         },
         getData: () => {
           return {
-            minSourceZoom: 4,
-            maxSourceZoom: 9, // minSourceZoom is different then mockSource
-            layerName: 'aggs',
-            refreshTokenParamName: 'token',
-            urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
-            urlToken: '12345',
+            tileMinZoom: 4,
+            tileMaxZoom: 9, // tileMinZoom is different then mockSource
+            tileSourceLayer: 'aggs',
+            tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
+            refreshToken: '12345',
           };
         },
       } as unknown as DataRequest,

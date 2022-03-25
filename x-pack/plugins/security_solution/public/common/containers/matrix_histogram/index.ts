@@ -56,6 +56,7 @@ export const useMatrixHistogram = ({
   isPtrIncluded,
   onError,
   stackByField,
+  runtimeMappings,
   startDate,
   threshold,
   skip = false,
@@ -97,6 +98,7 @@ export const useMatrixHistogram = ({
       histogramType: initialHistogramType ?? histogramType,
       timerange: initialTimerange,
       stackByField,
+      runtimeMappings,
       threshold,
       ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
       ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
@@ -226,6 +228,14 @@ export const useMatrixHistogram = ({
       abortCtrl.current.abort();
     };
   }, [matrixHistogramRequest, hostsSearch, skip]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   const runMatrixHistogramSearch = useCallback(
     (to: string, from: string) => {

@@ -49,6 +49,17 @@ describe('aggregateRulesRoute', () => {
         pending: 1,
         unknown: 0,
       },
+      ruleEnabledStatus: {
+        disabled: 1,
+        enabled: 40,
+      },
+      ruleMutedStatus: {
+        muted: 2,
+        unmuted: 39,
+      },
+      ruleSnoozedStatus: {
+        snoozed: 4,
+      },
     };
     rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
@@ -65,12 +76,23 @@ describe('aggregateRulesRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "rule_enabled_status": Object {
+            "disabled": 1,
+            "enabled": 40,
+          },
           "rule_execution_status": Object {
             "active": 23,
             "error": 2,
             "ok": 15,
             "pending": 1,
             "unknown": 0,
+          },
+          "rule_muted_status": Object {
+            "muted": 2,
+            "unmuted": 39,
+          },
+          "rule_snoozed_status": Object {
+            "snoozed": 4,
           },
         },
       }
@@ -89,12 +111,23 @@ describe('aggregateRulesRoute', () => {
 
     expect(res.ok).toHaveBeenCalledWith({
       body: {
+        rule_enabled_status: {
+          disabled: 1,
+          enabled: 40,
+        },
         rule_execution_status: {
           ok: 15,
           error: 2,
           active: 23,
           pending: 1,
           unknown: 0,
+        },
+        rule_muted_status: {
+          muted: 2,
+          unmuted: 39,
+        },
+        rule_snoozed_status: {
+          snoozed: 4,
         },
       },
     });

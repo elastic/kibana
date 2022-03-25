@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import { overwrite } from '../../helpers';
-import { esQuery } from '../../../../../../../data/server';
 
 export function splitByFilters(req, panel, series, esQueryConfig, seriesIndex) {
   return (next) => (doc) => {
     if (series.split_mode === 'filters' && series.split_filters) {
       series.split_filters.forEach((filter) => {
-        const builtEsQuery = esQuery.buildEsQuery(
+        const builtEsQuery = buildEsQuery(
           seriesIndex.indexPattern,
           [filter.filter],
           [],

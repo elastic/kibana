@@ -6,12 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
-import {
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_RULES_STATUS_URL,
-} from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -33,7 +32,6 @@ import {
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
-import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -89,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
          When the api key is updated before / while the rule is executing, the alert
          executor no longer has access to a service to update the rule status
          saved object in Elasticsearch. Because of this, we cannot set the rule into
-         a 'failure' state, so the user ends up seeing 'going to run' as that is the
+         a 'failure' state, so the user ends up seeing 'running' as that is the
          last status set for the rule before it erupts in an error that cannot be
          recorded inside of the executor.
 
@@ -105,18 +103,9 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           await waitForRuleSuccessOrStatus(supertest, log, body.id);
-
-          const { body: statusBody } = await supertest
-            .post(DETECTION_ENGINE_RULES_STATUS_URL)
-            .set('kbn-xsrf', 'true')
-            .send({ ids: [body.id] })
-            .expect(200);
-
-          expect(statusBody[body.id].current_status.status).to.eql('succeeded');
         });
 
-        // TODO: does the below test work?
-        it.skip('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
+        it('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
           const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
@@ -124,17 +113,23 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, log, body.id, 'partial failure');
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            body.id,
+            RuleExecutionStatus['partial failure']
+          );
 
-          const { body: statusBody } = await supertest
-            .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          const { body: rule } = await supertest
+            .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send({ ids: [body.id] })
+            .query({ id: body.id })
             .expect(200);
 
-          expect(statusBody[body.id].current_status.status).to.eql('partial failure');
-          expect(statusBody[body.id].current_status.last_success_message).to.eql(
-            'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.'
+          // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+          expect(rule?.execution_summary?.last_execution.status).to.eql('partial failure');
+          expect(rule?.execution_summary?.last_execution.message).to.eql(
+            'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
           );
         });
 
@@ -146,15 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, log, body.id, 'succeeded');
-
-          const { body: statusBody } = await supertest
-            .post(DETECTION_ENGINE_RULES_STATUS_URL)
-            .set('kbn-xsrf', 'true')
-            .send({ ids: [body.id] })
-            .expect(200);
-
-          expect(statusBody[body.id].current_status.status).to.eql('succeeded');
+          await waitForRuleSuccessOrStatus(supertest, log, body.id, RuleExecutionStatus.succeeded);
         });
 
         it('should create a single rule without an input index', async () => {
@@ -318,21 +305,23 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyId = body.id;
 
         await waitForAlertToComplete(supertest, log, bodyId);
-        await waitForRuleSuccessOrStatus(supertest, log, bodyId, 'partial failure');
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          bodyId,
+          RuleExecutionStatus['partial failure']
+        );
         await sleep(5000);
 
-        const { body: statusBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+        const { body: rule } = await supertest
+          .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ids: [bodyId] })
+          .query({ id: bodyId })
           .expect(200);
 
-        expect((statusBody as RuleStatusResponse)[bodyId].current_status?.status).to.eql(
-          'partial failure'
-        );
-        expect(
-          (statusBody as RuleStatusResponse)[bodyId].current_status?.last_success_message
-        ).to.eql(
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        expect(rule?.execution_summary?.last_execution.status).to.eql('partial failure');
+        expect(rule?.execution_summary?.last_execution.message).to.eql(
           'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1"]'
         );
       });
@@ -349,17 +338,23 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         const bodyId = body.id;
 
-        await waitForRuleSuccessOrStatus(supertest, log, bodyId, 'partial failure');
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          bodyId,
+          RuleExecutionStatus['partial failure']
+        );
         await sleep(5000);
         await waitForSignalsToBePresent(supertest, log, 2, [bodyId]);
 
-        const { body: statusBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+        const { body: rule } = await supertest
+          .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ids: [bodyId] })
+          .query({ id: bodyId })
           .expect(200);
 
-        expect(statusBody[bodyId].current_status.status).to.eql('partial failure');
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        expect(rule?.execution_summary?.last_execution.status).to.eql('partial failure');
       });
     });
   });

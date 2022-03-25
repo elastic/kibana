@@ -33,6 +33,7 @@ import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import type { HistogramItem } from '../../../../../common/correlations/types';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -42,6 +43,7 @@ import { ChartContainer } from '../chart_container';
 export interface TransactionDistributionChartData {
   id: string;
   histogram: HistogramItem[];
+  areaSeriesColor: string;
 }
 
 interface TransactionDistributionChartProps {
@@ -49,9 +51,7 @@ interface TransactionDistributionChartProps {
   hasData: boolean;
   markerCurrentTransaction?: number;
   markerValue: number;
-  markerPercentile: number;
   onChartSelection?: BrushEndListener;
-  palette?: string[];
   selection?: [number, number];
   status: FETCH_STATUS;
 }
@@ -98,19 +98,13 @@ export function TransactionDistributionChart({
   hasData,
   markerCurrentTransaction,
   markerValue,
-  markerPercentile,
   onChartSelection,
-  palette,
   selection,
   status,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
-
-  const areaSeriesColors = palette ?? [
-    euiTheme.eui.euiColorVis1,
-    euiTheme.eui.euiColorVis2,
-  ];
+  const markerPercentile = DEFAULT_PERCENTILE_THRESHOLD;
 
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
@@ -162,28 +156,31 @@ export function TransactionDistributionChart({
         <Chart>
           <Settings
             rotation={0}
-            theme={{
+            theme={[
+              {
+                legend: {
+                  spacingBuffer: 100,
+                },
+                areaSeriesStyle: {
+                  line: {
+                    visible: true,
+                  },
+                },
+                axes: {
+                  tickLine: {
+                    visible: true,
+                    size: 5,
+                    padding: 10,
+                  },
+                  tickLabel: {
+                    fontSize: 10,
+                    fill: euiTheme.eui.euiColorMediumShade,
+                    padding: 0,
+                  },
+                },
+              },
               ...chartTheme,
-              legend: {
-                spacingBuffer: 100,
-              },
-              areaSeriesStyle: {
-                line: {
-                  visible: true,
-                },
-              },
-              axes: {
-                ...chartTheme.axes,
-                tickLine: {
-                  size: 5,
-                },
-                tickLabel: {
-                  fontSize: 10,
-                  fill: euiTheme.eui.euiColorMediumShade,
-                  padding: 0,
-                },
-              },
-            }}
+            ]}
             showLegend={true}
             legendPosition={Position.Bottom}
             onBrushEnd={onChartSelection}
@@ -265,7 +262,7 @@ export function TransactionDistributionChart({
               curve={CurveType.CURVE_STEP_AFTER}
               xAccessor="key"
               yAccessors={['doc_count']}
-              color={areaSeriesColors[i]}
+              color={d.areaSeriesColor}
               fit="lookahead"
               // To make the area appear without the orphaned points technique,
               // we changed the original data to replace values of 0 with 0.0001.

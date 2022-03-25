@@ -15,7 +15,6 @@ import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
-import { enableRule } from './enable_rule';
 import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 class UpdateError extends Error {
@@ -27,9 +26,7 @@ class UpdateError extends Error {
 }
 
 export const updateRules = async ({
-  spaceId,
   rulesClient,
-  ruleStatusClient,
   defaultOutputIndex,
   existingRule,
   ruleUpdate,
@@ -104,7 +101,7 @@ export const updateRules = async ({
   if (existingRule.enabled && enabled === false) {
     await rulesClient.disable({ id: existingRule.id });
   } else if (!existingRule.enabled && enabled === true) {
-    await enableRule({ rule: existingRule, rulesClient, ruleStatusClient, spaceId });
+    await rulesClient.enable({ id: existingRule.id });
   }
   return { ...update, enabled };
 };

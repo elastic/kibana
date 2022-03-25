@@ -2,13 +2,10 @@
   "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
     "declaration": true,
-    "declarationMap": true,
     "emitDeclarationOnly": true,
     "isolatedModules": true,
     "outDir": "./target_types",
     "rootDir": "src",
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-telemetry-tools/src",
     "types": [
       "jest",
       "node"

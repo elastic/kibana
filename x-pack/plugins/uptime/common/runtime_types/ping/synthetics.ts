@@ -13,6 +13,52 @@ import * as t from 'io-ts';
  * check failures and removes a lot of unnecessary fields that our Synthetics UI code
  * does not care about.
  */
+export const SyntheticsDataType = t.partial({
+  index: t.number,
+  journey: t.type({
+    id: t.string,
+    name: t.string,
+  }),
+  error: t.partial({
+    message: t.string,
+    name: t.string,
+    stack: t.string,
+  }),
+  package_version: t.string,
+  step: t.type({
+    status: t.string,
+    index: t.number,
+    name: t.string,
+    duration: t.type({
+      us: t.number,
+    }),
+  }),
+  type: t.string,
+  blob: t.string,
+  blob_mime: t.string,
+  payload: t.partial({
+    duration: t.number,
+    index: t.number,
+    is_navigation_request: t.boolean,
+    message: t.string,
+    method: t.string,
+    name: t.string,
+    params: t.partial({
+      homepage: t.string,
+    }),
+    source: t.string,
+    start: t.number,
+    status: t.string,
+    ts: t.number,
+    type: t.string,
+    url: t.string,
+    end: t.number,
+    text: t.string,
+  }),
+  isFullScreenshot: t.boolean,
+  isScreenshotRef: t.boolean,
+});
+
 export const JourneyStepType = t.intersection([
   t.partial({
     monitor: t.partial({
@@ -32,23 +78,9 @@ export const JourneyStepType = t.intersection([
         name: t.string,
       }),
     }),
-    synthetics: t.partial({
-      error: t.partial({
-        message: t.string,
-        stack: t.string,
-      }),
-      payload: t.partial({
-        message: t.string,
-        source: t.string,
-        status: t.string,
-        text: t.string,
-      }),
-      step: t.type({
-        index: t.number,
-        name: t.string,
-      }),
-      isFullScreenshot: t.boolean,
-      isScreenshotRef: t.boolean,
+    synthetics: SyntheticsDataType,
+    error: t.type({
+      message: t.string,
     }),
   }),
   t.type({

@@ -7,12 +7,7 @@
 import { RequestHandler } from 'src/core/server';
 import { kibanaResponseFactory } from '../../../../../../src/core/server';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  coreMock,
-} from '../../../../../../src/core/server/mocks';
+import { httpServerMock, httpServiceMock, coreMock } from '../../../../../../src/core/server/mocks';
 
 import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
 
@@ -22,8 +17,6 @@ import { handleEsError } from '../../shared_imports';
 
 import { register } from './update_route';
 import { ScopedClusterClientMock } from './types';
-
-const { createApiResponse } = elasticsearchServiceMock;
 
 // Re-implement the mock that was imported directly from `x-pack/mocks`
 function createCoreRequestHandlerContextMock() {
@@ -84,44 +77,36 @@ describe('UPDATE remote clusters', () => {
 
   describe('success', () => {
     test('updates remote cluster', async () => {
-      remoteInfoMockFn.mockResolvedValueOnce(
-        createApiResponse({
-          body: {
-            test: {
-              connected: true,
-              mode: 'sniff',
-              seeds: ['127.0.0.1:9300'],
-              num_nodes_connected: 1,
-              max_connections_per_cluster: 3,
-              initial_connect_timeout: '30s',
-              skip_unavailable: false,
-            },
-          },
-        })
-      );
-      putSettingsMockFn.mockResolvedValueOnce(
-        createApiResponse({
-          body: {
-            acknowledged: true,
-            persistent: {
-              cluster: {
-                remote: {
-                  test: {
-                    connected: true,
-                    mode: 'sniff',
-                    seeds: ['127.0.0.1:9300'],
-                    num_nodes_connected: 1,
-                    max_connections_per_cluster: 3,
-                    initial_connect_timeout: '30s',
-                    skip_unavailable: true,
-                  },
-                },
+      remoteInfoMockFn.mockResponseOnce({
+        test: {
+          connected: true,
+          mode: 'sniff',
+          seeds: ['127.0.0.1:9300'],
+          num_nodes_connected: 1,
+          max_connections_per_cluster: 3,
+          initial_connect_timeout: '30s',
+          skip_unavailable: false,
+        },
+      });
+      putSettingsMockFn.mockResponseOnce({
+        acknowledged: true,
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                connected: true,
+                mode: 'sniff',
+                seeds: ['127.0.0.1:9300'],
+                num_nodes_connected: 1,
+                max_connections_per_cluster: 3,
+                initial_connect_timeout: '30s',
+                skip_unavailable: true,
               },
             },
-            transient: {},
           },
-        })
-      );
+        },
+        transient: {},
+      });
 
       const mockRequest = createMockRequest();
 
@@ -163,43 +148,35 @@ describe('UPDATE remote clusters', () => {
     });
 
     test('updates v1 proxy cluster', async () => {
-      remoteInfoMockFn.mockResolvedValueOnce(
+      remoteInfoMockFn.mockResponseOnce({
         // @ts-expect-error not full interface
-        createApiResponse({
-          body: {
-            test: {
-              connected: true,
-              initial_connect_timeout: '30s',
-              skip_unavailable: false,
-              seeds: ['127.0.0.1:9300'],
-              max_connections_per_cluster: 20,
-              num_nodes_connected: 1,
-            },
-          },
-        })
-      );
-      putSettingsMockFn.mockResolvedValueOnce(
-        createApiResponse({
-          body: {
-            acknowledged: true,
-            persistent: {
-              cluster: {
-                remote: {
-                  test: {
-                    connected: true,
-                    proxy_address: '127.0.0.1:9300',
-                    initial_connect_timeout: '30s',
-                    skip_unavailable: true,
-                    mode: 'proxy',
-                    proxy_socket_connections: 18,
-                  },
-                },
+        test: {
+          connected: true,
+          initial_connect_timeout: '30s',
+          skip_unavailable: false,
+          seeds: ['127.0.0.1:9300'],
+          max_connections_per_cluster: 20,
+          num_nodes_connected: 1,
+        },
+      });
+      putSettingsMockFn.mockResponseOnce({
+        acknowledged: true,
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                connected: true,
+                proxy_address: '127.0.0.1:9300',
+                initial_connect_timeout: '30s',
+                skip_unavailable: true,
+                mode: 'proxy',
+                proxy_socket_connections: 18,
               },
             },
-            transient: {},
           },
-        })
-      );
+        },
+        transient: {},
+      });
 
       const mockRequest = createMockRequest({
         proxyAddress: '127.0.0.1:9300',
@@ -249,11 +226,7 @@ describe('UPDATE remote clusters', () => {
 
   describe('failure', () => {
     test('returns 404 if remote cluster does not exist', async () => {
-      remoteInfoMockFn.mockResolvedValueOnce(
-        createApiResponse({
-          body: {} as any,
-        })
-      );
+      remoteInfoMockFn.mockResponseOnce({} as any);
 
       const mockRequest = createMockRequest({
         seeds: ['127.0.0.1:9300'],
@@ -273,26 +246,18 @@ describe('UPDATE remote clusters', () => {
     });
 
     test('returns 400 if ES did not acknowledge remote cluster', async () => {
-      remoteInfoMockFn.mockResolvedValueOnce(
-        createApiResponse({
-          body: {
-            test: {
-              connected: true,
-              mode: 'sniff',
-              seeds: ['127.0.0.1:9300'],
-              num_nodes_connected: 1,
-              max_connections_per_cluster: 3,
-              initial_connect_timeout: '30s',
-              skip_unavailable: false,
-            },
-          },
-        })
-      );
-      putSettingsMockFn.mockResolvedValueOnce(
-        createApiResponse({
-          body: {} as any,
-        })
-      );
+      remoteInfoMockFn.mockResponseOnce({
+        test: {
+          connected: true,
+          mode: 'sniff',
+          seeds: ['127.0.0.1:9300'],
+          num_nodes_connected: 1,
+          max_connections_per_cluster: 3,
+          initial_connect_timeout: '30s',
+          skip_unavailable: false,
+        },
+      });
+      putSettingsMockFn.mockResponseOnce({} as any);
 
       const mockRequest = createMockRequest({
         seeds: ['127.0.0.1:9300'],

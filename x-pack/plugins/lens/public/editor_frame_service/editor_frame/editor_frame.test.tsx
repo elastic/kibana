@@ -32,7 +32,7 @@ import { EditorFrame, EditorFrameProps } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -475,6 +475,9 @@ describe('editor_frame', () => {
         datasourceId: 'testDatasource',
         getOperationForColumnId: jest.fn(),
         getTableSpec: jest.fn(),
+        getVisualDefaults: jest.fn(),
+        getSourceId: jest.fn(),
+        getFilters: jest.fn(),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 

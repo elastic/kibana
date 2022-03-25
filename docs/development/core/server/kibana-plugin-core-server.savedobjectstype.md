@@ -4,15 +4,12 @@
 
 ## SavedObjectsType interface
 
+
 <b>Signature:</b>
 
 ```typescript
 export interface SavedObjectsType<Attributes = any> 
 ```
-
-## Remarks
-
-This is only internal for now, and will only be public when we expose the registerType API
 
 ## Properties
 
@@ -57,4 +54,5 @@ Note: migration function(s) can be optionally specified for any of these version
 |  [migrations?](./kibana-plugin-core-server.savedobjectstype.migrations.md) | SavedObjectMigrationMap \| (() =&gt; SavedObjectMigrationMap) | <i>(Optional)</i> An optional map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) or a function returning a map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used to migrate the type. |
 |  [name](./kibana-plugin-core-server.savedobjectstype.name.md) | string | The name of the type, which is also used as the internal id. |
 |  [namespaceType](./kibana-plugin-core-server.savedobjectstype.namespacetype.md) | SavedObjectsNamespaceType | The [namespace type](./kibana-plugin-core-server.savedobjectsnamespacetype.md) for the type. |
+|  [schemas?](./kibana-plugin-core-server.savedobjectstype.schemas.md) | SavedObjectsValidationMap \| (() =&gt; SavedObjectsValidationMap) | <i>(Optional)</i> An optional schema that can be used to validate the attributes of the type.<!-- -->When provided, calls to [create](./kibana-plugin-core-server.savedobjectsclient.create.md) will be validated against this schema.<!-- -->See [SavedObjectsValidationMap](./kibana-plugin-core-server.savedobjectsvalidationmap.md) for more details. |
 

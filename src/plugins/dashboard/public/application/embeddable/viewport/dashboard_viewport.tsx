@@ -13,11 +13,17 @@ import { DashboardContainer, DashboardReactContextValue } from '../dashboard_con
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { ControlGroupContainer } from '../../../../../presentation_util/public';
+import {
+  CalloutProps,
+  ControlGroupContainer,
+  LazyControlsCallout,
+} from '../../../../../controls/public';
+import { withSuspense } from '../../../services/presentation_util';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
   controlGroup?: ControlGroupContainer;
+  controlsEnabled?: boolean;
 }
 
 interface State {
@@ -30,9 +36,11 @@ interface State {
   isEmbeddedExternally?: boolean;
 }
 
+const ControlsCallout = withSuspense<CalloutProps>(LazyControlsCallout);
+
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
-  public readonly context!: DashboardReactContextValue;
+  public declare readonly context: DashboardReactContextValue;
 
   private controlsRoot: React.RefObject<HTMLDivElement>;
 
@@ -93,13 +101,25 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   };
 
   public render() {
-    const { container } = this.props;
+    const { container, controlsEnabled, controlGroup } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
     const { isEmbeddedExternally, isFullScreenMode, panelCount, title, description, useMargins } =
       this.state;
+
     return (
       <>
-        <div className="dshDashboardViewport-controlGroup" ref={this.controlsRoot} />
+        {controlsEnabled ? (
+          <>
+            {isEditMode && panelCount !== 0 && controlGroup?.getPanelCount() === 0 ? (
+              <ControlsCallout
+                getCreateControlButton={() => {
+                  return controlGroup?.getCreateControlButton('callout');
+                }}
+              />
+            ) : null}
+            <div className="dshDashboardViewport-controls" ref={this.controlsRoot} />
+          </>
+        ) : null}
         <div
           data-shared-items-count={panelCount}
           data-shared-items-container

@@ -10,19 +10,22 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
   describe('errors', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/invalid_scripted_field');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/invalid_scripted_field'
+      );
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(async function () {
-      await esArchiver.unload('x-pack/test/functional/es_archives/invalid_scripted_field');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
 
     // this is the same test as in OSS but it catches different error message issue in different licences

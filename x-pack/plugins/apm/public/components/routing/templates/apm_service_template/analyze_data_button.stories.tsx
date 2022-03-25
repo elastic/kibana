@@ -48,9 +48,9 @@ export default {
             <APMServiceContext.Provider
               value={{
                 agentName,
-                alerts: [],
                 transactionTypes: [],
                 serviceName,
+                fallbackToTransactions: false,
               }}
             >
               <KibanaContext.Provider>

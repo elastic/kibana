@@ -32,10 +32,9 @@ export type NodesUsageGetter = (esClient: ElasticsearchClient) => Promise<{ node
 export async function fetchNodesUsage(
   esClient: ElasticsearchClient
 ): Promise<estypes.NodesUsageResponse> {
-  const { body } = await esClient.nodes.usage({
+  return await esClient.nodes.usage({
     timeout: TIMEOUT,
   });
-  return body;
 }
 
 /**

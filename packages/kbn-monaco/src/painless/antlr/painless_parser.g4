@@ -155,7 +155,7 @@ primary
     | listinitializer                     # listinit
     | mapinitializer                      # mapinit
     | ID                                  # variable
-    | ID arguments                        # calllocal
+    | (ID | DOLLAR) arguments             # calllocal
     | NEW type arguments                  # newobject
     ;
 

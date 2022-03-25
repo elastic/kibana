@@ -175,6 +175,7 @@ export async function clearCacheIndices(indices: string[]) {
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
   return response;
 }
+
 export async function unfreezeIndices(indices: string[]) {
   const body = JSON.stringify({
     indices,
@@ -194,14 +195,17 @@ export async function loadIndexSettings(indexName: string) {
 }
 
 export async function updateIndexSettings(indexName: string, body: object) {
-  const response = await httpService.httpClient.put(
-    `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
-    {
-      body: JSON.stringify(body),
-    }
-  );
+  const response = await sendRequest({
+    path: `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
+    method: 'put',
+    body: JSON.stringify(body),
+  });
+
   // Only track successful requests.
-  uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_UPDATE_SETTINGS);
+  if (!response.error) {
+    uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_UPDATE_SETTINGS);
+  }
+
   return response;
 }
 
@@ -298,5 +302,12 @@ export function simulateIndexTemplate(template: { [key: string]: any }) {
   }).then((result) => {
     uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_TEMPLATE_SIMULATE);
     return result;
+  });
+}
+
+export function useLoadNodesPlugins() {
+  return useRequest<string[]>({
+    path: `${API_BASE_PATH}/nodes/plugins`,
+    method: 'get',
   });
 }

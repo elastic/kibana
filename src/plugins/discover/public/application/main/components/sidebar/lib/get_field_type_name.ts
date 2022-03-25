@@ -64,6 +64,10 @@ export function getFieldTypeName(type: string) {
       return i18n.translate('discover.fieldNameIcons.nestedFieldAriaLabel', {
         defaultMessage: 'Nested field',
       });
+    case 'version':
+      return i18n.translate('discover.fieldNameIcons.versionFieldAriaLabel', {
+        defaultMessage: 'Version field',
+      });
     default:
       return i18n.translate('discover.fieldNameIcons.unknownFieldAriaLabel', {
         defaultMessage: 'Unknown field',

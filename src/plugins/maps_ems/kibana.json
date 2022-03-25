@@ -9,5 +9,8 @@
   "configPath": ["map"],
   "ui": true,
   "server": true,
+  "optionalPlugins": [
+    "licensing"
+  ],
   "extraPublicDirs": ["common"]
 }

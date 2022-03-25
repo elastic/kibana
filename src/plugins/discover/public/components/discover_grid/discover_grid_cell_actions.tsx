@@ -9,7 +9,8 @@
 import React, { useContext } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { flattenHit, IndexPatternField } from '../../../../data/common';
+import { DataViewField } from '../../../../data_views/public';
+import { flattenHit } from '../../../../data/public';
 import { DiscoverGridContext } from './discover_grid_context';
 
 export const FilterInBtn = ({
@@ -78,7 +79,7 @@ export const FilterOutBtn = ({
   );
 };
 
-export function buildCellActions(field: IndexPatternField) {
+export function buildCellActions(field: DataViewField) {
   if (!field.filterable) {
     return undefined;
   }

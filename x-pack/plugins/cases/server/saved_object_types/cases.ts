@@ -12,7 +12,7 @@ import {
   SavedObjectsExportTransformContext,
   SavedObjectsType,
 } from 'src/core/server';
-import { CASE_SAVED_OBJECT } from '../../common';
+import { CASE_SAVED_OBJECT } from '../../common/constants';
 import { ESCaseAttributes } from '../services/cases/types';
 import { handleExport } from './import_export/export';
 import { caseMigrations } from './migrations';
@@ -124,10 +124,6 @@ export const createCaseSavedObjectType = (
         type: 'keyword',
       },
       tags: {
-        type: 'keyword',
-      },
-      // collection or individual
-      type: {
         type: 'keyword',
       },
       updated_at: {

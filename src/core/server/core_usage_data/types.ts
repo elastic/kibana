@@ -177,6 +177,7 @@ export interface CoreServicesUsageData {
       docsDeleted: number;
       storeSizeBytes: number;
       primaryStoreSizeBytes: number;
+      savedObjectsDocsCount: number;
     }[];
     legacyUrlAliases: {
       activeCount: number;

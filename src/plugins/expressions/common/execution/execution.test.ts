@@ -310,6 +310,13 @@ describe('Execution', () => {
       const { result } = await run('var name="foo"', { variables });
       expect(result).toBe('bar');
     });
+
+    test('can access variables set from the parent expression', async () => {
+      const { result } = await run(
+        'var_set name="a" value="bar" | var_set name="b" value={var name="a"} | var name="b"'
+      );
+      expect(result).toBe('bar');
+    });
   });
 
   describe('inspector adapters', () => {
@@ -721,6 +728,65 @@ describe('Execution', () => {
           message: '[var_set] > var_set requires an "name" argument',
         },
       });
+    });
+  });
+
+  describe('when arguments are not valid', () => {
+    let executor: ReturnType<typeof createUnitTestExecutor>;
+
+    beforeEach(() => {
+      const validateArg: ExpressionFunctionDefinition<
+        'validateArg',
+        unknown,
+        { arg: unknown },
+        unknown
+      > = {
+        name: 'validateArg',
+        args: {
+          arg: {
+            help: '',
+            multi: true,
+            options: ['valid'],
+            strict: true,
+          },
+        },
+        help: '',
+        fn: () => 'something',
+      };
+      executor = createUnitTestExecutor();
+      executor.registerFunction(validateArg);
+    });
+
+    it('errors when argument is invalid', async () => {
+      const { result } = await executor.run('validateArg arg="invalid"', null).toPromise();
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message:
+            "[validateArg] > Value 'invalid' is not among the allowed options for argument 'arg': 'valid'",
+        },
+      });
+    });
+
+    it('errors when at least one value is invalid', async () => {
+      const { result } = await executor
+        .run('validateArg arg="valid" arg="invalid"', null)
+        .toPromise();
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message:
+            "[validateArg] > Value 'invalid' is not among the allowed options for argument 'arg': 'valid'",
+        },
+      });
+    });
+
+    it('does not error when argument is valid', async () => {
+      const { result } = await executor.run('validateArg arg="valid"', null).toPromise();
+
+      expect(result).toBe('something');
     });
   });
 

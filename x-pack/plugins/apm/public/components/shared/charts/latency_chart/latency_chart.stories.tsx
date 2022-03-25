@@ -5,30 +5,10 @@
  * 2.0.
  */
 
-import {
-  ALERT_DURATION,
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_RULE_TYPE_ID,
-  ALERT_EVALUATION_VALUE,
-  ALERT_INSTANCE_ID,
-  ALERT_SEVERITY,
-  ALERT_START,
-  ALERT_STATUS,
-  ALERT_UUID,
-  TIMESTAMP,
-  ALERT_RULE_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
-  SPACE_IDS,
-} from '@kbn/rule-data-utils/technical_field_names';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
@@ -38,11 +18,10 @@ import { MockUrlParamsContextProvider } from '../../../../context/url_params_con
 import {
   APIReturnType,
   createCallApmApi,
-} from '../../../../services/rest/createCallApmApi';
+} from '../../../../services/rest/create_call_apm_api';
 import { LatencyChart } from './';
 
 interface Args {
-  alertsResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>;
   latencyChartResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 }
 
@@ -58,7 +37,7 @@ const stories: Meta<Args> = {
   },
   decorators: [
     (StoryComponent, { args }) => {
-      const { alertsResponse, latencyChartResponse } = args as Args;
+      const { latencyChartResponse } = args as Args;
       const serviceName = 'testService';
 
       const apmPluginContextMock = {
@@ -102,10 +81,10 @@ const stories: Meta<Args> = {
               >
                 <APMServiceContext.Provider
                   value={{
-                    alerts: alertsResponse.alerts,
                     serviceName,
                     transactionType,
                     transactionTypes: [],
+                    fallbackToTransactions: false,
                   }}
                 >
                   <ChartPointerEventContextProvider>
@@ -124,100 +103,10 @@ const stories: Meta<Args> = {
 export default stories;
 
 export const Example: Story<Args> = () => {
-  return (
-    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
-  );
+  return <LatencyChart height={300} kuery="" />;
 };
 Example.args = {
-  alertsResponse: {
-    alerts: [
-      {
-        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
-        [ALERT_EVALUATION_VALUE]: [2001708.19],
-        'service.name': ['frontend-rum'],
-        [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
-        [ALERT_DURATION]: [10000000000],
-        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
-        tags: ['apm', 'service.name:frontend-rum'],
-        'transaction.type': ['page-load'],
-        [ALERT_RULE_PRODUCER]: ['apm'],
-        [ALERT_RULE_CONSUMER]: ['apm'],
-        [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
-        [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
-        'event.action': ['active'],
-        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
-        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
-        'processor.event': ['transaction'],
-        [ALERT_EVALUATION_THRESHOLD]: [500000],
-        [ALERT_START]: ['2021-06-02T04:00:00.000Z'],
-        'event.kind': ['state'],
-        [ALERT_RULE_CATEGORY]: ['Latency threshold'],
-        [SPACE_IDS]: [],
-      },
-      {
-        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
-
-        [ALERT_EVALUATION_VALUE]: [2001708.19],
-        'service.name': ['frontend-rum'],
-        [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
-        [ALERT_DURATION]: [10000000000],
-        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
-        tags: ['apm', 'service.name:frontend-rum'],
-        'transaction.type': ['page-load'],
-        [ALERT_RULE_PRODUCER]: ['apm'],
-        [ALERT_RULE_CONSUMER]: ['apm'],
-        [ALERT_SEVERITY]: ['warning'],
-        [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478181'],
-        [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
-        'event.action': ['active'],
-        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
-        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
-        'processor.event': ['transaction'],
-        [ALERT_EVALUATION_THRESHOLD]: [500000],
-        [ALERT_START]: ['2021-06-02T10:45:00.000Z'],
-        'event.kind': ['state'],
-        [ALERT_RULE_CATEGORY]: ['Latency threshold'],
-        [SPACE_IDS]: [],
-      },
-      {
-        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
-
-        [ALERT_EVALUATION_VALUE]: [2001708.19],
-        'service.name': ['frontend-rum'],
-        [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
-        [ALERT_DURATION]: [1000000000],
-        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
-        tags: ['apm', 'service.name:frontend-rum'],
-        'transaction.type': ['page-load'],
-        [ALERT_RULE_PRODUCER]: ['apm'],
-        [ALERT_RULE_CONSUMER]: ['apm'],
-        [ALERT_SEVERITY]: ['critical'],
-        [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478182'],
-        [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
-        'event.action': ['active'],
-        [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
-        [ALERT_INSTANCE_ID]: ['apm.transaction_duration_All'],
-        'processor.event': ['transaction'],
-        [ALERT_EVALUATION_THRESHOLD]: [500000],
-        [ALERT_START]: ['2021-06-02T16:50:00.000Z'],
-        'event.kind': ['state'],
-        [ALERT_RULE_CATEGORY]: ['Latency threshold'],
-        [SPACE_IDS]: [],
-      },
-    ],
-  },
   latencyChartResponse: {
-    anomalyTimeseries: {
-      jobId: 'apm-production-00aa-high_mean_transaction_duration',
-      anomalyScore: [
-        {
-          x0: 1622613600000,
-          x: 1622616000000,
-          y: 90.7449171687341,
-        },
-      ],
-      anomalyBoundaries: [],
-    },
     currentPeriod: {
       overallAvgDuration: 3912.628446632232,
       latencyTimeseries: [
@@ -816,18 +705,11 @@ Example.args = {
 };
 
 export const NoData: Story<Args> = () => {
-  return (
-    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
-  );
+  return <LatencyChart height={300} kuery="" />;
 };
+
 NoData.args = {
-  alertsResponse: { alerts: [] },
   latencyChartResponse: {
-    anomalyTimeseries: {
-      jobId: 'apm-production-00aa-high_mean_transaction_duration',
-      anomalyScore: [],
-      anomalyBoundaries: [],
-    },
     currentPeriod: { latencyTimeseries: [], overallAvgDuration: null },
     previousPeriod: { latencyTimeseries: [], overallAvgDuration: null },
   },

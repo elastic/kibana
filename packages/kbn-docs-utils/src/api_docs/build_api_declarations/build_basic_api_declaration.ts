@@ -48,7 +48,7 @@ export function buildBasicApiDeclaration(node: Node, opts: BuildApiDecOpts): Api
     signature: getSignature(node, opts.plugins, opts.log),
     path: getSourceForNode(node),
     deprecated,
-    removeBy: removeByTag ? removeByTag.getComment() : undefined,
+    removeBy: removeByTag ? removeByTag.getCommentText() : undefined,
   };
   return {
     ...apiDec,

@@ -37,7 +37,7 @@ import {
 } from '../../../../..//shared/constants/units';
 import { CANCEL_BUTTON_LABEL, SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
 
-import { DOCS_PREFIX } from '../../../../routes';
+import { WEB_CRAWLER_DOCS_URL } from '../../../../routes';
 import { CrawlUnits } from '../../types';
 
 import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic';
@@ -81,7 +81,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
           defaultMessage="Don't worry about it, we'll start a crawl for you. {readMoreMessage}."
           values={{
             readMoreMessage: (
-              <EuiLink href={`${DOCS_PREFIX}/web-crawler.html`} target="_blank">
+              <EuiLink href={WEB_CRAWLER_DOCS_URL} target="_blank">
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.readMoreLink',
                   {

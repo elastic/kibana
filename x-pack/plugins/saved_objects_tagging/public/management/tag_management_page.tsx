@@ -40,7 +40,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   capabilities,
   assignableTypes,
 }) => {
-  const { overlays, notifications, application, http } = core;
+  const { overlays, notifications, application, http, theme } = core;
   const [loading, setLoading] = useState<boolean>(false);
   const [allTags, setAllTags] = useState<TagWithRelations[]>([]);
   const [selectedTags, setSelectedTags] = useState<TagWithRelations[]>([]);
@@ -75,8 +75,8 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   });
 
   const createModalOpener = useMemo(
-    () => getCreateModalOpener({ overlays, tagClient }),
-    [overlays, tagClient]
+    () => getCreateModalOpener({ overlays, theme, tagClient }),
+    [overlays, theme, tagClient]
   );
 
   const tableActions = useMemo(() => {

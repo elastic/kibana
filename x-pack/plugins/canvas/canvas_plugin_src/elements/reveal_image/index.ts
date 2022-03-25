@@ -12,7 +12,8 @@ export const revealImage: ElementFactory = () => ({
   displayName: 'Image reveal',
   type: 'image',
   help: 'Reveals a percentage of an image',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | math "mean(percent_uptime)"
 | revealImage origin=bottom image=null

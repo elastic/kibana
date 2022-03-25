@@ -7,14 +7,10 @@
 
 export * from './detections_admin';
 export * from './hunter';
+export * from './hunter_no_actions';
 export * from './platform_engineer';
 export * from './reader';
 export * from './rule_author';
 export * from './soc_manager';
 export * from './t1_analyst';
 export * from './t2_analyst';
-
-// TODO: Steph/sourcerer remove from detections_role.json once we have our internal saved object client
-// https://github.com/elastic/security-team/issues/1978
-// "indexPatterns": ["read"],
-// "savedObjectsManagement": ["read"],

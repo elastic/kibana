@@ -93,17 +93,10 @@ describe.each([
     );
   });
 
-  describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when creating a with a valid actionClient and alertClient', async () => {
+  describe('status codes', () => {
+    test('returns 200', async () => {
       const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
       expect(response.status).toEqual(200);
-    });
-
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting.getRulesClient = jest.fn();
-      const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catch error when finding rules throws error', async () => {

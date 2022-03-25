@@ -42,8 +42,9 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+    const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
-    registerRoutes(core.http, core.getStartServices);
+    registerRoutes(core.http, core.getStartServices, dataViewRestCounter);
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
@@ -53,13 +54,14 @@ export class DataViewsServerPlugin
   }
 
   public start(
-    { uiSettings }: CoreStart,
+    { uiSettings, capabilities }: CoreStart,
     { fieldFormats }: DataViewsServerPluginStartDependencies
   ) {
     const serviceFactory = dataViewsServiceFactory({
       logger: this.logger.get('indexPatterns'),
       uiSettings,
       fieldFormats,
+      capabilities,
     });
 
     return {

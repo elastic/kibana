@@ -20,7 +20,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
 import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
@@ -29,6 +29,8 @@ import {
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
+import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
+import { ServiceGroup } from '../../../../common/service_groups';
 
 interface AggregationParams {
   environment: string;
@@ -38,6 +40,7 @@ interface AggregationParams {
   maxNumServices: number;
   start: number;
   end: number;
+  serviceGroup: ServiceGroup | null;
 }
 
 export async function getServiceTransactionStats({
@@ -48,6 +51,7 @@ export async function getServiceTransactionStats({
   maxNumServices,
   start,
   end,
+  serviceGroup,
 }: AggregationParams) {
   const { apmEventClient } = setup;
 
@@ -56,9 +60,7 @@ export async function getServiceTransactionStats({
   const metrics = {
     avg_duration: {
       avg: {
-        field: getTransactionDurationFieldForTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions),
       },
     },
     outcomes,
@@ -83,6 +85,7 @@ export async function getServiceTransactionStats({
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
+              ...serviceGroupQuery(serviceGroup),
             ],
           },
         },

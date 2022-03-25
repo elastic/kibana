@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base", ":disableDependencyDashboard"],
+  "extends": ["config:base"],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
   "enabledManagers": ["npm"],
   "baseBranches": ["main", "7.16", "7.15"],
@@ -26,7 +26,7 @@
       "matchPackageNames": ["@elastic/charts"],
       "reviewers": ["team:datavis"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "v8.0.0", "v7.16.0", "auto-backport"],
+      "labels": ["release_note:skip", "auto-backport", "Team:DataVis", "v8.1.0", "v7.17.0"],
       "draftPR": true,
       "enabled": true
     },
@@ -35,14 +35,14 @@
       "matchPackageNames": ["@elastic/elasticsearch"],
       "reviewers": ["team:kibana-operations", "team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "v8.0.0", "Team:Operations", "Team:Core", "backport:skip"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Operations", "Team:Core"],
       "enabled": true
     },
     {
       "groupName": "@elastic/elasticsearch",
       "matchPackageNames": ["@elastic/elasticsearch"],
       "reviewers": ["team:kibana-operations", "team:kibana-core"],
-      "matchBaseBranches": ["7.16"],
+      "matchBaseBranches": ["8.1"],
       "labels": ["release_note:skip", "Team:Operations", "Team:Core", "backport:skip"],
       "enabled": true
     },
@@ -50,7 +50,7 @@
       "groupName": "@elastic/elasticsearch",
       "matchPackageNames": ["@elastic/elasticsearch"],
       "reviewers": ["team:kibana-operations", "team:kibana-core"],
-      "matchBaseBranches": ["7.15"],
+      "matchBaseBranches": ["7.17"],
       "labels": ["release_note:skip", "Team:Operations", "Team:Core", "backport:skip"],
       "enabled": true
     },
@@ -66,6 +66,16 @@
       "groupName": "babel",
       "matchPackageNames": ["@types/babel__core"],
       "matchPackagePatterns": ["^@babel", "^babel-plugin"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true,
+      "stabilityDays": 7
+    },
+    {
+      "groupName": "typescript",
+      "matchPackageNames": ["typescript", "prettier", "@types/jsdom"],
+      "matchPackagePatterns": ["^@typescript-eslint"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
@@ -115,6 +125,21 @@
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Security", "release_note:skip", "auto-backport"],
+      "enabled": true
+    },
+    {
+      "groupName": "ftr",
+      "packageNames": [
+        "@types/chromedriver",
+        "@types/selenium-webdriver",
+        "chromedriver",
+        "geckodriver",
+        "ms-chromium-edge-driver",
+        "selenium-webdriver"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
       "enabled": true
     }
   ]

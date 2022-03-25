@@ -15,7 +15,6 @@ import {
 } from '../../../../common/detection_engine/utils';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { addTags } from './add_tags';
-import { enableRule } from './enable_rule';
 import { PatchRulesOptions } from './types';
 import {
   calculateInterval,
@@ -37,11 +36,8 @@ class PatchError extends Error {
 
 export const patchRules = async ({
   rulesClient,
-  savedObjectsClient,
   author,
   buildingBlockType,
-  ruleStatusClient,
-  spaceId,
   description,
   eventCategoryOverride,
   falsePositives,
@@ -71,6 +67,7 @@ export const patchRules = async ({
   threshold,
   threatFilters,
   threatIndex,
+  threatIndicatorPath,
   threatQuery,
   threatMapping,
   threatLanguage,
@@ -123,6 +120,7 @@ export const patchRules = async ({
     threshold,
     threatFilters,
     threatIndex,
+    threatIndicatorPath,
     threatQuery,
     threatMapping,
     threatLanguage,
@@ -170,6 +168,7 @@ export const patchRules = async ({
       threshold: threshold ? normalizeThresholdObject(threshold) : undefined,
       threatFilters,
       threatIndex,
+      threatIndicatorPath,
       threatQuery,
       threatMapping,
       threatLanguage,
@@ -219,7 +218,7 @@ export const patchRules = async ({
   if (rule.enabled && enabled === false) {
     await rulesClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
-    await enableRule({ rule, rulesClient, ruleStatusClient, spaceId });
+    await rulesClient.enable({ id: rule.id });
   } else {
     // enabled is null or undefined and we do not touch the rule
   }

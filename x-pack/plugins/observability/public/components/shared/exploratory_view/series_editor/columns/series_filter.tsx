@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterExpanded } from './filter_expanded';
 import { SeriesConfig, SeriesUrl } from '../../types';
@@ -33,23 +33,37 @@ export function SeriesFilter({ series, seriesConfig, seriesId }: Props) {
     .filter((field) => field !== TRANSACTION_URL)
     .map((field) => {
       if (typeof field === 'string') {
-        return { label: seriesConfig.labels?.[field] ?? FieldLabels[field], field };
+        return { label: seriesConfig.labels?.[field] ?? FieldLabels[field] ?? field, field };
       }
 
       return {
         field: field.field,
         nestedField: field.nested,
         isNegated: field.isNegated,
-        label: seriesConfig.labels?.[field.field] ?? FieldLabels[field.field],
+        label: (seriesConfig.labels?.[field.field] ?? FieldLabels[field.field]) || field.field,
       };
     });
+
+  const hasUrlFilter = useMemo(() => {
+    return seriesConfig.filterFields.some((field) => {
+      if (typeof field === 'string') {
+        return field === TRANSACTION_URL;
+      } else if (field.field !== undefined) {
+        return field.field === TRANSACTION_URL;
+      } else {
+        return false;
+      }
+    });
+  }, [seriesConfig]);
 
   return (
     <>
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <URLSearch series={series} seriesId={seriesId} seriesConfig={seriesConfig} />
-        </EuiFlexItem>
+        {hasUrlFilter ? (
+          <EuiFlexItem>
+            <URLSearch series={series} seriesId={seriesId} seriesConfig={seriesConfig} />
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem>
           <EuiFilterGroup>
             {options.map((opt) =>

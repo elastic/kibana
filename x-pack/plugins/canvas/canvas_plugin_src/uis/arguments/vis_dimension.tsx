@@ -10,27 +10,25 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { DatatableColumn, ExpressionAstExpression } from 'src/plugins/expressions';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
+import { ResolvedArgProps, ResolvedColumns } from '../../../public/expression_types/arg';
 
 const { VisDimension: strings } = ArgumentStrings;
 
-interface VisDimensionArgInputProps {
+type VisDimensionArgInputProps = {
   onValueChange: (value: ExpressionAstExpression) => void;
   argValue: ExpressionAstExpression;
-  argId?: string;
-  columns: DatatableColumn[];
   typeInstance: {
     options?: {
       confirm?: string;
     };
   };
-}
+} & ResolvedArgProps<ResolvedColumns>;
 
 const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
   argValue,
   typeInstance,
   onValueChange,
-  argId,
-  columns,
+  resolved: { columns },
 }) => {
   const [value, setValue] = useState(argValue);
   const confirm = typeInstance?.options?.confirm;
@@ -55,27 +53,30 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
         ],
       };
 
-      onChangeFn(astObj);
+      onChangeFn(typeof value === 'string' ? ev.target.value : astObj);
     },
-    [confirm, onValueChange]
+    [confirm, onValueChange, value]
   );
 
   const options = [
     { value: '', text: strings.getDefaultOptionName(), disabled: true },
-    ...columns.map((column: DatatableColumn) => ({ value: column.name, text: column.name })),
+    ...columns.map((column: DatatableColumn) => ({ value: column.id, text: column.name })),
   ];
 
-  const selectedValue = value.chain[0].arguments._?.[0];
+  const selectedValue =
+    typeof value === 'string'
+      ? value
+      : value.chain[0].arguments._?.[0] ?? value.chain[0].arguments.accessor?.[0];
 
-  const column =
-    columns
-      .map((col: DatatableColumn) => col.name)
-      .find((colName: string) => colName === selectedValue) || '';
+  const columnId =
+    typeof selectedValue === 'number'
+      ? columns[selectedValue]?.id || ''
+      : columns.find(({ id }) => id === selectedValue)?.id || '';
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
       <EuiFlexItem>
-        <EuiSelect options={options} value={column} onChange={onChange} />
+        <EuiSelect compressed options={options} value={columnId} onChange={onChange} />
       </EuiFlexItem>
       {confirm && (
         <EuiFlexItem grow={false}>

@@ -25,8 +25,6 @@ import {
   pushCase,
   createComment,
   updateCase,
-  getCaseUserActions,
-  removeServerGeneratedPropertiesFromUserAction,
   deleteAllCaseItems,
   superUserSpace1Auth,
   createCaseWithConnector,
@@ -35,11 +33,13 @@ import {
   getConnectorMappingsFromES,
   getCase,
   getServiceNowSimulationServer,
+  createConfiguration,
+  getSignalsWithES,
 } from '../../../../common/lib/utils';
 import {
   CaseConnector,
   CaseStatuses,
-  CaseUserActionResponse,
+  CommentType,
 } from '../../../../../../plugins/cases/common/api';
 import {
   globalRead,
@@ -55,6 +55,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('push_case', () => {
     const actionsRemover = new ActionsRemover(supertest);
@@ -251,65 +252,6 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(theCase.status).to.eql('closed');
     });
 
-    it('should create the correct user action', async () => {
-      const { postedCase, connector } = await createCaseWithConnector({
-        supertest,
-        serviceNowSimulatorURL,
-        actionsRemover,
-      });
-      const pushedCase = await pushCase({
-        supertest,
-        caseId: postedCase.id,
-        connectorId: connector.id,
-      });
-      const userActions = await getCaseUserActions({ supertest, caseID: pushedCase.id });
-      const pushUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
-
-      const { new_value, ...rest } = pushUserAction as CaseUserActionResponse;
-      const parsedNewValue = JSON.parse(new_value!);
-
-      expect(rest).to.eql({
-        action_field: ['pushed'],
-        action: 'push-to-service',
-        action_by: defaultUser,
-        old_value: null,
-        old_val_connector_id: null,
-        new_val_connector_id: connector.id,
-        case_id: `${postedCase.id}`,
-        comment_id: null,
-        sub_case_id: '',
-        owner: 'securitySolutionFixture',
-      });
-
-      expect(parsedNewValue).to.eql({
-        pushed_at: pushedCase.external_service!.pushed_at,
-        pushed_by: defaultUser,
-        connector_name: connector.name,
-        external_id: '123',
-        external_title: 'INC01',
-        external_url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
-      });
-    });
-
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    it.skip('should push a collection case but not close it when closure_type: close-by-pushing', async () => {
-      const { postedCase, connector } = await createCaseWithConnector({
-        supertest,
-        serviceNowSimulatorURL,
-        actionsRemover,
-        configureReq: {
-          closure_type: 'close-by-pushing',
-        },
-      });
-
-      const theCase = await pushCase({
-        supertest,
-        caseId: postedCase.id,
-        connectorId: connector.id,
-      });
-      expect(theCase.status).to.eql(CaseStatuses.open);
-    });
-
     it('unhappy path - 404s when case does not exist', async () => {
       await pushCase({
         supertest,
@@ -359,12 +301,109 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('alerts', () => {
+      const defaultSignalsIndex = '.siem-signals-default-000001';
+      const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
+      const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
+
+      beforeEach(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
+        await deleteAllCaseItems(es);
+      });
+
+      const attachAlertsAndPush = async ({ syncAlerts = true }: { syncAlerts?: boolean } = {}) => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          createCaseReq: { ...getPostCaseRequest(), settings: { syncAlerts } },
+          configureReq: {
+            closure_type: 'close-by-pushing',
+          },
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            alertId: signalID,
+            index: defaultSignalsIndex,
+            rule: { id: 'test-rule-id', name: 'test-index-id' },
+            type: CommentType.alert,
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            alertId: signalID2,
+            index: defaultSignalsIndex,
+            rule: { id: 'test-rule-id', name: 'test-index-id' },
+            type: CommentType.alert,
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        await pushCase({
+          supertest,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+        });
+
+        await es.indices.refresh({ index: defaultSignalsIndex });
+
+        const signals = await getSignalsWithES({
+          es,
+          indices: defaultSignalsIndex,
+          ids: [signalID, signalID2],
+        });
+
+        return signals;
+      };
+
+      it('should change the status of all alerts attached to a case to closed when closure_type: close-by-pushing and syncAlerts: true', async () => {
+        const signals = await attachAlertsAndPush();
+        /**
+         * The status of the alerts should be changed to closed when pushing a case and the
+         * closure_type is set to close-by-pushing
+         */
+        expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal?.status).to.be(
+          CaseStatuses.closed
+        );
+
+        expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal?.status).to.be(
+          CaseStatuses.closed
+        );
+      });
+
+      it('should NOT change the status of all alerts attached to a case to closed when closure_type: close-by-pushing and syncAlerts: false', async () => {
+        const signals = await attachAlertsAndPush({ syncAlerts: false });
+        /**
+         * The status of the alerts should NOT be changed to closed when pushing a case and the
+         * closure_type is set to close-by-pushing and syncAlert is set to false
+         */
+        expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal?.status).to.be(
+          CaseStatuses.open
+        );
+
+        expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal?.status).to.be(
+          CaseStatuses.open
+        );
+      });
+    });
+
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
       it('should push a case that the user has permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
-          supertest,
+          supertest: supertestWithoutAuth,
           serviceNowSimulatorURL,
           actionsRemover,
           auth: superUserSpace1Auth,
@@ -380,7 +419,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should not push a case that the user does not have permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
-          supertest,
+          supertest: supertestWithoutAuth,
           serviceNowSimulatorURL,
           actionsRemover,
           auth: superUserSpace1Auth,
@@ -401,7 +440,7 @@ export default ({ getService }: FtrProviderContext): void => {
           user.username
         } with role(s) ${user.roles.join()} - should NOT push a case`, async () => {
           const { postedCase, connector } = await createCaseWithConnector({
-            supertest,
+            supertest: supertestWithoutAuth,
             serviceNowSimulatorURL,
             actionsRemover,
             auth: superUserSpace1Auth,
@@ -419,7 +458,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should not push a case in a space that the user does not have permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
-          supertest,
+          supertest: supertestWithoutAuth,
           serviceNowSimulatorURL,
           actionsRemover,
           auth: { user: superUser, space: 'space2' },
@@ -432,6 +471,59 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: secOnly, space: 'space2' },
           expectedHttpCode: 403,
         });
+      });
+
+      it('should respect closure options of the current owner when pushing', async () => {
+        await createConfiguration(
+          supertestWithoutAuth,
+          {
+            ...getConfigurationRequest(),
+            owner: 'securitySolutionFixture',
+            closure_type: 'close-by-user',
+          },
+          200,
+          {
+            user: superUser,
+            space: 'space1',
+          }
+        );
+
+        await createConfiguration(
+          supertestWithoutAuth,
+          {
+            ...getConfigurationRequest(),
+            owner: 'observabilityFixture',
+            closure_type: 'close-by-pushing',
+          },
+          200,
+          {
+            user: superUser,
+            space: 'space1',
+          }
+        );
+
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest: supertestWithoutAuth,
+          serviceNowSimulatorURL,
+          actionsRemover,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await pushCase({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        const theCase = await getCase({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          includeComments: false,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        expect(theCase.status).to.eql('open');
       });
     });
   });

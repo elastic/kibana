@@ -12,12 +12,12 @@ import { rgba } from 'polished';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { AppDataType, ReportViewType, BuilderItem } from '../types';
 import { SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
-import { IndexPatternState, useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
+import { DataViewState, useAppDataViewContext } from '../hooks/use_app_data_view';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { ReportTypesSelect } from './columns/report_type_select';
 import { ViewActions } from '../views/view_actions';
 import { Series } from './series';
-import { ReportConfigMap, useExploratoryView } from '../contexts/exploatory_view_config';
+import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
 
 export interface ReportTypeItem {
   id: string;
@@ -28,23 +28,23 @@ export interface ReportTypeItem {
 type ExpandedRowMap = Record<string, true>;
 
 export const getSeriesToEdit = ({
-  indexPatterns,
+  dataViews,
   allSeries,
   reportType,
   reportConfigMap,
 }: {
   allSeries: SeriesContextValue['allSeries'];
-  indexPatterns: IndexPatternState;
+  dataViews: DataViewState;
   reportType: ReportViewType;
   reportConfigMap: ReportConfigMap;
 }): BuilderItem[] => {
   const getDataViewSeries = (dataType: AppDataType) => {
-    if (indexPatterns?.[dataType]) {
+    if (dataViews?.[dataType]) {
       return getDefaultConfigs({
         dataType,
         reportType,
         reportConfigMap,
-        indexPattern: indexPatterns[dataType],
+        dataView: dataViews[dataType],
       });
     }
   };
@@ -61,7 +61,7 @@ export const SeriesEditor = React.memo(function () {
 
   const { getSeries, allSeries, reportType } = useSeriesStorage();
 
-  const { loading, indexPatterns } = useAppIndexPatternContext();
+  const { loading, dataViews } = useAppDataViewContext();
 
   const { reportConfigMap } = useExploratoryView();
 
@@ -88,7 +88,7 @@ export const SeriesEditor = React.memo(function () {
       const newEditorItems = getSeriesToEdit({
         reportType,
         allSeries,
-        indexPatterns,
+        dataViews,
         reportConfigMap,
       });
 
@@ -108,7 +108,7 @@ export const SeriesEditor = React.memo(function () {
     setItemIdToExpandedRowMap((prevState) => {
       return { ...prevState, ...newExpandRows };
     });
-  }, [allSeries, getSeries, indexPatterns, loading, reportConfigMap, reportType]);
+  }, [allSeries, getSeries, dataViews, loading, reportConfigMap, reportType]);
 
   const toggleDetails = (item: BuilderItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };

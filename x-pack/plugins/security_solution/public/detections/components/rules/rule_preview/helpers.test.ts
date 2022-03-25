@@ -14,31 +14,25 @@ import {
 
 describe('query_preview/helpers', () => {
   describe('isNoisy', () => {
-    test('returns true if timeframe selection is "Last hour" and average hits per hour is greater than one', () => {
-      const isItNoisy = isNoisy(2, 'h');
+    test('returns true if timeframe selection is "Last hour" and average hits per hour is greater than one execution duration', () => {
+      const isItNoisy = isNoisy(30, 'h');
 
       expect(isItNoisy).toBeTruthy();
     });
 
-    test('returns false if timeframe selection is "Last hour" and average hits per hour is  one', () => {
-      const isItNoisy = isNoisy(1, 'h');
+    test('returns false if timeframe selection is "Last hour" and average hits per hour is less than one execution duration', () => {
+      const isItNoisy = isNoisy(0, 'h');
 
       expect(isItNoisy).toBeFalsy();
     });
 
-    test('returns false if timeframe selection is "Last hour" and hits is 0', () => {
-      const isItNoisy = isNoisy(1, 'h');
-
-      expect(isItNoisy).toBeFalsy();
-    });
-
-    test('returns true if timeframe selection is "Last day" and average hits per hour is greater than one', () => {
+    test('returns true if timeframe selection is "Last day" and average hits per hour is greater than one execution duration', () => {
       const isItNoisy = isNoisy(50, 'd');
 
       expect(isItNoisy).toBeTruthy();
     });
 
-    test('returns false if timeframe selection is "Last day" and average hits per hour is  one', () => {
+    test('returns false if timeframe selection is "Last day" and average hits per hour is equal to one execution duration', () => {
       const isItNoisy = isNoisy(24, 'd');
 
       expect(isItNoisy).toBeFalsy();
@@ -50,20 +44,20 @@ describe('query_preview/helpers', () => {
       expect(isItNoisy).toBeFalsy();
     });
 
-    test('returns true if timeframe selection is "Last month" and average hits per hour is greater than one', () => {
-      const isItNoisy = isNoisy(1000, 'M');
+    test('returns true if timeframe selection is "Last month" and average hits per hour is greater than one execution duration', () => {
+      const isItNoisy = isNoisy(50, 'M');
 
       expect(isItNoisy).toBeTruthy();
     });
 
-    test('returns false if timeframe selection is "Last month" and average hits per hour is  one', () => {
-      const isItNoisy = isNoisy(730, 'M');
+    test('returns false if timeframe selection is "Last month" and average hits per hour is equal to one execution duration', () => {
+      const isItNoisy = isNoisy(30, 'M');
 
       expect(isItNoisy).toBeFalsy();
     });
 
     test('returns false if timeframe selection is "Last month" and hits is 0', () => {
-      const isItNoisy = isNoisy(1, 'M');
+      const isItNoisy = isNoisy(0, 'M');
 
       expect(isItNoisy).toBeFalsy();
     });
@@ -80,6 +74,8 @@ describe('query_preview/helpers', () => {
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
+        machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -94,6 +90,8 @@ describe('query_preview/helpers', () => {
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
+        machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -108,6 +106,8 @@ describe('query_preview/helpers', () => {
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
+        machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -122,6 +122,8 @@ describe('query_preview/helpers', () => {
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
+        machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -134,6 +136,36 @@ describe('query_preview/helpers', () => {
         index: ['test-*'],
         threatIndex: ['threat-*'],
         threatMapping: [],
+        machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when there is no machine learning job id', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'threat_match',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        threatIndex: ['threat-*'],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when eql rule with no query', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'eql',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        threatIndex: ['threat-*'],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -148,6 +180,22 @@ describe('query_preview/helpers', () => {
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
+        machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+      });
+      expect(isDisabled).toEqual(false);
+    });
+
+    test('enabled when eql rule with query', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'eql',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        threatIndex: ['threat-*'],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: { filters: [], query: { query: 'any where true', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(false);
     });
@@ -163,7 +211,7 @@ describe('query_preview/helpers', () => {
       ]);
     });
 
-    test('returns hour, day, and month options if ruleType is not eql', () => {
+    test('returns hour, day, and month options if ruleType is not eql or threshold', () => {
       const options = getTimeframeOptions('query');
 
       expect(options).toEqual([
@@ -171,6 +219,12 @@ describe('query_preview/helpers', () => {
         { value: 'd', text: 'Last day' },
         { value: 'M', text: 'Last month' },
       ]);
+    });
+
+    test('returns hour option if ruleType is threshold', () => {
+      const options = getTimeframeOptions('threshold');
+
+      expect(options).toEqual([{ value: 'h', text: 'Last hour' }]);
     });
   });
 

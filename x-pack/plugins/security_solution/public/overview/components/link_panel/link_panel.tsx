@@ -71,7 +71,7 @@ const LinkPanelComponent = ({
   splitPanel,
   subtitle,
 }: {
-  button: React.ReactNode;
+  button?: React.ReactNode;
   columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>>;
   dataTestSubj: string;
   defaultSortField?: string;
@@ -104,7 +104,7 @@ const LinkPanelComponent = ({
 
   const pagination = useMemo(
     () => ({
-      hidePerPageOptions: true,
+      showPerPageOptions: false,
       pageIndex,
       pageSize: PAGE_SIZE,
       totalItemCount: listItems.length,
@@ -134,14 +134,16 @@ const LinkPanelComponent = ({
               </HeaderSection>
               {splitPanel}
               {infoPanel}
-              <StyledTable
-                columns={columns}
-                itemId="id"
-                items={chunkedItems[pageIndex] || []}
-                onChange={onTableChange}
-                pagination={pagination}
-                sorting={sorting}
-              />
+              {chunkedItems.length > 0 && (
+                <StyledTable
+                  columns={columns}
+                  itemId="id"
+                  items={chunkedItems[pageIndex] || []}
+                  onChange={onTableChange}
+                  pagination={pagination}
+                  sorting={sorting}
+                />
+              )}
             </EuiPanel>
           </InspectButtonContainer>
         </EuiFlexItem>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { ToolingLog } from '@kbn/dev-utils';
-import { FunctionalTestRunner, readConfigFile } from '../../functional_test_runner';
+import { FunctionalTestRunner, readConfigFile, EsVersion } from '../../functional_test_runner';
 import { CliError } from './run_cli';
 
 export interface CreateFtrOptions {
@@ -26,6 +26,8 @@ export interface CreateFtrOptions {
     exclude?: string[];
   };
   updateSnapshots?: boolean;
+  esVersion: EsVersion;
+  dryRun?: boolean;
 }
 
 export interface CreateFtrParams {
@@ -34,31 +36,48 @@ export interface CreateFtrParams {
 }
 async function createFtr({
   configPath,
-  options: { installDir, log, bail, grep, updateBaselines, suiteFiles, suiteTags, updateSnapshots },
+  options: {
+    installDir,
+    log,
+    bail,
+    grep,
+    updateBaselines,
+    suiteFiles,
+    suiteTags,
+    updateSnapshots,
+    esVersion,
+    dryRun,
+  },
 }: CreateFtrParams) {
-  const config = await readConfigFile(log, configPath);
+  const config = await readConfigFile(log, esVersion, configPath);
 
   return {
     config,
-    ftr: new FunctionalTestRunner(log, configPath, {
-      mochaOpts: {
-        bail: !!bail,
-        grep,
+    ftr: new FunctionalTestRunner(
+      log,
+      configPath,
+      {
+        mochaOpts: {
+          bail: !!bail,
+          grep,
+          dryRun: !!dryRun,
+        },
+        kbnTestServer: {
+          installDir,
+        },
+        updateBaselines,
+        updateSnapshots,
+        suiteFiles: {
+          include: [...(suiteFiles?.include || []), ...config.get('suiteFiles.include')],
+          exclude: [...(suiteFiles?.exclude || []), ...config.get('suiteFiles.exclude')],
+        },
+        suiteTags: {
+          include: [...(suiteTags?.include || []), ...config.get('suiteTags.include')],
+          exclude: [...(suiteTags?.exclude || []), ...config.get('suiteTags.exclude')],
+        },
       },
-      kbnTestServer: {
-        installDir,
-      },
-      updateBaselines,
-      updateSnapshots,
-      suiteFiles: {
-        include: [...(suiteFiles?.include || []), ...config.get('suiteFiles.include')],
-        exclude: [...(suiteFiles?.exclude || []), ...config.get('suiteFiles.exclude')],
-      },
-      suiteTags: {
-        include: [...(suiteTags?.include || []), ...config.get('suiteTags.include')],
-        exclude: [...(suiteTags?.exclude || []), ...config.get('suiteTags.exclude')],
-      },
-    }),
+      esVersion
+    ),
   };
 }
 
@@ -71,15 +90,15 @@ export async function assertNoneExcluded({ configPath, options }: CreateFtrParam
   }
 
   const stats = await ftr.getTestStats();
-  if (stats.excludedTests.length > 0) {
+  if (stats.testsExcludedByTag.length > 0) {
     throw new CliError(`
-      ${stats.excludedTests.length} tests in the ${configPath} config
+      ${stats.testsExcludedByTag.length} tests in the ${configPath} config
       are excluded when filtering by the tags run on CI. Make sure that all suites are
       tagged with one of the following tags:
 
       ${JSON.stringify(options.suiteTags)}
 
-      - ${stats.excludedTests.join('\n      - ')}
+      - ${stats.testsExcludedByTag.join('\n      - ')}
     `);
   }
 }

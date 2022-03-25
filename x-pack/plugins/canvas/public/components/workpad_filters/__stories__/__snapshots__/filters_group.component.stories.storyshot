@@ -23,7 +23,6 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
           aria-expanded={true}
           aria-labelledby="generated-id"
           className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-          disabled={false}
           onClick={[Function]}
           tabIndex={-1}
           type="button"
@@ -86,7 +85,6 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent empty group 
           aria-expanded={true}
           aria-labelledby="generated-id"
           className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-          disabled={false}
           onClick={[Function]}
           tabIndex={-1}
           type="button"

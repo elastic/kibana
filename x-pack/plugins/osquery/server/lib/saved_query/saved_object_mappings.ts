@@ -7,7 +7,11 @@
 
 import { produce } from 'immer';
 import { SavedObjectsType } from '../../../../../../src/core/server';
-import { savedQuerySavedObjectType, packSavedObjectType } from '../../../common/types';
+import {
+  savedQuerySavedObjectType,
+  packSavedObjectType,
+  packAssetSavedObjectType,
+} from '../../../common/types';
 
 export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
@@ -58,7 +62,7 @@ export const savedQueryType: SavedObjectsType = {
     getTitle: (savedObject) => savedObject.attributes.id,
     getEditUrl: (savedObject) => `/saved_queries/${savedObject.id}/edit`,
     getInAppUrl: (savedObject) => ({
-      path: `/app/saved_queries/${savedObject.id}`,
+      path: `/app/osquery/saved_queries/${savedObject.id}`,
       uiCapabilitiesPath: 'osquery.read',
     }),
   },
@@ -86,6 +90,9 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     enabled: {
       type: 'boolean',
+    },
+    version: {
+      type: 'long',
     },
     queries: {
       properties: {
@@ -124,7 +131,7 @@ export const packType: SavedObjectsType = {
     getTitle: (savedObject) => `Pack: ${savedObject.attributes.name}`,
     getEditUrl: (savedObject) => `/packs/${savedObject.id}/edit`,
     getInAppUrl: (savedObject) => ({
-      path: `/app/packs/${savedObject.id}`,
+      path: `/app/osquery/packs/${savedObject.id}`,
       uiCapabilitiesPath: 'osquery.read',
     }),
     onExport: (context, objects) =>
@@ -136,4 +143,53 @@ export const packType: SavedObjectsType = {
         return draft;
       }),
   },
+};
+
+export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
+  properties: {
+    description: {
+      type: 'text',
+    },
+    name: {
+      type: 'text',
+    },
+    version: {
+      type: 'long',
+    },
+    queries: {
+      properties: {
+        id: {
+          type: 'keyword',
+        },
+        query: {
+          type: 'text',
+        },
+        interval: {
+          type: 'text',
+        },
+        platform: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
+        ecs_mapping: {
+          type: 'object',
+          enabled: false,
+        },
+      },
+    },
+  },
+};
+
+export const packAssetType: SavedObjectsType = {
+  name: packAssetSavedObjectType,
+  hidden: false,
+  management: {
+    importableAndExportable: true,
+    visibleInManagement: false,
+  },
+  namespaceType: 'agnostic',
+  mappings: packAssetSavedObjectMappings,
 };

@@ -227,6 +227,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
           setAdvancedContentState('open');
+        } else {
+          setFieldValue('ecs_mapping', {});
         }
       } else {
         setFieldValue('savedQueryId', null);
@@ -235,11 +237,23 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [setFieldValue]
   );
 
+  const commands = useMemo(
+    () => [
+      {
+        name: 'submitOnCmdEnter',
+        bindKey: { win: 'ctrl+enter', mac: 'cmd+enter' },
+        exec: () => submit(),
+      },
+    ],
+    [submit]
+  );
+
   const queryComponentProps = useMemo(
     () => ({
       disabled: queryStatus === 'disabled',
+      commands,
     }),
-    [queryStatus]
+    [queryStatus, commands]
   );
 
   const flyoutFormDefaultValue = useMemo(
@@ -259,16 +273,26 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [permissions.writeSavedQueries]
   );
 
+  const isSavedQueryDisabled = useMemo(
+    () =>
+      queryComponentProps.disabled || !permissions.runSavedQueries || !permissions.readSavedQueries,
+    [permissions.readSavedQueries, permissions.runSavedQueries, queryComponentProps.disabled]
+  );
+
   const queryFieldStepContent = useMemo(
     () => (
       <>
         {queryField ? (
           <>
-            <SavedQueriesDropdown
-              disabled={queryComponentProps.disabled || !permissions.runSavedQueries}
-              onChange={handleSavedQueryChange}
-            />
-            <EuiSpacer />
+            {!isSavedQueryDisabled && (
+              <>
+                <SavedQueriesDropdown
+                  disabled={isSavedQueryDisabled}
+                  onChange={handleSavedQueryChange}
+                />
+                <EuiSpacer />
+              </>
+            )}
             <UseField
               path="query"
               component={LiveQueryQueryField}
@@ -342,7 +366,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [
       queryField,
       queryComponentProps,
-      permissions.runSavedQueries,
       permissions.writeSavedQueries,
       handleSavedQueryChange,
       ecsMappingField,
@@ -358,6 +381,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       enabled,
       isSubmitting,
       submit,
+      isSavedQueryDisabled,
     ]
   );
 

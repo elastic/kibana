@@ -11,7 +11,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { KibanaContext } from './kibana_context_type';
 
 interface Arguments {
-  group?: string;
+  group: string[];
   from?: string;
   ungrouped?: boolean;
 }
@@ -37,6 +37,7 @@ export const selectFilterFunction: ExpressionFunctionSelectFilter = {
       help: i18n.translate('data.search.functions.selectFilter.group.help', {
         defaultMessage: 'Select only filters belonging to the provided group',
       }),
+      multi: true,
     },
     from: {
       types: ['string'],
@@ -54,13 +55,15 @@ export const selectFilterFunction: ExpressionFunctionSelectFilter = {
     },
   },
 
-  fn(input, { group, ungrouped, from }) {
+  fn(input, { group = [], ungrouped, from }) {
     return {
       ...input,
       filters:
         input.filters?.filter(({ meta }) => {
           const isGroupMatching =
-            (!group && !ungrouped) || group === meta.group || (ungrouped && !meta.group);
+            (!group.length && !ungrouped) ||
+            (meta.group && group.length && group.includes(meta.group)) ||
+            (ungrouped && !meta.group);
           const isOriginMatching = !from || from === meta.controlledBy;
           return isGroupMatching && isOriginMatching;
         }) || [],

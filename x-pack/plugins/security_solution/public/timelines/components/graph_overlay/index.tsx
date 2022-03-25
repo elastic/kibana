@@ -14,13 +14,16 @@ import {
   EuiToolTip,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/translations';
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
+import {
+  FULL_SCREEN_TOGGLED_CLASS_NAME,
+  SCROLLING_DISABLED_CLASS_NAME,
+} from '../../../../common/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
@@ -31,6 +34,7 @@ import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
+import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
 import {
   isLoadingSelector,
@@ -40,6 +44,7 @@ import {
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { sourcererSelectors } from '../../../common/store';
 
 const OverlayContainer = styled.div`
   display: flex;
@@ -159,13 +164,33 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
 
   const isInTimeline = timelineId === TimelineId.active;
   const onCloseOverlay = useCallback(() => {
-    if (timelineId === TimelineId.active) {
-      setTimelineFullScreen(false);
+    const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
+    // Since EUI changes these values directly as a side effect, need to add them back on close.
+    if (isDataGridFullScreen) {
+      if (timelineId === TimelineId.active) {
+        document.body.classList.add('euiDataGrid__restrictBody');
+      } else {
+        document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
+      }
     } else {
-      setGlobalFullScreen(false);
+      if (timelineId === TimelineId.active) {
+        setTimelineFullScreen(false);
+      } else {
+        setGlobalFullScreen(false);
+      }
     }
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
   }, [dispatch, timelineId, setTimelineFullScreen, setGlobalFullScreen]);
+
+  useEffect(() => {
+    return () => {
+      if (timelineId === TimelineId.active) {
+        dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen: false }));
+      } else {
+        dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen: false }));
+      }
+    };
+  }, [dispatch, timelineId]);
 
   const toggleFullScreen = useCallback(() => {
     if (timelineId === TimelineId.active) {
@@ -181,7 +206,18 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
     globalFullScreen,
   ]);
 
-  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+  const getDefaultDataViewSelector = useMemo(
+    () => sourcererSelectors.defaultDataViewSelector(),
+    []
+  );
+  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
+
+  const { selectedPatterns: timelinePatterns } = useSourcererDataView(SourcererScopeName.timeline);
+
+  const selectedPatterns = useMemo(
+    () => (isInTimeline ? timelinePatterns : defaultDataView.patternList),
+    [defaultDataView.patternList, isInTimeline, timelinePatterns]
+  );
 
   if (fullScreen && !isInTimeline) {
     return (

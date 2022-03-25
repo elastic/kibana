@@ -7,29 +7,28 @@
  */
 
 const { NativeRealm } = require('./native_realm');
-
-jest.genMockFromModule('@elastic/elasticsearch');
-jest.mock('@elastic/elasticsearch');
-
 const { ToolingLog } = require('@kbn/dev-utils');
-const { Client } = require('@elastic/elasticsearch');
 
 const mockClient = {
   xpack: {
     info: jest.fn(),
   },
+  cluster: {
+    health: jest.fn(),
+  },
   security: {
     changePassword: jest.fn(),
     getUser: jest.fn(),
+    putRole: jest.fn(),
+    putUser: jest.fn(),
   },
 };
-Client.mockImplementation(() => mockClient);
 
 const log = new ToolingLog();
 let nativeRealm;
 
 beforeEach(() => {
-  nativeRealm = new NativeRealm({ elasticPassword: 'changeme', port: '9200', log });
+  nativeRealm = new NativeRealm({ elasticPassword: 'changeme', client: mockClient, log });
 });
 
 afterAll(() => {
@@ -45,6 +44,12 @@ function mockXPackInfo(available, enabled) {
       },
     },
   }));
+}
+
+function mockClusterStatus(status) {
+  mockClient.cluster.health.mockImplementation(() => {
+    return status;
+  });
 }
 
 describe('isSecurityEnabled', () => {
@@ -93,6 +98,7 @@ describe('isSecurityEnabled', () => {
 describe('setPasswords', () => {
   it('uses provided passwords', async () => {
     mockXPackInfo(true, true);
+    mockClusterStatus('green');
 
     mockClient.security.getUser.mockImplementation(() => ({
       kibana_system: {

@@ -33,6 +33,7 @@ export async function getHasAggregatedTransactions({
         events: [ProcessorEvent.metric],
       },
       body: {
+        size: 1,
         query: {
           bool: {
             filter: [
@@ -82,7 +83,7 @@ export async function getSearchAggregatedTransactions({
   }
 }
 
-export function getTransactionDurationFieldForTransactions(
+export function getDurationFieldForTransactions(
   searchAggregatedTransactions: boolean
 ) {
   return searchAggregatedTransactions

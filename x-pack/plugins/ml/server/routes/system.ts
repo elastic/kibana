@@ -43,7 +43,7 @@ export function systemRoutes(
         const { asCurrentUser } = client;
         let upgradeInProgress = false;
         try {
-          const { body } = await mlClient.info();
+          const body = await mlClient.info();
           // if ml indices are currently being migrated, upgrade_mode will be set to true
           // pass this back with the privileges to allow for the disabling of UI controls.
           upgradeInProgress = body.upgrade_mode === true;
@@ -70,7 +70,7 @@ export function systemRoutes(
             },
           });
         } else {
-          const { body } = await asCurrentUser.security.hasPrivileges({ body: request.body });
+          const body = await asCurrentUser.security.hasPrivileges({ body: request.body });
           return response.ok({
             body: {
               ...body,
@@ -164,7 +164,7 @@ export function systemRoutes(
     },
     routeGuard.basicLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.info();
+        const body = await mlClient.info();
         const cloudId = cloud && cloud.cloudId;
         return response.ok({
           body: { ...body, cloudId },
@@ -195,7 +195,7 @@ export function systemRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const { body } = await client.asCurrentUser.search(request.body);
+        const body = await client.asCurrentUser.search(request.body);
         return response.ok({
           body,
         });
@@ -225,17 +225,16 @@ export function systemRoutes(
       try {
         const { indices } = request.body;
 
-        const options = {
-          index: indices,
-          fields: ['*'],
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        };
+        const results = await Promise.all(
+          indices.map(async (index) =>
+            client.asCurrentUser.indices.exists({
+              index,
+            })
+          )
+        );
 
-        const { body } = await client.asCurrentUser.fieldCaps(options);
-
-        const result = indices.reduce((acc, cur) => {
-          acc[cur] = { exists: body.indices.includes(cur) };
+        const result = indices.reduce((acc, cur, i) => {
+          acc[cur] = { exists: results[i] };
           return acc;
         }, {} as Record<string, { exists: boolean }>);
 

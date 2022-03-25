@@ -12,7 +12,7 @@ export type {
   FormHook,
   FieldHook,
   FormData,
-  Props as UseFieldProps,
+  UseFieldProps,
   FieldConfig,
   OnFormUpdateArg,
   ValidationFunc,
@@ -20,6 +20,7 @@ export type {
   ValidationConfig,
   ValidationError,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+
 export {
   useForm,
   useFormData,
@@ -43,8 +44,16 @@ export {
 
 export { attemptToURIDecode } from '../../../../src/plugins/es_ui_shared/public';
 
-export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+export {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  RedirectAppLinks,
+} from '../../../../src/plugins/kibana_react/public';
 
 export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
 
 export const useKibana = () => _useKibana<AppServicesContext>();
+
+export type { CloudSetup } from '../../cloud/public';
+
+export type { ILicense } from '../../licensing/public';

@@ -9,7 +9,7 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
 } from '../../../../../../src/core/server';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 export { caseMigrations } from './cases';
 export { configureMigrations } from './configuration';
@@ -33,14 +33,6 @@ export const addOwnerToSO = <T = Record<string, unknown>>(
 });
 
 export const connectorMappingsMigrations = {
-  '7.14.0': (
-    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
-    return addOwnerToSO(doc);
-  },
-};
-
-export const subCasesMigrations = {
   '7.14.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {

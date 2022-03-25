@@ -19,10 +19,12 @@ import type {
   DeletePackagePoliciesRequestSchema,
   UpgradePackagePoliciesRequestSchema,
   DryRunPackagePoliciesRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
 import type {
   CreatePackagePolicyResponse,
   DeletePackagePoliciesResponse,
+  NewPackagePolicy,
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
 } from '../../../common';
@@ -79,19 +81,25 @@ export const getOnePackagePolicyHandler: RequestHandler<
   }
 };
 
-export const createPackagePolicyHandler: RequestHandler<
+export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof CreatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const soClient = context.fleet.epm.internalSoClient;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, ...newPolicy } = request.body;
+  const spaceId = context.fleet.spaceId;
   try {
+    const newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+      soClient,
+      newPolicy as NewPackagePolicy
+    );
+
     const newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
-      newPolicy,
+      newPackagePolicy,
       context,
       request
     );
@@ -100,6 +108,7 @@ export const createPackagePolicyHandler: RequestHandler<
     const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
       user,
       force,
+      spaceId,
     });
     const body: CreatePackagePolicyResponse = { item: packagePolicy };
     return response.ok({
@@ -122,7 +131,7 @@ export const updatePackagePolicyHandler: RequestHandler<
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
@@ -130,9 +139,33 @@ export const updatePackagePolicyHandler: RequestHandler<
     throw Boom.notFound('Package policy not found');
   }
 
-  let newData = { ...request.body };
-  const pkg = newData.package || packagePolicy.package;
-  const inputs = newData.inputs || packagePolicy.inputs;
+  const { force, ...body } = request.body;
+  // removed fields not recognized by schema
+  const packagePolicyInputs = packagePolicy.inputs.map((input) => {
+    const newInput = {
+      ...input,
+      streams: input.streams.map((stream) => {
+        const newStream = { ...stream };
+        delete newStream.compiled_stream;
+        return newStream;
+      }),
+    };
+    delete newInput.compiled_input;
+    return newInput;
+  });
+  // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
+  let newData = {
+    ...body,
+    name: body.name ?? packagePolicy.name,
+    description: body.description ?? packagePolicy.description,
+    namespace: body.namespace ?? packagePolicy.namespace,
+    policy_id: body.policy_id ?? packagePolicy.policy_id,
+    enabled: body.enabled ?? packagePolicy.enabled,
+    output_id: body.output_id ?? packagePolicy.output_id,
+    package: body.package ?? packagePolicy.package,
+    inputs: body.inputs ?? packagePolicyInputs,
+    vars: body.vars ?? packagePolicy.vars,
+  } as NewPackagePolicy;
 
   try {
     newData = await packagePolicyService.runExternalCallbacks(
@@ -146,8 +179,8 @@ export const updatePackagePolicyHandler: RequestHandler<
       soClient,
       esClient,
       request.params.packagePolicyId,
-      { ...newData, package: pkg, inputs },
-      { user },
+      newData,
+      { user, force },
       packagePolicy.package?.version
     );
     return response.ok({
@@ -164,7 +197,7 @@ export const deletePackagePolicyHandler: RequestHandler<
   TypeOf<typeof DeletePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   try {
     const body: DeletePackagePoliciesResponse = await packagePolicyService.delete(
@@ -199,7 +232,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
   TypeOf<typeof UpgradePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   try {
     const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
@@ -233,10 +266,10 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   try {
     const body: UpgradePackagePolicyDryRunResponse = [];
-    const { packagePolicyIds, packageVersion } = request.body;
+    const { packagePolicyIds } = request.body;
 
     for (const id of packagePolicyIds) {
-      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id, packageVersion);
+      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
       body.push(result);
     }
 

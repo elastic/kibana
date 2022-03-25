@@ -35,7 +35,6 @@ describe('RoleMapping', () => {
     handleAttributeSelectorChange: jest.fn(),
     handleDeleteMapping: jest.fn(),
     handleRoleChange: jest.fn(),
-    handleAuthProviderChange: jest.fn(),
     resetState: jest.fn(),
   };
 
@@ -51,9 +50,6 @@ describe('RoleMapping', () => {
     availableEngines: engines,
     selectedEngines: new Set(),
     accessAllEngines: false,
-    availableAuthProviders: [],
-    multipleAuthProvidersConfig: true,
-    selectedAuthProviders: [],
     myRole: {
       availableRoleTypes: mockRole.ability.availableRoleTypes,
     },

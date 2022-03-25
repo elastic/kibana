@@ -20,7 +20,7 @@ import {
   AbstractVectorLayer,
   VectorLayerArguments,
 } from '../vector_layer';
-import { ITiledSingleLayerVectorSource } from '../../../sources/tiled_single_layer_vector_source';
+import { IMvtVectorSource } from '../../../sources/vector_source';
 import { DataRequestContext } from '../../../../actions';
 import {
   StyleMetaDescriptor,
@@ -42,7 +42,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(descriptor, mapColors);
-    layerDescriptor.type = LAYER_TYPE.TILED_VECTOR;
+    layerDescriptor.type = LAYER_TYPE.MVT_VECTOR;
 
     if (!layerDescriptor.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -52,11 +52,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return layerDescriptor;
   }
 
-  readonly _source: ITiledSingleLayerVectorSource; // downcast to the more specific type
+  readonly _source: IMvtVectorSource;
 
   constructor({ layerDescriptor, source }: VectorLayerArguments) {
     super({ layerDescriptor, source });
-    this._source = source as ITiledSingleLayerVectorSource;
+    this._source = source as IMvtVectorSource;
   }
 
   getFeatureId(feature: Feature): string | number | undefined {
@@ -106,11 +106,16 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       };
     }
 
-    const totalFeaturesCount: number = tileMetaFeatures.reduce((acc: number, tileMeta: Feature) => {
+    let totalFeaturesCount = 0;
+    let tilesWithFeatures = 0;
+    tileMetaFeatures.forEach((tileMeta: Feature) => {
       const count =
         tileMeta && tileMeta.properties ? tileMeta.properties[ES_MVT_HITS_TOTAL_VALUE] : 0;
-      return count + acc;
-    }, 0);
+      if (count > 0) {
+        totalFeaturesCount += count;
+        tilesWithFeatures++;
+      }
+    });
 
     if (totalFeaturesCount === 0) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
@@ -124,21 +129,35 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       }
     });
 
+    // Documents may be counted multiple times if geometry crosses tile boundaries.
+    const canMultiCountShapes =
+      !this.getStyle().getIsPointsOnly() && totalFeaturesCount > 1 && tilesWithFeatures > 1;
+    const countPrefix = canMultiCountShapes ? '~' : '';
+    const countMsg = areResultsTrimmed
+      ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
+          defaultMessage: `Results limited to {countPrefix}{count} documents.`,
+          values: {
+            count: totalFeaturesCount.toLocaleString(),
+            countPrefix,
+          },
+        })
+      : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
+          defaultMessage: `Found {countPrefix}{count} documents.`,
+          values: {
+            count: totalFeaturesCount.toLocaleString(),
+            countPrefix,
+          },
+        });
+    const tooltipContent = canMultiCountShapes
+      ? countMsg +
+        i18n.translate('xpack.maps.tiles.shapeCountMsg', {
+          defaultMessage: ' This count is approximate.',
+        })
+      : countMsg;
+
     return {
       icon: this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed),
-      tooltipContent: areResultsTrimmed
-        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
-            defaultMessage: `Results limited to {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          })
-        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
-            defaultMessage: `Found {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          }),
+      tooltipContent,
       areResultsTrimmed,
     };
   }
@@ -170,6 +189,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     }
     await this._syncSourceStyleMeta(syncContext, this.getSource(), this.getCurrentStyle());
     await this._syncSourceFormatters(syncContext, this.getSource(), this.getCurrentStyle());
+    await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
 
     await syncMvtSourceData({
       layerId: this.getId(),
@@ -180,7 +200,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
         this.getSource(),
         this.getCurrentStyle()
       ),
-      source: this.getSource() as ITiledSingleLayerVectorSource,
+      source: this.getSource() as IMvtVectorSource,
       syncContext,
     });
   }
@@ -206,9 +226,9 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     const mbSourceId = this.getMbSourceId();
     mbMap.addSource(mbSourceId, {
       type: 'vector',
-      tiles: [sourceData.urlTemplate],
-      minzoom: sourceData.minSourceZoom,
-      maxzoom: sourceData.maxSourceZoom,
+      tiles: [sourceData.tileUrl],
+      minzoom: sourceData.tileMinZoom,
+      maxzoom: sourceData.tileMaxZoom,
     });
   }
 
@@ -236,13 +256,13 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       return;
     }
     const sourceData = sourceDataRequest.getData() as MvtSourceData | undefined;
-    if (!sourceData || sourceData.layerName === '') {
+    if (!sourceData || sourceData.tileSourceLayer === '') {
       return;
     }
 
-    this._setMbLabelProperties(mbMap, sourceData.layerName);
-    this._setMbPointsProperties(mbMap, sourceData.layerName);
-    this._setMbLinePolygonProperties(mbMap, sourceData.layerName);
+    this._setMbLabelProperties(mbMap, sourceData.tileSourceLayer);
+    this._setMbPointsProperties(mbMap, sourceData.tileSourceLayer);
+    this._setMbLinePolygonProperties(mbMap, sourceData.tileSourceLayer);
     this._syncTooManyFeaturesProperties(mbMap);
   }
 
@@ -308,9 +328,9 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     }
 
     const isSourceDifferent =
-      mbTileSource.tiles?.[0] !== sourceData.urlTemplate ||
-      mbTileSource.minzoom !== sourceData.minSourceZoom ||
-      mbTileSource.maxzoom !== sourceData.maxSourceZoom;
+      mbTileSource.tiles?.[0] !== sourceData.tileUrl ||
+      mbTileSource.minzoom !== sourceData.tileMinZoom ||
+      mbTileSource.maxzoom !== sourceData.tileMaxZoom;
 
     if (isSourceDifferent) {
       return true;
@@ -324,7 +344,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       if (
         mbLayer &&
         // @ts-expect-error
-        mbLayer.sourceLayer !== sourceData.layerName &&
+        mbLayer.sourceLayer !== sourceData.tileSourceLayer &&
         // @ts-expect-error
         mbLayer.sourceLayer !== ES_MVT_META_LAYER_NAME
       ) {

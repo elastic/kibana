@@ -46,20 +46,6 @@ const QueueSchema = schema.object({
   }),
 });
 
-const RulesSchema = schema.object({
-  allow: schema.boolean(),
-  host: schema.maybe(schema.string()),
-  protocol: schema.maybe(
-    schema.string({
-      validate(value) {
-        if (!/:$/.test(value)) {
-          return 'must end in colon';
-        }
-      },
-    })
-  ),
-});
-
 const CaptureSchema = schema.object({
   timeouts: schema.object({
     openUrl: schema.oneOf([schema.number(), schema.duration()], {
@@ -72,55 +58,9 @@ const CaptureSchema = schema.object({
       defaultValue: moment.duration({ seconds: 30 }),
     }),
   }),
-  networkPolicy: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    rules: schema.arrayOf(RulesSchema, {
-      defaultValue: [
-        { host: undefined, allow: true, protocol: 'http:' },
-        { host: undefined, allow: true, protocol: 'https:' },
-        { host: undefined, allow: true, protocol: 'ws:' },
-        { host: undefined, allow: true, protocol: 'wss:' },
-        { host: undefined, allow: true, protocol: 'data:' },
-        { host: undefined, allow: false, protocol: undefined }, // Default action is to deny!
-      ],
-    }),
-  }),
   zoom: schema.number({ defaultValue: 2 }),
   loadDelay: schema.oneOf([schema.number(), schema.duration()], {
     defaultValue: moment.duration({ seconds: 3 }),
-  }),
-  browser: schema.object({
-    autoDownload: schema.conditional(
-      schema.contextRef('dist'),
-      true,
-      schema.boolean({ defaultValue: false }),
-      schema.boolean({ defaultValue: true })
-    ),
-    chromium: schema.object({
-      inspect: schema.conditional(
-        schema.contextRef('dist'),
-        true,
-        schema.boolean({ defaultValue: false }),
-        schema.maybe(schema.never())
-      ),
-      disableSandbox: schema.maybe(schema.boolean()), // default value is dynamic in createConfig$
-      proxy: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-        server: schema.conditional(
-          schema.siblingRef('enabled'),
-          true,
-          schema.uri({ scheme: ['http', 'https'] }),
-          schema.maybe(schema.never())
-        ),
-        bypass: schema.conditional(
-          schema.siblingRef('enabled'),
-          true,
-          schema.arrayOf(schema.string()),
-          schema.maybe(schema.never())
-        ),
-      }),
-    }),
-    type: schema.string({ defaultValue: 'chromium' }),
   }),
   maxAttempts: schema.conditional(
     schema.contextRef('dist'),

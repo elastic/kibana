@@ -1,6 +1,6 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-optimizer"
 PKG_REQUIRE_NAME = "@kbn/optimizer"
@@ -38,20 +38,21 @@ RUNTIME_DEPS = [
   "//packages/kbn-ui-shared-deps-npm",
   "//packages/kbn-ui-shared-deps-src",
   "//packages/kbn-utils",
+  "@npm//@babel/core",
   "@npm//chalk",
   "@npm//clean-webpack-plugin",
   "@npm//compression-webpack-plugin",
   "@npm//cpy",
+  "@npm//dedent",
   "@npm//del",
   "@npm//execa",
-  "@npm//jest-diff",
   "@npm//json-stable-stringify",
+  "@npm//js-yaml",
   "@npm//lmdb-store",
   "@npm//loader-utils",
   "@npm//node-sass",
   "@npm//normalize-path",
   "@npm//pirates",
-  "@npm//resize-observer-polyfill",
   "@npm//rxjs",
   "@npm//source-map-support",
   "@npm//watchpack",
@@ -62,27 +63,28 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-config",
-  "//packages/kbn-config-schema",
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-std",
-  "//packages/kbn-ui-shared-deps-npm",
-  "//packages/kbn-ui-shared-deps-src",
-  "//packages/kbn-utils",
+  "//packages/kbn-config:npm_module_types",
+  "//packages/kbn-config-schema:npm_module_types",
+  "//packages/kbn-dev-utils:npm_module_types",
+  "//packages/kbn-std:npm_module_types",
+  "//packages/kbn-ui-shared-deps-npm:npm_module_types",
+  "//packages/kbn-ui-shared-deps-src:npm_module_types",
+  "//packages/kbn-utils:npm_module_types",
   "@npm//chalk",
   "@npm//clean-webpack-plugin",
   "@npm//cpy",
   "@npm//del",
   "@npm//execa",
-  "@npm//jest-diff",
   "@npm//lmdb-store",
   "@npm//pirates",
-  "@npm//resize-observer-polyfill",
   "@npm//rxjs",
   "@npm//zlib",
+  "@npm//@types/babel__core",
   "@npm//@types/compression-webpack-plugin",
+  "@npm//@types/dedent",
   "@npm//@types/jest",
   "@npm//@types/json-stable-stringify",
+  "@npm//@types/js-yaml",
   "@npm//@types/loader-utils",
   "@npm//@types/node",
   "@npm//@types/normalize-path",
@@ -114,10 +116,8 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )
@@ -125,7 +125,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -141,6 +141,23 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

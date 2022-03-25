@@ -9,10 +9,11 @@ import React, { useState, useEffect, useCallback, useRef, memo, ReactPortal } fr
 import deepEqual from 'react-fast-compare';
 import usePrevious from 'react-use/lib/usePrevious';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { ExpressionAstExpression, ExpressionValue } from 'src/plugins/expressions';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
 import { UpdatePropsRef } from '../../../types/arguments';
 
-interface ArgTemplateFormProps {
+export interface ArgTemplateFormProps {
   template?: (
     domNode: HTMLElement,
     config: ArgTemplateFormProps['argumentProps'],
@@ -24,10 +25,13 @@ interface ArgTemplateFormProps {
     label?: string;
     setLabel: (label: string) => void;
     expand?: boolean;
+    argValue: any;
     setExpand?: (expand: boolean) => void;
-    onValueRemove?: (argName: string, argIndex: string) => void;
+    onValueRemove?: () => void;
+    onValueChange: (value: any) => void;
     resetErrorState: () => void;
     renderError: () => void;
+    argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
   };
   handlers?: { [key: string]: (...args: any[]) => any };
   error?: unknown;

@@ -14,7 +14,8 @@ import execa from 'execa';
 import * as Rx from 'rxjs';
 import { mergeMap, reduce } from 'rxjs/operators';
 import { supportsColor } from 'chalk';
-import { REPO_ROOT, run, createFailError } from '@kbn/dev-utils';
+import { run, createFailError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { lastValueFrom } from '@kbn/std';
 
 import { PROJECTS } from '../typescript/projects';
@@ -108,9 +109,9 @@ export function runEslintWithTypes() {
               return undefined;
             } else {
               log.error(`${project.name} failed`);
-              log.indent(4);
-              log.write(proc.all);
-              log.indent(-4);
+              log.indent(4, () => {
+                log.write(proc.all);
+              });
               return project;
             }
           }, concurrency),

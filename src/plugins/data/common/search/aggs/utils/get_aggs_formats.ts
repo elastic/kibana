@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import {
   FieldFormat,
   FieldFormatInstanceType,
+  FieldFormatParams,
   FieldFormatsContentType,
   IFieldFormat,
   SerializedFieldFormat,
@@ -133,19 +134,28 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static id = 'multi_terms';
       static hidden = true;
 
+      private formatCache: Map<SerializedFieldFormat<FieldFormatParams>, FieldFormat> = new Map();
+
       convert = (val: unknown, type: FieldFormatsContentType) => {
         const params = this._params;
-        const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) =>
-          getFieldFormat({ id: fieldParams.id, params: fieldParams })
-        );
+        const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) => {
+          const isCached = this.formatCache.has(fieldParams);
+          const cachedFormat = this.formatCache.get(fieldParams) || getFieldFormat(fieldParams);
+          if (!isCached) {
+            this.formatCache.set(fieldParams, cachedFormat);
+          }
+          return cachedFormat;
+        });
 
         if (String(val) === '__other__') {
           return params.otherBucketLabel;
         }
 
+        const joinTemplate = params.separator ?? ' › ';
+
         return (val as MultiFieldKey).keys
           .map((valPart, i) => formats[i].convert(valPart, type))
-          .join(' › ');
+          .join(joinTemplate);
       };
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
     },

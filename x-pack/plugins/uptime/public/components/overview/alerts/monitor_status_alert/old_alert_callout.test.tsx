@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { OldAlertCallOut } from './old_alert_call_out';
 
 describe('OldAlertCallOut', () => {

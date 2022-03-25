@@ -29,6 +29,8 @@ export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | '
   id: string;
   spaceId: string;
   apiKey: string | null;
+  executionId: string;
+  consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
 }
 
@@ -45,7 +47,16 @@ export function createExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions): ExecutionEnqueuer<void> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, apiKey, relatedSavedObjects }: ExecuteOptions
+    {
+      id,
+      params,
+      spaceId,
+      consumer,
+      source,
+      apiKey,
+      executionId,
+      relatedSavedObjects,
+    }: ExecuteOptions
   ) {
     if (!isESOCanEncrypt) {
       throw new Error(
@@ -87,6 +98,8 @@ export function createExecutionEnqueuerFunction({
         actionId: id,
         params,
         apiKey,
+        executionId,
+        consumer,
         relatedSavedObjects: relatedSavedObjectWithRefs,
       },
       {
@@ -113,7 +126,7 @@ export function createEphemeralExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions): ExecutionEnqueuer<RunNowResult> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, apiKey }: ExecuteOptions
+    { id, params, spaceId, source, consumer, apiKey, executionId }: ExecuteOptions
   ): Promise<RunNowResult> {
     const { action } = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
     validateCanActionBeUsed(action);
@@ -127,10 +140,12 @@ export function createEphemeralExecutionEnqueuerFunction({
       spaceId,
       taskParams: {
         actionId: id,
+        consumer,
         // Saved Objects won't allow us to enforce unknown rather than any
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         params: params as Record<string, any>,
         ...(apiKey ? { apiKey } : {}),
+        ...(executionId ? { executionId } : {}),
       },
       ...executionSourceAsSavedObjectReferences(source),
     };

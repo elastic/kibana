@@ -16,43 +16,6 @@ Object {
 }
 `;
 
-exports[`services queries fetches the legacy data status 1`] = `
-Object {
-  "apm": Object {
-    "events": Array [
-      "transaction",
-    ],
-    "includeLegacyData": true,
-  },
-  "body": Object {
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "range": Object {
-              "observer.version_major": Object {
-                "lt": 7,
-              },
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1,
-                "lte": 50000,
-              },
-            },
-          },
-        ],
-      },
-    },
-    "size": 0,
-  },
-  "terminate_after": 1,
-}
-`;
-
 exports[`services queries fetches the service agent name 1`] = `
 Object {
   "apm": Object {
@@ -99,7 +62,9 @@ Object {
     },
     "size": 1,
     "sort": Object {
-      "_score": "desc",
+      "_score": Object {
+        "order": "desc",
+      },
     },
   },
   "terminate_after": 1,
@@ -159,7 +124,7 @@ Array [
           },
           "terms": Object {
             "field": "service.name",
-            "size": 500,
+            "size": 50,
           },
         },
       },
@@ -185,6 +150,7 @@ Array [
     "apm": Object {
       "events": Array [
         "metric",
+        "error",
       ],
     },
     "body": Object {
@@ -211,7 +177,7 @@ Array [
           },
           "terms": Object {
             "field": "service.name",
-            "size": 500,
+            "size": 50,
           },
         },
       },

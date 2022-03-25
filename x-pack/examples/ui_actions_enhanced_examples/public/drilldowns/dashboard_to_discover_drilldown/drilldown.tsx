@@ -33,7 +33,9 @@ export interface Params {
 export class DashboardToDiscoverDrilldown
   implements Drilldown<Config, ApplyGlobalFilterActionContext>
 {
-  constructor(protected readonly params: Params) {}
+  constructor(protected readonly params: Params) {
+    this.ReactCollectConfig = (props) => <CollectConfigContainer {...props} params={this.params} />;
+  }
 
   public readonly id = SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN;
 
@@ -47,9 +49,7 @@ export class DashboardToDiscoverDrilldown
     return [APPLY_FILTER_TRIGGER];
   }
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = (props) => (
-    <CollectConfigContainer {...props} params={this.params} />
-  );
+  private readonly ReactCollectConfig!: React.FC<CollectConfigProps>;
 
   public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
@@ -65,9 +65,9 @@ export class DashboardToDiscoverDrilldown
   };
 
   private readonly getPath = async (config: Config, context: ActionContext): Promise<string> => {
-    const { urlGenerator } = this.params.start().plugins.discover;
+    const { locator } = this.params.start().plugins.discover;
 
-    if (!urlGenerator) throw new Error('Discover URL generator not available.');
+    if (!locator) throw new Error('Discover locator not available.');
 
     let indexPatternId =
       !!config.customIndexPattern && !!config.indexPatternId ? config.indexPatternId : '';
@@ -79,7 +79,7 @@ export class DashboardToDiscoverDrilldown
       }
     }
 
-    return await urlGenerator.createUrl({
+    return await locator.getUrl({
       indexPatternId,
     });
   };

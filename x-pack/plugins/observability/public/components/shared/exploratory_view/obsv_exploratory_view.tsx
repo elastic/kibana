@@ -7,8 +7,9 @@
 
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { ExploratoryViewPage } from './index';
-import { ExploratoryViewContextProvider } from './contexts/exploatory_view_config';
+import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
 import { AppDataType, ReportViewType } from './types';
 
 import {
@@ -28,6 +29,7 @@ import { getMobileKPIDistributionConfig } from './configurations/mobile/distribu
 import { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config';
 import { getMobileDeviceDistributionConfig } from './configurations/mobile/device_distribution_config';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
 
 export const DataTypesLabels = {
   [DataTypes.UX]: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
@@ -40,6 +42,14 @@ export const DataTypesLabels = {
       defaultMessage: 'Synthetics monitoring',
     }
   ),
+
+  [DataTypes.METRICS]: i18n.translate('xpack.observability.overview.exploratoryView.metricsLabel', {
+    defaultMessage: 'Metrics',
+  }),
+
+  [DataTypes.LOGS]: i18n.translate('xpack.observability.overview.exploratoryView.logsLabel', {
+    defaultMessage: 'Logs',
+  }),
 
   [DataTypes.MOBILE]: i18n.translate(
     'xpack.observability.overview.exploratoryView.mobileExperienceLabel',
@@ -56,6 +66,10 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   {
     id: DataTypes.UX,
     label: DataTypesLabels[DataTypes.UX],
+  },
+  {
+    id: DataTypes.LOGS,
+    label: DataTypesLabels[DataTypes.LOGS],
   },
   {
     id: DataTypes.MOBILE,
@@ -81,19 +95,23 @@ export const obsvReportConfigMap = {
     getMobileKPIDistributionConfig,
     getMobileDeviceDistributionConfig,
   ],
+  [DataTypes.LOGS]: [getLogsKPIConfig],
 };
 
 export function ObservabilityExploratoryView() {
   const { appMountParameters } = usePluginContext();
   return (
-    <ExploratoryViewContextProvider
-      reportTypes={reportTypesList}
-      dataTypes={dataTypes}
-      indexPatterns={{}}
-      reportConfigMap={obsvReportConfigMap}
-      setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
-    >
-      <ExploratoryViewPage />
-    </ExploratoryViewContextProvider>
+    <EuiErrorBoundary>
+      <ExploratoryViewContextProvider
+        reportTypes={reportTypesList}
+        dataTypes={dataTypes}
+        dataViews={{}}
+        reportConfigMap={obsvReportConfigMap}
+        setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+        theme$={appMountParameters.theme$}
+      >
+        <ExploratoryViewPage />
+      </ExploratoryViewContextProvider>
+    </EuiErrorBoundary>
   );
 }

@@ -15,10 +15,21 @@ export {
 } from '../common/lib';
 export { onRedirectNoIndexPattern } from './data_views';
 
-export type { IIndexPatternFieldList, TypeMeta } from '../common';
-export { IndexPatternField, DataViewField } from '../common';
+export type { IIndexPatternFieldList, TypeMeta, RuntimeType } from '../common';
+export type { DataViewSpec, FieldSpec, DataViewAttributes } from '../common';
+export {
+  IndexPatternField,
+  DataViewField,
+  DataViewType,
+  DataViewSavedObjectConflictError,
+  META_FIELDS,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
+} from '../common';
 
-export type { IndexPatternsContract, DataViewsContract } from './data_views';
+export type { IndexPatternsContract } from './data_views';
+export type { DataViewListItem } from './data_views';
 export {
   IndexPatternsService,
   IndexPattern,
@@ -39,7 +50,14 @@ export function plugin() {
   return new DataViewsPublicPlugin();
 }
 
-export type { DataViewsPublicPluginSetup, DataViewsPublicPluginStart } from './types';
+export type {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+  DataViewsContract,
+  HasDataViewsResponse,
+  IndicesResponse,
+  IndicesResponseModified,
+} from './types';
 
 // Export plugin after all other imports
-export type { DataViewsPublicPlugin as DataPlugin };
+export type { DataViewsPublicPlugin as DataViewsPlugin };

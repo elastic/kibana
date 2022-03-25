@@ -14,13 +14,24 @@ import {
   HostsStrategyResponse,
   HostsQueries,
   HostsRequestOptions,
+  HostsEdges,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
+
+import {
+  getHostRiskIndex,
+  buildHostNamesFilter,
+  HostsRiskScore,
+} from '../../../../../../common/search_strategy';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 import { buildHostsQuery } from './query.all_hosts.dsl';
 import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
+import { IScopedClusterClient } from '../../../../../../../../../src/core/server';
+
 import { buildHostsQueryEntities } from './query.all_hosts_entities.dsl';
+import { EndpointAppContext } from '../../../../../endpoint/types';
+import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 
 export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
   buildDsl: (options: HostsRequestOptions) => {
@@ -31,7 +42,12 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
   },
   parse: async (
     options: HostsRequestOptions,
-    response: IEsSearchResponse<unknown>
+    response: IEsSearchResponse<unknown>,
+    deps?: {
+      esClient: IScopedClusterClient;
+      spaceId?: string;
+      endpointContext: EndpointAppContext;
+    }
   ): Promise<HostsStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response.rawResponse);
@@ -48,10 +64,17 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 
+    const hostNames = edges.map((edge) => getOr('', 'node.host.name[0]', edge));
+
+    const enhancedEdges =
+      deps?.spaceId && deps?.endpointContext.experimentalFeatures.riskyHostsEnabled
+        ? await enhanceEdges(edges, hostNames, deps.spaceId, deps.esClient)
+        : edges;
+
     return {
       ...response,
       inspect,
-      edges,
+      edges: enhancedEdges,
       totalCount,
       pageInfo: {
         activePage: activePage ?? 0,
@@ -61,6 +84,54 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
     };
   },
 };
+
+async function enhanceEdges(
+  edges: HostsEdges[],
+  hostNames: string[],
+  spaceId: string,
+  esClient: IScopedClusterClient
+): Promise<HostsEdges[]> {
+  const hostRiskData = await getHostRiskData(esClient, spaceId, hostNames);
+
+  const hostsRiskByHostName: Record<string, string> | undefined = hostRiskData?.hits.hits.reduce(
+    (acc, hit) => ({
+      ...acc,
+      [hit._source?.host.name ?? '']: hit._source?.risk,
+    }),
+    {}
+  );
+
+  return hostsRiskByHostName
+    ? edges.map(({ node, cursor }) => ({
+        node: {
+          ...node,
+          risk: hostsRiskByHostName[node._id ?? ''],
+        },
+        cursor,
+      }))
+    : edges;
+}
+
+async function getHostRiskData(
+  esClient: IScopedClusterClient,
+  spaceId: string,
+  hostNames: string[]
+) {
+  try {
+    const hostRiskResponse = await esClient.asCurrentUser.search<HostsRiskScore>(
+      buildRiskScoreQuery({
+        defaultIndex: [getHostRiskIndex(spaceId)],
+        filterQuery: buildHostNamesFilter(hostNames),
+      })
+    );
+    return hostRiskResponse;
+  } catch (error) {
+    if (error?.meta?.body?.error?.type !== 'index_not_found_exception') {
+      throw error;
+    }
+    return undefined;
+  }
+}
 
 export const allHostsEntities: SecuritySolutionFactory<HostsQueries.hosts> = {
   buildDsl: (options: HostsRequestOptions) => {

@@ -7,7 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern, ISearchSource } from 'src/plugins/data/common';
+import type { ISearchSource } from 'src/plugins/data/public';
+import type { DataView } from 'src/plugins/data_views/public';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { unhashUrl } from '../../../../../../kibana_utils/public';
@@ -31,7 +32,7 @@ export const getTopNavLinks = ({
   searchSource,
   onOpenSavedSearch,
 }: {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
@@ -52,6 +53,8 @@ export const getTopNavLinks = ({
       openOptionsPopover({
         I18nContext: services.core.i18n.Context,
         anchorElement,
+        theme$: services.core.theme.theme$,
+        services,
       }),
     testId: 'discoverOptionsButton',
   };
@@ -95,6 +98,8 @@ export const getTopNavLinks = ({
       showOpenSearchPanel({
         onOpenSavedSearch,
         I18nContext: services.core.i18n.Context,
+        theme$: services.core.theme.theme$,
+        services,
       }),
   };
 

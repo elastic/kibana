@@ -22,7 +22,7 @@ import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks'
 
 import { siemMock } from '../../../../mocks';
 import { createMockConfig } from '../../../../config.mock';
-import { ruleExecutionLogClientMock } from '../../rule_execution_log/__mocks__/rule_execution_log_client';
+import { ruleExecutionLogMock } from '../../rule_execution_log/__mocks__';
 import { requestMock } from './request';
 import { internalFrameworkRequest } from '../../../framework';
 
@@ -30,8 +30,10 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz';
+import { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 
-const createMockClients = () => {
+export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
   const license = licensingMock.createLicenseMock();
 
@@ -54,7 +56,7 @@ const createMockClients = () => {
 
     config: createMockConfig(),
     appClient: siemMock.createClient(),
-    ruleExecutionLogClient: ruleExecutionLogClientMock.create(),
+    ruleExecutionLog: ruleExecutionLogMock.forRoutes.create(),
   };
 };
 
@@ -66,11 +68,12 @@ type SecuritySolutionRequestHandlerContextMock =
   };
 
 const createRequestContextMock = (
-  clients: MockClients = createMockClients()
+  clients: MockClients = createMockClients(),
+  overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
 ): SecuritySolutionRequestHandlerContextMock => {
   return {
     core: clients.core,
-    securitySolution: createSecuritySolutionRequestContextMock(clients),
+    securitySolution: createSecuritySolutionRequestContextMock(clients, overrides),
     actions: {
       getActionsClient: jest.fn(() => clients.actionsClient),
     } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>,
@@ -81,18 +84,21 @@ const createRequestContextMock = (
     lists: {
       getListClient: jest.fn(() => clients.lists.listClient),
       getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
+      getExtensionPointClient: jest.fn(),
     },
   };
 };
 
 const createSecuritySolutionRequestContextMock = (
-  clients: MockClients
+  clients: MockClients,
+  overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
 ): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
   const core = clients.core;
   const kibanaRequest = requestMock.create();
 
   return {
     core,
+    endpointAuthz: getEndpointAuthzInitialStateMock(overrides.endpointAuthz),
     getConfig: jest.fn(() => clients.config),
     getFrameworkRequest: jest.fn(() => {
       return {
@@ -107,7 +113,7 @@ const createSecuritySolutionRequestContextMock = (
     getAppClient: jest.fn(() => clients.appClient),
     getSpaceId: jest.fn(() => 'default'),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
-    getExecutionLogClient: jest.fn(() => clients.ruleExecutionLogClient),
+    getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
   };
 };

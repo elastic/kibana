@@ -6,6 +6,7 @@ exports[`HeaderSection it renders 1`] = `
 >
   <EuiFlexGroup
     alignItems="center"
+    direction="row"
     gutterSize="s"
   >
     <EuiFlexItem
@@ -17,19 +18,25 @@ exports[`HeaderSection it renders 1`] = `
         responsive={false}
       >
         <EuiFlexItem>
-          <EuiTitle
-            size="m"
+          <EuiFlexGroup
+            gutterSize="none"
           >
-            <h4
-              data-test-subj="header-section-title"
-            >
-              <span
-                className="eui-textBreakNormal"
+            <EuiFlexItem>
+              <EuiTitle
+                size="m"
               >
-                Test title
-              </span>
-            </h4>
-          </EuiTitle>
+                <h4
+                  data-test-subj="header-section-title"
+                >
+                  <span
+                    className="eui-textBreakNormal"
+                  >
+                    Test title
+                  </span>
+                </h4>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <Subtitle
             data-test-subj="header-section-subtitle"
           />

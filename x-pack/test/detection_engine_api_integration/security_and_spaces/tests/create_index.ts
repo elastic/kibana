@@ -11,6 +11,8 @@ import {
   DETECTION_ENGINE_INDEX_URL,
 } from '../../../../plugins/security_solution/common/constants';
 
+import { SIGNALS_FIELD_ALIASES_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteSignalsIndex } from '../../utils';
 
@@ -36,6 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/signals/index_alias_clash');
         });
 
+        // This fails and should be investigated or removed if it no longer applies
         it.skip('should report that signals index does not exist', async () => {
           const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(404);
           expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
@@ -81,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
           // Make sure that aliases_version has been updated on the existing index
           expect(mappings['.siem-signals-default-000001'].mappings?._meta?.aliases_version).to.eql(
-            1
+            SIGNALS_FIELD_ALIASES_VERSION
           );
         });
       });

@@ -9,18 +9,15 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import {
-  IndexPatternField,
-  TimefilterContract,
-  DataPublicPluginStart,
-} from 'src/plugins/data/public';
+import { TimefilterContract, DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataViewField } from '../../../data_views/public';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';
 
-const minMaxAgg = (field?: IndexPatternField) => {
+const minMaxAgg = (field?: DataViewField) => {
   const aggBody: any = {};
   if (field) {
     if (field.scripted) {

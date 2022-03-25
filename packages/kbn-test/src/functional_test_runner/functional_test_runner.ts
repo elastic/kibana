@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { writeFileSync, mkdirSync } from 'fs';
+import Path, { dirname } from 'path';
 import { ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { Suite, Test } from './fake_mocha_types';
 import {
   Lifecycle,
   LifecyclePhase,
-  FailureMetadata,
+  TestMetadata,
   readConfigFile,
   ProviderCollection,
   readProviderSpec,
@@ -21,17 +24,21 @@ import {
   DockerServersService,
   Config,
   SuiteTracker,
+  EsVersion,
 } from './lib';
+import { createEsClientForFtrConfig } from '../es';
 
 export class FunctionalTestRunner {
   public readonly lifecycle = new Lifecycle();
-  public readonly failureMetadata = new FailureMetadata(this.lifecycle);
+  public readonly testMetadata = new TestMetadata(this.lifecycle);
   private closed = false;
 
+  private readonly esVersion: EsVersion;
   constructor(
     private readonly log: ToolingLog,
     private readonly configFile: string,
-    private readonly configOverrides: any
+    private readonly configOverrides: any,
+    esVersion?: string | EsVersion
   ) {
     for (const [key, value] of Object.entries(this.lifecycle)) {
       if (value instanceof LifecyclePhase) {
@@ -39,6 +46,12 @@ export class FunctionalTestRunner {
         value.after$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
       }
     }
+    this.esVersion =
+      esVersion === undefined
+        ? EsVersion.getDefault()
+        : esVersion instanceof EsVersion
+        ? esVersion
+        : new EsVersion(esVersion);
   }
 
   async run() {
@@ -51,6 +64,9 @@ export class FunctionalTestRunner {
         ...readProviderSpec('PageObject', config.get('pageObjects')),
       ]);
 
+      if (providers.hasService('es')) {
+        await this.validateEsVersion(config);
+      }
       await providers.loadAll();
 
       const customTestRunner = config.get('testRunner');
@@ -61,12 +77,69 @@ export class FunctionalTestRunner {
         return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      let reporter;
+      let reporterOptions;
+      if (config.get('mochaOpts.dryRun')) {
+        // override default reporter for dryRun results
+        const targetFile = Path.resolve(REPO_ROOT, 'target/functional-tests/dryRunOutput.json');
+        reporter = 'json';
+        reporterOptions = {
+          output: targetFile,
+        };
+        this.log.info(`Dry run results will be stored in ${targetFile}`);
+      }
+
+      const mocha = await setupMocha(
+        this.lifecycle,
+        this.log,
+        config,
+        providers,
+        this.esVersion,
+        reporter,
+        reporterOptions
+      );
+
+      // there's a bug in mocha's dry run, see https://github.com/mochajs/mocha/issues/4838
+      // until we can update to a mocha version where this is fixed, we won't actually
+      // execute the mocha dry run but simulate it by reading the suites and tests of
+      // the mocha object and writing a report file with similar structure to the json report
+      // (just leave out some execution details like timing, retry and erros)
+      if (config.get('mochaOpts.dryRun')) {
+        return this.simulateMochaDryRun(mocha);
+      }
+
       await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 
       return await runTests(this.lifecycle, mocha);
     });
+  }
+
+  private async validateEsVersion(config: Config) {
+    const es = createEsClientForFtrConfig(config);
+
+    let esInfo;
+    try {
+      esInfo = await es.info();
+    } catch (error) {
+      throw new Error(
+        `attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ${error.stack}`
+      );
+    } finally {
+      try {
+        await es.close();
+      } catch {
+        // noop
+      }
+    }
+
+    if (!this.esVersion.eql(esInfo.version.number)) {
+      throw new Error(
+        `ES reports a version number "${
+          esInfo.version.number
+        }" which doesn't match supplied es version "${this.esVersion.toString()}"`
+      );
+    }
   }
 
   async getTestStats() {
@@ -82,8 +155,9 @@ export class FunctionalTestRunner {
         readProviderSpec(type, providers).map((p) => ({
           ...p,
           fn: skip.includes(p.name)
-            ? (...args: unknown[]) => {
-                const result = p.fn(...args);
+            ? (ctx: any) => {
+                const result = ProviderCollection.callProviderFn(p.fn, ctx);
+
                 if ('then' in result) {
                   throw new Error(
                     `Provider [${p.name}] returns a promise so it can't loaded during test analysis`
@@ -107,14 +181,14 @@ export class FunctionalTestRunner {
         ...readStubbedProviderSpec('PageObject', config.get('pageObjects'), []),
       ]);
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
 
       const countTests = (suite: Suite): number =>
         suite.suites.reduce((sum, s) => sum + countTests(s), suite.tests.length);
 
       return {
         testCount: countTests(mocha.suite),
-        excludedTests: mocha.excludedTests.map((t: Test) => t.fullTitle()),
+        testsExcludedByTag: mocha.testsExcludedByTag.map((t: Test) => t.fullTitle()),
       };
     });
   }
@@ -125,7 +199,12 @@ export class FunctionalTestRunner {
     let runErrorOccurred = false;
 
     try {
-      const config = await readConfigFile(this.log, this.configFile, this.configOverrides);
+      const config = await readConfigFile(
+        this.log,
+        this.esVersion,
+        this.configFile,
+        this.configOverrides
+      );
       this.log.info('Config loaded');
 
       if (
@@ -145,9 +224,10 @@ export class FunctionalTestRunner {
       const coreProviders = readProviderSpec('Service', {
         lifecycle: () => this.lifecycle,
         log: () => this.log,
-        failureMetadata: () => this.failureMetadata,
+        testMetadata: () => this.testMetadata,
         config: () => config,
         dockerServers: () => dockerServers,
+        esVersion: () => this.esVersion,
       });
 
       return await handler(config, coreProviders);
@@ -174,5 +254,63 @@ export class FunctionalTestRunner {
 
     this.closed = true;
     await this.lifecycle.cleanup.trigger();
+  }
+
+  simulateMochaDryRun(mocha: any) {
+    interface TestEntry {
+      file: string;
+      title: string;
+      fullTitle: string;
+    }
+
+    const getFullTitle = (node: Test | Suite): string => {
+      const parentTitle = node.parent && getFullTitle(node.parent);
+      return parentTitle ? `${parentTitle} ${node.title}` : node.title;
+    };
+
+    let suiteCount = 0;
+    const passes: TestEntry[] = [];
+    const pending: TestEntry[] = [];
+
+    const collectTests = (suite: Suite) => {
+      for (const subSuite of suite.suites) {
+        suiteCount++;
+        for (const test of subSuite.tests) {
+          const testEntry = {
+            title: test.title,
+            fullTitle: getFullTitle(test),
+            file: test.file || '',
+          };
+          if (test.pending) {
+            pending.push(testEntry);
+          } else {
+            passes.push(testEntry);
+          }
+        }
+        collectTests(subSuite);
+      }
+    };
+
+    collectTests(mocha.suite);
+
+    const reportData = {
+      stats: {
+        suites: suiteCount,
+        tests: passes.length + pending.length,
+        passes: passes.length,
+        pending: pending.length,
+        failures: 0,
+      },
+      tests: [...passes, ...pending],
+      passes,
+      pending,
+      failures: [],
+    };
+
+    const reportPath = mocha.options.reporterOptions.output;
+    mkdirSync(dirname(reportPath), { recursive: true });
+    writeFileSync(reportPath, JSON.stringify(reportData, null, 2), 'utf8');
+
+    return 0;
   }
 }

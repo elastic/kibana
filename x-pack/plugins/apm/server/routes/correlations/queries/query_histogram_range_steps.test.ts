@@ -75,24 +75,18 @@ describe('query_histogram_range_steps', () => {
   describe('fetchTransactionDurationHistogramRangeSteps', () => {
     it('fetches the range steps for the log histogram', async () => {
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              hits: { total: { value: 10 } },
-              aggregations: {
-                transaction_duration_max: {
-                  value: 10000,
-                },
-                transaction_duration_min: {
-                  value: 10,
-                },
+            hits: { total: { value: 10 } },
+            aggregations: {
+              transaction_duration_max: {
+                value: 10000,
               },
-            } as unknown as estypes.SearchResponse,
-          };
+              transaction_duration_min: {
+                value: 10,
+              },
+            },
+          } as unknown as estypes.SearchResponse;
         }
       );
 

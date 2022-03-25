@@ -16,15 +16,14 @@ import { ES_GEO_SHAPE_TYPES, GeoContainmentAlertParams } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataViewField, DataView } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
-  alertParams: GeoContainmentAlertParams;
+  ruleParams: GeoContainmentAlertParams;
   errors: IErrorObject;
-  boundaryIndexPattern: IIndexPattern;
+  boundaryIndexPattern: DataView;
   boundaryNameField?: string;
-  setBoundaryIndexPattern: (boundaryIndexPattern?: IIndexPattern) => void;
+  setBoundaryIndexPattern: (boundaryIndexPattern?: DataView) => void;
   setBoundaryGeoField: (boundaryGeoField?: string) => void;
   setBoundaryNameField: (boundaryNameField?: string) => void;
   data: DataPublicPluginStart;
@@ -35,7 +34,7 @@ interface KibanaDeps {
 }
 
 export const BoundaryIndexExpression: FunctionComponent<Props> = ({
-  alertParams,
+  ruleParams,
   errors,
   boundaryIndexPattern,
   boundaryNameField,
@@ -48,12 +47,12 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
   const { http } = useKibana<KibanaDeps>().services;
   const IndexPatternSelect = (data.ui && data.ui.IndexPatternSelect) || null;
-  const { boundaryGeoField } = alertParams;
+  const { boundaryGeoField } = ruleParams;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const nothingSelected: IFieldType = {
+  const nothingSelected: DataViewField = {
     name: '<nothing selected>',
     type: 'string',
-  };
+  } as DataViewField;
 
   const usePrevious = <T extends unknown>(value: T): T | undefined => {
     const ref = useRef<T>();
@@ -65,8 +64,8 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
 
   const oldIndexPattern = usePrevious(boundaryIndexPattern);
   const fields = useRef<{
-    geoFields: IFieldType[];
-    boundaryNameFields: IFieldType[];
+    geoFields: DataViewField[];
+    boundaryNameFields: DataViewField[];
   }>({
     geoFields: [],
     boundaryNameFields: [],
@@ -74,8 +73,9 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   useEffect(() => {
     if (oldIndexPattern !== boundaryIndexPattern) {
       fields.current.geoFields =
-        (boundaryIndexPattern.fields.length &&
-          boundaryIndexPattern.fields.filter((field: IFieldType) =>
+        (boundaryIndexPattern.fields &&
+          boundaryIndexPattern.fields.length &&
+          boundaryIndexPattern.fields.filter((field: DataViewField) =>
             ES_GEO_SHAPE_TYPES.includes(field.type)
           )) ||
         [];
@@ -84,7 +84,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
       }
 
       fields.current.boundaryNameFields = [
-        ...boundaryIndexPattern.fields.filter((field: IFieldType) => {
+        ...(boundaryIndexPattern.fields ?? []).filter((field: DataViewField) => {
           return (
             BOUNDARY_NAME_ENTITY_TYPES.includes(field.type) &&
             !field.name.startsWith('_') &&

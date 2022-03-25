@@ -49,7 +49,7 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
           action('onValueChange')(argValue);
           this.setState({ argValue });
         }}
-        labels={array('Series Labels', ['label1', 'label2'])}
+        resolved={{ labels: array('Series Labels', ['label1', 'label2']) }}
         typeInstance={{
           name: radios('Type Instance', { default: 'defaultStyle', custom: 'custom' }, 'custom'),
           options: {
@@ -74,7 +74,7 @@ storiesOf('arguments/SeriesStyle/components', module)
   .add('extended: defaults', () => (
     <ExtendedTemplate
       argValue={defaultExpression}
-      labels={[]}
+      resolved={{ labels: [] }}
       onValueChange={action('onValueChange')}
       typeInstance={{
         name: 'defaultStyle',

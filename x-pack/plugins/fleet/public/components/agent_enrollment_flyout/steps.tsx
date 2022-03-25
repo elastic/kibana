@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -16,8 +16,8 @@ import semverPatch from 'semver/functions/patch';
 import type { AgentPolicy } from '../../types';
 import { useKibanaVersion } from '../../hooks';
 
-import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
+import { SelectCreateAgentPolicy } from './agent_policy_select_create';
 
 export const DownloadStep = (hasFleetServer: boolean) => {
   const kibanaVersion = useKibanaVersion();
@@ -79,44 +79,53 @@ export const AgentPolicySelectionStep = ({
   selectedApiKeyId,
   setSelectedAPIKeyId,
   excludeFleetServer,
+  refreshAgentPolicies,
 }: {
-  agentPolicies?: AgentPolicy[];
+  agentPolicies: AgentPolicy[];
   setSelectedPolicyId?: (policyId?: string) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId?: (key?: string) => void;
   excludeFleetServer?: boolean;
+  refreshAgentPolicies: () => void;
 }) => {
+  // storing the created agent policy id as the child component is being recreated
+  const [policyId, setPolicyId] = useState<string | undefined>(undefined);
   const regularAgentPolicies = useMemo(() => {
-    return Array.isArray(agentPolicies)
-      ? agentPolicies.filter(
-          (policy) =>
-            policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
-        )
-      : [];
+    return agentPolicies.filter(
+      (policy) =>
+        policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
+    );
   }, [agentPolicies, excludeFleetServer]);
 
   const onAgentPolicyChange = useCallback(
-    async (policyId?: string) => {
+    async (key?: string, policy?: AgentPolicy) => {
+      if (policy) {
+        refreshAgentPolicies();
+      }
       if (setSelectedPolicyId) {
-        setSelectedPolicyId(policyId);
+        setSelectedPolicyId(key);
+        setPolicyId(key);
       }
     },
-    [setSelectedPolicyId]
+    [setSelectedPolicyId, refreshAgentPolicies]
   );
 
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
-      defaultMessage: 'Choose an agent policy',
+      defaultMessage: 'What type of host are you adding?',
     }),
     children: (
-      <EnrollmentStepAgentPolicy
-        agentPolicies={regularAgentPolicies}
-        withKeySelection={setSelectedAPIKeyId ? true : false}
-        selectedApiKeyId={selectedApiKeyId}
-        onKeyChange={setSelectedAPIKeyId}
-        onAgentPolicyChange={onAgentPolicyChange}
-        excludeFleetServer={excludeFleetServer}
-      />
+      <>
+        <SelectCreateAgentPolicy
+          agentPolicies={regularAgentPolicies}
+          withKeySelection={setSelectedAPIKeyId ? true : false}
+          selectedApiKeyId={selectedApiKeyId}
+          onKeyChange={setSelectedAPIKeyId}
+          onAgentPolicyChange={onAgentPolicyChange}
+          excludeFleetServer={excludeFleetServer}
+          policyId={policyId}
+        />
+      </>
     ),
   };
 };

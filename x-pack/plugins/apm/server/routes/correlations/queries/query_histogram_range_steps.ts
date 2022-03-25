@@ -29,6 +29,9 @@ export const getHistogramRangeSteps = (
     .map(logFn.invert)
     .map((d) => (isNaN(d) ? 0 : Math.round(d)));
 };
+interface Aggs extends estypes.AggregationsRateAggregate {
+  value: number;
+}
 
 export const getHistogramIntervalRequest = (
   params: CorrelationsParams
@@ -50,27 +53,26 @@ export const fetchTransactionDurationHistogramRangeSteps = async (
 ): Promise<number[]> => {
   const steps = 100;
 
-  const resp = await esClient.search(getHistogramIntervalRequest(params));
+  const resp = await esClient.search<
+    unknown,
+    {
+      transaction_duration_min: Aggs;
+      transaction_duration_max: Aggs;
+    }
+  >(getHistogramIntervalRequest(params));
 
-  if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
+  if ((resp.hits.total as estypes.SearchTotalHits).value === 0) {
     return getHistogramRangeSteps(0, 1, 100);
   }
 
-  if (resp.body.aggregations === undefined) {
+  if (resp.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationHistogramRangeSteps failed, did not return aggregations.'
     );
   }
 
-  const min = (
-    resp.body.aggregations
-      .transaction_duration_min as estypes.AggregationsValueAggregate
-  ).value;
-  const max =
-    (
-      resp.body.aggregations
-        .transaction_duration_max as estypes.AggregationsValueAggregate
-    ).value * 2;
+  const min = resp.aggregations.transaction_duration_min.value;
+  const max = resp.aggregations.transaction_duration_max.value * 2;
 
   return getHistogramRangeSteps(min, max, steps);
 };

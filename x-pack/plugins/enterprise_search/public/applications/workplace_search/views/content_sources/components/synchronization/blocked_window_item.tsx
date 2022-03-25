@@ -118,7 +118,7 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow, index }) => 
             options={syncOptions}
             onChange={(value) => setBlockedTimeWindow(index, 'jobType', value)}
             itemClassName="blockedWindowSelectItem"
-            popoverClassName="blockedWindowSelectPopover"
+            popoverProps={{ className: 'blockedWindowSelectPopover' }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

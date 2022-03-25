@@ -8,11 +8,10 @@
 import React from 'react';
 import moment from 'moment';
 
-import { ALERT_END, ALERT_STATUS, ALERT_REASON } from '@kbn/rule-data-utils/technical_field_names';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
+import { ALERT_END, ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_REASON } from '@kbn/rule-data-utils';
 
 import { AlertTypeInitializer } from '.';
-import { getMonitorRouteFromMonitorId } from './common';
+import { getMonitorRouteFromMonitorId } from '../../../common/utils/get_monitor_url';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { DurationAnomalyTranslations } from '../../../common/translations';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
@@ -29,7 +28,7 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   documentationUrl(docLinks) {
     return `${docLinks.links.observability.uptimeDurationAnomaly}`;
   },
-  alertParamsExpression: (params: unknown) => (
+  ruleParamsExpression: (params: unknown) => (
     <DurationAnomalyAlert core={core} plugins={plugins} params={params} />
   ),
   description,

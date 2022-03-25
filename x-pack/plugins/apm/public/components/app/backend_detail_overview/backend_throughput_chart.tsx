@@ -7,24 +7,42 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { asTransactionRate } from '../../../../common/utils/formatters';
-import { useComparison } from '../../../hooks/use_comparison';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import { useTheme } from '../../../hooks/use_theme';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../shared/charts/helper/get_timeseries_color';
+import {
+  getComparisonChartTheme,
+  getTimeRangeComparison,
+} from '../../shared/time_comparison/get_time_range_comparison';
 
 export function BackendThroughputChart({ height }: { height: number }) {
-  const theme = useTheme();
-
   const {
-    query: { backendName, rangeFrom, rangeTo, kuery, environment },
+    query: {
+      backendName,
+      rangeFrom,
+      rangeTo,
+      kuery,
+      environment,
+      comparisonEnabled,
+      comparisonType,
+    },
   } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { offset, comparisonChartTheme } = useComparison();
+  const comparisonChartTheme = getComparisonChartTheme();
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+    comparisonEnabled,
+  });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -32,8 +50,7 @@ export function BackendThroughputChart({ height }: { height: number }) {
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /internal/apm/backends/charts/throughput',
+      return callApmApi('GET /internal/apm/backends/charts/throughput', {
         params: {
           query: {
             backendName,
@@ -49,6 +66,10 @@ export function BackendThroughputChart({ height }: { height: number }) {
     [backendName, start, end, offset, kuery, environment]
   );
 
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.THROUGHPUT
+  );
+
   const timeseries = useMemo(() => {
     const specs: Array<TimeSeries<Coordinate>> = [];
 
@@ -56,7 +77,7 @@ export function BackendThroughputChart({ height }: { height: number }) {
       specs.push({
         data: data.currentTimeseries,
         type: 'linemark',
-        color: theme.eui.euiColorVis0,
+        color: currentPeriodColor,
         title: i18n.translate('xpack.apm.backendThroughputChart.chartTitle', {
           defaultMessage: 'Throughput',
         }),
@@ -67,7 +88,7 @@ export function BackendThroughputChart({ height }: { height: number }) {
       specs.push({
         data: data.comparisonTimeseries,
         type: 'area',
-        color: theme.eui.euiColorMediumShade,
+        color: previousPeriodColor,
         title: i18n.translate(
           'xpack.apm.backendThroughputChart.previousPeriodLabel',
           { defaultMessage: 'Previous period' }
@@ -76,7 +97,7 @@ export function BackendThroughputChart({ height }: { height: number }) {
     }
 
     return specs;
-  }, [data, theme.eui.euiColorVis0, theme.eui.euiColorMediumShade]);
+  }, [data, currentPeriodColor, previousPeriodColor]);
 
   return (
     <TimeseriesChart

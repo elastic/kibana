@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { first, last, meanBy } from 'lodash';
 import moment from 'moment';
@@ -13,7 +13,7 @@ import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_n
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+} from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
@@ -73,42 +73,42 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const JAVA_PROD_RATE = 45;
 
         before(async () => {
-          const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
-            'instance-a'
-          );
-          const serviceGoDevInstance = service(serviceName, 'development', 'go').instance(
-            'instance-b'
-          );
+          const serviceGoProdInstance = apm
+            .service(serviceName, 'production', 'go')
+            .instance('instance-a');
+          const serviceGoDevInstance = apm
+            .service(serviceName, 'development', 'go')
+            .instance('instance-b');
 
-          const serviceJavaInstance = service('synth-java', 'development', 'java').instance(
-            'instance-c'
-          );
+          const serviceJavaInstance = apm
+            .service('synth-java', 'development', 'java')
+            .instance('instance-c');
 
           await synthtraceEsClient.index([
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceGoProdInstance
                   .transaction('GET /api/product/list')
                   .duration(1000)
                   .timestamp(timestamp)
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_DEV_RATE)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceGoDevInstance
                   .transaction('GET /api/product/:id')
                   .duration(1000)
                   .timestamp(timestamp)
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(JAVA_PROD_RATE)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceJavaInstance
                   .transaction('POST /api/product/buy')
                   .duration(1000)

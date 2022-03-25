@@ -8,7 +8,7 @@
 export { parseDuration, validateDurationSchema } from '../../common/parse_duration';
 export type { ILicenseState } from './license_state';
 export { LicenseState } from './license_state';
-export { validateAlertTypeParams } from './validate_alert_type_params';
+export { validateRuleTypeParams } from './validate_rule_type_params';
 export { getAlertNotifyWhenType } from './get_alert_notify_when_type';
 export { verifyApiAccess } from './license_api_access';
 export { ErrorWithReason, getReasonFromError, isErrorWithReason } from './error_with_reason';
@@ -17,10 +17,12 @@ export type {
   ErrorThatHandlesItsOwnResponse,
   ElasticsearchError,
 } from './errors';
-export { AlertTypeDisabledError, isErrorThatHandlesItsOwnResponse } from './errors';
+export { AlertTypeDisabledError, RuleMutedError, isErrorThatHandlesItsOwnResponse } from './errors';
 export {
   executionStatusFromState,
   executionStatusFromError,
-  alertExecutionStatusToRaw,
-  alertExecutionStatusFromRaw,
-} from './alert_execution_status';
+  ruleExecutionStatusToRaw,
+  ruleExecutionStatusFromRaw,
+} from './rule_execution_status';
+export { getRecoveredAlerts } from './get_recovered_alerts';
+export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';

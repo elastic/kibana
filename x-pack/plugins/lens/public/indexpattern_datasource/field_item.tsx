@@ -36,15 +36,15 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { FieldButton } from '@kbn/react-field/field_button';
+import { FieldButton } from '@kbn/react-field';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { EuiHighlight } from '@elastic/eui';
+import { Filter, buildEsQuery } from '@kbn/es-query';
 import {
   Query,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
-  Filter,
-  esQuery,
+  getEsQueryConfig,
 } from '../../../../../src/plugins/data/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
@@ -167,12 +167,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     core.http
       .post<FieldStatsResponse<string | number>>(`/api/lens/index_stats/${indexPattern.id}/field`, {
         body: JSON.stringify({
-          dslQuery: esQuery.buildEsQuery(
-            indexPattern,
-            query,
-            filters,
-            esQuery.getEsQueryConfig(core.uiSettings)
-          ),
+          dslQuery: buildEsQuery(indexPattern, query, filters, getEsQueryConfig(core.uiSettings)),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           fieldName: field.name,
@@ -496,15 +491,21 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     (!props.histogram || props.histogram.buckets.length === 0) &&
     (!props.topValues || props.topValues.buckets.length === 0)
   ) {
+    const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
     return (
       <>
         <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
 
         <EuiText size="s">
-          {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-            defaultMessage:
-              'This field is empty because it doesn’t exist in the 500 sampled documents. Adding this field to the configuration may result in a blank chart.',
-          })}
+          {isUsingSampling
+            ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
+                defaultMessage:
+                  'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
+              })
+            : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+                defaultMessage:
+                  'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
+              })}
         </EuiText>
       </>
     );

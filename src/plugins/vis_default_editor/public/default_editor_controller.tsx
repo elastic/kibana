@@ -12,7 +12,7 @@ import { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import { IEditorController, EditorRenderProps } from 'src/plugins/visualize/public';
+import { IEditorController, EditorRenderProps } from 'src/plugins/visualizations/public';
 import { KibanaThemeProvider } from '../../kibana_react/public';
 import { getTheme } from './services';
 

@@ -23,7 +23,6 @@ import {
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
-  SUB_CASES_PATCH_DEL_URL,
 } from '../../../../plugins/cases/common/constants';
 import {
   CasesConfigureRequest,
@@ -32,14 +31,11 @@ import {
   ConnectorTypes,
   CasePostRequest,
   CaseResponse,
-  SubCasesFindResponse,
   CaseStatuses,
-  SubCasesResponse,
   CasesResponse,
   CasesFindResponse,
   CommentRequest,
   CaseUserActionResponse,
-  SubCaseResponse,
   CommentResponse,
   CasesPatchRequest,
   AllCommentsResponse,
@@ -52,10 +48,10 @@ import {
   ConnectorMappings,
   CasesByAlertId,
   CaseResolveResponse,
+  CaseMetricsResponse,
 } from '../../../../plugins/cases/common/api';
-import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
-import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
-import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
+import { getPostCaseRequest } from './mock';
+import { getCaseUserActionUrl } from '../../../../plugins/cases/common/api/helpers';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
 import { User } from './authentication/types';
@@ -124,58 +120,21 @@ interface SetStatusCasesParams {
 }
 
 /**
- * Sets the status of some cases or sub cases. The cases field must be all of one type.
+ * Sets the status of some cases.
  */
 export const setStatus = async ({
   supertest,
   cases,
-  type,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   cases: SetStatusCasesParams[];
-  type: 'case' | 'sub_case';
-}): Promise<CasesResponse | SubCasesResponse> => {
-  const url = type === 'case' ? CASES_URL : SUB_CASES_PATCH_DEL_URL;
-  const patchFields = type === 'case' ? { cases } : { subCases: cases };
-  const { body }: { body: CasesResponse | SubCasesResponse } = await supertest
-    .patch(url)
+}): Promise<CasesResponse> => {
+  const { body }: { body: CasesResponse } = await supertest
+    .patch(CASES_URL)
     .set('kbn-xsrf', 'true')
-    .send(patchFields)
+    .send({ cases })
     .expect(200);
   return body;
-};
-
-/**
- * Variable to easily access the default comment for the createSubCase function.
- */
-export const defaultCreateSubComment = postCommentGenAlertReq;
-
-/**
- * Variable to easily access the default comment for the createSubCase function.
- */
-export const defaultCreateSubPost = postCollectionReq;
-
-/**
- * Response structure for the createSubCase and createSubCaseComment functions.
- */
-export interface CreateSubCaseResp {
-  newSubCaseInfo: CaseResponse;
-  modifiedSubCases?: SubCasesResponse;
-}
-
-/**
- * Creates a sub case using the actions API. If a caseID isn't passed in then it will create
- * the collection as well. To create a sub case a comment must be created so it uses a default
- * generated alert style comment which can be overridden.
- */
-export const createSubCase = async (args: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  comment?: ContextTypeGeneratedAlertType;
-  caseID?: string;
-  caseInfo?: CasePostRequest;
-  actionID?: string;
-}): Promise<CreateSubCaseResp> => {
-  return createSubCaseComment({ ...args, forceNewSubCase: true });
 };
 
 /**
@@ -202,89 +161,6 @@ export const deleteCaseAction = async (
   id: string
 ) => {
   await supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
-};
-
-/**
- * Creates a sub case using the actions APIs. This will handle forcing a creation of a new sub case even if one exists
- * if the forceNewSubCase parameter is set to true.
- */
-export const createSubCaseComment = async ({
-  supertest,
-  caseID,
-  comment = defaultCreateSubComment,
-  caseInfo = defaultCreateSubPost,
-  // if true it will close any open sub cases and force a new sub case to be opened
-  forceNewSubCase = false,
-  actionID,
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  comment?: ContextTypeGeneratedAlertType;
-  caseID?: string;
-  caseInfo?: CasePostRequest;
-  forceNewSubCase?: boolean;
-  actionID?: string;
-}): Promise<CreateSubCaseResp> => {
-  let actionIDToUse: string;
-
-  if (actionID === undefined) {
-    actionIDToUse = await createCaseAction(supertest);
-  } else {
-    actionIDToUse = actionID;
-  }
-
-  let collectionID: string;
-
-  if (!caseID) {
-    collectionID = (
-      await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(caseInfo).expect(200)
-    ).body.id;
-  } else {
-    collectionID = caseID;
-  }
-
-  let closedSubCases: SubCasesResponse | undefined;
-  if (forceNewSubCase) {
-    const { body: subCasesResp }: { body: SubCasesFindResponse } = await supertest
-      .get(`${getSubCasesUrl(collectionID)}/_find`)
-      .expect(200);
-
-    const nonClosed = subCasesResp.subCases.filter(
-      (subCase) => subCase.status !== CaseStatuses.closed
-    );
-    if (nonClosed.length > 0) {
-      // mark the sub case as closed so a new sub case will be created on the next comment
-      closedSubCases = (
-        await supertest
-          .patch(SUB_CASES_PATCH_DEL_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            subCases: nonClosed.map((subCase) => ({
-              id: subCase.id,
-              version: subCase.version,
-              status: CaseStatuses.closed,
-            })),
-          })
-          .expect(200)
-      ).body;
-    }
-  }
-
-  const caseConnector = await supertest
-    .post(`/api/actions/connector/${actionIDToUse}/_execute`)
-    .set('kbn-xsrf', 'foo')
-    .send({
-      params: {
-        subAction: 'addComment',
-        subActionParams: {
-          caseId: collectionID,
-          comment,
-        },
-      },
-    })
-    .expect(200);
-
-  expect(caseConnector.body.status).to.eql('ok');
-  return { newSubCaseInfo: caseConnector.body.data, modifiedSubCases: closedSubCases };
 };
 
 type ConfigRequestParams = Partial<CaseConnector> & {
@@ -441,24 +317,11 @@ export const removeServerGeneratedPropertiesFromSavedObject = <
 export const removeServerGeneratedPropertiesFromUserAction = (
   attributes: CaseUserActionResponse
 ) => {
-  const keysToRemove: Array<keyof CaseUserActionResponse> = ['action_id', 'action_at'];
+  const keysToRemove: Array<keyof CaseUserActionResponse> = ['action_id', 'created_at'];
   return removeServerGeneratedPropertiesFromObject<
     CaseUserActionResponse,
     typeof keysToRemove[number]
   >(attributes, keysToRemove);
-};
-
-export const removeServerGeneratedPropertiesFromSubCase = (
-  subCase: SubCaseResponse | undefined
-) => {
-  if (!subCase) {
-    return;
-  }
-
-  return removeServerGeneratedPropertiesFromSavedObject<SubCaseResponse>(subCase, [
-    'closed_at',
-    'comments',
-  ]);
 };
 
 export const removeServerGeneratedPropertiesFromCase = (
@@ -478,7 +341,6 @@ export const removeServerGeneratedPropertiesFromComments = (
 export const deleteAllCaseItems = async (es: Client) => {
   await Promise.all([
     deleteCasesByESQuery(es),
-    deleteSubCases(es),
     deleteCasesUserActions(es),
     deleteComments(es),
     deleteConfiguration(es),
@@ -501,21 +363,6 @@ export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases',
-    wait_for_completion: true,
-    refresh: true,
-    body: {},
-    conflicts: 'proceed',
-  });
-};
-
-/**
- * Deletes all sub cases in the .kibana index. This uses ES to perform the delete and does
- * not go through the case API.
- */
-export const deleteSubCases = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: '.kibana',
-    q: 'type:cases-sub-case',
     wait_for_completion: true,
     refresh: true,
     body: {},
@@ -693,6 +540,7 @@ export const createCaseWithConnector = async ({
 }): Promise<{
   postedCase: CaseResponse;
   connector: CreateConnectorResponse;
+  configuration: CasesConfigureResponse;
 }> => {
   const connector = await createConnector({
     supertest,
@@ -704,7 +552,7 @@ export const createCaseWithConnector = async ({
   });
 
   actionsRemover.add(auth.space ?? 'default', connector.id, 'action', 'actions');
-  await createConfiguration(
+  const configuration = await createConfiguration(
     supertest,
     {
       ...getConfigurationRequest({
@@ -739,7 +587,7 @@ export const createCaseWithConnector = async ({
     auth
   );
 
-  return { postedCase, connector };
+  return { postedCase, connector, configuration };
 };
 
 export const createCase = async (
@@ -1094,6 +942,28 @@ export const getCase = async ({
   return theCase;
 };
 
+export const getCaseMetrics = async ({
+  supertest,
+  caseId,
+  features,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  features: string[];
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseMetricsResponse> => {
+  const { body: metricsResponse } = await supertest
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics/${caseId}`)
+    .query({ features: JSON.stringify(features) })
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return metricsResponse;
+};
+
 export const resolveCase = async ({
   supertest,
   caseId,
@@ -1260,4 +1130,16 @@ export const getServiceNowSimulationServer = async (): Promise<{
   const url = `http://localhost:${port}`;
 
   return { server, url };
+};
+
+/**
+ * Extracts the warning value a warning header that is formatted according to RFC 7234.
+ * For example for the string 299 Kibana-8.1.0 "Deprecation endpoint", the return value is Deprecation endpoint.
+ *
+ */
+export const extractWarningValueFromWarningHeader = (warningHeader: string) => {
+  const firstQuote = warningHeader.indexOf('"');
+  const lastQuote = warningHeader.length - 1;
+  const warningValue = warningHeader.substring(firstQuote + 1, lastQuote);
+  return warningValue;
 };

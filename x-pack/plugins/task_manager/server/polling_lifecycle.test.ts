@@ -67,9 +67,14 @@ describe('TaskPollingLifecycle', () => {
       unsafe: {
         exclude_task_types: [],
       },
+      event_loop_delay: {
+        monitor: true,
+        warn_threshold: 5000,
+      },
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
+    unusedTypes: [],
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
     maxWorkersConfiguration$: of(100),

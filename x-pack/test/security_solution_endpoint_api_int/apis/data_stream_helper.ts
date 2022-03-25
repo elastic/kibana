@@ -119,10 +119,12 @@ export async function startTransform(
   const transformsResponse = await client.transform.getTransform({
     transform_id: `${transformId}*`,
   });
-  return transformsResponse.transforms.map((transform) => {
-    const t = transform as unknown as { id: string };
-    return client.transform.startTransform({ transform_id: t.id });
-  });
+  return Promise.all(
+    transformsResponse.transforms.map((transform) => {
+      const t = transform as unknown as { id: string };
+      return client.transform.startTransform({ transform_id: t.id });
+    })
+  );
 }
 
 export function bulkIndex(

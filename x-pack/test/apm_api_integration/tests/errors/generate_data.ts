@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, SynthtraceEsClient, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@elastic/apm-synthtrace';
 
 export const config = {
   appleTransaction: {
@@ -25,35 +26,34 @@ export async function generateData({
   start,
   end,
 }: {
-  synthtraceEsClient: SynthtraceEsClient;
+  synthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
 }) {
-  const serviceGoProdInstance = service(serviceName, 'production', 'go').instance('instance-a');
+  const serviceGoProdInstance = apm.service(serviceName, 'production', 'go').instance('instance-a');
 
   const interval = '1m';
 
   const { bananaTransaction, appleTransaction } = config;
 
-  const documents = [appleTransaction, bananaTransaction]
-    .map((transaction, index) => {
-      return [
-        ...timerange(start, end)
-          .interval(interval)
-          .rate(transaction.successRate)
-          .flatMap((timestamp) =>
-            serviceGoProdInstance
-              .transaction(transaction.name)
-              .timestamp(timestamp)
-              .duration(1000)
-              .success()
-              .serialize()
-          ),
-        ...timerange(start, end)
+  const documents = [appleTransaction, bananaTransaction].map((transaction, index) => {
+    return timerange(start, end)
+      .interval(interval)
+      .rate(transaction.successRate)
+      .spans((timestamp) =>
+        serviceGoProdInstance
+          .transaction(transaction.name)
+          .timestamp(timestamp)
+          .duration(1000)
+          .success()
+          .serialize()
+      )
+      .concat(
+        timerange(start, end)
           .interval(interval)
           .rate(transaction.failureRate)
-          .flatMap((timestamp) =>
+          .spans((timestamp) =>
             serviceGoProdInstance
               .transaction(transaction.name)
               .errors(
@@ -63,10 +63,9 @@ export async function generateData({
               .timestamp(timestamp)
               .failure()
               .serialize()
-          ),
-      ];
-    })
-    .flatMap((_) => _);
+          )
+      );
+  });
 
   await synthtraceEsClient.index(documents);
 }

@@ -8,12 +8,11 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
-import { IndexPattern, SortDirection } from 'src/plugins/data/common';
+import { SortDirection } from 'src/plugins/data/public';
+import type { DataView } from 'src/plugins/data_views/public';
 import { createContextSearchSourceStub } from './_stubs';
-import { setServices } from '../../../kibana_services';
-import { Query } from '../../../../../data/public';
+import { DataPublicPluginStart, Query } from '../../../../../data/public';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { DiscoverServices } from '../../../build_services';
 import { EsHitRecord, EsHitRecordList } from '../../types';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -35,6 +34,7 @@ describe('context successors', function () {
     tieBreakerValue: number,
     size: number
   ) => Promise<EsHitRecordList>;
+  let dataPluginMock: DataPublicPluginStart;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
   const indexPattern = {
@@ -42,21 +42,19 @@ describe('context successors', function () {
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
-  } as unknown as IndexPattern;
+  } as unknown as DataView;
 
   describe('function fetchSuccessors', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
-      setServices({
-        data: {
-          search: {
-            searchSource: {
-              createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
-            },
+      dataPluginMock = {
+        search: {
+          searchSource: {
+            createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
           },
         },
-      } as unknown as DiscoverServices);
+      } as unknown as DataPublicPluginStart;
 
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
         const anchor = {
@@ -73,7 +71,8 @@ describe('context successors', function () {
           tieBreakerField,
           SortDirection.desc,
           size,
-          []
+          [],
+          dataPluginMock
         );
       };
     });
@@ -185,15 +184,13 @@ describe('context successors', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
-      setServices({
-        data: {
-          search: {
-            searchSource: {
-              createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
-            },
+      dataPluginMock = {
+        search: {
+          searchSource: {
+            createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
           },
         },
-      } as unknown as DiscoverServices);
+      } as unknown as DataPublicPluginStart;
 
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
         const anchor = {
@@ -211,6 +208,7 @@ describe('context successors', function () {
           SortDirection.desc,
           size,
           [],
+          dataPluginMock,
           true
         );
       };

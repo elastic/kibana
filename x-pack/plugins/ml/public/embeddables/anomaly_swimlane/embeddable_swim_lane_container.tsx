@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useState, useEffect } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
 import { CoreStart } from 'kibana/public';
@@ -133,9 +133,17 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
         }}
         isLoading={isLoading}
         noDataWarning={
-          <FormattedMessage
-            id="xpack.ml.swimlaneEmbeddable.noDataFound"
-            defaultMessage="No anomalies found"
+          <EuiEmptyPrompt
+            titleSize="xxs"
+            style={{ padding: 0 }}
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.swimlaneEmbeddable.noDataFound"
+                  defaultMessage="No anomalies found"
+                />
+              </h2>
+            }
           />
         }
       />

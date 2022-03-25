@@ -10,29 +10,22 @@ import {
   Chart,
   CurveType,
   LineSeries,
+  PartialTheme,
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { merge } from 'lodash';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingChart,
+} from '@elastic/eui';
 import React from 'react';
 import { useChartTheme } from '../../../../../../observability/public';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
-
-export type Color =
-  | 'euiColorVis0'
-  | 'euiColorVis1'
-  | 'euiColorVis2'
-  | 'euiColorVis3'
-  | 'euiColorVis4'
-  | 'euiColorVis5'
-  | 'euiColorVis6'
-  | 'euiColorVis7'
-  | 'euiColorVis8'
-  | 'euiColorVis9';
 
 function hasValidTimeseries(
   series?: Coordinate[] | null
@@ -44,42 +37,21 @@ const flexGroupStyle = { overflow: 'hidden' };
 
 export function SparkPlot({
   color,
+  isLoading,
   series,
   comparisonSeries = [],
   valueLabel,
   compact,
+  comparisonSeriesColor,
 }: {
-  color: Color;
+  color: string;
+  isLoading: boolean;
   series?: Coordinate[] | null;
   valueLabel: React.ReactNode;
   compact?: boolean;
   comparisonSeries?: Coordinate[];
+  comparisonSeriesColor: string;
 }) {
-  const theme = useTheme();
-  const defaultChartTheme = useChartTheme();
-  const comparisonChartTheme = getComparisonChartTheme(theme);
-  const hasComparisonSeries = !!comparisonSeries?.length;
-
-  const sparkplotChartTheme = merge({}, defaultChartTheme, {
-    chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
-    lineSeriesStyle: {
-      point: { opacity: 0 },
-    },
-    areaSeriesStyle: {
-      point: { opacity: 0 },
-    },
-    ...(hasComparisonSeries ? comparisonChartTheme : {}),
-  });
-
-  const colorValue = theme.eui[color];
-
-  const chartSize = {
-    height: theme.eui.euiSizeL,
-    width: compact ? unit * 4 : unit * 5,
-  };
-
-  const Sparkline = hasComparisonSeries ? LineSeries : AreaSeries;
-
   return (
     <EuiFlexGroup
       justifyContent="flexEnd"
@@ -92,49 +64,116 @@ export function SparkPlot({
         {valueLabel}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {hasValidTimeseries(series) ? (
-          <Chart size={chartSize}>
-            <Settings
-              theme={sparkplotChartTheme}
-              showLegend={false}
-              tooltip="none"
-            />
-            <Sparkline
-              id="Sparkline"
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor={'x'}
-              yAccessors={['y']}
-              data={series}
-              color={colorValue}
-              curve={CurveType.CURVE_MONOTONE_X}
-            />
-            {hasComparisonSeries && (
-              <AreaSeries
-                id="comparisonSeries"
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                xAccessor={'x'}
-                yAccessors={['y']}
-                data={comparisonSeries}
-                color={theme.eui.euiColorLightestShade}
-                curve={CurveType.CURVE_MONOTONE_X}
-              />
-            )}
-          </Chart>
-        ) : (
-          <div
-            style={{
-              ...chartSize,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <EuiIcon type="visLine" color={theme.eui.euiColorMediumShade} />
-          </div>
-        )}
+        <SparkPlotItem
+          color={color}
+          isLoading={isLoading}
+          series={series}
+          comparisonSeries={comparisonSeries}
+          comparisonSeriesColor={comparisonSeriesColor}
+          compact={compact}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+}
+
+function SparkPlotItem({
+  color,
+  isLoading,
+  series,
+  comparisonSeries,
+  comparisonSeriesColor,
+  compact,
+}: {
+  color: string;
+  isLoading: boolean;
+  series?: Coordinate[] | null;
+  compact?: boolean;
+  comparisonSeries?: Coordinate[];
+  comparisonSeriesColor: string;
+}) {
+  const theme = useTheme();
+  const defaultChartTheme = useChartTheme();
+  const comparisonChartTheme = getComparisonChartTheme();
+  const hasComparisonSeries = !!comparisonSeries?.length;
+
+  const sparkplotChartTheme: PartialTheme = {
+    chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
+    lineSeriesStyle: {
+      point: { opacity: 0 },
+    },
+    areaSeriesStyle: {
+      point: { opacity: 0 },
+    },
+    ...(hasComparisonSeries ? comparisonChartTheme : {}),
+  };
+
+  const chartSize = {
+    height: theme.eui.euiSizeL,
+    width: compact ? unit * 4 : unit * 5,
+  };
+
+  const Sparkline = hasComparisonSeries ? LineSeries : AreaSeries;
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          ...chartSize,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <EuiLoadingChart mono />
+      </div>
+    );
+  }
+
+  if (hasValidTimeseries(series)) {
+    return (
+      <Chart size={chartSize}>
+        <Settings
+          theme={[sparkplotChartTheme, ...defaultChartTheme]}
+          showLegend={false}
+          tooltip="none"
+        />
+        <Sparkline
+          id="Sparkline"
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={'x'}
+          yAccessors={['y']}
+          data={series}
+          color={color}
+          curve={CurveType.CURVE_MONOTONE_X}
+        />
+        {hasComparisonSeries && (
+          <AreaSeries
+            id="comparisonSeries"
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={'x'}
+            yAccessors={['y']}
+            data={comparisonSeries}
+            color={comparisonSeriesColor}
+            curve={CurveType.CURVE_MONOTONE_X}
+          />
+        )}
+      </Chart>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        ...chartSize,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <EuiIcon type="visLine" color={theme.eui.euiColorMediumShade} />
+    </div>
   );
 }

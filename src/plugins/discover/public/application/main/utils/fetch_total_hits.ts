@@ -7,36 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { filter } from 'rxjs/operators';
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  ISearchSource,
-} from '../../../../../data/public';
-import { DataViewType } from '../../../../../data_views/common';
-import { Adapters } from '../../../../../inspector/common';
-import { FetchStatus } from '../../types';
-import { SavedSearchData } from './use_saved_search';
-import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
+import { filter, map } from 'rxjs/operators';
+import { isCompleteResponse, ISearchSource } from '../../../../../data/public';
+import { DataViewType } from '../../../../../data_views/public';
+import { FetchDeps } from './fetch_all';
 
 export function fetchTotalHits(
-  data$: SavedSearchData,
   searchSource: ISearchSource,
-  {
-    abortController,
-    data,
-    inspectorAdapters,
-    onResults,
-    searchSessionId,
-  }: {
-    abortController: AbortController;
-    data: DataPublicPluginStart;
-    onResults: (foundDocuments: boolean) => void;
-    inspectorAdapters: Adapters;
-    searchSessionId: string;
-  }
+  { abortController, inspectorAdapters, searchSessionId, savedSearch }: FetchDeps
 ) {
-  const { totalHits$ } = data$;
   searchSource.setField('trackTotalHits', true);
   searchSource.setField('size', 0);
   searchSource.removeField('sort');
@@ -50,14 +29,8 @@ export function fetchTotalHits(
     searchSource.setOverwriteDataViewType(undefined);
   }
 
-  sendLoadingMsg(totalHits$);
-
   const executionContext = {
-    type: 'application',
-    name: 'discover',
     description: 'fetch total hits',
-    url: window.location.pathname,
-    id: '',
   };
 
   const fetch$ = searchSource
@@ -75,21 +48,10 @@ export function fetchTotalHits(
       sessionId: searchSessionId,
       executionContext,
     })
-    .pipe(filter((res) => isCompleteResponse(res)));
+    .pipe(
+      filter((res) => isCompleteResponse(res)),
+      map((res) => res.rawResponse.hits.total as number)
+    );
 
-  fetch$.subscribe(
-    (res) => {
-      const totalHitsNr = res.rawResponse.hits.total as number;
-      totalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
-      onResults(totalHitsNr > 0);
-    },
-    (error) => {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return;
-      }
-      sendErrorMsg(totalHits$, error);
-    }
-  );
-
-  return fetch$;
+  return fetch$.toPromise();
 }

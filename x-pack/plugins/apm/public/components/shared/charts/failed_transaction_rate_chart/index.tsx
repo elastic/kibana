@@ -8,12 +8,10 @@
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ALERT_RULE_TYPE_ID } from '../../../../../../rule_registry/common/technical_rule_data_field_names';
-import { AlertType } from '../../../../../common/alert_types';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimeseriesChart } from '../timeseries_chart';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -23,6 +21,10 @@ import {
 } from '../../time_comparison/get_time_range_comparison';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
+import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
+import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -32,7 +34,6 @@ interface Props {
   height?: number;
   showAnnotations?: boolean;
   kuery: string;
-  environment: string;
 }
 
 type ErrorRate =
@@ -52,22 +53,27 @@ const INITIAL_STATE: ErrorRate = {
 export function FailedTransactionRateChart({
   height,
   showAnnotations = true,
-  environment,
   kuery,
 }: Props) {
-  const theme = useTheme();
   const {
-    urlParams: { transactionName, comparisonEnabled, comparisonType },
+    urlParams: { transactionName },
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, comparisonEnabled, comparisonType },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { serviceName, transactionType, alerts } = useApmServiceContext();
-  const comparisonChartThem = getComparisonChartTheme(theme);
+  const { environment } = useEnvironmentsContext();
+
+  const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
+    ApmMlDetectorType.txFailureRate
+  );
+
+  const { serviceName, transactionType } = useApmServiceContext();
+
+  const comparisonChartTheme = getComparisonChartTheme();
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
@@ -78,25 +84,26 @@ export function FailedTransactionRateChart({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (transactionType && serviceName && start && end) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
-          params: {
-            path: {
-              serviceName,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
+          {
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionType,
+                transactionName,
+                comparisonStart,
+                comparisonEnd,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionType,
-              transactionName,
-              comparisonStart,
-              comparisonEnd,
-            },
-          },
-        });
+          }
+        );
       }
     },
     [
@@ -112,11 +119,15 @@ export function FailedTransactionRateChart({
     ]
   );
 
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.FAILED_TRANSACTION_RATE
+  );
+
   const timeseries = [
     {
       data: data.currentPeriod.timeseries,
       type: 'linemark',
-      color: theme.eui.euiColorVis7,
+      color: currentPeriodColor,
       title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
         defaultMessage: 'Failed transaction rate (avg.)',
       }),
@@ -126,7 +137,7 @@ export function FailedTransactionRateChart({
           {
             data: data.previousPeriod.timeseries,
             type: 'area',
-            color: theme.eui.euiColorMediumShade,
+            color: previousPeriodColor,
             title: i18n.translate(
               'xpack.apm.errorRate.chart.errorRate.previousPeriodLabel',
               { defaultMessage: 'Previous period' }
@@ -138,13 +149,28 @@ export function FailedTransactionRateChart({
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.apm.errorRate', {
-            defaultMessage: 'Failed transaction rate',
-          })}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.apm.errorRate', {
+                defaultMessage: 'Failed transaction rate',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={i18n.translate('xpack.apm.errorRate.tip', {
+              defaultMessage:
+                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+            })}
+            position="right"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <TimeseriesChart
         id="errorRate"
         height={height}
@@ -153,11 +179,8 @@ export function FailedTransactionRateChart({
         timeseries={timeseries}
         yLabelFormat={yLabelFormat}
         yDomain={{ min: 0, max: 1 }}
-        customTheme={comparisonChartThem}
-        alerts={alerts.filter(
-          (alert) =>
-            alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.TransactionErrorRate
-        )}
+        customTheme={comparisonChartTheme}
+        anomalyTimeseries={preferredAnomalyTimeseries}
       />
     </EuiPanel>
   );

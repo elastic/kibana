@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / [user_actions/client](../modules/user_actions_client.md) / UserActionsSubClient
+[Cases Client API Interface](../README.md) / [user\_actions/client](../modules/user_actions_client.md) / UserActionsSubClient
 
 # Interface: UserActionsSubClient
 
@@ -10,13 +10,13 @@ API for interacting the actions performed by a user when interacting with the ca
 
 ### Methods
 
-- [getAll](user_actions_client.useractionssubclient.md#getall)
+- [getAll](user_actions_client.UserActionsSubClient.md#getall)
 
 ## Methods
 
 ### getAll
 
-▸ **getAll**(`clientArgs`: [*UserActionGet*](user_actions_client.useractionget.md)): *Promise*<[*ICaseUserActionsResponse*](typedoc_interfaces.icaseuseractionsresponse.md)\>
+▸ **getAll**(`clientArgs`): `Promise`<[`ICaseUserActionsResponse`](typedoc_interfaces.ICaseUserActionsResponse.md)\>
 
 Retrieves all user actions for a particular case.
 
@@ -24,8 +24,12 @@ Retrieves all user actions for a particular case.
 
 | Name | Type |
 | :------ | :------ |
-| `clientArgs` | [*UserActionGet*](user_actions_client.useractionget.md) |
+| `clientArgs` | [`UserActionGet`](user_actions_client.UserActionGet.md) |
 
-**Returns:** *Promise*<[*ICaseUserActionsResponse*](typedoc_interfaces.icaseuseractionsresponse.md)\>
+#### Returns
 
-Defined in: [user_actions/client.ts:33](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/user_actions/client.ts#L33)
+`Promise`<[`ICaseUserActionsResponse`](typedoc_interfaces.ICaseUserActionsResponse.md)\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/user_actions/client.ts:29](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/user_actions/client.ts#L29)

@@ -11,9 +11,10 @@ import { Storage } from './index';
 export const DEFAULT_SETTINGS = Object.freeze({
   fontSize: 14,
   polling: true,
+  pollInterval: 60000,
   tripleQuotes: true,
   wrapMode: true,
-  autocomplete: Object.freeze({ fields: true, indices: true, templates: true }),
+  autocomplete: Object.freeze({ fields: true, indices: true, templates: true, dataStreams: true }),
   historyDisabled: false,
 });
 
@@ -24,8 +25,10 @@ export interface DevToolsSettings {
     fields: boolean;
     indices: boolean;
     templates: boolean;
+    dataStreams: boolean;
   };
   polling: boolean;
+  pollInterval: number;
   tripleQuotes: boolean;
   historyDisabled: boolean;
 }
@@ -87,6 +90,14 @@ export class Settings {
     return this.storage.get('disable_history', DEFAULT_SETTINGS.historyDisabled);
   }
 
+  setPollInterval(interval: number) {
+    this.storage.set('poll_interval', interval);
+  }
+
+  getPollInterval() {
+    return this.storage.get('poll_interval', DEFAULT_SETTINGS.pollInterval);
+  }
+
   toJSON(): DevToolsSettings {
     return {
       autocomplete: this.getAutocomplete(),
@@ -94,6 +105,7 @@ export class Settings {
       tripleQuotes: this.getTripleQuotes(),
       fontSize: parseFloat(this.getFontSize()),
       polling: Boolean(this.getPolling()),
+      pollInterval: this.getPollInterval(),
       historyDisabled: Boolean(this.getHistoryDisabled()),
     };
   }
@@ -104,6 +116,7 @@ export class Settings {
     tripleQuotes,
     autocomplete,
     polling,
+    pollInterval,
     historyDisabled,
   }: DevToolsSettings) {
     this.setFontSize(fontSize);
@@ -111,6 +124,7 @@ export class Settings {
     this.setTripleQuotes(tripleQuotes);
     this.setAutocomplete(autocomplete);
     this.setPolling(polling);
+    this.setPollInterval(pollInterval);
     this.setHistoryDisabled(historyDisabled);
   }
 }

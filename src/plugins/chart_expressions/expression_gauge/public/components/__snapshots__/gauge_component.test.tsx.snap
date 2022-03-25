@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GaugeComponent renders the chart 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Settings
+    ariaUseDefaultSummary={true}
+    debugState={false}
+    theme={
+      Array [
+        Object {
+          "background": Object {
+            "color": "transparent",
+          },
+        },
+        Object {},
+      ]
+    }
+  />
+  <Component
+    actual={3}
+    bandFillColor={[Function]}
+    bands={
+      Array [
+        0,
+        4,
+      ]
+    }
+    base={0}
+    id="goal"
+    labelMajor="Count of records   "
+    labelMinor=""
+    subtype="verticalBullet"
+    tickValueFormatter={[Function]}
+    ticks={
+      Array [
+        0,
+        1.33,
+        2.67,
+        4,
+      ]
+    }
+    tooltipValueFormatter={[Function]}
+  />
+</Chart>
+`;

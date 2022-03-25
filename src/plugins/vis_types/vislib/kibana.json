@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["charts", "data", "expressions", "visualizations"],
-  "requiredBundles": ["kibanaUtils", "visDefaultEditor", "visTypeXy", "visTypePie", "fieldFormats", "kibanaReact"],
+  "requiredBundles": ["kibanaUtils", "visTypeXy", "visTypePie", "visTypeHeatmap", "visTypeGauge", "fieldFormats", "kibanaReact"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

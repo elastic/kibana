@@ -43,7 +43,7 @@ export async function getServicesDetailedStatistics({
       getServiceTransactionDetailedStatistics(commonProps),
       offset
         ? getServiceTransactionDetailedStatistics({ ...commonProps, offset })
-        : {},
+        : Promise.resolve({}),
     ]);
 
     return { currentPeriod, previousPeriod };

@@ -101,6 +101,7 @@ export const ExpandableHostDetails = ({
               to: fromTo.to,
             });
           }}
+          hostName={hostName}
         />
       )}
     </AnomalyTableProvider>

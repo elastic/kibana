@@ -22,7 +22,7 @@
     },
     "model_memory_limit": "50mb",
     "create_time": 1568974998023,
-    "version": "8.1.0"
+    "version": "8.2.0"
   },
   "id": "fq_outlier_1222",
   "checkpointing": {},

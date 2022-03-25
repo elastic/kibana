@@ -17,7 +17,7 @@ import { CellValueElementProps } from '../../../../timelines/components/timeline
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 import { RenderCellValue } from '.';
-import { ColumnHeaderOptions } from '../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../common/types';
 
 jest.mock('../../../../common/lib/kibana/');
 
@@ -46,6 +46,7 @@ describe('RenderCellValue', () => {
       isExpanded: false,
       linkValues,
       rowIndex,
+      colIndex: 0,
       setCellProps: jest.fn(),
       timelineId,
     };

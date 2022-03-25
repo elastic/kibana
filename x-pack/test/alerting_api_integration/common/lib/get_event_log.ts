@@ -16,7 +16,7 @@ interface EqualCondition {
   equal: number;
 }
 
-function isEqualConsition(
+function isEqualCondition(
   condition: GreaterThanEqualCondition | EqualCondition
 ): condition is EqualCondition {
   return Number.isInteger((condition as EqualCondition).equal);
@@ -39,7 +39,7 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
   const supertest = getService('supertest');
 
   const spacePrefix = getUrlPrefix(spaceId);
-  const url = `${spacePrefix}/api/event_log/${type}/${id}/_find?per_page=5000${
+  const url = `${spacePrefix}/internal/event_log/${type}/${id}/_find?per_page=5000${
     params.filter ? `&filter=${params.filter}` : ''
   }`;
 
@@ -67,7 +67,7 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
     if (
       !(
         foundActions.has(action) &&
-        (isEqualConsition(condition)
+        (isEqualCondition(condition)
           ? foundActions.get(action)! === condition.equal
           : foundActions.get(action)! >= condition.gte)
       )
@@ -76,7 +76,7 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
         `insufficient events found with action "${action}" (${
           foundActions.get(action) ?? 0
         } must be ${
-          isEqualConsition(condition)
+          isEqualCondition(condition)
             ? `equal to ${condition.equal}`
             : `greater than or equal to ${condition.gte}`
         })`

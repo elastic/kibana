@@ -57,5 +57,6 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
     </EuiFlexGroup>
   );
 };
+FieldMappingRowComponent.displayName = 'FieldMappingRow';
 
 export const FieldMappingRowStatic = React.memo(FieldMappingRowComponent);

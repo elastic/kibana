@@ -8,13 +8,15 @@
 import type { TransformConfigUnion, TransformId } from '../../../../../../common/types/transform';
 
 export type EsIndexName = string;
-export type IndexPatternTitle = string;
+export type EsIngestPipelineName = string;
+export type DataViewTitle = string;
 
 export interface StepDetailsExposedState {
   continuousModeDateField: string;
   continuousModeDelay: string;
-  createIndexPattern: boolean;
+  createDataView: boolean;
   destinationIndex: EsIndexName;
+  destinationIngestPipeline: EsIngestPipelineName;
   isContinuousModeEnabled: boolean;
   isRetentionPolicyEnabled: boolean;
   retentionPolicyDateField: string;
@@ -26,7 +28,7 @@ export interface StepDetailsExposedState {
   transformSettingsMaxPageSearchSize: number;
   transformSettingsDocsPerSecond?: number;
   valid: boolean;
-  indexPatternTimeField?: string | undefined;
+  dataViewTimeField?: string | undefined;
   _meta?: Record<string, unknown>;
 }
 
@@ -38,7 +40,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
   return {
     continuousModeDateField: '',
     continuousModeDelay: defaultContinuousModeDelay,
-    createIndexPattern: true,
+    createDataView: true,
     isContinuousModeEnabled: false,
     isRetentionPolicyEnabled: false,
     retentionPolicyDateField: '',
@@ -48,9 +50,10 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
     transformFrequency: defaultTransformFrequency,
     transformSettingsMaxPageSearchSize: defaultTransformSettingsMaxPageSearchSize,
     destinationIndex: '',
+    destinationIngestPipeline: '',
     touched: false,
     valid: false,
-    indexPatternTimeField: undefined,
+    dataViewTimeField: undefined,
   };
 }
 
@@ -71,6 +74,11 @@ export function applyTransformConfigToDetailsState(
     // Description
     if (transformConfig.description !== undefined) {
       state.transformDescription = transformConfig.description;
+    }
+
+    // Ingest Pipeline
+    if (transformConfig.dest.pipeline !== undefined) {
+      state.destinationIngestPipeline = transformConfig.dest.pipeline;
     }
 
     // Frequency

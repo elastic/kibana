@@ -17,7 +17,7 @@ import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizonta
 import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
 import { LensIconChartLine } from '../assets/chart_line';
 
-import type { VisualizationType } from '../types';
+import type { VisualizationType, Suggestion } from '../types';
 import type {
   SeriesType,
   LegendConfig,
@@ -27,6 +27,7 @@ import type {
   AxesSettingsConfig,
   FittingFunction,
   LabelsOrientationConfig,
+  EndValue,
 } from '../../common/expressions';
 import type { ValueLabelConfig } from '../../common/types';
 
@@ -36,6 +37,8 @@ export interface XYState {
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
+  emphasizeFitting?: boolean;
+  endValue?: EndValue;
   yLeftExtent?: AxisExtentConfig;
   yRightExtent?: AxisExtentConfig;
   layers: XYLayerConfig[];
@@ -157,3 +160,12 @@ export const visualizationTypes: VisualizationType[] = [
     sortPriority: 2,
   },
 ];
+
+interface XYStateWithLayers {
+  [prop: string]: unknown;
+  layers: XYLayerConfig[];
+}
+export interface XYSuggestion extends Suggestion {
+  datasourceState: XYStateWithLayers;
+  visualizationState: XYStateWithLayers;
+}

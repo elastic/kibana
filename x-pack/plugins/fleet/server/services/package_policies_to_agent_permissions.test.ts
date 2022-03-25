@@ -30,49 +30,18 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     expect(permissions).toBeUndefined();
   });
 
-  it('Returns the default permissions for string package policies', async () => {
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, ['foo']);
-    expect(permissions).toMatchObject({
-      _fallback: {
-        cluster: ['monitor'],
-        indices: [
-          {
-            names: [
-              'logs-*',
-              'metrics-*',
-              'traces-*',
-              'synthetics-*',
-              '.logs-endpoint.diagnostic.collection-*',
-            ],
-            privileges: ['auto_configure', 'create_doc'],
-          },
-        ],
-      },
-    });
+  it('Throw an error for string package policies', async () => {
+    await expect(() => storedPackagePoliciesToAgentPermissions(soClient, ['foo'])).rejects.toThrow(
+      /storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy/
+    );
   });
 
   it('Returns the default permissions if a package policy does not have a package', async () => {
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, [
-      { name: 'foo', package: undefined } as PackagePolicy,
-    ]);
-
-    expect(permissions).toMatchObject({
-      foo: {
-        cluster: ['monitor'],
-        indices: [
-          {
-            names: [
-              'logs-*',
-              'metrics-*',
-              'traces-*',
-              'synthetics-*',
-              '.logs-endpoint.diagnostic.collection-*',
-            ],
-            privileges: ['auto_configure', 'create_doc'],
-          },
-        ],
-      },
-    });
+    await expect(() =>
+      storedPackagePoliciesToAgentPermissions(soClient, [
+        { name: 'foo', package: undefined } as PackagePolicy,
+      ])
+    ).rejects.toThrow(/No package for package policy foo/);
   });
 
   it('Returns the permissions for the enabled inputs', async () => {
@@ -89,6 +58,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -98,6 +68,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -201,6 +172,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -210,6 +182,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -293,6 +266,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -302,6 +276,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -417,6 +392,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -426,6 +402,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],

@@ -51,7 +51,6 @@ export const useDashboardTable = () => {
   }, []);
 
   const [dashboardItems, setDashboardItems] = useState<DashboardItem[]>([]);
-  const [selectedItems, setSelectedItems] = useState<DashboardItem[]>([]);
 
   const fetchDashboards = useCallback(
     debounce(async (query?: string) => {
@@ -75,8 +74,6 @@ export const useDashboardTable = () => {
     }, 500),
     []
   );
-  const selection: EuiTableProps['selection'] = {
-    onSelectionChange: setSelectedItems,
-  };
-  return { dashboardItems, selectedItems, selection, search, isLoading };
+
+  return { dashboardItems, search, isLoading };
 };

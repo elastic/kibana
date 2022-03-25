@@ -6,13 +6,14 @@
  */
 import { IScopedClusterClient } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isPopulatedObject } from './utils/runtime_field_utils';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { isPopulatedObject } from '../common/utils';
 
 export async function getTimeFieldRange(
   client: IScopedClusterClient,
   index: string[] | string,
   timeFieldName: string,
-  query: any,
+  query: QueryDslQueryContainer,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): Promise<{
   success: boolean;
@@ -21,9 +22,7 @@ export async function getTimeFieldRange(
 }> {
   const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-  const {
-    body: { aggregations },
-  } = await client.asCurrentUser.search({
+  const { aggregations } = await client.asCurrentUser.search({
     index,
     size: 0,
     body: {

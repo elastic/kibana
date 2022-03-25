@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Unit } from '@elastic/datemath';
 import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
@@ -17,14 +17,17 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
+import { useSecurityJobs } from '../../../../../public/common/components/ml_popover/hooks/use_security_jobs';
 import { FieldValueQueryBar } from '../query_bar';
 import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';
 import { PreviewHistogram } from './preview_histogram';
 import { getTimeframeOptions } from './helpers';
-import { CalloutGroup } from './callout_group';
+import { PreviewLogsComponent } from './preview_logs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from './loading_histogram';
+import { FieldValueThreshold } from '../threshold_input';
+import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 
 export interface RulePreviewProps {
   index: string[];
@@ -34,6 +37,9 @@ export interface RulePreviewProps {
   threatIndex: string[];
   threatMapping: ThreatMapping;
   threatQuery: FieldValueQueryBar;
+  threshold: FieldValueThreshold;
+  machineLearningJobId: string[];
+  anomalyThreshold: number;
 }
 
 const Select = styled(EuiSelect)`
@@ -44,6 +50,8 @@ const PreviewButton = styled(EuiButton)`
   margin-left: 0;
 `;
 
+const defaultTimeRange: Unit = 'h';
+
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   index,
   isDisabled,
@@ -52,8 +60,13 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   threatIndex,
   threatQuery,
   threatMapping,
+  threshold,
+  machineLearningJobId,
+  anomalyThreshold,
 }) => {
   const { spaces } = useKibana().services;
+  const { loading: isMlLoading, jobs } = useSecurityJobs(false);
+
   const [spaceId, setSpaceId] = useState('');
   useEffect(() => {
     if (spaces) {
@@ -61,14 +74,25 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     }
   }, [spaces]);
 
-  const [timeFrame, setTimeFrame] = useState<Unit>('h');
+  const areRelaventMlJobsRunning = useMemo(() => {
+    if (ruleType !== 'machine_learning') {
+      return true; // Don't do the expensive logic if we don't need it
+    }
+    if (isMlLoading) {
+      const selectedJobs = jobs.filter(({ id }) => machineLearningJobId.includes(id));
+      return selectedJobs.every((job) => isJobStarted(job.jobState, job.datafeedState));
+    }
+  }, [jobs, machineLearningJobId, ruleType, isMlLoading]);
+
+  const [timeFrame, setTimeFrame] = useState<Unit>(defaultTimeRange);
   const {
     addNoiseWarning,
     createPreview,
-    errors,
     isPreviewRequestInProgress,
     previewId,
-    warnings,
+    logs,
+    hasNoiseWarning,
+    isAborted,
   } = usePreviewRoute({
     index,
     isDisabled,
@@ -78,7 +102,15 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     timeFrame,
     ruleType,
     threatMapping,
+    threshold,
+    machineLearningJobId,
+    anomalyThreshold,
   });
+
+  // Resets the timeFrame to default when rule type is changed because not all time frames are supported by all rule types
+  useEffect(() => {
+    setTimeFrame(defaultTimeRange);
+  }, [ruleType]);
 
   return (
     <>
@@ -106,9 +138,9 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
             <PreviewButton
               fill
               isLoading={isPreviewRequestInProgress}
-              isDisabled={isDisabled}
+              isDisabled={isDisabled || !areRelaventMlJobsRunning}
               onClick={createPreview}
-              data-test-subj="preview-button"
+              data-test-subj="queryPreviewButton"
             >
               {i18n.QUERY_PREVIEW_BUTTON}
             </PreviewButton>
@@ -119,14 +151,16 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       {isPreviewRequestInProgress && <LoadingHistogram />}
       {!isPreviewRequestInProgress && previewId && spaceId && (
         <PreviewHistogram
+          ruleType={ruleType}
           timeFrame={timeFrame}
           previewId={previewId}
           addNoiseWarning={addNoiseWarning}
           spaceId={spaceId}
+          threshold={threshold}
+          index={index}
         />
       )}
-      <CalloutGroup items={errors} isError />
-      <CalloutGroup items={warnings} />
+      <PreviewLogsComponent logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
     </>
   );
 };

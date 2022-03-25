@@ -9,8 +9,8 @@
 import { URL } from 'url';
 import uuid from 'uuid';
 import { Request, RouteOptionsApp, RequestApplicationState, RouteOptions } from '@hapi/hapi';
-import { Observable, fromEvent, merge } from 'rxjs';
-import { shareReplay, first, takeUntil } from 'rxjs/operators';
+import { Observable, fromEvent } from 'rxjs';
+import { shareReplay, first, filter } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 
@@ -78,13 +78,6 @@ export interface KibanaRequestEvents {
 }
 
 /**
- * @deprecated
- * `hapi` request object, supported during migration process only for backward compatibility.
- * @public
- */
-export interface LegacyRequest extends Request {} // eslint-disable-line @typescript-eslint/no-empty-interface
-
-/**
  * Kibana specific abstraction for an incoming request.
  * @public
  */
@@ -134,6 +127,7 @@ export class KibanaRequest<
     const body = routeValidator.getBody(req.payload, 'request body');
     return { query, params, body };
   }
+
   /**
    * A identifier to identify this request.
    *
@@ -222,11 +216,9 @@ export class KibanaRequest<
   }
 
   private getEvents(request: Request): KibanaRequestEvents {
-    // the response is completed, or its underlying connection was terminated prematurely
-    const finish$ = fromEvent(request.raw.res, 'close').pipe(shareReplay(1), first());
-
-    const aborted$ = fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$));
-    const completed$ = merge<void, void>(finish$, aborted$).pipe(shareReplay(1), first());
+    const completed$ = fromEvent<void>(request.raw.res, 'close').pipe(shareReplay(1), first());
+    // the response's underlying connection was terminated prematurely
+    const aborted$ = completed$.pipe(filter(() => !isCompleted(request)));
 
     return {
       aborted$,
@@ -312,7 +304,7 @@ export class KibanaRequest<
  * Returns underlying Hapi Request
  * @internal
  */
-export const ensureRawRequest = (request: KibanaRequest | LegacyRequest) =>
+export const ensureRawRequest = (request: KibanaRequest | Request) =>
   isKibanaRequest(request) ? request[requestSymbol] : request;
 
 /**
@@ -323,7 +315,7 @@ export function isKibanaRequest(request: unknown): request is KibanaRequest {
   return request instanceof KibanaRequest;
 }
 
-function isRequest(request: any): request is LegacyRequest {
+function isRequest(request: any): request is Request {
   try {
     return request.raw.req && typeof request.raw.req === 'object';
   } catch {
@@ -332,9 +324,13 @@ function isRequest(request: any): request is LegacyRequest {
 }
 
 /**
- * Checks if an incoming request either KibanaRequest or Legacy.Request
+ * Checks if an incoming request either KibanaRequest or Hapi.Request
  * @internal
  */
-export function isRealRequest(request: unknown): request is KibanaRequest | LegacyRequest {
+export function isRealRequest(request: unknown): request is KibanaRequest | Request {
   return isKibanaRequest(request) || isRequest(request);
+}
+
+function isCompleted(request: Request) {
+  return request.raw.res.writableFinished;
 }

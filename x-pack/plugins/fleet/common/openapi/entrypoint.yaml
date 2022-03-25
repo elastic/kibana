@@ -16,26 +16,49 @@ paths:
   # plugin-wide endpoint(s)
   /setup:
     $ref: paths/setup.yaml
+  /setup/preconfiguration:
+    $ref: paths/setup_preconfiguration.yaml
   /settings:
     $ref: paths/settings.yaml
+  # App endpoints
+  /service-tokens:
+    $ref: paths/service_tokens_deprecated.yaml
+  /service_tokens:
+    $ref: paths/service_tokens.yaml
   # EPM / integrations endpoints
   /epm/categories:
     $ref: paths/epm@categories.yaml
+  /epm/packages/limited:
+    $ref: paths/epm@limited_list.yaml
   /epm/packages:
     $ref: paths/epm@packages.yaml
+  /epm/packages/_bulk:
+    $ref: paths/epm@packages_bulk.yaml
   '/epm/packages/{pkgkey}':
-    $ref: 'paths/epm@packages@{pkgkey}.yaml'
+    $ref: 'paths/epm@packages@{pkgkey}_deprecated.yaml'
+  '/epm/packages/{pkgName}/{pkgVersion}':
+    $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}.yaml'
+  '/epm/packages/{pkgName}/{pkgVersion}/{filePath}':
+    $ref: paths/epm@get_file.yaml
+  '/epm/packages/{pkgName}/stats':
+    $ref: 'paths/epm@packages@{pkg_name}@stats.yaml'
   # Agent-related endpoints
   /agents/setup:
     $ref: paths/agents@setup.yaml
   /agent-status:
+    $ref: paths/agent_status_deprecated.yaml
+  /agent_status:
     $ref: paths/agent_status.yaml
+  /agent_status/data:
+    $ref: paths/agent_status@data.yaml
   /agents:
     $ref: paths/agents.yaml
   /agents/bulk_upgrade:
     $ref: paths/agents@bulk_upgrade.yaml
   '/agents/{agentId}':
     $ref: 'paths/agents@{agent_id}.yaml'
+  '/agents/{agentId}/actions':
+    $ref: 'paths/agents@{agent_id}@actions.yaml'
   '/agents/{agentId}/reassign':
     $ref: 'paths/agents@{agent_id}@reassign.yaml'
   '/agents/{agentId}/unenroll':
@@ -46,6 +69,7 @@ paths:
     $ref: 'paths/agents@bulk_reassign.yaml'
   '/agents/bulk_unenroll':
     $ref: 'paths/agents@bulk_unenroll.yaml'
+  #  Agent policies endpoints
   /agent_policies:
     $ref: paths/agent_policies.yaml
   '/agent_policies/{agentPolicyId}':
@@ -54,10 +78,19 @@ paths:
     $ref: 'paths/agent_policies@{agent_policy_id}@copy.yaml'
   /agent_policies/delete:
     $ref: paths/agent_policies@delete.yaml
+  # Data streams endpoints
+  /data_streams:
+    $ref: paths/data_streams.yaml
+  #  Enrollment endpoints
   /enrollment-api-keys:
-    $ref: paths/enrollment_api_keys.yaml
+    $ref: paths/enrollment_api_keys_deprecated.yaml
   '/enrollment-api-keys/{keyId}':
+    $ref: 'paths/enrollment_api_keys@{key_id}_deprecated.yaml'
+  /enrollment_api_keys:
+    $ref: paths/enrollment_api_keys.yaml
+  '/enrollment_api_keys/{keyId}':
     $ref: 'paths/enrollment_api_keys@{key_id}.yaml'
+  #  Package policies endpoints
   /package_policies:
     $ref: paths/package_policies.yaml
   /package_policies/delete:
@@ -68,12 +101,13 @@ paths:
     $ref: paths/package_policies@upgrade_dryrun.yaml
   '/package_policies/{packagePolicyId}':
     $ref: 'paths/package_policies@{package_policy_id}.yaml'
+  # Outputs
   /outputs:
     $ref: paths/outputs.yaml
   /outputs/{outputId}:
     $ref: paths/outputs@{output_id}.yaml
-  '/epm/packages/{pkgName}/stats':
-    $ref: 'paths/epm@packages@{pkg_name}@stats.yaml'
+  /logstash_api_keys:
+    $ref: paths/logstash_api_keys.yaml
 components:
   securitySchemes:
     basicAuth:

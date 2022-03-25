@@ -6,8 +6,11 @@
  */
 
 import type { IScopedClusterClient } from 'kibana/server';
-import { sumBy, pick } from 'lodash';
-import { NodesInfoNodeInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { pick } from 'lodash';
+import {
+  MlTrainedModelStats,
+  NodesInfoNodeInfo,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   NodeDeploymentStatsResponse,
   PipelineDefinition,
@@ -15,23 +18,55 @@ import type {
 } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import {
-  MemoryOverviewService,
-  NATIVE_EXECUTABLE_CODE_OVERHEAD,
-} from '../memory_overview/memory_overview_service';
-import { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
+  TrainedModelDeploymentStatsResponse,
+  TrainedModelModelSizeStats,
+} from '../../../common/types/trained_models';
 import { isDefined } from '../../../common/types/guards';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
-const NODE_FIELDS = ['attributes', 'name', 'roles', 'version'] as const;
+const NODE_FIELDS = ['attributes', 'name', 'roles'] as const;
 
 export type RequiredNodeFields = Pick<NodesInfoNodeInfo, typeof NODE_FIELDS[number]>;
 
-export function modelsProvider(
-  client: IScopedClusterClient,
-  mlClient: MlClient,
-  memoryOverviewService?: MemoryOverviewService
-) {
+// @ts-expect-error TrainedModelDeploymentStatsResponse missing properties from MlTrainedModelDeploymentStats
+interface TrainedModelStatsResponse extends MlTrainedModelStats {
+  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  model_size_stats?: TrainedModelModelSizeStats;
+}
+
+export interface MemoryStatsResponse {
+  _nodes: { total: number; failed: number; successful: number };
+  cluster_name: string;
+  nodes: Record<
+    string,
+    {
+      jvm: {
+        heap_max_in_bytes: number;
+        java_inference_in_bytes: number;
+        java_inference_max_in_bytes: number;
+      };
+      mem: {
+        adjusted_total_in_bytes: number;
+        total_in_bytes: number;
+        ml: {
+          data_frame_analytics_in_bytes: number;
+          native_code_overhead_in_bytes: number;
+          max_in_bytes: number;
+          anomaly_detectors_in_bytes: number;
+          native_inference_in_bytes: number;
+        };
+      };
+      transport_address: string;
+      roles: string[];
+      name: string;
+      attributes: Record<`${'ml.'}${string}`, string>;
+      ephemeral_id: string;
+    }
+  >;
+}
+
+export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   return {
     /**
      * Retrieves the map of model ids and aliases with associated pipelines.
@@ -43,7 +78,7 @@ export function modelsProvider(
       );
 
       try {
-        const { body } = await client.asCurrentUser.ingest.getPipeline();
+        const body = await client.asCurrentUser.ingest.getPipeline();
 
         for (const [pipelineName, pipelineDefinition] of Object.entries(body)) {
           const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
@@ -76,45 +111,44 @@ export function modelsProvider(
      * Provides the ML nodes overview with allocated models.
      */
     async getNodesOverview(): Promise<NodesOverviewResponse> {
-      if (!memoryOverviewService) {
-        throw new Error('Memory overview service is not provided');
-      }
+      const response = (await mlClient.getMemoryStats()) as MemoryStatsResponse;
 
-      const {
-        body: { trained_model_stats: trainedModelStats },
-      } = await mlClient.getTrainedModelsStats({
-        model_id: '_all',
+      const { trained_model_stats: trainedModelStats } = await mlClient.getTrainedModelsStats({
         size: 10000,
       });
 
-      const {
-        body: { nodes: clusterNodes },
-      } = await client.asCurrentUser.nodes.stats();
-
-      const mlNodes = Object.entries(clusterNodes).filter(([, node]) => node.roles.includes('ml'));
-
-      const adMemoryReport = await memoryOverviewService.getAnomalyDetectionMemoryOverview();
-      const dfaMemoryReport = await memoryOverviewService.getDFAMemoryOverview();
+      const mlNodes = Object.entries(response.nodes);
 
       const nodeDeploymentStatsResponses: NodeDeploymentStatsResponse[] = mlNodes.map(
         ([nodeId, node]) => {
           const nodeFields = pick(node, NODE_FIELDS) as RequiredNodeFields;
 
-          const allocatedModels = (
-            trainedModelStats
-              .map((v) => {
-                // @ts-ignore new prop
-                return v.deployment_stats;
-              })
-              .filter(isDefined) as TrainedModelDeploymentStatsResponse[]
-          )
-            .filter((v) => v.nodes.some((n) => Object.keys(n.node)[0] === nodeId))
-            .map(({ nodes, ...rest }) => {
+          nodeFields.attributes = nodeFields.attributes;
+
+          const allocatedModels = (trainedModelStats as TrainedModelStatsResponse[])
+            .filter(
+              (d) =>
+                isDefined(d.deployment_stats) &&
+                isDefined(d.deployment_stats.nodes) &&
+                d.deployment_stats.nodes.some((n) => Object.keys(n.node)[0] === nodeId)
+            )
+            .map((d) => {
+              const modelSizeState = d.model_size_stats;
+              const deploymentStats = d.deployment_stats;
+
+              if (!deploymentStats || !modelSizeState) {
+                throw new Error('deploymentStats or modelSizeState not defined');
+              }
+
+              const { nodes, ...rest } = deploymentStats;
+
               const { node: tempNode, ...nodeRest } = nodes.find(
                 (v) => Object.keys(v.node)[0] === nodeId
               )!;
               return {
+                model_id: d.model_id,
                 ...rest,
+                ...modelSizeState,
                 node: nodeRest,
               };
             });
@@ -122,20 +156,14 @@ export function modelsProvider(
           const modelsMemoryUsage = allocatedModels.map((v) => {
             return {
               model_id: v.model_id,
-              model_size: v.model_size_bytes,
+              model_size: v.required_native_memory_bytes,
             };
           });
 
           const memoryRes = {
-            adTotalMemory: sumBy(
-              adMemoryReport.filter((ad) => ad.node_id === nodeId),
-              'model_size'
-            ),
-            dfaTotalMemory: sumBy(
-              dfaMemoryReport.filter((dfa) => dfa.node_id === nodeId),
-              'model_size'
-            ),
-            trainedModelsTotalMemory: sumBy(modelsMemoryUsage, 'model_size'),
+            adTotalMemory: node.mem.ml.anomaly_detectors_in_bytes,
+            dfaTotalMemory: node.mem.ml.data_frame_analytics_in_bytes,
+            trainedModelsTotalMemory: node.mem.ml.native_inference_in_bytes,
           };
 
           for (const key of Object.keys(memoryRes)) {
@@ -145,7 +173,7 @@ export function modelsProvider(
                * ML job to run on a given node will do this, and then subsequent ML jobs on the same node will reuse the
                * same already-loaded code.
                */
-              memoryRes[key as keyof typeof memoryRes] += NATIVE_EXECUTABLE_CODE_OVERHEAD;
+              memoryRes[key as keyof typeof memoryRes] += node.mem.ml.native_code_overhead_in_bytes;
               break;
             }
           }
@@ -156,10 +184,8 @@ export function modelsProvider(
             allocated_models: allocatedModels,
             memory_overview: {
               machine_memory: {
-                // TODO remove ts-ignore when elasticsearch client is updated
-                // @ts-ignore
-                total: Number(node.os?.mem.adjusted_total_in_bytes ?? node.os?.mem.total_in_bytes),
-                jvm: Number(node.attributes['ml.max_jvm_size']),
+                total: node.mem.adjusted_total_in_bytes,
+                jvm: node.jvm.heap_max_in_bytes,
               },
               anomaly_detection: {
                 total: memoryRes.adTotalMemory,
@@ -171,13 +197,14 @@ export function modelsProvider(
                 total: memoryRes.trainedModelsTotalMemory,
                 by_model: modelsMemoryUsage,
               },
+              ml_max_in_bytes: node.mem.ml.max_in_bytes,
             },
           };
         }
       );
 
       return {
-        count: nodeDeploymentStatsResponses.length,
+        _nodes: response._nodes,
         nodes: nodeDeploymentStatsResponses,
       };
     },

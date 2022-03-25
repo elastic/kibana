@@ -6,12 +6,16 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import type {
   Logger,
   KibanaRequest,
   ISavedObjectsRepository,
   IBasePath,
   ExecutionContextStart,
+  SavedObjectsServiceStart,
+  ElasticsearchServiceStart,
+  UiSettingsServiceStart,
 } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
@@ -19,7 +23,6 @@ import { PluginStartContract as ActionsPluginStartContract } from '../../../acti
 import {
   AlertTypeParams,
   RuleTypeRegistry,
-  GetServicesFunction,
   SpaceIdToNamespaceFunction,
   AlertTypeState,
   AlertInstanceState,
@@ -28,11 +31,14 @@ import {
 import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
 import { RulesClient } from '../rules_client';
-import { NormalizedAlertType } from '../rule_type_registry';
+import { NormalizedRuleType } from '../rule_type_registry';
+import { InMemoryMetrics } from '../monitoring';
 
 export interface TaskRunnerContext {
   logger: Logger;
-  getServices: GetServicesFunction;
+  savedObjects: SavedObjectsServiceStart;
+  uiSettings: UiSettingsServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
   getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
@@ -44,8 +50,9 @@ export interface TaskRunnerContext {
   ruleTypeRegistry: RuleTypeRegistry;
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
-  maxEphemeralActionsPerAlert: number;
+  maxEphemeralActionsPerRule: number;
   cancelAlertsOnRuleTimeout: boolean;
+  usageCounter?: UsageCounter;
 }
 
 export class TaskRunnerFactory {
@@ -69,7 +76,7 @@ export class TaskRunnerFactory {
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string
   >(
-    alertType: NormalizedAlertType<
+    ruleType: NormalizedRuleType<
       Params,
       ExtractedParams,
       State,
@@ -78,7 +85,8 @@ export class TaskRunnerFactory {
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    { taskInstance }: RunContext
+    { taskInstance }: RunContext,
+    inMemoryMetrics: InMemoryMetrics
   ) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
@@ -92,6 +100,6 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(alertType, taskInstance, this.taskRunnerContext!);
+    >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
   }
 }

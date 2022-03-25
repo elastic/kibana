@@ -173,56 +173,74 @@ exports[`Inspector Data View component should render empty state 1`] = `
         </h2>
       }
     >
-      <div
-        className="euiEmptyPrompt"
+      <EuiPanel
+        className="euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+        color="transparent"
+        paddingSize="none"
       >
-        <EuiTitle
-          size="m"
+        <div
+          className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
         >
-          <h2
-            className="euiTitle euiTitle--medium"
+          <div
+            className="euiEmptyPrompt__main"
           >
-            <FormattedMessage
-              defaultMessage="No data available"
-              id="data.inspector.table.noDataAvailableTitle"
-              values={Object {}}
-            >
-              No data available
-            </FormattedMessage>
-          </h2>
-        </EuiTitle>
-        <EuiTextColor
-          color="subdued"
-        >
-          <span
-            className="euiTextColor euiTextColor--subdued"
-            style={Object {}}
-          >
-            <EuiSpacer
-              size="m"
+            <div
+              className="euiEmptyPrompt__content"
             >
               <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
-            <EuiText>
-              <div
-                className="euiText euiText--medium"
+                className="euiEmptyPrompt__contentInner"
               >
-                <p>
-                  <FormattedMessage
-                    defaultMessage="The element did not provide any data."
-                    id="data.inspector.table.noDataAvailableDescription"
-                    values={Object {}}
+                <EuiTitle
+                  size="m"
+                >
+                  <h2
+                    className="euiTitle euiTitle--medium"
                   >
-                    The element did not provide any data.
-                  </FormattedMessage>
-                </p>
+                    <FormattedMessage
+                      defaultMessage="No data available"
+                      id="data.inspector.table.noDataAvailableTitle"
+                      values={Object {}}
+                    >
+                      No data available
+                    </FormattedMessage>
+                  </h2>
+                </EuiTitle>
+                <EuiTextColor
+                  color="subdued"
+                >
+                  <span
+                    className="euiTextColor euiTextColor--subdued"
+                    style={Object {}}
+                  >
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <EuiText>
+                      <div
+                        className="euiText euiText--medium"
+                      >
+                        <p>
+                          <FormattedMessage
+                            defaultMessage="The element did not provide any data."
+                            id="data.inspector.table.noDataAvailableDescription"
+                            values={Object {}}
+                          >
+                            The element did not provide any data.
+                          </FormattedMessage>
+                        </p>
+                      </div>
+                    </EuiText>
+                  </span>
+                </EuiTextColor>
               </div>
-            </EuiText>
-          </span>
-        </EuiTextColor>
-      </div>
+            </div>
+          </div>
+        </div>
+      </EuiPanel>
     </EuiEmptyPrompt>
   </DataViewComponent>
 </Component>
@@ -893,7 +911,6 @@ exports[`Inspector Data View component should render single table without select
           onChange={[Function]}
           pagination={
             Object {
-              "hidePerPageOptions": undefined,
               "pageIndex": 0,
               "pageSize": 20,
               "pageSizeOptions": Array [
@@ -901,6 +918,7 @@ exports[`Inspector Data View component should render single table without select
                 20,
                 50,
               ],
+              "showPerPageOptions": undefined,
               "totalItemCount": 1,
             }
           }
@@ -1236,7 +1254,6 @@ exports[`Inspector Data View component should render single table without select
                 onPageSizeChange={[Function]}
                 pagination={
                   Object {
-                    "hidePerPageOptions": undefined,
                     "pageIndex": 0,
                     "pageSize": 20,
                     "pageSizeOptions": Array [
@@ -1244,6 +1261,7 @@ exports[`Inspector Data View component should render single table without select
                       20,
                       50,
                     ],
+                    "showPerPageOptions": undefined,
                     "totalItemCount": 1,
                   }
                 }
@@ -1274,11 +1292,14 @@ exports[`Inspector Data View component should render single table without select
                   >
                     <EuiFlexGroup
                       alignItems="center"
+                      className="eui-xScroll"
+                      gutterSize="s"
                       justifyContent="spaceBetween"
                       responsive={false}
+                      wrap={true}
                     >
                       <div
-                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
                       >
                         <EuiFlexItem
                           grow={false}
@@ -1297,12 +1318,14 @@ exports[`Inspector Data View component should render single table without select
                                   onClick={[Function]}
                                   size="xs"
                                 >
-                                  <EuiI18n
-                                    default="Rows per page"
-                                    token="euiTablePagination.rowsPerPage"
-                                  />
-                                  : 
-                                  20
+                                  <React.Fragment>
+                                    <EuiI18n
+                                      default="Rows per page"
+                                      token="euiTablePagination.rowsPerPage"
+                                    />
+                                    : 
+                                    20
+                                  </React.Fragment>
                                 </EuiButtonEmpty>
                               }
                               closePopover={[Function]}
@@ -1398,54 +1421,57 @@ exports[`Inspector Data View component should render single table without select
                                 aria-label="Pagination for table: "
                                 className="euiPagination"
                               >
-                                <EuiI18n
-                                  default="Previous page, {page}"
-                                  token="euiPagination.previousPage"
-                                  values={
-                                    Object {
-                                      "page": 0,
-                                    }
-                                  }
-                                >
-                                  <EuiI18n
-                                    default="Previous page"
-                                    token="euiPagination.disabledPreviousPage"
+                                <EuiScreenReaderOnly>
+                                  <span
+                                    aria-atomic="true"
+                                    aria-relevant="additions text"
+                                    className="euiScreenReaderOnly"
+                                    role="status"
                                   >
-                                    <EuiButtonIcon
+                                    Page 1 of 1
+                                  </span>
+                                </EuiScreenReaderOnly>
+                                <EuiPaginationButtonArrow
+                                  ariaControls="__table_generated-id"
+                                  disabled={true}
+                                  onClick={[Function]}
+                                  type="previous"
+                                >
+                                  <EuiButtonIcon
+                                    aria-label="Previous page"
+                                    className="euiPaginationArrowButton"
+                                    color="text"
+                                    data-test-subj="pagination-button-previous"
+                                    iconType="arrowLeft"
+                                    isDisabled={true}
+                                    onClick={[Function]}
+                                  >
+                                    <button
                                       aria-label="Previous page"
-                                      color="text"
+                                      className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                                       data-test-subj="pagination-button-previous"
                                       disabled={true}
-                                      iconType="arrowLeft"
                                       onClick={[Function]}
+                                      type="button"
                                     >
-                                      <button
-                                        aria-label="Previous page"
-                                        className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-                                        data-test-subj="pagination-button-previous"
-                                        disabled={true}
-                                        onClick={[Function]}
-                                        type="button"
+                                      <EuiIcon
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        color="inherit"
+                                        size="m"
+                                        type="arrowLeft"
                                       >
-                                        <EuiIcon
+                                        <span
                                           aria-hidden="true"
                                           className="euiButtonIcon__icon"
                                           color="inherit"
+                                          data-euiicon-type="arrowLeft"
                                           size="m"
-                                          type="arrowLeft"
-                                        >
-                                          <span
-                                            aria-hidden="true"
-                                            className="euiButtonIcon__icon"
-                                            color="inherit"
-                                            data-euiicon-type="arrowLeft"
-                                            size="m"
-                                          />
-                                        </EuiIcon>
-                                      </button>
-                                    </EuiButtonIcon>
-                                  </EuiI18n>
-                                </EuiI18n>
+                                        />
+                                      </EuiIcon>
+                                    </button>
+                                  </EuiButtonIcon>
+                                </EuiPaginationButtonArrow>
                                 <ul
                                   aria-label="Pagination for table: "
                                   className="euiPagination__list"
@@ -1463,7 +1489,6 @@ exports[`Inspector Data View component should render single table without select
                                     >
                                       <EuiPaginationButton
                                         aria-controls="__table_generated-id"
-                                        hideOnMobile={true}
                                         isActive={true}
                                         onClick={[Function]}
                                         pageIndex={0}
@@ -1492,7 +1517,7 @@ exports[`Inspector Data View component should render single table without select
                                               aria-controls="__table_generated-id"
                                               aria-current={true}
                                               aria-label="Page 1 of 1"
-                                              className="euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                              className="euiPaginationButton euiPaginationButton-isActive"
                                               color="text"
                                               data-test-subj="pagination-button-0"
                                               href="#__table_generated-id"
@@ -1504,7 +1529,7 @@ exports[`Inspector Data View component should render single table without select
                                                 aria-controls="__table_generated-id"
                                                 aria-current={true}
                                                 aria-label="Page 1 of 1"
-                                                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
                                                 data-test-subj="pagination-button-0"
                                                 disabled={true}
                                                 onClick={[Function]}
@@ -1538,54 +1563,47 @@ exports[`Inspector Data View component should render single table without select
                                     </li>
                                   </PaginationButtonWrapper>
                                 </ul>
-                                <EuiI18n
-                                  default="Next page, {page}"
-                                  token="euiPagination.nextPage"
-                                  values={
-                                    Object {
-                                      "page": 2,
-                                    }
-                                  }
+                                <EuiPaginationButtonArrow
+                                  ariaControls="__table_generated-id"
+                                  disabled={true}
+                                  onClick={[Function]}
+                                  type="next"
                                 >
-                                  <EuiI18n
-                                    default="Next page"
-                                    token="euiPagination.disabledNextPage"
+                                  <EuiButtonIcon
+                                    aria-label="Next page"
+                                    className="euiPaginationArrowButton"
+                                    color="text"
+                                    data-test-subj="pagination-button-next"
+                                    iconType="arrowRight"
+                                    isDisabled={true}
+                                    onClick={[Function]}
                                   >
-                                    <EuiButtonIcon
+                                    <button
                                       aria-label="Next page"
-                                      color="text"
+                                      className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                                       data-test-subj="pagination-button-next"
                                       disabled={true}
-                                      iconType="arrowRight"
                                       onClick={[Function]}
+                                      type="button"
                                     >
-                                      <button
-                                        aria-label="Next page"
-                                        className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-                                        data-test-subj="pagination-button-next"
-                                        disabled={true}
-                                        onClick={[Function]}
-                                        type="button"
+                                      <EuiIcon
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        color="inherit"
+                                        size="m"
+                                        type="arrowRight"
                                       >
-                                        <EuiIcon
+                                        <span
                                           aria-hidden="true"
                                           className="euiButtonIcon__icon"
                                           color="inherit"
+                                          data-euiicon-type="arrowRight"
                                           size="m"
-                                          type="arrowRight"
-                                        >
-                                          <span
-                                            aria-hidden="true"
-                                            className="euiButtonIcon__icon"
-                                            color="inherit"
-                                            data-euiicon-type="arrowRight"
-                                            size="m"
-                                          />
-                                        </EuiIcon>
-                                      </button>
-                                    </EuiButtonIcon>
-                                  </EuiI18n>
-                                </EuiI18n>
+                                        />
+                                      </EuiIcon>
+                                    </button>
+                                  </EuiButtonIcon>
+                                </EuiPaginationButtonArrow>
                               </nav>
                             </EuiPagination>
                           </div>
@@ -2478,7 +2496,6 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
           onChange={[Function]}
           pagination={
             Object {
-              "hidePerPageOptions": undefined,
               "pageIndex": 0,
               "pageSize": 20,
               "pageSizeOptions": Array [
@@ -2486,6 +2503,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                 20,
                 50,
               ],
+              "showPerPageOptions": undefined,
               "totalItemCount": 1,
             }
           }
@@ -2822,7 +2840,6 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                 onPageSizeChange={[Function]}
                 pagination={
                   Object {
-                    "hidePerPageOptions": undefined,
                     "pageIndex": 0,
                     "pageSize": 20,
                     "pageSizeOptions": Array [
@@ -2830,6 +2847,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                       20,
                       50,
                     ],
+                    "showPerPageOptions": undefined,
                     "totalItemCount": 1,
                   }
                 }
@@ -2860,11 +2878,14 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                   >
                     <EuiFlexGroup
                       alignItems="center"
+                      className="eui-xScroll"
+                      gutterSize="s"
                       justifyContent="spaceBetween"
                       responsive={false}
+                      wrap={true}
                     >
                       <div
-                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
                       >
                         <EuiFlexItem
                           grow={false}
@@ -2883,12 +2904,14 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                   onClick={[Function]}
                                   size="xs"
                                 >
-                                  <EuiI18n
-                                    default="Rows per page"
-                                    token="euiTablePagination.rowsPerPage"
-                                  />
-                                  : 
-                                  20
+                                  <React.Fragment>
+                                    <EuiI18n
+                                      default="Rows per page"
+                                      token="euiTablePagination.rowsPerPage"
+                                    />
+                                    : 
+                                    20
+                                  </React.Fragment>
                                 </EuiButtonEmpty>
                               }
                               closePopover={[Function]}
@@ -2984,54 +3007,57 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                 aria-label="Pagination for table: "
                                 className="euiPagination"
                               >
-                                <EuiI18n
-                                  default="Previous page, {page}"
-                                  token="euiPagination.previousPage"
-                                  values={
-                                    Object {
-                                      "page": 0,
-                                    }
-                                  }
-                                >
-                                  <EuiI18n
-                                    default="Previous page"
-                                    token="euiPagination.disabledPreviousPage"
+                                <EuiScreenReaderOnly>
+                                  <span
+                                    aria-atomic="true"
+                                    aria-relevant="additions text"
+                                    className="euiScreenReaderOnly"
+                                    role="status"
                                   >
-                                    <EuiButtonIcon
+                                    Page 1 of 1
+                                  </span>
+                                </EuiScreenReaderOnly>
+                                <EuiPaginationButtonArrow
+                                  ariaControls="__table_generated-id"
+                                  disabled={true}
+                                  onClick={[Function]}
+                                  type="previous"
+                                >
+                                  <EuiButtonIcon
+                                    aria-label="Previous page"
+                                    className="euiPaginationArrowButton"
+                                    color="text"
+                                    data-test-subj="pagination-button-previous"
+                                    iconType="arrowLeft"
+                                    isDisabled={true}
+                                    onClick={[Function]}
+                                  >
+                                    <button
                                       aria-label="Previous page"
-                                      color="text"
+                                      className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                                       data-test-subj="pagination-button-previous"
                                       disabled={true}
-                                      iconType="arrowLeft"
                                       onClick={[Function]}
+                                      type="button"
                                     >
-                                      <button
-                                        aria-label="Previous page"
-                                        className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-                                        data-test-subj="pagination-button-previous"
-                                        disabled={true}
-                                        onClick={[Function]}
-                                        type="button"
+                                      <EuiIcon
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        color="inherit"
+                                        size="m"
+                                        type="arrowLeft"
                                       >
-                                        <EuiIcon
+                                        <span
                                           aria-hidden="true"
                                           className="euiButtonIcon__icon"
                                           color="inherit"
+                                          data-euiicon-type="arrowLeft"
                                           size="m"
-                                          type="arrowLeft"
-                                        >
-                                          <span
-                                            aria-hidden="true"
-                                            className="euiButtonIcon__icon"
-                                            color="inherit"
-                                            data-euiicon-type="arrowLeft"
-                                            size="m"
-                                          />
-                                        </EuiIcon>
-                                      </button>
-                                    </EuiButtonIcon>
-                                  </EuiI18n>
-                                </EuiI18n>
+                                        />
+                                      </EuiIcon>
+                                    </button>
+                                  </EuiButtonIcon>
+                                </EuiPaginationButtonArrow>
                                 <ul
                                   aria-label="Pagination for table: "
                                   className="euiPagination__list"
@@ -3049,7 +3075,6 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                     >
                                       <EuiPaginationButton
                                         aria-controls="__table_generated-id"
-                                        hideOnMobile={true}
                                         isActive={true}
                                         onClick={[Function]}
                                         pageIndex={0}
@@ -3078,7 +3103,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                               aria-controls="__table_generated-id"
                                               aria-current={true}
                                               aria-label="Page 1 of 1"
-                                              className="euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                              className="euiPaginationButton euiPaginationButton-isActive"
                                               color="text"
                                               data-test-subj="pagination-button-0"
                                               href="#__table_generated-id"
@@ -3090,7 +3115,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                                 aria-controls="__table_generated-id"
                                                 aria-current={true}
                                                 aria-label="Page 1 of 1"
-                                                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
                                                 data-test-subj="pagination-button-0"
                                                 disabled={true}
                                                 onClick={[Function]}
@@ -3124,54 +3149,47 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                     </li>
                                   </PaginationButtonWrapper>
                                 </ul>
-                                <EuiI18n
-                                  default="Next page, {page}"
-                                  token="euiPagination.nextPage"
-                                  values={
-                                    Object {
-                                      "page": 2,
-                                    }
-                                  }
+                                <EuiPaginationButtonArrow
+                                  ariaControls="__table_generated-id"
+                                  disabled={true}
+                                  onClick={[Function]}
+                                  type="next"
                                 >
-                                  <EuiI18n
-                                    default="Next page"
-                                    token="euiPagination.disabledNextPage"
+                                  <EuiButtonIcon
+                                    aria-label="Next page"
+                                    className="euiPaginationArrowButton"
+                                    color="text"
+                                    data-test-subj="pagination-button-next"
+                                    iconType="arrowRight"
+                                    isDisabled={true}
+                                    onClick={[Function]}
                                   >
-                                    <EuiButtonIcon
+                                    <button
                                       aria-label="Next page"
-                                      color="text"
+                                      className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                                       data-test-subj="pagination-button-next"
                                       disabled={true}
-                                      iconType="arrowRight"
                                       onClick={[Function]}
+                                      type="button"
                                     >
-                                      <button
-                                        aria-label="Next page"
-                                        className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-                                        data-test-subj="pagination-button-next"
-                                        disabled={true}
-                                        onClick={[Function]}
-                                        type="button"
+                                      <EuiIcon
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        color="inherit"
+                                        size="m"
+                                        type="arrowRight"
                                       >
-                                        <EuiIcon
+                                        <span
                                           aria-hidden="true"
                                           className="euiButtonIcon__icon"
                                           color="inherit"
+                                          data-euiicon-type="arrowRight"
                                           size="m"
-                                          type="arrowRight"
-                                        >
-                                          <span
-                                            aria-hidden="true"
-                                            className="euiButtonIcon__icon"
-                                            color="inherit"
-                                            data-euiicon-type="arrowRight"
-                                            size="m"
-                                          />
-                                        </EuiIcon>
-                                      </button>
-                                    </EuiButtonIcon>
-                                  </EuiI18n>
-                                </EuiI18n>
+                                        />
+                                      </EuiIcon>
+                                    </button>
+                                  </EuiButtonIcon>
+                                </EuiPaginationButtonArrow>
                               </nav>
                             </EuiPagination>
                           </div>

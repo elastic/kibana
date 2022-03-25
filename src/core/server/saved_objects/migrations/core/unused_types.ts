@@ -29,6 +29,8 @@ export const REMOVED_TYPES: string[] = [
   'tsvb-validation-telemetry',
   // replaced by osquery-manager-usage-metric
   'osquery-usage-metric',
+  // Was removed in 8.1 https://github.com/elastic/kibana/issues/91265
+  'siem-detection-engine-rule-status',
   // Was removed in 7.16
   'timelion-sheet',
 ].sort();

@@ -10,7 +10,7 @@ import { UserAtSpaceScenarios } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   AlertUtils,
   ESTestIndexTool,
@@ -89,6 +89,10 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             default:
               expect(health.is_sufficiently_secure).to.eql(true);
               expect(health.has_permanent_encryption_key).to.eql(true);
+              expect(health.alerting_framework_health.decryption_health.status).to.eql('ok');
+              expect(health.alerting_framework_health.execution_health.status).to.eql('ok');
+              expect(health.alerting_framework_health.read_health.status).to.eql('ok');
+              // Legacy: pre-v8.0 typo
               expect(health.alerting_framework_heath.decryption_health.status).to.eql('ok');
               expect(health.alerting_framework_heath.execution_health.status).to.eql('ok');
               expect(health.alerting_framework_heath.read_health.status).to.eql('ok');
@@ -101,7 +105,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 schedule: {
                   interval: '5m',
                 },
@@ -138,6 +142,11 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 });
                 break;
               default:
+                expect(health.alerting_framework_health.execution_health.status).to.eql('warn');
+                expect(health.alerting_framework_health.execution_health.timestamp).to.eql(
+                  ruleInErrorStatus.execution_status.last_execution_date
+                );
+                // Legacy: pre-v8.0 typo
                 expect(health.alerting_framework_heath.execution_health.status).to.eql('warn');
                 expect(health.alerting_framework_heath.execution_health.timestamp).to.eql(
                   ruleInErrorStatus.execution_status.last_execution_date

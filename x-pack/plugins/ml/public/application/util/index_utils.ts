@@ -48,11 +48,12 @@ export async function getDataViewIdFromName(name: string): Promise<string | null
   if (dataViewsContract === null) {
     throw new Error('Data views are not initialized!');
   }
-  const [dv] = await dataViewsContract?.find(name);
-  if (!dv) {
+  const dataViews = await dataViewsContract.find(name);
+  const dataView = dataViews.find(({ title }) => title === name);
+  if (!dataView) {
     return null;
   }
-  return dv.id ?? dv.title;
+  return dataView.id ?? dataView.title;
 }
 
 export function getDataViewById(id: string): Promise<DataView> {

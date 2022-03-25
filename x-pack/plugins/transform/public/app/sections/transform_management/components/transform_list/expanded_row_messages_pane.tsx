@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
 
@@ -128,7 +128,6 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
     page = { index: 0, size: 10 },
   }: {
     page?: { index: number; size: number };
-    sort?: { field: string; direction: string };
   }) => {
     const { index, size } = page;
 
@@ -146,7 +145,7 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
     pageSize,
     totalItemCount,
     pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   return (

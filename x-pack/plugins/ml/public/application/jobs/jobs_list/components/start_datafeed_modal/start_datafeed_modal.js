@@ -27,6 +27,7 @@ import { forceStartDatafeeds } from '../utils';
 import { TimeRangeSelector } from './time_range_selector';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isManagedJob } from '../../../jobs_utils';
 
 export class StartDatafeedModal extends Component {
   constructor(props) {
@@ -43,6 +44,7 @@ export class StartDatafeedModal extends Component {
       initialSpecifiedStartTime: now,
       now,
       timeRangeValid: true,
+      hasManagedJob: false,
     };
 
     this.initialSpecifiedStartTime = now;
@@ -88,6 +90,7 @@ export class StartDatafeedModal extends Component {
     const endTime = now;
     const initialSpecifiedStartTime = getLowestLatestTime(jobs);
     const allowCreateAlert = jobs.length > 0;
+
     this.setState({
       jobs,
       isModalVisible: true,
@@ -98,6 +101,7 @@ export class StartDatafeedModal extends Component {
       allowCreateAlert,
       createAlert: false,
       now,
+      hasManagedJob: jobs.some((j) => isManagedJob(j)),
     });
   };
 
@@ -164,6 +168,8 @@ export class StartDatafeedModal extends Component {
               setEndTime={this.setEndTime}
               now={now}
               setTimeRangeValid={this.setTimeRangeValid}
+              hasManagedJob={this.state.hasManagedJob}
+              jobsCount={startableJobs.length}
             />
             {this.state.endTime === undefined && (
               <div className="create-watch">

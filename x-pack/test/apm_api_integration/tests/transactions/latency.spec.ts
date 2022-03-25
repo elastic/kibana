@@ -8,8 +8,7 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import moment from 'moment';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 
@@ -90,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Latency with a basic license when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      let response: PromiseReturnType<typeof supertest.get>;
+      let response: Awaited<ReturnType<typeof supertest.get>>;
 
       describe('average latency type', () => {
         before(async () => {
@@ -249,7 +248,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Transaction latency with a trial license when data is loaded',
     { config: 'trial', archives: [archiveName] },
     () => {
-      let response: PromiseReturnType<typeof supertest.get>;
+      let response: Awaited<ReturnType<typeof supertest.get>>;
 
       const transactionType = 'request';
 
@@ -295,24 +294,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('should have a successful response', () => {
           expect(response.status).to.eql(200);
         });
-
-        it('should return the ML job id for anomalies of the selected environment', () => {
-          const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn).to.have.property('anomalyTimeseries');
-          expect(latencyChartReturn.anomalyTimeseries).to.have.property('jobId');
-          expectSnapshot(latencyChartReturn.anomalyTimeseries?.jobId).toMatchInline(
-            `"apm-production-6117-high_mean_transaction_duration"`
-          );
-        });
-
-        it('should return a non-empty anomaly series', () => {
-          const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn).to.have.property('anomalyTimeseries');
-          expect(latencyChartReturn.anomalyTimeseries?.anomalyBoundaries?.length).to.be.greaterThan(
-            0
-          );
-          expectSnapshot(latencyChartReturn.anomalyTimeseries?.anomalyBoundaries).toMatch();
-        });
       });
 
       describe('with all environments selected', () => {
@@ -334,11 +315,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('should have a successful response', () => {
           expect(response.status).to.eql(200);
-        });
-
-        it('should not return anomaly timeseries data', () => {
-          const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn).to.not.have.property('anomalyTimeseries');
         });
       });
     }

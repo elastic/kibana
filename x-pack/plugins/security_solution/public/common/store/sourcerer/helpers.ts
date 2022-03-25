@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import { SourcererDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
 import { SelectedDataViewPayload } from './actions';
+import { sourcererModel } from '../model';
 
 export const getScopePatternListSelection = (
   theDataView: SourcererDataView | undefined,
@@ -33,46 +34,47 @@ export const getScopePatternListSelection = (
   }
 };
 
+export const ensurePatternFormat = (patternList: string[]): string[] =>
+  [
+    ...new Set(
+      patternList.reduce((acc: string[], pattern: string) => [...pattern.split(','), ...acc], [])
+    ),
+  ].sort();
+
 export const validateSelectedPatterns = (
   state: SourcererModel,
-  payload: SelectedDataViewPayload
+  payload: SelectedDataViewPayload,
+  shouldValidateSelectedPatterns: boolean
 ): Partial<SourcererScopeById> => {
   const { id, ...rest } = payload;
-  let dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
+  const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
   // dedupe because these could come from a silly url or pre 8.0 timeline
-  const dedupePatterns = [...new Set(rest.selectedPatterns)];
-  let selectedPatterns =
-    dataView != null
+  const dedupePatterns = ensurePatternFormat(rest.selectedPatterns);
+  let missingPatterns: string[] = [];
+  // check for missing patterns against default data view only
+  if (dataView == null || dataView.id === state.defaultDataView.id) {
+    const dedupeAllDefaultPatterns = ensurePatternFormat(
+      (dataView ?? state.defaultDataView).title.split(',')
+    );
+    missingPatterns = dedupePatterns.filter(
+      (pattern) => !dedupeAllDefaultPatterns.includes(pattern)
+    );
+  }
+  const selectedPatterns =
+    // shouldValidateSelectedPatterns is false when upgrading from
+    // legacy pre-8.0 timeline index patterns to data view.
+    shouldValidateSelectedPatterns && dataView != null && missingPatterns.length === 0
       ? dedupePatterns.filter(
           (pattern) =>
-            // Typescript is being mean and telling me dataView could be undefined here
-            // so redoing the dataView != null check
             (dataView != null && dataView.patternList.includes(pattern)) ||
             // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
             state.signalIndexName == null ||
             state.signalIndexName === pattern
         )
-      : // 7.16 -> 8.0 this will get hit because dataView == null
+      : // don't remove non-existing patterns, they were saved in the first place in timeline
+        // but removed from the security data view
+        // or its a legacy pre-8.0 timeline
         dedupePatterns;
-
-  if (selectedPatterns.length > 0 && dataView == null) {
-    // we have index patterns, but not a data view id
-    // find out if we have these index patterns in the defaultDataView
-    const areAllPatternsInDefault = selectedPatterns.every(
-      (pattern) => state.defaultDataView.title.indexOf(pattern) > -1
-    );
-    if (areAllPatternsInDefault) {
-      dataView = state.defaultDataView;
-      selectedPatterns = selectedPatterns.filter(
-        (pattern) => dataView != null && dataView.patternList.includes(pattern)
-      );
-    }
-  }
-  // TO DO: Steph/sourcerer If dataView is still undefined here, create temporary dataView
-  // and prompt user to go create this dataView
-  // currently UI will take the undefined dataView and default to defaultDataView anyways
-  // this is a "strategically merged" bug ;)
-  // https://github.com/elastic/security-team/issues/1921
 
   return {
     [id]: {
@@ -80,7 +82,10 @@ export const validateSelectedPatterns = (
       ...rest,
       selectedDataViewId: dataView?.id ?? null,
       selectedPatterns,
-      ...(isEmpty(selectedPatterns)
+      missingPatterns,
+      // if in timeline, allow for empty in case pattern was deleted
+      // need flow for this
+      ...(isEmpty(selectedPatterns) && id !== SourcererScopeName.timeline
         ? {
             selectedPatterns: getScopePatternListSelection(
               dataView ?? state.defaultDataView,
@@ -94,3 +99,19 @@ export const validateSelectedPatterns = (
     },
   };
 };
+
+interface CheckIfIndicesExistParams {
+  patternList: sourcererModel.SourcererDataView['patternList'];
+  scopeId: sourcererModel.SourcererScopeName;
+  signalIndexName: string | null;
+}
+export const checkIfIndicesExist = ({
+  patternList,
+  scopeId,
+  signalIndexName,
+}: CheckIfIndicesExistParams) =>
+  scopeId === SourcererScopeName.detections
+    ? patternList.includes(`${signalIndexName}`)
+    : scopeId === SourcererScopeName.default
+    ? patternList.filter((i) => i !== signalIndexName).length > 0
+    : patternList.length > 0;

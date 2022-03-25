@@ -69,7 +69,10 @@ export class AnomalyTimelineService {
     this._customTimeRange = timeRange;
   }
 
-  public getSwimlaneBucketInterval(selectedJobs: ExplorerJob[], swimlaneContainerWidth: number) {
+  public getSwimlaneBucketInterval(
+    selectedJobs: Array<{ id: string; bucketSpanSeconds: number }>,
+    swimlaneContainerWidth: number
+  ) {
     // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
     // and the max bucket span for the jobs shown in the chart.
     const bounds = this.getTimeBounds();
@@ -114,7 +117,7 @@ export class AnomalyTimelineService {
    * @param chartWidth
    */
   public async loadOverallData(
-    selectedJobs: ExplorerJob[],
+    selectedJobs: Array<{ id: string; bucketSpanSeconds: number }>,
     chartWidth?: number,
     bucketInterval?: TimeBucketsInterval,
     overallScore?: number
@@ -183,7 +186,7 @@ export class AnomalyTimelineService {
     influencersFilterQuery?: any,
     bucketInterval?: TimeBucketsInterval,
     swimLaneSeverity?: number
-  ): Promise<SwimlaneData | undefined> {
+  ): Promise<ViewBySwimLaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
 
     if (timefilterBounds === undefined) {
@@ -350,7 +353,7 @@ export class AnomalyTimelineService {
     bounds: any,
     viewBySwimlaneFieldName: string,
     interval: number
-  ): OverallSwimlaneData {
+  ): ViewBySwimLaneData {
     // Processes the scores for the 'view by' swim lane.
     // Sorts the lanes according to the supplied array of lane
     // values in the order in which they should be displayed,

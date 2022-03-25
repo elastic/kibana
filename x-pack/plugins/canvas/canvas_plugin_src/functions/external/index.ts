@@ -16,6 +16,7 @@ export interface InitializeArguments {
   embeddablePersistableStateService: {
     extract: EmbeddableStart['extract'];
     inject: EmbeddableStart['inject'];
+    getAllMigrations: EmbeddableStart['getAllMigrations'];
   };
 }
 

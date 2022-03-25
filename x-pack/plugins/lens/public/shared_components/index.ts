@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './empty_placeholder';
 export type { ToolbarPopoverProps } from './toolbar_popover';
 export { ToolbarPopover } from './toolbar_popover';
 export { LegendSettingsPopover } from './legend_settings_popover';
@@ -15,5 +14,9 @@ export * from './coloring';
 export { useDebouncedValue } from './debounced_value';
 export * from './helpers';
 export { LegendActionPopover } from './legend_action_popover';
+export { NameInput } from './name_input';
 export { ValueLabelsSettings } from './value_labels_settings';
+export { AxisTitleSettings } from './axis_title_settings';
+export { DimensionEditorSection } from './dimension_section';
 export * from './static_header';
+export * from './vis_label';

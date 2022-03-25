@@ -7,12 +7,13 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { InspectorPanel } from './inspector_panel';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import type { ApplicationStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
 import { SharePluginStart } from '../../../share/public';
+import { sharePluginMock } from '../../../share/public/mocks';
 import { applicationServiceMock } from '../../../../core/public/mocks';
 
 describe('InspectorPanel', () => {
@@ -21,7 +22,7 @@ describe('InspectorPanel', () => {
   const dependencies = {
     application: applicationServiceMock.createStartContract(),
     http: {},
-    share: {},
+    share: sharePluginMock.createStartContract(),
     uiSettings: {},
   } as unknown as {
     application: ApplicationStart;

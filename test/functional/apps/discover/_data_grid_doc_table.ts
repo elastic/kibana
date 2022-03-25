@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'dashboard']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'doc_table:legacy': false,
@@ -32,6 +33,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
+
+    beforeEach(async () => {
       await PageObjects.common.navigateToApp('discover');
     });
 
@@ -57,26 +61,96 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const finalRows = await PageObjects.discover.getDocTableRows();
       expect(finalRows.length).to.be.below(initialRows.length);
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    // flaky https://github.com/elastic/kibana/issues/94889
-    it.skip('should show popover with expanded cell content by click on expand button', async () => {
+    it('should show popover with expanded cell content by click on expand button', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
-      const documentCell = await dataGrid.getCellElement(1, 3);
-      await documentCell.click();
-      const expandCellContentButton = await documentCell.findByClassName(
-        'euiDataGridRowCell__expandButtonIcon'
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
+        const cell = await dataGrid.getCellElement(0, 2);
+        const text = await cell.getVisibleText();
+        log.debug(`row document timestamp: ${text}`);
+        return text === 'Sep 22, 2015 @ 23:50:13.253';
+      });
+      const docCell = await dataGrid.getCellElement(0, 3);
+      await docCell.click();
+      const expandCellContentButton = await docCell.findByTestSubject(
+        'euiDataGridCellExpandButton'
       );
       await expandCellContentButton.click();
-      const popoverJson = await monacoEditor.getCodeEditorValue();
+      let expandDocId = '';
 
-      log.debug('open expanded document flyout to get json');
+      await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
+        const text = await monacoEditor.getCodeEditorValue();
+        const flyoutJson = JSON.parse(text);
+        expandDocId = flyoutJson._id;
+        return expandDocId === 'AU_x3_g4GFA8no6QjkYX';
+      });
+      log.debug(`expanded document id: ${expandDocId}`);
+
       await dataGrid.clickRowToggle();
       await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
-      const flyoutJson = await monacoEditor.getCodeEditorValue();
 
-      expect(popoverJson).to.be(flyoutJson);
+      await retry.waitForWithTimeout(
+        'document id in flyout matching the expanded document id',
+        5000,
+        async () => {
+          const text = await monacoEditor.getCodeEditorValue();
+          const flyoutJson = JSON.parse(text);
+          log.debug(`flyout document id: ${flyoutJson._id}`);
+          return flyoutJson._id === expandDocId;
+        }
+      );
+    });
+
+    it('should show popover with expanded cell content by click on expand button on embeddable', async () => {
+      log.debug('open popover with expanded cell content to get json from the editor');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.saveSearch('expand-cell-search');
+
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardAddPanel.addSavedSearch('expand-cell-search');
+
+      await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
+        const cell = await dataGrid.getCellElement(0, 2);
+        const text = await cell.getVisibleText();
+        log.debug(`row document timestamp: ${text}`);
+        return text === 'Sep 22, 2015 @ 23:50:13.253';
+      });
+      const docCell = await dataGrid.getCellElement(0, 3);
+      await docCell.click();
+      const expandCellContentButton = await docCell.findByTestSubject(
+        'euiDataGridCellExpandButton'
+      );
+      await expandCellContentButton.click();
+
+      let expandDocId = '';
+
+      await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
+        const text = await monacoEditor.getCodeEditorValue();
+        return (expandDocId = JSON.parse(text)._id) === 'AU_x3_g4GFA8no6QjkYX';
+      });
+      log.debug(`expanded document id: ${expandDocId}`);
+
+      await dataGrid.clickRowToggle();
+      await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
+
+      await retry.waitForWithTimeout(
+        'document id in flyout matching the expanded document id',
+        5000,
+        async () => {
+          const text = await monacoEditor.getCodeEditorValue();
+          const flyoutJson = JSON.parse(text);
+          log.debug(`flyout document id: ${flyoutJson._id}`);
+          return flyoutJson._id === expandDocId;
+        }
+      );
     });
 
     describe('expand a document row', function () {
@@ -122,7 +196,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // add columns
           const fields = ['_id', '_index', 'agent'];
           for (const field of fields) {
-            await testSubjects.click(`toggleColumnButton_${field}`);
+            await testSubjects.click(`openFieldActionsButton-${field}`);
+            await testSubjects.click(`toggleColumnButton-${field}`);
           }
 
           const headerWithFields = await dataGrid.getHeaderFields();
@@ -130,7 +205,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // remove columns
           for (const field of fields) {
-            await testSubjects.click(`toggleColumnButton_${field}`);
+            await testSubjects.click(`openFieldActionsButton-${field}`);
+            await testSubjects.click(`toggleColumnButton-${field}`);
           }
 
           const headerWithoutFields = await dataGrid.getHeaderFields();

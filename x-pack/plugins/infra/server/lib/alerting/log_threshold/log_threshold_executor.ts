@@ -16,17 +16,17 @@ import { ElasticsearchClient } from 'kibana/server';
 import {
   ActionGroup,
   ActionGroupIdsOf,
-  AlertInstance,
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertTypeState,
+  Alert,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  AlertTypeState as RuleTypeState,
 } from '../../../../../alerting/server';
 import {
-  AlertParams,
-  alertParamsRT,
+  RuleParams,
+  ruleParamsRT,
   AlertStates,
   Comparator,
-  CountAlertParams,
+  CountRuleParams,
   CountCriteria,
   Criterion,
   getDenominator,
@@ -36,11 +36,11 @@ import {
   hasGroupBy,
   isOptimizableGroupedThreshold,
   isOptimizedGroupedSearchQueryResponse,
-  isRatioAlertParams,
-  RatioAlertParams,
+  isRatioRuleParams,
+  RatioRuleParams,
   UngroupedSearchQueryResponse,
   UngroupedSearchQueryResponseRT,
-} from '../../../../common/alerting/logs/log_threshold/types';
+} from '../../../../common/alerting/logs/log_threshold';
 import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
@@ -54,22 +54,22 @@ import {
 } from './reason_formatters';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
-export type LogThresholdAlertTypeParams = AlertParams;
-export type LogThresholdAlertTypeState = AlertTypeState; // no specific state used
-export type LogThresholdAlertInstanceState = AlertInstanceState; // no specific state used
-export type LogThresholdAlertInstanceContext = AlertInstanceContext; // no specific instance context used
+export type LogThresholdRuleTypeParams = RuleParams;
+export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
+export type LogThresholdAlertState = AlertState; // no specific state used
+export type LogThresholdAlertContext = AlertContext; // no specific instance context used
 
-type LogThresholdAlertInstance = AlertInstance<
-  LogThresholdAlertInstanceState,
-  LogThresholdAlertInstanceContext,
+type LogThresholdAlert = Alert<
+  LogThresholdAlertState,
+  LogThresholdAlertContext,
   LogThresholdActionGroups
 >;
-type LogThresholdAlertInstanceFactory = (
+type LogThresholdAlertFactory = (
   id: string,
   reason: string,
   value: number,
   threshold: number
-) => LogThresholdAlertInstance;
+) => LogThresholdAlert;
 
 const COMPOSITE_GROUP_SIZE = 2000;
 
@@ -88,15 +88,15 @@ const checkValueAgainstComparatorMap: {
 
 export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.logsRules.createLifecycleRuleExecutor<
-    LogThresholdAlertTypeParams,
-    LogThresholdAlertTypeState,
-    LogThresholdAlertInstanceState,
-    LogThresholdAlertInstanceContext,
+    LogThresholdRuleTypeParams,
+    LogThresholdRuleTypeState,
+    LogThresholdAlertState,
+    LogThresholdAlertContext,
     LogThresholdActionGroups
   >(async ({ services, params }) => {
     const { alertWithLifecycle, savedObjectsClient, scopedClusterClient } = services;
     const { sources } = libs;
-    const alertInstanceFactory: LogThresholdAlertInstanceFactory = (id, reason, value, threshold) =>
+    const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold) =>
       alertWithLifecycle({
         id,
         fields: {
@@ -116,16 +116,16 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     );
 
     try {
-      const validatedParams = decodeOrThrow(alertParamsRT)(params);
+      const validatedParams = decodeOrThrow(ruleParamsRT)(params);
 
-      if (!isRatioAlertParams(validatedParams)) {
+      if (!isRatioRuleParams(validatedParams)) {
         await executeAlert(
           validatedParams,
           timestampField,
           indices,
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
-          alertInstanceFactory
+          alertFactory
         );
       } else {
         await executeRatioAlert(
@@ -134,7 +134,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           indices,
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
-          alertInstanceFactory
+          alertFactory
         );
       }
     } catch (e) {
@@ -143,53 +143,53 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   });
 
 async function executeAlert(
-  alertParams: CountAlertParams,
+  ruleParams: CountRuleParams,
   timestampField: string,
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
-  alertInstanceFactory: LogThresholdAlertInstanceFactory
+  alertFactory: LogThresholdAlertFactory
 ) {
-  const query = getESQuery(alertParams, timestampField, indexPattern, runtimeMappings);
+  const query = getESQuery(ruleParams, timestampField, indexPattern, runtimeMappings);
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');
   }
 
-  if (hasGroupBy(alertParams)) {
+  if (hasGroupBy(ruleParams)) {
     processGroupByResults(
       await getGroupedResults(query, esClient),
-      alertParams,
-      alertInstanceFactory,
-      updateAlertInstance
+      ruleParams,
+      alertFactory,
+      updateAlert
     );
   } else {
     processUngroupedResults(
       await getUngroupedResults(query, esClient),
-      alertParams,
-      alertInstanceFactory,
-      updateAlertInstance
+      ruleParams,
+      alertFactory,
+      updateAlert
     );
   }
 }
 
 async function executeRatioAlert(
-  alertParams: RatioAlertParams,
+  ruleParams: RatioRuleParams,
   timestampField: string,
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
-  alertInstanceFactory: LogThresholdAlertInstanceFactory
+  alertFactory: LogThresholdAlertFactory
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
-  const numeratorParams: AlertParams = {
-    ...alertParams,
-    criteria: getNumerator(alertParams.criteria),
+  const numeratorParams: RuleParams = {
+    ...ruleParams,
+    criteria: getNumerator(ruleParams.criteria),
   };
 
-  const denominatorParams: AlertParams = {
-    ...alertParams,
-    criteria: getDenominator(alertParams.criteria),
+  const denominatorParams: RuleParams = {
+    ...ruleParams,
+    criteria: getDenominator(ruleParams.criteria),
   };
 
   const numeratorQuery = getESQuery(numeratorParams, timestampField, indexPattern, runtimeMappings);
@@ -204,31 +204,35 @@ async function executeRatioAlert(
     throw new Error('ES query could not be built from the provided ratio alert params');
   }
 
-  if (hasGroupBy(alertParams)) {
-    const numeratorGroupedResults = await getGroupedResults(numeratorQuery, esClient);
-    const denominatorGroupedResults = await getGroupedResults(denominatorQuery, esClient);
+  if (hasGroupBy(ruleParams)) {
+    const [numeratorGroupedResults, denominatorGroupedResults] = await Promise.all([
+      getGroupedResults(numeratorQuery, esClient),
+      getGroupedResults(denominatorQuery, esClient),
+    ]);
     processGroupByRatioResults(
       numeratorGroupedResults,
       denominatorGroupedResults,
-      alertParams,
-      alertInstanceFactory,
-      updateAlertInstance
+      ruleParams,
+      alertFactory,
+      updateAlert
     );
   } else {
-    const numeratorUngroupedResults = await getUngroupedResults(numeratorQuery, esClient);
-    const denominatorUngroupedResults = await getUngroupedResults(denominatorQuery, esClient);
+    const [numeratorUngroupedResults, denominatorUngroupedResults] = await Promise.all([
+      getUngroupedResults(numeratorQuery, esClient),
+      getUngroupedResults(denominatorQuery, esClient),
+    ]);
     processUngroupedRatioResults(
       numeratorUngroupedResults,
       denominatorUngroupedResults,
-      alertParams,
-      alertInstanceFactory,
-      updateAlertInstance
+      ruleParams,
+      alertFactory,
+      updateAlert
     );
   }
 }
 
 const getESQuery = (
-  alertParams: Omit<AlertParams, 'criteria'> & { criteria: CountCriteria },
+  alertParams: Omit<RuleParams, 'criteria'> & { criteria: CountCriteria },
   timestampField: string,
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields
@@ -240,21 +244,22 @@ const getESQuery = (
 
 export const processUngroupedResults = (
   results: UngroupedSearchQueryResponse,
-  params: CountAlertParams,
-  alertInstanceFactory: LogThresholdAlertInstanceFactory,
-  alertInstaceUpdater: AlertInstanceUpdater
+  params: CountRuleParams,
+  alertFactory: LogThresholdAlertFactory,
+  alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
-
+  const reasonMessage = getReasonMessageForUngroupedCountAlert(
+    documentCount,
+    count.value,
+    count.comparator,
+    timeSize,
+    timeUnit
+  );
   if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
-    const alertInstance = alertInstanceFactory(
-      UNGROUPED_FACTORY_KEY,
-      getReasonMessageForUngroupedCountAlert(documentCount, count.value, count.comparator),
-      documentCount,
-      count.value
-    );
-    alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
+    const alert = alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value);
+    alertUpdater(alert, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
         context: {
@@ -262,6 +267,7 @@ export const processUngroupedResults = (
           conditions: createConditionsMessageForCriteria(criteria),
           group: null,
           isRatio: false,
+          reason: reasonMessage,
         },
       },
     ]);
@@ -271,24 +277,26 @@ export const processUngroupedResults = (
 export const processUngroupedRatioResults = (
   numeratorResults: UngroupedSearchQueryResponse,
   denominatorResults: UngroupedSearchQueryResponse,
-  params: RatioAlertParams,
-  alertInstanceFactory: LogThresholdAlertInstanceFactory,
-  alertInstaceUpdater: AlertInstanceUpdater
+  params: RatioRuleParams,
+  alertFactory: LogThresholdAlertFactory,
+  alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const numeratorCount = numeratorResults.hits.total.value;
   const denominatorCount = denominatorResults.hits.total.value;
   const ratio = getRatio(numeratorCount, denominatorCount);
 
   if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
-    const alertInstance = alertInstanceFactory(
-      UNGROUPED_FACTORY_KEY,
-      getReasonMessageForUngroupedRatioAlert(ratio, count.value, count.comparator),
+    const reasonMessage = getReasonMessageForUngroupedRatioAlert(
       ratio,
-      count.value
+      count.value,
+      count.comparator,
+      timeSize,
+      timeUnit
     );
-    alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
+    const alert = alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value);
+    alertUpdater(alert, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
         context: {
@@ -297,6 +305,7 @@ export const processUngroupedRatioResults = (
           denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
           group: null,
           isRatio: true,
+          reason: reasonMessage,
         },
       },
     ]);
@@ -324,31 +333,31 @@ const getReducedGroupByResults = (
     key: GroupedSearchQueryResponse['aggregations']['groups']['buckets'][0]['key']
   ) => Object.values(key).join(', ');
 
+  const reducedGroupByResults: ReducedGroupByResults = [];
   if (isOptimizedGroupedSearchQueryResponse(results)) {
-    return results.reduce<ReducedGroupByResults>((acc, groupBucket) => {
+    for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
-      const groupResult = { name: groupName, documentCount: groupBucket.doc_count };
-      return [...acc, groupResult];
-    }, []);
+      reducedGroupByResults.push({ name: groupName, documentCount: groupBucket.doc_count });
+    }
   } else {
-    return results.reduce<ReducedGroupByResults>((acc, groupBucket) => {
+    for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
-      const groupResult = {
+      reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
-      };
-      return [...acc, groupResult];
-    }, []);
+      });
+    }
   }
+  return reducedGroupByResults;
 };
 
 export const processGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
-  params: CountAlertParams,
-  alertInstanceFactory: LogThresholdAlertInstanceFactory,
-  alertInstaceUpdater: AlertInstanceUpdater
+  params: CountRuleParams,
+  alertFactory: LogThresholdAlertFactory,
+  alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const groupResults = getReducedGroupByResults(results);
 
@@ -356,18 +365,16 @@ export const processGroupByResults = (
     const documentCount = group.documentCount;
 
     if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
-      const alertInstance = alertInstanceFactory(
-        group.name,
-        getReasonMessageForGroupedCountAlert(
-          documentCount,
-          count.value,
-          count.comparator,
-          group.name
-        ),
+      const reasonMessage = getReasonMessageForGroupedCountAlert(
         documentCount,
-        count.value
+        count.value,
+        count.comparator,
+        group.name,
+        timeSize,
+        timeUnit
       );
-      alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
+      const alert = alertFactory(group.name, reasonMessage, documentCount, count.value);
+      alertUpdater(alert, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
           context: {
@@ -375,6 +382,7 @@ export const processGroupByResults = (
             conditions: createConditionsMessageForCriteria(criteria),
             group: group.name,
             isRatio: false,
+            reason: reasonMessage,
           },
         },
       ]);
@@ -385,11 +393,11 @@ export const processGroupByResults = (
 export const processGroupByRatioResults = (
   numeratorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   denominatorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
-  params: RatioAlertParams,
-  alertInstanceFactory: LogThresholdAlertInstanceFactory,
-  alertInstaceUpdater: AlertInstanceUpdater
+  params: RatioRuleParams,
+  alertFactory: LogThresholdAlertFactory,
+  alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const numeratorGroupResults = getReducedGroupByResults(numeratorResults);
   const denominatorGroupResults = getReducedGroupByResults(denominatorResults);
@@ -407,18 +415,16 @@ export const processGroupByRatioResults = (
       ratio !== undefined &&
       checkValueAgainstComparatorMap[count.comparator](ratio, count.value)
     ) {
-      const alertInstance = alertInstanceFactory(
-        numeratorGroup.name,
-        getReasonMessageForGroupedRatioAlert(
-          ratio,
-          count.value,
-          count.comparator,
-          numeratorGroup.name
-        ),
+      const reasonMessage = getReasonMessageForGroupedRatioAlert(
         ratio,
-        count.value
+        count.value,
+        count.comparator,
+        numeratorGroup.name,
+        timeSize,
+        timeUnit
       );
-      alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
+      const alert = alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value);
+      alertUpdater(alert, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
           context: {
@@ -427,6 +433,7 @@ export const processGroupByRatioResults = (
             denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
             group: numeratorGroup.name,
             isRatio: true,
+            reason: reasonMessage,
           },
         },
       ]);
@@ -434,30 +441,30 @@ export const processGroupByRatioResults = (
   });
 };
 
-type AlertInstanceUpdater = (
-  alertInstance: AlertInstance<AlertInstanceState, AlertInstanceContext, LogThresholdActionGroups>,
+type AlertUpdater = (
+  alert: Alert<AlertState, AlertContext, LogThresholdActionGroups>,
   state: AlertStates,
-  actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertInstanceContext }>
+  actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>
 ) => void;
 
-export const updateAlertInstance: AlertInstanceUpdater = (alertInstance, state, actions) => {
+export const updateAlert: AlertUpdater = (alert, state, actions) => {
   if (actions && actions.length > 0) {
     const sharedContext = {
       timestamp: new Date().toISOString(),
     };
     actions.forEach((actionSet) => {
       const { actionGroup, context } = actionSet;
-      alertInstance.scheduleActions(actionGroup, { ...sharedContext, ...context });
+      alert.scheduleActions(actionGroup, { ...sharedContext, ...context });
     });
   }
 
-  alertInstance.replaceState({
+  alert.replaceState({
     alertState: state,
   });
 };
 
 export const buildFiltersFromCriteria = (
-  params: Pick<AlertParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
+  params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string
 ) => {
   const { timeSize, timeUnit, criteria } = params;
@@ -508,11 +515,11 @@ export const buildFiltersFromCriteria = (
 };
 
 export const getGroupedESQuery = (
-  params: Pick<AlertParams, 'timeSize' | 'timeUnit' | 'groupBy'> & {
+  params: Pick<RuleParams, 'timeSize' | 'timeUnit' | 'groupBy'> & {
     criteria: CountCriteria;
     count: {
-      comparator: AlertParams['count']['comparator'];
-      value?: AlertParams['count']['value'];
+      comparator: RuleParams['count']['comparator'];
+      value?: RuleParams['count']['value'];
     };
   },
   timestampField: string,
@@ -619,7 +626,7 @@ export const getGroupedESQuery = (
 };
 
 export const getUngroupedESQuery = (
-  params: Pick<AlertParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
+  params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields
@@ -752,7 +759,7 @@ const getQueryMappingForComparator = (comparator: Comparator) => {
 };
 
 const getUngroupedResults = async (query: object, esClient: ElasticsearchClient) => {
-  return decodeOrThrow(UngroupedSearchQueryResponseRT)((await esClient.search(query)).body);
+  return decodeOrThrow(UngroupedSearchQueryResponseRT)(await esClient.search(query));
 };
 
 const getGroupedResults = async (query: object, esClient: ElasticsearchClient) => {
@@ -763,7 +770,7 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
     const queryWithAfterKey: any = { ...query };
     queryWithAfterKey.body.aggregations.groups.composite.after = lastAfterKey;
     const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
-      (await esClient.search(queryWithAfterKey)).body
+      await esClient.search(queryWithAfterKey)
     );
     compositeGroupBuckets = [
       ...compositeGroupBuckets,

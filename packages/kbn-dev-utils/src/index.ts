@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from '@kbn/utils';
 export { withProcRunner, ProcRunner } from './proc_runner';
 export * from './tooling_log';
 export * from './serializers';
@@ -33,3 +32,5 @@ export * from './streams';
 export * from './babel';
 export * from './extract';
 export * from './vscode_config';
+export * from './sort_package_json';
+export * from './diff_strings';

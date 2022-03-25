@@ -8,13 +8,12 @@ import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import {
-  ALERT_SEVERITY,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
-import { updateState, generateAlertMessage } from './common';
+import { updateState, generateAlertMessage, getViewInAppUrl } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { AnomaliesTableRecord } from '../../../../ml/common/types/anomalies';
@@ -25,8 +24,10 @@ import { Ping } from '../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../common/lib';
 
 import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../common/translations';
+import { getMonitorRouteFromMonitorId } from '../../../common/utils/get_monitor_url';
 
 import { createUptimeESClient } from '../lib';
+import { ALERT_REASON_MSG, ACTION_VARIABLES, VIEW_IN_APP_URL } from './action_variables';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
 
@@ -72,7 +73,7 @@ const getAnomalies = async (
 };
 
 export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
-  _server,
+  server,
   libs,
   plugins
 ) => ({
@@ -93,20 +94,23 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
     },
   ],
   actionVariables: {
-    context: [],
+    context: [ACTION_VARIABLES[ALERT_REASON_MSG], ACTION_VARIABLES[VIEW_IN_APP_URL]],
     state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
   },
   isExportable: true,
   minimumLicenseRequired: 'platinum',
   async executor({
     params,
-    services: { alertWithLifecycle, scopedClusterClient, savedObjectsClient },
+    services: { alertWithLifecycle, scopedClusterClient, savedObjectsClient, getAlertStartedDate },
     state,
+    startedAt,
   }) {
     const uptimeEsClient = createUptimeESClient({
       esClient: scopedClusterClient.asCurrentUser,
       savedObjectsClient,
     });
+    const { basePath } = server;
+
     const { anomalies } =
       (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt as string)) ??
       {};
@@ -123,9 +127,21 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
 
       anomalies.forEach((anomaly, index) => {
         const summary = getAnomalySummary(anomaly, monitorInfo);
+        const alertReasonMessage = generateAlertMessage(
+          CommonDurationAnomalyTranslations.defaultActionMessage,
+          summary
+        );
+
+        const alertId = DURATION_ANOMALY.id + index;
+        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+        const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
+          monitorId: DURATION_ANOMALY.id + index,
+          dateRangeEnd: 'now',
+          dateRangeStart: indexedStartedAt,
+        });
 
         const alertInstance = alertWithLifecycle({
-          id: DURATION_ANOMALY.id + index,
+          id: alertId,
           fields: {
             'monitor.id': params.monitorId,
             'url.full': summary.monitorUrl,
@@ -134,18 +150,17 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
             'anomaly.bucket_span.minutes': summary.bucketSpan,
             [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
-            [ALERT_SEVERITY]: summary.severity,
-            [ALERT_REASON]: generateAlertMessage(
-              CommonDurationAnomalyTranslations.defaultActionMessage,
-              summary
-            ),
+            [ALERT_REASON]: alertReasonMessage,
           },
         });
         alertInstance.replaceState({
           ...updateState(state, false),
           ...summary,
         });
-        alertInstance.scheduleActions(DURATION_ANOMALY.id);
+        alertInstance.scheduleActions(DURATION_ANOMALY.id, {
+          [ALERT_REASON_MSG]: alertReasonMessage,
+          [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+        });
       });
     }
 

@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { TrustedAppConditionEntry } from '../types';
 import { getDuplicateFields, isValidHash } from '../service/trusted_apps/validations';
 
 export const DeleteTrustedAppsRequestSchema = {
@@ -95,7 +96,7 @@ const MacEntrySchema = schema.object({
 
 const entriesSchemaOptions = {
   minSize: 1,
-  validate(entries: ConditionEntry[]) {
+  validate(entries: TrustedAppConditionEntry[]) {
     return (
       getDuplicateFields(entries)
         .map((field) => `duplicatedEntry.${field}`)
@@ -124,7 +125,7 @@ const EntriesSchema = schema.conditional(
   )
 );
 
-const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
+const getTrustedAppForOsScheme = () =>
   schema.object({
     name: schema.string({ minLength: 1, maxLength: 256 }),
     description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
@@ -143,7 +144,7 @@ const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
       }),
     ]),
     entries: EntriesSchema,
-    ...(forUpdateFlow ? { version: schema.maybe(schema.string()) } : {}),
+    version: schema.maybe(schema.string()),
   });
 
 export const PostTrustedAppCreateRequestSchema = {
@@ -154,5 +155,5 @@ export const PutTrustedAppUpdateRequestSchema = {
   params: schema.object({
     id: schema.string(),
   }),
-  body: getTrustedAppForOsScheme(true),
+  body: getTrustedAppForOsScheme(),
 };

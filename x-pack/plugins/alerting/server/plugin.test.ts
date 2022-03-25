@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertingPlugin, AlertingPluginsSetup, PluginSetupContract } from './plugin';
+import { AlertingPlugin, PluginSetupContract } from './plugin';
 import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
 import { coreMock, statusServiceMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
@@ -15,46 +15,77 @@ import { eventLogServiceMock } from '../../event_log/server/event_log_service.mo
 import { KibanaRequest } from 'kibana/server';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { KibanaFeature } from '../../features/server';
-import { AlertsConfig } from './config';
-import { AlertType } from './types';
+import { AlertingConfig } from './config';
+import { RuleType } from './types';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
+import { monitoringCollectionMock } from '../../monitoring_collection/server/mocks';
+
+const generateAlertingConfig = (): AlertingConfig => ({
+  healthCheck: {
+    interval: '5m',
+  },
+  invalidateApiKeysTask: {
+    interval: '5m',
+    removalDelay: '1h',
+  },
+  maxEphemeralActionsPerAlert: 10,
+  defaultRuleTaskTimeout: '5m',
+  cancelAlertsOnRuleTimeout: true,
+  rules: {
+    minimumScheduleInterval: { value: '1m', enforce: false },
+    execution: {
+      actions: {
+        max: 1000,
+      },
+    },
+  },
+});
+
+const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
+  id: 'test',
+  name: 'test',
+  minimumLicenseRequired: 'basic',
+  isExportable: true,
+  actionGroups: [],
+  defaultActionGroupId: 'default',
+  producer: 'test',
+  config: {
+    execution: {
+      actions: {
+        max: 1000,
+      },
+    },
+  },
+  async executor() {},
+};
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
+    const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+    const setupMocks = coreMock.createSetup();
+    const mockPlugins = {
+      licensing: licensingMock.createSetup(),
+      encryptedSavedObjects: encryptedSavedObjectsSetup,
+      taskManager: taskManagerMock.createSetup(),
+      eventLog: eventLogServiceMock.create(),
+      actions: actionsMock.createSetup(),
+      statusService: statusServiceMock.createSetupContract(),
+      monitoringCollection: monitoringCollectionMock.createSetup(),
+    };
+
     let plugin: AlertingPlugin;
-    let coreSetup: ReturnType<typeof coreMock.createSetup>;
-    let pluginsSetup: jest.Mocked<AlertingPluginsSetup>;
 
     beforeEach(() => jest.clearAllMocks());
 
     it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
-        healthCheck: {
-          interval: '5m',
-        },
-        invalidateApiKeysTask: {
-          interval: '5m',
-          removalDelay: '1h',
-        },
-        maxEphemeralActionsPerAlert: 10,
-        defaultRuleTaskTimeout: '5m',
-        cancelAlertsOnRuleTimeout: true,
-      });
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+        generateAlertingConfig()
+      );
       plugin = new AlertingPlugin(context);
 
-      const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
-
-      const setupMocks = coreMock.createSetup();
       // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
-      await plugin.setup(setupMocks, {
-        licensing: licensingMock.createSetup(),
-        encryptedSavedObjects: encryptedSavedObjectsSetup,
-        taskManager: taskManagerMock.createSetup(),
-        eventLog: eventLogServiceMock.create(),
-        actions: actionsMock.createSetup(),
-        statusService: statusServiceMock.createSetupContract(),
-      });
+      await plugin.setup(setupMocks, mockPlugins);
 
       expect(setupMocks.status.set).toHaveBeenCalledTimes(1);
       expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
@@ -64,69 +95,98 @@ describe('Alerting Plugin', () => {
     });
 
     it('should create usage counter if usageCollection plugin is defined', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
-        healthCheck: {
-          interval: '5m',
-        },
-        invalidateApiKeysTask: {
-          interval: '5m',
-          removalDelay: '1h',
-        },
-        maxEphemeralActionsPerAlert: 10,
-        defaultRuleTaskTimeout: '5m',
-        cancelAlertsOnRuleTimeout: true,
-      });
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+        generateAlertingConfig()
+      );
       plugin = new AlertingPlugin(context);
 
-      const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
       const usageCollectionSetup = createUsageCollectionSetupMock();
 
-      const setupMocks = coreMock.createSetup();
       // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
-      await plugin.setup(setupMocks, {
-        licensing: licensingMock.createSetup(),
-        encryptedSavedObjects: encryptedSavedObjectsSetup,
-        taskManager: taskManagerMock.createSetup(),
-        eventLog: eventLogServiceMock.create(),
-        actions: actionsMock.createSetup(),
-        statusService: statusServiceMock.createSetupContract(),
-        usageCollection: usageCollectionSetup,
-      });
+      await plugin.setup(setupMocks, { ...mockPlugins, usageCollection: usageCollectionSetup });
 
       expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
       expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
     });
 
+    it(`exposes configured minimumScheduleInterval()`, async () => {
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+        generateAlertingConfig()
+      );
+      plugin = new AlertingPlugin(context);
+
+      const setupContract = await plugin.setup(setupMocks, mockPlugins);
+
+      expect(setupContract.getConfig()).toEqual({
+        minimumScheduleInterval: { value: '1m', enforce: false },
+      });
+    });
+
+    it(`applies the default config if there is no rule type specific config `, async () => {
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
+        ...generateAlertingConfig(),
+        rules: {
+          minimumScheduleInterval: { value: '1m', enforce: false },
+          execution: {
+            actions: {
+              max: 123,
+            },
+          },
+        },
+      });
+      plugin = new AlertingPlugin(context);
+
+      const setupContract = await plugin.setup(setupMocks, mockPlugins);
+
+      const ruleType = { ...sampleRuleType };
+      setupContract.registerType(ruleType);
+
+      expect(ruleType.config).toEqual({
+        execution: {
+          actions: { max: 123 },
+        },
+      });
+    });
+
+    it(`applies rule type specific config if defined in config`, async () => {
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
+        ...generateAlertingConfig(),
+        rules: {
+          minimumScheduleInterval: { value: '1m', enforce: false },
+          execution: {
+            actions: { max: 123 },
+            ruleTypeOverrides: [{ id: sampleRuleType.id, timeout: '1d' }],
+          },
+        },
+      });
+      plugin = new AlertingPlugin(context);
+
+      const setupContract = await plugin.setup(setupMocks, mockPlugins);
+
+      const ruleType = { ...sampleRuleType };
+      setupContract.registerType(ruleType);
+
+      expect(ruleType.config).toEqual({
+        execution: {
+          id: sampleRuleType.id,
+          actions: {
+            max: 123,
+          },
+          timeout: '1d',
+        },
+      });
+    });
+
     describe('registerType()', () => {
       let setup: PluginSetupContract;
-      const sampleAlertType: AlertType<never, never, never, never, never, 'default'> = {
-        id: 'test',
-        name: 'test',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        actionGroups: [],
-        defaultActionGroupId: 'default',
-        producer: 'test',
-        async executor() {},
-      };
-
       beforeEach(async () => {
-        coreSetup = coreMock.createSetup();
-        pluginsSetup = {
-          taskManager: taskManagerMock.createSetup(),
-          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
-          licensing: licensingMock.createSetup(),
-          eventLog: eventLogMock.createSetup(),
-          actions: actionsMock.createSetup(),
-          statusService: statusServiceMock.createSetupContract(),
-        };
-        setup = plugin.setup(coreSetup, pluginsSetup);
+        setup = await plugin.setup(setupMocks, mockPlugins);
       });
 
       it('should throw error when license type is invalid', async () => {
         expect(() =>
           setup.registerType({
-            ...sampleAlertType,
+            ...sampleRuleType,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             minimumLicenseRequired: 'foo' as any,
           })
@@ -135,52 +195,52 @@ describe('Alerting Plugin', () => {
 
       it('should not throw when license type is gold', async () => {
         setup.registerType({
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'gold',
         });
       });
 
       it('should not throw when license type is basic', async () => {
         setup.registerType({
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'basic',
         });
       });
 
       it('should apply default config value for ruleTaskTimeout if no value is specified', async () => {
         const ruleType = {
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'basic',
-        } as AlertType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, never, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('5m');
       });
 
       it('should apply value for ruleTaskTimeout if specified', async () => {
         const ruleType = {
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'basic',
           ruleTaskTimeout: '20h',
-        } as AlertType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, never, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('20h');
       });
 
       it('should apply default config value for cancelAlertsOnRuleTimeout if no value is specified', async () => {
         const ruleType = {
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'basic',
-        } as AlertType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, never, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
       });
 
       it('should apply value for cancelAlertsOnRuleTimeout if specified', async () => {
         const ruleType = {
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'basic',
           cancelAlertsOnRuleTimeout: false,
-        } as AlertType<never, never, never, never, never, 'default', never>;
+        } as RuleType<never, never, never, never, never, 'default', never>;
         await setup.registerType(ruleType);
         expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
       });
@@ -190,18 +250,9 @@ describe('Alerting Plugin', () => {
   describe('start()', () => {
     describe('getRulesClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
-        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
-          healthCheck: {
-            interval: '5m',
-          },
-          invalidateApiKeysTask: {
-            interval: '5m',
-            removalDelay: '1h',
-          },
-          maxEphemeralActionsPerAlert: 10,
-          defaultRuleTaskTimeout: '5m',
-          cancelAlertsOnRuleTimeout: true,
-        });
+        const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+          generateAlertingConfig()
+        );
         const plugin = new AlertingPlugin(context);
 
         const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -212,6 +263,7 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogServiceMock.create(),
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
+          monitoringCollection: monitoringCollectionMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -232,18 +284,9 @@ describe('Alerting Plugin', () => {
       });
 
       it(`doesn't throw error when encryptedSavedObjects plugin has encryption key`, async () => {
-        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
-          healthCheck: {
-            interval: '5m',
-          },
-          invalidateApiKeysTask: {
-            interval: '5m',
-            removalDelay: '1h',
-          },
-          maxEphemeralActionsPerAlert: 10,
-          defaultRuleTaskTimeout: '5m',
-          cancelAlertsOnRuleTimeout: true,
-        });
+        const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+          generateAlertingConfig()
+        );
         const plugin = new AlertingPlugin(context);
 
         const encryptedSavedObjectsSetup = {
@@ -257,6 +300,7 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogServiceMock.create(),
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
+          monitoringCollection: monitoringCollectionMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -288,18 +332,9 @@ describe('Alerting Plugin', () => {
     });
 
     test(`exposes getAlertingAuthorizationWithRequest()`, async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
-        healthCheck: {
-          interval: '5m',
-        },
-        invalidateApiKeysTask: {
-          interval: '5m',
-          removalDelay: '1h',
-        },
-        maxEphemeralActionsPerAlert: 100,
-        defaultRuleTaskTimeout: '5m',
-        cancelAlertsOnRuleTimeout: true,
-      });
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+        generateAlertingConfig()
+      );
       const plugin = new AlertingPlugin(context);
 
       const encryptedSavedObjectsSetup = {
@@ -313,6 +348,7 @@ describe('Alerting Plugin', () => {
         eventLog: eventLogServiceMock.create(),
         actions: actionsMock.createSetup(),
         statusService: statusServiceMock.createSetupContract(),
+        monitoringCollection: monitoringCollectionMock.createSetup(),
       });
 
       const startContract = plugin.start(coreMock.createStart(), {

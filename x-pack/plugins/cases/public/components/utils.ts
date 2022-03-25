@@ -6,9 +6,9 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { ConnectorTypes } from '../../common';
+import { ConnectorTypes } from '../../common/api';
 import { FieldConfig, ValidationConfig } from '../common/shared_imports';
-import { StartPlugins } from '../types';
+import { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import { connectorValidator as servicenowConnectorValidator } from './connectors/servicenow/validator';
 import { CaseActionConnector } from './types';
@@ -48,7 +48,7 @@ export const getConnectorsFormValidators = ({
 });
 
 export const getConnectorIcon = (
-  triggersActionsUi: StartPlugins['triggersActionsUi'],
+  triggersActionsUi: CasesPluginStart['triggersActionsUi'],
   type?: string
 ): IconType => {
   /**

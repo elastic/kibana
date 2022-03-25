@@ -14,7 +14,7 @@ import {
   ESTestIndexTool,
   ES_TEST_INDEX_NAME,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   AlertUtils,
   getConsumerUnauthorizedErrorMessage,
@@ -227,7 +227,7 @@ instanceStateValue: true
                 alertId,
                 ruleTypeId: 'test.always-firing',
                 outcome: 'success',
-                message: `alert executed: test.always-firing:${alertId}: 'abc'`,
+                message: `rule executed: test.always-firing:${alertId}: 'abc'`,
                 ruleObject: alertSearchResultWithoutDates,
               });
               break;
@@ -494,7 +494,7 @@ instanceStateValue: true
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.always-firing',
                 params: {
                   index: ES_TEST_INDEX_NAME,
@@ -603,7 +603,7 @@ instanceStateValue: true
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.authorization',
                 params: {
                   callClusterAuthorizationIndex: authorizationIndex,
@@ -711,7 +711,7 @@ instanceStateValue: true
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.always-firing',
                 params: {
                   index: ES_TEST_INDEX_NAME,
@@ -1330,6 +1330,11 @@ instanceStateValue: true
         type_id: ruleObject.alertInfo.ruleTypeId,
       },
     ]);
+
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_triggered_actions).to.be(1);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(0);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms).to.be(0);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms).to.be(0);
 
     expect(event?.rule).to.eql({
       id: alertId,

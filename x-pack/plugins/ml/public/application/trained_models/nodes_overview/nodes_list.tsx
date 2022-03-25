@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
+import { cloneDeep } from 'lodash';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { usePageUrlState } from '../../util/url_state';
@@ -22,11 +23,6 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { ExpandedRow } from './expanded_row';
-import {
-  REFRESH_ANALYTICS_LIST_STATE,
-  refreshAnalyticsList$,
-  useRefreshAnalyticsList,
-} from '../../data_frame_analytics/common';
 import { MemoryPreviewChart } from './memory_preview_chart';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { ListingPageUrlState } from '../../../../common/types/common';
@@ -43,7 +39,11 @@ export const getDefaultNodesListState = (): ListingPageUrlState => ({
   sortDirection: 'asc',
 });
 
-export const NodesList: FC = () => {
+export interface NodesListProps {
+  compactView?: boolean;
+}
+
+export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const refresh = useRefresh();
@@ -51,7 +51,7 @@ export const NodesList: FC = () => {
   const { displayErrorToast } = useToastNotificationService();
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const [items, setItems] = useState<NodeItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
@@ -75,7 +75,6 @@ export const NodesList: FC = () => {
       });
 
       setIsLoading(false);
-      refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
     } catch (e) {
       displayErrorToast(
         e,
@@ -83,11 +82,12 @@ export const NodesList: FC = () => {
           defaultMessage: 'Nodes fetch failed',
         })
       );
+      setIsLoading(false);
     }
   }, [itemIdToExpandedRowMap]);
 
   const toggleDetails = (item: NodeItem) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    const itemIdToExpandedRowMapValues = cloneDeep(itemIdToExpandedRowMap);
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
@@ -123,6 +123,7 @@ export const NodesList: FC = () => {
       name: i18n.translate('xpack.ml.trainedModels.nodesList.nodeNameHeader', {
         defaultMessage: 'Name',
       }),
+      width: '200px',
       sortable: true,
       truncateText: true,
       'data-test-subj': 'mlNodesTableColumnName',
@@ -158,15 +159,12 @@ export const NodesList: FC = () => {
         label: i18n.translate('xpack.ml.trainedModels.nodesList.totalAmountLabel', {
           defaultMessage: 'Total machine learning nodes',
         }),
+        'data-test-subj': 'mlTotalNodesCount',
       },
     };
   }, [items]);
 
-  const { onTableChange, pagination, sorting } = useTableSettings<NodeItem>(
-    items,
-    pageState,
-    updatePageState
-  );
+  let tableSettings: object = useTableSettings<NodeItem>(items, pageState, updatePageState);
 
   const search: EuiSearchBarProps = {
     query: searchQueryText,
@@ -182,12 +180,6 @@ export const NodesList: FC = () => {
     },
   };
 
-  // Subscribe to the refresh observable to trigger reloading the model list.
-  useRefreshAnalyticsList({
-    isLoading: setIsLoading,
-    onRefresh: fetchNodesData,
-  });
-
   useEffect(
     function updateOnTimerRefresh() {
       fetchNodesData();
@@ -195,8 +187,12 @@ export const NodesList: FC = () => {
     [refresh]
   );
 
+  if (compactView) {
+    tableSettings = {};
+  }
+
   return (
-    <>
+    <div data-test-subj={'mlNodesOverviewPanel'}>
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         {nodesStats && (
@@ -210,23 +206,21 @@ export const NodesList: FC = () => {
         <EuiInMemoryTable<NodeItem>
           allowNeutralSort={false}
           columns={columns}
-          hasActions={true}
+          hasActions={false}
           isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
           items={items}
           itemId={'id'}
           loading={isLoading}
-          search={search}
+          search={compactView ? undefined : search}
+          {...tableSettings}
           rowProps={(item) => ({
             'data-test-subj': `mlNodesTableRow row-${item.id}`,
           })}
-          pagination={pagination}
-          onTableChange={onTableChange}
-          sorting={sorting}
           data-test-subj={isLoading ? 'mlNodesTable loading' : 'mlNodesTable loaded'}
         />
       </div>
-    </>
+    </div>
   );
 };

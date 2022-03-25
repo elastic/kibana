@@ -5,39 +5,23 @@
  * 2.0.
  */
 
-import { ConnectorTypeFields } from '../../../common';
+import { isConnectorUserAction, isCreateCaseUserAction } from '../../../common/utils/user_actions';
+import { ConnectorTypeFields } from '../../../common/api';
 import { CaseUserActions } from '../../containers/types';
-import { parseStringAsConnector } from '../../common/user_actions';
 
 export const getConnectorFieldsFromUserActions = (
   id: string,
   userActions: CaseUserActions[]
 ): ConnectorTypeFields['fields'] => {
-  try {
-    for (const action of [...userActions].reverse()) {
-      if (action.actionField.length === 1 && action.actionField[0] === 'connector') {
-        const parsedNewConnector = parseStringAsConnector(
-          action.newValConnectorId,
-          action.newValue
-        );
+  for (const action of [...userActions].reverse()) {
+    if (isConnectorUserAction(action) || isCreateCaseUserAction(action)) {
+      const connector = action.payload.connector;
 
-        if (parsedNewConnector && id === parsedNewConnector.id) {
-          return parsedNewConnector.fields;
-        }
-
-        const parsedOldConnector = parseStringAsConnector(
-          action.oldValConnectorId,
-          action.oldValue
-        );
-
-        if (parsedOldConnector && id === parsedOldConnector.id) {
-          return parsedOldConnector.fields;
-        }
+      if (connector && id === connector.id) {
+        return connector.fields;
       }
     }
-
-    return null;
-  } catch {
-    return null;
   }
+
+  return null;
 };

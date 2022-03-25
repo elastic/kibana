@@ -17,7 +17,7 @@ export enum API_URLS {
   PINGS = '/internal/uptime/pings',
   PING_HISTOGRAM = `/internal/uptime/ping/histogram`,
   SNAPSHOT_COUNT = `/internal/uptime/snapshot/count`,
-  SYNTHETICS_SUCCESSFUL_STEP = `/internal/uptime/synthetics/step/success`,
+  SYNTHETICS_SUCCESSFUL_CHECK = `/internal/uptime/synthetics/check/success`,
   JOURNEY_CREATE = `/internal/uptime/journey/{checkGroup}`,
   JOURNEY_FAILED_STEPS = `/internal/uptime/journeys/failed_steps`,
   JOURNEY_SCREENSHOT = `/internal/uptime/journey/screenshot/{checkGroup}/{stepIndex}`,
@@ -37,5 +37,10 @@ export enum API_URLS {
   CONNECTOR_TYPES = '/api/actions/connector_types',
 
   // Service end points
-  INDEX_TEMPLATES = '/api/uptime/service/index_templates',
+  INDEX_TEMPLATES = '/internal/uptime/service/index_templates',
+  SERVICE_LOCATIONS = '/internal/uptime/service/locations',
+  SYNTHETICS_MONITORS = '/internal/uptime/service/monitors',
+  RUN_ONCE_MONITOR = '/internal/uptime/service/monitors/run_once',
+  TRIGGER_MONITOR = '/internal/uptime/service/monitors/trigger',
+  SERVICE_ALLOWED = '/internal/uptime/service/allowed',
 }

@@ -8,18 +8,18 @@
 
 import { Entity, Fields } from './entity';
 
-export class Serializable extends Entity {
-  constructor(fields: Fields) {
+export class Serializable<TFields extends Fields> extends Entity<TFields> {
+  constructor(fields: TFields) {
     super({
       ...fields,
     });
   }
 
-  timestamp(time: number) {
+  timestamp(time: number): this {
     this.fields['@timestamp'] = time;
     return this;
   }
-  serialize(): Fields[] {
+  serialize(): TFields[] {
     return [this.fields];
   }
 }

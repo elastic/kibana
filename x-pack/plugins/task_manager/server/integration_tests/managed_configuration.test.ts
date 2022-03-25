@@ -16,7 +16,8 @@ import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
 import { coreMock } from '../../../../../src/core/server/mocks';
 import { TaskManagerConfig } from '../config';
 
-describe('managed configuration', () => {
+// FAILING: https://github.com/elastic/kibana/issues/120269
+describe.skip('managed configuration', () => {
   let taskManagerStart: TaskManagerStartContract;
   let logger: Logger;
 
@@ -55,6 +56,10 @@ describe('managed configuration', () => {
       },
       unsafe: {
         exclude_task_types: [],
+      },
+      event_loop_delay: {
+        monitor: true,
+        warn_threshold: 5000,
       },
     });
     logger = context.logger.get('taskManager');

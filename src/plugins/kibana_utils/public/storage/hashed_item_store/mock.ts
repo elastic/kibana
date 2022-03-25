@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { HashedItemStore } from './hashed_item_store';
 
 /**

@@ -15,12 +15,19 @@ export type { Space, GetAllSpacesPurpose, GetSpaceResult } from '../common';
 
 export type { SpacesData, SpacesDataEntry, SpacesApi } from './types';
 
+export type { SpacesManager } from './spaces_manager';
+
 export type {
   CopyToSpaceFlyoutProps,
   CopyToSpaceSavedObjectTarget,
+  CopySavedObjectsToSpaceResponse,
 } from './copy_saved_objects_to_space';
 
-export type { LegacyUrlConflictProps, EmbeddableLegacyUrlConflictProps } from './legacy_urls';
+export type {
+  LegacyUrlConflictProps,
+  EmbeddableLegacyUrlConflictProps,
+  RedirectLegacyUrlParams,
+} from './legacy_urls';
 
 export type {
   ShareToSpaceFlyoutProps,

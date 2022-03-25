@@ -43,7 +43,7 @@ export interface Deps {
   /**
    * Just for demo purposes
    */
-  openIndexPatternNumberFieldEditor: () => void;
+  openDateViewNumberFieldEditor: () => void;
 }
 
 const UsingAnExistingFieldFormatExample: React.FC<{ deps: Deps }> = (props) => {
@@ -123,15 +123,15 @@ const CreatingCustomFieldFormat: React.FC<{ deps: Deps }> = (props) => {
       <EuiSpacer size={'s'} />
 
       <EuiCallOut
-        title="Seamless integration with index patterns!"
+        title="Seamless integration with data views!"
         color="success"
         iconType="indexManagementApp"
       >
         <p>
-          Currency formatter that we&apos;ve just created is already integrated with index patterns.
-          It can be applied to any <EuiCode>numeric</EuiCode> field of any index pattern.{' '}
-          <EuiLink onClick={() => props.deps.openIndexPatternNumberFieldEditor()}>
-            Open index pattern field editor to give it a try.
+          Currency formatter that we&apos;ve just created is already integrated with data views. It
+          can be applied to any <EuiCode>numeric</EuiCode> field of any data view.{' '}
+          <EuiLink onClick={() => props.deps.openDateViewNumberFieldEditor()}>
+            Open data view field editor to give it a try.
           </EuiLink>
         </p>
       </EuiCallOut>
@@ -155,15 +155,15 @@ const CreatingCustomFieldFormatEditor: React.FC<{ deps: Deps }> = (props) => {
       <EuiSpacer size={'s'} />
 
       <EuiCallOut
-        title="Check the result in the index pattern field editor!"
+        title="Check the result in the data view field editor!"
         color="primary"
         iconType="indexManagementApp"
       >
         <p>
-          Currency formatter and its custom editor are integrated with index patterns. It can be
-          applied to any <EuiCode>numeric</EuiCode> field of any index pattern.{' '}
-          <EuiLink onClick={() => props.deps.openIndexPatternNumberFieldEditor()}>
-            Open index pattern field editor to give it a try.
+          Currency formatter and its custom editor are integrated with data views. It can be applied
+          to any <EuiCode>numeric</EuiCode> field of any data view.{' '}
+          <EuiLink onClick={() => props.deps.openDateViewNumberFieldEditor()}>
+            Open date view field editor to give it a try.
           </EuiLink>
         </p>
       </EuiCallOut>

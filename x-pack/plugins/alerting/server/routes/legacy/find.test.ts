@@ -78,6 +78,7 @@ describe('findAlertRoute', () => {
     expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "excludeFromPublicApi": true,
           "options": Object {
             "defaultSearchOperator": "OR",
             "page": 1,

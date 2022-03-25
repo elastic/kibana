@@ -11,14 +11,14 @@ import { getKibanaTileMap } from '../../util';
 import { getEMSSettings } from '../../kibana_services';
 // @ts-expect-error
 import { KibanaTilemapSource } from '../sources/kibana_tilemap_source';
-import { TileLayer } from './tile_layer/tile_layer';
-import { VectorTileLayer } from './vector_tile_layer/vector_tile_layer';
+import { RasterTileLayer } from './raster_tile_layer/raster_tile_layer';
+import { EmsVectorTileLayer } from './ems_vector_tile_layer/ems_vector_tile_layer';
 import { EMSTMSSource } from '../sources/ems_tms_source';
 
 export function createBasemapLayerDescriptor(): LayerDescriptor | null {
   const tilemapSourceFromKibana = getKibanaTileMap();
   if (_.get(tilemapSourceFromKibana, 'url')) {
-    const layerDescriptor = TileLayer.createDescriptor({
+    const layerDescriptor = RasterTileLayer.createDescriptor({
       sourceDescriptor: KibanaTilemapSource.createDescriptor(),
     });
     return layerDescriptor;
@@ -26,7 +26,7 @@ export function createBasemapLayerDescriptor(): LayerDescriptor | null {
 
   const isEmsEnabled = getEMSSettings()!.isEMSEnabled();
   if (isEmsEnabled) {
-    const layerDescriptor = VectorTileLayer.createDescriptor({
+    const layerDescriptor = EmsVectorTileLayer.createDescriptor({
       sourceDescriptor: EMSTMSSource.createDescriptor({ isAutoSelect: true }),
     });
     return layerDescriptor;

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiAccordion,
-  EuiCheckbox,
-  EuiFormRow,
-  EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiAccordion, EuiCheckbox, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import { DescribedFormGroupWithWrap } from '../common/described_form_group_with_wrap';
 
 import { useTCPAdvancedFieldsContext } from '../contexts';
 
-import { ConfigKeys } from '../types';
+import { ConfigKey } from '../types';
 
 import { OptionalLabel } from '../optional_label';
 
-export const TCPAdvancedFields = () => {
+interface Props {
+  children?: React.ReactNode;
+  minColumnWidth?: string;
+  onFieldBlur?: (field: ConfigKey) => void;
+}
+
+export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth, onFieldBlur }) => {
   const { fields, setFields } = useTCPAdvancedFieldsContext();
 
   const handleInputChange = useCallback(
-    ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
       setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
     },
     [setFields]
@@ -39,7 +39,8 @@ export const TCPAdvancedFields = () => {
       data-test-subj="syntheticsTCPAdvancedFieldsAccordion"
     >
       <EuiSpacer size="m" />
-      <EuiDescribedFormGroup
+      <DescribedFormGroupWithWrap
+        minColumnWidth={minColumnWidth}
         title={
           <h4>
             <FormattedMessage
@@ -72,21 +73,22 @@ export const TCPAdvancedFields = () => {
           }
         >
           <EuiFieldText
-            value={fields[ConfigKeys.PROXY_URL]}
+            value={fields[ConfigKey.PROXY_URL]}
             onChange={(event) =>
               handleInputChange({
                 value: event.target.value,
-                configKey: ConfigKeys.PROXY_URL,
+                configKey: ConfigKey.PROXY_URL,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.PROXY_URL)}
             data-test-subj="syntheticsProxyUrl"
           />
         </EuiFormRow>
-        {!!fields[ConfigKeys.PROXY_URL] && (
+        {!!fields[ConfigKey.PROXY_URL] && (
           <EuiFormRow data-test-subj="syntheticsUseLocalResolver">
             <EuiCheckbox
               id={'uptimeFleetUseLocalResolverCheckbox'}
-              checked={fields[ConfigKeys.PROXY_USE_LOCAL_RESOLVER]}
+              checked={fields[ConfigKey.PROXY_USE_LOCAL_RESOLVER]}
               label={
                 <FormattedMessage
                   id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.resolveHostnamesLocally"
@@ -96,7 +98,7 @@ export const TCPAdvancedFields = () => {
               onChange={(event) =>
                 handleInputChange({
                   value: event.target.checked,
-                  configKey: ConfigKeys.PROXY_USE_LOCAL_RESOLVER,
+                  configKey: ConfigKey.PROXY_USE_LOCAL_RESOLVER,
                 })
               }
             />
@@ -118,20 +120,22 @@ export const TCPAdvancedFields = () => {
           }
         >
           <EuiFieldText
-            value={fields[ConfigKeys.REQUEST_SEND_CHECK]}
+            value={fields[ConfigKey.REQUEST_SEND_CHECK]}
             onChange={useCallback(
               (event) =>
                 handleInputChange({
                   value: event.target.value,
-                  configKey: ConfigKeys.REQUEST_SEND_CHECK,
+                  configKey: ConfigKey.REQUEST_SEND_CHECK,
                 }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.REQUEST_SEND_CHECK)}
             data-test-subj="syntheticsTCPRequestSendCheck"
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
+      </DescribedFormGroupWithWrap>
+      <DescribedFormGroupWithWrap
+        minColumnWidth={minColumnWidth}
         title={
           <h4>
             <FormattedMessage
@@ -163,19 +167,21 @@ export const TCPAdvancedFields = () => {
           }
         >
           <EuiFieldText
-            value={fields[ConfigKeys.RESPONSE_RECEIVE_CHECK]}
+            value={fields[ConfigKey.RESPONSE_RECEIVE_CHECK]}
             onChange={useCallback(
               (event) =>
                 handleInputChange({
                   value: event.target.value,
-                  configKey: ConfigKeys.RESPONSE_RECEIVE_CHECK,
+                  configKey: ConfigKey.RESPONSE_RECEIVE_CHECK,
                 }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.RESPONSE_RECEIVE_CHECK)}
             data-test-subj="syntheticsTCPResponseReceiveCheck"
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
+      </DescribedFormGroupWithWrap>
+      {children}
     </EuiAccordion>
   );
-};
+});

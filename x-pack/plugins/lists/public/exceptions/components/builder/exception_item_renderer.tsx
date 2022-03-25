@@ -19,7 +19,7 @@ import {
   getFormattedBuilderEntries,
   getUpdatedEntriesOnDelete,
 } from '@kbn/securitysolution-list-utils';
-import { IndexPatternBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
@@ -47,18 +47,19 @@ interface BuilderExceptionListItemProps {
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionItemIndex: number;
   osTypes?: OsTypeArray;
-  indexPattern: IndexPatternBase;
+  indexPattern: DataViewBase;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IndexPatternBase,
+    pattern: DataViewBase,
     type: ExceptionListType,
     osTypes?: OsTypeArray
-  ) => IndexPatternBase;
+  ) => DataViewBase;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: boolean) => void;
+  setWarningsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
@@ -80,6 +81,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     onDeleteExceptionItem,
     onChangeExceptionItem,
     setErrorsExist,
+    setWarningsExist,
     onlyShowListOperators = false,
     isDisabled = false,
     operatorsList,
@@ -112,14 +114,12 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
       },
       [exceptionItem, onDeleteExceptionItem, exceptionItemIndex]
     );
-
-    const entries = useMemo(
-      (): FormattedBuilderEntry[] =>
-        indexPattern != null && exceptionItem.entries.length > 0
-          ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries)
-          : [],
-      [exceptionItem.entries, indexPattern]
-    );
+    const entries = useMemo((): FormattedBuilderEntry[] => {
+      const hasIndexPatternAndEntries = indexPattern != null && exceptionItem.entries.length > 0;
+      return hasIndexPatternAndEntries
+        ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries)
+        : [];
+    }, [exceptionItem.entries, indexPattern]);
 
     return (
       <EuiFlexItem>
@@ -150,6 +150,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           onChange={handleEntryChange}
                           onlyShowListOperators={onlyShowListOperators}
                           setErrorsExist={setErrorsExist}
+                          setWarningsExist={setWarningsExist}
                           osTypes={osTypes}
                           isDisabled={isDisabled}
                           showLabel={

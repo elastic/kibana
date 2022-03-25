@@ -7,10 +7,11 @@
 
 import expect from '@kbn/expect';
 import multiclusterFixture from './fixtures/multicluster';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('list mb', () => {
     describe('with trial license clusters', () => {
@@ -22,11 +23,11 @@ export default function ({ getService }) {
       const codePaths = ['all'];
 
       before('load clusters archive', () => {
-        return esArchiver.load(archive);
+        return setup(archive);
       });
 
       after('unload clusters archive', () => {
-        return esArchiver.unload(archive);
+        return tearDown();
       });
 
       it('should load multiple clusters', async () => {

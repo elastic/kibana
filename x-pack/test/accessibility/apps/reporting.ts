@@ -7,16 +7,14 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-import { JOB_PARAMS_RISON_CSV_DEPRECATED } from '../../reporting_api_integration/services/fixtures';
-
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
   const retry = getService('retry');
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const reporting = getService('reporting');
   const security = getService('security');
+  const log = getService('log');
 
   describe('Reporting', () => {
     const createReportingUser = async () => {
@@ -32,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
-      await reporting.initLogs();
+      await reporting.initEcommerce();
       await createReportingUser();
       await reporting.loginReportingUser();
     });
@@ -44,12 +42,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     beforeEach(async () => {
       // Add one report
-      await supertestWithoutAuth
-        .post(`/api/reporting/generate/csv`)
-        .auth(reporting.REPORTING_USER_USERNAME, reporting.REPORTING_USER_PASSWORD)
-        .set('kbn-xsrf', 'xxx')
-        .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED })
-        .expect(200);
+      const { body } = await reporting.generateCsv(
+        {
+          title: 'CSV Report',
+          browserTimezone: 'UTC',
+          objectType: 'search',
+          version: '7.15.0',
+          searchSource: {
+            version: true,
+            query: { query: '', language: 'kuery' },
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            fields: ['*'],
+          },
+        },
+        reporting.REPORTING_USER_USERNAME,
+        reporting.REPORTING_USER_PASSWORD
+      );
+
+      log.info(`Queued report job: ${body.path}`);
 
       await retry.waitFor('Reporting app', async () => {
         await common.navigateToApp('reporting');
@@ -65,7 +75,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitForWithTimeout('A reporting list item', 5000, () => {
         return testSubjects.exists('reportingListItemObjectTitle');
       });
-      await a11y.testAppSnapshot();
+      await retry.try(async () => {
+        await a11y.testAppSnapshot();
+      });
     });
   });
 }

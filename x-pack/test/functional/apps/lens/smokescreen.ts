@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
+  const retry = getService('retry');
 
   describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -59,6 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('Afancilenstest');
       await PageObjects.lens.clickVisualizeListItemTitle('Afancilenstest');
       await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.waitForVisualization();
 
       expect(await PageObjects.lens.getTitle()).to.eql('Afancilenstest');
 
@@ -80,6 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         keepOpen: true,
       });
       await PageObjects.lens.addFilterToAgg(`geo.src : CN`);
+      await PageObjects.lens.waitForVisualization();
 
       // Verify that the field was persisted from the transition
       expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`ip : *`, `geo.src : CN`]);
@@ -334,7 +337,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(1);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
-        'Top values of geo.dest'
+        'Top 5 values of geo.dest'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
@@ -410,6 +413,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
+        disableEmptyRows: true,
       });
 
       await PageObjects.lens.configureDimension({
@@ -431,7 +435,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+      await PageObjects.lens.switchToVisualization('heatmap', 'heat');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsHeatmap_xDimensionPanel > lns-empty-dimension',
@@ -504,6 +508,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsDatatable_rows > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
+        disableEmptyRows: true,
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
@@ -765,6 +770,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasExtensionFilter).to.be(true);
 
       await filterBar.removeFilter('extension.raw');
+    });
+
+    it('should show visual options button group for a donut chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.switchToVisualization('donut');
+
+      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
+      expect(hasVisualOptionsButton).to.be(true);
+
+      await PageObjects.lens.openVisualOptions();
+      await retry.try(async () => {
+        expect(await PageObjects.lens.hasEmptySizeRatioButtonGroup()).to.be(true);
+      });
+    });
+
+    it('should not show visual options button group for a pie chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.switchToVisualization('pie');
+
+      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
+      expect(hasVisualOptionsButton).to.be(false);
     });
   });
 }

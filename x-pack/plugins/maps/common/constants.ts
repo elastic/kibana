@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 
-export const EMS_APP_NAME = 'kibana';
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
@@ -31,12 +30,11 @@ export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
+export const OPEN_LAYER_WIZARD = 'openLayerWizard';
 
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
-
-export const MVT_TOKEN_PARAM_NAME = 'token';
 
 export function getNewMapPath() {
   return `/${MAPS_APP_PATH}/${MAP_PATH}`;
@@ -49,12 +47,12 @@ export function getEditPath(id: string | undefined) {
 }
 
 export enum LAYER_TYPE {
-  TILE = 'TILE',
-  VECTOR = 'VECTOR',
-  VECTOR_TILE = 'VECTOR_TILE', // for static display of mvt vector tiles with a mapbox stylesheet. Does not support any ad-hoc configurations. Used for consuming EMS vector tiles.
+  RASTER_TILE = 'RASTER_TILE',
+  GEOJSON_VECTOR = 'GEOJSON_VECTOR',
+  EMS_VECTOR_TILE = 'EMS_VECTOR_TILE',
   HEATMAP = 'HEATMAP',
   BLENDED_VECTOR = 'BLENDED_VECTOR',
-  TILED_VECTOR = 'TILED_VECTOR', // similar to a regular vector-layer, but it consumes the data as .mvt tilea iso GeoJson. It supports similar ad-hoc configurations like a regular vector layer (E.g. using IVectorStyle), although there is some loss of functionality  e.g. does not support term joining
+  MVT_VECTOR = 'MVT_VECTOR',
 }
 
 export enum SOURCE_TYPES {
@@ -147,6 +145,7 @@ export enum DRAW_SHAPE {
   LINE = 'LINE',
   SIMPLE_SELECT = 'SIMPLE_SELECT',
   DELETE = 'DELETE',
+  WAIT = 'WAIT',
 }
 
 export const AGG_DELIMITER = '_of_';
@@ -165,6 +164,7 @@ export enum RENDER_AS {
   HEATMAP = 'heatmap',
   POINT = 'point',
   GRID = 'grid',
+  HEX = 'hex',
 }
 
 export enum GRID_RESOLUTION {
@@ -288,3 +288,23 @@ export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
 export const emsWorldLayerId = 'world_countries';
+
+export enum WIZARD_ID {
+  CHOROPLETH = 'choropleth',
+  GEO_FILE = 'uploadGeoFile',
+  NEW_VECTOR = 'newVectorLayer',
+  OBSERVABILITY = 'observabilityLayer',
+  SECURITY = 'securityLayer',
+  EMS_BOUNDARIES = 'emsBoundaries',
+  EMS_BASEMAP = 'emsBaseMap',
+  CLUSTERS = 'clusters',
+  HEATMAP = 'heatmap',
+  GEO_LINE = 'geoLine',
+  POINT_2_POINT = 'point2Point',
+  ES_DOCUMENT = 'esDocument',
+  ES_TOP_HITS = 'esTopHits',
+  KIBANA_BASEMAP = 'kibanaBasemap',
+  MVT_VECTOR = 'mvtVector',
+  WMS_LAYER = 'wmsLayer',
+  TMS_LAYER = 'tmsLayer',
+}

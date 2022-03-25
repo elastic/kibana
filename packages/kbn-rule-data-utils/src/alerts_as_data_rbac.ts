@@ -40,10 +40,10 @@ export const isValidFeatureId = (a: unknown): a is ValidFeatureId =>
  * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
  *
  * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
- * @param sortIds estypes.SearchSortResults | undefined
+ * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
-export const getSafeSortIds = (sortIds: estypes.SearchSortResults | null | undefined) => {
+export const getSafeSortIds = (sortIds: estypes.SortResults | null | undefined) => {
   if (sortIds == null) {
     return sortIds;
   }

@@ -17,7 +17,7 @@ import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elasti
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
-import { CommentType } from '../../../common';
+import { CommentType } from '../../../common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { EuiMarkdownEditorRef, MarkdownEditorForm } from '../markdown_editor';
@@ -52,7 +52,6 @@ export interface AddCommentProps {
   onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
-  subCaseId?: string;
 }
 
 export const AddComment = React.memo(
@@ -66,7 +65,6 @@ export const AddComment = React.memo(
         onCommentSaving,
         showLoading = true,
         statusActionButton,
-        subCaseId,
       },
       ref
     ) => {
@@ -118,11 +116,10 @@ export const AddComment = React.memo(
             caseId,
             data: { ...data, type: CommentType.user, owner: owner[0] },
             updateCase: onCommentPosted,
-            subCaseId,
           });
           reset();
         }
-      }, [submit, onCommentSaving, postComment, caseId, owner, onCommentPosted, subCaseId, reset]);
+      }, [submit, onCommentSaving, postComment, caseId, owner, onCommentPosted, reset]);
 
       /**
        * Focus on the text area when a quote has been added.

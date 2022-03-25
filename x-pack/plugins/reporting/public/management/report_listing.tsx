@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ILicense } from '../../../licensing/public';
-import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID, JOB_STATUSES } from '../../common/constants';
+import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
@@ -31,7 +31,6 @@ import { checkLicense } from '../lib/license_check';
 import { useInternalApiClient } from '../lib/reporting_api_client';
 import { useKibana } from '../shared_imports';
 import { ListingProps as Props } from './';
-import { PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2 } from '../../common/constants';
 import {
   IlmPolicyLink,
   MigrateIlmPolicyCallOut,
@@ -322,7 +321,10 @@ class ReportListingUi extends Component<Props, State> {
         render: (objectTitle: string, job) => {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
-              <EuiLink onClick={() => this.setState({ selectedJob: job })}>
+              <EuiLink
+                data-test-subj={`viewReportingLink${job.id}`}
+                onClick={() => this.setState({ selectedJob: job })}
+              >
                 {objectTitle ||
                   i18n.translate('xpack.reporting.listing.table.noTitleLabel', {
                     defaultMessage: 'Untitled',
@@ -400,8 +402,7 @@ class ReportListingUi extends Component<Props, State> {
               defaultMessage: 'Download this report in a new tab.',
             }),
             onClick: (job) => this.props.apiClient.downloadReport(job.id),
-            enabled: (job) =>
-              job.status === JOB_STATUSES.COMPLETED || job.status === JOB_STATUSES.WARNINGS,
+            enabled: (job) => job.isDownloadReady,
           },
           {
             name: i18n.translate(
@@ -422,19 +423,16 @@ class ReportListingUi extends Component<Props, State> {
           },
           {
             name: i18n.translate('xpack.reporting.listing.table.openInKibanaAppLabel', {
-              defaultMessage: 'Open in Kibana App',
+              defaultMessage: 'Open in Kibana',
             }),
             'data-test-subj': 'reportOpenInKibanaApp',
             description: i18n.translate(
               'xpack.reporting.listing.table.openInKibanaAppDescription',
               {
-                defaultMessage: 'Open the Kibana App where this report was generated.',
+                defaultMessage: 'Open the Kibana app where this report was generated.',
               }
             ),
-            available: (job) =>
-              [PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2].some(
-                (linkableJobType) => linkableJobType === job.jobtype
-              ),
+            available: (job) => job.canLinkToKibanaApp,
             type: 'icon',
             icon: 'popout',
             onClick: (job) => {
@@ -451,7 +449,7 @@ class ReportListingUi extends Component<Props, State> {
       pageIndex: this.state.page,
       pageSize: 10,
       totalItemCount: this.state.total,
-      hidePerPageOptions: true,
+      showPerPageOptions: false,
     };
 
     const selection = {

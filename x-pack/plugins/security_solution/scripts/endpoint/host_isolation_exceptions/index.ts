@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { run, RunFn, createFailError } from '@kbn/dev-utils';
-import { KbnClient } from '@kbn/test';
-import { AxiosError } from 'axios';
-import pMap from 'p-map';
+import { createFailError, run, RunFn } from '@kbn/dev-utils';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION,
@@ -17,7 +14,10 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
+import { KbnClient } from '@kbn/test';
+import { AxiosError } from 'axios';
 import { HostIsolationExceptionGenerator } from '../../../common/endpoint/data_generators/host_isolation_exception_generator';
+import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 
 export const cli = () => {
   run(
@@ -47,7 +47,7 @@ export const cli = () => {
   );
 };
 
-class EventFilterDataLoaderError extends Error {
+class HostIsolationExceptionDataLoaderError extends Error {
   constructor(message: string, public readonly meta: unknown) {
     super(message);
   }
@@ -61,27 +61,40 @@ const handleThrowAxiosHttpError = (err: AxiosError): never => {
       err.response.config.method
     ).toUpperCase()} ${err.response.config.url} ]`;
   }
-  throw new EventFilterDataLoaderError(message, err.toJSON());
+  throw new HostIsolationExceptionDataLoaderError(message, err.toJSON());
 };
 
 const createHostIsolationException: RunFn = async ({ flags, log }) => {
-  const eventGenerator = new HostIsolationExceptionGenerator();
+  const exceptionGenerator = new HostIsolationExceptionGenerator();
   const kbn = new KbnClient({ log, url: flags.kibana as string });
 
+  log.info('Creating Host isolation exceptions list');
   await ensureCreateEndpointHostIsolationExceptionList(kbn);
 
-  await pMap(
-    Array.from({ length: flags.count as unknown as number }),
-    () =>
-      kbn
-        .request({
+  const randomPolicyId = await randomPolicyIdGenerator(kbn, log);
+
+  log.info('Generating exceptions....');
+  await Promise.all(
+    Array.from({ length: flags.count as unknown as number }, async () => {
+      const body = exceptionGenerator.generate();
+      if (body.tags?.length && body.tags[0] !== 'policy:all') {
+        const nmExceptions = Math.floor(Math.random() * 3) || 1;
+        body.tags = Array.from({ length: nmExceptions }, () => {
+          return `policy:${randomPolicyId()}`;
+        });
+      }
+      try {
+        return kbn.request({
           method: 'POST',
           path: EXCEPTION_LIST_ITEM_URL,
-          body: eventGenerator.generate(),
-        })
-        .catch((e) => handleThrowAxiosHttpError(e)),
-    { concurrency: 10 }
+          body,
+        });
+      } catch (e) {
+        return handleThrowAxiosHttpError(e);
+      }
+    })
   );
+  log.info('Finished.');
 };
 
 const ensureCreateEndpointHostIsolationExceptionList = async (kbn: KbnClient) => {

@@ -30,7 +30,7 @@ export const isNoisy = (hits: number, timeframe: Unit): boolean => {
   } else if (timeframe === 'w') {
     return hits / 168 > 1;
   } else if (timeframe === 'M') {
-    return hits / 730 > 1;
+    return hits / 30 > 1;
   }
 
   return false;
@@ -54,6 +54,8 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
       { value: 'd', text: i18n.LAST_DAY },
       { value: 'w', text: i18n.LAST_WEEK },
     ];
+  } else if (ruleType === 'threshold') {
+    return [{ value: 'h', text: i18n.LAST_HOUR }];
   } else {
     return [
       { value: 'h', text: i18n.LAST_HOUR },
@@ -206,6 +208,8 @@ export const getIsRulePreviewDisabled = ({
   index,
   threatIndex,
   threatMapping,
+  machineLearningJobId,
+  queryBar,
 }: {
   ruleType: Type;
   isQueryBarValid: boolean;
@@ -213,6 +217,8 @@ export const getIsRulePreviewDisabled = ({
   index: string[];
   threatIndex: string[];
   threatMapping: ThreatMapping;
+  machineLearningJobId: string[];
+  queryBar: FieldValueQueryBar;
 }) => {
   if (!isQueryBarValid || index.length === 0) return true;
   if (ruleType === 'threat_match') {
@@ -224,6 +230,12 @@ export const getIsRulePreviewDisabled = ({
       !threatMapping[0].entries[0].value
     )
       return true;
+  }
+  if (ruleType === 'machine_learning') {
+    return machineLearningJobId.length === 0;
+  }
+  if (ruleType === 'eql') {
+    return queryBar.query.query.length === 0;
   }
   return false;
 };

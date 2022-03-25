@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { Size, LayoutParams } from './layout';
-import type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 } from './base';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { FormattedScreenshotResult } from '../../../screenshotting/server';
+import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
-export type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 };
-export type { Size, LayoutParams };
+export type { JobParamsPNGDeprecated } from './export_types/png';
+export type { JobParamsPNGV2 } from './export_types/png_v2';
+export type { JobAppParamsPDF, JobParamsPDFDeprecated } from './export_types/printable_pdf';
+export type { JobAppParamsPDFV2, JobParamsPDFV2 } from './export_types/printable_pdf_v2';
 export type {
   DownloadReportFn,
   IlmPolicyMigrationStatus,
@@ -18,21 +21,7 @@ export type {
   ManagementLinkFn,
   UrlOrUrlLocatorTuple,
 } from './url';
-export * from './export_types';
-
-export interface PageSizeParams {
-  pageMarginTop: number;
-  pageMarginBottom: number;
-  pageMarginWidth: number;
-  tableBorderWidth: number;
-  headingHeight: number;
-  subheadingHeight: number;
-}
-
-export interface PdfImageSize {
-  width: number;
-  height?: number;
-}
+export type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 };
 
 export interface ReportDocumentHead {
   _id: string;
@@ -46,11 +35,43 @@ export interface ReportOutput extends TaskRunResult {
   size: number;
 }
 
+type ScreenshotMetrics = Required<FormattedScreenshotResult>['metrics'];
+
+export interface CsvMetrics {
+  rows: number;
+}
+
+export type PngMetrics = ScreenshotMetrics;
+
+export interface PdfMetrics extends Partial<ScreenshotMetrics> {
+  /**
+   * A number of emitted pages in the generated PDF report.
+   */
+  pages: number;
+}
+
+export interface TaskRunMetrics {
+  csv?: CsvMetrics;
+  png?: PngMetrics;
+  pdf?: PdfMetrics;
+}
+
 export interface TaskRunResult {
   content_type: string | null;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];
+  metrics?: TaskRunMetrics;
+
+  /**
+   * When running a report task we may finish with warnings that were triggered
+   * by an error. We can pass the error code via the task run result to the
+   * task runner so that it can be recorded for telemetry.
+   *
+   * Alternatively, this field can be populated in the event that the task does
+   * not complete in the task runner's error handler.
+   */
+  error_code?: string;
 }
 
 export interface ReportSource {
@@ -83,12 +104,12 @@ export interface ReportSource {
    */
   kibana_name?: string; // for troubleshooting
   kibana_id?: string; // for troubleshooting
-  browser_type?: string; // no longer used since chromium is the only option (used to allow phantomjs)
   timeout?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.queue.timeout
   max_attempts?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.capture.maxAttempts
   started_at?: string; // timestamp in UTC
   completed_at?: string; // timestamp in UTC
   process_expiration?: string | null; // timestamp in UTC - is overwritten with `null` when the job needs a retry
+  metrics?: TaskRunMetrics;
 }
 
 /*

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 import { useEffect, useState } from 'react';
-import { IndexPattern, IndexPatternsContract } from '../../../data/common';
+import { DataView, DataViewsContract } from '../../../data_views/public';
 
-export const useIndexPattern = (indexPatterns: IndexPatternsContract, indexPatternId: string) => {
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
+export const useIndexPattern = (indexPatterns: DataViewsContract, indexPatternId: string) => {
+  const [indexPattern, setIndexPattern] = useState<DataView | undefined>(undefined);
   const [error, setError] = useState();
 
   useEffect(() => {

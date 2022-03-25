@@ -7,26 +7,23 @@
 
 import crypto from 'crypto';
 import ipaddr from 'ipaddr.js';
-import { sum, upperFirst } from 'lodash';
+import type { CoreSetup, Logger } from 'kibana/server';
+import { sum } from 'lodash';
 import { Observable } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
-import { CoreSetup } from 'src/core/server';
-import { LevelLogger } from '../lib';
-import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
+import { map } from 'rxjs/operators';
 import { ReportingConfigType } from './schema';
 
 /*
  * Set up dynamic config defaults
- * - xpack.capture.browser.chromium.disableSandbox
  * - xpack.kibanaServer
  * - xpack.reporting.encryptionKey
  */
 export function createConfig$(
   core: CoreSetup,
   config$: Observable<ReportingConfigType>,
-  parentLogger: LevelLogger
+  parentLogger: Logger
 ) {
-  const logger = parentLogger.clone(['config']);
+  const logger = parentLogger.get('config');
   return config$.pipe(
     map((config) => {
       // encryption key
@@ -69,41 +66,6 @@ export function createConfig$(
           hostname: kibanaServerHostname,
           port: kibanaServerPort,
           protocol: kibanaServerProtocol,
-        },
-      };
-    }),
-    mergeMap(async (config) => {
-      if (config.capture.browser.chromium.disableSandbox != null) {
-        // disableSandbox was set by user
-        return { ...config };
-      }
-
-      // disableSandbox was not set by user, apply default for OS
-      const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
-      const osName = [os.os, os.dist, os.release].filter(Boolean).map(upperFirst).join(' ');
-
-      logger.debug(`Running on OS: '{osName}'`);
-
-      if (disableSandbox === true) {
-        logger.warn(
-          `Chromium sandbox provides an additional layer of protection, but is not supported for ${osName} OS.` +
-            ` Automatically setting 'xpack.reporting.capture.browser.chromium.disableSandbox: true'.`
-        );
-      } else {
-        logger.info(
-          `Chromium sandbox provides an additional layer of protection, and is supported for ${osName} OS.` +
-            ` Automatically enabling Chromium sandbox.`
-        );
-      }
-
-      return {
-        ...config,
-        capture: {
-          ...config.capture,
-          browser: {
-            ...config.capture.browser,
-            chromium: { ...config.capture.browser.chromium, disableSandbox },
-          },
         },
       };
     })

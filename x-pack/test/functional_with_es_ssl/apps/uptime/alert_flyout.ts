@@ -16,7 +16,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const supertest = getService('supertest');
     const retry = getService('retry');
 
-    describe('overview page alert flyout controls', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/88177
+    describe.skip('overview page alert flyout controls', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
@@ -87,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveAlertButton();
+        await alerts.clickSaveRuleButton();
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });
@@ -141,7 +142,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('tls alert', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/116865
+    describe.skip('tls alert', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
@@ -176,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveAlertButton();
+        await alerts.clickSaveRuleButton();
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });

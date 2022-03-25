@@ -10,7 +10,9 @@
     "embeddable",
     "share",
     "discover",
-    "fileUpload"
+    "fileUpload",
+    "uiActions",
+    "charts"
   ],
   "optionalPlugins": [
     "security",
@@ -18,7 +20,8 @@
     "home",
     "lens",
     "dataViewFieldEditor",
-    "customIntegrations"
+    "customIntegrations",
+    "cloud"
   ],
   "requiredBundles": [
     "home",
@@ -26,10 +29,9 @@
     "maps",
     "esUiShared",
     "fieldFormats",
-    "charts"
-  ],
-  "extraPublicDirs": [
-    "common"
+    "uiActions",
+    "lens",
+    "cloud"
   ],
   "owner": {
     "name": "Machine Learning UI",

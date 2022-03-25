@@ -8,22 +8,24 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { Fragment } from 'react';
-import type { IndexPattern } from 'src/plugins/data/common';
-import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import { getServices } from '../../../kibana_services';
+import type { DataView } from 'src/plugins/data_views/public';
+import { FieldFormatsStart } from '../../../../../field_formats/public';
 import { formatHit } from '../../../utils/format_hit';
 
 import './row_formatter.scss';
 
 interface Props {
-  defPairs: Array<[string, string]>;
+  defPairs: Array<readonly [string, string]>;
 }
 const TemplateComponent = ({ defPairs }: Props) => {
   return (
     <dl className={'source dscTruncateByHeight'}>
       {defPairs.map((pair, idx) => (
         <Fragment key={idx}>
-          <dt>{pair[0]}:</dt>
+          <dt>
+            {pair[0]}
+            {!!pair[1] && ':'}
+          </dt>
           <dd
             className="rowFormatter__value"
             // eslint-disable-next-line react/no-danger
@@ -37,10 +39,12 @@ const TemplateComponent = ({ defPairs }: Props) => {
 
 export const formatRow = (
   hit: estypes.SearchHit,
-  indexPattern: IndexPattern,
-  fieldsToShow: string[]
+  indexPattern: DataView,
+  fieldsToShow: string[],
+  maxEntries: number,
+  fieldFormats: FieldFormatsStart
 ) => {
-  const pairs = formatHit(hit, indexPattern, fieldsToShow);
+  const pairs = formatHit(hit, indexPattern, fieldsToShow, maxEntries, fieldFormats);
   return <TemplateComponent defPairs={pairs} />;
 };
 
@@ -49,7 +53,8 @@ export const formatTopLevelObject = (
   row: Record<string, any>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fields: Record<string, any>,
-  indexPattern: IndexPattern
+  indexPattern: DataView,
+  maxEntries: number
 ) => {
   const highlights = row.highlight ?? {};
   const highlightPairs: Array<[string, string]> = [];
@@ -74,6 +79,5 @@ export const formatTopLevelObject = (
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     pairs.push([displayKey ? displayKey : key, formatted]);
   });
-  const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
   return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
 };

@@ -56,3 +56,5 @@ export * from './sum_fn';
 export * from './sum';
 export * from './top_hit_fn';
 export * from './top_hit';
+export * from './top_metrics';
+export * from './top_metrics_fn';

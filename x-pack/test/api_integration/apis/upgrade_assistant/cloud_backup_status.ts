@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const deployment = getService('deployment');
 
   const CLOUD_SNAPSHOT_REPOSITORY = 'found-snapshots';
 
@@ -49,14 +50,21 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
-  describe('Cloud backup status', () => {
+  describe('Cloud backup status', function () {
+    // file system repositories are not supported in cloud
+    this.tags(['skipCloud']);
+    this.onlyEsVersion('<=7');
+
     describe('get', () => {
       describe('with backups present', () => {
         // Needs SnapshotInfo type https://github.com/elastic/elasticsearch-specification/issues/685
         let mostRecentSnapshot: any;
 
         before(async () => {
-          await createCloudRepository();
+          const isCloud = await deployment.isCloud();
+          if (!isCloud) {
+            await createCloudRepository();
+          }
           await createCloudSnapshot('test_snapshot_1');
           mostRecentSnapshot = (await createCloudSnapshot('test_snapshot_2')).snapshot;
         });
@@ -78,6 +86,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('without backups present', () => {
+        // snapshot repository on Cloud always has a snapshot so the status is returned as backed up
+        this.tags(['skipCloud']);
         it('returns not-backed-up status', async () => {
           const { body: cloudBackupStatus } = await supertest
             .get('/api/upgrade_assistant/cloud_backup_status')

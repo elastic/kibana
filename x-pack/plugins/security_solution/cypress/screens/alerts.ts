@@ -15,16 +15,15 @@ export const ALERT_CHECKBOX = '[data-test-subj~="select-event"].euiCheckbox__inp
 export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
 export const ALERT_RISK_SCORE_HEADER =
-  '[data-test-subj="dataGridHeaderCell-kibana.alert.rule.risk_score"]';
+  '[data-test-subj="dataGridHeaderCell-kibana.alert.risk_score"]';
 
 export const ALERT_RULE_NAME = '[data-test-subj="formatted-field-kibana.alert.rule.name"]';
 
-export const ALERT_RULE_RISK_SCORE =
-  '[data-test-subj="formatted-field-kibana.alert.rule.risk_score"]';
+export const ALERT_RISK_SCORE = '[data-test-subj="formatted-field-kibana.alert.risk_score"]';
 
-export const ALERT_RULE_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.rule.severity"]';
+export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
-export const ALERT_DATA_GRID = '[data-test-subj="dataGridWrapper"]';
+export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
 export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="event"]';
 
@@ -63,6 +62,7 @@ export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
 export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
 
+export const PROCESS_NAME_COLUMN = '[data-test-subj="dataGridHeaderCell-process.name"]';
 export const PROCESS_NAME = '[data-test-subj="formatted-field-process.name"]';
 
 export const REASON = '[data-test-subj^=formatted-field][data-test-subj$=reason]';
@@ -85,4 +85,6 @@ export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu
 
 export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user\\.name]';
 
-export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-existing-case-menu-item"]';
+export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-case-action"]';
+
+export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';

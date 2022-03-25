@@ -5,25 +5,29 @@
  * 2.0.
  */
 import { createHash } from 'crypto';
-import { chunk, get, isEmpty, partition } from 'lodash';
+import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportResult } from '@elastic/elasticsearch';
-import { ALERT_UUID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import type {
+  ListArray,
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import {
   TimestampOverrideOrUndefined,
   Privilege,
   RuleExecutionStatus,
-} from '../../../../common/detection_engine/schemas/common/schemas';
-import {
+} from '../../../../common/detection_engine/schemas/common';
+import type {
   ElasticsearchClient,
+  IUiSettingsClient,
   Logger,
   SavedObjectsClientContract,
 } from '../../../../../../../src/core/server';
@@ -33,8 +37,8 @@ import {
   AlertServices,
   parseDuration,
 } from '../../../../../alerting/server';
-import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
-import {
+import type { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
+import type {
   BulkResponseErrorAggregation,
   SignalHit,
   SearchAfterAndBulkCreateReturnType,
@@ -47,9 +51,9 @@ import {
   SimpleHit,
   WrappedEventHit,
 } from './types';
-import { BuildRuleMessage } from './rule_messages';
-import { ShardError } from '../../types';
-import {
+import type { BuildRuleMessage } from './rule_messages';
+import type { ShardError } from '../../types';
+import type {
   EqlRuleParams,
   MachineLearningRuleParams,
   QueryRuleParams,
@@ -58,9 +62,12 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
-import { RACAlert, WrappedRACAlert } from '../rule_types/types';
-import { SearchTypes } from '../../../../common/detection_engine/types';
-import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import type { RACAlert, WrappedRACAlert } from '../rule_types/types';
+import type { SearchTypes } from '../../../../common/detection_engine/types';
+import type { IRuleExecutionLogForExecutors } from '../rule_execution_log';
+import { withSecuritySpan } from '../../../utils/with_security_span';
+import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
+
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
   exceptionsWithoutValueLists: ExceptionListItemSchema[];
@@ -87,26 +94,20 @@ export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
-  ruleStatusClient: IRuleExecutionLogClient;
-  ruleId: string;
-  ruleName: string;
-  ruleType: string;
-  spaceId: string;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  uiSettingsClient: IUiSettingsClient;
 }): Promise<boolean> => {
-  const {
-    privileges,
-    logger,
-    buildRuleMessage,
-    ruleStatusClient,
-    ruleId,
-    ruleName,
-    ruleType,
-    spaceId,
-  } = args;
+  const { privileges, logger, buildRuleMessage, ruleExecutionLogger, uiSettingsClient } = args;
+
+  const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
 
   const indexNames = Object.keys(privileges.index);
+  const filteredIndexNames = isCcsPermissionWarningEnabled
+    ? indexNames
+    : indexNames.filter((indexName) => !indexName.includes(':')); // Cross cluster indices uniquely contain `:` in their name
+
   const [, indexesWithNoReadPrivileges] = partition(
-    indexNames,
+    filteredIndexNames,
     (indexName) => privileges.index[indexName].read
   );
 
@@ -116,14 +117,10 @@ export const hasReadIndexPrivileges = async (args: {
     const errorString = `This rule may not have the required read privileges to the following indices/index patterns: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
-    logger.error(buildRuleMessage(errorString));
-    await ruleStatusClient.logStatusChange({
-      message: errorString,
-      ruleId,
-      ruleName,
-      ruleType,
-      spaceId,
+    logger.warn(buildRuleMessage(errorString));
+    await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
+      message: errorString,
     });
     return true;
   }
@@ -132,48 +129,38 @@ export const hasReadIndexPrivileges = async (args: {
 
 export const hasTimestampFields = async (args: {
   timestampField: string;
-  ruleName: string;
   // any is derived from here
   // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
-  ruleStatusClient: IRuleExecutionLogClient;
-  ruleId: string;
-  spaceId: string;
-  ruleType: string;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
 }): Promise<boolean> => {
   const {
     timestampField,
-    ruleName,
     timestampFieldCapsResponse,
     inputIndices,
-    ruleStatusClient,
-    ruleId,
-    ruleType,
-    spaceId,
+    ruleExecutionLogger,
     logger,
     buildRuleMessage,
   } = args;
 
+  const { ruleName } = ruleExecutionLogger.context;
+
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
-    )} was found. This warning will continue to appear until a matching index is created or this rule is de-activated. ${
+    )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
       ruleName === 'Endpoint Security'
         ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
         : ''
     }`;
-    logger.error(buildRuleMessage(errorString.trimEnd()));
-    await ruleStatusClient.logStatusChange({
-      message: errorString.trimEnd(),
-      ruleId,
-      ruleName,
-      ruleType,
-      spaceId,
+    logger.warn(buildRuleMessage(errorString.trimEnd()));
+    await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
+      message: errorString.trimEnd(),
     });
     return true;
   } else if (
@@ -193,15 +180,13 @@ export const hasTimestampFields = async (args: {
         ? timestampFieldCapsResponse.body.indices
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
-    logger.error(buildRuleMessage(errorString));
-    await ruleStatusClient.logStatusChange({
-      message: errorString,
-      ruleId,
-      ruleName,
-      ruleType,
-      spaceId,
+
+    logger.warn(buildRuleMessage(errorString));
+    await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
+      message: errorString,
     });
+
     return true;
   }
   return false;
@@ -217,21 +202,23 @@ export const checkPrivilegesFromEsClient = async (
   esClient: ElasticsearchClient,
   indices: string[]
 ): Promise<Privilege> =>
-  (
-    await esClient.transport.request({
-      path: '/_security/user/_has_privileges',
-      method: 'POST',
-      body: {
-        index: [
-          {
-            names: indices ?? [],
-            allow_restricted_indices: true,
-            privileges: ['read'],
-          },
-        ],
-      },
-    })
-  ).body as Privilege;
+  withSecuritySpan(
+    'checkPrivilegesFromEsClient',
+    async () =>
+      (await esClient.transport.request({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: indices ?? [],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      })) as Privilege
+  );
 
 export const getNumCatchupIntervals = ({
   gap,
@@ -294,18 +281,28 @@ export const getExceptions = async ({
     try {
       const listIds = lists.map(({ list_id: listId }) => listId);
       const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
-      const items = await client.findExceptionListsItem({
+
+      // Stream the results from the Point In Time (PIT) finder into this array
+      let items: ExceptionListItemSchema[] = [];
+      const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
+        items = [...items, ...response.data];
+      };
+
+      await client.findExceptionListsItemPointInTimeFinder({
+        executeFunctionOnStream,
         listId: listIds,
         namespaceType: namespaceTypes,
-        page: 1,
-        perPage: MAX_EXCEPTION_LIST_SIZE,
+        perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
         filter: [],
+        maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
         sortOrder: undefined,
         sortField: undefined,
       });
-      return items != null ? items.data : [];
-    } catch {
-      throw new Error('unable to fetch exception list items');
+      return items;
+    } catch (e) {
+      throw new Error(
+        `unable to fetch exception list items, message: "${e.message}" full error: "${e}"`
+      );
     }
   } else {
     return [];
@@ -946,10 +943,10 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
  *
  * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
- * @param sortIds estypes.SearchSortResults | undefined
+ * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
-export const getSafeSortIds = (sortIds: estypes.SearchSortResults | undefined) => {
+export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
@@ -991,14 +988,49 @@ export const isRACAlert = (event: unknown): event is RACAlert => {
 
 export const racFieldMappings: Record<string, string> = {
   'signal.rule.id': ALERT_RULE_UUID,
+  'signal.rule.description': `${ALERT_RULE_PARAMETERS}.description`,
+  'signal.rule.filters': `${ALERT_RULE_PARAMETERS}.filters`,
+  'signal.rule.language': `${ALERT_RULE_PARAMETERS}.language`,
+  'signal.rule.query': `${ALERT_RULE_PARAMETERS}.query`,
+  'signal.rule.risk_score': `${ALERT_RULE_PARAMETERS}.riskScore`,
+  'signal.rule.severity': `${ALERT_RULE_PARAMETERS}.severity`,
+  'signal.rule.building_block_type': `${ALERT_RULE_PARAMETERS}.buildingBlockType`,
+  'signal.rule.namespace': `${ALERT_RULE_PARAMETERS}.namespace`,
+  'signal.rule.note': `${ALERT_RULE_PARAMETERS}.note`,
+  'signal.rule.license': `${ALERT_RULE_PARAMETERS}.license`,
+  'signal.rule.output_index': `${ALERT_RULE_PARAMETERS}.outputIndex`,
+  'signal.rule.timeline_id': `${ALERT_RULE_PARAMETERS}.timelineId`,
+  'signal.rule.timeline_title': `${ALERT_RULE_PARAMETERS}.timelineTitle`,
+  'signal.rule.meta': `${ALERT_RULE_PARAMETERS}.meta`,
+  'signal.rule.rule_name_override': `${ALERT_RULE_PARAMETERS}.ruleNameOverride`,
+  'signal.rule.timestamp_override': `${ALERT_RULE_PARAMETERS}.timestampOverride`,
+  'signal.rule.author': `${ALERT_RULE_PARAMETERS}.author`,
+  'signal.rule.false_positives': `${ALERT_RULE_PARAMETERS}.falsePositives`,
+  'signal.rule.from': `${ALERT_RULE_PARAMETERS}.from`,
+  'signal.rule.rule_id': `${ALERT_RULE_PARAMETERS}.ruleId`,
+  'signal.rule.max_signals': `${ALERT_RULE_PARAMETERS}.maxSignals`,
+  'signal.rule.risk_score_mapping': `${ALERT_RULE_PARAMETERS}.riskScoreMapping`,
+  'signal.rule.severity_mapping': `${ALERT_RULE_PARAMETERS}.severityMapping`,
+  'signal.rule.threat': `${ALERT_RULE_PARAMETERS}.threat`,
+  'signal.rule.to': `${ALERT_RULE_PARAMETERS}.to`,
+  'signal.rule.references': `${ALERT_RULE_PARAMETERS}.references`,
+  'signal.rule.version': `${ALERT_RULE_PARAMETERS}.version`,
+  'signal.rule.exceptions_list': `${ALERT_RULE_PARAMETERS}.exceptionsList`,
+  'signal.rule.immutable': `${ALERT_RULE_PARAMETERS}.immutable`,
 };
 
 export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
   if (isWrappedRACAlert(event)) {
     const mappedField = racFieldMappings[field] ?? field.replace('signal', 'kibana.alert');
+    const parts = mappedField.split('.');
+    if (mappedField.includes(ALERT_RULE_PARAMETERS) && parts[parts.length - 1] !== 'parameters') {
+      const params = get(event._source, ALERT_RULE_PARAMETERS);
+      return get(params, parts[parts.length - 1]);
+    }
     return get(event._source, mappedField) as T;
   } else if (isWrappedSignalHit(event)) {
-    return get(event._source, field) as T;
+    const mappedField = invert(racFieldMappings)[field] ?? field.replace('kibana.alert', 'signal');
+    return get(event._source, mappedField) as T;
   } else if (isWrappedEventHit(event)) {
     return get(event._source, field) as T;
   }

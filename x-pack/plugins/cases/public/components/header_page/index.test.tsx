@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../common/mock/match_media';
-import { TestProviders } from '../../common/mock';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { HeaderPage } from './index';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
@@ -21,15 +21,11 @@ describe('HeaderPage', () => {
 
   test('it renders', () => {
     const wrapper = shallow(
-      <HeaderPage
-        badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
-        border
-        subtitle="Test subtitle"
-        subtitle2="Test subtitle 2"
-        title="Test title"
-      >
-        <p>{'Test supplement'}</p>
-      </HeaderPage>
+      <TestProviders>
+        <HeaderPage border subtitle="Test subtitle" subtitle2="Test subtitle 2" title="Test title">
+          <p>{'Test supplement'}</p>
+        </HeaderPage>
+      </TestProviders>
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -141,5 +137,37 @@ describe('HeaderPage', () => {
 
     expect(casesHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
     expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+  });
+
+  describe('Badges', () => {
+    let appMock: AppMockRenderer;
+
+    beforeEach(() => {
+      appMock = createAppMockRenderer();
+    });
+
+    it('does not render the badge if the release is ga', () => {
+      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.queryByText('Beta')).toBeFalsy();
+      expect(renderResult.queryByText('Technical preview')).toBeFalsy();
+    });
+
+    it('does render the beta badge', () => {
+      appMock = createAppMockRenderer({ releasePhase: 'beta' });
+      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.getByText('Beta')).toBeInTheDocument();
+    });
+
+    it('does render the experimental badge', () => {
+      appMock = createAppMockRenderer({ releasePhase: 'experimental' });
+      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.getByText('Technical preview')).toBeInTheDocument();
+    });
   });
 });

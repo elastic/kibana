@@ -2,7 +2,7 @@
 === Set the time range
 Display data within a
 specified time range when your index contains time-based events, and a time-field is configured for the
-selected <<data-views, data view>>.
+selected <<data-views, {data-source}>>.
 The default time range is 15 minutes, but you can customize
 it in <<advanced-options,Advanced Settings>>.
 

@@ -8,7 +8,7 @@
 import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
@@ -33,6 +33,21 @@ const crawlRequestResponse: CrawlRequestWithDetailsFromServer = {
   type: CrawlType.Full,
   crawl_config: {
     domain_allowlist: [],
+    seed_urls: [],
+    sitemap_urls: [],
+    max_crawl_depth: 10,
+  },
+  stats: {
+    status: {
+      urls_allowed: 4,
+      pages_visited: 4,
+      crawl_duration_msec: 100,
+      avg_response_time_msec: 10,
+      status_codes: {
+        200: 4,
+        404: 0,
+      },
+    },
   },
 };
 

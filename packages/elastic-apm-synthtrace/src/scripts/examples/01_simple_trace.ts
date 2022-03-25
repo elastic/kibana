@@ -6,75 +6,88 @@
  * Side Public License, v 1.
  */
 
-import { service, timerange, getTransactionMetrics, getSpanDestinationMetrics } from '../..';
-import { getBreakdownMetrics } from '../../lib/utils/get_breakdown_metrics';
+import { apm, timerange } from '../../index';
+import { Instance } from '../../lib/apm/instance';
+import { Scenario } from '../scenario';
+import { getCommonServices } from '../utils/get_common_services';
+import { RunOptions } from '../utils/parse_run_cli_flags';
 
-export default function ({ from, to }: { from: number; to: number }) {
-  const numServices = 3;
+const scenario: Scenario = async (runOptions: RunOptions) => {
+  const { logger } = getCommonServices(runOptions);
 
-  const range = timerange(from, to);
+  const { numServices = 3 } = runOptions.scenarioOpts || {};
 
-  const transactionName = '240rpm/75% 1000ms';
+  return {
+    generate: ({ from, to }) => {
+      const range = timerange(from, to);
 
-  const successfulTimestamps = range.interval('1s').rate(3);
+      const transactionName = '240rpm/75% 1000ms';
 
-  const failedTimestamps = range.interval('1s').rate(1);
+      const successfulTimestamps = range.interval('1s').rate(3);
 
-  return new Array(numServices).fill(undefined).flatMap((_, index) => {
-    const instance = service(`opbeans-go-${index}`, 'production', 'go').instance('instance');
+      const failedTimestamps = range.interval('1s').rate(1);
 
-    const successfulTraceEvents = successfulTimestamps.flatMap((timestamp) =>
-      instance
-        .transaction(transactionName)
-        .timestamp(timestamp)
-        .duration(1000)
-        .success()
-        .children(
+      const instances = [...Array(numServices).keys()].map((index) =>
+        apm.service(`opbeans-go-${index}`, 'production', 'go').instance('instance')
+      );
+      const instanceSpans = (instance: Instance) => {
+        const successfulTraceEvents = successfulTimestamps.spans((timestamp) =>
           instance
-            .span('GET apm-*/_search', 'db', 'elasticsearch')
+            .transaction(transactionName)
+            .timestamp(timestamp)
             .duration(1000)
             .success()
-            .destination('elasticsearch')
-            .timestamp(timestamp),
-          instance.span('custom_operation', 'custom').duration(100).success().timestamp(timestamp)
-        )
-        .serialize()
-    );
+            .children(
+              instance
+                .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .duration(1000)
+                .success()
+                .destination('elasticsearch')
+                .timestamp(timestamp),
+              instance
+                .span('custom_operation', 'custom')
+                .duration(100)
+                .success()
+                .timestamp(timestamp)
+            )
+            .serialize()
+        );
 
-    const failedTraceEvents = failedTimestamps.flatMap((timestamp) =>
-      instance
-        .transaction(transactionName)
-        .timestamp(timestamp)
-        .duration(1000)
-        .failure()
-        .errors(
-          instance.error('[ResponseError] index_not_found_exception').timestamp(timestamp + 50)
-        )
-        .serialize()
-    );
+        const failedTraceEvents = failedTimestamps.spans((timestamp) =>
+          instance
+            .transaction(transactionName)
+            .timestamp(timestamp)
+            .duration(1000)
+            .failure()
+            .errors(
+              instance.error('[ResponseError] index_not_found_exception').timestamp(timestamp + 50)
+            )
+            .serialize()
+        );
 
-    const metricsets = range
-      .interval('30s')
-      .rate(1)
-      .flatMap((timestamp) =>
-        instance
-          .appMetrics({
-            'system.memory.actual.free': 800,
-            'system.memory.total': 1000,
-            'system.cpu.total.norm.pct': 0.6,
-            'system.process.cpu.total.norm.pct': 0.7,
-          })
-          .timestamp(timestamp)
-          .serialize()
-      );
-    const events = successfulTraceEvents.concat(failedTraceEvents);
+        const metricsets = range
+          .interval('30s')
+          .rate(1)
+          .spans((timestamp) =>
+            instance
+              .appMetrics({
+                'system.memory.actual.free': 800,
+                'system.memory.total': 1000,
+                'system.cpu.total.norm.pct': 0.6,
+                'system.process.cpu.total.norm.pct': 0.7,
+              })
+              .timestamp(timestamp)
+              .serialize()
+          );
 
-    return [
-      ...events,
-      ...metricsets,
-      ...getTransactionMetrics(events),
-      ...getSpanDestinationMetrics(events),
-      ...getBreakdownMetrics(events),
-    ];
-  });
-}
+        return successfulTraceEvents.concat(failedTraceEvents, metricsets);
+      };
+
+      return instances
+        .map((instance) => logger.perf('generating_apm_events', () => instanceSpans(instance)))
+        .reduce((p, c) => p.concat(c));
+    },
+  };
+};
+
+export default scenario;

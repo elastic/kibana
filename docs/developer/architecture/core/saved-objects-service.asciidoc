@@ -32,6 +32,7 @@ wanting to use Saved Objects.
 
 === Server side usage
 
+[[saved-objects-type-registration]]
 ==== Registering a Saved Object type
 Saved object type definitions should be defined in their own `my_plugin/server/saved_objects` directory.
 
@@ -258,6 +259,9 @@ expected shape, migrations are encouraged to throw an exception to abort the
 upgrade. In most scenarios, it is better to fail an upgrade than to silently
 ignore a corrupt document which can cause unexpected behaviour at some future
 point in time.
+
+WARNING: Do not attempt to change the `migrationVersion`, `id`, or `type` fields
+within a migration function, this is not supported.
 
 It is critical that you have extensive tests to ensure that migrations behave
 as expected with all possible input documents. Given how simple it is to test

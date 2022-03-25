@@ -88,14 +88,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ loading, step, index, brow
             language="javascript"
             initialIsOpen={!isSucceeded}
           >
-            <>
-              {browserConsoles?.map((browserConsole) => (
-                <>
-                  {browserConsole}
-                  <EuiSpacer />
-                </>
-              ))}
-            </>
+            {browserConsoles?.join('\n')}
           </CodeBlockAccordion>
           <EuiSpacer />
           <StepScreenshots step={step} />

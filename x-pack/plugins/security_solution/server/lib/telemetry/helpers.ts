@@ -8,15 +8,22 @@
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
-import { copyAllowlistedFields, exceptionListEventFields } from './filters';
-import { ExceptionListItem, ListTemplate, TelemetryEvent } from './types';
+import { copyAllowlistedFields, exceptionListAllowlistFields } from './filterlists/index';
+import { PolicyData } from '../../../common/endpoint/types';
+import type {
+  ExceptionListItem,
+  ESClusterInfo,
+  ESLicense,
+  ListTemplate,
+  TelemetryEvent,
+} from './types';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
 } from './constants';
-import { TrustedApp } from '../../../common/endpoint/types';
+import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -97,18 +104,20 @@ export function isPackagePolicyList(
 /**
  * Maps trusted application to shared telemetry object
  *
- * @param exceptionListItem
+ * @param trustedAppExceptionItem
  * @returns collection of trusted applications
  */
-export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedApp) => {
+export const trustedApplicationToTelemetryEntry = (
+  trustedAppExceptionItem: ExceptionListItemSchema
+) => {
   return {
-    id: trustedApplication.id,
-    name: trustedApplication.name,
-    created_at: trustedApplication.created_at,
-    updated_at: trustedApplication.updated_at,
-    entries: trustedApplication.entries,
-    os_types: [trustedApplication.os],
-    scope: trustedApplication.effectScope,
+    id: trustedAppExceptionItem.id,
+    name: trustedAppExceptionItem.name,
+    created_at: trustedAppExceptionItem.created_at,
+    updated_at: trustedAppExceptionItem.updated_at,
+    entries: trustedAppExceptionItem.entries,
+    os_types: trustedAppExceptionItem.os_types,
+    scope: tagsToEffectScope(trustedAppExceptionItem.tags),
   } as ExceptionListItem;
 };
 
@@ -158,15 +167,23 @@ export const ruleExceptionListItemToTelemetryEvent = (
  * @param listType
  * @returns lists telemetry schema
  */
-export const templateExceptionList = (listData: ExceptionListItem[], listType: string) => {
+export const templateExceptionList = (
+  listData: ExceptionListItem[],
+  clusterInfo: ESClusterInfo,
+  licenseInfo: ESLicense | undefined,
+  listType: string
+) => {
   return listData.map((item) => {
     const template: ListTemplate = {
       '@timestamp': moment().toISOString(),
+      cluster_uuid: clusterInfo.cluster_uuid,
+      cluster_name: clusterInfo.cluster_name,
+      license_id: licenseInfo?.uid,
     };
 
     // cast exception list type to a TelemetryEvent for allowlist filtering
     const filteredListItem = copyAllowlistedFields(
-      exceptionListEventFields,
+      exceptionListAllowlistFields,
       item as unknown as TelemetryEvent
     );
 
@@ -200,6 +217,14 @@ export const templateExceptionList = (listData: ExceptionListItem[], listType: s
  * @param label_list the list of labels to create standardized UsageCounter from
  * @returns a string label for usage in the UsageCounter
  */
-export function createUsageCounterLabel(labelList: string[]): string {
-  return labelList.join('-');
-}
+export const createUsageCounterLabel = (labelList: string[]): string => labelList.join('-');
+
+/**
+ * Resiliantly handles an edge case where the endpoint config details are not present
+ *
+ * @returns the endpoint policy configuration
+ */
+export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
+  const epPolicyConfig = policyData?.inputs[0]?.config?.policy;
+  return epPolicyConfig ? epPolicyConfig : null;
+};

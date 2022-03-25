@@ -9,19 +9,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  IndexPatternBase,
-  IndexPatternFieldBase,
-  getDataViewFieldSubtypeNested,
-} from '@kbn/es-query';
+import { DataViewBase, DataViewFieldBase, getDataViewFieldSubtypeNested } from '@kbn/es-query';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '../../../../../../../../src/plugins/data/public';
 type AutocompleteStart = any;
 
 interface FuncArgs {
-  fieldSelected: IndexPatternFieldBase | undefined;
-  patterns: IndexPatternBase | undefined;
+  fieldSelected: DataViewFieldBase | undefined;
+  patterns: DataViewBase | undefined;
   searchQuery: string;
   value: string | string[] | undefined;
 }
@@ -33,10 +29,10 @@ export type UseFieldValueAutocompleteReturn = [boolean, boolean, string[], Func 
 export interface UseFieldValueAutocompleteProps {
   autocompleteService: AutocompleteStart;
   fieldValue: string | string[] | undefined;
-  indexPattern: IndexPatternBase | undefined;
+  indexPattern: DataViewBase | undefined;
   operatorType: OperatorTypeEnum;
   query: string;
-  selectedField: IndexPatternFieldBase | undefined;
+  selectedField: DataViewFieldBase | undefined;
 }
 /**
  * Hook for using the field value autocomplete service

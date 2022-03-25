@@ -8,19 +8,17 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
-import { act, waitFor } from '@testing-library/react';
+import { act, render, waitFor, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import userEvent from '@testing-library/user-event';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
-import {
-  casesStatus,
-  useGetCasesMockState,
-  collectionCase,
-  connectorsMock,
-} from '../../containers/mock';
+import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
-import { CaseStatuses, CaseType, SECURITY_SOLUTION_OWNER, StatusAll } from '../../../common';
+import { StatusAll } from '../../../common/ui/types';
+import { CaseStatuses, CommentType } from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -29,28 +27,41 @@ import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useKibana } from '../../common/lib/kibana';
-import { AllCasesList, AllCasesListProps } from './all_cases_list';
+import { AllCasesList } from './all_cases_list';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
+import { waitForComponentToUpdate } from '../../common/test_utils';
+import { usePostComment } from '../../containers/use_post_comment';
+import { useGetTags } from '../../containers/use_get_tags';
+import { useGetReporters } from '../../containers/use_get_reporters';
 
+jest.mock('../../containers/use_post_comment');
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/use_get_tags');
+jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
+jest.mock('../app/use_available_owners', () => ({
+  useAvailableCasesOwners: () => ['securitySolution', 'observability'],
+}));
 
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
+const useGetTagsMock = useGetTags as jest.Mock;
+const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
+const usePostCommentMock = usePostComment as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -64,10 +75,6 @@ const mockKibana = () => {
 };
 
 describe('AllCasesListGeneric', () => {
-  const defaultAllCasesListProps: AllCasesListProps = {
-    disableAlerts: false,
-  };
-
   const dispatchResetIsDeleted = jest.fn();
   const dispatchResetIsUpdated = jest.fn();
   const dispatchUpdateCaseProperty = jest.fn();
@@ -81,6 +88,7 @@ describe('AllCasesListGeneric', () => {
   const fetchCasesStatus = jest.fn();
   const onRowClick = jest.fn();
   const emptyTag = getEmptyTagValue().props.children;
+  usePostCommentMock.mockReturnValue({ status: { isLoading: false }, postComment: jest.fn() });
 
   const defaultGetCases = {
     ...useGetCasesMockState,
@@ -147,6 +155,14 @@ describe('AllCasesListGeneric', () => {
     useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
+    useGetTagsMock.mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
+    useGetReportersMock.mockReturnValue({
+      reporters: ['casetester'],
+      respReporters: [{ username: 'casetester' }],
+      isLoading: true,
+      isError: false,
+      fetchReporters: jest.fn(),
+    });
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     mockKibana();
@@ -161,7 +177,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
 
@@ -176,7 +192,7 @@ describe('AllCasesListGeneric', () => {
         wrapper.find(`span[data-test-subj="case-table-column-tags-0"]`).first().prop('title')
       ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
       expect(wrapper.find(`[data-test-subj="case-table-column-createdBy"]`).first().text()).toEqual(
-        useGetCasesMockState.data.cases[0].createdBy.fullName
+        useGetCasesMockState.data.cases[0].createdBy.username
       );
       expect(
         wrapper
@@ -204,7 +220,6 @@ describe('AllCasesListGeneric', () => {
             createdAt: null,
             createdBy: null,
             status: null,
-            subCases: null,
             tags: null,
             title: null,
             totalComment: null,
@@ -213,19 +228,24 @@ describe('AllCasesListGeneric', () => {
         ],
       },
     });
+
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
+
     const checkIt = (columnName: string, key: number) => {
       const column = wrapper.find('[data-test-subj="cases-table"] tbody .euiTableRowCell').at(key);
       expect(column.find('.euiTableRowCell--hideForDesktop').text()).toEqual(columnName);
       expect(column.find('span').text()).toEqual(emptyTag);
     };
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
-      useCasesColumns(defaultColumnArgs)
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+      () => useCasesColumns(defaultColumnArgs),
+      {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
     );
 
     await waitFor(() => {
@@ -245,7 +265,7 @@ describe('AllCasesListGeneric', () => {
     });
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     await waitFor(() => {
@@ -253,47 +273,10 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it.skip('should enable correct actions for sub cases', async () => {
-    useGetCasesMock.mockReturnValue({
-      ...defaultGetCases,
-      data: {
-        ...defaultGetCases.data,
-        cases: [
-          {
-            ...defaultGetCases.data.cases[0],
-            id: 'my-case-with-subcases',
-            createdAt: null,
-            createdBy: null,
-            status: null,
-            subCases: [
-              {
-                id: 'sub-case-id',
-              },
-            ],
-            tags: null,
-            title: null,
-            totalComment: null,
-            totalAlerts: null,
-            type: CaseType.collection,
-          },
-        ],
-      },
-    });
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toEqual(
-      false
-    );
-  });
-
   it('should tableHeaderSortButton AllCasesList', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
@@ -310,7 +293,7 @@ describe('AllCasesListGeneric', () => {
   it('Updates status when status context menu is updated', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).first().simulate('click');
@@ -336,7 +319,7 @@ describe('AllCasesListGeneric', () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
-      selectedCases: [...useGetCasesMockState.data.cases, collectionCase],
+      selectedCases: [...useGetCasesMockState.data.cases, mockCase],
     });
 
     useDeleteCasesMock
@@ -351,7 +334,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
 
@@ -369,11 +352,10 @@ describe('AllCasesListGeneric', () => {
       expect(handleToggleModal).toBeCalled();
 
       expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual([
-        ...useGetCasesMockState.data.cases.map(({ id, type, title }) => ({ id, type, title })),
+        ...useGetCasesMockState.data.cases.map(({ id, title }) => ({ id, title })),
         {
-          id: collectionCase.id,
-          title: collectionCase.title,
-          type: collectionCase.type,
+          id: mockCase.id,
+          title: mockCase.title,
         },
       ]);
     });
@@ -388,7 +370,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
 
@@ -406,49 +388,6 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('Renders correct bulk actions for case collection when filter status is set to all - enable only bulk delete if any collection is selected', async () => {
-    useGetCasesMock.mockReturnValue({
-      ...defaultGetCases,
-      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
-      selectedCases: [
-        ...useGetCasesMockState.data.cases,
-        {
-          ...useGetCasesMockState.data.cases[0],
-          type: CaseType.collection,
-        },
-      ],
-    });
-
-    useDeleteCasesMock
-      .mockReturnValueOnce({
-        ...defaultDeleteCases,
-        isDisplayConfirmDeleteModal: false,
-      })
-      .mockReturnValue({
-        ...defaultDeleteCases,
-        isDisplayConfirmDeleteModal: true,
-      });
-
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
-      </TestProviders>
-    );
-    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
-      expect(
-        wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().props().disabled
-      ).toEqual(true);
-      expect(
-        wrapper.find('[data-test-subj="cases-bulk-close-button"]').first().props().disabled
-      ).toEqual(true);
-      expect(
-        wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().props().disabled
-      ).toEqual(false);
-    });
-  });
-
   it('Bulk close status update', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
@@ -458,7 +397,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
@@ -481,7 +420,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
@@ -500,7 +439,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
@@ -521,7 +460,7 @@ describe('AllCasesListGeneric', () => {
 
     mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     await waitFor(() => {
@@ -539,7 +478,7 @@ describe('AllCasesListGeneric', () => {
 
     mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     await waitFor(() => {
@@ -552,7 +491,7 @@ describe('AllCasesListGeneric', () => {
   it('should not render table utility bar when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={true} />
+        <AllCasesList isSelectorView={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -566,13 +505,53 @@ describe('AllCasesListGeneric', () => {
   it('case table should not be selectable when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={true} />
+        <AllCasesList isSelectorView={true} />
       </TestProviders>
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="cases-table"]').first().prop('isSelectable')).toBe(
         false
       );
+    });
+  });
+
+  it('should call postComment when a case is selected in isSelectorView=true and has attachments', async () => {
+    const postCommentMockedValue = { status: { isLoading: false }, postComment: jest.fn() };
+    usePostCommentMock.mockReturnValueOnce(postCommentMockedValue);
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList
+          isSelectorView={true}
+          attachments={[
+            {
+              type: CommentType.alert,
+              alertId: 'alert-id-201',
+              owner: 'test',
+              index: 'index-id-1',
+              rule: {
+                id: 'rule-id-1',
+                name: 'Awesome myrule',
+              },
+            },
+          ]}
+        />
+      </TestProviders>
+    );
+    wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
+    await waitFor(() => {
+      expect(postCommentMockedValue.postComment).toHaveBeenCalledWith({
+        caseId: '1',
+        data: {
+          alertId: 'alert-id-201',
+          index: 'index-id-1',
+          owner: 'test',
+          rule: {
+            id: 'rule-id-1',
+            name: 'Awesome myrule',
+          },
+          type: 'alert',
+        },
+      });
     });
   });
 
@@ -588,7 +567,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={true} onRowClick={onRowClick} />
+        <AllCasesList isSelectorView={true} onRowClick={onRowClick} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
@@ -600,7 +579,7 @@ describe('AllCasesListGeneric', () => {
   it('should call onRowClick when clicking a case with modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={true} onRowClick={onRowClick} />
+        <AllCasesList isSelectorView={true} onRowClick={onRowClick} />
       </TestProviders>
     );
 
@@ -634,12 +613,10 @@ describe('AllCasesListGeneric', () => {
         id: '1',
         owner: SECURITY_SOLUTION_OWNER,
         status: 'open',
-        subCaseIds: [],
         tags: ['coke', 'pepsi'],
         title: 'Another horrible breach!!',
         totalAlerts: 0,
         totalComment: 0,
-        type: CaseType.individual,
         updatedAt: '2020-02-20T15:02:57.995Z',
         updatedBy: {
           email: 'leslie.knope@elastic.co',
@@ -657,7 +634,7 @@ describe('AllCasesListGeneric', () => {
   it('should NOT call onRowClick when clicking a case with modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} />
+        <AllCasesList isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
@@ -669,7 +646,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to closed', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} />
+        <AllCasesList isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -684,7 +661,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to in-progress', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} />
+        <AllCasesList isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -699,7 +676,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to open', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} />
+        <AllCasesList isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -714,7 +691,7 @@ describe('AllCasesListGeneric', () => {
   it('should show the correct count on stats', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} />
+        <AllCasesList isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -734,15 +711,19 @@ describe('AllCasesListGeneric', () => {
   it('should not render status when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={true} />
+        <AllCasesList isSelectorView={true} />
       </TestProviders>
     );
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
-      useCasesColumns({
-        ...defaultColumnArgs,
-        isSelectorView: true,
-      })
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+      () =>
+        useCasesColumns({
+          ...defaultColumnArgs,
+          isSelectorView: true,
+        }),
+      {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
     );
 
     expect(result.current.find((i) => i.name === 'Status')).toBeFalsy();
@@ -769,7 +750,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} doRefresh={doRefresh} />
+        <AllCasesList isSelectorView={false} doRefresh={doRefresh} />
       </TestProviders>
     );
 
@@ -778,5 +759,130 @@ describe('AllCasesListGeneric', () => {
     });
 
     expect(doRefresh).toHaveBeenCalled();
+  });
+
+  it('shows Solution column if there are no set owners', async () => {
+    const doRefresh = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders owner={[]}>
+        <AllCasesList isSelectorView={false} doRefresh={doRefresh} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeTruthy();
+    });
+  });
+
+  it('hides Solution column if there is a set owner', async () => {
+    const doRefresh = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={false} doRefresh={doRefresh} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeFalsy();
+    });
+  });
+
+  it('should deselect cases when refreshing', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: [],
+    });
+
+    render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    const allCheckbox = await screen.findByTestId('checkboxSelectAll');
+    userEvent.click(allCheckbox);
+    const checkboxes = await screen.findAllByRole('checkbox');
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).toBeChecked();
+    }
+
+    userEvent.click(screen.getByText('Refresh'));
+    for (const checkbox of checkboxes) {
+      expect(checkbox).not.toBeChecked();
+    }
+
+    await waitForComponentToUpdate();
+  });
+
+  it('should deselect cases when changing filters', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: [],
+    });
+
+    render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    const allCheckbox = await screen.findByTestId('checkboxSelectAll');
+
+    userEvent.click(allCheckbox);
+    const checkboxes = await screen.findAllByRole('checkbox');
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).toBeChecked();
+    }
+
+    userEvent.click(screen.getByTestId('case-status-filter'));
+    userEvent.click(screen.getByTestId('case-status-filter-closed'));
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).not.toBeChecked();
+    }
+
+    await waitForComponentToUpdate();
+  });
+
+  it('should hide the alerts column if the alert feature is disabled', async () => {
+    expect.assertions(1);
+
+    const { findAllByTestId } = render(
+      <TestProviders features={{ alerts: { enabled: false } }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    await expect(findAllByTestId('case-table-column-alertsCount')).rejects.toThrow();
+  });
+
+  it('should show the alerts column if the alert feature is enabled', async () => {
+    const { findAllByTestId } = render(
+      <TestProviders features={{ alerts: { enabled: true } }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    const alertCounts = await findAllByTestId('case-table-column-alertsCount');
+
+    expect(alertCounts.length).toBeGreaterThan(0);
+  });
+
+  it('should show the alerts column if the alert object is empty', async () => {
+    const { findAllByTestId } = render(
+      <TestProviders features={{ alerts: {} }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    const alertCounts = await findAllByTestId('case-table-column-alertsCount');
+
+    expect(alertCounts.length).toBeGreaterThan(0);
   });
 });

@@ -11,7 +11,7 @@ import * as i18n from '../case_view/translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
-import { Case } from '../../../common';
+import { Case } from '../../../common/ui/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { useAllCasesNavigation } from '../../common/navigation';
 
@@ -57,12 +57,11 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
         caseTitle={caseData.title}
         isModalVisible={isDisplayConfirmDeleteModal}
         onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, [
-          { id: caseData.id, title: caseData.title, type: caseData.type },
-        ])}
+        onConfirm={handleOnDeleteConfirm.bind(null, [{ id: caseData.id, title: caseData.title }])}
       />
     </>
   );
 };
+ActionsComponent.displayName = 'Actions';
 
 export const Actions = React.memo(ActionsComponent);

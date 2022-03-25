@@ -23,11 +23,6 @@ export const LOCALSTORAGE_KEY = 'telemetry.data';
 export const PATH_TO_ADVANCED_SETTINGS = '/app/management/kibana/settings';
 
 /**
- * Link to the Elastic Telemetry privacy statement.
- */
-export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-statement`;
-
-/**
  * The telemetry payload content encryption encoding
  */
 export const PAYLOAD_CONTENT_ENCODING = 'aes256gcm';

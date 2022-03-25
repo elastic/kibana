@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import { ICommonFields, ICustomFields, ConfigKeys } from '../types';
+import { CommonFields, MonitorFields, ConfigKey } from '../types';
 
-export type Formatter = null | ((fields: Partial<ICustomFields>) => string | null);
+export type Formatter = null | ((fields: Partial<MonitorFields>) => string | null);
 
-export type CommonFormatMap = Record<keyof ICommonFields | ConfigKeys.NAME, Formatter>;
+export type CommonFormatMap = Record<keyof CommonFields | ConfigKey.NAME, Formatter>;
 
 export const commonFormatters: CommonFormatMap = {
-  [ConfigKeys.NAME]: null,
-  [ConfigKeys.MONITOR_TYPE]: null,
-  [ConfigKeys.SCHEDULE]: (fields) =>
+  [ConfigKey.NAME]: null,
+  [ConfigKey.LOCATIONS]: null,
+  [ConfigKey.MONITOR_TYPE]: null,
+  [ConfigKey.ENABLED]: null,
+  [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(
-      `@every ${fields[ConfigKeys.SCHEDULE]?.number}${fields[ConfigKeys.SCHEDULE]?.unit}`
+      `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`
     ),
-  [ConfigKeys.APM_SERVICE_NAME]: null,
-  [ConfigKeys.TAGS]: (fields) => arrayToJsonFormatter(fields[ConfigKeys.TAGS]),
-  [ConfigKeys.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKeys.TIMEOUT]),
+  [ConfigKey.APM_SERVICE_NAME]: null,
+  [ConfigKey.TAGS]: (fields) => arrayToJsonFormatter(fields[ConfigKey.TAGS]),
+  [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT] || undefined),
+  [ConfigKey.NAMESPACE]: null,
+  [ConfigKey.REVISION]: null,
 };
 
 export const arrayToJsonFormatter = (value: string[] = []) =>

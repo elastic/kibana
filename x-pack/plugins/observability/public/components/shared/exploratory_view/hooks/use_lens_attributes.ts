@@ -19,19 +19,21 @@ import {
 import { getDefaultConfigs } from '../configurations/default_configs';
 
 import { ReportViewType, SeriesUrl, UrlFilter } from '../types';
-import { IndexPatternState, useAppIndexPatternContext } from './use_app_index_pattern';
+import { DataViewState, useAppDataViewContext } from './use_app_data_view';
 import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
 import { useTheme } from '../../../../hooks/use_theme';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
-import { ReportConfigMap, useExploratoryView } from '../contexts/exploatory_view_config';
+import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
 
-export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
+export const getFiltersFromDefs = (
+  reportDefinitions: SeriesUrl['reportDefinitions'] | SeriesUrl['textReportDefinitions']
+) => {
   return Object.entries(reportDefinitions ?? {})
     .map(([field, value]) => {
       return {
         field,
-        values: value,
+        values: Array.isArray(value) ? value : [value],
       };
     })
     .filter(({ values }) => !values.includes(ALL_VALUES_SELECTED)) as UrlFilter[];
@@ -41,36 +43,37 @@ export function getLayerConfigs(
   allSeries: AllSeries,
   reportType: ReportViewType,
   theme: EuiTheme,
-  indexPatterns: IndexPatternState,
+  dataViews: DataViewState,
   reportConfigMap: ReportConfigMap
 ) {
   const layerConfigs: LayerConfig[] = [];
 
   allSeries.forEach((series, seriesIndex) => {
-    const indexPattern = indexPatterns?.[series?.dataType];
+    const dataView = dataViews?.[series?.dataType];
 
     if (
-      indexPattern &&
+      dataView &&
       !isEmpty(series.reportDefinitions) &&
       !series.hidden &&
       series.selectedMetricField
     ) {
       const seriesConfig = getDefaultConfigs({
         reportType,
-        indexPattern,
+        dataView,
         dataType: series.dataType,
         reportConfigMap,
       });
 
       const filters: UrlFilter[] = (series.filters ?? []).concat(
-        getFiltersFromDefs(series.reportDefinitions)
+        getFiltersFromDefs(series.reportDefinitions),
+        getFiltersFromDefs(series.textReportDefinitions)
       );
 
       const color = `euiColorVis${seriesIndex}`;
 
       layerConfigs.push({
         filters,
-        indexPattern,
+        indexPattern: dataView,
         seriesConfig,
         time: series.time,
         name: series.name,
@@ -90,7 +93,7 @@ export function getLayerConfigs(
 export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null => {
   const { storage, allSeries, lastRefresh, reportType } = useSeriesStorage();
 
-  const { indexPatterns } = useAppIndexPatternContext();
+  const { dataViews } = useAppDataViewContext();
 
   const { reportConfigMap } = useExploratoryView();
 
@@ -101,14 +104,14 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
     const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
     const reportTypeT: ReportViewType = storage.get(reportTypeKey) as ReportViewType;
 
-    if (isEmpty(indexPatterns) || isEmpty(allSeriesT) || !reportTypeT) {
+    if (isEmpty(dataViews) || isEmpty(allSeriesT) || !reportTypeT) {
       return null;
     }
     const layerConfigs = getLayerConfigs(
       allSeriesT,
       reportTypeT,
       theme,
-      indexPatterns,
+      dataViews,
       reportConfigMap
     );
 
@@ -118,8 +121,8 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
 
     const lensAttributes = new LensAttributes(layerConfigs);
 
-    return lensAttributes.getJSON(lastRefresh);
+    return lensAttributes.getJSON();
     // we also want to check the state on allSeries changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPatterns, reportType, storage, theme, lastRefresh, allSeries]);
+  }, [dataViews, reportType, storage, theme, lastRefresh, allSeries]);
 };

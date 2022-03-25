@@ -15,8 +15,8 @@ import { FLYOUT_ARIA_LABEL_ID } from './constants';
 import {
   ShowCreationModes,
   ApiCodeExample,
-  PasteJsonText,
-  UploadJsonFile,
+  JsonFlyout,
+  ElasticsearchIndex,
 } from './creation_mode_components';
 import { Summary } from './creation_response_components';
 import { DocumentCreationStep } from './types';
@@ -46,10 +46,10 @@ export const FlyoutContent: React.FC = () => {
       switch (creationMode) {
         case 'api':
           return <ApiCodeExample />;
-        case 'text':
-          return <PasteJsonText />;
-        case 'file':
-          return <UploadJsonFile />;
+        case 'json':
+          return <JsonFlyout />;
+        case 'elasticsearchIndex':
+          return <ElasticsearchIndex />;
       }
     case DocumentCreationStep.ShowSummary:
       return <Summary />;

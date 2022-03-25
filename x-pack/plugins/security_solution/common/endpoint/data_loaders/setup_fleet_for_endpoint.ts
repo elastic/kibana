@@ -101,7 +101,7 @@ export const installOrUpgradeEndpointFleetPackage = async (
     })
     .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
 
-  const bulkResp = installEndpointPackageResp.data.response;
+  const bulkResp = installEndpointPackageResp.data.items;
 
   if (bulkResp.length <= 0) {
     throw new EndpointDataLoadingError(

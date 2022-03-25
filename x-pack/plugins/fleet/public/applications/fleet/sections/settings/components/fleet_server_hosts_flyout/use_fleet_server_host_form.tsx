@@ -35,7 +35,7 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
 }) => (
   <FormattedMessage
     id="xpack.fleet.settings.fleetServerHostsFlyout.confirmModalText"
-    defaultMessage="This action will update {policies} agent policies and {agents}. This action can not be undone. Are you sure you wish to continue?"
+    defaultMessage="This action will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
     values={{
       agents: (
         <strong>
@@ -142,7 +142,7 @@ export function useFleetServerHostsForm(
 
   const submit = useCallback(async () => {
     try {
-      if (!validate) {
+      if (!validate()) {
         return;
       }
       const { agentCount, agentPolicyCount } = await getAgentAndPolicyCount();
@@ -178,9 +178,12 @@ export function useFleetServerHostsForm(
     }
   }, [fleetServerHostsInput.value, validate, notifications, confirm, onSuccess]);
 
+  const isDisabled =
+    isLoading || !fleetServerHostsInput.hasChanged || fleetServerHostsInput.props.isInvalid;
+
   return {
     isLoading,
-    isDisabled: isLoading || !fleetServerHostsInput.hasChanged,
+    isDisabled,
     submit,
     fleetServerHostsInput,
   };

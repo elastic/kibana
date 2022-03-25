@@ -4,39 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useCallback } from 'react';
 import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
-import { first, last } from 'lodash';
-import moment from 'moment';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { first, last } from 'lodash';
+import moment from 'moment';
+import React, { useCallback, useMemo } from 'react';
+import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { Color } from '../../../../common/color_palette';
-import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
-import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
-import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';
+import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useSnapshot } from '../../../pages/metrics/inventory_view/hooks/use_snaphot';
+import { useWaffleOptionsContext } from '../../../pages/metrics/inventory_view/hooks/use_waffle_options';
+import { createInventoryMetricFormatter } from '../../../pages/metrics/inventory_view/lib/create_inventory_metric_formatter';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
-import { useSnapshot } from '../../../pages/metrics/inventory_view/hooks/use_snaphot';
-import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { createInventoryMetricFormatter } from '../../../pages/metrics/inventory_view/lib/create_inventory_metric_formatter';
-
+import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
+import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import {
   ChartContainer,
+  getChartTheme,
   LoadingState,
   NoDataState,
   TIME_LABELS,
   tooltipProps,
-  getChartTheme,
 } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { ThresholdAnnotations } from '../../common/criterion_preview_chart/threshold_annotations';
-import { useWaffleOptionsContext } from '../../../pages/metrics/inventory_view/hooks/use_waffle_options';
 
 interface Props {
   expression: InventoryMetricConditions;
-  filterQuery?: string;
+  filterQuery?: string | symbol;
   nodeType: InventoryItemType;
   sourceId: string;
 }

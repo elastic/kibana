@@ -7,6 +7,8 @@
 
 import type { Output } from '../models';
 
+import type { ListResult } from './common';
+
 export interface GetOneOutputResponse {
   item: Output;
 }
@@ -26,26 +28,38 @@ export interface PutOutputRequest {
     outputId: string;
   };
   body: {
-    type?: 'elasticsearch';
+    type?: 'elasticsearch' | 'logstash';
     name?: string;
     hosts?: string[];
     ca_sha256?: string;
+    ca_trusted_fingerprint?: string;
     config_yaml?: string;
     is_default?: boolean;
     is_default_monitoring?: boolean;
+    ssl?: {
+      certificate_authorities?: string[];
+      certificate?: string;
+      key?: string;
+    };
   };
 }
 
 export interface PostOutputRequest {
   body: {
     id?: string;
-    type: 'elasticsearch';
+    type: 'elasticsearch' | 'logstash';
     name: string;
     hosts?: string[];
     ca_sha256?: string;
+    ca_trusted_fingerprint?: string;
     is_default?: boolean;
     is_default_monitoring?: boolean;
     config_yaml?: string;
+    ssl?: {
+      certificate_authorities?: string[];
+      certificate?: string;
+      key?: string;
+    };
   };
 }
 
@@ -53,9 +67,8 @@ export interface PutOutputResponse {
   item: Output;
 }
 
-export interface GetOutputsResponse {
-  items: Output[];
-  total: number;
-  page: number;
-  perPage: number;
+export type GetOutputsResponse = ListResult<Output>;
+
+export interface PostLogstashApiKeyResponse {
+  api_key: string;
 }

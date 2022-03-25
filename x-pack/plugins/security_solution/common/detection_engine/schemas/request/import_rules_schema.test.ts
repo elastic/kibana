@@ -9,13 +9,11 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import {
+  importRulesPayloadSchema,
+  ImportRulesPayloadSchema,
   ImportRulesSchema,
   importRulesSchema,
   ImportRulesSchemaDecoded,
-  importRulesQuerySchema,
-  ImportRulesQuerySchema,
-  importRulesPayloadSchema,
-  ImportRulesPayloadSchema,
 } from './import_rules_schema';
 import {
   getImportRulesSchemaMock,
@@ -1252,46 +1250,6 @@ describe('import rules schema', () => {
       'Invalid value "1578550728650" supplied to "updated_at"',
     ]);
     expect(message.schema).toEqual({});
-  });
-
-  describe('importRulesQuerySchema', () => {
-    test('overwrite gets a default value of false', () => {
-      const payload: ImportRulesQuerySchema = {};
-
-      const decoded = importRulesQuerySchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual({
-        overwrite: false,
-      });
-    });
-
-    test('overwrite validates with a boolean true', () => {
-      const payload: ImportRulesQuerySchema = { overwrite: true };
-
-      const decoded = importRulesQuerySchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual({
-        overwrite: true,
-      });
-    });
-
-    test('overwrite does not validate with a weird string', () => {
-      const payload: Omit<ImportRulesQuerySchema, 'overwrite'> & { overwrite: string } = {
-        overwrite: 'invalid-string',
-      };
-
-      const decoded = importRulesQuerySchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "invalid-string" supplied to "overwrite"',
-      ]);
-      expect(message.schema).toEqual({});
-    });
   });
 
   describe('importRulesPayloadSchema', () => {

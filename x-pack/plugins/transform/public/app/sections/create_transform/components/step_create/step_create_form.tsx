@@ -26,10 +26,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-import {
-  DISCOVER_APP_URL_GENERATOR,
-  DiscoverUrlGeneratorState,
-} from '../../../../../../../../../src/plugins/discover/public';
+import { DISCOVER_APP_LOCATOR } from '../../../../../../../../../src/plugins/discover/public';
 
 import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
@@ -59,19 +56,19 @@ import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting
 export interface StepDetailsExposedState {
   created: boolean;
   started: boolean;
-  indexPatternId: string | undefined;
+  dataViewId: string | undefined;
 }
 
 export function getDefaultStepCreateState(): StepDetailsExposedState {
   return {
     created: false,
     started: false,
-    indexPatternId: undefined,
+    dataViewId: undefined,
   };
 }
 
 export interface StepCreateFormProps {
-  createIndexPattern: boolean;
+  createDataView: boolean;
   transformId: string;
   transformConfig: PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema;
   overrides: StepDetailsExposedState;
@@ -80,7 +77,7 @@ export interface StepCreateFormProps {
 }
 
 export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
-  ({ createIndexPattern, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
+  ({ createDataView, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
     const [redirectToTransformManagement, setRedirectToTransformManagement] = useState(false);
@@ -89,43 +86,38 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [created, setCreated] = useState(defaults.created);
     const [started, setStarted] = useState(defaults.started);
     const [alertFlyoutVisible, setAlertFlyoutVisible] = useState(false);
-    const [indexPatternId, setIndexPatternId] = useState(defaults.indexPatternId);
+    const [dataViewId, setDataViewId] = useState(defaults.dataViewId);
     const [progressPercentComplete, setProgressPercentComplete] = useState<undefined | number>(
       undefined
     );
     const [discoverLink, setDiscoverLink] = useState<string>();
 
     const deps = useAppDependencies();
-    const indexPatterns = deps.data.indexPatterns;
+    const { share } = deps;
+    const dataViews = deps.data.dataViews;
     const toastNotifications = useToastNotifications();
-    const { getUrlGenerator } = deps.share.urlGenerators;
     const isDiscoverAvailable = deps.application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
       let unmounted = false;
 
-      onChange({ created, started, indexPatternId });
+      onChange({ created, started, dataViewId });
 
       const getDiscoverUrl = async (): Promise<void> => {
-        const state: DiscoverUrlGeneratorState = {
-          indexPatternId,
-        };
+        const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
 
-        let discoverUrlGenerator;
-        try {
-          discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
-        } catch (error) {
-          // ignore error thrown when url generator is not available
-          return;
-        }
+        if (!locator) return;
 
-        const discoverUrl = await discoverUrlGenerator.createUrl(state);
+        const discoverUrl = await locator.getUrl({
+          indexPatternId: dataViewId,
+        });
+
         if (!unmounted) {
           setDiscoverLink(discoverUrl);
         }
       };
 
-      if (started === true && indexPatternId !== undefined && isDiscoverAvailable) {
+      if (started === true && dataViewId !== undefined && isDiscoverAvailable) {
         getDiscoverUrl();
       }
 
@@ -134,8 +126,9 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       };
       // custom comparison
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [created, started, indexPatternId]);
+    }, [created, started, dataViewId]);
 
+    const { overlays, theme } = useAppDependencies();
     const api = useApi();
 
     async function createTransform() {
@@ -160,9 +153,11 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           }),
           text: toMountPoint(
             <ToastNotificationText
-              overlays={deps.overlays}
+              overlays={overlays}
+              theme={theme}
               text={getErrorMessage(isPutTransformsResponseSchema(resp) ? respErrors : resp)}
-            />
+            />,
+            { theme$: theme.theme$ }
           ),
         });
         setCreated(false);
@@ -179,8 +174,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       setCreated(true);
       setLoading(false);
 
-      if (createIndexPattern) {
-        createKibanaIndexPattern();
+      if (createDataView) {
+        createKibanaDataView();
       }
 
       return true;
@@ -214,7 +209,12 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           values: { transformId },
         }),
         text: toMountPoint(
-          <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(errorMessage)} />
+          <ToastNotificationText
+            overlays={overlays}
+            theme={theme}
+            text={getErrorMessage(errorMessage)}
+          />,
+          { theme$: theme.theme$ }
         ),
       });
       setStarted(false);
@@ -228,7 +228,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       }
     }
 
-    const createKibanaIndexPattern = async () => {
+    const createKibanaDataView = async () => {
       setLoading(true);
       const dataViewName = transformConfig.dest.index;
       const runtimeMappings = transformConfig.source.runtime_mappings as Record<
@@ -237,7 +237,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       >;
 
       try {
-        const newIndexPattern = await indexPatterns.createAndSave(
+        const newDataView = await dataViews.createAndSave(
           {
             title: dataViewName,
             timeFieldName,
@@ -256,7 +256,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           })
         );
 
-        setIndexPatternId(newIndexPattern.id);
+        setDataViewId(newDataView.id);
         setLoading(false);
         return true;
       } catch (e) {
@@ -275,7 +275,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               values: { dataViewName },
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(e)} />,
+              { theme$: theme.theme$ }
             ),
           });
           setLoading(false);
@@ -321,7 +322,12 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                 defaultMessage: 'An error occurred getting the progress percentage:',
               }),
               text: toMountPoint(
-                <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(stats)} />
+                <ToastNotificationText
+                  overlays={overlays}
+                  theme={theme}
+                  text={getErrorMessage(stats)}
+                />,
+                { theme$: theme.theme$ }
               ),
             });
             clearInterval(interval);
@@ -523,7 +529,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                     data-test-subj="transformWizardCardManagement"
                   />
                 </EuiFlexItem>
-                {started === true && createIndexPattern === true && indexPatternId === undefined && (
+                {started === true && createDataView === true && dataViewId === undefined && (
                   <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                     <EuiPanel style={{ position: 'relative' }}>
                       <EuiProgress size="xs" color="primary" position="absolute" />

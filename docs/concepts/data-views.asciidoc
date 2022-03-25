@@ -1,7 +1,7 @@
 [[data-views]]
 === Create a data view
 
-{kib} requires a data view to access the {es} data that you want to explore. 
+{kib} requires a data view to access the {es} data that you want to explore.
 A data view selects the data to use and allows you to define properties of the fields.
 
 A data view can point to one or more indices, {ref}/data-streams.html[data stream], or {ref}/alias.html[index aliases].
@@ -12,10 +12,10 @@ or all indices that contain your data.
 [[data-views-read-only-access]]
 === Required permissions
 
-* Access to *Data Views* requires the <<xpack-kibana-role-management, {kib} privilege>>
+* Access to *Data Views* requires the <<kibana-role-management, {kib} privilege>>
 `Data View Management`.
 
-* To create a data view, you must have the <<xpack-kibana-role-management,{es} privilege>>
+* To create a data view, you must have the <<kibana-role-management,{es} privilege>>
 `view_index_metadata`.
 
 * If a read-only indicator appears in {kib}, you have insufficient privileges
@@ -32,15 +32,15 @@ uploaded a file, or added sample data,
 you get a data view for free, and can start exploring your data.
 If you loaded your own data, follow these steps to create a data view.
 
-. Open the main menu, then click to *Stack Management > Data Views*.
+. Open the main menu, then click *Stack Management > Data Views*.
 
 . Click *Create data view*.
 
-[role="screenshot"]
-image:management/index-patterns/images/create-index-pattern.png["Create data view"]
-
 . Start typing in the *name* field, and {kib} looks for the names of
 indices, data streams, and aliases that match your input.
++
+[role="screenshot"]
+image:management/index-patterns/images/create-data-view.png["Create data view"]
 +
 ** To match multiple sources, use a wildcard (*). For example, `filebeat-*` matches
 `filebeat-apache-a`, `filebeat-apache-b`, and so on.
@@ -87,11 +87,12 @@ For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up d
 ==== Create a data view that searches across clusters
 
 If your {es} clusters are configured for {ref}/modules-cross-cluster-search.html[{ccs}],
-you can create an index pattern to search across the clusters of your choosing. Use the
-same syntax that you use in a raw {ccs} request in {es}:
+you can create a {data-source} to search across the clusters of your choosing.
+You specify data streams, indices, and aliases in a remote cluster using the
+following syntax:
 
 ```ts
-<cluster-names>:<pattern>
+<remote_cluster_name>:<target>
 ```
 
 To query {ls} indices across two {es} clusters

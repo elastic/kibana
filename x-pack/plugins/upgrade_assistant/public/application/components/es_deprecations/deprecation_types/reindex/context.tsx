@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, createContext, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 
 import { ApiService } from '../../../../lib/api';
 import { useReindexStatus, ReindexState } from './use_reindex_state';
@@ -37,15 +37,10 @@ export const ReindexStatusProvider: React.FunctionComponent<Props> = ({
   indexName,
   children,
 }) => {
-  const { reindexState, startReindex, cancelReindex, updateStatus } = useReindexStatus({
+  const { reindexState, startReindex, cancelReindex } = useReindexStatus({
     indexName,
     api,
   });
-
-  useEffect(() => {
-    updateStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <ReindexContext.Provider

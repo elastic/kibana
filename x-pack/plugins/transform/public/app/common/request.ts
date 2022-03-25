@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { HttpFetchError } from '../../../../../../src/core/public';
-import type { IndexPattern } from '../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
 import type {
   PivotTransformPreviewRequestSchema,
@@ -19,7 +19,7 @@ import type {
 } from '../../../common/api_schemas/transforms';
 import { isPopulatedObject } from '../../../common/shared_imports';
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
-import { isIndexPattern } from '../../../common/types/index_pattern';
+import { isDataView } from '../../../common/types/data_view';
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
@@ -39,7 +39,7 @@ import {
 export interface SimpleQuery {
   query_string: {
     query: string;
-    default_operator?: estypes.DefaultOperator;
+    default_operator?: estypes.QueryDslOperator;
   };
 }
 
@@ -78,14 +78,14 @@ export function isDefaultQuery(query: PivotQuery): boolean {
 }
 
 export function getCombinedRuntimeMappings(
-  indexPattern: IndexPattern | undefined,
+  dataView: DataView | undefined,
   runtimeMappings?: StepDefineExposedState['runtimeMappings']
 ): StepDefineExposedState['runtimeMappings'] | undefined {
   let combinedRuntimeMappings = {};
 
   // And runtime field mappings defined by index pattern
-  if (isIndexPattern(indexPattern)) {
-    const computedFields = indexPattern.getComputedFields();
+  if (isDataView(dataView)) {
+    const computedFields = dataView.getComputedFields();
     if (computedFields?.runtimeFields !== undefined) {
       const ipRuntimeMappings = computedFields.runtimeFields;
       if (isPopulatedObject(ipRuntimeMappings)) {
@@ -167,12 +167,12 @@ export const getRequestPayload = (
 };
 
 export function getPreviewTransformRequestBody(
-  indexPatternTitle: IndexPattern['title'],
+  dataViewTitle: DataView['title'],
   query: PivotQuery,
   partialRequest?: StepDefineExposedState['previewRequest'] | undefined,
   runtimeMappings?: StepDefineExposedState['runtimeMappings']
 ): PostTransformsPreviewRequestSchema {
-  const index = indexPatternTitle.split(',').map((name: string) => name.trim());
+  const index = dataViewTitle.split(',').map((name: string) => name.trim());
 
   return {
     source: {
@@ -199,12 +199,12 @@ export const getCreateTransformSettingsRequestBody = (
 };
 
 export const getCreateTransformRequestBody = (
-  indexPatternTitle: IndexPattern['title'],
+  dataViewTitle: DataView['title'],
   pivotState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState
 ): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...getPreviewTransformRequestBody(
-    indexPatternTitle,
+    dataViewTitle,
     getPivotQuery(pivotState.searchQuery),
     pivotState.previewRequest,
     pivotState.runtimeMappings
@@ -219,6 +219,10 @@ export const getCreateTransformRequestBody = (
     : {}),
   dest: {
     index: transformDetailsState.destinationIndex,
+    // conditionally add optional ingest pipeline
+    ...(transformDetailsState.destinationIngestPipeline !== ''
+      ? { pipeline: transformDetailsState.destinationIngestPipeline }
+      : {}),
   },
   // conditionally add continuous mode config
   ...(transformDetailsState.isContinuousModeEnabled

@@ -10,43 +10,35 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { wrapError, escapeHatch } from '../utils';
+import { throwErrors, CasePushRequestParamsRt } from '../../../../common/api';
+import { CASE_PUSH_URL } from '../../../../common/constants';
+import { CaseRoute } from '../types';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
-import { throwErrors, CasePushRequestParamsRt, CASE_PUSH_URL } from '../../../../common';
-import { RouteDeps } from '../types';
+export const pushCaseRoute: CaseRoute = createCasesRoute({
+  method: 'post',
+  path: CASE_PUSH_URL,
+  handler: async ({ context, request, response }) => {
+    try {
+      const casesClient = await context.cases.getCasesClient();
 
-export function initPushCaseApi({ router, logger }: RouteDeps) {
-  router.post(
-    {
-      path: CASE_PUSH_URL,
-      validate: {
-        params: escapeHatch,
-        body: escapeHatch,
-      },
-    },
-    async (context, request, response) => {
-      try {
-        if (!context.cases) {
-          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-        }
+      const params = pipe(
+        CasePushRequestParamsRt.decode(request.params),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const casesClient = await context.cases.getCasesClient();
-
-        const params = pipe(
-          CasePushRequestParamsRt.decode(request.params),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
-
-        return response.ok({
-          body: await casesClient.cases.push({
-            caseId: params.case_id,
-            connectorId: params.connector_id,
-          }),
-        });
-      } catch (error) {
-        logger.error(`Failed to push case in route: ${error}`);
-        return response.customError(wrapError(error));
-      }
+      return response.ok({
+        body: await casesClient.cases.push({
+          caseId: params.case_id,
+          connectorId: params.connector_id,
+        }),
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to push case in route: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});

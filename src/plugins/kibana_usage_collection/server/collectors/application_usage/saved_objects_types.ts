@@ -27,7 +27,10 @@ export interface ApplicationUsageTransactional extends ApplicationUsageTotal {
   timestamp: string;
 }
 
-/** @deprecated transactional type is no longer used, and only preserved for backward compatibility */
+/**
+ * @deprecated transactional type is no longer used, and only preserved for backward compatibility
+ * @removeBy 8.0.0
+ */
 export const SAVED_OBJECTS_TRANSACTIONAL_TYPE = 'application_usage_transactional';
 
 /**

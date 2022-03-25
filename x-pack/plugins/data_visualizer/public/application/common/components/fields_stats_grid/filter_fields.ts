@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JOB_FIELD_TYPES } from '../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../common/constants';
 import type {
   FileBasedFieldVisConfig,
   FileBasedUnknownFieldVisConfig,

@@ -135,7 +135,12 @@ describe('registerDataHandler', () => {
           },
         };
       },
-      hasData: async () => true,
+      hasData: async () => {
+        return {
+          hasData: true,
+          indices: 'test-index',
+        };
+      },
     });
 
     it('registered data handler', () => {
@@ -176,9 +181,9 @@ describe('registerDataHandler', () => {
     });
 
     it('returns true when hasData is called', async () => {
-      const dataHandler = getDataHandler('apm');
+      const dataHandler = getDataHandler('infra_logs');
       const hasData = await dataHandler?.hasData();
-      expect(hasData).toBeTruthy();
+      expect(hasData?.hasData).toBeTruthy();
     });
   });
   describe('Uptime', () => {
@@ -341,7 +346,7 @@ describe('registerDataHandler', () => {
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: makeRequest,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'metrics-*' }),
     });
 
     it('registered data handler', () => {

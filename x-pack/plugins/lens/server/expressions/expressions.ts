@@ -7,12 +7,12 @@
 
 import type { CoreSetup } from 'kibana/server';
 import {
-  pie,
   xyChart,
   counterRate,
-  metricChart,
   yAxisConfig,
-  layerConfig,
+  dataLayerConfig,
+  referenceLineLayerConfig,
+  annotationLayerConfig,
   formatColumn,
   legendConfig,
   renameColumns,
@@ -36,12 +36,12 @@ export const setupExpressions = (
   [lensMultitable].forEach((expressionType) => expressions.registerType(expressionType));
 
   [
-    pie,
     xyChart,
     counterRate,
-    metricChart,
     yAxisConfig,
-    layerConfig,
+    dataLayerConfig,
+    referenceLineLayerConfig,
+    annotationLayerConfig,
     formatColumn,
     legendConfig,
     renameColumns,

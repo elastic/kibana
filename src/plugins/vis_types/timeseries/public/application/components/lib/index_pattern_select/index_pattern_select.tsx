@@ -19,7 +19,7 @@ import { ComboBoxSelect } from './combo_box_select';
 
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../../common/types';
 import { USE_KIBANA_INDEXES_KEY } from '../../../../../common/constants';
-import { IndexPattern } from '../../../../../../../data/common';
+import type { DataView } from '../../../../../../../data_views/public';
 
 export interface IndexPatternSelectProps {
   indexPatternName: string;
@@ -28,7 +28,7 @@ export interface IndexPatternSelectProps {
   allowIndexSwitchingMode?: boolean;
   fetchedIndex:
     | (FetchedIndexPattern & {
-        defaultIndex?: IndexPattern | null;
+        defaultIndex?: DataView | null;
       })
     | null;
 }
@@ -111,7 +111,7 @@ export const IndexPatternSelect = ({
       label={indexPatternLabel}
       helpText={fetchedIndex.defaultIndex && getIndexPatternHelpText(useKibanaIndices)}
       labelAppend={
-        fetchedIndex.indexPatternString && !fetchedIndex.indexPattern ? (
+        !useKibanaIndices && fetchedIndex.indexPatternString && !fetchedIndex.indexPattern ? (
           <EuiLink onClick={navigateToCreateIndexPatternPage}>
             <EuiText size="xs">
               <FormattedMessage

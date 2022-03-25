@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import type { EndpointPrivileges } from './use_endpoint_privileges';
-import { getEndpointPrivilegesInitialState } from './utils';
+import { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 
-export const getEndpointPrivilegesInitialStateMock = (
-  overrides: Partial<EndpointPrivileges> = {}
-): EndpointPrivileges => {
-  // Get the initial state and set all permissions to `true` (enabled) for testing
+export const getEndpointPrivilegesInitialStateMock = ({
+  loading = false,
+  ...overrides
+}: Partial<EndpointPrivileges> = {}): EndpointPrivileges => {
   const endpointPrivilegesMock: EndpointPrivileges = {
-    ...(
-      Object.entries(getEndpointPrivilegesInitialState()) as Array<
-        [keyof EndpointPrivileges, boolean]
-      >
-    ).reduce((mockPrivileges, [key, value]) => {
-      mockPrivileges[key] = !value;
-
-      return mockPrivileges;
-    }, {} as EndpointPrivileges),
-    ...overrides,
+    ...getEndpointAuthzInitialStateMock(overrides),
+    loading,
   };
 
   return endpointPrivilegesMock;

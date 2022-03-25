@@ -1,0 +1,3010 @@
+{
+  "id": "ml",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.MlLocatorDefinition",
+        "type": "Class",
+        "tags": [],
+        "label": "MlLocatorDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "ml",
+            "scope": "public",
+            "docId": "kibMlPluginApi",
+            "section": "def-public.MlLocatorDefinition",
+            "text": "MlLocatorDefinition"
+          },
+          " implements ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorDefinition",
+            "text": "LocatorDefinition"
+          },
+          "<",
+          "MlLocatorParams",
+          ">"
+        ],
+        "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlLocatorDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"ML_APP_LOCATOR\""
+            ],
+            "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlLocatorDefinition.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [],
+            "signature": [
+              "(params: ",
+              "MlLocatorParams",
+              ") => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
+            "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ml",
+                "id": "def-public.MlLocatorDefinition.getLocation.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "MlLocatorParams"
+                ],
+                "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.getFormattedSeverityScore",
+        "type": "Function",
+        "tags": [],
+        "label": "getFormattedSeverityScore",
+        "description": [
+          "\nReturns formatted severity score."
+        ],
+        "signature": [
+          "(score: number) => string"
+        ],
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.getFormattedSeverityScore.$1",
+            "type": "number",
+            "tags": [],
+            "label": "score",
+            "description": [
+              "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.getMlSharedImports",
+        "type": "Function",
+        "tags": [],
+        "label": "getMlSharedImports",
+        "description": [],
+        "signature": [
+          "() => Promise<typeof ",
+          "x-pack/plugins/ml/public/shared",
+          ">"
+        ],
+        "path": "x-pack/plugins/ml/public/index.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.getSeverity",
+        "type": "Function",
+        "tags": [],
+        "label": "getSeverity",
+        "description": [
+          "\nReturns a severity label (one of critical, major, minor, warning or unknown)\nfor the supplied normalized anomaly score (a value between 0 and 100)."
+        ],
+        "signature": [
+          "(normalizedScore: number) => ",
+          "SeverityType"
+        ],
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.getSeverity.$1",
+            "type": "number",
+            "tags": [],
+            "label": "normalizedScore",
+            "description": [
+              "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.getSeverityColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getSeverityColor",
+        "description": [
+          "\nReturns a severity RGB color (one of critical, major, minor, warning, low or blank)\nfor the supplied normalized anomaly score (a value between 0 and 100)."
+        ],
+        "signature": [
+          "(normalizedScore: number) => string"
+        ],
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.getSeverityColor.$1",
+            "type": "number",
+            "tags": [],
+            "label": "normalizedScore",
+            "description": [
+              "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.getSeverityType",
+        "type": "Function",
+        "tags": [],
+        "label": "getSeverityType",
+        "description": [
+          "\nReturns a severity type (indicating a critical, major, minor, warning or low severity anomaly)\nfor the supplied normalized anomaly score (a value between 0 and 100)."
+        ],
+        "signature": [
+          "(normalizedScore: number) => ",
+          {
+            "pluginId": "ml",
+            "scope": "common",
+            "docId": "kibMlPluginApi",
+            "section": "def-common.ANOMALY_SEVERITY",
+            "text": "ANOMALY_SEVERITY"
+          }
+        ],
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.getSeverityType.$1",
+            "type": "number",
+            "tags": [],
+            "label": "normalizedScore",
+            "description": [
+              "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.MLJobsAwaitingNodeWarning",
+        "type": "Function",
+        "tags": [],
+        "label": "MLJobsAwaitingNodeWarning",
+        "description": [],
+        "signature": [
+          "({ jobIds }: React.PropsWithChildren<Props>) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MLJobsAwaitingNodeWarning.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ jobIds }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
+            "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.useMlHref",
+        "type": "Function",
+        "tags": [],
+        "label": "useMlHref",
+        "description": [
+          "\nProvides a URL to ML plugin page\nTODO remove basePath parameter"
+        ],
+        "signature": [
+          "(ml: { locator: ",
+          "MlLocator",
+          " | undefined; } | undefined, basePath: string | undefined, params: ",
+          "MlLocatorParams",
+          ") => string"
+        ],
+        "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.useMlHref.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "ml",
+            "description": [],
+            "signature": [
+              "{ locator: ",
+              "MlLocator",
+              " | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.useMlHref.$2",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.useMlHref.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "MlLocatorParams"
+            ],
+            "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.AnomaliesTableRecord",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnomaliesTableRecord",
+        "description": [
+          "\nAnomaly table record, representing the fields shown in the ML UI anomalies table."
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.time",
+            "type": "number",
+            "tags": [],
+            "label": "time",
+            "description": [
+              "\nThe start time of the interval for which the anomaly data in the table is being aggregated.\nAnomalies in the table are commonly aggregated by day, hour, or at the bucket span of the job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.source",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [
+              "\nThe source anomaly record document, containing the full source anomaly record fields."
+            ],
+            "signature": [
+              "AnomalyRecordDoc"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.rowId",
+            "type": "string",
+            "tags": [],
+            "label": "rowId",
+            "description": [
+              "\nUnique identifier for the table row."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.jobId",
+            "type": "string",
+            "tags": [],
+            "label": "jobId",
+            "description": [
+              "\nIdentifier for the anomaly detection job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.detectorIndex",
+            "type": "number",
+            "tags": [],
+            "label": "detectorIndex",
+            "description": [
+              "\nA unique identifier for the detector.\nThis identifier is based on the order of the detectors in the analysis configuration, starting at zero."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.severity",
+            "type": "number",
+            "tags": [],
+            "label": "severity",
+            "description": [
+              "\nSeverity of the anomaly displaying the anomaly record_score, a normalized score between 0-100,\nwhich is based on the probability of the anomalousness of this record."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.entityName",
+            "type": "string",
+            "tags": [],
+            "label": "entityName",
+            "description": [
+              "\nThe entity name of the anomaly, looking first for a by_field, then over_field,\nthen partition_field, returning undefined if none of these fields are present."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.entityValue",
+            "type": "Any",
+            "tags": [],
+            "label": "entityValue",
+            "description": [
+              "\nThe value of the entity field."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.influencers",
+            "type": "Array",
+            "tags": [],
+            "label": "influencers",
+            "description": [
+              "\nIf influencers was specified in the detector configuration, this array contains influencers\nthat contributed to or were to blame for an anomaly."
+            ],
+            "signature": [
+              "{ [key: string]: any; }[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.actual",
+            "type": "Array",
+            "tags": [],
+            "label": "actual",
+            "description": [
+              "\nThe actual value for the anomaly."
+            ],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.actualSort",
+            "type": "Any",
+            "tags": [],
+            "label": "actualSort",
+            "description": [
+              "\nProperty used by the table to sort anomalies by their actual value,\nwhich is a single numeric value rather than the underlying arrays."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.typical",
+            "type": "Array",
+            "tags": [],
+            "label": "typical",
+            "description": [
+              "\nThe typical value for the anomaly."
+            ],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.typicalSort",
+            "type": "Any",
+            "tags": [],
+            "label": "typicalSort",
+            "description": [
+              "\nProperty used by the table to sort anomalies by their typical value,\nwhich is a single numeric value rather than the underlying arrays."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.metricDescriptionSort",
+            "type": "number",
+            "tags": [],
+            "label": "metricDescriptionSort",
+            "description": [
+              "\nProperty used by the table to sort anomalies by the description of how the\nactual value compares to the typical value."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.customUrls",
+            "type": "Array",
+            "tags": [],
+            "label": "customUrls",
+            "description": [
+              "\nList of custom URL drilldowns from the table row to other pages such as\nDiscover, Dashboard or other web pages."
+            ],
+            "signature": [
+              "KibanaUrlConfig",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.isTimeSeriesViewRecord",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTimeSeriesViewRecord",
+            "description": [
+              "\nReturns true if the anomaly record represented by the table row is for a time series\nwhich can be plotted by the ML UI in an anomaly chart."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.DataRecognizerConfigResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataRecognizerConfigResponse",
+        "description": [],
+        "path": "x-pack/plugins/ml/common/types/modules.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.DataRecognizerConfigResponse.datafeeds",
+            "type": "Array",
+            "tags": [],
+            "label": "datafeeds",
+            "description": [],
+            "signature": [
+              "DatafeedResponse",
+              "[]"
+            ],
+            "path": "x-pack/plugins/ml/common/types/modules.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.DataRecognizerConfigResponse.jobs",
+            "type": "Array",
+            "tags": [],
+            "label": "jobs",
+            "description": [],
+            "signature": [
+              "JobResponse",
+              "[]"
+            ],
+            "path": "x-pack/plugins/ml/common/types/modules.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.DataRecognizerConfigResponse.kibana",
+            "type": "Object",
+            "tags": [],
+            "label": "kibana",
+            "description": [],
+            "signature": [
+              "{ search: ",
+              "KibanaObjectResponse",
+              "[]; visualization: ",
+              "KibanaObjectResponse",
+              "[]; dashboard: ",
+              "KibanaObjectResponse",
+              "[]; }"
+            ],
+            "path": "x-pack/plugins/ml/common/types/modules.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.Influencer",
+        "type": "Interface",
+        "tags": [],
+        "label": "Influencer",
+        "description": [
+          "\nInfluencers are the entities that have contributed to, or are to blame for, the anomalies.\nInfluencer results are available only if an influencer_field_name is specified in the job configuration."
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.Influencer.influencer_field_name",
+            "type": "string",
+            "tags": [],
+            "label": "influencer_field_name",
+            "description": [
+              "\nThe field name of the influencer."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.Influencer.influencer_field_values",
+            "type": "Array",
+            "tags": [],
+            "label": "influencer_field_values",
+            "description": [
+              "\nThe entities that influenced, contributed to, or were to blame for the anomaly."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.JobExistResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "JobExistResult",
+        "description": [],
+        "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.JobExistResult.jobsExist",
+            "type": "boolean",
+            "tags": [],
+            "label": "jobsExist",
+            "description": [],
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.JobExistResult.jobs",
+            "type": "Array",
+            "tags": [],
+            "label": "jobs",
+            "description": [],
+            "signature": [
+              "JobStat",
+              "[]"
+            ],
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.JobStat",
+        "type": "Interface",
+        "tags": [],
+        "label": "JobStat",
+        "description": [],
+        "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.JobStat.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.JobStat.earliestTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "earliestTimestampMs",
+            "description": [],
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.JobStat.latestTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "latestTimestampMs",
+            "description": [],
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.JobStat.latestResultsTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "latestResultsTimestampMs",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.MlCapabilitiesResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "MlCapabilitiesResponse",
+        "description": [],
+        "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlCapabilitiesResponse.capabilities",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "capabilities",
+            "description": [],
+            "signature": [
+              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; }"
+            ],
+            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlCapabilitiesResponse.upgradeInProgress",
+            "type": "boolean",
+            "tags": [],
+            "label": "upgradeInProgress",
+            "description": [],
+            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlCapabilitiesResponse.isPlatinumOrTrialLicense",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPlatinumOrTrialLicense",
+            "description": [],
+            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlCapabilitiesResponse.mlFeatureEnabledInSpace",
+            "type": "boolean",
+            "tags": [],
+            "label": "mlFeatureEnabledInSpace",
+            "description": [],
+            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.MlSummaryJob",
+        "type": "Interface",
+        "tags": [],
+        "label": "MlSummaryJob",
+        "description": [
+          "\nA summary of an anomaly detection job."
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe identifier for the anomaly detection job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nA description of the job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.groups",
+            "type": "Array",
+            "tags": [],
+            "label": "groups",
+            "description": [
+              "\nA list of job groups. A job can belong to no groups, one or many."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.processed_record_count",
+            "type": "number",
+            "tags": [],
+            "label": "processed_record_count",
+            "description": [
+              "\nThe number of input documents that have been processed by the anomaly detection job.\nThis value includes documents with missing fields, since they are nonetheless analyzed."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.memory_status",
+            "type": "string",
+            "tags": [],
+            "label": "memory_status",
+            "description": [
+              "\nThe status of the mathematical models, which can take the values ok, soft_limit or hard_limit."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.jobState",
+            "type": "string",
+            "tags": [],
+            "label": "jobState",
+            "description": [
+              "\nThe status of the job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.datafeedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "datafeedIndices",
+            "description": [
+              "\nAn array of index names used by the datafeed. Wildcards are supported."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.hasDatafeed",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasDatafeed",
+            "description": [
+              "\nFlag indicating whether a datafeed exists for the job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.datafeedId",
+            "type": "string",
+            "tags": [],
+            "label": "datafeedId",
+            "description": [
+              "\nThe identifier for the datafeed."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.datafeedState",
+            "type": "string",
+            "tags": [],
+            "label": "datafeedState",
+            "description": [
+              "\nThe status of the datafeed."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.latestTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "latestTimestampMs",
+            "description": [
+              "\nThe timestamp of the latest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.earliestTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "earliestTimestampMs",
+            "description": [
+              "\nThe timestamp of the earliest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.latestResultsTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "latestResultsTimestampMs",
+            "description": [
+              "\nThe latest of the timestamp of the latest chronologically input document or the latest bucket that was processed."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.fullJob",
+            "type": "Object",
+            "tags": [],
+            "label": "fullJob",
+            "description": [
+              "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /api/ml/jobs/jobs_summary endpoint."
+            ],
+            "signature": [
+              "CombinedJob",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.nodeName",
+            "type": "string",
+            "tags": [],
+            "label": "nodeName",
+            "description": [
+              "\nThe name of the node that runs the job."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.auditMessage",
+            "type": "Object",
+            "tags": [],
+            "label": "auditMessage",
+            "description": [
+              "\nAudit message for the job."
+            ],
+            "signature": [
+              "Partial<",
+              "AuditMessage",
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.isSingleMetricViewerJob",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSingleMetricViewerJob",
+            "description": [
+              "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.isNotSingleMetricViewerJobMessage",
+            "type": "string",
+            "tags": [],
+            "label": "isNotSingleMetricViewerJobMessage",
+            "description": [
+              "\nFor jobs which cannot be viewed in the Single Metric Viewer, a message indicating the reason why\nresults for the job cannot be viewed in the Single Metric Viewer."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.blocked",
+            "type": "Object",
+            "tags": [],
+            "label": "blocked",
+            "description": [
+              "\nWhen present, it explains that a task is currently running on the job, which is stopping\nany other actions from being performed on the job."
+            ],
+            "signature": [
+              "MlJobBlocked",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.latestTimestampSortValue",
+            "type": "number",
+            "tags": [],
+            "label": "latestTimestampSortValue",
+            "description": [
+              "\nValue of the latest timestamp for the job used for sorting."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.earliestStartTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "earliestStartTimestampMs",
+            "description": [
+              "\nThe earlist of the timestamp of the earliest chronologically input document or the earliest bucket that was processed."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.awaitingNodeAssignment",
+            "type": "boolean",
+            "tags": [],
+            "label": "awaitingNodeAssignment",
+            "description": [
+              "\nIndicates whether the job is currently awaiting assignment to a node before opening."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.alertingRules",
+            "type": "Array",
+            "tags": [],
+            "label": "alertingRules",
+            "description": [
+              "\nList of anomaly detection alerting rules configured for the job."
+            ],
+            "signature": [
+              "MlAnomalyDetectionAlertRule",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.jobTags",
+            "type": "Object",
+            "tags": [],
+            "label": "jobTags",
+            "description": [
+              "\nList of tags that have been added to the job."
+            ],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.bucketSpanSeconds",
+            "type": "number",
+            "tags": [],
+            "label": "bucketSpanSeconds",
+            "description": [
+              "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.customSettings",
+            "type": "Any",
+            "tags": [],
+            "label": "customSettings",
+            "description": [
+              "\nAdvanced configuration option. Contains custom meta data about the job. For example, it can contain custom URL information."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.UseIndexDataReturnType",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseIndexDataReturnType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "ml",
+            "scope": "public",
+            "docId": "kibMlPluginApi",
+            "section": "def-public.UseIndexDataReturnType",
+            "text": "UseIndexDataReturnType"
+          },
+          " extends Pick<",
+          "UseDataGridReturnType",
+          ", \"status\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"ccsWarning\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"pagination\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
+        ],
+        "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.UseIndexDataReturnType.renderCellValue",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCellValue",
+            "description": [],
+            "signature": [
+              "({ rowIndex, columnId, setCellProps, }: { rowIndex: number; columnId: string; setCellProps: (props: ",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLDivElement>) => void; }) => any"
+            ],
+            "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "ml",
+                "id": "def-public.UseIndexDataReturnType.renderCellValue.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ rowIndex: number; columnId: string; setCellProps: (props: ",
+                  "CommonProps",
+                  " & React.HTMLAttributes<HTMLDivElement>) => void; }"
+                ],
+                "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.UseIndexDataReturnType.indexPatternFields",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatternFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.ANOMALY_SEVERITY",
+        "type": "Enum",
+        "tags": [],
+        "label": "ANOMALY_SEVERITY",
+        "description": [
+          "\nLabels displayed in the ML UI to indicate the severity of the anomaly according\nto the normalized anomaly score."
+        ],
+        "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.ANOMALY_SWIMLANE_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ANOMALY_SWIMLANE_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"ml_anomaly_swimlane\""
+        ],
+        "path": "x-pack/plugins/ml/public/embeddables/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.AnomalySwimlaneEmbeddableInput",
+        "type": "Type",
+        "tags": [],
+        "label": "AnomalySwimlaneEmbeddableInput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          " & ",
+          "AnomalySwimlaneEmbeddableCustomInput"
+        ],
+        "path": "x-pack/plugins/ml/public/embeddables/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.CONTROLLED_BY_SWIM_LANE_FILTER",
+        "type": "string",
+        "tags": [],
+        "label": "CONTROLLED_BY_SWIM_LANE_FILTER",
+        "description": [],
+        "signature": [
+          "\"anomaly-swim-lane\""
+        ],
+        "path": "x-pack/plugins/ml/public/ui_actions/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.EsSorting",
+        "type": "Type",
+        "tags": [],
+        "label": "EsSorting",
+        "description": [],
+        "signature": [
+          "Dictionary",
+          "<{ order: \"asc\" | \"desc\"; }>"
+        ],
+        "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.GetMlSharedImportsReturnType",
+        "type": "Type",
+        "tags": [],
+        "label": "GetMlSharedImportsReturnType",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "x-pack/plugins/ml/public/shared"
+        ],
+        "path": "x-pack/plugins/ml/public/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.MlLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "MlLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "MlLocatorParams",
+          ">"
+        ],
+        "path": "x-pack/plugins/ml/common/types/locator.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.RenderCellValue",
+        "type": "Type",
+        "tags": [],
+        "label": "RenderCellValue",
+        "description": [],
+        "signature": [
+          "({ rowIndex, columnId, setCellProps, }: { rowIndex: number; columnId: string; setCellProps: (props: ",
+          "CommonProps",
+          " & React.HTMLAttributes<HTMLDivElement>) => void; }) => any"
+        ],
+        "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.RenderCellValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ rowIndex: number; columnId: string; setCellProps: (props: ",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLDivElement>) => void; }"
+            ],
+            "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.ES_CLIENT_TOTAL_HITS_RELATION",
+        "type": "Object",
+        "tags": [],
+        "label": "ES_CLIENT_TOTAL_HITS_RELATION",
+        "description": [],
+        "signature": [
+          "{ GTE: ",
+          "SearchTotalHitsRelation",
+          "; EQ: ",
+          "SearchTotalHitsRelation",
+          "; }"
+        ],
+        "path": "x-pack/plugins/ml/common/types/es_client.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.ML_PAGES",
+        "type": "Object",
+        "tags": [],
+        "label": "ML_PAGES",
+        "description": [],
+        "signature": [
+          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly TRAINED_MODELS_NODES: \"trained_models/nodes\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; }"
+        ],
+        "path": "x-pack/plugins/ml/common/constants/locator.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "start": {
+      "parentPluginId": "ml",
+      "id": "def-public.MlPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "MlPluginStart",
+      "description": [],
+      "signature": [
+        "{ locator: ",
+        "MlLocator",
+        " | undefined; }"
+      ],
+      "path": "x-pack/plugins/ml/public/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.InsufficientMLCapabilities",
+        "type": "Class",
+        "tags": [],
+        "label": "InsufficientMLCapabilities",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "ml",
+            "scope": "server",
+            "docId": "kibMlPluginApi",
+            "section": "def-server.InsufficientMLCapabilities",
+            "text": "InsufficientMLCapabilities"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.InsufficientMLCapabilities.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ml",
+                "id": "def-server.InsufficientMLCapabilities.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.MLPrivilegesUninitialized",
+        "type": "Class",
+        "tags": [],
+        "label": "MLPrivilegesUninitialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "ml",
+            "scope": "server",
+            "docId": "kibMlPluginApi",
+            "section": "def-server.MLPrivilegesUninitialized",
+            "text": "MLPrivilegesUninitialized"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MLPrivilegesUninitialized.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ml",
+                "id": "def-server.MLPrivilegesUninitialized.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.UnknownMLCapabilitiesError",
+        "type": "Class",
+        "tags": [],
+        "label": "UnknownMLCapabilitiesError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "ml",
+            "scope": "server",
+            "docId": "kibMlPluginApi",
+            "section": "def-server.UnknownMLCapabilitiesError",
+            "text": "UnknownMLCapabilitiesError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.UnknownMLCapabilitiesError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ml",
+                "id": "def-server.UnknownMLCapabilitiesError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.getHistogramsForFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getHistogramsForFields",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.IScopedClusterClient",
+            "text": "IScopedClusterClient"
+          },
+          ", indexPattern: string, query: any, fields: ",
+          "HistogramField",
+          "[], samplerShardSize: number, runtimeMappings?: ",
+          "MappingRuntimeFields",
+          " | undefined) => Promise<ChartData[]>"
+        ],
+        "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.getHistogramsForFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              }
+            ],
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.getHistogramsForFields.$2",
+            "type": "string",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.getHistogramsForFields.$3",
+            "type": "Any",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.getHistogramsForFields.$4",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "HistogramField",
+              "[]"
+            ],
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.getHistogramsForFields.$5",
+            "type": "number",
+            "tags": [],
+            "label": "samplerShardSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.getHistogramsForFields.$6",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeMappings",
+            "description": [],
+            "signature": [
+              "MappingRuntimeFields",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.AnomaliesTableRecord",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnomaliesTableRecord",
+        "description": [
+          "\nAnomaly table record, representing the fields shown in the ML UI anomalies table."
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.time",
+            "type": "number",
+            "tags": [],
+            "label": "time",
+            "description": [
+              "\nThe start time of the interval for which the anomaly data in the table is being aggregated.\nAnomalies in the table are commonly aggregated by day, hour, or at the bucket span of the job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.source",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [
+              "\nThe source anomaly record document, containing the full source anomaly record fields."
+            ],
+            "signature": [
+              "AnomalyRecordDoc"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.rowId",
+            "type": "string",
+            "tags": [],
+            "label": "rowId",
+            "description": [
+              "\nUnique identifier for the table row."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.jobId",
+            "type": "string",
+            "tags": [],
+            "label": "jobId",
+            "description": [
+              "\nIdentifier for the anomaly detection job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.detectorIndex",
+            "type": "number",
+            "tags": [],
+            "label": "detectorIndex",
+            "description": [
+              "\nA unique identifier for the detector.\nThis identifier is based on the order of the detectors in the analysis configuration, starting at zero."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.severity",
+            "type": "number",
+            "tags": [],
+            "label": "severity",
+            "description": [
+              "\nSeverity of the anomaly displaying the anomaly record_score, a normalized score between 0-100,\nwhich is based on the probability of the anomalousness of this record."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.entityName",
+            "type": "string",
+            "tags": [],
+            "label": "entityName",
+            "description": [
+              "\nThe entity name of the anomaly, looking first for a by_field, then over_field,\nthen partition_field, returning undefined if none of these fields are present."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.entityValue",
+            "type": "Any",
+            "tags": [],
+            "label": "entityValue",
+            "description": [
+              "\nThe value of the entity field."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.influencers",
+            "type": "Array",
+            "tags": [],
+            "label": "influencers",
+            "description": [
+              "\nIf influencers was specified in the detector configuration, this array contains influencers\nthat contributed to or were to blame for an anomaly."
+            ],
+            "signature": [
+              "{ [key: string]: any; }[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.actual",
+            "type": "Array",
+            "tags": [],
+            "label": "actual",
+            "description": [
+              "\nThe actual value for the anomaly."
+            ],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.actualSort",
+            "type": "Any",
+            "tags": [],
+            "label": "actualSort",
+            "description": [
+              "\nProperty used by the table to sort anomalies by their actual value,\nwhich is a single numeric value rather than the underlying arrays."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.typical",
+            "type": "Array",
+            "tags": [],
+            "label": "typical",
+            "description": [
+              "\nThe typical value for the anomaly."
+            ],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.typicalSort",
+            "type": "Any",
+            "tags": [],
+            "label": "typicalSort",
+            "description": [
+              "\nProperty used by the table to sort anomalies by their typical value,\nwhich is a single numeric value rather than the underlying arrays."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.metricDescriptionSort",
+            "type": "number",
+            "tags": [],
+            "label": "metricDescriptionSort",
+            "description": [
+              "\nProperty used by the table to sort anomalies by the description of how the\nactual value compares to the typical value."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.customUrls",
+            "type": "Array",
+            "tags": [],
+            "label": "customUrls",
+            "description": [
+              "\nList of custom URL drilldowns from the table row to other pages such as\nDiscover, Dashboard or other web pages."
+            ],
+            "signature": [
+              "KibanaUrlConfig",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.isTimeSeriesViewRecord",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTimeSeriesViewRecord",
+            "description": [
+              "\nReturns true if the anomaly record represented by the table row is for a time series\nwhich can be plotted by the ML UI in an anomaly chart."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.AnomalyRecordDoc",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnomalyRecordDoc",
+        "description": [
+          "\nAnomaly record document. Records contain the detailed analytical results.\nThey describe the anomalous activity that has been identified in the input data based on the detector configuration."
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [
+              "\nIndex signature to cover dynamic attributes added to the record depending on the fields being analyzed.\nFor example, if the job is analyzing hostname as a by field, then a field hostname is added to the result document."
+            ],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.job_id",
+            "type": "string",
+            "tags": [],
+            "label": "job_id",
+            "description": [
+              "\nThe identifier for the anomaly detection job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.result_type",
+            "type": "string",
+            "tags": [],
+            "label": "result_type",
+            "description": [
+              "\nThe type of the result document, which is 'record' for record level results."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.probability",
+            "type": "number",
+            "tags": [],
+            "label": "probability",
+            "description": [
+              "\nThe probability of the individual anomaly occurring, in the range 0 to 1.\nThis value can be held to a high precision of over 300 decimal places,\nso the record_score is provided as a human-readable and friendly interpretation of this."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.record_score",
+            "type": "number",
+            "tags": [],
+            "label": "record_score",
+            "description": [
+              "\nA normalized score between 0-100, which is based on the probability of the anomalousness of this record.\nUnlike initial_record_score, this value will be updated by a re-normalization process as new data is analyzed."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.initial_record_score",
+            "type": "number",
+            "tags": [],
+            "label": "initial_record_score",
+            "description": [
+              "\nA normalized score between 0-100, which is based on the probability of the anomalousness of this record.\nThis is the initial value that was calculated at the time the bucket was processed."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.bucket_span",
+            "type": "number",
+            "tags": [],
+            "label": "bucket_span",
+            "description": [
+              "\nThe length of the bucket in seconds. This value matches the bucket_span that is specified in the job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.detector_index",
+            "type": "number",
+            "tags": [],
+            "label": "detector_index",
+            "description": [
+              "\nA unique identifier for the detector. This identifier is based on the order of the detectors\nin the analysis configuration, starting at zero."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.is_interim",
+            "type": "boolean",
+            "tags": [],
+            "label": "is_interim",
+            "description": [
+              "\nIf true, this is an interim result. In other words, the results are calculated based on partial input data."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.timestamp",
+            "type": "number",
+            "tags": [],
+            "label": "timestamp",
+            "description": [
+              "\nThe start time of the bucket for which these results were calculated."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.partition_field_name",
+            "type": "string",
+            "tags": [],
+            "label": "partition_field_name",
+            "description": [
+              "\nThe field used to segment the analysis.\nWhen you use this property, you have completely independent baselines for each value of this field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.partition_field_value",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "partition_field_value",
+            "description": [
+              "\nThe value of the partition field."
+            ],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.function",
+            "type": "string",
+            "tags": [],
+            "label": "function",
+            "description": [
+              "\nThe function in which the anomaly occurs, as specified in the detector configuration. For example, max."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.function_description",
+            "type": "string",
+            "tags": [],
+            "label": "function_description",
+            "description": [
+              "\nThe description of the function in which the anomaly occurs, as specified in the detector configuration."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.field_name",
+            "type": "string",
+            "tags": [],
+            "label": "field_name",
+            "description": [
+              "\nCertain functions require a field to operate on, for example, sum().\nFor those functions, this value is the name of the field to be analyzed."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.typical",
+            "type": "Array",
+            "tags": [],
+            "label": "typical",
+            "description": [
+              "\nThe typical value for the bucket, according to analytical modeling."
+            ],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.actual",
+            "type": "Array",
+            "tags": [],
+            "label": "actual",
+            "description": [
+              "\nThe actual value for the bucket."
+            ],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.influencers",
+            "type": "Array",
+            "tags": [],
+            "label": "influencers",
+            "description": [
+              "\nIf influencers was specified in the detector configuration, this array contains influencers\nthat contributed to or were to blame for an anomaly."
+            ],
+            "signature": [
+              "Influencer",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.by_field_name",
+            "type": "string",
+            "tags": [],
+            "label": "by_field_name",
+            "description": [
+              "\nThe field used to split the data. In particular, this property is used for analyzing the splits\nwith respect to their own history. It is used for finding unusual values in the context of the split."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.by_field_value",
+            "type": "string",
+            "tags": [],
+            "label": "by_field_value",
+            "description": [
+              "\nThe value of the by field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.over_field_name",
+            "type": "string",
+            "tags": [],
+            "label": "over_field_name",
+            "description": [
+              "\nThe field used to split the data. In particular, this property is used for analyzing\nthe splits with respect to the history of all splits.\nIt is used for finding unusual values in the population of all splits."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.over_field_value",
+            "type": "string",
+            "tags": [],
+            "label": "over_field_value",
+            "description": [
+              "\nThe value of the over field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.causes",
+            "type": "Array",
+            "tags": [],
+            "label": "causes",
+            "description": [
+              "\nFor population analysis, this property contains an array of anomaly records that are the causes\nfor the anomaly that has been identified for the over field. If no over fields exist, this field is not present.\nThis sub-resource contains the most anomalous records for the over_field_name.\nThe causes resource contains similar elements to the record resource.\nProbability and scores are not applicable to causes."
+            ],
+            "signature": [
+              "{ function: string; function_description: string; probability: number; actual: number[]; typical: number[]; field_name?: string | undefined; over_field_name?: string | undefined; over_field_value?: string | undefined; by_field_name?: string | undefined; by_field_value?: string | undefined; partition_field_name?: string | undefined; partition_field_value?: string | number | undefined; }[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomalyRecordDoc.multi_bucket_impact",
+            "type": "number",
+            "tags": [],
+            "label": "multi_bucket_impact",
+            "description": [
+              "\nAn indication of how strongly an anomaly is multi bucket or single bucket.\nThe value is on a scale of -5.0 to +5.0 where -5.0 means the anomaly is\npurely single bucket and +5.0 means the anomaly is purely multi bucket."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.AnomalyResultType",
+        "type": "Type",
+        "tags": [],
+        "label": "AnomalyResultType",
+        "description": [
+          "\nThe type of the anomaly result, such as bucket, influencer or record."
+        ],
+        "signature": [
+          "\"bucket\" | \"record\" | \"influencer\""
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.DatafeedStats",
+        "type": "Type",
+        "tags": [],
+        "label": "DatafeedStats",
+        "description": [],
+        "signature": [
+          "MlDatafeedStats"
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.Job",
+        "type": "Type",
+        "tags": [],
+        "label": "Job",
+        "description": [],
+        "signature": [
+          "MlJob"
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "ml",
+      "id": "def-server.MlPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "MlPluginSetup",
+      "description": [],
+      "signature": [
+        "JobServiceProvider",
+        " & ",
+        "AnomalyDetectorsProvider",
+        " & ",
+        "MlSystemProvider",
+        " & ",
+        "ModulesProvider",
+        " & ",
+        "ResultsServiceProvider",
+        " & { alertingServiceProvider(savedObjectsClient: ",
+        {
+          "pluginId": "core",
+          "scope": "server",
+          "docId": "kibCoreSavedObjectsPluginApi",
+          "section": "def-server.SavedObjectsClientContract",
+          "text": "SavedObjectsClientContract"
+        },
+        ", request: ",
+        {
+          "pluginId": "core",
+          "scope": "server",
+          "docId": "kibCoreHttpPluginApi",
+          "section": "def-server.KibanaRequest",
+          "text": "KibanaRequest"
+        },
+        "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, startedAt: Date, previousStartedAt: Date | null) => Promise<",
+        "AnomalyDetectionAlertContext",
+        " | undefined>; }; }"
+      ],
+      "path": "x-pack/plugins/ml/server/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "ml",
+      "id": "def-server.MlPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "MlPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/ml/server/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.composeValidators",
+        "type": "Function",
+        "tags": [],
+        "label": "composeValidators",
+        "description": [
+          "\nComposes multiple validators into a single function"
+        ],
+        "signature": [
+          "(validators: ((value: any) => { [key: string]: any; } | null)[]) => (value: any) => { [key: string]: any; } | null"
+        ],
+        "path": "x-pack/plugins/ml/common/util/validators.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.composeValidators.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "validators",
+            "description": [],
+            "signature": [
+              "((value: any) => { [key: string]: any; } | null)[]"
+            ],
+            "path": "x-pack/plugins/ml/common/util/validators.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.extractErrorMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "extractErrorMessage",
+        "description": [],
+        "signature": [
+          "(error: ",
+          "ErrorType",
+          ") => string"
+        ],
+        "path": "x-pack/plugins/ml/common/util/errors/process_errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.extractErrorMessage.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "ErrorType"
+            ],
+            "path": "x-pack/plugins/ml/common/util/errors/process_errors.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.getDefaultCapabilities",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultCapabilities",
+        "description": [],
+        "signature": [
+          "() => ",
+          "MlCapabilities"
+        ],
+        "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.getSeverityColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getSeverityColor",
+        "description": [
+          "\nReturns a severity RGB color (one of critical, major, minor, warning, low or blank)\nfor the supplied normalized anomaly score (a value between 0 and 100)."
+        ],
+        "signature": [
+          "(normalizedScore: number) => string"
+        ],
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.getSeverityColor.$1",
+            "type": "number",
+            "tags": [],
+            "label": "normalizedScore",
+            "description": [
+              "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.getSeverityType",
+        "type": "Function",
+        "tags": [],
+        "label": "getSeverityType",
+        "description": [
+          "\nReturns a severity type (indicating a critical, major, minor, warning or low severity anomaly)\nfor the supplied normalized anomaly score (a value between 0 and 100)."
+        ],
+        "signature": [
+          "(normalizedScore: number) => ",
+          {
+            "pluginId": "ml",
+            "scope": "common",
+            "docId": "kibMlPluginApi",
+            "section": "def-common.ANOMALY_SEVERITY",
+            "text": "ANOMALY_SEVERITY"
+          }
+        ],
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.getSeverityType.$1",
+            "type": "number",
+            "tags": [],
+            "label": "normalizedScore",
+            "description": [
+              "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.isPopulatedObject",
+        "type": "Function",
+        "tags": [],
+        "label": "isPopulatedObject",
+        "description": [],
+        "signature": [
+          "<U extends string = string>(arg: unknown, requiredAttributes?: U[]) => arg is Record<U, unknown>"
+        ],
+        "path": "x-pack/plugins/ml/common/util/object_utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.isPopulatedObject.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/ml/common/util/object_utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.isPopulatedObject.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "requiredAttributes",
+            "description": [],
+            "signature": [
+              "U[]"
+            ],
+            "path": "x-pack/plugins/ml/common/util/object_utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.isRuntimeField",
+        "type": "Function",
+        "tags": [],
+        "label": "isRuntimeField",
+        "description": [],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.isRuntimeField.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.isRuntimeMappings",
+        "type": "Function",
+        "tags": [],
+        "label": "isRuntimeMappings",
+        "description": [],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.isRuntimeMappings.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.patternValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "patternValidator",
+        "description": [
+          "\nProvides a validator function for checking against pattern."
+        ],
+        "signature": [
+          "(pattern: RegExp) => (value: string) => { pattern: { matchPattern: string; }; } | null"
+        ],
+        "path": "x-pack/plugins/ml/common/util/validators.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.patternValidator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "RegExp"
+            ],
+            "path": "x-pack/plugins/ml/common/util/validators.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.ANOMALY_SEVERITY",
+        "type": "Enum",
+        "tags": [],
+        "label": "ANOMALY_SEVERITY",
+        "description": [
+          "\nLabels displayed in the ML UI to indicate the severity of the anomaly according\nto the normalized anomaly score."
+        ],
+        "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.ANOMALY_THRESHOLD",
+        "type": "Enum",
+        "tags": [],
+        "label": "ANOMALY_THRESHOLD",
+        "description": [
+          "\nAnomaly score numeric thresholds to indicate the severity of the anomaly."
+        ],
+        "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.DATAFEED_STATE",
+        "type": "Enum",
+        "tags": [],
+        "label": "DATAFEED_STATE",
+        "description": [
+          "\nThe status of the datafeed."
+        ],
+        "path": "x-pack/plugins/ml/common/constants/states.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.JOB_STATE",
+        "type": "Enum",
+        "tags": [],
+        "label": "JOB_STATE",
+        "description": [
+          "\nThe status of the anomaly detection job."
+        ],
+        "path": "x-pack/plugins/ml/common/constants/states.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.ChartData",
+        "type": "Type",
+        "tags": [],
+        "label": "ChartData",
+        "description": [],
+        "signature": [
+          "NumericChartData",
+          " | ",
+          "OrdinalChartData",
+          " | ",
+          "UnsupportedChartData"
+        ],
+        "path": "x-pack/plugins/ml/common/types/field_histograms.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.RuntimeMappings",
+        "type": "Type",
+        "tags": [],
+        "label": "RuntimeMappings",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          "MappingRuntimeField",
+          " | ",
+          "MappingRuntimeField",
+          "[]; }"
+        ],
+        "path": "x-pack/plugins/ml/common/types/fields.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.SEVERITY_COLOR_RAMP",
+        "type": "Array",
+        "tags": [],
+        "label": "SEVERITY_COLOR_RAMP",
+        "description": [],
+        "signature": [
+          "{ stop: ",
+          {
+            "pluginId": "ml",
+            "scope": "common",
+            "docId": "kibMlPluginApi",
+            "section": "def-common.ANOMALY_THRESHOLD",
+            "text": "ANOMALY_THRESHOLD"
+          },
+          "; color: string; }[]"
+        ],
+        "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.ES_CLIENT_TOTAL_HITS_RELATION",
+        "type": "Object",
+        "tags": [],
+        "label": "ES_CLIENT_TOTAL_HITS_RELATION",
+        "description": [],
+        "signature": [
+          "{ GTE: ",
+          "SearchTotalHitsRelation",
+          "; EQ: ",
+          "SearchTotalHitsRelation",
+          "; }"
+        ],
+        "path": "x-pack/plugins/ml/common/types/es_client.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.SEVERITY_COLORS",
+        "type": "Object",
+        "tags": [],
+        "label": "SEVERITY_COLORS",
+        "description": [
+          "\nRGB hex codes used to indicate the severity of an anomaly according to its anomaly score."
+        ],
+        "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.SEVERITY_COLORS.CRITICAL",
+            "type": "string",
+            "tags": [],
+            "label": "CRITICAL",
+            "description": [
+              "/**\n   * Color used in the UI to indicate a critical anomaly, with a score greater than or equal to 75.\n   */"
+            ],
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.SEVERITY_COLORS.MAJOR",
+            "type": "string",
+            "tags": [],
+            "label": "MAJOR",
+            "description": [
+              "/**\n   * Color used in the UI to indicate a major anomaly, with a score greater than or equal to 50 and less than 75 .\n   */"
+            ],
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.SEVERITY_COLORS.MINOR",
+            "type": "string",
+            "tags": [],
+            "label": "MINOR",
+            "description": [
+              "/**\n   * Color used in the UI to indicate a minor anomaly, with a score greater than or equal to 25 and less than 50.\n   */"
+            ],
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.SEVERITY_COLORS.WARNING",
+            "type": "string",
+            "tags": [],
+            "label": "WARNING",
+            "description": [
+              "/**\n   * Color used in the UI to indicate a warning anomaly, with a score greater than or equal to 3 and less than 25.\n   * Note in some parts of the UI, warning severity is used when the score is greater than or equal to 0.\n   */"
+            ],
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.SEVERITY_COLORS.LOW",
+            "type": "string",
+            "tags": [],
+            "label": "LOW",
+            "description": [
+              "/**\n   * Color used in some parts of the UI to indicate a low severity anomaly, with a score greater than or equal to 0 and less than 3.\n   */"
+            ],
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.SEVERITY_COLORS.BLANK",
+            "type": "string",
+            "tags": [],
+            "label": "BLANK",
+            "description": [
+              "/**\n   * Color used in the UI to indicate an anomaly for which the score is unknown.\n   */"
+            ],
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

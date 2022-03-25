@@ -74,10 +74,12 @@ import {
   SearchSourceService,
   phraseFilterFunction,
   esRawResponse,
+  eqlRawResponse,
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
+  SQL_SEARCH_STRATEGY,
 } from '../../common/search';
-import { getEsaggs, getEsdsl } from './expressions';
+import { getEsaggs, getEsdsl, getEql } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
@@ -92,6 +94,7 @@ import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
 import { CachedUiSettingsClient } from './services';
+import { sqlSearchStrategyProvider } from './strategies/sql_search';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -175,6 +178,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
 
     this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
+    this.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategyProvider(this.logger));
 
     registerBsearchRoute(
       bfetch,
@@ -189,6 +193,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
     expressions.registerFunction(getEsdsl({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(getEql({ getStartServices: core.getStartServices }));
     expressions.registerFunction(cidrFunction);
     expressions.registerFunction(dateRangeFunction);
     expressions.registerFunction(extendedBoundsFunction);
@@ -212,6 +217,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
     expressions.registerType(esRawResponse);
+    expressions.registerType(eqlRawResponse);
 
     const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
 
@@ -233,6 +239,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs,
       registerSearchStrategy: this.registerSearchStrategy,
       usage,
+      searchSource: this.searchSourceService.setup(),
     };
   }
 

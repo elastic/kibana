@@ -8,7 +8,7 @@
 
 import { createSavedQueryService } from './saved_query_service';
 import { httpServiceMock } from '../../../../../core/public/mocks';
-import { SavedQueryAttributes } from '../../../common';
+import type { SavedQueryAttributes } from '../../../common';
 
 const http = httpServiceMock.createStartContract();
 
@@ -67,9 +67,7 @@ describe('saved query service', () => {
       });
       const result = await getAllSavedQueries();
       expect(http.post).toBeCalled();
-      expect(http.post).toHaveBeenCalledWith('/api/saved_query/_find', {
-        body: '{"perPage":10000}',
-      });
+      expect(http.post).toHaveBeenCalledWith('/api/saved_query/_all');
       expect(result).toEqual([{ attributes: savedQueryAttributes }]);
     });
   });

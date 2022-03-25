@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UptimeCorePluginsSetup, UptimeCoreSetup } from '../adapters';
+import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
 import { UMServerLibs } from '../lib';
 import { AlertTypeWithExecutor } from '../../../../rule_registry/server';
 import { AlertInstanceContext, AlertTypeState } from '../../../../alerting/common';
@@ -26,11 +26,12 @@ export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = AlertTy
       AlertInstanceContext,
       TActionGroupIds
     >;
+    getAlertStartedDate: (alertId: string) => string | null;
   }
 >;
 
 export type UptimeAlertTypeFactory<TActionGroupIds extends string> = (
-  server: UptimeCoreSetup,
+  server: UptimeServerSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePluginsSetup
 ) => DefaultUptimeAlertInstance<TActionGroupIds>;

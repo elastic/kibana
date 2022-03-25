@@ -11,22 +11,16 @@ import type {
   UpdatePackagePolicy,
   DryRunPackagePolicy,
   PackagePolicyPackage,
+  FullAgentPolicyInput,
 } from '../models';
 
+import type { ListResult, ListWithKuery } from './common';
+
 export interface GetPackagePoliciesRequest {
-  query: {
-    page: number;
-    perPage: number;
-    kuery?: string;
-  };
+  query: ListWithKuery;
 }
 
-export interface GetPackagePoliciesResponse {
-  items: PackagePolicy[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+export type GetPackagePoliciesResponse = ListResult<PackagePolicy>;
 
 export interface GetOnePackagePolicyRequest {
   params: {
@@ -63,6 +57,7 @@ export type DeletePackagePoliciesResponse = Array<{
   name?: string;
   success: boolean;
   package?: PackagePolicyPackage;
+  policy_id?: string;
 }>;
 
 export interface UpgradePackagePolicyBaseResponse {
@@ -78,6 +73,7 @@ export interface UpgradePackagePolicyBaseResponse {
 export interface UpgradePackagePolicyDryRunResponseItem extends UpgradePackagePolicyBaseResponse {
   hasErrors: boolean;
   diff?: [PackagePolicy, DryRunPackagePolicy];
+  agent_diff?: [FullAgentPolicyInput[]];
 }
 
 export type UpgradePackagePolicyDryRunResponse = UpgradePackagePolicyDryRunResponseItem[];

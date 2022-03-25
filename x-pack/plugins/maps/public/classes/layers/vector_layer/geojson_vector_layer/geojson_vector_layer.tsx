@@ -39,11 +39,9 @@ import { DataRequestAbortError } from '../../../util/data_request';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
 import { getFeatureCollectionBounds } from '../../../util/get_feature_collection_bounds';
 import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './assign_feature_ids';
-import { addGeoJsonMbSource, syncVectorSource } from './utils';
+import { syncGeojsonSourceData } from './geojson_source_data';
 import { JoinState, performInnerJoins } from './perform_inner_joins';
 import { buildVectorRequestMeta } from '../../build_vector_request_meta';
-
-export const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 
 export class GeoJsonVectorLayer extends AbstractVectorLayer {
   static createDescriptor(
@@ -51,7 +49,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
-    layerDescriptor.type = LAYER_TYPE.VECTOR;
+    layerDescriptor.type = LAYER_TYPE.GEOJSON_VECTOR;
 
     if (!options.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -63,12 +61,6 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     }
 
     return layerDescriptor;
-  }
-
-  supportsFeatureEditing(): boolean {
-    const dataRequest = this.getDataRequest(SUPPORTS_FEATURE_EDITING_REQUEST_ID);
-    const data = dataRequest?.getData() as { supportsFeatureEditing: boolean } | undefined;
-    return data ? data.supportsFeatureEditing : false;
   }
 
   async getBounds(syncContext: DataRequestContext) {
@@ -138,8 +130,26 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     return await style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
   }
 
+  _requiresPrevSourceCleanup(mbMap: MbMap) {
+    const mbSource = mbMap.getSource(this.getMbSourceId());
+    if (!mbSource) {
+      return false;
+    }
+
+    return mbSource.type !== 'geojson';
+  }
+
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
-    addGeoJsonMbSource(this.getMbSourceId(), this.getMbLayerIds(), mbMap);
+    this._removeStaleMbSourcesAndLayers(mbMap);
+
+    const mbSourceId = this.getMbSourceId();
+    const mbSource = mbMap.getSource(mbSourceId);
+    if (!mbSource) {
+      mbMap.addSource(mbSourceId, {
+        type: 'geojson',
+        data: EMPTY_FEATURE_COLLECTION,
+      });
+    }
 
     this._syncFeatureCollectionWithMb(mbMap);
 
@@ -211,7 +221,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     try {
       await this._syncSourceStyleMeta(syncContext, source, style);
       await this._syncSourceFormatters(syncContext, source, style);
-      const sourceResult = await syncVectorSource({
+      const sourceResult = await syncGeojsonSourceData({
         layerId: this.getId(),
         layerName: await this.getDisplayName(source),
         prevDataRequest: this.getSourceDataRequest(),
@@ -237,7 +247,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       }
 
       const joinStates = await this._syncJoins(syncContext, style);
-      performInnerJoins(
+      await performInnerJoins(
         sourceResult,
         joinStates,
         syncContext.updateSourceData,
@@ -360,33 +370,6 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
         }),
       ...syncContext,
     });
-  }
-
-  async _syncSupportsFeatureEditing({
-    syncContext,
-    source,
-  }: {
-    syncContext: DataRequestContext;
-    source: IVectorSource;
-  }) {
-    if (syncContext.dataFilters.isReadOnly) {
-      return;
-    }
-    const { startLoading, stopLoading, onLoadError } = syncContext;
-    const dataRequestId = SUPPORTS_FEATURE_EDITING_REQUEST_ID;
-    const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
-    const prevDataRequest = this.getDataRequest(dataRequestId);
-    if (prevDataRequest) {
-      return;
-    }
-    try {
-      startLoading(dataRequestId, requestToken);
-      const supportsFeatureEditing = await source.supportsFeatureEditing();
-      stopLoading(dataRequestId, requestToken, { supportsFeatureEditing });
-    } catch (error) {
-      onLoadError(dataRequestId, requestToken, error.message);
-      throw error;
-    }
   }
 
   _getSourceFeatureCollection() {

@@ -9,4 +9,4 @@ export type {
   FakeRequest,
   JobParamsDownloadCSV,
   SavedObjectServiceError,
-} from '../../../common/types';
+} from '../../../common/types/export_types/csv_searchsource_immediate';

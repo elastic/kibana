@@ -31,8 +31,7 @@ export function BackendDetailTemplate({ title, children }: Props) {
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /internal/apm/backends/metadata',
+      return callApmApi('GET /internal/apm/backends/metadata', {
         params: {
           query: {
             backendName,

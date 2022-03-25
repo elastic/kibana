@@ -14,7 +14,6 @@ import {
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 // @ts-ignore
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 // @ts-ignore
@@ -23,48 +22,24 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
-import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
-// @ts-ignore
-import { setIndexPatternsService, setInternalRepository } from './kibana_server_services';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { setStartServices } from './kibana_server_services';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
-// @ts-ignore
 import { initRoutes } from './routes';
-import { ILicense } from '../../licensing/common/types';
-import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/server';
-import { EMSSettings } from '../common/ems_settings';
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
-import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
-import { embeddableMigrations } from './embeddable_migrations';
-import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
+import type { EMSSettings } from '../../../../src/plugins/maps_ems/server';
+import { setupEmbeddable } from './embeddable';
+import { setupSavedObjects } from './saved_objects';
 import { registerIntegrations } from './register_integrations';
-
-interface SetupDeps {
-  features: FeaturesPluginSetupContract;
-  usageCollection?: UsageCollectionSetup;
-  home?: HomeServerPluginSetup;
-  licensing: LicensingPluginSetup;
-  mapsEms: MapsEmsPluginSetup;
-  embeddable: EmbeddableSetup;
-  customIntegrations?: CustomIntegrationsPluginSetup;
-}
-
-export interface StartDeps {
-  data: DataPluginStart;
-}
+import { StartDeps, SetupDeps } from './types';
 
 export class MapsPlugin implements Plugin {
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
   private readonly _logger: Logger;
-  private readonly kibanaVersion: string;
 
   constructor(initializerContext: PluginInitializerContext<MapsXPackConfig>) {
     this._logger = initializerContext.logger.get();
     this._initializerContext = initializerContext;
-    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   _initHomeData(
@@ -99,6 +74,9 @@ export class MapsPlugin implements Plugin {
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
         isLayerTOCOpen: false,
+        hiddenLayers: [],
+        mapCenter: { lat: 45.88578, lon: -15.07605, zoom: 2.11 },
+        openTOCDetails: [],
       },
     });
 
@@ -125,6 +103,9 @@ export class MapsPlugin implements Plugin {
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
         isLayerTOCOpen: true,
+        hiddenLayers: [],
+        mapCenter: { lat: 48.72307, lon: -115.18171, zoom: 4.28 },
+        openTOCDetails: [],
       },
     });
 
@@ -149,6 +130,9 @@ export class MapsPlugin implements Plugin {
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
         isLayerTOCOpen: false,
+        hiddenLayers: [],
+        mapCenter: { lat: 42.16337, lon: -88.92107, zoom: 3.64 },
+        openTOCDetails: [],
       },
     });
 
@@ -160,22 +144,17 @@ export class MapsPlugin implements Plugin {
     );
   }
 
-  // @ts-ignore
   setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features, mapsEms, customIntegrations } = plugins;
-    const mapsEmsConfig = mapsEms.config;
+    const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
+      plugins.data.query.filterManager
+    );
+
+    const { usageCollection, home, features, customIntegrations } = plugins;
     const config$ = this._initializerContext.config.create();
 
-    let isEnterprisePlus = false;
-    let lastLicenseId: string | undefined;
-    const emsSettings = new EMSSettings(mapsEmsConfig, () => isEnterprisePlus);
-    licensing.license$.subscribe((license: ILicense) => {
-      const enterprise = license.check(APP_ID, 'enterprise');
-      isEnterprisePlus = enterprise.state === 'valid';
-      lastLicenseId = license.uid;
-    });
+    const emsSettings = plugins.mapsEms.createEMSSettings();
 
-    initRoutes(core, () => lastLicenseId, emsSettings, this.kibanaVersion, this._logger);
+    initRoutes(core, this._logger);
 
     if (home) {
       this._initHomeData(home, core.http.basePath.prepend, emsSettings);
@@ -216,26 +195,17 @@ export class MapsPlugin implements Plugin {
       },
     });
 
-    core.savedObjects.registerType(mapsTelemetrySavedObjects);
-    core.savedObjects.registerType(mapSavedObjects);
+    setupSavedObjects(core, getFilterMigrations);
     registerMapsUsageCollector(usageCollection);
 
-    plugins.embeddable.registerEmbeddableFactory({
-      id: MAP_SAVED_OBJECT_TYPE,
-      migrations: embeddableMigrations,
-    });
+    setupEmbeddable(plugins.embeddable, getFilterMigrations);
 
     return {
       config: config$,
     };
   }
 
-  // @ts-ignore
   start(core: CoreStart, plugins: StartDeps) {
-    setInternalRepository(core.savedObjects.createInternalRepository);
-    setIndexPatternsService(
-      plugins.data.indexPatterns.indexPatternsServiceFactory,
-      core.elasticsearch.client.asInternalUser
-    );
+    setStartServices(core, plugins);
   }
 }

@@ -6,20 +6,23 @@
  * Side Public License, v 1.
  */
 import React, { useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DiscoverServices } from '../../build_services';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
-import { Doc } from './components/doc';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
+import { withQueryParams } from '../../utils/with_query_params';
+import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
+import { Doc } from './components/doc';
+import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useExecutionContext } from '../../../../kibana_react/public';
 
 export interface SingleDocRouteProps {
   /**
-   * Kibana core services used by discover
+   * Document id
    */
-  services: DiscoverServices;
+  id: string;
 }
 
 export interface DocUrlParams {
@@ -27,27 +30,27 @@ export interface DocUrlParams {
   index: string;
 }
 
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
-
-export function SingleDocRoute(props: SingleDocRouteProps) {
-  const { services } = props;
-  const { chrome, timefilter } = services;
+const SingleDoc = ({ id }: SingleDocRouteProps) => {
+  const services = useDiscoverServices();
+  const { chrome, timefilter, core } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
+  const breadcrumb = useMainRouteBreadcrumb();
 
-  const query = useQuery();
-  const docId = query.get('id') || '';
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'single-doc',
+    id: indexPatternId,
+  });
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(),
+      ...getRootBreadcrumbs(breadcrumb),
       {
-        text: `${index}#${docId}`,
+        text: `${index}#${id}`,
       },
     ]);
-  }, [chrome, index, docId]);
+  }, [chrome, index, id, breadcrumb]);
 
   useEffect(() => {
     timefilter.disableAutoRefreshSelector();
@@ -84,7 +87,9 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
 
   return (
     <div className="app-container">
-      <Doc id={docId} index={index} indexPattern={indexPattern} />
+      <Doc id={id} index={index} indexPattern={indexPattern} />
     </div>
   );
-}
+};
+
+export const SingleDocRoute = withQueryParams(SingleDoc, ['id']);

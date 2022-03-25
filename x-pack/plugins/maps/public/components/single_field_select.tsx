@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldIcon } from '@kbn/react-field';
 import { IndexPatternField } from 'src/plugins/data/public';
 
 function fieldsToOptions(

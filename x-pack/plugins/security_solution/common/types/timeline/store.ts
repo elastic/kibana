@@ -39,7 +39,7 @@ export interface SortColumnTimeline {
 export interface TimelinePersistInput {
   columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
-  dataViewId: string;
+  dataViewId: string | null; // null if legacy pre-8.0 timeline
   dateRange?: {
     start: string;
     end: string;

@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { service } from '../../lib/service';
+import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
 
 describe('simple trace', () => {
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {
-    const javaService = service('opbeans-java', 'production', 'java');
+    const javaService = apm.service('opbeans-java', 'production', 'java');
     const javaInstance = javaService.instance('instance-1');
 
     const range = timerange(
-      new Date('2021-01-01T00:00:00.000Z').getTime(),
-      new Date('2021-01-01T00:15:00.000Z').getTime()
+      new Date('2021-01-01T00:00:00.000Z'),
+      new Date('2021-01-01T00:15:00.000Z')
     );
 
     events = range
       .interval('1m')
       .rate(1)
-      .flatMap((timestamp) =>
+      .spans((timestamp) =>
         javaInstance
           .transaction('GET /api/product/list')
           .duration(1000)
@@ -38,7 +38,8 @@ describe('simple trace', () => {
               .timestamp(timestamp + 50)
           )
           .serialize()
-      );
+      )
+      .toArray();
   });
 
   it('generates the same data every time', () => {
@@ -70,6 +71,7 @@ describe('simple trace', () => {
       'agent.name': 'java',
       'container.id': 'instance-1',
       'event.outcome': 'success',
+      'host.name': 'instance-1',
       'processor.event': 'transaction',
       'processor.name': 'transaction',
       'service.environment': 'production',
@@ -92,6 +94,7 @@ describe('simple trace', () => {
       'agent.name': 'java',
       'container.id': 'instance-1',
       'event.outcome': 'success',
+      'host.name': 'instance-1',
       'parent.id': '0000000000000300',
       'processor.event': 'span',
       'processor.name': 'transaction',

@@ -52,7 +52,7 @@ import {
   isOneOfOperator,
   isOperator,
 } from '@kbn/securitysolution-list-utils';
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
@@ -91,7 +91,7 @@ const getEntryMatchAnyWithIdMock = (): EntryMatchAny & { id: string } => ({
   id: '123',
 });
 
-const getMockIndexPattern = (): IndexPatternBase => ({
+const getMockIndexPattern = (): DataViewBase => ({
   fields,
   id: '1234',
   title: 'logstash-*',
@@ -165,13 +165,10 @@ const mockEndpointFields = [
   },
 ];
 
-export const getEndpointField = (name: string): IndexPatternFieldBase =>
-  mockEndpointFields.find((field) => field.name === name) as IndexPatternFieldBase;
+export const getEndpointField = (name: string): DataViewFieldBase =>
+  mockEndpointFields.find((field) => field.name === name) as DataViewFieldBase;
 
-const filterIndexPatterns = (
-  patterns: IndexPatternBase,
-  type: ExceptionListType
-): IndexPatternBase => {
+const filterIndexPatterns = (patterns: DataViewBase, type: ExceptionListType): DataViewBase => {
   return type === 'endpoint'
     ? {
         ...patterns,
@@ -189,7 +186,7 @@ describe('Exception builder helpers', () => {
         const payloadIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
-        const expected: IndexPatternBase = {
+        const expected: DataViewBase = {
           fields: [{ ...getField('nestedField.child'), name: 'child' }],
           id: '1234',
           title: 'logstash-*',
@@ -201,7 +198,7 @@ describe('Exception builder helpers', () => {
         const payloadIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
-        const expected: IndexPatternBase & { fields: Array<Partial<FieldSpec>> } = {
+        const expected: DataViewBase & { fields: Array<Partial<FieldSpec>> } = {
           fields: [{ ...getField('nestedField.child'), esTypes: ['nested'], name: 'nestedField' }],
           id: '1234',
           title: 'logstash-*',
@@ -216,7 +213,7 @@ describe('Exception builder helpers', () => {
           field: undefined,
         };
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
-        const expected: IndexPatternBase = {
+        const expected: DataViewBase = {
           fields: [
             { ...getField('nestedField.child') },
             { ...getField('nestedField.nestedChild.doublyNestedChild') },
@@ -231,7 +228,7 @@ describe('Exception builder helpers', () => {
         const payloadIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
-        const expected: IndexPatternBase = {
+        const expected: DataViewBase = {
           fields: [...fields],
           id: '1234',
           title: 'logstash-*',
@@ -269,7 +266,7 @@ describe('Exception builder helpers', () => {
           value: 'some value',
         };
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
-        const expected: IndexPatternBase = {
+        const expected: DataViewBase = {
           fields: [{ ...getEndpointField('file.Ext.code_signature.status'), name: 'status' }],
           id: '1234',
           title: 'logstash-*',
@@ -305,7 +302,7 @@ describe('Exception builder helpers', () => {
             type: 'string',
           },
         ];
-        const expected: IndexPatternBase = {
+        const expected: DataViewBase = {
           fields: fieldsExpected,
           id: '1234',
           title: 'logstash-*',
@@ -324,7 +321,7 @@ describe('Exception builder helpers', () => {
           'endpoint',
           filterIndexPatterns
         );
-        const expected: IndexPatternBase = {
+        const expected: DataViewBase = {
           fields: [getEndpointField('file.Ext.code_signature.status')],
           id: '1234',
           title: 'logstash-*',
@@ -363,7 +360,7 @@ describe('Exception builder helpers', () => {
             type: 'string',
           },
         ];
-        const expected: IndexPatternBase = {
+        const expected: DataViewBase = {
           fields: fieldsExpected,
           id: '1234',
           title: 'logstash-*',
@@ -1261,7 +1258,7 @@ describe('Exception builder helpers', () => {
 
   describe('#getFormattedBuilderEntry', () => {
     test('it returns entry with a value for "correspondingKeywordField" when "item.field" is of type "text" and matching keyword field exists', () => {
-      const payloadIndexPattern: IndexPatternBase = {
+      const payloadIndexPattern: DataViewBase = {
         ...getMockIndexPattern(),
         fields: [
           ...fields,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data_views/public';
 import { isSortable } from './get_sort';
 import { SortOrder } from '../components/table_header/helpers';
 
@@ -15,7 +15,7 @@ import { SortOrder } from '../components/table_header/helpers';
  * the default sort is returned depending of the index pattern
  */
 export function getDefaultSort(
-  indexPattern: IndexPattern | undefined,
+  indexPattern: DataView | undefined,
   defaultSortOrder: string = 'desc'
 ): SortOrder[] {
   if (indexPattern?.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {

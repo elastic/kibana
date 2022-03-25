@@ -6,7 +6,6 @@
  */
 
 import React, { createContext, ReactNode } from 'react';
-import { ValuesType } from 'utility-types';
 import { isRumAgentName } from '../../../common/agent_name';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -14,28 +13,23 @@ import {
 } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 import { useServiceAgentFetcher } from './use_service_agent_fetcher';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
-import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
-
-export type APMServiceAlert = ValuesType<
-  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
->;
+import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
 
 export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
   transactionType?: string;
   transactionTypes: string[];
-  alerts: APMServiceAlert[];
   runtimeName?: string;
+  fallbackToTransactions: boolean;
 }
 
 export const APMServiceContext = createContext<APMServiceContextValue>({
   serviceName: '',
   transactionTypes: [],
-  alerts: [],
+  fallbackToTransactions: false,
 });
 
 export function ApmServiceContextProvider({
@@ -46,7 +40,7 @@ export function ApmServiceContextProvider({
   const {
     path: { serviceName },
     query,
-    query: { rangeFrom, rangeTo },
+    query: { kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -69,12 +63,8 @@ export function ApmServiceContextProvider({
     agentName,
   });
 
-  const { alerts } = useServiceAlertsFetcher({
-    serviceName,
-    transactionType,
-    environment: query.environment,
-    start,
-    end,
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
   });
 
   return (
@@ -84,8 +74,8 @@ export function ApmServiceContextProvider({
         agentName,
         transactionType,
         transactionTypes,
-        alerts,
         runtimeName,
+        fallbackToTransactions,
       }}
       children={children}
     />

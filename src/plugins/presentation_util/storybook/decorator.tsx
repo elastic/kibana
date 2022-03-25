@@ -14,6 +14,22 @@ import { pluginServices } from '../public/services';
 import { PresentationUtilServices } from '../public/services';
 import { providers, StorybookParams } from '../public/services/storybook';
 import { PluginServiceRegistry } from '../public/services/create';
+import { KibanaContextProvider as KibanaReactProvider } from '../../kibana_react/public';
+
+const settings = new Map();
+settings.set('darkMode', true);
+
+const services = {
+  http: {
+    basePath: {
+      get: () => '',
+      prepend: () => '',
+      remove: () => '',
+      serverBasePath: '',
+    },
+  },
+  uiSettings: settings,
+};
 
 export const servicesContextDecorator: DecoratorFn = (story: Function, storybook) => {
   const registry = new PluginServiceRegistry<PresentationUtilServices, StorybookParams>(providers);
@@ -22,7 +38,9 @@ export const servicesContextDecorator: DecoratorFn = (story: Function, storybook
 
   return (
     <I18nProvider>
-      <ContextProvider>{story()}</ContextProvider>
+      <KibanaReactProvider services={services}>
+        <ContextProvider>{story()}</ContextProvider>
+      </KibanaReactProvider>
     </I18nProvider>
   );
 };

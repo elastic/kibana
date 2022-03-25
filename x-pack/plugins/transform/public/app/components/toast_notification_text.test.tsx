@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { CoreStart } from 'src/core/public';
+import { themeServiceMock } from 'src/core/public/mocks';
 
 import { ToastNotificationText } from './toast_notification_text';
 
@@ -20,6 +21,7 @@ describe('ToastNotificationText', () => {
     const props = {
       overlays: {} as CoreStart['overlays'],
       text: 'a short text message',
+      theme: themeServiceMock.createStartContract(),
     };
     const { container } = render(<ToastNotificationText {...props} />);
     expect(container.textContent).toBe('a short text message');
@@ -29,6 +31,7 @@ describe('ToastNotificationText', () => {
     const props = {
       overlays: {} as CoreStart['overlays'],
       text: 'a text message that is longer than 140 characters. a text message that is longer than 140 characters. a text message that is longer than 140 characters. ',
+      theme: themeServiceMock.createStartContract(),
     };
     const { container } = render(<ToastNotificationText {...props} />);
     expect(container.textContent).toBe(

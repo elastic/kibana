@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldIcon } from '@kbn/react-field';
 import {
   KibanaContextProvider,
   KibanaReactContextValue,

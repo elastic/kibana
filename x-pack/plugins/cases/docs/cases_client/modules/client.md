@@ -1,9 +1,13 @@
-[Cases Client API Interface](../cases_client_api.md) / client
+[Cases Client API Interface](../README.md) / client
 
 # Module: client
 
 ## Table of contents
 
+### Namespaces
+
+- [\_internal\_namespace](client._internal_namespace.md)
+
 ### Classes
 
-- [CasesClient](../classes/client.casesclient.md)
+- [CasesClient](../classes/client.CasesClient.md)

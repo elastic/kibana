@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
+import { Stream } from 'stream';
 import { schema } from '@kbn/config-schema';
-import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
+import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import {
@@ -16,6 +16,7 @@ import {
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
 } from '../../common/constants';
+import { decodeMvtResponseBody } from '../../common/mvt_request_body';
 import { getEsTile } from './get_tile';
 import { getEsGridTile } from './get_grid_tile';
 
@@ -24,9 +25,11 @@ const CACHE_TIMEOUT_SECONDS = 60 * 60;
 export function initMVTRoutes({
   router,
   logger,
+  core,
 }: {
   router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
+  core: CoreStart;
 }) {
   router.get(
     {
@@ -52,14 +55,11 @@ export function initMVTRoutes({
     ) => {
       const { query, params } = request;
 
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+      const abortController = makeAbortController(request);
 
-      const requestBodyDSL = rison.decode(query.requestBody as string);
-
-      const tile = await getEsTile({
+      const gzippedTile = await getEsTile({
+        url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+        core,
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -67,11 +67,11 @@ export function initMVTRoutes({
         y: parseInt((params as any).y, 10) as number,
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
-        requestBody: requestBodyDSL as any,
+        requestBody: decodeMvtResponseBody(query.requestBody as string) as any,
         abortController,
       });
 
-      return sendResponse(response, tile);
+      return sendResponse(response, gzippedTile);
     }
   );
 
@@ -88,7 +88,7 @@ export function initMVTRoutes({
           geometryFieldName: schema.string(),
           requestBody: schema.string(),
           index: schema.string(),
-          requestType: schema.string(),
+          renderAs: schema.string(),
           token: schema.maybe(schema.string()),
           gridPrecision: schema.number(),
         }),
@@ -101,14 +101,11 @@ export function initMVTRoutes({
     ) => {
       const { query, params } = request;
 
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+      const abortController = makeAbortController(request);
 
-      const requestBodyDSL = rison.decode(query.requestBody as string);
-
-      const tile = await getEsGridTile({
+      const gzipTileStream = await getEsGridTile({
+        url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+        core,
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -116,34 +113,50 @@ export function initMVTRoutes({
         y: parseInt((params as any).y, 10) as number,
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
-        requestBody: requestBodyDSL as any,
-        requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
+        requestBody: decodeMvtResponseBody(query.requestBody as string) as any,
+        renderAs: query.renderAs as RENDER_AS,
         gridPrecision: parseInt(query.gridPrecision, 10),
         abortController,
       });
 
-      return sendResponse(response, tile);
+      return sendResponse(response, gzipTileStream);
     }
   );
 }
 
-function sendResponse(response: KibanaResponseFactory, tile: any) {
-  const headers = {
-    'content-disposition': 'inline',
-    'content-length': tile ? `${tile.length}` : `0`,
-    'Content-Type': 'application/x-protobuf',
-    'Cache-Control': `public, max-age=${CACHE_TIMEOUT_SECONDS}`,
-    'Last-Modified': `${new Date().toUTCString()}`,
-  };
-
-  if (tile) {
+function sendResponse(response: KibanaResponseFactory, gzipTileStream: Stream | null) {
+  const cacheControl = `public, max-age=${CACHE_TIMEOUT_SECONDS}`;
+  const lastModified = `${new Date().toUTCString()}`;
+  if (gzipTileStream) {
     return response.ok({
-      body: tile,
-      headers,
+      body: gzipTileStream,
+      headers: {
+        'content-disposition': 'inline',
+        'content-encoding': 'gzip',
+        'Content-Type': 'application/x-protobuf',
+        'Cache-Control': cacheControl,
+        'Last-Modified': lastModified,
+      },
     });
   } else {
     return response.ok({
-      headers,
+      headers: {
+        'content-length': `0`,
+        'content-disposition': 'inline',
+        'Content-Type': 'application/x-protobuf',
+        'Cache-Control': cacheControl,
+        'Last-Modified': lastModified,
+      },
     });
   }
+}
+
+function makeAbortController(
+  request: KibanaRequest<unknown, Record<string, any>, unknown>
+): AbortController {
+  const abortController = new AbortController();
+  request.events.aborted$.subscribe(() => {
+    abortController.abort();
+  });
+  return abortController;
 }

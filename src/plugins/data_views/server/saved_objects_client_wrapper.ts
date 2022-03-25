@@ -42,6 +42,6 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
     return await this.savedObjectClient.create(type, attributes, options);
   }
   delete(type: string, id: string) {
-    return this.savedObjectClient.delete(type, id);
+    return this.savedObjectClient.delete(type, id, { force: true });
   }
 }

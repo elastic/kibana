@@ -28,7 +28,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler',
+        path: '/api/as/v1/engines/:name/crawler',
       });
     });
 
@@ -61,7 +61,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests',
       });
     });
 
@@ -94,7 +94,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests/:id',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests/:id',
       });
     });
 
@@ -132,12 +132,57 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests',
       });
     });
 
     it('validates correctly with name', () => {
       const request = { params: { name: 'some-engine' } };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with domain urls', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { overrides: { domain_allowlist: ['https://www.elastic.co'] } },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with max crawl depth', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { overrides: { max_crawl_depth: 10 } },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with seed urls', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { overrides: { seed_urls: ['https://www.elastic.co/guide'] } },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with sitemap urls', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { overrides: { sitemap_urls: ['https://www.elastic.co/sitemap1.xml'] } },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly when we set sitemap discovery', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { overrides: { sitemap_discovery_disabled: true } },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with empty overrides', () => {
+      const request = { params: { name: 'some-engine' }, body: { overrides: {} } };
       mockRouter.shouldValidate(request);
     });
 
@@ -165,7 +210,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains',
+        path: '/api/as/v1/engines/:name/crawler/domains',
       });
     });
 
@@ -204,7 +249,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests/active/cancel',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests/active/cancel',
       });
     });
 
@@ -237,7 +282,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains',
+        path: '/api/as/v1/engines/:name/crawler/domains',
       });
     });
 
@@ -293,7 +338,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
@@ -339,7 +384,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
@@ -397,7 +442,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
@@ -435,7 +480,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/crawler/validate_url',
+        path: '/api/as/v1/crawler/validate_url',
       });
     });
 
@@ -472,7 +517,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/process_crawls',
+        path: '/api/as/v1/engines/:name/crawler/process_crawls',
       });
     });
 
@@ -519,7 +564,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 
@@ -556,7 +601,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 
@@ -611,7 +656,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 
@@ -626,6 +671,39 @@ describe('crawler routes', () => {
       const request = {
         params: {},
       };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
+  describe('GET /internal/app_search/engines/{name}/crawler/domain_configs', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/internal/app_search/engines/{name}/crawler/domain_configs',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v1/engines/:name/crawler/domain_configs',
+      });
+    });
+
+    it('validates correctly with name', () => {
+      const request = { params: { name: 'some-engine' } };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without name', () => {
+      const request = { params: {} };
       mockRouter.shouldThrow(request);
     });
   });

@@ -66,7 +66,7 @@ export type LayerDescriptor = {
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
-  type: LAYER_TYPE.VECTOR | LAYER_TYPE.TILED_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
+  type: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
   joins?: JoinDescriptor[];
   style: VectorStyleDescriptor;
 };

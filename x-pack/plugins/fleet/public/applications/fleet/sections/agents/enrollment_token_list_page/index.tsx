@@ -96,7 +96,6 @@ const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }
                   })
             }
             color="text"
-            isDisabled={state === 'LOADING'}
             onClick={toggleKey}
             iconType={state === 'VISIBLE' ? 'eyeClosed' : 'eye'}
           />
@@ -182,7 +181,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
 
   const total = enrollmentAPIKeysRequest?.data?.total ?? 0;
   const rowItems =
-    enrollmentAPIKeysRequest?.data?.list.filter((enrollmentKey) => {
+    enrollmentAPIKeysRequest?.data?.items.filter((enrollmentKey) => {
       if (!agentPolicies.length || !enrollmentKey.policy_id) return false;
       const agentPolicy = agentPoliciesById[enrollmentKey.policy_id];
       return !agentPolicy?.is_managed;
@@ -269,6 +268,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     },
   ];
 
+  const isLoading =
+    (enrollmentAPIKeysRequest.isLoading && enrollmentAPIKeysRequest.isInitialRequest) ||
+    (agentPoliciesRequest.isLoading && agentPoliciesRequest.isInitialRequest);
+
   return (
     <DefaultLayout section="enrollment_tokens">
       {isModalOpen && (
@@ -312,10 +315,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiBasicTable<EnrollmentAPIKey>
-        loading={enrollmentAPIKeysRequest.isLoading && enrollmentAPIKeysRequest.isInitialRequest}
+        loading={isLoading}
         hasActions={true}
         noItemsMessage={
-          enrollmentAPIKeysRequest.isLoading && enrollmentAPIKeysRequest.isInitialRequest ? (
+          isLoading ? (
             <FormattedMessage
               id="xpack.fleet.enrollemntAPIKeyList.loadingTokensMessage"
               defaultMessage="Loading enrollment tokens..."

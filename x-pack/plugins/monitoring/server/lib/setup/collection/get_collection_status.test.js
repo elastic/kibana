@@ -17,6 +17,7 @@ const mockReq = (
 ) => {
   return {
     server: {
+      instanceUuid: 'kibana-1234',
       newPlatform: {
         setup: {
           plugins: {
@@ -28,18 +29,7 @@ const mockReq = (
           },
         },
       },
-      config() {
-        return {
-          get: jest.fn((prop) => {
-            if (prop === 'server.uuid') {
-              return 'kibana-1234';
-            }
-            if (prop === 'monitoring.ui.metricbeat.index') {
-              return 'metricbeat-*';
-            }
-          }),
-        };
-      },
+      config: { ui: { ccs: { enabled: false } } },
       usage: {
         collectorSet: {
           getCollectorByType: () => ({

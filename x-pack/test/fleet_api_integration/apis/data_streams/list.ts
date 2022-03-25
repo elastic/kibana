@@ -21,17 +21,16 @@ export default function (providerContext: FtrProviderContext) {
   const retry = getService('retry');
   const pkgName = 'datastreams';
   const pkgVersion = '0.1.0';
-  const pkgKey = `${pkgName}-${pkgVersion}`;
   const logsTemplateName = `logs-${pkgName}.test_logs`;
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
 
-  const uninstallPackage = async (pkg: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+  const uninstallPackage = async (name: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  const installPackage = async (pkg: string) => {
+  const installPackage = async (name: string, version: string) => {
     return await supertest
-      .post(`/api/fleet/epm/packages/${pkg}`)
+      .post(`/api/fleet/epm/packages/${name}/${version}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true })
       .expect(200);
@@ -91,11 +90,11 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     beforeEach(async () => {
-      await installPackage(pkgKey);
+      await installPackage(pkgName, pkgVersion);
     });
 
     afterEach(async () => {
-      await uninstallPackage(pkgKey);
+      await uninstallPackage(pkgName, pkgVersion);
       try {
         await es.transport.request({
           method: 'DELETE',
@@ -146,7 +145,8 @@ export default function (providerContext: FtrProviderContext) {
 
         body.data_streams.forEach((dataStream: any) => {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          const { index, size_in_bytes, last_activity_ms, ...coreFields } = dataStream;
+          const { index, size_in_bytes, size_in_bytes_formatted, last_activity_ms, ...coreFields } =
+            dataStream;
           expect(expectedStreamsByDataset[coreFields.dataset]).not.to.eql(undefined);
           expect(coreFields).to.eql(expectedStreamsByDataset[coreFields.dataset]);
         });

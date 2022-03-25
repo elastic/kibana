@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data_views/public';
 
 export type SortOrder = [string, string];
 export interface ColumnProps {
@@ -21,7 +21,7 @@ export interface ColumnProps {
 
 /**
  * Returns properties necessary to display the time column
- * If it's an IndexPattern with timefield, the time column is
+ * If it's an DataView with timefield, the time column is
  * prepended, not moveable and removeable
  * @param timeFieldName
  */
@@ -46,7 +46,7 @@ export function getTimeColumn(timeFieldName: string): ColumnProps {
  */
 export function getDisplayedColumns(
   columns: string[],
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   hideTimeField: boolean,
   isShortDots: boolean
 ) {

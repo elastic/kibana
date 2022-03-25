@@ -15,22 +15,22 @@ import { FILTER_FIELDS } from '../../../../../common/constants';
 import { useGetUrlParams } from '../../../../hooks';
 
 export interface FilterExpressionsSelectProps {
-  alertParams: { [key: string]: any };
+  ruleParams: { [key: string]: any };
   newFilters: string[];
   onRemoveFilter: (val: string) => void;
-  setAlertParams: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
   shouldUpdateUrl: boolean;
 }
 
 const { TYPE, TAGS, LOCATION, PORT } = FILTER_FIELDS;
 
 export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = ({
-  alertParams,
+  ruleParams,
   newFilters,
   onRemoveFilter,
-  setAlertParams,
+  setRuleParams,
 }) => {
-  const alertFilters = alertParams?.filters;
+  const alertFilters = ruleParams?.filters;
 
   const selectedPorts = alertFilters?.[PORT] ?? [];
   const selectedLocations = alertFilters?.[LOCATION] ?? [];
@@ -40,10 +40,10 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
   const { dateRangeStart: from, dateRangeEnd: to } = useGetUrlParams();
   const onFilterFieldChange = (fieldName: string, values?: string[]) => {
     // the `filters` field is no longer a string
-    if (alertParams.filters && typeof alertParams.filters !== 'string') {
-      setAlertParams('filters', { ...alertParams.filters, [fieldName]: values });
+    if (ruleParams.filters && typeof ruleParams.filters !== 'string') {
+      setRuleParams('filters', { ...ruleParams.filters, [fieldName]: values });
     } else {
-      setAlertParams(
+      setRuleParams(
         'filters',
         Object.assign(
           {},
@@ -134,7 +134,7 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
                 <FieldValueSuggestions
                   filters={[]}
                   key={fieldName}
-                  indexPatternTitle={indexPattern.title}
+                  dataViewTitle={indexPattern.title}
                   sourceField={fieldName}
                   label={title}
                   onChange={(vals) => {

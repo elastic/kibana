@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import _saved_queries from '../apps/discover/_saved_queries';
 import { FtrService } from '../ftr_provider_context';
 
 export class DiscoverPageObject extends FtrService {
@@ -240,7 +241,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async useLegacyTable() {
-    return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) !== false;
+    return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) === true;
   }
 
   public async getDocTableIndex(index: number) {
@@ -274,6 +275,11 @@ export class DiscoverPageObject extends FtrService {
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
     const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
     return result[usedCellIdx];
+  }
+
+  public async clickDocTableRowToggle(rowIndex: number = 0) {
+    const docTable = await this.getDocTable();
+    await docTable.clickRowToggle({ rowIndex });
   }
 
   public async skipToEndOfDocTable() {
@@ -361,6 +367,21 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.click('indexPattern-add-field');
       await this.find.byClassName('indexPatternFieldEditor__form');
     });
+  }
+
+  public async clickCreateNewDataView() {
+    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
+      return await this.testSubjects.isDisplayed('dataview-create-new');
+    });
+    await this.testSubjects.click('dataview-create-new');
+    await this.retry.waitForWithTimeout(
+      'index pattern editor form to be visible',
+      15000,
+      async () => {
+        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
+      }
+    );
+    await (await this.find.byClassName('indexPatternEditor__form')).click();
   }
 
   public async hasNoResults() {
@@ -597,5 +618,11 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.clickWhenNotDisabled('dscViewModeFieldStatsButton');
       await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
     });
+  }
+
+  public async getCurrentlySelectedDataView() {
+    await this.testSubjects.existOrFail('discover-sidebar');
+    const button = await this.testSubjects.find('indexPattern-switch-link');
+    return button.getAttribute('title');
   }
 }

@@ -17,7 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
-  describe('Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/106650
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
@@ -35,8 +36,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/119763
-    describe.skip('with metrics present', () => {
+    describe('with metrics present', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
@@ -96,8 +96,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('group nodes by custom field', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        const groups = await pageObjects.infraHome.groupByCustomField('host.os.platform');
-        expect(groups).to.eql(['ubuntu']);
+        await retry.try(async () => {
+          const groups = await pageObjects.infraHome.groupByCustomField('host.os.platform');
+          expect(groups).to.eql(['ubuntu']);
+        });
       });
 
       it('filter nodes by search term', async () => {
@@ -168,8 +170,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/106650
-    describe.skip('Saved Views', () => {
+    describe('Saved Views', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       it('should have save and load controls', async () => {

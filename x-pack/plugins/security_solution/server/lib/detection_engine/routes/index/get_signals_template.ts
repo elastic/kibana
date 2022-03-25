@@ -33,7 +33,7 @@ import signalExtraFields from './signal_extra_fields.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 57;
+export const SIGNALS_TEMPLATE_VERSION = 67;
 /**
   @constant
   @type {number}
@@ -47,7 +47,7 @@ export const SIGNALS_TEMPLATE_VERSION = 57;
   UI will call create_index_route and and go through the index update process. Increment this number if
   making changes to the field aliases we use to make signals forwards-compatible.
 */
-export const SIGNALS_FIELD_ALIASES_VERSION = 1;
+export const SIGNALS_FIELD_ALIASES_VERSION = 3;
 
 /**
   @constant
@@ -59,16 +59,16 @@ export const SIGNALS_FIELD_ALIASES_VERSION = 1;
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
 export const ALIAS_VERSION_FIELD = 'aliases_version';
 
-export const getSignalsTemplate = (index: string, spaceId?: string, aadIndexAliasName?: string) => {
+export const getSignalsTemplate = (index: string, aadIndexAliasName: string) => {
   const fieldAliases = createSignalsFieldAliases();
   const template = {
     index_patterns: [`${index}-*`],
     template: {
-      // aliases: {
-      //   [aadIndexAliasName]: {
-      //     is_write_index: false,
-      //   },
-      // },
+      aliases: {
+        [aadIndexAliasName]: {
+          is_write_index: false,
+        },
+      },
       settings: {
         index: {
           lifecycle: {
@@ -142,7 +142,7 @@ const properties = {
 export const backwardsCompatibilityMappings = [
   {
     minVersion: 0,
-    // Version 45 shipped with 7.14
+    // Version 45 shipped with 7.14. 7.15+ have both the host.os.name.caseless field and the field aliases
     maxVersion: 45,
     mapping: {
       runtime: {
@@ -154,7 +154,6 @@ export const backwardsCompatibilityMappings = [
           },
         },
       },
-      properties,
     },
   },
 ];
@@ -171,7 +170,7 @@ export const createBackwardsCompatibilityMapping = (version: number) => {
     },
   };
 
-  return merge({}, ...mappings, meta);
+  return merge({ properties }, ...mappings, meta);
 };
 
 export const getRbacRequiredFields = (spaceId: string) => {

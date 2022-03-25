@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPatternFieldList } from '../../../data/common';
-import { IndexPattern } from '../../../data/common';
+import { IIndexPatternFieldList, DataView } from '../../../data_views/public';
 
 const fields = [
   {
@@ -71,7 +70,7 @@ const indexPattern = {
   getFormatterForField: () => ({ convert: (value: unknown) => value }),
   isTimeNanosBased: () => false,
   popularizeField: () => {},
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
 

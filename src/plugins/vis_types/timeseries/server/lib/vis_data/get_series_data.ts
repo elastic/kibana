@@ -14,13 +14,13 @@ import { handleResponseBody } from './series/handle_response_body';
 import { getSeriesRequestParams } from './series/get_request_params';
 import { getActiveSeries } from './helpers/get_active_series';
 import { isAggSupported } from './helpers/check_aggs';
-import { isEntireTimeRangeMode } from './helpers/get_timerange_mode';
+
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
   VisTypeTimeseriesRequestServices,
 } from '../../types';
-import type { Panel } from '../../../common/types';
+import type { Panel, DataResponseMeta } from '../../../common/types';
 import { PANEL_TYPES } from '../../../common/enums';
 
 export async function getSeriesData(
@@ -52,19 +52,17 @@ export async function getSeriesData(
   }
 
   const { searchStrategy, capabilities } = strategy;
-  const meta = {
+  const handleError = handleErrorResponse(panel);
+
+  const meta: DataResponseMeta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
+    trackedEsSearches: {},
   };
-
-  const handleError = handleErrorResponse(panel);
 
   try {
     const bodiesPromises = getActiveSeries(panel).map((series) => {
-      if (isEntireTimeRangeMode(panel, series)) {
-        isAggSupported(series.metrics);
-      }
-
+      isAggSupported(series.metrics, capabilities);
       return getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services);
     });
 
@@ -83,7 +81,7 @@ export async function getSeriesData(
     );
 
     const searches = await Promise.all(bodiesPromises);
-    const data = await searchStrategy.search(requestContext, req, searches);
+    const data = await searchStrategy.search(requestContext, req, searches, meta.trackedEsSearches);
 
     const series = await Promise.all(
       data.map(
@@ -104,6 +102,7 @@ export async function getSeriesData(
           searchStrategy,
           capabilities,
         },
+        trackedEsSearches: meta.trackedEsSearches,
       });
     }
 

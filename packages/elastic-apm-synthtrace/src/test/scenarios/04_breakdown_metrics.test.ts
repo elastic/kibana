@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 import { sumBy } from 'lodash';
-import { Fields } from '../../lib/entity';
-import { service } from '../../lib/service';
+import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
-import { getBreakdownMetrics } from '../../lib/utils/get_breakdown_metrics';
+import { getBreakdownMetrics } from '../../lib/apm/processors/get_breakdown_metrics';
+import { ApmFields } from '../../lib/apm/apm_fields';
+import { StreamProcessor } from '../../lib/stream_processor';
 
 describe('breakdown metrics', () => {
-  let events: Fields[];
+  let events: ApmFields[];
 
   const LIST_RATE = 2;
   const LIST_SPANS = 2;
@@ -21,54 +22,61 @@ describe('breakdown metrics', () => {
   const INTERVALS = 6;
 
   beforeEach(() => {
-    const javaService = service('opbeans-java', 'production', 'java');
+    const javaService = apm.service('opbeans-java', 'production', 'java');
     const javaInstance = javaService.instance('instance-1');
 
-    const start = new Date('2021-01-01T00:00:00.000Z').getTime();
+    const start = new Date('2021-01-01T00:00:00.000Z');
 
-    const range = timerange(start, start + INTERVALS * 30 * 1000);
+    const range = timerange(start, new Date(start.getTime() + INTERVALS * 30 * 1000));
 
-    events = getBreakdownMetrics([
-      ...range
-        .interval('30s')
-        .rate(LIST_RATE)
-        .flatMap((timestamp) =>
-          javaInstance
-            .transaction('GET /api/product/list')
-            .timestamp(timestamp)
-            .duration(1000)
-            .children(
-              javaInstance
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
-                .timestamp(timestamp + 150)
-                .duration(500),
-              javaInstance.span('GET foo', 'db', 'redis').timestamp(timestamp).duration(100)
-            )
-            .serialize()
-        ),
-      ...range
-        .interval('30s')
-        .rate(ID_RATE)
-        .flatMap((timestamp) =>
-          javaInstance
-            .transaction('GET /api/product/:id')
-            .timestamp(timestamp)
-            .duration(1000)
-            .children(
-              javaInstance
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
-                .duration(500)
-                .timestamp(timestamp + 100)
-                .children(
-                  javaInstance
-                    .span('bar', 'external', 'http')
-                    .timestamp(timestamp + 200)
-                    .duration(100)
-                )
-            )
-            .serialize()
-        ),
-    ]).filter((event) => event['processor.event'] === 'metric');
+    const listSpans = range
+      .interval('30s')
+      .rate(LIST_RATE)
+      .spans((timestamp) =>
+        javaInstance
+          .transaction('GET /api/product/list')
+          .timestamp(timestamp)
+          .duration(1000)
+          .children(
+            javaInstance
+              .span('GET apm-*/_search', 'db', 'elasticsearch')
+              .timestamp(timestamp + 150)
+              .duration(500),
+            javaInstance.span('GET foo', 'db', 'redis').timestamp(timestamp).duration(100)
+          )
+          .serialize()
+      );
+
+    const productPageSpans = range
+      .interval('30s')
+      .rate(ID_RATE)
+      .spans((timestamp) =>
+        javaInstance
+          .transaction('GET /api/product/:id')
+          .timestamp(timestamp)
+          .duration(1000)
+          .children(
+            javaInstance
+              .span('GET apm-*/_search', 'db', 'elasticsearch')
+              .duration(500)
+              .timestamp(timestamp + 100)
+              .children(
+                javaInstance
+                  .span('bar', 'external', 'http')
+                  .timestamp(timestamp + 200)
+                  .duration(100)
+              )
+          )
+          .serialize()
+      );
+
+    const processor = new StreamProcessor({
+      processors: [getBreakdownMetrics],
+      flushInterval: '15m',
+    });
+    events = processor
+      .streamToArray(listSpans, productPageSpans)
+      .filter((event) => event['processor.event'] === 'metric');
   });
 
   it('generates the right amount of breakdown metrics', () => {

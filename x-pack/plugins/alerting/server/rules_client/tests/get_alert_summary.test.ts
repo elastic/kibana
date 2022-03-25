@@ -19,7 +19,7 @@ import { eventLogClientMock } from '../../../../event_log/server/mocks';
 import { QueryEventsBySavedObjectResult } from '../../../../event_log/server';
 import { SavedObject } from 'kibana/server';
 import { EventsFactory } from '../../lib/alert_summary_from_event_log.test';
-import { RawAlert } from '../../types';
+import { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 
 const taskManager = taskManagerMock.createStart();
@@ -40,6 +40,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
@@ -64,7 +65,7 @@ const AlertSummaryFindEventsResult: QueryEventsBySavedObjectResult = {
 
 const RuleIntervalSeconds = 1;
 
-const BaseRuleSavedObject: SavedObject<RawAlert> = {
+const BaseRuleSavedObject: SavedObject<RawRule> = {
   id: '1',
   type: 'alert',
   attributes: {
@@ -91,12 +92,13 @@ const BaseRuleSavedObject: SavedObject<RawAlert> = {
       status: 'unknown',
       lastExecutionDate: '2020-08-20T19:23:38Z',
       error: null,
+      warning: null,
     },
   },
   references: [],
 };
 
-function getRuleSavedObject(attributes: Partial<RawAlert> = {}): SavedObject<RawAlert> {
+function getRuleSavedObject(attributes: Partial<RawRule> = {}): SavedObject<RawRule> {
   return {
     ...BaseRuleSavedObject,
     attributes: { ...BaseRuleSavedObject.attributes, ...attributes },
@@ -134,6 +136,14 @@ describe('getAlertSummary()', () => {
       data: events,
     };
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(eventsResult);
+
+    const executionEvents = eventsFactory.getEvents();
+    const executionEventsResult = {
+      ...AlertSummaryFindEventsResult,
+      total: executionEvents.length,
+      data: executionEvents,
+    };
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(executionEventsResult);
 
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
@@ -203,7 +213,7 @@ describe('getAlertSummary()', () => {
     await rulesClient.getAlertSummary({ id: '1' });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(2);
     expect(eventLogClient.findEventsBySavedObjectIds.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alert",
@@ -214,7 +224,12 @@ describe('getAlertSummary()', () => {
           "end": "2019-02-12T21:01:22.479Z",
           "page": 1,
           "per_page": 10000,
-          "sort_order": "desc",
+          "sort": Array [
+            Object {
+              "sort_field": "@timestamp",
+              "sort_order": "desc",
+            },
+          ],
           "start": "2019-02-12T21:00:22.479Z",
         },
         undefined,
@@ -240,7 +255,7 @@ describe('getAlertSummary()', () => {
     await rulesClient.getAlertSummary({ id: '1' });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(2);
     expect(eventLogClient.findEventsBySavedObjectIds.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alert",
@@ -251,7 +266,12 @@ describe('getAlertSummary()', () => {
           "end": "2019-02-12T21:01:22.479Z",
           "page": 1,
           "per_page": 10000,
-          "sort_order": "desc",
+          "sort": Array [
+            Object {
+              "sort_field": "@timestamp",
+              "sort_order": "desc",
+            },
+          ],
           "start": "2019-02-12T21:00:22.479Z",
         },
         Array [
@@ -269,7 +289,7 @@ describe('getAlertSummary()', () => {
     await rulesClient.getAlertSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(2);
     const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
 
     expect({ start, end }).toMatchInlineSnapshot(`
@@ -288,13 +308,32 @@ describe('getAlertSummary()', () => {
     await rulesClient.getAlertSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(2);
     const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
 
     expect({ start, end }).toMatchInlineSnapshot(`
       Object {
         "end": "2019-02-12T21:01:22.479Z",
         "start": "2019-02-12T20:59:22.479Z",
+      }
+    `);
+  });
+
+  test('calls event log client with number of executions', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
+
+    const numberOfExecutions = 15;
+    await rulesClient.getAlertSummary({ id: '1', numberOfExecutions });
+
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(2);
+    const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[1][2]!;
+
+    expect({ start, end }).toMatchInlineSnapshot(`
+      Object {
+        "end": "2019-02-12T21:01:22.479Z",
+        "start": undefined,
       }
     `);
   });

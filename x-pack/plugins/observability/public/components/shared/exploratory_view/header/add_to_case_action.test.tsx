@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '../rtl_helpers';
+import { render, forNearestButton } from '../rtl_helpers';
 import { fireEvent } from '@testing-library/dom';
 import { AddToCaseAction } from './add_to_case_action';
 import * as useCaseHook from '../hooks/use_add_to_case';
@@ -14,6 +14,10 @@ import * as datePicker from '../components/date_range_picker';
 import moment from 'moment';
 
 describe('AddToCaseAction', function () {
+  beforeEach(() => {
+    jest.spyOn(datePicker, 'parseRelativeDate').mockRestore();
+  });
+
   it('should render properly', async function () {
     const { findByText } = render(
       <AddToCaseAction
@@ -49,6 +53,33 @@ describe('AddToCaseAction', function () {
     );
   });
 
+  it('should use an empty time-range when timeRanges are empty', async function () {
+    const useAddToCaseHook = jest.spyOn(useCaseHook, 'useAddToCase');
+
+    const { getByText } = render(
+      <AddToCaseAction
+        lensAttributes={null}
+        timeRange={{ to: '', from: '' }}
+        appId="securitySolutionUI"
+        owner="security"
+      />
+    );
+
+    expect(await forNearestButton(getByText)('Add to case')).toBeDisabled();
+
+    expect(useAddToCaseHook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lensAttributes: null,
+        timeRange: {
+          from: '',
+          to: '',
+        },
+        appId: 'securitySolutionUI',
+        owner: 'security',
+      })
+    );
+  });
+
   it('should be able to click add to case button', async function () {
     const initSeries = {
       data: [
@@ -71,8 +102,8 @@ describe('AddToCaseAction', function () {
     );
     fireEvent.click(await findByText('Add to case'));
 
-    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
-    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledWith(
+    expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
+    expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledWith(
       expect.objectContaining({
         owner: ['observability'],
         userCanCrud: true,

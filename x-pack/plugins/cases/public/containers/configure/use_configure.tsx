@@ -10,7 +10,7 @@ import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 
 import * as i18n from './translations';
 import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 import { useToasts } from '../../common/lib/kibana';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
 

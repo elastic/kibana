@@ -14,6 +14,8 @@ import {
   EuiProgress,
   EuiSearchBarProps,
   EuiSpacer,
+  EuiPageHeader,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
@@ -23,8 +25,6 @@ import { AutoDownload } from '../../../../../../common/components/auto_download/
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFormatUrl } from '../../../../../../common/components/link_to';
 import { Loader } from '../../../../../../common/components/loader';
-
-import { DetectionEngineHeaderPage } from '../../../../../components/detection_engine_header_page';
 
 import * as i18n from './translations';
 import { AllRulesUtilityBar } from '../utility_bar';
@@ -39,6 +39,8 @@ import { useUserData } from '../../../../../components/user_info';
 import { userHasPermissions } from '../../helpers';
 import { useListsConfig } from '../../../../../containers/detection_engine/lists/use_lists_config';
 import { ExceptionsTableItem } from './types';
+import { MissingPrivilegesCallOut } from '../../../../../components/callouts/missing_privileges_callout';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../../../common/endpoint/service/artifacts/constants';
 
 export type Func = () => Promise<void>;
 
@@ -60,7 +62,7 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 
 export const ExceptionListsTable = React.memo(() => {
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-  const [{ loading: userInfoLoading, canUserCRUD }] = useUserData();
+  const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
   const hasPermissions = userHasPermissions(canUserCRUD);
 
   const { loading: listsConfigLoading } = useListsConfig();
@@ -83,9 +85,7 @@ export const ExceptionListsTable = React.memo(() => {
       http,
       namespaceTypes: ['single', 'agnostic'],
       notifications,
-      showTrustedApps: false,
-      showEventFilters: false,
-      showHostIsolationExceptions: false,
+      hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
     });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
@@ -193,8 +193,16 @@ export const ExceptionListsTable = React.memo(() => {
   );
 
   const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {
-    return getAllExceptionListsColumns(handleExport, handleDelete, formatUrl, navigateToUrl);
-  }, [handleExport, handleDelete, formatUrl, navigateToUrl]);
+    // Defaulting to true to default to the lower privilege first
+    const isKibanaReadOnly = (canUserREAD && !canUserCRUD) ?? true;
+    return getAllExceptionListsColumns(
+      handleExport,
+      handleDelete,
+      formatUrl,
+      navigateToUrl,
+      isKibanaReadOnly
+    );
+  }, [handleExport, handleDelete, formatUrl, navigateToUrl, canUserREAD, canUserCRUD]);
 
   const handleRefresh = useCallback((): void => {
     if (refreshExceptions != null) {
@@ -341,13 +349,14 @@ export const ExceptionListsTable = React.memo(() => {
 
   return (
     <>
-      <DetectionEngineHeaderPage
-        title={i18n.ALL_EXCEPTIONS}
-        border
-        subtitle={i18n.ALL_EXCEPTIONS_DESCRIPTION}
-        subtitle2={timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}
+      <MissingPrivilegesCallOut />
+      <EuiPageHeader
+        pageTitle={i18n.ALL_EXCEPTIONS}
+        description={
+          <p>{timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}</p>
+        }
       />
-
+      <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
         {loadingTableInfo && (
           <EuiProgress
@@ -369,7 +378,7 @@ export const ExceptionListsTable = React.memo(() => {
         ) : (
           <>
             <AllRulesUtilityBar
-              showBulkActions={false}
+              hasBulkActions={false}
               canBulkEdit={hasPermissions}
               paginationTotal={exceptionListsWithRuleRefs.length ?? 0}
               numberSelectedItems={0}

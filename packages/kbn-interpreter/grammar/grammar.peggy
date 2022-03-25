@@ -23,7 +23,7 @@ start
   = expression
 
 expression
-  = space? first:function? rest:('|' space? fn:function { return fn; })* {
+  = blank? first:function? rest:('|' blank? fn:function { return fn; })* {
     return addMeta({
       type: 'expression',
       chain: first ? [first].concat(rest) : []
@@ -44,7 +44,7 @@ function "function"
 /* ----- Arguments ----- */
 
 argument_assignment
-  = name:identifier space? '=' space? value:argument {
+  = name:identifier blank? '=' blank? value:argument {
     return { name, value };
   }
   / value:argument {
@@ -58,7 +58,7 @@ argument
   }
 
 arg_list
-  = args:(space arg:argument_assignment { return arg; })* space? {
+  = args:(blank arg:argument_assignment { return arg; })* blank? {
     return args.reduce((accumulator, { name, value }) => ({
       ...accumulator,
       [name]: (accumulator[name] || []).concat(value)
@@ -82,7 +82,7 @@ phrase
 
 unquoted_string_or_number
   // Make sure we're not matching the beginning of a search
-  = string:unquoted+ { // this also matches nulls, booleans, and numbers
+  = !comment string:unquoted+ { // this also matches nulls, booleans, and numbers
     var result = string.join('');
     // Sort of hacky, but PEG doesn't have backtracking so
     // a null/boolean/number rule is hard to read, and performs worse
@@ -93,8 +93,20 @@ unquoted_string_or_number
     return Number(result);
   }
 
+blank
+  = (space / comment)+
+
 space
-  = [\ \t\r\n]+
+  = [\ \t\r\n]
+
+comment
+  = inline_comment / multiline_comment
+
+inline_comment
+  = "//" [^\n]*
+
+multiline_comment
+  = "/*" (!"*/" .)* "*/"?
 
 unquoted
   = "\\" sequence:([\"'(){}<>\[\]$`|=\ \t\n\r] / "\\") { return sequence; }

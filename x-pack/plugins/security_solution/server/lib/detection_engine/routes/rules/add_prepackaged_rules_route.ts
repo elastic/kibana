@@ -54,12 +54,7 @@ export const addPrepackedRulesRoute = (router: SecuritySolutionPluginRouter) => 
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const rulesClient = context.alerting?.getRulesClient();
-        const siemClient = context.securitySolution?.getAppClient();
-
-        if (!siemClient || !rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const rulesClient = context.alerting.getRulesClient();
 
         const validated = await createPrepackagedRules(
           context.securitySolution,
@@ -78,7 +73,7 @@ export const addPrepackedRulesRoute = (router: SecuritySolutionPluginRouter) => 
   );
 };
 
-class PrepackagedRulesError extends Error {
+export class PrepackagedRulesError extends Error {
   public readonly statusCode: number;
   constructor(message: string, statusCode: number) {
     super(message);
@@ -98,7 +93,6 @@ export const createPrepackagedRules = async (
   const siemClient = context.getAppClient();
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
   const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
-  const ruleStatusClient = context.getExecutionLogClient();
 
   const {
     maxTimelineImportExportSize,
@@ -153,11 +147,10 @@ export const createPrepackagedRules = async (
   await updatePrepackagedRules(
     rulesClient,
     savedObjectsClient,
-    context.getSpaceId(),
-    ruleStatusClient,
     rulesToUpdate,
     signalsIndex,
-    ruleRegistryEnabled
+    ruleRegistryEnabled,
+    context.getRuleExecutionLog()
   );
 
   const prepackagedRulesOutput: PrePackagedRulesAndTimelinesSchema = {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data_views/public';
 import { getSortArray, SortPairArr } from '../../../components/doc_table/lib/get_sort';
 
 /**
@@ -14,8 +14,8 @@ import { getSortArray, SortPairArr } from '../../../components/doc_table/lib/get
  * index pattern, returns a new state object
  */
 export function getSwitchIndexPatternAppState(
-  currentIndexPattern: IndexPattern,
-  nextIndexPattern: IndexPattern,
+  currentIndexPattern: DataView,
+  nextIndexPattern: DataView,
   currentColumns: string[],
   currentSort: SortPairArr[],
   modifyColumns: boolean = true,

@@ -59,6 +59,7 @@ export interface CustomRule {
   timeline: CompleteTimeline;
   maxSignals: number;
   buildingBlockType?: string;
+  exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -80,6 +81,9 @@ export interface ThreatIndicatorRule extends CustomRule {
   threatIndicatorPath: string;
   type?: string;
   atomic?: string;
+  matchedType?: string;
+  matchedId?: string;
+  matchedIndex?: string;
 }
 
 export interface MachineLearningRule {
@@ -160,6 +164,8 @@ const getSeverityOverride4 = (): SeverityOverride => ({
   sourceValue: 'auditbeat',
 });
 
+// Default interval is 1m, our tests config overwrite this to 1s
+// See https://github.com/elastic/kibana/pull/125396 for details
 const getRunsEvery = (): Interval => ({
   interval: '1',
   timeType: 'Seconds',
@@ -407,6 +413,9 @@ export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   timeline: getIndicatorMatchTimelineTemplate(),
   maxSignals: 100,
   threatIndicatorPath: 'threat.indicator',
+  matchedType: 'indicator_match_rule',
+  matchedId: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
+  matchedIndex: 'logs-ti_abusech.malware',
 });
 
 export const duplicatedRuleName = `${getNewThreatIndicatorRule().name} [Duplicate]`;
@@ -461,7 +470,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     immutable: false,
     type: 'query',
     language: 'kuery',
-    index: ['exceptions-*'],
+    index: getIndexPatterns(),
     query,
     throttle: 'no_actions',
     actions: [],

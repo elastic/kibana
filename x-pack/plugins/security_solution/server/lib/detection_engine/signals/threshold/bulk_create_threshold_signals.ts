@@ -22,11 +22,7 @@ import {
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
 import { GenericBulkCreateResponse } from '../bulk_create_factory';
-import {
-  calculateThresholdSignalUuid,
-  getThresholdAggregationParts,
-  getThresholdTermsHash,
-} from '../utils';
+import { calculateThresholdSignalUuid, getThresholdAggregationParts } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type {
   MultiAggBucket,
@@ -102,6 +98,7 @@ const getTransformedHits = (
             ].filter((term) => term.field != null),
             cardinality: val.cardinality,
             maxTimestamp: val.maxTimestamp,
+            minTimestamp: val.minTimestamp,
             docCount: val.docCount,
           };
           acc.push(el as MultiAggBucket);
@@ -124,6 +121,7 @@ const getTransformedHits = (
               ]
             : undefined,
           maxTimestamp: bucket.max_timestamp.value_as_string,
+          minTimestamp: bucket.min_timestamp.value_as_string,
           docCount: bucket.doc_count,
         };
         acc.push(el as MultiAggBucket);
@@ -138,9 +136,6 @@ const getTransformedHits = (
     0,
     aggParts.field
   ).reduce((acc: Array<BaseHit<SignalSource>>, bucket) => {
-    const termsHash = getThresholdTermsHash(bucket.terms);
-    const signalHit = signalHistory[termsHash];
-
     const source = {
       [TIMESTAMP]: bucket.maxTimestamp,
       ...bucket.terms.reduce<object>((termAcc, term) => {
@@ -162,8 +157,7 @@ const getTransformedHits = (
         // threshold set in the timeline search. The upper bound will always be
         // the `original_time` of the signal (the timestamp of the latest event
         // in the set).
-        from:
-          signalHit?.lastSignalTimestamp != null ? new Date(signalHit.lastSignalTimestamp) : from,
+        from: new Date(bucket.minTimestamp) ?? from,
       },
     };
 

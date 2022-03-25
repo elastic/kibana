@@ -7,19 +7,14 @@
  */
 
 import React from 'react';
-import type { IndexPattern } from 'src/plugins/data/common';
-import { mountWithIntl } from '@kbn/test/jest';
+import type { DataView } from 'src/plugins/data_views/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DocViewerSource } from './source';
 import * as hooks from '../../../../utils/use_es_doc_search';
-import * as useUiSettingHook from 'src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import * as useUiSettingHook from '../../../../../../kibana_react/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../../../../components/json_code_editor/json_code_editor_common';
-
-jest.mock('../../../../kibana_services', () => ({
-  getServices: jest.fn(),
-}));
-
-import { getServices } from '../../../../kibana_services';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 const mockIndexPattern = {
   getComputedFields: () => [],
@@ -27,9 +22,8 @@ const mockIndexPattern = {
 const getMock = jest.fn(() => Promise.resolve(mockIndexPattern));
 const mockIndexPatternService = {
   get: getMock,
-} as unknown as IndexPattern;
-
-(getServices as jest.Mock).mockImplementation(() => ({
+} as unknown as DataView;
+const services = {
   uiSettings: {
     get: (key: string) => {
       if (key === 'discover:useNewFieldsApi') {
@@ -40,21 +34,24 @@ const mockIndexPatternService = {
   data: {
     indexPatternService: mockIndexPatternService,
   },
-}));
+};
+
 describe('Source Viewer component', () => {
   test('renders loading state', () => {
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [0, null, () => {}]);
 
     const comp = mountWithIntl(
-      <DocViewerSource
-        id={'1'}
-        index={'index1'}
-        indexPattern={mockIndexPattern}
-        width={123}
-        hasLineNumbers={true}
-      />
+      <KibanaContextProvider services={services}>
+        <DocViewerSource
+          id={'1'}
+          index={'index1'}
+          indexPattern={mockIndexPattern}
+          width={123}
+          hasLineNumbers={true}
+        />
+      </KibanaContextProvider>
     );
-    expect(comp).toMatchSnapshot();
+    expect(comp.children()).toMatchSnapshot();
     const loadingIndicator = comp.find(EuiLoadingSpinner);
     expect(loadingIndicator).not.toBe(null);
   });
@@ -63,15 +60,17 @@ describe('Source Viewer component', () => {
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [3, null, () => {}]);
 
     const comp = mountWithIntl(
-      <DocViewerSource
-        id={'1'}
-        index={'index1'}
-        indexPattern={mockIndexPattern}
-        width={123}
-        hasLineNumbers={true}
-      />
+      <KibanaContextProvider services={services}>
+        <DocViewerSource
+          id={'1'}
+          index={'index1'}
+          indexPattern={mockIndexPattern}
+          width={123}
+          hasLineNumbers={true}
+        />
+      </KibanaContextProvider>
     );
-    expect(comp).toMatchSnapshot();
+    expect(comp.children()).toMatchSnapshot();
     const errorPrompt = comp.find(EuiEmptyPrompt);
     expect(errorPrompt.length).toBe(1);
     const refreshButton = comp.find(EuiButton);
@@ -102,15 +101,17 @@ describe('Source Viewer component', () => {
       return false;
     });
     const comp = mountWithIntl(
-      <DocViewerSource
-        id={'1'}
-        index={'index1'}
-        indexPattern={mockIndexPattern}
-        width={123}
-        hasLineNumbers={true}
-      />
+      <KibanaContextProvider services={services}>
+        <DocViewerSource
+          id={'1'}
+          index={'index1'}
+          indexPattern={mockIndexPattern}
+          width={123}
+          hasLineNumbers={true}
+        />
+      </KibanaContextProvider>
     );
-    expect(comp).toMatchSnapshot();
+    expect(comp.children()).toMatchSnapshot();
     const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
     expect(jsonCodeEditor).not.toBe(null);
   });

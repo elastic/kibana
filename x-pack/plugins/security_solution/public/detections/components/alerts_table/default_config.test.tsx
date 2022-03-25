@@ -7,7 +7,7 @@
 
 import { ExistsFilter, Filter } from '@kbn/es-query';
 import {
-  buildAlertsRuleIdFilter,
+  buildAlertsFilter,
   buildAlertStatusesFilter,
   buildAlertStatusFilter,
   buildThreatMatchFilter,
@@ -18,21 +18,21 @@ jest.mock('./actions');
 describe('alerts default_config', () => {
   describe('buildAlertsRuleIdFilter', () => {
     test('given a rule id this will return an array with a single filter', () => {
-      const filters: Filter[] = buildAlertsRuleIdFilter('rule-id-1');
+      const filters: Filter[] = buildAlertsFilter('rule-id-1');
       const expectedFilter: Filter = {
         meta: {
           alias: null,
           negate: false,
           disabled: false,
           type: 'phrase',
-          key: 'kibana.alert.rule.uuid',
+          key: 'kibana.alert.rule.rule_id',
           params: {
             query: 'rule-id-1',
           },
         },
         query: {
           match_phrase: {
-            'kibana.alert.rule.uuid': 'rule-id-1',
+            'kibana.alert.rule.rule_id': 'rule-id-1',
           },
         },
       };
@@ -48,15 +48,10 @@ describe('alerts default_config', () => {
             alias: null,
             disabled: false,
             negate: false,
-            key: 'kibana.alert.rule.threat_mapping',
-            type: 'exists',
-            value: 'exists',
+            key: 'kibana.alert.rule.type',
+            type: 'term',
           },
-          query: {
-            exists: {
-              field: 'kibana.alert.rule.threat_mapping',
-            },
-          },
+          query: { term: { 'kibana.alert.rule.type': 'threat_match' } },
         };
         expect(filters).toHaveLength(1);
         expect(filters[0]).toEqual(expectedFilter);

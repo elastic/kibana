@@ -144,7 +144,7 @@ const multipleColumnsLayer: IndexPatternLayer = {
   columns: {
     col1: oneColumnLayer.columns.col1,
     col2: {
-      label: 'Top values of src',
+      label: 'Top 10 values of src',
       dataType: 'string',
       isBucketed: true,
       // Private
@@ -157,7 +157,7 @@ const multipleColumnsLayer: IndexPatternLayer = {
       sourceField: 'src',
     } as TermsIndexPatternColumn,
     col3: {
-      label: 'Top values of dest',
+      label: 'Top 10 values of dest',
       dataType: 'string',
       isBucketed: true,
 
@@ -243,6 +243,35 @@ describe('IndexPatternDimensionEditorPanel', () => {
   let state: IndexPatternPrivateState;
   let setState: jest.Mock;
   let defaultProps: IndexPatternDimensionEditorProps;
+
+  function getStateWithMultiFieldColumn() {
+    return {
+      ...state,
+      layers: {
+        ...state.layers,
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: {
+              label: 'Top values of dest',
+              dataType: 'string',
+              isBucketed: true,
+
+              // Private
+              operationType: 'terms',
+              params: {
+                orderBy: { type: 'alphabetical' },
+                orderDirection: 'desc',
+                size: 10,
+              },
+              sourceField: 'dest',
+            } as TermsIndexPatternColumn,
+          },
+        },
+      },
+    };
+  }
 
   beforeEach(() => {
     state = {
@@ -398,16 +427,29 @@ describe('IndexPatternDimensionEditorPanel', () => {
           })
         ).toBe(undefined);
       });
+
+      it('returns also field_combine if the field is supported by filterOperations and the dropTarget is an existing column that supports multiple fields', () => {
+        // replace the state with a top values column to enable the multi fields behaviour
+        state = getStateWithMultiFieldColumn();
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: draggingField,
+            filterOperations: (op: OperationMetadata) => op.dataType !== 'date',
+          })
+        ).toEqual({ dropTypes: ['field_replace', 'field_combine'] });
+      });
     });
 
     describe('dragging a column', () => {
       it('returns undefined if the dragged column from different group uses the same field as the dropTarget', () => {
-        const testState = { ...state };
-        testState.layers.first = {
+        state.layers.first = {
           indexPatternId: 'foo',
           columnOrder: ['col1', 'col2', 'col3'],
           columns: {
-            col1: testState.layers.first.columns.col1,
+            col1: state.layers.first.columns.col1,
 
             col2: {
               label: 'Date histogram of timestamp (1)',
@@ -438,13 +480,134 @@ describe('IndexPatternDimensionEditorPanel', () => {
         ).toEqual(undefined);
       });
 
+      it('returns undefined if the dragged column from different group uses the same fields as the dropTarget', () => {
+        state = getStateWithMultiFieldColumn();
+        const sourceMultiFieldColumn = {
+          ...state.layers.first.columns.col1,
+          sourceField: 'bytes',
+          params: {
+            ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+            secondaryFields: ['dest'],
+          },
+        } as TermsIndexPatternColumn;
+        // invert the fields
+        const targetMultiFieldColumn = {
+          ...state.layers.first.columns.col1,
+          sourceField: 'dest',
+          params: {
+            ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+            secondaryFields: ['bytes'],
+          },
+        } as TermsIndexPatternColumn;
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: sourceMultiFieldColumn,
+            col2: targetMultiFieldColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual(undefined);
+      });
+
+      it('returns duplicate and replace if the dragged column from different group uses the same field as the dropTarget, but this last one is multifield, and can be swappable', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              ...state.layers.first.columns.col1,
+              sourceField: 'bytes',
+              params: {
+                ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                secondaryFields: ['dest'],
+              },
+            } as TermsIndexPatternColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual({
+          dropTypes: ['replace_compatible', 'replace_duplicate_compatible'],
+        });
+      });
+
+      it('returns swap, duplicate and replace if the dragged column from different group uses the same field as the dropTarget, but this last one is multifield', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              ...state.layers.first.columns.col1,
+              sourceField: 'bytes',
+              params: {
+                ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                secondaryFields: ['dest'],
+              },
+            } as TermsIndexPatternColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            // make it swappable
+            dimensionGroups: [
+              {
+                accessors: [{ columnId: 'col1' }],
+                filterOperations: jest.fn(() => true),
+                groupId,
+                groupLabel: '',
+                supportsMoreColumns: false,
+              },
+            ],
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual({
+          dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
+        });
+      });
+
       it('returns reorder if drop target and droppedItem columns are from the same group and both are existing', () => {
-        const testState = { ...state };
-        testState.layers.first = {
+        state.layers.first = {
           indexPatternId: 'foo',
           columnOrder: ['col1', 'col2', 'col3'],
           columns: {
-            col1: testState.layers.first.columns.col1,
+            col1: state.layers.first.columns.col1,
 
             col2: {
               label: 'Sum of bytes',
@@ -500,12 +663,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
 
       it('returns incompatible drop target types if dropping column to existing incompatible column', () => {
-        const testState = { ...state };
-        testState.layers.first = {
+        state.layers.first = {
           indexPatternId: 'foo',
           columnOrder: ['col1', 'col2', 'col3'],
           columns: {
-            col1: testState.layers.first.columns.col1,
+            col1: state.layers.first.columns.col1,
 
             col2: {
               label: 'Sum of bytes',
@@ -536,23 +698,22 @@ describe('IndexPatternDimensionEditorPanel', () => {
             'replace_duplicate_incompatible',
             'swap_incompatible',
           ],
-          nextLabel: 'Unique count',
+          nextLabel: 'Minimum',
         });
       });
 
       it('does not return swap_incompatible if current dropTarget column cannot be swapped to the group of dragging column', () => {
-        const testState = { ...state };
-        testState.layers.first = {
+        state.layers.first = {
           indexPatternId: 'foo',
           columnOrder: ['col1', 'col2', 'col3'],
           columns: {
-            col1: testState.layers.first.columns.col1,
+            col1: state.layers.first.columns.col1,
 
             col2: {
               label: 'Count of records',
               dataType: 'number',
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             },
           },
@@ -575,7 +736,153 @@ describe('IndexPatternDimensionEditorPanel', () => {
           })
         ).toEqual({
           dropTypes: ['replace_incompatible', 'replace_duplicate_incompatible'],
-          nextLabel: 'Unique count',
+          nextLabel: 'Minimum',
+        });
+      });
+
+      it('returns combine_compatible drop type if the dragged column is compatible and the target one support multiple fields', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              ...state.layers.first.columns.col1,
+              sourceField: 'bytes',
+            },
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual({
+          dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'combine_compatible'],
+        });
+      });
+
+      it('returns no combine_compatible drop type if the target column uses rarity ordering', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              ...state.layers.first.columns.col1,
+              sourceField: 'bytes',
+              params: {
+                ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                orderBy: { type: 'rare' },
+              },
+            } as TermsIndexPatternColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual({
+          dropTypes: ['replace_compatible', 'replace_duplicate_compatible'],
+        });
+      });
+
+      it('returns no combine drop type if the dragged column is compatible, the target one supports multiple fields but there are too many fields', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              ...state.layers.first.columns.col1,
+              sourceField: 'source',
+              params: {
+                ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                secondaryFields: ['memory', 'bytes', 'geo.src'], // too many fields here
+              },
+            } as TermsIndexPatternColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual({
+          dropTypes: ['replace_compatible', 'replace_duplicate_compatible'],
+        });
+      });
+
+      it('returns combine_incompatible drop target types if dropping column to existing incompatible column which supports multiple fields', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2', 'col3'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              label: 'Sum of bytes',
+              dataType: 'number',
+              isBucketed: false,
+
+              // Private
+              operationType: 'sum',
+              sourceField: 'bytes',
+            },
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            // drag the sum over the top values
+            dragging: {
+              ...draggingCol2,
+              groupId: 'c',
+              filterOperation: undefined,
+            },
+            columnId: 'col1',
+            filterOperations: (op: OperationMetadata) => op.isBucketed,
+          })
+        ).toEqual({
+          dropTypes: [
+            'replace_incompatible',
+            'replace_duplicate_incompatible',
+            'swap_incompatible',
+            'combine_incompatible',
+          ],
+          nextLabel: 'Top values',
         });
       });
     });
@@ -748,6 +1055,33 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         });
       });
+
+      it('appends the new field to the column that supports multiple fields when a field is dropped', () => {
+        state = getStateWithMultiFieldColumn();
+        onDrop({
+          ...defaultProps,
+          state,
+          droppedItem: draggingField,
+          filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+          dropType: 'field_combine',
+        });
+
+        expect(setState).toBeCalledTimes(1);
+        expect(setState).toHaveBeenCalledWith({
+          ...state,
+          layers: {
+            first: expect.objectContaining({
+              columns: expect.objectContaining({
+                col1: expect.objectContaining({
+                  dataType: 'string',
+                  sourceField: 'dest',
+                  params: expect.objectContaining({ secondaryFields: ['bytes'] }),
+                }),
+              }),
+            }),
+          },
+        });
+      });
     });
 
     describe('dropping a dimension', () => {
@@ -887,7 +1221,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   label: 'Count of records',
                   dataType: 'number',
                   isBucketed: false,
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   operationType: 'count',
                 },
               },
@@ -950,7 +1284,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   label: 'Count of records',
                   dataType: 'number',
                   isBucketed: false,
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   operationType: 'count',
                 },
                 ref2: {
@@ -1030,7 +1364,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   label: 'Count of records',
                   dataType: 'number',
                   isBucketed: false,
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   operationType: 'count',
                 },
                 ref2: {
@@ -1116,7 +1450,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   label: 'Count of records',
                   dataType: 'number',
                   isBucketed: false,
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   operationType: 'count',
                 },
                 col2: {
@@ -1286,7 +1620,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             col1: testState.layers.first.columns.col1,
 
             col2: {
-              label: 'Top values of src',
+              label: 'Top 10 values of src',
               dataType: 'string',
               isBucketed: true,
 
@@ -1306,7 +1640,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
               // Private
               operationType: 'count',
-              sourceField: 'Records',
+              sourceField: '___records___',
               customLabel: true,
             },
           },
@@ -1331,6 +1665,57 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 col3: testState.layers.first.columns.col3,
               },
             },
+          },
+        });
+      });
+
+      it('when combine compatible columns should append dropped column fields into the target one', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first.columns = {
+          ...state.layers.first.columns,
+          col2: {
+            isBucketed: true,
+            label: 'Top values of source',
+            operationType: 'terms',
+            sourceField: 'bytes',
+            dataType: 'number',
+            params: {
+              orderBy: {
+                type: 'alphabetical',
+              },
+              orderDirection: 'desc',
+              size: 10,
+            },
+          } as TermsIndexPatternColumn,
+        };
+        onDrop({
+          ...defaultProps,
+          state,
+          droppedItem: {
+            columnId: 'col2',
+            groupId: 'a',
+            layerId: 'first',
+            id: 'col2',
+            humanData: { label: 'Label' },
+          },
+          filterOperations: (op: OperationMetadata) => op.isBucketed,
+          dropType: 'combine_compatible',
+          columnId: 'col1',
+        });
+
+        expect(setState).toBeCalledTimes(1);
+        expect(setState).toHaveBeenCalledWith({
+          ...state,
+          layers: {
+            first: expect.objectContaining({
+              columns: expect.objectContaining({
+                col1: expect.objectContaining({
+                  dataType: 'string',
+                  sourceField: 'dest',
+                  params: expect.objectContaining({ secondaryFields: ['bytes'] }),
+                }),
+              }),
+            }),
           },
         });
       });
@@ -1472,7 +1857,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                       operationType: 'count',
                       label: '',
                       isBucketed: false,
-                      sourceField: 'Records',
+                      sourceField: '___records___',
                       customLabel: true,
                     },
                     col6: {
@@ -1480,7 +1865,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                       operationType: 'count',
                       label: '',
                       isBucketed: false,
-                      sourceField: 'Records',
+                      sourceField: '___records___',
                       customLabel: true,
                     },
                   },
@@ -1512,14 +1897,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
                     operationType: 'count',
                     label: '',
                     isBucketed: false,
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   }),
                   col6: expect.objectContaining({
                     dataType: 'number',
                     operationType: 'count',
                     label: '',
                     isBucketed: false,
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   }),
                 },
               },
@@ -1807,7 +2192,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   col1: testState.layers.first.columns.col1,
                   col2: {
                     isBucketed: true,
-                    label: 'Top values of bytes',
+                    label: 'Top 10 values of bytes',
                     operationType: 'terms',
                     sourceField: 'bytes',
                     dataType: 'number',
@@ -1817,6 +2202,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                       },
                       orderDirection: 'desc',
                       size: 10,
+                      parentFormat: { id: 'terms' },
                     },
                   },
                   col3: testState.layers.first.columns.col3,
@@ -1898,7 +2284,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   col1: testState.layers.first.columns.col1,
                   col2: {
                     isBucketed: true,
-                    label: 'Top values of bytes',
+                    label: 'Top 10 values of bytes',
                     operationType: 'terms',
                     sourceField: 'bytes',
                     dataType: 'number',
@@ -1907,6 +2293,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                         type: 'alphabetical',
                       },
                       orderDirection: 'desc',
+                      parentFormat: { id: 'terms' },
                       size: 10,
                     },
                   },
@@ -1917,8 +2304,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
                     filter: undefined,
                     operationType: 'unique_count',
                     sourceField: 'src',
+                    timeShift: undefined,
                     dataType: 'number',
-                    params: undefined,
+                    params: {
+                      emptyAsNull: true,
+                    },
                     scale: 'ratio',
                   },
                 },

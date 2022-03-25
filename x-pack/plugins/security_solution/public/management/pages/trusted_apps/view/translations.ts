@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import {
   MacosLinuxConditionEntry,
   WindowsConditionEntry,
-  ConditionEntryField,
   OperatorFieldIds,
 } from '../../../../../common/endpoint/types';
 
@@ -87,39 +87,6 @@ export const LIST_VIEW_TOGGLE_LABEL = i18n.translate(
     defaultMessage: 'List view',
   }
 );
-
-export const CREATE_TRUSTED_APP_ERROR: { [K in string]: string } = {
-  [`duplicatedEntry.${ConditionEntryField.HASH}`]: i18n.translate(
-    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.hash',
-    { defaultMessage: 'Hash value can only be used once. Please enter a single valid hash.' }
-  ),
-  [`duplicatedEntry.${ConditionEntryField.PATH}`]: i18n.translate(
-    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.path',
-    { defaultMessage: 'Path value can only be used once. Please enter a single valid path.' }
-  ),
-  [`duplicatedEntry.${ConditionEntryField.SIGNER}`]: i18n.translate(
-    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.signature',
-    {
-      defaultMessage:
-        'Signature value can only be used once. Please enter a single valid signature.',
-    }
-  ),
-  [`invalidField.${ConditionEntryField.HASH}`]: i18n.translate(
-    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.hash',
-    {
-      defaultMessage:
-        'An invalid Hash was entered. Please enter in a valid Hash (md5, sha1, or sha256).',
-    }
-  ),
-  [`invalidField.${ConditionEntryField.PATH}`]: i18n.translate(
-    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.path',
-    { defaultMessage: 'An invalid Path was entered. Please enter in a valid Path.' }
-  ),
-  [`invalidField.${ConditionEntryField.SIGNER}`]: i18n.translate(
-    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.signature',
-    { defaultMessage: 'An invalid Signature was entered. Please enter in a valid Signature.' }
-  ),
-};
 
 export const SEARCH_TRUSTED_APP_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.trustedapps.list.search.placeholder',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesConfigureAttributes } from '../../../common';
+import { CasesConfigureAttributes } from '../../../common/api';
 import { ESCaseConnector } from '..';
 
 /**

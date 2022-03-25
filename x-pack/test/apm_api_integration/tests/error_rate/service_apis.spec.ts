@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { mean, meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
-import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -111,8 +110,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   }
 
-  let errorRateMetricValues: PromiseReturnType<typeof getErrorRateValues>;
-  let errorTransactionValues: PromiseReturnType<typeof getErrorRateValues>;
+  let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
+  let errorTransactionValues: Awaited<ReturnType<typeof getErrorRateValues>>;
 
   registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
     describe('when data is loaded ', () => {
@@ -121,18 +120,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_PROD_ID_RATE = 50;
       const GO_PROD_ID_ERROR_RATE = 50;
       before(async () => {
-        const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
-          'instance-a'
-        );
+        const serviceGoProdInstance = apm
+          .service(serviceName, 'production', 'go')
+          .instance('instance-a');
 
         const transactionNameProductList = 'GET /api/product/list';
         const transactionNameProductId = 'GET /api/product/:id';
 
         await synthtraceEsClient.index([
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_RATE)
-            .flatMap((timestamp) =>
+            .spans((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductList)
                 .timestamp(timestamp)
@@ -140,10 +139,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .success()
                 .serialize()
             ),
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_ERROR_RATE)
-            .flatMap((timestamp) =>
+            .spans((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductList)
                 .duration(1000)
@@ -151,10 +150,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .failure()
                 .serialize()
             ),
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_ID_RATE)
-            .flatMap((timestamp) =>
+            .spans((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductId)
                 .timestamp(timestamp)
@@ -162,10 +161,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .success()
                 .serialize()
             ),
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_ID_ERROR_RATE)
-            .flatMap((timestamp) =>
+            .spans((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductId)
                 .duration(1000)

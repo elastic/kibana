@@ -1,0 +1,338 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
+<DocumentFragment>
+  .c6 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c6:focus-within .timelines__hoverActionButton,
+.c6:focus-within .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c6:hover .timelines__hoverActionButton,
+.c6:hover .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c6 .timelines__hoverActionButton,
+.c6 .securitySolution__hoverActionButton {
+  opacity: 0;
+}
+
+.c6 .timelines__hoverActionButton:focus,
+.c6 .securitySolution__hoverActionButton:focus {
+  opacity: 1;
+}
+
+.c3 {
+  text-transform: capitalize;
+}
+
+.c5 {
+  width: 0;
+  -webkit-transform: translate(6px);
+  -ms-transform: translate(6px);
+  transform: translate(6px);
+  -webkit-transition: -webkit-transform 50ms ease-in-out;
+  -webkit-transition: transform 50ms ease-in-out;
+  transition: transform 50ms ease-in-out;
+  margin-left: 8px;
+}
+
+.c1.c1.c1 {
+  background-color: #25262e;
+  padding: 8px;
+  height: 78px;
+}
+
+.c1 .hoverActions-active .timelines__hoverActionButton,
+.c1 .hoverActions-active .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c1:hover .timelines__hoverActionButton,
+.c1:hover .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c1:hover .c4 {
+  width: auto;
+  -webkit-transform: translate(0);
+  -ms-transform: translate(0);
+  transform: translate(0);
+}
+
+.c2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.c0 {
+  -webkit-box-flex: 0;
+  -webkit-flex-grow: 0;
+  -ms-flex-positive: 0;
+  flex-grow: 0;
+}
+
+<div>
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive c0"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+        >
+          <div
+            class="euiText euiText--small"
+          >
+            Status
+          </div>
+          <div
+            class="euiSpacer euiSpacer--s"
+          />
+          <div
+            class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="c2"
+            >
+              <div
+                class="euiPopover euiPopover--anchorDownCenter"
+                data-test-subj="alertStatus"
+              >
+                <div
+                  class="euiPopover__anchor"
+                >
+                  <button
+                    aria-label="Click to change alert status"
+                    class="euiBadge euiBadge-isClickable euiBadge--iconRight c3"
+                    style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
+                    title="open"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        open
+                      </span>
+                      <span
+                        class="euiBadge__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowDown"
+                      />
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
+              class="c4 c5"
+            >
+              <div
+                data-eui="EuiFocusTrap"
+              >
+                <div
+                  class="c6"
+                >
+                  <p
+                    class="euiScreenReaderOnly"
+                  >
+                    You are in a dialog, containing options for field kibana.alert.workflow_status. Press tab to navigate options. Press escape to exit.
+                  </p>
+                  <div
+                    data-test-subj="hover-actions-filter-for"
+                  >
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
+                  </div>
+                  <div
+                    data-test-subj="hover-actions-filter-out"
+                  >
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
+                  </div>
+                  <div
+                    data-test-subj="more-actions-kibana.alert.workflow_status"
+                    field="kibana.alert.workflow_status"
+                    items="[object Object],[object Object],[object Object]"
+                    value="open"
+                  >
+                    Overflow button
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+        >
+          <div
+            class="euiText euiText--small"
+          >
+            Risk Score
+          </div>
+          <div
+            class="euiSpacer euiSpacer--s"
+          />
+          <div
+            class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="c2"
+              data-test-subj="riskScore"
+            >
+              47
+            </div>
+            <div
+              class="c4 c5"
+            >
+              <div
+                data-eui="EuiFocusTrap"
+              >
+                <div
+                  class="c6"
+                >
+                  <p
+                    class="euiScreenReaderOnly"
+                  >
+                    You are in a dialog, containing options for field kibana.alert.risk_score. Press tab to navigate options. Press escape to exit.
+                  </p>
+                  <div
+                    data-test-subj="hover-actions-filter-for"
+                  >
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
+                  </div>
+                  <div
+                    data-test-subj="hover-actions-filter-out"
+                  >
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
+                  </div>
+                  <div
+                    data-test-subj="more-actions-kibana.alert.risk_score"
+                    field="kibana.alert.risk_score"
+                    items="[object Object],[object Object],[object Object]"
+                    value="47"
+                  >
+                    Overflow button
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive c0"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+        >
+          <div
+            class="euiText euiText--small"
+          >
+            Rule
+          </div>
+          <div
+            class="euiSpacer euiSpacer--s"
+          />
+          <div
+            class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="c2"
+            >
+              <button
+                class="euiLink euiLink--primary"
+                data-test-subj="ruleName"
+                type="button"
+              >
+                More than one event with user name
+              </button>
+            </div>
+            <div
+              class="c4 c5"
+            >
+              <div
+                data-eui="EuiFocusTrap"
+              >
+                <div
+                  class="c6"
+                >
+                  <p
+                    class="euiScreenReaderOnly"
+                  >
+                    You are in a dialog, containing options for field kibana.alert.rule.name. Press tab to navigate options. Press escape to exit.
+                  </p>
+                  <div
+                    data-test-subj="hover-actions-filter-for"
+                  >
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
+                  </div>
+                  <div
+                    data-test-subj="hover-actions-filter-out"
+                  >
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
+                  </div>
+                  <div
+                    data-test-subj="more-actions-kibana.alert.rule.name"
+                    field="kibana.alert.rule.name"
+                    items="[object Object],[object Object],[object Object]"
+                    value="More than one event with user name"
+                  >
+                    Overflow button
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

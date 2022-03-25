@@ -18,8 +18,6 @@ import {
   getCreateCasePath,
   getCaseViewPath,
   getCaseViewWithCommentPath,
-  getSubCaseViewPath,
-  getSubCaseViewWithCommentPath,
   useAllCasesNavigation,
   useCaseViewNavigation,
 } from '../../common/navigation';
@@ -28,14 +26,12 @@ import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
-  disableAlerts,
   onComponentInitialized,
   actionsNavigation,
   ruleDetailsNavigation,
   showAlertDetails,
   useFetchAlertData,
   refreshRef,
-  hideSyncAlerts,
   timelineIntegration,
 }) => {
   const { basePath, userCanCrud } = useCasesContext();
@@ -51,7 +47,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   return (
     <Switch>
       <Route strict exact path={basePath}>
-        <AllCases disableAlerts={disableAlerts} />
+        <AllCases />
       </Route>
 
       <Route path={getCreateCasePath(basePath)}>
@@ -59,7 +55,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           <CreateCase
             onSuccess={onCreateCaseSuccess}
             onCancel={navigateToAllCases}
-            disableAlerts={disableAlerts}
             timelineIntegration={timelineIntegration}
           />
         ) : (
@@ -75,15 +70,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         )}
       </Route>
 
-      <Route
-        exact
-        path={[
-          getSubCaseViewWithCommentPath(basePath),
-          getCaseViewWithCommentPath(basePath),
-          getSubCaseViewPath(basePath),
-          getCaseViewPath(basePath),
-        ]}
-      >
+      <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
         <CaseView
           onComponentInitialized={onComponentInitialized}
           actionsNavigation={actionsNavigation}
@@ -91,7 +78,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           showAlertDetails={showAlertDetails}
           useFetchAlertData={useFetchAlertData}
           refreshRef={refreshRef}
-          hideSyncAlerts={hideSyncAlerts}
           timelineIntegration={timelineIntegration}
         />
       </Route>
@@ -102,5 +88,8 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
     </Switch>
   );
 };
+CasesRoutesComponent.displayName = 'CasesRoutes';
 
 export const CasesRoutes = React.memo(CasesRoutesComponent);
+// eslint-disable-next-line import/no-default-export
+export { CasesRoutes as default };

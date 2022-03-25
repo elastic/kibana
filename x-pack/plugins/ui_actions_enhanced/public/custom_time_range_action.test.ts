@@ -19,7 +19,7 @@ import {
   HELLO_WORLD_EMBEDDABLE,
 } from '../../../../src/plugins/embeddable/public/tests/fixtures';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { ReactElement } from 'react';
 
 const createOpenModalMock = () => {

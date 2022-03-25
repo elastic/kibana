@@ -8,11 +8,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
-import { DiscoverServices } from '../../../build_services';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
-import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
-import { IndexPattern, SortDirection } from '../../../../../data/public';
+import { MarkdownSimple, toMountPoint, wrapWithTheme } from '../../../../../kibana_react/public';
+import type { DataView } from '../../../../../data_views/public';
+import { SortDirection } from '../../../../../data/public';
 import {
   ContextFetchState,
   FailureReason,
@@ -22,6 +22,7 @@ import {
 import { AppState } from '../services/context_state';
 import { getFirstSortableField } from './sorting';
 import { EsHitRecord } from '../../types';
+import { useDiscoverServices } from '../../../utils/use_discover_services';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
@@ -29,10 +30,9 @@ const createError = (statusKey: string, reason: FailureReason, error?: Error) =>
 
 export interface ContextAppFetchProps {
   anchorId: string;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   appState: AppState;
   useNewFieldsApi: boolean;
-  services: DiscoverServices;
 }
 
 export function useContextAppFetch({
@@ -40,9 +40,15 @@ export function useContextAppFetch({
   indexPattern,
   appState,
   useNewFieldsApi,
-  services,
 }: ContextAppFetchProps) {
-  const { uiSettings: config, data, toastNotifications, filterManager } = services;
+  const {
+    uiSettings: config,
+    data,
+    toastNotifications,
+    filterManager,
+    core,
+  } = useDiscoverServices();
+  const { theme$ } = core.theme;
 
   const searchSource = useMemo(() => {
     return data.search.searchSource.createEmpty();
@@ -70,11 +76,14 @@ export function useContextAppFetch({
       toastNotifications.addDanger({
         title: errorTitle,
         text: toMountPoint(
-          <MarkdownSimple>
-            {i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
-              defaultMessage: 'Invalid tie breaker field setting',
-            })}
-          </MarkdownSimple>
+          wrapWithTheme(
+            <MarkdownSimple>
+              {i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
+                defaultMessage: 'Invalid tie breaker field setting',
+              })}
+            </MarkdownSimple>,
+            theme$
+          )
         ),
       });
       return;
@@ -93,7 +102,7 @@ export function useContextAppFetch({
       setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+        text: toMountPoint(wrapWithTheme(<MarkdownSimple>{error.message}</MarkdownSimple>, theme$)),
       });
     }
   }, [
@@ -104,6 +113,7 @@ export function useContextAppFetch({
     anchorId,
     searchSource,
     useNewFieldsApi,
+    theme$,
   ]);
 
   const fetchSurroundingRows = useCallback(
@@ -128,6 +138,7 @@ export function useContextAppFetch({
           SortDirection.desc,
           count,
           filters,
+          data,
           useNewFieldsApi
         );
         setState({ [type]: rows, [statusKey]: { value: LoadingStatus.LOADED } });
@@ -135,7 +146,9 @@ export function useContextAppFetch({
         setState(createError(statusKey, FailureReason.UNKNOWN, error));
         toastNotifications.addDanger({
           title: errorTitle,
-          text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+          text: toMountPoint(
+            wrapWithTheme(<MarkdownSimple>{error.message}</MarkdownSimple>, theme$)
+          ),
         });
       }
     },
@@ -148,6 +161,8 @@ export function useContextAppFetch({
       indexPattern,
       toastNotifications,
       useNewFieldsApi,
+      theme$,
+      data,
     ]
   );
 

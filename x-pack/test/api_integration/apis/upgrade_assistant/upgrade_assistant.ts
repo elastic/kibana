@@ -14,7 +14,9 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
 
-  describe.skip('Upgrade Assistant', () => {
+  describe('Upgrade Assistant', function () {
+    this.onlyEsVersion('<=7');
+
     describe('Reindex operation saved object', () => {
       const dotKibanaIndex = '.kibana';
       const fakeSavedObjectId = 'fakeSavedObjectId';
@@ -97,10 +99,10 @@ export default function ({ getService }: FtrProviderContext) {
           const updatedIndexSettings = indexSettingsResponse[indexName].settings.index;
 
           // Verify number_of_shards and number_of_replicas are unchanged
-          expect(updatedIndexSettings.number_of_shards).to.eql(indexSettings.number_of_shards);
-          expect(updatedIndexSettings.number_of_replicas).to.eql(indexSettings.number_of_replicas);
+          expect(updatedIndexSettings?.number_of_shards).to.eql(indexSettings.number_of_shards);
+          expect(updatedIndexSettings?.number_of_replicas).to.eql(indexSettings.number_of_replicas);
           // Verify refresh_interval no longer exists
-          expect(updatedIndexSettings.refresh_interval).to.be.eql(undefined);
+          expect(updatedIndexSettings?.refresh_interval).to.be.eql(undefined);
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log('[Error] Unable to fetch index and verify index settings');

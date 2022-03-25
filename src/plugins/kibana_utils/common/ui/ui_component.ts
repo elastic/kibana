@@ -7,21 +7,7 @@
  */
 
 /**
- * In many places in Kibana we want to be agnostic to frontend view library,
- * i.e. instead of exposing React-specific APIs we want to expose APIs that
- * are orthogonal to any rendering library. This interface represents such UI
- * components. UI component receives a DOM element and `props` through `render()`
- * method, the `render()` method can be called many times.
- *
- * Although Kibana aims to be library agnostic, Kibana itself is written in React,
- * thus here we define `UiComponent` which is an abstract unit of UI that can be
- * implemented in any framework, but it maps easily to React components, i.e.
- * `UiComponent<Props>` is like `React.ComponentType<Props>`.
- */
-export type UiComponent<Props extends object = object> = () => UiComponentInstance<Props>;
-
-/**
- * Instance of an UiComponent, corresponds to React virtual DOM node.
+ * @public
  */
 export interface UiComponentInstance<Props extends object = object> {
   /**
@@ -38,3 +24,17 @@ export interface UiComponentInstance<Props extends object = object> {
    */
   unmount?(): void;
 }
+
+/**
+ * In many places in Kibana we want to be agnostic to frontend view library,
+ * i.e. instead of exposing React-specific APIs we want to expose APIs that
+ * are orthogonal to any rendering library. This interface represents such UI
+ * components. UI component receives a DOM element and `props` through `render()`
+ * method, the `render()` method can be called many times.
+ *
+ * Although Kibana aims to be library agnostic, Kibana itself is written in React,
+ * thus here we define `UiComponent` which is an abstract unit of UI that can be
+ * implemented in any framework, but it maps easily to React components, i.e.
+ * `UiComponent<Props>` is like `React.ComponentType<Props>`.
+ */
+export type UiComponent<Props extends object = object> = () => UiComponentInstance<Props>;

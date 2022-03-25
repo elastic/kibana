@@ -7,6 +7,7 @@
 
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { AppMountParameters } from 'kibana/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
   createKibanaReactContext,
@@ -26,6 +27,9 @@ export default {
           capabilities: { [casesFeatureId]: { read_cases: true } },
           getUrlForApp: () => '',
         },
+        http: {
+          basePath: { prepend: (link: string) => `http://localhost:5601${link}` },
+        },
         cases: { getAllCases: () => <></> },
         chrome: { docTitle: { change: () => {} }, setBadge: () => {} },
         docLinks: {
@@ -37,6 +41,9 @@ export default {
 
       const pluginContextValue = {
         ObservabilityPageTemplate: KibanaPageTemplate,
+        appMountParameters: {
+          setHeaderActionMenu: () => {},
+        } as unknown as AppMountParameters,
       } as unknown as PluginContextValue;
 
       return (

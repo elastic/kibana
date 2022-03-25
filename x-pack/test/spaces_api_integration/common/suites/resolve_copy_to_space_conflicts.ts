@@ -163,7 +163,6 @@ export function resolveCopyToSpaceConflictsSuite(
                 destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
               },
               id: `cts_ip_1_${sourceSpaceId}`,
-              title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
               meta: {
                 title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
                 icon: 'indexPatternApp',
@@ -176,7 +175,6 @@ export function resolveCopyToSpaceConflictsSuite(
                 destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
               },
               id: `cts_vis_3_${sourceSpaceId}`,
-              title: `CTS vis 3 from ${sourceSpaceId} space`,
               meta: {
                 title: `CTS vis 3 from ${sourceSpaceId} space`,
                 icon: 'visualizeApp',
@@ -211,7 +209,6 @@ export function resolveCopyToSpaceConflictsSuite(
               },
               id: `cts_dashboard_${sourceSpaceId}`,
               type: 'dashboard',
-              title: `This is the ${sourceSpaceId} test space CTS dashboard`,
               meta: {
                 title: `This is the ${sourceSpaceId} test space CTS dashboard`,
                 icon: 'dashboardApp',
@@ -323,7 +320,9 @@ export function resolveCopyToSpaceConflictsSuite(
       const statusCode = outcome === 'noAccess' ? 403 : 200;
       const type = 'sharedtype';
       const exactMatchId = 'each_space';
-      const inexactMatchId = `conflict_1_${spaceId}`;
+      const inexactMatchIdA = `conflict_1a_${spaceId}`;
+      const inexactMatchIdB = `conflict_1b_${spaceId}`;
+      const inexactMatchIdC = `conflict_1c_default_and_space_1`;
       const ambiguousConflictId = `conflict_2_${spaceId}`;
 
       const createRetries = (overwriteRetry: Record<string, any>) => ({
@@ -350,10 +349,20 @@ export function resolveCopyToSpaceConflictsSuite(
         expect(success).to.eql(true);
         expect(successCount).to.eql(1);
         expect(errors).to.be(undefined);
-        const title =
-          id === exactMatchId
-            ? 'A shared saved-object in the default, space_1, and space_2 spaces'
-            : 'A shared saved-object in one space';
+        const title = (() => {
+          switch (id) {
+            case exactMatchId:
+              return 'A shared saved-object in the default, space_1, and space_2 spaces';
+            case inexactMatchIdA:
+              return 'This is used to test an inexact match conflict for an originId -> originId match';
+            case inexactMatchIdB:
+              return 'This is used to test an inexact match conflict for an originId -> id match';
+            case inexactMatchIdC:
+              return 'This is used to test an inexact match conflict for an id -> originId match';
+            default:
+              return 'A shared saved-object in one space';
+          }
+        })();
         const meta = { title, icon: 'beaker' };
         expect(successResults).to.eql([
           { type, id, meta, overwrite: true, ...(destinationId && { destinationId }) },
@@ -378,18 +387,61 @@ export function resolveCopyToSpaceConflictsSuite(
           },
         },
         {
-          testTitle: 'copying with an inexact match conflict',
-          objects: [{ type, id: inexactMatchId }],
+          testTitle:
+            'copying with an inexact match conflict (a) - originId matches existing originId',
+          objects: [{ type, id: inexactMatchIdA }],
           retries: createRetries({
             type,
-            id: inexactMatchId,
+            id: inexactMatchIdA,
             overwrite: true,
-            destinationId: 'conflict_1_space_2',
+            destinationId: 'conflict_1a_space_2',
           }),
           statusCode,
           response: async (response: TestResponse) => {
             if (outcome === 'authorized') {
-              expectSavedObjectSuccessResponse(response, inexactMatchId, 'conflict_1_space_2');
+              expectSavedObjectSuccessResponse(response, inexactMatchIdA, 'conflict_1a_space_2');
+            } else if (outcome === 'noAccess') {
+              expectRouteForbiddenResponse(response);
+            } else {
+              // unauthorized read/write
+              expectSavedObjectForbiddenResponse(response);
+            }
+          },
+        },
+        {
+          testTitle: 'copying with an inexact match conflict (b) - originId matches existing id',
+          objects: [{ type, id: inexactMatchIdB }],
+          retries: createRetries({
+            type,
+            id: inexactMatchIdB,
+            overwrite: true,
+            destinationId: 'conflict_1b_space_2',
+          }),
+          statusCode,
+          response: async (response: TestResponse) => {
+            if (outcome === 'authorized') {
+              expectSavedObjectSuccessResponse(response, inexactMatchIdB, 'conflict_1b_space_2');
+            } else if (outcome === 'noAccess') {
+              expectRouteForbiddenResponse(response);
+            } else {
+              // unauthorized read/write
+              expectSavedObjectForbiddenResponse(response);
+            }
+          },
+        },
+        {
+          testTitle: 'copying with an inexact match conflict (c) - id matches existing originId',
+          objects: [{ type, id: inexactMatchIdC }],
+          retries: createRetries({
+            type,
+            id: inexactMatchIdC,
+            overwrite: true,
+            destinationId: 'conflict_1c_space_2',
+          }),
+          statusCode,
+          response: async (response: TestResponse) => {
+            if (outcome === 'authorized') {
+              expectSavedObjectSuccessResponse(response, inexactMatchIdC, 'conflict_1c_space_2');
             } else if (outcome === 'noAccess') {
               expectRouteForbiddenResponse(response);
             } else {

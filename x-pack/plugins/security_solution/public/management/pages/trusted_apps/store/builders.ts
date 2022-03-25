@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import {
-  ConditionEntry,
-  ConditionEntryField,
-  NewTrustedApp,
-  OperatingSystem,
-} from '../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { TrustedAppConditionEntry, NewTrustedApp } from '../../../../../common/endpoint/types';
 
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 
 import { TrustedAppsListPageState } from '../state';
 
-export const defaultConditionEntry = (): ConditionEntry<ConditionEntryField.HASH> => ({
+export const defaultConditionEntry = (): TrustedAppConditionEntry<ConditionEntryField.HASH> => ({
   field: ConditionEntryField.HASH,
   operator: 'included',
   type: 'match',
@@ -58,7 +54,6 @@ export const initialTrustedAppsPageState = (): TrustedAppsListPageState => ({
     view_type: 'grid',
     filter: '',
     included_policies: '',
-    excluded_policies: '',
   },
   active: false,
   forceRefresh: false,

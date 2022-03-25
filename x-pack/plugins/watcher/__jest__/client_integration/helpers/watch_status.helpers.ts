@@ -7,7 +7,12 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, findTestSubject, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
+import {
+  registerTestBed,
+  findTestSubject,
+  TestBed,
+  AsyncTestBedConfig,
+} from '@kbn/test-jest-helpers';
 import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './jest_constants';

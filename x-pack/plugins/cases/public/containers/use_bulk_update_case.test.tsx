@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { CaseStatuses } from '../../common';
+import { CaseStatuses } from '../../common/api';
 import { useUpdateCases, UseUpdateCases } from './use_bulk_update_case';
 import { basicCase } from './mock';
 import * as api from './api';

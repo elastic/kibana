@@ -9,13 +9,94 @@
 // TODO: https://github.com/elastic/kibana/issues/109904
 /* eslint-disable @kbn/eslint/no_export_all */
 
-export * from './constants';
-export * from './es_query';
-export * from './kbn_field_types';
-export * from './query';
+export { DEFAULT_QUERY_LANGUAGE, KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from './constants';
+export type { ValueSuggestionsMethod } from './constants';
+export { DatatableUtilitiesService } from './datatable_utilities';
+export {
+  buildEmptyFilter,
+  buildCustomFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildQueryFilter,
+  buildQueryFromFilters,
+  buildRangeFilter,
+  buildFilter,
+  buildEsQuery,
+  getPhraseFilterField,
+  getPhraseFilterValue,
+  isExistsFilter,
+  compareFilters,
+  dedupFilters,
+  disableFilter,
+  enableFilter,
+  isPhraseFilter,
+  isFilters,
+  isQueryStringFilter,
+  isRangeFilter,
+  isPhrasesFilter,
+  decorateQuery,
+  fromKueryExpression,
+  isFilterDisabled,
+  isFilterPinned,
+  isMatchAllFilter,
+  FilterStateStore,
+  COMPARE_ALL_OPTIONS,
+  FILTERS,
+  getEsQueryConfig,
+  luceneStringToDsl,
+  nodeBuilder,
+  nodeTypes,
+  onlyDisabledFiltersChanged,
+  pinFilter,
+  toElasticsearchQuery,
+  toggleFilterDisabled,
+  toggleFilterNegated,
+  uniqFilters,
+} from './es_query';
+export type {
+  ExistsFilter,
+  Filter,
+  MatchAllFilter,
+  FilterMeta,
+  PhraseFilter,
+  RangeFilter,
+  RangeFilterParams,
+  KueryNode,
+  EsQueryConfig,
+} from './es_query';
+export { KbnFieldType } from './kbn_field_types';
+export {
+  calculateBounds,
+  getAbsoluteTimeRange,
+  getRelativeTime,
+  getTime,
+  isQuery,
+  isTimeRange,
+} from './query';
 export * from './search';
-export * from './types';
-export * from './exports';
+export type {
+  RefreshInterval,
+  TimeRange,
+  TimeRangeBounds,
+  GetConfigFn,
+  SavedQuery,
+  SavedQueryAttributes,
+  SavedQueryTimeFilter,
+  FilterValueFormatter,
+  KbnFieldTypeOptions,
+  Query,
+} from './types';
+export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from './types';
+
+export {
+  createEscapeValue,
+  tableHasFormulas,
+  datatableToCSV,
+  cellHasFormulas,
+  CSV_FORMULA_CHARS,
+  CSV_MIME_TYPE,
+} from './exports';
 export type {
   IFieldType,
   IIndexPatternFieldList,
@@ -35,7 +116,6 @@ export type {
   GetFieldsOptions,
   GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
-  IIndexPatternsApiClient,
   SavedObject,
   AggregationRestrictions,
   TypeMeta,
@@ -43,9 +123,7 @@ export type {
   FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
-  IndexPatternFieldMap,
   DataViewSpec,
-  IndexPatternSpec,
   SourceFilter,
   IndexPatternExpressionType,
   IndexPatternLoadStartDependencies,
@@ -54,12 +132,11 @@ export type {
 export type {
   IndexPatternsContract,
   DataViewsContract,
-  IndexPatternListItem,
   DataViewListItem,
 } from '../../data_views/common';
 export {
   RUNTIME_FIELD_TYPES,
-  FLEET_ASSETS_TO_IGNORE,
+  DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
@@ -68,7 +145,6 @@ export {
   DataViewField,
   IndexPatternField,
   DataViewType,
-  IndexPatternType,
   IndexPatternsService,
   DataViewsService,
   IndexPattern,

@@ -10,6 +10,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from 'kibana/server';
+import { RuleExecutionMetrics } from '.';
 import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 export type AlertTypeState = Record<string, unknown>;
@@ -21,7 +22,14 @@ export interface IntervalSchedule extends SavedObjectAttributes {
 
 // for the `typeof ThingValues[number]` types below, become string types that
 // only accept the values in the associated string arrays
-export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'pending', 'unknown'] as const;
+export const AlertExecutionStatusValues = [
+  'ok',
+  'active',
+  'error',
+  'pending',
+  'unknown',
+  'warning',
+] as const;
 export type AlertExecutionStatuses = typeof AlertExecutionStatusValues[number];
 
 export enum AlertExecutionStatusErrorReasons {
@@ -31,14 +39,25 @@ export enum AlertExecutionStatusErrorReasons {
   Unknown = 'unknown',
   License = 'license',
   Timeout = 'timeout',
+  Disabled = 'disabled',
+}
+
+export enum AlertExecutionStatusWarningReasons {
+  MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
 }
 
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
+  numberOfTriggeredActions?: number;
+  metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
   error?: {
     reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
+  warning?: {
+    reason: AlertExecutionStatusWarningReasons;
     message: string;
   };
 }
@@ -55,7 +74,17 @@ export interface AlertAction {
 
 export interface AlertAggregations {
   alertExecutionStatus: { [status: string]: number };
+  ruleEnabledStatus: { enabled: number; disabled: number };
+  ruleMutedStatus: { muted: number; unmuted: number };
+  ruleSnoozedStatus: { snoozed: number };
 }
+
+export interface MappedParamsProperties {
+  risk_score?: number;
+  severity?: string;
+}
+
+export type MappedParams = SavedObjectAttributes & MappedParamsProperties;
 
 export interface Alert<Params extends AlertTypeParams = never> {
   id: string;
@@ -67,6 +96,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   schedule: IntervalSchedule;
   actions: AlertAction[];
   params: Params;
+  mapped_params?: MappedParams;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
@@ -79,6 +109,8 @@ export interface Alert<Params extends AlertTypeParams = never> {
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
+  monitoring?: RuleMonitoring;
+  snoozeEndTime?: Date | null; // Remove ? when this parameter is made available in the public API
 }
 
 export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
@@ -131,4 +163,22 @@ export interface ActionVariable {
   description: string;
   deprecated?: boolean;
   useWithTripleBracesInTemplates?: boolean;
+}
+
+export interface RuleMonitoringHistory extends SavedObjectAttributes {
+  success: boolean;
+  timestamp: number;
+  duration?: number;
+}
+
+export interface RuleMonitoring extends SavedObjectAttributes {
+  execution: {
+    history: RuleMonitoringHistory[];
+    calculated_metrics: {
+      p50?: number;
+      p95?: number;
+      p99?: number;
+      success_ratio: number;
+    };
+  };
 }

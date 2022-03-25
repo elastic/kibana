@@ -6,20 +6,29 @@
  * Side Public License, v 1.
  */
 
-const fs = require('fs');
-const util = require('util');
+const fsp = require('fs/promises');
 const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
+const { Client } = require('@elastic/elasticsearch');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
-const { ES_BIN } = require('./paths');
-const { log: defaultLog, parseEsLog, extractConfigFiles, NativeRealm } = require('./utils');
+const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
+const {
+  log: defaultLog,
+  parseEsLog,
+  extractConfigFiles,
+  NativeRealm,
+  parseTimeoutToMs,
+} = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
-const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD, extract } = require('@kbn/dev-utils');
-const readFile = util.promisify(fs.readFile);
+const { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } = require('@kbn/dev-utils');
+
+const DEFAULT_READY_TIMEOUT = parseTimeoutToMs('1m');
+
+/** @typedef {import('./cluster_exec_options').EsClusterExecOptions} ExecOptions */
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
@@ -38,7 +47,6 @@ exports.Cluster = class Cluster {
   constructor({ log = defaultLog, ssl = false } = {}) {
     this._log = log.withType('@kbn/es Cluster');
     this._ssl = ssl;
-    this._caCertPromise = ssl ? readFile(CA_CERT_PATH) : undefined;
   }
 
   /**
@@ -51,13 +59,10 @@ exports.Cluster = class Cluster {
    */
   async installSource(options = {}) {
     this._log.info(chalk.bold('Installing from source'));
-    this._log.indent(4);
-
-    const { installPath } = await installSource({ log: this._log, ...options });
-
-    this._log.indent(-4);
-
-    return { installPath };
+    return await this._log.indent(4, async () => {
+      const { installPath } = await installSource({ log: this._log, ...options });
+      return { installPath };
+    });
   }
 
   /**
@@ -70,16 +75,14 @@ exports.Cluster = class Cluster {
    */
   async downloadSnapshot(options = {}) {
     this._log.info(chalk.bold('Downloading snapshot'));
-    this._log.indent(4);
+    return await this._log.indent(4, async () => {
+      const { installPath } = await downloadSnapshot({
+        log: this._log,
+        ...options,
+      });
 
-    const { installPath } = await downloadSnapshot({
-      log: this._log,
-      ...options,
+      return { installPath };
     });
-
-    this._log.indent(-4);
-
-    return { installPath };
   }
 
   /**
@@ -92,16 +95,14 @@ exports.Cluster = class Cluster {
    */
   async installSnapshot(options = {}) {
     this._log.info(chalk.bold('Installing from snapshot'));
-    this._log.indent(4);
+    return await this._log.indent(4, async () => {
+      const { installPath } = await installSnapshot({
+        log: this._log,
+        ...options,
+      });
 
-    const { installPath } = await installSnapshot({
-      log: this._log,
-      ...options,
+      return { installPath };
     });
-
-    this._log.indent(-4);
-
-    return { installPath };
   }
 
   /**
@@ -114,16 +115,14 @@ exports.Cluster = class Cluster {
    */
   async installArchive(path, options = {}) {
     this._log.info(chalk.bold('Installing from an archive'));
-    this._log.indent(4);
+    return await this._log.indent(4, async () => {
+      const { installPath } = await installArchive(path, {
+        log: this._log,
+        ...options,
+      });
 
-    const { installPath } = await installArchive(path, {
-      log: this._log,
-      ...options,
+      return { installPath };
     });
-
-    this._log.indent(-4);
-
-    return { installPath };
   }
 
   /**
@@ -136,72 +135,109 @@ exports.Cluster = class Cluster {
    */
   async extractDataDirectory(installPath, archivePath, extractDirName = 'data') {
     this._log.info(chalk.bold(`Extracting data directory`));
-    this._log.indent(4);
+    await this._log.indent(4, async () => {
+      // stripComponents=1 excludes the root directory as that is how our archives are
+      // structured. This works in our favor as we can explicitly extract into the data dir
+      const extractPath = path.resolve(installPath, extractDirName);
+      this._log.info(`Data archive: ${archivePath}`);
+      this._log.info(`Extract path: ${extractPath}`);
 
-    // stripComponents=1 excludes the root directory as that is how our archives are
-    // structured. This works in our favor as we can explicitly extract into the data dir
-    const extractPath = path.resolve(installPath, extractDirName);
-    this._log.info(`Data archive: ${archivePath}`);
-    this._log.info(`Extract path: ${extractPath}`);
-
-    await extract({
-      archivePath,
-      targetDir: extractPath,
-      stripComponents: 1,
+      await extract({
+        archivePath,
+        targetDir: extractPath,
+        stripComponents: 1,
+      });
     });
-
-    this._log.indent(-4);
   }
 
   /**
    * Starts ES and returns resolved promise once started
    *
    * @param {String} installPath
+   * @param {String} plugins - comma separated list of plugins to install
    * @param {Object} options
-   * @property {Array} options.esArgs
-   * @property {String} options.password - super user password used to bootstrap
    * @returns {Promise}
    */
+  async installPlugins(installPath, plugins, options) {
+    const esJavaOpts = this.javaOptions(options);
+    for (const plugin of plugins.split(',')) {
+      await execa(ES_PLUGIN_BIN, ['install', plugin.trim()], {
+        cwd: installPath,
+        env: {
+          JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
+          ES_JAVA_OPTS: esJavaOpts.trim(),
+        },
+      });
+    }
+  }
+
+  async configureKeystoreWithSecureSettingsFiles(installPath, secureSettingsFiles) {
+    const env = { JAVA_HOME: '' };
+    for (const [secureSettingName, secureSettingFile] of secureSettingsFiles) {
+      this._log.info(
+        `setting secure setting %s to %s`,
+        chalk.bold(secureSettingName),
+        chalk.bold(secureSettingFile)
+      );
+      await execa(ES_KEYSTORE_BIN, ['add-file', secureSettingName, secureSettingFile], {
+        cwd: installPath,
+        env,
+      });
+    }
+  }
+
+  /**
+   * Starts ES and returns resolved promise once started
+   *
+   * @param {String} installPath
+   * @param {ExecOptions} options
+   * @returns {Promise<void>}
+   */
   async start(installPath, options = {}) {
-    this._exec(installPath, options);
+    // _exec indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
+    await this._log.indent(0, async () => {
+      this._exec(installPath, options);
 
-    await Promise.race([
-      // wait for native realm to be setup and es to be started
-      Promise.all([
-        first(this._process.stdout, (data) => {
-          if (/started/.test(data)) {
-            return true;
-          }
+      await Promise.race([
+        // wait for native realm to be setup and es to be started
+        Promise.all([
+          first(this._process.stdout, (data) => {
+            if (/started/.test(data)) {
+              return true;
+            }
+          }),
+          this._setupPromise,
+        ]),
+
+        // await the outcome of the process in case it exits before starting
+        this._outcome.then(() => {
+          throw createCliError('ES exited without starting');
         }),
-        this._nativeRealmSetup,
-      ]),
-
-      // await the outcome of the process in case it exits before starting
-      this._outcome.then(() => {
-        throw createCliError('ES exited without starting');
-      }),
-    ]);
+      ]);
+    });
   }
 
   /**
    * Starts Elasticsearch and waits for Elasticsearch to exit
    *
    * @param {String} installPath
-   * @param {Object} options
-   * @property {Array} options.esArgs
-   * @returns {Promise<undefined>}
+   * @param {ExecOptions} options
+   * @returns {Promise<void>}
    */
   async run(installPath, options = {}) {
-    this._exec(installPath, options);
+    // _exec indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
+    await this._log.indent(0, async () => {
+      this._exec(installPath, options);
 
-    // log native realm setup errors so they aren't uncaught
-    this._nativeRealmSetup.catch((error) => {
-      this._log.error(error);
-      this.stop();
+      // log native realm setup errors so they aren't uncaught
+      this._setupPromise.catch((error) => {
+        this._log.error(error);
+        this.stop();
+      });
+
+      // await the final outcome of the process
+      await this._outcome;
     });
-
-    // await the final outcome of the process
-    await this._outcome;
   }
 
   /**
@@ -233,14 +269,17 @@ exports.Cluster = class Cluster {
    *
    * @private
    * @param {String} installPath
-   * @param {Object} options
-   * @property {string|Array} options.esArgs
-   * @property {string} options.esJavaOpts
-   * @property {Boolean} options.skipNativeRealmSetup
-   * @return {undefined}
+   * @param {ExecOptions} opts
    */
   _exec(installPath, opts = {}) {
-    const { skipNativeRealmSetup = false, reportTime = () => {}, startTime, ...options } = opts;
+    const {
+      skipNativeRealmSetup = false,
+      reportTime = () => {},
+      startTime,
+      skipReadyCheck,
+      readyTimeout,
+      ...options
+    } = opts;
 
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
@@ -252,6 +291,8 @@ exports.Cluster = class Cluster {
     const esArgs = [
       'action.destructive_requires_name=true',
       'ingest.geoip.downloader.enabled=false',
+      'search.check_ccs_compatibility=true',
+      'cluster.routing.allocation.disk.threshold_enabled=false',
     ].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled
@@ -260,9 +301,10 @@ exports.Cluster = class Cluster {
 
       // Include default keystore settings only if keystore isn't configured.
       if (!esArgs.some((arg) => arg.startsWith('xpack.security.http.ssl.keystore'))) {
-        esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+        esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_NOPASSWORD_P12_PATH}`);
         esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
-        esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
+        // We are explicitly using ES_NOPASSWORD_P12_PATH instead of ES_P12_PATH + ES_P12_PASSWORD. The reasoning for this is that setting
+        // the keystore password using environment variables causes Elasticsearch to emit deprecation warnings.
       }
     }
 
@@ -273,20 +315,10 @@ exports.Cluster = class Cluster {
       []
     );
 
-    this._log.debug('%s %s', ES_BIN, args.join(' '));
+    this._log.info('%s %s', ES_BIN, args.join(' '));
+    const esJavaOpts = this.javaOptions(options);
 
-    let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
-
-    // ES now automatically sets heap size to 50% of the machine's available memory
-    // so we need to set it to a smaller size for local dev and CI
-    // especially because we currently run many instances of ES on the same machine during CI
-    // inital and max must be the same, so we only need to check the max
-    if (!esJavaOpts.includes('Xmx')) {
-      // 1536m === 1.5g
-      esJavaOpts += ' -Xms1536m -Xmx1536m';
-    }
-
-    this._log.debug('ES_JAVA_OPTS: %s', esJavaOpts.trim());
+    this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
@@ -294,35 +326,54 @@ exports.Cluster = class Cluster {
         ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-        ES_JAVA_OPTS: esJavaOpts.trim(),
+        ES_JAVA_OPTS: esJavaOpts,
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    // parse log output to find http port
-    const httpPort = first(this._process.stdout, (data) => {
-      const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
+    this._setupPromise = Promise.all([
+      // parse log output to find http port
+      first(this._process.stdout, (data) => {
+        const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
 
-      if (match) {
-        return match[1];
-      }
-    });
+        if (match) {
+          return match[1];
+        }
+      }),
 
-    // once the http port is available setup the native realm
-    this._nativeRealmSetup = httpPort.then(async (port) => {
-      if (skipNativeRealmSetup) {
-        return;
-      }
-
-      const caCert = await this._caCertPromise;
-      const nativeRealm = new NativeRealm({
-        port,
-        caCert,
-        log: this._log,
-        elasticPassword: options.password,
-        ssl: this._ssl,
+      // load the CA cert from disk if necessary
+      this._ssl ? fsp.readFile(CA_CERT_PATH) : null,
+    ]).then(async ([port, caCert]) => {
+      const client = new Client({
+        node: `${caCert ? 'https:' : 'http:'}//localhost:${port}`,
+        auth: {
+          username: 'elastic',
+          password: options.password,
+        },
+        tls: caCert
+          ? {
+              ca: caCert,
+              rejectUnauthorized: true,
+            }
+          : undefined,
       });
-      await nativeRealm.setPasswords(options);
+
+      if (!skipReadyCheck) {
+        await this._waitForClusterReady(client, readyTimeout);
+      }
+
+      // once the cluster is ready setup the native realm
+      if (!skipNativeRealmSetup) {
+        const nativeRealm = new NativeRealm({
+          log: this._log,
+          elasticPassword: options.password,
+          client,
+        });
+
+        await nativeRealm.setPasswords(options);
+      }
+
+      this._log.success('kbn/es setup complete');
     });
 
     let reportSent = false;
@@ -364,5 +415,58 @@ exports.Cluster = class Cluster {
         });
       }
     });
+  }
+
+  async _waitForClusterReady(client, readyTimeout = DEFAULT_READY_TIMEOUT) {
+    let attempt = 0;
+    const start = Date.now();
+
+    this._log.info('waiting for ES cluster to report a yellow or green status');
+
+    while (true) {
+      attempt += 1;
+
+      try {
+        const resp = await client.cluster.health();
+        if (resp.status !== 'red') {
+          return;
+        }
+
+        throw new Error(`not ready, cluster health is ${resp.status}`);
+      } catch (error) {
+        const timeSinceStart = Date.now() - start;
+        if (timeSinceStart > readyTimeout) {
+          const sec = readyTimeout / 1000;
+          throw new Error(`ES cluster failed to come online with the ${sec} second timeout`);
+        }
+
+        if (error.message.startsWith('not ready,')) {
+          if (timeSinceStart > 10_000) {
+            this._log.warning(error.message);
+          }
+        } else {
+          this._log.warning(
+            `waiting for ES cluster to come online, attempt ${attempt} failed with: ${error.message}`
+          );
+        }
+
+        const waitSec = attempt * 1.5;
+        await new Promise((resolve) => setTimeout(resolve, waitSec * 1000));
+      }
+    }
+  }
+
+  javaOptions(options) {
+    let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
+
+    // ES now automatically sets heap size to 50% of the machine's available memory
+    // so we need to set it to a smaller size for local dev and CI
+    // especially because we currently run many instances of ES on the same machine during CI
+    // inital and max must be the same, so we only need to check the max
+    if (!esJavaOpts.includes('Xmx')) {
+      // 1536m === 1.5g
+      esJavaOpts += ' -Xms1536m -Xmx1536m';
+    }
+    return esJavaOpts.trim();
   }
 };

@@ -8,14 +8,16 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 import { IndexedFieldItem } from '../../types';
-import { Table, renderFieldName, getConflictModalContent } from './table';
-import { overlayServiceMock } from 'src/core/public/mocks';
+import { Table, renderFieldName, getConflictModalContent, showDelete } from './table';
+import { overlayServiceMock, themeServiceMock } from 'src/core/public/mocks';
+
+const theme = themeServiceMock.createStartContract();
 
 const indexPattern = {
   timeFieldName: 'timestamp',
-} as IndexPattern;
+} as DataView;
 
 const items: IndexedFieldItem[] = [
   {
@@ -89,6 +91,7 @@ const renderTable = (
       editField={editField}
       deleteField={() => {}}
       openModal={overlayServiceMock.createStartContract().openModal}
+      theme={theme}
     />
   );
 
@@ -126,10 +129,19 @@ describe('Table', () => {
     const tableCell = shallow(
       renderTable()
         .prop('columns')[1]
-        .render('conflict', {
+        .render('text, long', {
           kbnType: 'conflict',
           conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
         })
+    );
+    expect(tableCell).toMatchSnapshot();
+  });
+
+  test('should render mixed, non-conflicting type', () => {
+    const tableCell = shallow(
+      renderTable().prop('columns')[1].render('keyword, constant_keyword', {
+        kbnType: 'string',
+      })
     );
     expect(tableCell).toMatchSnapshot();
   });
@@ -185,5 +197,43 @@ describe('Table', () => {
         conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
       })
     ).toMatchSnapshot();
+  });
+
+  test('showDelete', () => {
+    const runtimeFields = [
+      {
+        name: 'customer',
+        info: [],
+        excluded: false,
+        kbnType: 'string',
+        type: 'keyword',
+        isMapped: false,
+        isUserEditable: true,
+        hasRuntime: true,
+        runtimeField: {
+          type: 'keyword',
+        },
+      },
+      {
+        name: 'thing',
+        info: [],
+        excluded: false,
+        kbnType: 'string',
+        type: 'keyword',
+        isMapped: false,
+        isUserEditable: true,
+        hasRuntime: true,
+        runtimeField: {
+          type: 'composite',
+        },
+      },
+    ] as IndexedFieldItem[];
+
+    // indexed field
+    expect(showDelete(items[0])).toBe(false);
+    // runtime field - primitive type
+    expect(showDelete(runtimeFields[0])).toBe(true);
+    // runtime field - composite type
+    expect(showDelete(runtimeFields[1])).toBe(false);
   });
 });

@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '../config';
 import { HttpService } from './http_service';

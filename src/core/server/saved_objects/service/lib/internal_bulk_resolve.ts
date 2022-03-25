@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { MgetHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   CORE_USAGE_STATS_ID,
   CORE_USAGE_STATS_TYPE,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '../../../core_usage_data';
+import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
@@ -79,6 +80,8 @@ export interface InternalBulkResolveError {
   error: DecoratedError;
 }
 
+type AliasInfo = Pick<LegacyUrlAlias, 'targetId' | 'purpose'>;
+
 export async function internalBulkResolve<T>(
   params: InternalBulkResolveParams
 ): Promise<InternalSavedObjectsBulkResolveResponse<T>> {
@@ -101,14 +104,17 @@ export async function internalBulkResolve<T>(
   const validObjects = allObjects.filter(isRight);
 
   const namespace = normalizeNamespace(options.namespace);
-  const requiresAliasCheck = namespace !== undefined;
 
-  const aliasDocs = requiresAliasCheck
-    ? await fetchAndUpdateAliases(validObjects, client, serializer, getIndexForType, namespace)
-    : [];
+  const aliasDocs = await fetchAndUpdateAliases(
+    validObjects,
+    client,
+    serializer,
+    getIndexForType,
+    namespace
+  );
 
   const docsToBulkGet: Array<{ _id: string; _index: string }> = [];
-  const aliasTargetIds: Array<string | undefined> = [];
+  const aliasInfoArray: Array<AliasInfo | undefined> = [];
   validObjects.forEach(({ value: { type, id } }, i) => {
     const objectIndex = getIndexForType(type);
     docsToBulkGet.push({
@@ -116,33 +122,42 @@ export async function internalBulkResolve<T>(
       _id: serializer.generateRawId(namespace, type, id),
       _index: objectIndex,
     });
-    if (requiresAliasCheck) {
-      const aliasDoc = aliasDocs[i];
-      if (aliasDoc?.found) {
-        const legacyUrlAlias: LegacyUrlAlias = aliasDoc._source[LEGACY_URL_ALIAS_TYPE];
-        if (!legacyUrlAlias.disabled) {
-          docsToBulkGet.push({
-            // also attempt to find a match for the legacy URL alias target ID
-            _id: serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
-            _index: objectIndex,
-          });
-          aliasTargetIds.push(legacyUrlAlias.targetId);
-          return;
-        }
+    const aliasDoc = aliasDocs[i];
+    if (aliasDoc?.found) {
+      const legacyUrlAlias: LegacyUrlAlias = aliasDoc._source[LEGACY_URL_ALIAS_TYPE];
+      if (!legacyUrlAlias.disabled) {
+        docsToBulkGet.push({
+          // also attempt to find a match for the legacy URL alias target ID
+          _id: serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
+          _index: objectIndex,
+        });
+        const { targetId, purpose } = legacyUrlAlias;
+        aliasInfoArray.push({ targetId, purpose });
+        return;
       }
     }
-    aliasTargetIds.push(undefined);
+    aliasInfoArray.push(undefined);
   });
 
   const bulkGetResponse = docsToBulkGet.length
     ? await client.mget<SavedObjectsRawDocSource>(
         { body: { docs: docsToBulkGet } },
-        { ignore: [404] }
+        { ignore: [404], meta: true }
       )
     : undefined;
+  // exit early if a 404 isn't from elasticsearch
+  if (
+    bulkGetResponse &&
+    isNotFoundFromUnsupportedServer({
+      statusCode: bulkGetResponse.statusCode,
+      headers: bulkGetResponse.headers,
+    })
+  ) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+  }
 
   let getResponseIndex = 0;
-  let aliasTargetIndex = 0;
+  let aliasInfoIndex = 0;
   const resolveCounter = new ResolveCounter();
   const resolvedObjects = allObjects.map<SavedObjectsResolveResponse<T> | InternalBulkResolveError>(
     (either) => {
@@ -150,9 +165,9 @@ export async function internalBulkResolve<T>(
         return either.value;
       }
       const exactMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
-      let aliasMatchDoc: MgetHit<SavedObjectsRawDocSource> | undefined;
-      const aliasTargetId = aliasTargetIds[aliasTargetIndex++];
-      if (aliasTargetId !== undefined) {
+      let aliasMatchDoc: MgetResponseItem<SavedObjectsRawDocSource> | undefined;
+      const aliasInfo = aliasInfoArray[aliasInfoIndex++];
+      if (aliasInfo !== undefined) {
         aliasMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
       }
       const foundExactMatch =
@@ -169,7 +184,8 @@ export async function internalBulkResolve<T>(
           // @ts-expect-error MultiGetHit._source is optional
           saved_object: getSavedObjectFromSource(registry, type, id, exactMatchDoc),
           outcome: 'conflict',
-          alias_target_id: aliasTargetId!,
+          alias_target_id: aliasInfo!.targetId,
+          alias_purpose: aliasInfo!.purpose,
         };
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
       } else if (foundExactMatch) {
@@ -181,10 +197,16 @@ export async function internalBulkResolve<T>(
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
       } else if (foundAliasMatch) {
         result = {
-          // @ts-expect-error MultiGetHit._source is optional
-          saved_object: getSavedObjectFromSource(registry, type, aliasTargetId!, aliasMatchDoc),
+          saved_object: getSavedObjectFromSource(
+            registry,
+            type,
+            aliasInfo!.targetId,
+            // @ts-expect-error MultiGetHit._source is optional
+            aliasMatchDoc!
+          ),
           outcome: 'aliasMatch',
-          alias_target_id: aliasTargetId,
+          alias_target_id: aliasInfo!.targetId,
+          alias_purpose: aliasInfo!.purpose,
         };
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
       }
@@ -201,7 +223,7 @@ export async function internalBulkResolve<T>(
     }
   );
 
-  await incrementCounterInternal(
+  incrementCounterInternal(
     CORE_USAGE_STATS_TYPE,
     CORE_USAGE_STATS_ID,
     resolveCounter.getCounterFields(),
@@ -248,7 +270,7 @@ async function fetchAndUpdateAliases(
     .map(({ value: { type, id } }) => [
       {
         update: {
-          _id: serializer.generateRawLegacyUrlAliasId(namespace!, type, id),
+          _id: serializer.generateRawLegacyUrlAliasId(namespace, type, id),
           _index: getIndexForType(LEGACY_URL_ALIAS_TYPE),
           _source: true,
         },
@@ -282,7 +304,7 @@ async function fetchAndUpdateAliases(
     require_alias: true,
     body: bulkUpdateDocs,
   });
-  return bulkUpdateResponse.body.items.map((item) => {
+  return bulkUpdateResponse.items.map((item) => {
     // Map the bulk update response to the `_source` fields that were returned for each document
     return item.update?.get;
   });

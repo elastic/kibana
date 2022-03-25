@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { caseStatuses, CaseStatuses } from '../../../common';
+import { caseStatuses, CaseStatuses } from '../../../common/api';
 import { Status } from '../status';
 import { CHANGE_STATUS } from '../all_cases/translations';
 
@@ -69,5 +69,6 @@ const StatusContextMenuComponent: React.FC<Props> = ({
     </EuiPopover>
   );
 };
+StatusContextMenuComponent.displayName = 'StatusContextMenu';
 
 export const StatusContextMenu = memo(StatusContextMenuComponent);

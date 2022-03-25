@@ -22,6 +22,17 @@ describe('config validation', () => {
           "removalDelay": "1h",
         },
         "maxEphemeralActionsPerAlert": 10,
+        "rules": Object {
+          "execution": Object {
+            "actions": Object {
+              "max": 100000,
+            },
+          },
+          "minimumScheduleInterval": Object {
+            "enforce": false,
+            "value": "1m",
+          },
+        },
       }
     `);
   });

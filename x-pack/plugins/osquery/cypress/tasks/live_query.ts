@@ -5,21 +5,45 @@
  * 2.0.
  */
 
-import {
-  AGENT_FIELD,
-  ALL_AGENTS_OPTION,
-  LIVE_QUERY_EDITOR,
-  SUBMIT_BUTTON,
-} from '../screens/live_query';
+import { LIVE_QUERY_EDITOR } from '../screens/live_query';
+
+export const DEFAULT_QUERY = 'select * from processes;';
+export const BIG_QUERY = 'select * from processes, users;';
 
 export const selectAllAgents = () => {
-  cy.get(AGENT_FIELD).first().click();
-  return cy.get(ALL_AGENTS_OPTION).contains('All agents').click();
+  cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type('All agents');
+  cy.react('EuiFilterSelectItem').contains('All agents').should('exist');
+  cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type(
+    '{downArrow}{enter}{esc}'
+  );
 };
 
-export const inputQuery = () => cy.get(LIVE_QUERY_EDITOR).type('select * from processes;');
+export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);
 
-export const submitQuery = () => cy.get(SUBMIT_BUTTON).contains('Submit').click();
+export const submitQuery = () => cy.contains('Submit').click();
 
 export const checkResults = () =>
-  cy.get('[data-test-subj="dataGridRowCell"]').should('have.lengthOf.above', 0);
+  cy.getBySel('dataGridRowCell', { timeout: 60000 }).should('have.lengthOf.above', 0);
+
+export const typeInECSFieldInput = (text: string) =>
+  cy.getBySel('ECS-field-input').click().type(text);
+export const typeInOsqueryFieldInput = (text: string) =>
+  cy.react('OsqueryColumnFieldComponent').first().react('ResultComboBox').click().type(text);
+
+export const findFormFieldByRowsLabelAndType = (label: string, text: string) => {
+  cy.react('EuiFormRow', { props: { label } }).type(text);
+};
+
+export const deleteAndConfirm = (type: string) => {
+  cy.react('EuiButton').contains(`Delete ${type}`).click();
+  cy.contains(`Are you sure you want to delete this ${type}?`);
+  cy.react('EuiButton').contains('Confirm').click();
+  cy.get('[data-test-subj="globalToastList"]')
+    .first()
+    .contains('Successfully deleted')
+    .contains(type);
+};
+
+export const findAndClickButton = (text: string) => {
+  cy.react('EuiButton').contains(text).click();
+};

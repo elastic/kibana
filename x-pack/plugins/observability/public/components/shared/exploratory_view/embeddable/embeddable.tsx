@@ -12,45 +12,72 @@ import { AllSeries, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
-import { LensPublicStart, XYState } from '../../../../../../lens/public';
+import { LensEmbeddableInput, LensPublicStart, XYState } from '../../../../../../lens/public';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
-import { IndexPatternState } from '../hooks/use_app_index_pattern';
-import { ReportConfigMap } from '../contexts/exploatory_view_config';
+import { DataViewState } from '../hooks/use_app_data_view';
+import { ReportConfigMap } from '../contexts/exploratory_view_config';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
+import { ActionTypes, useActions } from './use_actions';
+import { AddToCaseAction } from '../header/add_to_case_action';
+import { ViewMode } from '../../../../../../../../src/plugins/embeddable/common';
+import { observabilityFeatureId } from '../../../../../common';
+import { SingleMetric, SingleMetricOptions } from './single_metric';
 
 export interface ExploratoryEmbeddableProps {
-  reportType: ReportViewType;
-  attributes: AllSeries;
+  appId?: 'securitySolutionUI' | 'observability';
   appendTitle?: JSX.Element;
-  title: string | JSX.Element;
-  showCalculationMethod?: boolean;
+  attributes?: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
+  customHeight?: string | number;
+  customLensAttrs?: any; // Takes LensAttributes
+  customTimeRange?: { from: string; to: string }; // requred if rendered with LensAttributes
+  dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
+  isSingleMetric?: boolean;
   legendIsVisible?: boolean;
-  dataTypesIndexPatterns?: Record<AppDataType, string>;
+  onBrushEnd?: (param: { range: number[] }) => void;
+  caseOwner?: string;
   reportConfigMap?: ReportConfigMap;
+  reportType: ReportViewType;
+  showCalculationMethod?: boolean;
+  singleMetricOptions?: SingleMetricOptions;
+  title?: string | JSX.Element;
+  withActions?: boolean | ActionTypes[];
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
   lens: LensPublicStart;
-  indexPatterns: IndexPatternState;
+  indexPatterns: DataViewState;
 }
 
 // eslint-disable-next-line import/no-default-export
 export default function Embeddable({
-  reportType,
-  attributes,
-  title,
+  appId,
   appendTitle,
-  indexPatterns,
-  lens,
+  attributes = [],
   axisTitlesVisibility,
+  customHeight,
+  customLensAttrs,
+  customTimeRange,
+  indexPatterns,
+  isSingleMetric = false,
   legendIsVisible,
+  lens,
+  onBrushEnd,
+  caseOwner = observabilityFeatureId,
   reportConfigMap = {},
+  reportType,
   showCalculationMethod = false,
+  singleMetricOptions,
+  title,
+  withActions = true,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
+  const LensSaveModalComponent = lens?.SaveModalComponent;
 
-  const series = Object.entries(attributes)[0][1];
+  const [isSaveOpen, setIsSaveOpen] = useState(false);
+  const [isAddToCaseOpen, setAddToCaseOpen] = useState(false);
+
+  const series = Object.entries(attributes)[0]?.[1];
 
   const [operationType, setOperationType] = useState(series?.operationType);
   const theme = useTheme();
@@ -63,32 +90,52 @@ export default function Embeddable({
     { ...reportConfigMap, ...obsvReportConfigMap }
   );
 
-  if (layerConfigs.length < 1) {
-    return null;
+  let lensAttributes;
+  try {
+    lensAttributes = new LensAttributes(layerConfigs);
+    // eslint-disable-next-line no-empty
+  } catch (error) {}
+
+  const attributesJSON = customLensAttrs ?? lensAttributes?.getJSON();
+  const timeRange = customTimeRange ?? series?.time;
+  if (typeof axisTitlesVisibility !== 'undefined') {
+    (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
+      axisTitlesVisibility;
   }
-  const lensAttributes = new LensAttributes(layerConfigs);
-
-  if (!LensComponent) {
-    return <EuiText>No lens component</EuiText>;
-  }
-
-  const attributesJSON = lensAttributes.getJSON();
-
-  (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
-    axisTitlesVisibility;
 
   if (typeof legendIsVisible !== 'undefined') {
     (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
   }
 
+  const actions = useActions({
+    withActions,
+    attributes,
+    reportType,
+    appId,
+    setIsSaveOpen,
+    setAddToCaseOpen,
+    lensAttributes: attributesJSON,
+    timeRange,
+  });
+
+  if (!attributesJSON && layerConfigs.length < 1) {
+    return null;
+  }
+
+  if (!LensComponent) {
+    return <EuiText>No lens component</EuiText>;
+  }
+
   return (
-    <Wrapper>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
+    <Wrapper $customHeight={customHeight}>
+      <EuiFlexGroup alignItems="center" gutterSize="none">
+        {title && (
+          <EuiFlexItem data-test-subj="exploratoryView-title">
+            <EuiTitle size="xs">
+              <h3>{title}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
         {showCalculationMethod && (
           <EuiFlexItem grow={false} style={{ minWidth: 150 }}>
             <OperationTypeComponent
@@ -99,24 +146,84 @@ export default function Embeddable({
             />
           </EuiFlexItem>
         )}
-        {appendTitle}
+        {appendTitle && appendTitle}
       </EuiFlexGroup>
-      <LensComponent
-        id="exploratoryView"
-        style={{ height: '100%' }}
-        timeRange={series?.time}
-        attributes={attributesJSON}
-        onBrushEnd={({ range }) => {}}
+
+      {isSingleMetric && (
+        <SingleMetric {...singleMetricOptions}>
+          <LensComponent
+            id="exploratoryView-singleMetric"
+            data-test-subj="exploratoryView-singleMetric"
+            style={{ height: '100%' }}
+            timeRange={timeRange}
+            attributes={attributesJSON}
+            onBrushEnd={onBrushEnd}
+            withDefaultActions={Boolean(withActions)}
+            extraActions={actions}
+            viewMode={ViewMode.VIEW}
+          />
+        </SingleMetric>
+      )}
+      {!isSingleMetric && (
+        <LensComponent
+          id="exploratoryView"
+          data-test-subj="exploratoryView"
+          style={{ height: '100%' }}
+          timeRange={timeRange}
+          attributes={attributesJSON}
+          onBrushEnd={onBrushEnd}
+          withDefaultActions={Boolean(withActions)}
+          extraActions={actions}
+          viewMode={ViewMode.VIEW}
+        />
+      )}
+      {isSaveOpen && attributesJSON && (
+        <LensSaveModalComponent
+          initialInput={attributesJSON as unknown as LensEmbeddableInput}
+          onClose={() => setIsSaveOpen(false)}
+          // if we want to do anything after the viz is saved
+          // right now there is no action, so an empty function
+          onSave={() => {}}
+        />
+      )}
+      <AddToCaseAction
+        lensAttributes={attributesJSON}
+        timeRange={customTimeRange ?? series?.time}
+        autoOpen={isAddToCaseOpen}
+        setAutoOpen={setAddToCaseOpen}
+        appId={appId}
+        owner={caseOwner}
       />
     </Wrapper>
   );
 }
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{
+  $customHeight?: string | number;
+}>`
   height: 100%;
   &&& {
     > :nth-child(2) {
-      height: calc(100% - 32px);
+      height: ${(props) =>
+        props.$customHeight ? `${props.$customHeight};` : `calc(100% - 32px);`};
+    }
+    .embPanel--editing {
+      border-style: initial !important;
+      :hover {
+        box-shadow: none;
+      }
+    }
+    .embPanel__title {
+      display: none;
+    }
+    .embPanel__optionsMenuPopover {
+      visibility: collapse;
+    }
+
+    &&&:hover {
+      .embPanel__optionsMenuPopover {
+        visibility: visible;
+      }
     }
   }
 `;

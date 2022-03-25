@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiButtonEmpty,
@@ -16,15 +16,17 @@ import {
   EuiFlexItem,
   EuiIconTip,
 } from '@elastic/eui';
-import { Case, CaseStatuses, CaseType } from '../../../common';
+import { Case } from '../../../common/ui/types';
+import { CaseStatuses } from '../../../common/api';
 import * as i18n from '../case_view/translations';
-import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { Actions } from './actions';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { StatusContextMenu } from './status_context_menu';
-import { getStatusDate, getStatusTitle } from './helpers';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
-import { OnUpdateFields } from '../case_view';
+import type { OnUpdateFields } from '../case_view/types';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
+import { getStatusDate, getStatusTitle } from './helpers';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -39,11 +41,10 @@ const MyDescriptionList = styled(EuiDescriptionList)`
   `}
 `;
 
-interface CaseActionBarProps {
+export interface CaseActionBarProps {
   caseData: Case;
   currentExternalIncident: CaseService | null;
   userCanCrud: boolean;
-  disableAlerting: boolean;
   isLoading: boolean;
   onRefresh: () => void;
   onUpdateField: (args: OnUpdateFields) => void;
@@ -51,12 +52,12 @@ interface CaseActionBarProps {
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   caseData,
   currentExternalIncident,
-  disableAlerting,
   userCanCrud,
   isLoading,
   onRefresh,
   onUpdateField,
 }) => {
+  const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
   const date = useMemo(() => getStatusDate(caseData), [caseData]);
   const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
   const onStatusChanged = useCallback(
@@ -82,27 +83,27 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       <EuiFlexItem grow={false}>
         <MyDescriptionList compressed>
           <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
-            {caseData.type !== CaseType.collection && (
-              <EuiFlexItem grow={false} data-test-subj="case-view-status">
-                <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  <StatusContextMenu
-                    currentStatus={caseData.status}
-                    disabled={!userCanCrud || isLoading}
-                    onStatusChanged={onStatusChanged}
-                  />
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+            <EuiFlexItem grow={false} data-test-subj="case-view-status">
+              <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                <FormattedRelativePreferenceDate
-                  data-test-subj={'case-action-bar-status-date'}
-                  value={date}
+                <StatusContextMenu
+                  currentStatus={caseData.status}
+                  disabled={!userCanCrud || isLoading}
+                  onStatusChanged={onStatusChanged}
                 />
               </EuiDescriptionListDescription>
             </EuiFlexItem>
+            {!metricsFeatures.includes('lifespan') ? (
+              <EuiFlexItem grow={false}>
+                <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <FormattedRelativePreferenceDate
+                    data-test-subj={'case-action-bar-status-date'}
+                    value={date}
+                  />
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </MyDescriptionList>
       </EuiFlexItem>
@@ -114,7 +115,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             responsive={false}
             justifyContent="spaceBetween"
           >
-            {userCanCrud && !disableAlerting && (
+            {userCanCrud && isSyncAlertsEnabled && (
               <EuiFlexItem grow={false}>
                 <EuiDescriptionListTitle>
                   <EuiFlexGroup
@@ -163,5 +164,6 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     </EuiFlexGroup>
   );
 };
+CaseActionBarComponent.displayName = 'CaseActionBar';
 
 export const CaseActionBar = React.memo(CaseActionBarComponent);

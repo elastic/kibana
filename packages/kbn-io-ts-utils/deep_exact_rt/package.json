@@ -1,4 +1,0 @@
-{
-  "main": "../target_node/deep_exact_rt",
-  "types": "../target_types/deep_exact_rt"
-}

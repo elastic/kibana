@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   const getSessionIds = async () => {
     const sessionsBtn = await testSubjects.find('showSessionsButton');
@@ -73,8 +74,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await esArchiver.loadIfNeeded(
           'test/functional/fixtures/es_archiver/dashboard/current/data'
         );
-        await esArchiver.loadIfNeeded(
-          'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.importExport.load(
+          'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
         );
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
@@ -88,7 +90,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       after(async () => {
         await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
-        await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('on load there is a single session', async () => {

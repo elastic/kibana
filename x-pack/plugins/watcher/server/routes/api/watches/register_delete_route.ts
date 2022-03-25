@@ -25,7 +25,7 @@ function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
       .deleteWatch({
         id: watchId,
       })
-      .then(({ body: success }) => ({ success }))
+      .then((success) => ({ success }))
       .catch((error) => ({ error }));
   });
 

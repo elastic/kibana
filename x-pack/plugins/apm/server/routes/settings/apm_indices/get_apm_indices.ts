@@ -6,15 +6,15 @@
  */
 
 import { SavedObjectsClient } from 'src/core/server';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
-  APM_INDICES_SAVED_OBJECT_TYPE,
-  APM_INDICES_SAVED_OBJECT_ID,
+  APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
+  APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
 } from '../../../../common/apm_saved_object_constants';
 import { APMConfig } from '../../..';
 import { APMRouteHandlerResources } from '../../typings';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { ApmIndicesConfig } from '../../../../../observability/common/typings';
+import { APMIndices } from '../../../saved_objects/apm_indices';
 
 export type { ApmIndicesConfig };
 
@@ -23,13 +23,15 @@ type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 async function getApmIndicesSavedObject(
   savedObjectsClient: ISavedObjectsClient
 ) {
-  const apmIndices = await withApmSpan('get_apm_indices_saved_object', () =>
-    savedObjectsClient.get<Partial<ApmIndicesConfig>>(
-      APM_INDICES_SAVED_OBJECT_TYPE,
-      APM_INDICES_SAVED_OBJECT_ID
-    )
+  const apmIndicesSavedObject = await withApmSpan(
+    'get_apm_indices_saved_object',
+    () =>
+      savedObjectsClient.get<Partial<APMIndices>>(
+        APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
+        APM_INDEX_SETTINGS_SAVED_OBJECT_ID
+      )
   );
-  return apmIndices.attributes;
+  return apmIndicesSavedObject.attributes.apmIndices;
 }
 
 export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
@@ -52,7 +54,7 @@ export async function getApmIndices({
 }: {
   config: APMConfig;
   savedObjectsClient: ISavedObjectsClient;
-}) {
+}): Promise<ApmIndicesConfig> {
   try {
     const apmIndicesSavedObject = await getApmIndicesSavedObject(
       savedObjectsClient
@@ -68,7 +70,9 @@ export async function getApmIndexSettings({
   context,
   config,
 }: Pick<APMRouteHandlerResources, 'context' | 'config'>) {
-  let apmIndicesSavedObject: PromiseReturnType<typeof getApmIndicesSavedObject>;
+  let apmIndicesSavedObject: Awaited<
+    ReturnType<typeof getApmIndicesSavedObject>
+  >;
   try {
     apmIndicesSavedObject = await getApmIndicesSavedObject(
       context.core.savedObjects.client
@@ -89,6 +93,6 @@ export async function getApmIndexSettings({
   return apmIndices.map((configurationName) => ({
     configurationName,
     defaultValue: apmIndicesConfig[configurationName], // value defined in kibana[.dev].yml
-    savedValue: apmIndicesSavedObject[configurationName], // value saved via Saved Objects service
+    savedValue: apmIndicesSavedObject?.[configurationName], // value saved via Saved Objects service
   }));
 }

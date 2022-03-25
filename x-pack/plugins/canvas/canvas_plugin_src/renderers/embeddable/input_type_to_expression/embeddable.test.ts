@@ -8,7 +8,7 @@
 import { toExpression } from './embeddable';
 import { EmbeddableInput } from '../../../../types';
 import { decode } from '../../../../common/lib/embeddable_dataurl';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 
 describe('toExpression', () => {
   describe('by-reference embeddable input', () => {

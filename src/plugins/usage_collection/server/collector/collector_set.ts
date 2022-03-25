@@ -5,49 +5,66 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { withTimeout } from '@kbn/std';
 import { snakeCase } from 'lodash';
 import type {
   Logger,
   ElasticsearchClient,
   SavedObjectsClientContract,
-  KibanaRequest,
+  KibanaExecutionContext,
+  ExecutionContextSetup,
 } from 'src/core/server';
 import { Collector } from './collector';
 import type { ICollector, CollectorOptions } from './types';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
+import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../../common/constants';
 
 // Needed for the general array containing all the collectors. We don't really care about their types here
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyCollector = ICollector<any, any>;
+interface CollectorWithStatus {
+  isReadyWithTimeout: Awaited<ReturnType<typeof withTimeout>>;
+  collector: AnyCollector;
+}
 
-interface CollectorSetConfig {
+export interface CollectorSetConfig {
   logger: Logger;
+  executionContext: ExecutionContextSetup;
   maximumWaitTimeForAllCollectorsInS?: number;
   collectors?: AnyCollector[];
 }
 
+// Schema manually added in src/plugins/telemetry/schema/oss_root.json under `stack_stats.kibana.plugins.usage_collector_stats`
+interface CollectorStats {
+  not_ready: { count: number; names: string[] };
+  not_ready_timeout: { count: number; names: string[] };
+  succeeded: { count: number; names: string[] };
+  failed: { count: number; names: string[] };
+}
+
 export class CollectorSet {
-  private _waitingForAllCollectorsTimestamp?: number;
   private readonly logger: Logger;
+  private readonly executionContext: ExecutionContextSetup;
   private readonly maximumWaitTimeForAllCollectorsInS: number;
   private readonly collectors: Map<string, AnyCollector>;
-  constructor({ logger, maximumWaitTimeForAllCollectorsInS, collectors = [] }: CollectorSetConfig) {
+  constructor({
+    logger,
+    executionContext,
+    maximumWaitTimeForAllCollectorsInS = DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S,
+    collectors = [],
+  }: CollectorSetConfig) {
     this.logger = logger;
+    this.executionContext = executionContext;
     this.collectors = new Map(collectors.map((collector) => [collector.type, collector]));
-    this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS || 60;
+    this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS;
   }
 
   /**
    * Instantiates a stats collector with the definition provided in the options
    * @param options Definition of the collector {@link CollectorOptions}
    */
-  public makeStatsCollector = <
-    TFetchReturn,
-    WithKibanaRequest extends boolean,
-    ExtraOptions extends object = {}
-  >(
-    options: CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
+  public makeStatsCollector = <TFetchReturn, ExtraOptions extends object = {}>(
+    options: CollectorOptions<TFetchReturn, ExtraOptions>
   ) => {
     return new Collector<TFetchReturn, ExtraOptions>(this.logger, options);
   };
@@ -56,15 +73,8 @@ export class CollectorSet {
    * Instantiates an usage collector with the definition provided in the options
    * @param options Definition of the collector {@link CollectorOptions}
    */
-  public makeUsageCollector = <
-    TFetchReturn,
-    // TODO: Right now, users will need to explicitly claim `true` for TS to allow `kibanaRequest` usage.
-    //  If we improve `telemetry-check-tools` so plugins do not need to specify TFetchReturn,
-    //  we'll be able to remove the type defaults and TS will successfully infer the config value as provided in JS.
-    WithKibanaRequest extends boolean = false,
-    ExtraOptions extends object = {}
-  >(
-    options: UsageCollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
+  public makeUsageCollector = <TFetchReturn, ExtraOptions extends object = {}>(
+    options: UsageCollectorOptions<TFetchReturn, ExtraOptions>
   ) => {
     return new UsageCollector<TFetchReturn, ExtraOptions>(this.logger, options);
   };
@@ -92,78 +102,125 @@ export class CollectorSet {
     return [...this.collectors.values()].find((c) => c.type === type);
   };
 
-  public areAllCollectorsReady = async (collectorSet: CollectorSet = this) => {
-    if (!(collectorSet instanceof CollectorSet)) {
+  private getReadyCollectors = async (
+    collectors: Map<string, AnyCollector> = this.collectors
+  ): Promise<{
+    readyCollectors: AnyCollector[];
+    nonReadyCollectorTypes: string[];
+    timedOutCollectorsTypes: string[];
+  }> => {
+    if (!(collectors instanceof Map)) {
       throw new Error(
-        `areAllCollectorsReady method given bad collectorSet parameter: ` + typeof collectorSet
+        `getReadyCollectors method given bad Map of collectors: ` + typeof collectors
       );
     }
 
-    const collectors = [...collectorSet.collectors.values()];
-    const collectorsWithStatus = await Promise.all(
-      collectors.map(async (collector) => {
-        return {
-          isReady: await collector.isReady(),
-          collector,
-        };
+    const secondInMs = 1000;
+    const collectorsWithStatus: CollectorWithStatus[] = await Promise.all(
+      [...collectors.values()].map(async (collector) => {
+        const isReadyWithTimeout = await withTimeout<boolean>({
+          promise: (async (): Promise<boolean> => {
+            try {
+              return await collector.isReady();
+            } catch (err) {
+              this.logger.debug(`Collector ${collector.type} failed to get ready. ${err}`);
+              return false;
+            }
+          })(),
+          timeoutMs: this.maximumWaitTimeForAllCollectorsInS * secondInMs,
+        });
+
+        return { isReadyWithTimeout, collector };
       })
     );
 
-    const collectorsTypesNotReady = collectorsWithStatus
-      .filter((collectorWithStatus) => collectorWithStatus.isReady === false)
-      .map((collectorWithStatus) => collectorWithStatus.collector.type);
+    const timedOutCollectorsTypes = collectorsWithStatus
+      .filter((collectorWithStatus) => collectorWithStatus.isReadyWithTimeout.timedout)
+      .map(({ collector }) => collector.type);
 
-    const allReady = collectorsTypesNotReady.length === 0;
-
-    if (!allReady && this.maximumWaitTimeForAllCollectorsInS >= 0) {
-      const nowTimestamp = +new Date();
-      this._waitingForAllCollectorsTimestamp =
-        this._waitingForAllCollectorsTimestamp || nowTimestamp;
-      const timeWaitedInMS = nowTimestamp - this._waitingForAllCollectorsTimestamp;
-      const timeLeftInMS = this.maximumWaitTimeForAllCollectorsInS * 1000 - timeWaitedInMS;
-      if (timeLeftInMS <= 0) {
-        this.logger.debug(
-          `All collectors are not ready (waiting for ${collectorsTypesNotReady.join(',')}) ` +
-            `but we have waited the required ` +
-            `${this.maximumWaitTimeForAllCollectorsInS}s and will return data from all collectors that are ready.`
-        );
-
-        return true;
-      } else {
-        this.logger.debug(`All collectors are not ready. Waiting for ${timeLeftInMS}ms longer.`);
-      }
-    } else {
-      this._waitingForAllCollectorsTimestamp = undefined;
+    if (timedOutCollectorsTypes.length) {
+      this.logger.debug(
+        `Some collectors timedout getting ready (${timedOutCollectorsTypes.join(', ')}). ` +
+          `Waited for ${this.maximumWaitTimeForAllCollectorsInS}s and will return data from collectors that are ready.`
+      );
     }
 
-    return allReady;
+    const nonTimedOutCollectors = collectorsWithStatus.filter(
+      (
+        collectorWithStatus
+      ): collectorWithStatus is {
+        isReadyWithTimeout: { timedout: false; value: boolean };
+        collector: AnyCollector;
+      } => collectorWithStatus.isReadyWithTimeout.timedout === false
+    );
+
+    const collectorsTypesNotReady = nonTimedOutCollectors
+      .filter(({ isReadyWithTimeout }) => isReadyWithTimeout.value === false)
+      .map(({ collector }) => collector.type);
+
+    if (collectorsTypesNotReady.length) {
+      this.logger.debug(
+        `Some collectors are not ready (${collectorsTypesNotReady.join(',')}). ` +
+          `will return data from all collectors that are ready.`
+      );
+    }
+
+    const readyCollectors = nonTimedOutCollectors
+      .filter(({ isReadyWithTimeout }) => isReadyWithTimeout.value === true)
+      .map(({ collector }) => collector);
+
+    return {
+      readyCollectors,
+      nonReadyCollectorTypes: collectorsTypesNotReady,
+      timedOutCollectorsTypes,
+    };
   };
 
   public bulkFetch = async (
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
     collectors: Map<string, AnyCollector> = this.collectors
   ) => {
+    this.logger.debug(`Getting ready collectors`);
+    const { readyCollectors, nonReadyCollectorTypes, timedOutCollectorsTypes } =
+      await this.getReadyCollectors(collectors);
+
+    const collectorStats: CollectorStats = {
+      not_ready: { count: nonReadyCollectorTypes.length, names: nonReadyCollectorTypes },
+      not_ready_timeout: { count: timedOutCollectorsTypes.length, names: timedOutCollectorsTypes },
+      succeeded: { count: 0, names: [] },
+      failed: { count: 0, names: [] },
+    };
+
     const responses = await Promise.all(
-      [...collectors.values()].map(async (collector) => {
+      readyCollectors.map(async (collector) => {
         this.logger.debug(`Fetching data from ${collector.type} collector`);
         try {
-          const context = {
-            esClient,
-            soClient,
-            ...(collector.extendFetchContext.kibanaRequest && { kibanaRequest }),
+          const context = { esClient, soClient };
+          const executionContext: KibanaExecutionContext = {
+            type: 'usage_collection',
+            name: 'collector.fetch',
+            id: collector.type,
+            description: `Fetch method in the Collector "${collector.type}"`,
           };
-          return {
-            type: collector.type,
-            result: await collector.fetch(context),
-          };
+          const result = await this.executionContext.withContext(executionContext, () =>
+            collector.fetch(context)
+          );
+          collectorStats.succeeded.names.push(collector.type);
+          return { type: collector.type, result };
         } catch (err) {
           this.logger.warn(err);
           this.logger.warn(`Unable to fetch data from ${collector.type} collector`);
+          collectorStats.failed.names.push(collector.type);
         }
       })
     );
+
+    collectorStats.succeeded.count = collectorStats.succeeded.names.length;
+    collectorStats.failed.count = collectorStats.failed.names.length;
+
+    // Treat it as just another "collector"
+    responses.push({ type: 'usage_collector_stats', result: collectorStats });
 
     return responses.filter(
       (response): response is { type: string; result: unknown } => typeof response !== 'undefined'
@@ -180,16 +237,10 @@ export class CollectorSet {
 
   public bulkFetchUsage = async (
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract,
-    kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
+    savedObjectsClient: SavedObjectsClientContract
   ) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
-    return await this.bulkFetch(
-      esClient,
-      savedObjectsClient,
-      kibanaRequest,
-      usageCollectors.collectors
-    );
+    return await this.bulkFetch(esClient, savedObjectsClient, usageCollectors.collectors);
   };
 
   /**
@@ -237,6 +288,7 @@ export class CollectorSet {
   private makeCollectorSetFromArray = (collectors: AnyCollector[]) => {
     return new CollectorSet({
       logger: this.logger,
+      executionContext: this.executionContext,
       maximumWaitTimeForAllCollectorsInS: this.maximumWaitTimeForAllCollectorsInS,
       collectors,
     });

@@ -17,12 +17,14 @@ import { includes, remove } from 'lodash';
 
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
 
-import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../src/plugins/kibana_react/public';
 import { PluginServices } from '../../../../src/plugins/presentation_util/public';
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
-import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { HelpMenu } from './components/help_menu/help_menu';
@@ -77,9 +79,11 @@ export const renderApp = ({
         <LegacyServicesProvider providers={services}>
           <presentationUtil.ContextProvider>
             <I18nProvider>
-              <Provider store={canvasStore}>
-                <App history={params.history} />
-              </Provider>
+              <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+                <Provider store={canvasStore}>
+                  <App history={params.history} />
+                </Provider>
+              </KibanaThemeProvider>
             </I18nProvider>
           </presentationUtil.ContextProvider>
         </LegacyServicesProvider>
@@ -121,8 +125,6 @@ export const initializeCanvas = async (
   // Create Store
   const canvasStore = await createStore(coreSetup);
 
-  registerLanguage(Object.values(expressions.getFunctions()));
-
   // Init Registries
   initRegistries();
   await populateRegistries(registries);
@@ -153,10 +155,12 @@ export const initializeCanvas = async (
     ],
     content: (domNode) => {
       ReactDOM.render(
-        <HelpMenu
-          functionRegistry={expressions.getFunctions()}
-          notifyService={canvasServices.getServices().notify}
-        />,
+        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+          <HelpMenu
+            functionRegistry={expressions.getFunctions()}
+            notifyService={canvasServices.getServices().notify}
+          />
+        </KibanaThemeProvider>,
         domNode
       );
       return () => ReactDOM.unmountComponentAtNode(domNode);

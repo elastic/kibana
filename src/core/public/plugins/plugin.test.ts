@@ -94,9 +94,7 @@ describe('PluginWrapper', () => {
     mockPluginReader.mockReturnValueOnce(
       jest.fn(() => ({
         setup: jest.fn(),
-        start: jest.fn(async () => {
-          // Add small delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
-          await new Promise((resolve) => setTimeout(resolve, 10));
+        start: jest.fn(() => {
           expect(startDependenciesResolved).toBe(false);
           return pluginStartContract;
         }),

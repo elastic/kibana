@@ -71,7 +71,7 @@ describe('tabify_docs', () => {
         },
         indexPattern
       );
-      const expectedOrder = ['_abc', 'date', 'name', 'zzz', '_id', '_routing', '_score', '_type'];
+      const expectedOrder = ['_abc', 'date', 'name', 'zzz', '_id', '_routing', '_score'];
       expect(Object.keys(response)).toEqual(expectedOrder);
       expect(Object.entries(response).map(([key]) => key)).toEqual(expectedOrder);
     });
@@ -179,7 +179,7 @@ describe('tabify_docs', () => {
     it('combines meta fields from index pattern', () => {
       const table = tabifyDocs(response, index);
       expect(table.columns.map((col) => col.id)).toEqual(
-        expect.arrayContaining(['_id', '_index', '_score', '_type'])
+        expect.arrayContaining(['_id', '_index', '_score'])
       );
     });
 

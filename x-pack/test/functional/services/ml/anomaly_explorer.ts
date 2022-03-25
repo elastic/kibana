@@ -89,9 +89,7 @@ export function MachineLearningAnomalyExplorerProvider({
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.filterDashboardSearchWithSearchString(dashboardTitle);
-        await this.selectAllDashboards();
-        await this.waitForAddAndEditDashboardButtonEnabled();
-        await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
+        await testSubjects.clickWhenNotDisabled('~mlEmbeddableAddAndEditDashboard');
 
         // make sure the dashboard page actually loaded
         const dashboardItemCount = await dashboardPage.getSharedItemsCount();
@@ -102,7 +100,7 @@ export function MachineLearningAnomalyExplorerProvider({
       const swimlane = await embeddable.findByClassName('mlSwimLaneContainer');
       expect(await swimlane.isDisplayed()).to.eql(
         true,
-        'Anomaly swimlane should be displayed in dashboard'
+        'Anomaly swim lane should be displayed in dashboard'
       );
     },
 
@@ -114,20 +112,21 @@ export function MachineLearningAnomalyExplorerProvider({
       await testSubjects.existOrFail('mlDashboardSelectionTable loaded', { timeout: 60 * 1000 });
     },
 
-    async waitForAddAndEditDashboardButtonEnabled() {
-      await retry.tryForTime(3000, async () => {
-        const isEnabled = await testSubjects.isEnabled('mlAddAndEditDashboardButton');
-        expect(isEnabled).to.eql(true, 'Button to add and edit dashboard should be enabled');
-      });
-    },
+    async filterDashboardSearchWithSearchString(filter: string, expectedRowCount: number = 1) {
+      await retry.tryForTime(20 * 1000, async () => {
+        await this.waitForDashboardsToLoad();
+        const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
+        await searchBarInput.clearValueWithKeyboard();
+        await searchBarInput.type(filter);
+        await this.assertDashboardSearchInputValue(filter);
+        await this.waitForDashboardsToLoad();
 
-    async filterDashboardSearchWithSearchString(filter: string) {
-      await this.waitForDashboardsToLoad();
-      const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
-      await searchBarInput.clearValueWithKeyboard();
-      await searchBarInput.type(filter);
-      await this.assertDashboardSearchInputValue(filter);
-      await this.waitForDashboardsToLoad();
+        const dashboardRows = await testSubjects.findAll('~mlDashboardSelectionTableRow', 2000);
+        expect(dashboardRows.length).to.eql(
+          expectedRowCount,
+          `Dashboard table should have ${expectedRowCount} rows, got ${dashboardRows.length}`
+        );
+      });
     },
 
     async assertDashboardSearchInputValue(expectedSearchValue: string) {
@@ -139,22 +138,17 @@ export function MachineLearningAnomalyExplorerProvider({
       );
     },
 
-    async selectAllDashboards() {
-      await retry.tryForTime(3000, async () => {
-        await testSubjects.clickWhenNotDisabled(
-          'mlDashboardSelectionTable loaded > checkboxSelectAll'
-        );
-        expect(
-          await testSubjects.isChecked('mlDashboardSelectionTable loaded > checkboxSelectAll')
-        ).to.eql(true, 'Checkbox to select all dashboards should be selected');
-      });
-    },
-
     async assertClearSelectionButtonVisible(expectVisible: boolean) {
       if (expectVisible) {
-        await testSubjects.existOrFail('mlAnomalyTimelineClearSelection');
+        expect(await testSubjects.isDisplayed('mlAnomalyTimelineClearSelection')).to.eql(
+          true,
+          `Expected 'Clear selection' button to be displayed`
+        );
       } else {
-        await testSubjects.missingOrFail('mlAnomalyTimelineClearSelection');
+        expect(await testSubjects.isDisplayed('mlAnomalyTimelineClearSelection')).to.eql(
+          false,
+          `Expected 'Clear selection' button to be hidden`
+        );
       }
     },
 
@@ -173,6 +167,14 @@ export function MachineLearningAnomalyExplorerProvider({
         expectedChartsCount,
         `Expect ${expectedChartsCount} charts to appear, got ${actualChartsCount}`
       );
+    },
+
+    async scrollChartsContainerIntoView() {
+      await testSubjects.scrollIntoView('mlExplorerChartsContainer');
+    },
+
+    async scrollMapContainerIntoView() {
+      await testSubjects.scrollIntoView('mlAnomaliesMapContainer');
     },
   };
 }

@@ -7,18 +7,18 @@
  */
 
 import { difference } from 'lodash';
-import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
+import { DataView, DataViewField } from 'src/plugins/data_views/public';
 import { isNestedFieldParent } from '../../../utils/nested_fields';
 
 export function getIndexPatternFieldList(
-  indexPattern?: IndexPattern,
+  indexPattern?: DataView,
   fieldCounts?: Record<string, number>
 ) {
   if (!indexPattern || !fieldCounts) return [];
 
   const fieldNamesInDocs = Object.keys(fieldCounts);
   const fieldNamesInIndexPattern = indexPattern.fields.getAll().map((fld) => fld.name);
-  const unknownFields: IndexPatternField[] = [];
+  const unknownFields: DataViewField[] = [];
 
   difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
     if (isNestedFieldParent(unknownFieldName, indexPattern)) {
@@ -26,13 +26,13 @@ export function getIndexPatternFieldList(
         displayName: String(unknownFieldName),
         name: String(unknownFieldName),
         type: 'nested',
-      } as IndexPatternField);
+      } as DataViewField);
     } else {
       unknownFields.push({
         displayName: String(unknownFieldName),
         name: String(unknownFieldName),
         type: 'unknown',
-      } as IndexPatternField);
+      } as DataViewField);
     }
   });
 

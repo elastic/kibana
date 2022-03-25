@@ -58,7 +58,7 @@ export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
-export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
+export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
@@ -104,9 +104,9 @@ export const DEFINE_INDEX_INPUT =
 
 export const EQL_TYPE = '[data-test-subj="eqlRuleType"]';
 
-export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
+export const PREVIEW_HISTOGRAM = '[data-test-subj="preview-histogram-panel"]';
 
-export const EQL_QUERY_PREVIEW_HISTOGRAM = '[data-test-subj="queryPreviewEqlHistogram"]';
+export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 
 export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loading"]';
 
@@ -170,7 +170,7 @@ export const RISK_OVERRIDE =
 
 export const RULES_CREATION_FORM = '[data-test-subj="stepDefineRule"]';
 
-export const RULES_CREATION_PREVIEW = '[data-test-subj="ruleCreationQueryPreview"]';
+export const RULES_CREATION_PREVIEW = '[data-test-subj="rule-preview"]';
 
 export const RULE_DESCRIPTION_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleDescription"] [data-test-subj="input"]';

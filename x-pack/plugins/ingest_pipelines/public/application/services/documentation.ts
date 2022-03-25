@@ -12,13 +12,15 @@ export class DocumentationService {
   private ingestNodeUrl: string = '';
   private processorsUrl: string = '';
   private handlingFailureUrl: string = '';
-  private putPipelineApiUrl: string = '';
+  private createPipelineUrl: string = '';
+  private createPipelineCSVUrl: string = '';
   private simulatePipelineApiUrl: string = '';
   private enrichDataUrl: string = '';
   private geoMatchUrl: string = '';
   private dissectKeyModifiersUrl: string = '';
   private classificationUrl: string = '';
   private regressionUrl: string = '';
+  private documentationUrl: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL, links } = docLinks;
@@ -28,13 +30,15 @@ export class DocumentationService {
     this.ingestNodeUrl = links.ingest.pipelines;
     this.processorsUrl = links.ingest.processors;
     this.handlingFailureUrl = links.ingest.pipelineFailure;
-    this.putPipelineApiUrl = links.apis.createPipeline;
+    this.createPipelineUrl = links.ingest.pipelines;
+    this.createPipelineCSVUrl = links.ingest.csvPipelines;
     this.simulatePipelineApiUrl = links.apis.simulatePipeline;
     this.enrichDataUrl = links.ingest.enrich;
     this.geoMatchUrl = links.ingest.geoMatch;
     this.dissectKeyModifiersUrl = links.ingest.dissectKeyModifiers;
     this.classificationUrl = links.ingest.inferenceClassification;
     this.regressionUrl = links.ingest.inferenceRegression;
+    this.documentationUrl = links.ingest.inference;
   }
 
   public getEsDocsBasePath() {
@@ -53,8 +57,12 @@ export class DocumentationService {
     return this.handlingFailureUrl;
   }
 
-  public getPutPipelineApiUrl() {
-    return this.putPipelineApiUrl;
+  public getCreatePipelineUrl() {
+    return this.createPipelineUrl;
+  }
+
+  public getCreatePipelineCSVUrl() {
+    return this.createPipelineCSVUrl;
   }
 
   public getSimulatePipelineApiUrl() {
@@ -79,6 +87,10 @@ export class DocumentationService {
 
   public getRegressionUrl() {
     return this.regressionUrl;
+  }
+
+  public getDocumentationUrl() {
+    return this.documentationUrl;
   }
 }
 

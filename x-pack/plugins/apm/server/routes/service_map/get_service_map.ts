@@ -8,8 +8,7 @@
 import { Logger } from 'kibana/server';
 import { chunk } from 'lodash';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery, termQuery } from '../../../../observability/server';
-import { PromiseReturnType } from '../../../../observability/typings/common';
+import { rangeQuery, termsQuery } from '../../../../observability/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -30,7 +29,7 @@ import { getProcessorEventForTransactions } from '../../lib/helpers/transactions
 
 export interface IEnvOptions {
   setup: Setup;
-  serviceName?: string;
+  serviceNames?: string[];
   environment: string;
   searchAggregatedTransactions: boolean;
   logger: Logger;
@@ -40,7 +39,7 @@ export interface IEnvOptions {
 
 async function getConnectionData({
   setup,
-  serviceName,
+  serviceNames,
   environment,
   start,
   end,
@@ -48,7 +47,7 @@ async function getConnectionData({
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
       setup,
-      serviceName,
+      serviceNames,
       environment,
       start,
       end,
@@ -110,7 +109,7 @@ async function getServicesData(options: IEnvOptions) {
           filter: [
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
-            ...termQuery(SERVICE_NAME, options.serviceName),
+            ...termsQuery(SERVICE_NAME, ...(options.serviceNames ?? [])),
           ],
         },
       },
@@ -154,8 +153,8 @@ async function getServicesData(options: IEnvOptions) {
   );
 }
 
-export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;
-export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
+export type ConnectionsResponse = Awaited<ReturnType<typeof getConnectionData>>;
+export type ServicesResponse = Awaited<ReturnType<typeof getServicesData>>;
 
 export function getServiceMap(options: IEnvOptions) {
   return withApmSpan('get_service_map', async () => {

@@ -27,7 +27,8 @@ export const getAllExceptionListsColumns = (
   onExport: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
   onDelete: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
   formatUrl: FormatUrl,
-  navigateToUrl: (url: string) => Promise<void>
+  navigateToUrl: (url: string) => Promise<void>,
+  isKibanaReadOnly: boolean
 ): AllExceptionListsColumns[] => [
   {
     align: 'left',
@@ -148,22 +149,25 @@ export const getAllExceptionListsColumns = (
               namespaceType,
             })}
             aria-label="Export exception list"
-            iconType="exportAction"
+            iconType="download"
             data-test-subj="exceptionsTableExportButton"
           />
         ),
       },
       {
-        render: ({ id, list_id: listId, namespace_type: namespaceType }: ExceptionListInfo) => (
-          <EuiButtonIcon
-            color="danger"
-            onClick={onDelete({ id, listId, namespaceType })}
-            aria-label="Delete exception list"
-            iconType="trash"
-            isDisabled={listId === 'endpoint_list'}
-            data-test-subj="exceptionsTableDeleteButton"
-          />
-        ),
+        render: ({ id, list_id: listId, namespace_type: namespaceType }: ExceptionListInfo) => {
+          return listId === 'endpoint_list' || isKibanaReadOnly ? (
+            <></>
+          ) : (
+            <EuiButtonIcon
+              color="danger"
+              onClick={onDelete({ id, listId, namespaceType })}
+              aria-label="Delete exception list"
+              iconType="trash"
+              data-test-subj="exceptionsTableDeleteButton"
+            />
+          );
+        },
       },
     ],
   },

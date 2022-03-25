@@ -5,13 +5,11 @@
  * 2.0.
  */
 import * as rt from 'io-ts';
-import { Unit } from '@elastic/datemath';
+import { SnapshotCustomMetricInput } from '../../http_api';
 import { ANOMALY_THRESHOLD } from '../../infra_ml';
 import { InventoryItemType, SnapshotMetricType } from '../../inventory_models/types';
-import { SnapshotCustomMetricInput } from '../../http_api';
+import { TimeUnitChar } from '../../../../observability/common/utils/formatters/duration';
 
-// TODO: Have threshold and inventory alerts import these types from this file instead of from their
-// local directories
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
 export const METRIC_ANOMALY_ALERT_TYPE_ID = 'metrics.alert.anomaly';
@@ -35,6 +33,14 @@ export enum Aggregators {
   CARDINALITY = 'cardinality',
   P95 = 'p95',
   P99 = 'p99',
+}
+
+export enum AlertStates {
+  OK,
+  ALERT,
+  WARNING,
+  NO_DATA,
+  ERROR,
 }
 
 const metricAnomalyNodeTypeRT = rt.union([rt.literal('hosts'), rt.literal('k8s')]);
@@ -63,7 +69,7 @@ export interface MetricAnomalyParams {
 export interface InventoryMetricConditions {
   metric: SnapshotMetricType;
   timeSize: number;
-  timeUnit: Unit;
+  timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
   comparator: Comparator;
@@ -75,7 +81,39 @@ export interface InventoryMetricConditions {
 export interface InventoryMetricThresholdParams {
   criteria: InventoryMetricConditions[];
   filterQuery?: string;
+  filterQueryText?: string;
   nodeType: InventoryItemType;
   sourceId?: string;
   alertOnNoData?: boolean;
+}
+
+interface BaseMetricExpressionParams {
+  timeSize: number;
+  timeUnit: TimeUnitChar;
+  sourceId?: string;
+  threshold: number[];
+  comparator: Comparator;
+  warningComparator?: Comparator;
+  warningThreshold?: number[];
+}
+
+export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
+  aggType: Exclude<Aggregators, Aggregators.COUNT>;
+  metric: string;
+}
+
+export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
+  aggType: Aggregators.COUNT;
+  metric: never;
+}
+
+export type MetricExpressionParams = NonCountMetricExpressionParams | CountMetricExpressionParams;
+
+export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
+
+export type FilterQuery = string | typeof QUERY_INVALID;
+
+export interface AlertExecutionDetails {
+  alertId: string;
+  executionId: string;
 }

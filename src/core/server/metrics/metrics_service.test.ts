@@ -203,6 +203,7 @@ describe('MetricsService', () => {
             },
             "process": Object {
               "eventLoopDelay": undefined,
+              "eventLoopDelayHistogram": undefined,
               "memory": Object {
                 "heap": Object {
                   "usedInBytes": undefined,

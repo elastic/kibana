@@ -24,8 +24,10 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
-import { ServiceNowSIRActionParams, Fields, Choice, ServiceNowActionConnector } from './types';
-import { choicesToEuiOptions, isDeprecatedConnector, DEFAULT_CORRELATION_ID } from './helpers';
+import { ServiceNowSIRActionParams, Fields, Choice } from './types';
+import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from './helpers';
+import { DeprecatedCallout } from './deprecated_callout';
+import { checkConnectorIsDeprecated } from '../../../../common/connectors_selection';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -42,6 +44,8 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     http,
     notifications: { toasts },
   } = useKibana().services;
+
+  const isDeprecatedActionConnector = checkConnectorIsDeprecated(actionConnector);
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
@@ -145,6 +149,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
 
   return (
     <>
+      {isDeprecatedActionConnector && <DeprecatedCallout />}
       <EuiTitle size="s">
         <h3>{i18n.SECURITY_INCIDENT}</h3>
       </EuiTitle>
@@ -207,23 +212,25 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.SUBCATEGORY_LABEL}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="subcategorySelect"
-              hasNoInitialSelection
-              isLoading={isLoadingChoices}
-              disabled={isLoadingChoices}
-              options={subcategoryOptions}
-              // Needs an empty string instead of undefined to select the blank option when changing categories
-              value={incident.subcategory ?? ''}
-              onChange={(e) => editSubActionProperty('subcategory', e.target.value)}
-            />
-          </EuiFormRow>
+          {subcategoryOptions?.length > 0 ? (
+            <EuiFormRow fullWidth label={i18n.SUBCATEGORY_LABEL}>
+              <EuiSelect
+                fullWidth
+                data-test-subj="subcategorySelect"
+                hasNoInitialSelection
+                isLoading={isLoadingChoices}
+                disabled={isLoadingChoices}
+                options={subcategoryOptions}
+                // Needs an empty string instead of undefined to select the blank option when changing categories
+                value={incident.subcategory ?? ''}
+                onChange={(e) => editSubActionProperty('subcategory', e.target.value)}
+              />
+            </EuiFormRow>
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!isDeprecatedConnector(actionConnector as unknown as ServiceNowActionConnector) && (
+      {!isDeprecatedActionConnector && (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>

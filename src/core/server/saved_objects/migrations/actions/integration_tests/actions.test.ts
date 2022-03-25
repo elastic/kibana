@@ -14,7 +14,6 @@ import {
   cloneIndex,
   closePit,
   createIndex,
-  fetchIndices,
   openPit,
   OpenPitResponse,
   reindex,
@@ -35,6 +34,7 @@ import {
   removeWriteBlock,
   transformDocs,
   waitForIndexStatusYellow,
+  initAction,
 } from '../../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -48,7 +48,10 @@ const { startES } = kbnTestServer.createTestServers({
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.join(__dirname, './archives', '7.7.2_xpack_100k_obj.zip'),
+      dataArchive: Path.resolve(
+        __dirname,
+        '../../integration_tests/archives/7.7.2_xpack_100k_obj.zip'
+      ),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
@@ -60,7 +63,7 @@ describe('migration actions', () => {
 
   beforeAll(async () => {
     esServer = await startES();
-    client = esServer.es.getKibanaEsClient();
+    client = esServer.es.getClient();
 
     // Create test fixture data:
     await createIndex({
@@ -108,10 +111,20 @@ describe('migration actions', () => {
     await esServer.stop();
   });
 
-  describe('fetchIndices', () => {
+  describe('initAction', () => {
+    afterAll(async () => {
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Remove persistent test settings
+            cluster: { routing: { allocation: { enable: null } } },
+          },
+        },
+      });
+    });
     it('resolves right empty record if no indices were found', async () => {
       expect.assertions(1);
-      const task = fetchIndices({ client, indices: ['no_such_index'] });
+      const task = initAction({ client, indices: ['no_such_index'] });
       await expect(task()).resolves.toMatchInlineSnapshot(`
                 Object {
                   "_tag": "Right",
@@ -121,7 +134,7 @@ describe('migration actions', () => {
     });
     it('resolves right record with found indices', async () => {
       expect.assertions(1);
-      const res = (await fetchIndices({
+      const res = (await initAction({
         client,
         indices: ['no_such_index', 'existing_index_with_docs'],
       })()) as Either.Right<unknown>;
@@ -135,6 +148,69 @@ describe('migration actions', () => {
           },
         })
       );
+    });
+    it('resolves left with cluster routing allocation disabled', async () => {
+      expect.assertions(3);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Disable all routing allocation
+            cluster: { routing: { allocation: { enable: 'none' } } },
+          },
+        },
+      });
+      const task = initAction({
+        client,
+        indices: ['existing_index_with_docs'],
+      });
+      await expect(task()).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "unsupported_cluster_routing_allocation",
+                },
+              }
+            `);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Allow routing to existing primaries only
+            cluster: { routing: { allocation: { enable: 'primaries' } } },
+          },
+        },
+      });
+      const task2 = initAction({
+        client,
+        indices: ['existing_index_with_docs'],
+      });
+      await expect(task2()).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "unsupported_cluster_routing_allocation",
+                },
+              }
+            `);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            // Allow routing to new primaries only
+            cluster: { routing: { allocation: { enable: 'new_primaries' } } },
+          },
+        },
+      });
+      const task3 = initAction({
+        client,
+        indices: ['existing_index_with_docs'],
+      });
+      await expect(task3()).resolves.toMatchInlineSnapshot(`
+              Object {
+                "_tag": "Left",
+                "left": Object {
+                  "type": "unsupported_cluster_routing_allocation",
+                },
+              }
+            `);
     });
   });
 
@@ -274,7 +350,7 @@ describe('migration actions', () => {
       })();
 
       const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
-      expect(redStatusResponse.body.status).toBe('red');
+      expect(redStatusResponse.status).toBe('red');
 
       client.indices.putSettings({
         index: 'red_then_yellow_index',
@@ -288,7 +364,7 @@ describe('migration actions', () => {
       // Assert that the promise didn't resolve before the index became yellow
 
       const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
-      expect(yellowStatusResponse.body.status).toBe('yellow');
+      expect(yellowStatusResponse.status).toBe('yellow');
     });
   });
 
@@ -331,7 +407,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              'index.routing.allocation.enable': 'none',
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
         })
@@ -395,7 +471,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              'index.routing.allocation.enable': 'none',
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
         })
@@ -819,6 +895,7 @@ describe('migration actions', () => {
         }
       `);
     });
+
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       await waitForIndexStatusYellow({
         client,
@@ -840,8 +917,8 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringMatching(
-            /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
+          message: expect.stringContaining(
+            '[timeout_exception] Timed out waiting for completion of [Task'
           ),
           type: 'wait_for_task_completion_timeout',
         },
@@ -921,7 +998,7 @@ describe('migration actions', () => {
         },
       });
 
-      await expect(searchResponse.body.hits.hits.length).toBeGreaterThan(0);
+      await expect(searchResponse.hits.hits.length).toBeGreaterThan(0);
     });
     it('rejects if index does not exist', async () => {
       const openPitTask = openPit({ client, index: 'no_such_index' });
@@ -1183,6 +1260,7 @@ describe('migration actions', () => {
 
       await expect(task()).rejects.toThrow('index_not_found_exception');
     });
+
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
@@ -1199,8 +1277,8 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringMatching(
-            /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
+          message: expect.stringContaining(
+            '[timeout_exception] Timed out waiting for completion of [Task'
           ),
           type: 'wait_for_task_completion_timeout',
         },
@@ -1450,7 +1528,7 @@ describe('migration actions', () => {
                 // Allocate 1 replica so that this index stays yellow
                 number_of_replicas: '1',
                 // Disable all shard allocation so that the index status is red
-                'index.routing.allocation.enable': 'none',
+                index: { routing: { allocation: { enable: 'none' } } },
               },
             },
           },
@@ -1567,8 +1645,8 @@ describe('migration actions', () => {
         }
       `);
     });
-    // TODO: unskip after https://github.com/elastic/kibana/issues/116111
-    it.skip('resolves left request_entity_too_large_exception when the payload is too large', async () => {
+
+    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
       const newDocs = new Array(10000).fill({
         _source: {
           title:

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseConnector } from '../../../common';
+import { CaseConnector } from '../../../common/api';
 
 export interface MappingsArgs {
   connector: CaseConnector;

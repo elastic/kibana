@@ -174,6 +174,7 @@ export class TOCEntryButton extends Component<Props, State> {
             {footnoteTooltipContent}
           </Fragment>
         }
+        data-test-subj="layerTocTooltip"
       >
         <EuiButtonEmpty
           className="mapTocEntry__layerName eui-textLeft"

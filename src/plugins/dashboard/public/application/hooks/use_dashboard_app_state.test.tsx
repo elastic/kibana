@@ -24,13 +24,15 @@ import { EmbeddableFactory, ViewMode } from '../../services/embeddable';
 import { dashboardStateStore, setDescription, setViewMode } from '../state';
 import { DashboardContainerServices } from '../embeddable/dashboard_container';
 import { createKbnUrlStateStorage, defer } from '../../../../kibana_utils/public';
-import { Filter, IIndexPattern, IndexPatternsContract } from '../../services/data';
 import { useDashboardAppState, UseDashboardStateProps } from './use_dashboard_app_state';
 import {
   getSampleDashboardInput,
   getSavedDashboardMock,
   makeDefaultServices,
 } from '../test_helpers';
+import { DataViewsContract } from '../../services/data';
+import { DataView } from '../../services/data_views';
+import type { Filter } from '@kbn/es-query';
 
 interface SetupEmbeddableFactoryReturn {
   finalizeEmbeddableCreation: () => void;
@@ -52,17 +54,14 @@ const createDashboardAppStateProps = (): UseDashboardStateProps => ({
   savedDashboardId: 'testDashboardId',
   history: createBrowserHistory(),
   isEmbeddedExternally: false,
-  redirectTo: jest.fn(),
 });
 
 const createDashboardAppStateServices = () => {
   const defaults = makeDefaultServices();
-  const indexPatterns = {} as IndexPatternsContract;
-  const defaultIndexPattern = { id: 'foo', fields: [{ name: 'bar' }] } as IIndexPattern;
-  indexPatterns.ensureDefaultDataView = jest.fn().mockImplementation(() => Promise.resolve(true));
-  indexPatterns.getDefault = jest
-    .fn()
-    .mockImplementation(() => Promise.resolve(defaultIndexPattern));
+  const dataViews = {} as DataViewsContract;
+  const defaultDataView = { id: 'foo', fields: [{ name: 'bar' }] } as DataView;
+  dataViews.ensureDefaultDataView = jest.fn().mockImplementation(() => Promise.resolve(true));
+  dataViews.getDefault = jest.fn().mockImplementation(() => Promise.resolve(defaultDataView));
 
   const data = dataPluginMock.createStartContract();
   data.query.filterManager.getUpdates$ = jest.fn().mockImplementation(() => of(void 0));
@@ -72,7 +71,7 @@ const createDashboardAppStateServices = () => {
     .fn()
     .mockImplementation(() => of(void 0));
 
-  return { ...defaults, indexPatterns, data };
+  return { ...defaults, dataViews, data };
 };
 
 const setupEmbeddableFactory = (

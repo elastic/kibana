@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies the creation of suppression rules in Azure. Suppression rules are a mechanism used to suppress alerts previously identified as false positives or too noisy to be in production. This mechanism can be abused or mistakenly configured, resulting in defense evasions and loss of security visibility.",
+  "false_positives": [
+    "Suppression Rules can be created legitimately by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Suppression Rules created by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Alert Suppression Rule Created or Modified",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.SECURITY/ALERTSSUPPRESSIONRULES/WRITE\" and \nevent.outcome: \"success\"\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations",
+    "https://docs.microsoft.com/en-us/rest/api/securitycenter/alerts-suppression-rules/update"
+  ],
+  "risk_score": 21,
+  "rule_id": "f0bc081a-2346-4744-a6a4-81514817e888",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

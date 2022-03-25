@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { waitFor } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
+import uuid from 'uuid';
+import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
-import { HostIsolationExceptionDeleteModal } from './delete_modal';
 import { deleteOneHostIsolationExceptionItem } from '../../service';
-import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { waitFor } from '@testing-library/dom';
-import userEvent from '@testing-library/user-event';
+import { HostIsolationExceptionDeleteModal } from './delete_modal';
 
 jest.mock('../../service');
 const deleteOneHostIsolationExceptionItemMock = deleteOneHostIsolationExceptionItem as jest.Mock;
@@ -23,10 +25,11 @@ describe('When on the host isolation exceptions delete modal', () => {
   let renderResult: ReturnType<typeof render>;
   let coreStart: AppContextTestRender['coreStart'];
   let onCancel: (forceRefresh?: boolean) => void;
+  let itemToDelete: ExceptionListItemSchema;
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
-    const itemToDelete = getExceptionListItemSchemaMock();
+    itemToDelete = getExceptionListItemSchemaMock();
     deleteOneHostIsolationExceptionItemMock.mockReset();
     onCancel = jest.fn();
     render = () =>
@@ -43,6 +46,24 @@ describe('When on the host isolation exceptions delete modal', () => {
       renderResult.getByTestId('hostIsolationExceptionsDeleteModalConfirmButton')
     ).toBeTruthy();
   });
+
+  it.each(['all', '0', '1', '2', '5'])(
+    'should display a warning banner with how many policies (%s) will be affected. skipping non-policy-tags',
+    (amount) => {
+      if (amount === 'all') {
+        itemToDelete.tags = ['policy:all', 'non-policy-tag'];
+      } else {
+        itemToDelete.tags = [
+          ...Array.from({ length: +amount }, (_) => `policy:${uuid.v4()}`),
+          'non-policy-tag',
+        ];
+      }
+      render();
+      expect(
+        renderResult.getByTestId('hostIsolationExceptionsDeleteModalCalloutMessage')
+      ).toHaveTextContent(`Deleting this entry will remove it from ${amount} associated`);
+    }
+  );
 
   it('should disable the buttons when confirm is pressed and show loading', async () => {
     render();
@@ -98,7 +119,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     await waitFor(expect(deleteOneHostIsolationExceptionItemMock).toHaveBeenCalled);
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-      '"some name" has been removed from the Host isolation exceptions list.'
+      '"some name" has been removed from the host isolation exceptions list.'
     );
     expect(onCancel).toHaveBeenCalledWith(true);
   });
@@ -119,7 +140,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     await waitFor(expect(deleteOneHostIsolationExceptionItemMock).toHaveBeenCalled);
 
     expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Unable to remove "some name" from the Host isolation exceptions list. Reason: That\'s not true. That\'s impossible'
+      'Unable to remove "some name" from the host isolation exceptions list. Reason: That\'s not true. That\'s impossible'
     );
     expect(onCancel).toHaveBeenCalledWith(true);
   });

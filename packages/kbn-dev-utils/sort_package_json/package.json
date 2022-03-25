@@ -1,0 +1,4 @@
+{
+  "main": "../target_node/sort_package_json",
+  "types": "../target_types/sort_package_json"
+}

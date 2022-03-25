@@ -11,13 +11,12 @@
 import { keys, each, cloneDeep, clone, uniq, filter, map } from 'lodash';
 // @ts-expect-error
 import realHits from '../../../../../__fixtures__/real_hits.js';
-
-import { IndexPattern } from '../../../../../../../data/public';
-import { flattenHit } from '../../../../../../../data/common';
+import { flattenHit } from '../../../../../../../data/public';
+import type { DataView } from '../../../../../../../data_views/public';
 
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
-import { stubLogstashIndexPattern as indexPattern } from '../../../../../../../data/common/stubs';
+import { stubLogstashDataView as dataView } from '../../../../../../../data_views/common/data_view.stub';
 
 describe('fieldCalculator', function () {
   it('should have a _countMissing that counts nulls & undefineds in an array', function () {
@@ -121,14 +120,14 @@ describe('fieldCalculator', function () {
     let hits: any;
 
     beforeEach(function () {
-      hits = each(cloneDeep(realHits), (hit) => flattenHit(hit, indexPattern));
+      hits = each(cloneDeep(realHits), (hit) => flattenHit(hit, dataView));
     });
 
     it('Should return an array of values for _source fields', function () {
       const extensions = fieldCalculator.getFieldValues(
         hits,
-        indexPattern.fields.getByName('extension'),
-        indexPattern
+        dataView.fields.getByName('extension'),
+        dataView
       );
       expect(extensions).toBeInstanceOf(Array);
       expect(
@@ -142,27 +141,22 @@ describe('fieldCalculator', function () {
     it('Should return an array of values for core meta fields', function () {
       const types = fieldCalculator.getFieldValues(
         hits,
-        indexPattern.fields.getByName('_type'),
-        indexPattern
+        dataView.fields.getByName('_id'),
+        dataView
       );
       expect(types).toBeInstanceOf(Array);
-      expect(
-        filter(types, function (v) {
-          return v === 'apache';
-        }).length
-      ).toBe(18);
-      expect(uniq(clone(types)).sort()).toEqual(['apache', 'nginx']);
+      expect(types.length).toBe(20);
     });
   });
 
   describe('getFieldValueCounts', function () {
-    let params: { hits: any; field: any; count: number; indexPattern: IndexPattern };
+    let params: { hits: any; field: any; count: number; dataView: DataView };
     beforeEach(function () {
       params = {
         hits: cloneDeep(realHits),
-        field: indexPattern.fields.getByName('extension'),
+        field: dataView.fields.getByName('extension'),
         count: 3,
-        indexPattern,
+        dataView,
       };
     });
 
@@ -176,18 +170,18 @@ describe('fieldCalculator', function () {
     });
 
     it('fails to analyze geo and attachment types', function () {
-      params.field = indexPattern.fields.getByName('point');
+      params.field = dataView.fields.getByName('point');
       expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
 
-      params.field = indexPattern.fields.getByName('area');
+      params.field = dataView.fields.getByName('area');
       expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
 
-      params.field = indexPattern.fields.getByName('request_body');
+      params.field = dataView.fields.getByName('request_body');
       expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
     });
 
     it('fails to analyze fields that are in the mapping, but not the hits', function () {
-      params.field = indexPattern.fields.getByName('ip');
+      params.field = dataView.fields.getByName('ip');
       expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
     });
 
@@ -196,7 +190,7 @@ describe('fieldCalculator', function () {
     });
 
     it('counts the hits the field exists in', function () {
-      params.field = indexPattern.fields.getByName('phpmemory');
+      params.field = dataView.fields.getByName('phpmemory');
       expect(fieldCalculator.getFieldValueCounts(params).exists).toBe(5);
     });
   });

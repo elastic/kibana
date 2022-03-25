@@ -169,6 +169,7 @@ describe('alertType', () => {
 
     await alertType.executor({
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as AlertServices<{}, ActionContext, typeof ActionGroupId>,
@@ -202,7 +203,7 @@ describe('alertType', () => {
       },
     });
 
-    expect(alertServices.alertInstanceFactory).toHaveBeenCalledWith('all documents');
+    expect(alertServices.alertFactory.create).toHaveBeenCalledWith('all documents');
   });
 
   it('should ensure a null result does not fire actions', async () => {
@@ -230,6 +231,7 @@ describe('alertType', () => {
 
     await alertType.executor({
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as AlertServices<
@@ -267,7 +269,7 @@ describe('alertType', () => {
       },
     });
 
-    expect(customAlertServices.alertInstanceFactory).not.toHaveBeenCalled();
+    expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
   });
 
   it('should ensure an undefined result does not fire actions', async () => {
@@ -295,6 +297,7 @@ describe('alertType', () => {
 
     await alertType.executor({
       alertId: uuid.v4(),
+      executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as AlertServices<
@@ -332,6 +335,6 @@ describe('alertType', () => {
       },
     });
 
-    expect(customAlertServices.alertInstanceFactory).not.toHaveBeenCalled();
+    expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
   });
 });

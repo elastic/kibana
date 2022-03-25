@@ -17,9 +17,10 @@ import {
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
-import { UI_SETTINGS } from '../../../data/common';
+import { UI_SETTINGS } from '../../../data/public';
 import { TopNavMenu } from '../../../navigation/public';
 import { FORMATS_UI_SETTINGS } from 'src/plugins/field_formats/common';
+import { LocalStorageMock } from './local_storage_mock';
 const dataPlugin = dataPluginMock.createStartContract();
 
 export const discoverServiceMock = {
@@ -78,7 +79,7 @@ export const discoverServiceMock = {
   http: {
     basePath: '/',
   },
-  indexPatternFieldEditor: {
+  dataViewFieldEditor: {
     openEditor: jest.fn(),
     userPermissions: {
       editIndexPattern: jest.fn(),
@@ -94,7 +95,6 @@ export const discoverServiceMock = {
     useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
     useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
   },
-  storage: {
-    get: jest.fn(),
-  },
+  storage: new LocalStorageMock({}) as unknown as Storage,
+  addBasePath: jest.fn(),
 } as unknown as DiscoverServices;

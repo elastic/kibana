@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import {
@@ -16,12 +16,14 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiPopoverProps,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { Query } from 'src/plugins/data/public';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import { validateQuery } from '../operations/definitions/filters';
 import { QueryInput } from '../query_input';
 import type { IndexPattern, IndexPatternLayer } from '../types';
+import { useDebouncedValue } from '../../shared_components';
 
 const filterByLabel = i18n.translate('xpack.lens.indexPattern.filterBy.label', {
   defaultMessage: 'Filter by',
@@ -53,6 +55,7 @@ export function Filtering({
   updateLayer,
   indexPattern,
   isInitiallyOpen,
+  helpMessage,
 }: {
   selectedColumn: GenericIndexPatternColumn;
   indexPattern: IndexPattern;
@@ -60,25 +63,30 @@ export function Filtering({
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
   isInitiallyOpen: boolean;
+  helpMessage: string | null;
 }) {
   const inputFilter = selectedColumn.filter;
-  const [queryInput, setQueryInput] = useState(inputFilter ?? defaultFilter);
+  const onChange = useCallback(
+    (query) => {
+      const { isValid } = validateQuery(query, indexPattern);
+      if (isValid && !isEqual(inputFilter, query)) {
+        updateLayer(setFilter(columnId, layer, query));
+      }
+    },
+    [columnId, indexPattern, inputFilter, layer, updateLayer]
+  );
+  const { inputValue: queryInput, handleInputChange: setQueryInput } = useDebouncedValue<Query>({
+    value: inputFilter ?? defaultFilter,
+    onChange,
+  });
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(isInitiallyOpen);
-
-  useEffect(() => {
-    const { isValid } = validateQuery(queryInput, indexPattern);
-
-    if (isValid && !isEqual(inputFilter, queryInput)) {
-      updateLayer(setFilter(columnId, layer, queryInput));
-    }
-  }, [columnId, layer, queryInput, indexPattern, updateLayer, inputFilter]);
 
   const onClosePopup: EuiPopoverProps['closePopover'] = useCallback(() => {
     setFilterPopoverOpen(false);
     if (inputFilter) {
       setQueryInput(inputFilter);
     }
-  }, [inputFilter]);
+  }, [inputFilter, setQueryInput]);
 
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
 
@@ -92,13 +100,26 @@ export function Filtering({
     indexPattern
   );
 
+  const labelNode = helpMessage ? (
+    <>
+      {filterByLabel}{' '}
+      <EuiIconTip
+        color="subdued"
+        content={helpMessage}
+        iconProps={{
+          className: 'eui-alignTop',
+        }}
+        position="top"
+        size="s"
+        type="questionInCircle"
+      />
+    </>
+  ) : (
+    filterByLabel
+  );
+
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      label={filterByLabel}
-      fullWidth
-      isInvalid={!isInputFilterValid}
-    >
+    <EuiFormRow display="rowCompressed" label={labelNode} fullWidth isInvalid={!isInputFilterValid}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
           <EuiPopover
@@ -150,10 +171,10 @@ export function Filtering({
               isInvalid={!isQueryInputValid}
               error={queryInputError}
               fullWidth={true}
+              data-test-subj="indexPattern-filter-by-input"
             >
               <QueryInput
                 indexPatternTitle={indexPattern.title}
-                data-test-subj="indexPattern-filter-by-input"
                 value={queryInput}
                 onChange={setQueryInput}
                 isInvalid={!isQueryInputValid}

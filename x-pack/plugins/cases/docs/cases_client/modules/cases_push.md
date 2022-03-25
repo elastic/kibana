@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / cases/push
+[Cases Client API Interface](../README.md) / cases/push
 
 # Module: cases/push
 
@@ -6,4 +6,4 @@
 
 ### Interfaces
 
-- [PushParams](../interfaces/cases_push.pushparams.md)
+- [PushParams](../interfaces/cases_push.PushParams.md)

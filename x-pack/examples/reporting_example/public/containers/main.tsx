@@ -8,41 +8,40 @@
 import {
   EuiButton,
   EuiCard,
+  EuiCodeBlock,
   EuiContextMenu,
+  EuiContextMenuProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPopover,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCodeBlock,
-  EuiSpacer,
-  EuiLink,
-  EuiContextMenuProps,
 } from '@elastic/eui';
-import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n-react';
-import React, { useEffect, useState } from 'react';
 import { parsePath } from 'history';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, useHistory } from 'react-router-dom';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
-import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import type {
   JobAppParamsPDF,
   JobParamsPDFV2,
   JobParamsPNGV2,
-} from '../../../../plugins/reporting/public';
-import { constants, ReportingStart } from '../../../../plugins/reporting/public';
-
+} from '../../../../plugins/reporting/common/types';
+import type { ReportingStart } from '../../../../plugins/reporting/public';
+import { LayoutTypes } from '../../../../plugins/screenshotting/common';
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
-
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';
 import type { MyForwardableState } from '../types';
@@ -87,7 +86,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
   const getPDFJobParamsDefault = (): JobAppParamsPDF => {
     return {
       layout: {
-        id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+        id: LayoutTypes.PRESERVE_LAYOUT,
       },
       relativeUrls: ['/app/reportingExample#/intended-visualization'],
       objectType: 'develeloperExample',
@@ -99,7 +98,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     return {
       version: '8.0.0',
       layout: {
-        id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+        id: LayoutTypes.PRESERVE_LAYOUT,
       },
       locatorParams: [
         { id: REPORTING_EXAMPLE_LOCATOR_ID, version: '0.5.0', params: { myTestState: {} } },
@@ -114,7 +113,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     return {
       version: '8.0.0',
       layout: {
-        id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+        id: LayoutTypes.PRESERVE_LAYOUT,
       },
       locatorParams: {
         id: REPORTING_EXAMPLE_LOCATOR_ID,
@@ -131,7 +130,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     return {
       version: '8.0.0',
       layout: {
-        id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+        id: LayoutTypes.PRESERVE_LAYOUT,
       },
       locatorParams: {
         id: REPORTING_EXAMPLE_LOCATOR_ID,
@@ -148,7 +147,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     return {
       version: '8.0.0',
       layout: {
-        id: print ? constants.LAYOUT_TYPES.PRINT : constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+        id: print ? LayoutTypes.PRINT : LayoutTypes.PRESERVE_LAYOUT,
         dimensions: {
           // Magic numbers based on height of components not rendered on this screen :(
           height: 2400,

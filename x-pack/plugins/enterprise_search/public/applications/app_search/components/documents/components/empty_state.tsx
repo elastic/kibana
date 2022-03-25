@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DOCS_PREFIX } from '../../../routes';
+import { INDEXING_DOCS_URL } from '../../../routes';
 
 export const EmptyState = () => (
   <EuiEmptyPrompt
@@ -32,12 +32,7 @@ export const EmptyState = () => (
       </p>
     }
     actions={
-      <EuiButton
-        size="s"
-        target="_blank"
-        iconType="popout"
-        href={`${DOCS_PREFIX}/indexing-documents-guide.html`}
-      >
+      <EuiButton size="s" target="_blank" iconType="popout" href={INDEXING_DOCS_URL}>
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.documents.empty.buttonLabel', {
           defaultMessage: 'Read the documents guide',
         })}

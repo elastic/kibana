@@ -20,6 +20,7 @@ import {
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
 import { TaskInfo } from './lib/action_executor';
+import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 export type { ActionTypeExecutorResult } from '../common';
 export type { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
 export type { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
@@ -32,10 +33,12 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 export type ActionTypeConfig = Record<string, unknown>;
 export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
+export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
+  connectorTokenClient: ConnectorTokenClient;
 }
 
 export interface ActionsApiRequestHandlerContext {
@@ -135,6 +138,8 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
+  executionId?: string;
+  consumer?: string;
 }
 
 interface PersistedActionTaskExecutorParams {
@@ -172,4 +177,13 @@ export interface ResponseSettings {
 
 export interface SSLSettings {
   verificationMode?: 'none' | 'certificate' | 'full';
+}
+
+export interface ConnectorToken extends SavedObjectAttributes {
+  connectorId: string;
+  tokenType: string;
+  token: string;
+  expiresAt: string;
+  createdAt: string;
+  updatedAt?: string;
 }

@@ -9,7 +9,7 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { reduxDecorator } from '../../../../storybook';
 import { WorkpadFilters } from '../workpad_filters';
-import { elements } from './elements';
+import { elementWithGroup, elements } from './elements';
 
 storiesOf('components/WorkpadFilters/WorkpadFilters', module)
   .addDecorator((story) => (
@@ -20,4 +20,5 @@ storiesOf('components/WorkpadFilters/WorkpadFilters', module)
     </div>
   ))
   .addDecorator(reduxDecorator({ elements }))
-  .add('redux: default', () => <WorkpadFilters />);
+  .add('redux: default', () => <WorkpadFilters />)
+  .add('redux: selected element with group', () => <WorkpadFilters element={elementWithGroup} />);

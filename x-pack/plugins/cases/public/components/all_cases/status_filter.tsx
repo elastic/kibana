@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiSuperSelect, EuiSuperSelectOption, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status, statuses } from '../status';
-import { CaseStatusWithAllStatus, StatusAll } from '../../../common';
+import { CaseStatusWithAllStatus, StatusAll } from '../../../common/ui/types';
 
 interface Props {
   stats: Record<CaseStatusWithAllStatus, number | null>;
@@ -50,5 +50,6 @@ const StatusFilterComponent: React.FC<Props> = ({
     />
   );
 };
+StatusFilterComponent.displayName = 'StatusFilter';
 
 export const StatusFilter = memo(StatusFilterComponent);

@@ -14,7 +14,7 @@ import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export * from './deprecated';
-export { getEsQueryConfig } from '../common';
+export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
 
 /**
  * Exporters (CSV)
@@ -106,7 +106,7 @@ export const search = {
  */
 
 export type { TimeRange } from '../common';
-export { castEsToKbnFieldTypeName, getTime, parseInterval } from '../common';
+export { getTime, parseInterval } from '../common';
 
 /**
  * Static code to be shared externally

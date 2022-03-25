@@ -13,6 +13,7 @@ export type {
   MissingPrivileges,
   Authorization,
 } from '../../../../src/plugins/es_ui_shared/public/';
+
 export {
   sendRequest,
   useRequest,
@@ -21,6 +22,7 @@ export {
   WithPrivileges,
   AuthorizationProvider,
   AuthorizationContext,
+  NotAuthorizedSection,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
 export { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -28,6 +30,8 @@ export { Storage } from '../../../../src/plugins/kibana_utils/public';
 export {
   KibanaContextProvider,
   reactRouterNavigate,
+  RedirectAppLinks,
+  KibanaThemeProvider,
 } from '../../../../src/plugins/kibana_react/public';
 
 export type { DataPublicPluginStart } from '../../../../src/plugins/data/public';

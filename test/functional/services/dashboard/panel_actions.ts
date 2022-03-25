@@ -316,7 +316,9 @@ export class DashboardPanelActionsService extends FtrService {
     } else {
       await this.customizePanel();
     }
-    await this.testSubjects.setValue('customEmbeddablePanelTitleInput', customTitle);
+    await this.testSubjects.setValue('customEmbeddablePanelTitleInput', customTitle, {
+      clearWithKeyboard: customTitle === '', // if clearing the title using the empty string as the new value, 'clearWithKeyboard' must be true; otherwise, false
+    });
     await this.testSubjects.click('saveNewTitleButton');
   }
 

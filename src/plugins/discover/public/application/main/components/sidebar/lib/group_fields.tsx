@@ -6,21 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternField } from 'src/plugins/data/public';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
-import { getFieldSubtypeMulti } from '../../../../../../../data/common';
+import { DataViewField, getFieldSubtypeMulti } from '../../../../../../../data_views/public';
 
 interface GroupedFields {
-  selected: IndexPatternField[];
-  popular: IndexPatternField[];
-  unpopular: IndexPatternField[];
+  selected: DataViewField[];
+  popular: DataViewField[];
+  unpopular: DataViewField[];
 }
 
 /**
  * group the fields into selected, popular and unpopular, filter by fieldFilterState
  */
 export function groupFields(
-  fields: IndexPatternField[] | null,
+  fields: DataViewField[] | null,
   columns: string[],
   popularLimit: number,
   fieldCounts: Record<string, number> | undefined,
@@ -39,11 +38,11 @@ export function groupFields(
 
   const popular = fields
     .filter((field) => !columns.includes(field.name) && field.count)
-    .sort((a: IndexPatternField, b: IndexPatternField) => (b.count || 0) - (a.count || 0))
+    .sort((a: DataViewField, b: DataViewField) => (b.count || 0) - (a.count || 0))
     .map((field) => field.name)
     .slice(0, popularLimit);
 
-  const compareFn = (a: IndexPatternField, b: IndexPatternField) => {
+  const compareFn = (a: DataViewField, b: DataViewField) => {
     if (!a.displayName) {
       return 0;
     }
@@ -55,6 +54,7 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
       continue;
     }
+
     const subTypeMulti = getFieldSubtypeMulti(field?.spec);
     const isSubfield = useNewFieldsApi && subTypeMulti;
     if (columns.includes(field.name)) {
@@ -79,7 +79,7 @@ export function groupFields(
       name: column,
       displayName: column,
       type: 'unknown_selected',
-    } as IndexPatternField;
+    } as DataViewField;
     if (
       !result.selected.find((field) => field.name === column) &&
       isFieldFiltered(tmpField, fieldFilterState, fieldCounts)

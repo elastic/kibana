@@ -25,6 +25,7 @@
     { "path": "../file_upload/tsconfig.json" },
     { "path": "../lens/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
+    { "path": "../cloud/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" }
   ]
 }

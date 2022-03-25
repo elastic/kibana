@@ -10,13 +10,12 @@ import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { FeatureCollection } from 'geojson';
 import { EuiPanel } from '@elastic/eui';
-import { DEFAULT_MAX_RESULT_WINDOW, SCALING_TYPES } from '../../../../../common/constants';
+import { SCALING_TYPES } from '../../../../../common/constants';
 import { GeoJsonFileSource } from '../../../sources/geojson_file_source';
 import { GeoJsonVectorLayer } from '../../vector_layer';
 import { createDefaultLayerDescriptor } from '../../../sources/es_search_source';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { FileUploadGeoResults } from '../../../../../../file_upload/public';
-import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
 import { getFileUploadComponent } from '../../../../kibana_services';
 
 export enum UPLOAD_STEPS {
@@ -75,12 +74,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     const esSearchSourceConfig = {
       indexPatternId: results.indexPatternId,
       geoField: results.geoFieldName,
-      // Only turn on bounds filter for large doc counts
-      filterByMapBounds: results.docCount > DEFAULT_MAX_RESULT_WINDOW,
-      scalingType:
-        results.geoFieldType === ES_FIELD_TYPES.GEO_POINT
-          ? SCALING_TYPES.CLUSTERS
-          : SCALING_TYPES.LIMIT,
+      scalingType: SCALING_TYPES.MVT,
     };
     this.props.previewLayers([
       createDefaultLayerDescriptor(esSearchSourceConfig, this.props.mapColors),

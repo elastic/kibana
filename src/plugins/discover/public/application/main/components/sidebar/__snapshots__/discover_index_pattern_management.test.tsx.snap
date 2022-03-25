@@ -1,8 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Discover IndexPattern Management renders correctly 1`] = `
-<DiscoverIndexPatternManagement
-  editField={[MockFunction]}
+exports[`Discover DataView Management renders correctly 1`] = `
+<Provider
   intl={
     Object {
       "defaultFormats": Object {},
@@ -105,539 +104,6 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
       "timeZone": null,
     }
   }
-  selectedIndexPattern={
-    DataView {
-      "allowNoIndex": false,
-      "deleteFieldFormat": [Function],
-      "fieldAttrs": Object {},
-      "fieldFormatMap": Object {},
-      "fieldFormats": Object {
-        "deserialize": [MockFunction],
-        "getByFieldType": [MockFunction],
-        "getDefaultConfig": [MockFunction],
-        "getDefaultInstance": [MockFunction],
-        "getDefaultInstanceCacheResolver": [MockFunction],
-        "getDefaultInstancePlain": [MockFunction],
-        "getDefaultType": [MockFunction],
-        "getDefaultTypeName": [MockFunction],
-        "getInstance": [MockFunction],
-        "getType": [MockFunction],
-        "getTypeNameByEsTypes": [MockFunction],
-        "getTypeWithoutMetaParams": [MockFunction],
-        "has": [MockFunction],
-        "init": [MockFunction],
-        "parseDefaultTypeMap": [MockFunction],
-        "register": [MockFunction],
-      },
-      "fields": FldList [
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 10,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "long",
-          ],
-          "lang": undefined,
-          "name": "bytes",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "number",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 20,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "boolean",
-          ],
-          "lang": undefined,
-          "name": "ssl",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "boolean",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 30,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "date",
-          ],
-          "lang": undefined,
-          "name": "@timestamp",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "date",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 30,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "date",
-          ],
-          "lang": undefined,
-          "name": "time",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "date",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "keyword",
-          ],
-          "lang": undefined,
-          "name": "@tags",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "date",
-          ],
-          "lang": undefined,
-          "name": "utc_time",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "date",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "integer",
-          ],
-          "lang": undefined,
-          "name": "phpmemory",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "number",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "ip",
-          ],
-          "lang": undefined,
-          "name": "ip",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "ip",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "attachment",
-          ],
-          "lang": undefined,
-          "name": "request_body",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "attachment",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "geo_point",
-          ],
-          "lang": undefined,
-          "name": "point",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "geo_point",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "geo_shape",
-          ],
-          "lang": undefined,
-          "name": "area",
-          "readFromDocValues": false,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "geo_shape",
-        },
-        Object {
-          "aggregatable": false,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "murmur3",
-          ],
-          "lang": undefined,
-          "name": "hashed",
-          "readFromDocValues": false,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "murmur3",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "geo_point",
-          ],
-          "lang": undefined,
-          "name": "geo.coordinates",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "geo_point",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "text",
-          ],
-          "lang": undefined,
-          "name": "extension",
-          "readFromDocValues": false,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "keyword",
-          ],
-          "lang": undefined,
-          "name": "extension.keyword",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": Object {
-            "multi": Object {
-              "parent": "extension",
-            },
-          },
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "text",
-          ],
-          "lang": undefined,
-          "name": "machine.os",
-          "readFromDocValues": false,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "keyword",
-          ],
-          "lang": undefined,
-          "name": "machine.os.raw",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": Object {
-            "multi": Object {
-              "parent": "machine.os",
-            },
-          },
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "keyword",
-          ],
-          "lang": undefined,
-          "name": "geo.src",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "_id",
-          ],
-          "lang": undefined,
-          "name": "_id",
-          "readFromDocValues": false,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "_type",
-          ],
-          "lang": undefined,
-          "name": "_type",
-          "readFromDocValues": false,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "_source",
-          ],
-          "lang": undefined,
-          "name": "_source",
-          "readFromDocValues": false,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "_source",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "text",
-          ],
-          "lang": undefined,
-          "name": "non-filterable",
-          "readFromDocValues": false,
-          "script": undefined,
-          "scripted": false,
-          "searchable": false,
-          "subType": undefined,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": false,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "text",
-          ],
-          "lang": undefined,
-          "name": "non-sortable",
-          "readFromDocValues": false,
-          "script": undefined,
-          "scripted": false,
-          "searchable": false,
-          "subType": undefined,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "conflict",
-          ],
-          "lang": undefined,
-          "name": "custom_user_field",
-          "readFromDocValues": true,
-          "script": undefined,
-          "scripted": false,
-          "searchable": true,
-          "subType": undefined,
-          "type": "conflict",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "text",
-          ],
-          "lang": "expression",
-          "name": "script string",
-          "readFromDocValues": false,
-          "script": "'i am a string'",
-          "scripted": true,
-          "searchable": true,
-          "subType": undefined,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "long",
-          ],
-          "lang": "expression",
-          "name": "script number",
-          "readFromDocValues": false,
-          "script": "1234",
-          "scripted": true,
-          "searchable": true,
-          "subType": undefined,
-          "type": "number",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "date",
-          ],
-          "lang": "painless",
-          "name": "script date",
-          "readFromDocValues": false,
-          "script": "1234",
-          "scripted": true,
-          "searchable": true,
-          "subType": undefined,
-          "type": "date",
-        },
-        Object {
-          "aggregatable": true,
-          "conflictDescriptions": undefined,
-          "count": 0,
-          "customLabel": undefined,
-          "esTypes": Array [
-            "murmur3",
-          ],
-          "lang": "expression",
-          "name": "script murmur3",
-          "readFromDocValues": false,
-          "script": "1234",
-          "scripted": true,
-          "searchable": true,
-          "subType": undefined,
-          "type": "murmur3",
-        },
-      ],
-      "flattenHit": [Function],
-      "getFieldAttrs": [Function],
-      "getOriginalSavedObjectBody": [Function],
-      "id": "logstash-*",
-      "intervalName": undefined,
-      "metaFields": Array [
-        "_id",
-        "_type",
-        "_source",
-      ],
-      "originalSavedObjectBody": Object {},
-      "resetOriginalSavedObjectBody": [Function],
-      "runtimeFieldMap": Object {},
-      "setFieldFormat": [Function],
-      "shortDotsEnable": false,
-      "sourceFilters": undefined,
-      "timeFieldName": "time",
-      "title": "logstash-*",
-      "type": undefined,
-      "typeMeta": undefined,
-      "version": undefined,
-    }
-  }
   services={
     Object {
       "capabilities": Object {
@@ -653,80 +119,617 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
           "navigateToApp": [MockFunction],
         },
       },
-      "history": [Function],
-      "indexPatternFieldEditor": Object {
+      "dataViewFieldEditor": Object {
         "openEditor": [MockFunction],
         "userPermissions": Object {
           "editIndexPattern": [Function],
         },
       },
+      "history": [Function],
       "uiSettings": Object {
         "get": [Function],
       },
     }
   }
-  useNewFieldsApi={true}
 >
-  <EuiPopover
-    anchorPosition="downCenter"
-    button={
-      <EuiButtonIcon
-        aria-label="Data view settings"
-        color="text"
-        data-test-subj="discoverIndexPatternActions"
-        iconType="boxesHorizontal"
-        onClick={[Function]}
-      />
+  <DiscoverIndexPatternManagement
+    createNewDataView={[MockFunction]}
+    editField={[MockFunction]}
+    selectedIndexPattern={
+      DataView {
+        "allowNoIndex": false,
+        "deleteFieldFormat": [Function],
+        "fieldAttrs": Object {},
+        "fieldFormatMap": Object {},
+        "fieldFormats": Object {
+          "deserialize": [MockFunction],
+          "getByFieldType": [MockFunction],
+          "getDefaultConfig": [MockFunction],
+          "getDefaultInstance": [MockFunction],
+          "getDefaultInstanceCacheResolver": [MockFunction],
+          "getDefaultInstancePlain": [MockFunction],
+          "getDefaultType": [MockFunction],
+          "getDefaultTypeName": [MockFunction],
+          "getInstance": [MockFunction],
+          "getType": [MockFunction],
+          "getTypeNameByEsTypes": [MockFunction],
+          "getTypeWithoutMetaParams": [MockFunction],
+          "has": [MockFunction],
+          "init": [MockFunction],
+          "parseDefaultTypeMap": [MockFunction],
+          "register": [MockFunction],
+        },
+        "fields": FldList [
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 10,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "long",
+            ],
+            "lang": undefined,
+            "name": "bytes",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "number",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 20,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "boolean",
+            ],
+            "lang": undefined,
+            "name": "ssl",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "boolean",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 30,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "date",
+            ],
+            "lang": undefined,
+            "name": "@timestamp",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "date",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 30,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "date",
+            ],
+            "lang": undefined,
+            "name": "time",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "date",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "lang": undefined,
+            "name": "@tags",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "date",
+            ],
+            "lang": undefined,
+            "name": "utc_time",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "date",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "integer",
+            ],
+            "lang": undefined,
+            "name": "phpmemory",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "number",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "ip",
+            ],
+            "lang": undefined,
+            "name": "ip",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "ip",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "attachment",
+            ],
+            "lang": undefined,
+            "name": "request_body",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "attachment",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "geo_point",
+            ],
+            "lang": undefined,
+            "name": "point",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "geo_point",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "geo_shape",
+            ],
+            "lang": undefined,
+            "name": "area",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "geo_shape",
+          },
+          Object {
+            "aggregatable": false,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "murmur3",
+            ],
+            "lang": undefined,
+            "name": "hashed",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "murmur3",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "geo_point",
+            ],
+            "lang": undefined,
+            "name": "geo.coordinates",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "geo_point",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "text",
+            ],
+            "lang": undefined,
+            "name": "extension",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "lang": undefined,
+            "name": "extension.keyword",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": Object {
+              "multi": Object {
+                "parent": "extension",
+              },
+            },
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "text",
+            ],
+            "lang": undefined,
+            "name": "machine.os",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "lang": undefined,
+            "name": "machine.os.raw",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": Object {
+              "multi": Object {
+                "parent": "machine.os",
+              },
+            },
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "lang": undefined,
+            "name": "geo.src",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "_id",
+            ],
+            "lang": undefined,
+            "name": "_id",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "_type",
+            ],
+            "lang": undefined,
+            "name": "_type",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "_source",
+            ],
+            "lang": undefined,
+            "name": "_source",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "_source",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "text",
+            ],
+            "lang": undefined,
+            "name": "non-filterable",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": false,
+            "subType": undefined,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": false,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "text",
+            ],
+            "lang": undefined,
+            "name": "non-sortable",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": false,
+            "subType": undefined,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "conflict",
+            ],
+            "lang": undefined,
+            "name": "custom_user_field",
+            "readFromDocValues": true,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "conflict",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "text",
+            ],
+            "lang": "expression",
+            "name": "script string",
+            "readFromDocValues": false,
+            "script": "'i am a string'",
+            "scripted": true,
+            "searchable": true,
+            "subType": undefined,
+            "type": "string",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "long",
+            ],
+            "lang": "expression",
+            "name": "script number",
+            "readFromDocValues": false,
+            "script": "1234",
+            "scripted": true,
+            "searchable": true,
+            "subType": undefined,
+            "type": "number",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "date",
+            ],
+            "lang": "painless",
+            "name": "script date",
+            "readFromDocValues": false,
+            "script": "1234",
+            "scripted": true,
+            "searchable": true,
+            "subType": undefined,
+            "type": "date",
+          },
+          Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customLabel": undefined,
+            "esTypes": Array [
+              "murmur3",
+            ],
+            "lang": "expression",
+            "name": "script murmur3",
+            "readFromDocValues": false,
+            "script": "1234",
+            "scripted": true,
+            "searchable": true,
+            "subType": undefined,
+            "type": "murmur3",
+          },
+        ],
+        "flattenHit": [Function],
+        "getFieldAttrs": [Function],
+        "getOriginalSavedObjectBody": [Function],
+        "id": "logstash-*",
+        "metaFields": Array [
+          "_id",
+          "_type",
+          "_source",
+        ],
+        "namespaces": Array [],
+        "originalSavedObjectBody": Object {},
+        "resetOriginalSavedObjectBody": [Function],
+        "runtimeFieldMap": Object {},
+        "setFieldFormat": [Function],
+        "shortDotsEnable": false,
+        "sourceFilters": undefined,
+        "timeFieldName": "time",
+        "title": "logstash-*",
+        "type": undefined,
+        "typeMeta": undefined,
+        "version": undefined,
+      }
     }
-    closePopover={[Function]}
-    data-test-subj="discover-addRuntimeField-popover"
-    display="inlineBlock"
-    hasArrow={true}
-    isOpen={false}
-    ownFocus={true}
-    panelPaddingSize="s"
+    useNewFieldsApi={true}
   >
-    <div
-      className="euiPopover euiPopover--anchorDownCenter"
-      data-test-subj="discover-addRuntimeField-popover"
-    >
-      <div
-        className="euiPopover__anchor"
-      >
+    <EuiPopover
+      anchorPosition="downCenter"
+      button={
         <EuiButtonIcon
           aria-label="Data view settings"
           color="text"
           data-test-subj="discoverIndexPatternActions"
           iconType="boxesHorizontal"
           onClick={[Function]}
+        />
+      }
+      closePopover={[Function]}
+      data-test-subj="discover-addRuntimeField-popover"
+      display="inlineBlock"
+      hasArrow={true}
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownCenter"
+        data-test-subj="discover-addRuntimeField-popover"
+      >
+        <div
+          className="euiPopover__anchor"
         >
-          <button
+          <EuiButtonIcon
             aria-label="Data view settings"
-            className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+            color="text"
             data-test-subj="discoverIndexPatternActions"
-            disabled={false}
+            iconType="boxesHorizontal"
             onClick={[Function]}
-            type="button"
           >
-            <EuiIcon
-              aria-hidden="true"
-              className="euiButtonIcon__icon"
-              color="inherit"
-              size="m"
-              type="boxesHorizontal"
+            <button
+              aria-label="Data view settings"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+              data-test-subj="discoverIndexPatternActions"
+              onClick={[Function]}
+              type="button"
             >
-              <span
+              <EuiIcon
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 color="inherit"
-                data-euiicon-type="boxesHorizontal"
                 size="m"
-              />
-            </EuiIcon>
-          </button>
-        </EuiButtonIcon>
+                type="boxesHorizontal"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="boxesHorizontal"
+                  size="m"
+                />
+              </EuiIcon>
+            </button>
+          </EuiButtonIcon>
+        </div>
       </div>
-    </div>
-  </EuiPopover>
-</DiscoverIndexPatternManagement>
+    </EuiPopover>
+  </DiscoverIndexPatternManagement>
+</Provider>
 `;

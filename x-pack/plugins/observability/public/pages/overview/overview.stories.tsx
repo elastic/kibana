@@ -14,7 +14,6 @@ import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
-import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { OverviewPage } from './';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
@@ -43,9 +42,29 @@ const withCore = makeDecorator({
   parameterName: 'core',
   wrapper: (storyFn, context, { options: { theme, ...options } }) => {
     unregisterAll();
-
     const KibanaReactContext = createKibanaReactContext({
-      application: { getUrlForApp: () => '' },
+      application: {
+        getUrlForApp: () => '',
+        capabilities: { navLinks: { integrations: true } },
+        currentAppId$: {
+          subscribe: () => {},
+        },
+      },
+      data: {
+        query: {
+          timefilter: {
+            timefilter: {
+              setTime: () => {},
+              getTime: () => ({}),
+            },
+          },
+        },
+      },
+      http: {
+        basePath: {
+          prepend: (link: string) => `http://localhost:5601${link}`,
+        },
+      },
       chrome: {
         docTitle: {
           change: () => {},
@@ -66,21 +85,13 @@ const withCore = makeDecorator({
                 setHeaderActionMenu: () => {},
               } as unknown as AppMountParameters,
               config: {
-                unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
-              },
-              core: options as CoreStart,
-              plugins: {
-                data: {
-                  query: {
-                    timefilter: {
-                      timefilter: {
-                        setTime: () => {},
-                        getTime: () => ({}),
-                      },
-                    },
-                  },
+                unsafe: {
+                  alertingExperience: { enabled: true },
+                  cases: { enabled: true },
+                  overviewNext: { enabled: false },
+                  rules: { enabled: true },
                 },
-              } as unknown as ObservabilityPublicPluginsStart,
+              },
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
             }}
@@ -168,6 +179,13 @@ const core = {
       return euiSettings[key];
     },
   },
+  docLinks: {
+    links: {
+      observability: {
+        guide: 'alink',
+      },
+    },
+  },
 } as unknown as CoreStart;
 
 const coreWithAlerts = {
@@ -207,12 +225,12 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: 'metric-*' }),
     });
     registerDataHandler({
       appName: 'synthetics',
@@ -226,7 +244,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
 
     return (
@@ -241,12 +259,12 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
 
     return (
@@ -263,12 +281,12 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: fetchMetricsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
 
       return (
@@ -287,12 +305,12 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: fetchMetricsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
       registerDataHandler({
         appName: 'apm',
@@ -319,12 +337,12 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
     registerDataHandler({
       appName: 'synthetics',
@@ -351,12 +369,12 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: fetchMetricsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
       registerDataHandler({
         appName: 'synthetics',
@@ -385,12 +403,12 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: fetchMetricsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
       registerDataHandler({
         appName: 'synthetics',
@@ -416,12 +434,12 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: async () => emptyLogsResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: async () => emptyMetricsResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
     registerDataHandler({
       appName: 'synthetics',
@@ -452,14 +470,14 @@ storiesOf('app/Overview', module)
         fetchData: async () => {
           throw new Error('Error fetching Logs data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: async () => {
           throw new Error('Error fetching Metric data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
       registerDataHandler({
         appName: 'synthetics',

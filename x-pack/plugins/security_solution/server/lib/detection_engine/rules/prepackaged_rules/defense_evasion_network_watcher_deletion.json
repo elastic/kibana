@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the deletion of a Network Watcher in Azure. Network Watchers are used to monitor, diagnose, view metrics, and enable or disable logs for resources in an Azure virtual network. An adversary may delete a Network Watcher in an attempt to evade defenses.",
   "false_positives": [
-    "Network Watcher deletions may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Network Watcher deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Network Watcher deletions may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Network Watcher deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-25m",
   "index": [
@@ -56,5 +56,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

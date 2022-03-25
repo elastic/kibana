@@ -17,12 +17,9 @@ import {
   EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  euiLightVars as themeLight,
-  euiDarkVars as themeDark,
-} from '@kbn/ui-shared-deps-src/theme';
-import { ElasticSearchHit } from '../../services/doc_views/doc_views_types';
+import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import { DiscoverGridContext } from './discover_grid_context';
+import { ElasticSearchHit } from '../../types';
 
 /**
  * Returning a generated id of a given ES document, since `_id` can be the same
@@ -169,7 +166,6 @@ export function DiscoverGridDocumentToolbarBtn({
           className={classNames({
             // eslint-disable-next-line @typescript-eslint/naming-convention
             euiDataGrid__controlBtn: true,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'euiDataGrid__controlBtn--active': isFilterActive,
           })}
         >

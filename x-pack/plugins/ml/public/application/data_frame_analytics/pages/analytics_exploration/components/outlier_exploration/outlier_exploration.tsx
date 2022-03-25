@@ -95,7 +95,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
 
   if (indexPatternErrorMessage !== undefined) {
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} hasShadow={false} hasBorder>
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
             defaultMessage: 'An error occurred loading the index data.',

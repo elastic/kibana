@@ -18,6 +18,7 @@ import { EuiCallOut } from '@elastic/eui';
 
 import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../../components/layout';
 
+import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 import { SourceInfoCard } from './source_info_card';
 import { SourceLayout } from './source_layout';
 
@@ -26,6 +27,7 @@ describe('SourceLayout', () => {
   const mockValues = {
     contentSource,
     dataLoading: false,
+    diagnosticDownloadButtonVisible: false,
     isOrganization: true,
   };
 
@@ -44,10 +46,10 @@ describe('SourceLayout', () => {
     expect(wrapper.find('.testChild')).toHaveLength(1);
   });
 
-  it('passes a source name to SourceInfoCard', () => {
+  it('passes a content source to SourceInfoCard', () => {
     const wrapper = shallow(<SourceLayout />);
 
-    expect(wrapper.find(SourceInfoCard).prop('sourceName')).toEqual('Jira');
+    expect(wrapper.find(SourceInfoCard).prop('contentSource')).toEqual(contentSource);
   });
 
   it('renders the default Workplace Search layout when on an organization view', () => {
@@ -86,5 +88,15 @@ describe('SourceLayout', () => {
     const wrapper = shallow(<SourceLayout />);
 
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+  });
+
+  it('renders DownloadDiagnosticsButton', () => {
+    setMockValues({
+      ...mockValues,
+      diagnosticDownloadButtonVisible: true,
+    });
+    const wrapper = shallow(<SourceLayout />);
+
+    expect(wrapper.find(DownloadDiagnosticsButton)).toHaveLength(1);
   });
 });

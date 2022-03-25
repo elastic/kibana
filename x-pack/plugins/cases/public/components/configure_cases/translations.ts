@@ -50,13 +50,6 @@ export const CASE_CLOSURE_OPTIONS_DESC = i18n.translate(
   }
 );
 
-export const CASE_CLOSURE_OPTIONS_SUB_CASES = i18n.translate(
-  'xpack.cases.configureCases.caseClosureOptionsSubCases',
-  {
-    defaultMessage: 'Automatic closure of sub-cases is not supported.',
-  }
-);
-
 export const CASE_CLOSURE_OPTIONS_LABEL = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsLabel',
   {

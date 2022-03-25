@@ -40,6 +40,10 @@ as uiSettings within the code.
 |Console provides the user with tools for storing and executing requests against Elasticsearch.
 
 
+|{kib-repo}blob/{branch}/src/plugins/controls/README.mdx[controls]
+|The Controls plugin contains Embeddables which can be used to add user-friendly interactivity to apps.
+
+
 |{kib-repo}blob/{branch}/src/plugins/custom_integrations/README.md[customIntegrations]
 |Register add-data cards
 
@@ -90,8 +94,20 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |This plugin contains reusable code in the form of self-contained modules (or libraries). Each of these modules exports a set of functionality relevant to the domain of the module.
 
 
+|{kib-repo}blob/{branch}/src/plugins/event_annotation/README.md[eventAnnotation]
+|The Event Annotation service contains expressions for event annotations
+
+
 |{kib-repo}blob/{branch}/src/plugins/expression_error/README.md[expressionError]
 |Expression Error plugin adds an error renderer to the expression plugin. The renderer will display the error image.
+
+
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_gauge[expressionGauge]
+|WARNING: Missing README.
+
+
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_heatmap[expressionHeatmap]
+|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/expression_image/README.md[expressionImage]
@@ -104,6 +120,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 |{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_metric/README.md[expressionMetricVis]
 |Expression MetricVis plugin adds a metric renderer and function to the expression plugin. The renderer will display the metric chart.
+
+
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_partition_vis/README.md[expressionPartitionVis]
+|Expression Partition Visualization plugin adds a partitionVis renderer and pieVis, mosaicVis, treemapVis, waffleVis functions to the expression plugin. The renderer will display the pie, waffle, treemap and mosaic charts.
 
 
 |{kib-repo}blob/{branch}/src/plugins/expression_repeat_image/README.md[expressionRepeatImage]
@@ -123,6 +143,9 @@ one of the *renderers* registered in `expressions` plugin.
 All the arguments to expression functions need to be serializable, as well as input and output.
 Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
 make it possible to serialize the whole chain as well as output at every step of execution.
+
+It is possible to add comments to expressions by starting them with a `//` sequence
+or by using `/*` and `*/` to enclose multi-line comments.
 
 Expressions power visualizations in Dashboard and Lens, as well as, every
 *element* in Canvas is backed by an expression.
@@ -185,7 +208,7 @@ management section itself.
 
 
 |{kib-repo}blob/{branch}/src/plugins/maps_ems/README.md[mapsEms]
-|Configuration of kibana-wide EMS settings and some higher level utilities.
+|Utility plugin:
 
 
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
@@ -219,9 +242,13 @@ oss plugins.
 |The service exposed by this plugin informs consumers whether they should optimize for non-interactivity. In this way plugins can avoid loading unnecessary code, data or other services.
 
 
-|{kib-repo}blob/{branch}/src/plugins/share/README.md[share]
+|{kib-repo}blob/{branch}/src/plugins/share/README.mdx[share]
 |The share plugin contains various utilities for displaying sharing context menu,
-generating deep links to other apps, and creating short URLs.
+generating deep links to other apps using locators, and creating short URLs.
+
+
+|{kib-repo}blob/{branch}/src/plugins/shared_ux/README.md[sharedUX]
+|Our mission is to make consistency in our user experience a product.
 
 
 |{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
@@ -274,6 +301,14 @@ It acts as a container for a particular visualization and options tabs. Contains
 The plugin exposes the static DefaultEditorController class to consume.
 
 
+|{kib-repo}blob/{branch}/src/plugins/vis_types/gauge[visTypeGauge]
+|WARNING: Missing README.
+
+
+|{kib-repo}blob/{branch}/src/plugins/vis_types/heatmap[visTypeHeatmap]
+|WARNING: Missing README.
+
+
 |{kib-repo}blob/{branch}/src/plugins/vis_type_markdown/README.md[visTypeMarkdown]
 |The markdown visualization that can be used to place text panels on dashboards.
 
@@ -318,10 +353,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/visualize[visualize]
-|WARNING: Missing README.
-
-
 |===
 
 [discrete]
@@ -361,6 +392,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The cloud plugin adds Cloud-specific features to Kibana.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_security_posture/README.md[cloudSecurityPosture]
+|Cloud Posture automates the identification and remediation of risks across cloud infrastructures
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/cross_cluster_replication/README.md[crossClusterReplication]
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
@@ -397,7 +432,7 @@ security and spaces filtering.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
-actitivies.
+activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
@@ -492,8 +527,12 @@ newly created modules as well.
 Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/monitoring[monitoring]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/monitoring/readme.md[monitoring]
+|This plugin provides the Stack Monitoring kibana application.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/monitoring_collection/README.md[monitoringCollection]
+|This plugin allows for other plugins to add data to Kibana stack monitoring documents.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
@@ -532,6 +571,11 @@ Elastic.
 |Add tagging capability to saved objects
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/screenshotting/README.md[screenshotting]
+|This plugin provides functionality to take screenshots of the Kibana pages.
+It uses Chromium and Puppeteer underneath to run the browser in headless mode.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler/README.md[searchprofiler]
 |The search profiler consumes the Profile API
 by sending a search API with profile: true enabled in the request body. The response contains
@@ -546,6 +590,10 @@ Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
 |Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]
+|Session View is meant to provide a visualization into what is going on in a particular Linux environment where the agent is running. It looks likes a terminal emulator; however, it is a tool for introspecting process activity and understanding user and service behaviour in your Linux servers and infrastructure. It is a time-ordered series of process executions displayed in a tree over time.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/snapshot_restore/README.md[snapshotRestore]
@@ -605,6 +653,10 @@ in their infrastructure.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/ux/readme.md[ux]
+|https://docs.elastic.dev/kibana-dev-docs/welcome
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]

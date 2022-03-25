@@ -1,67 +1,86 @@
 [[connect-to-elasticsearch]]
-== Add your data
-++++
-<titleabbrev>Add data</titleabbrev>
-++++
+== Add data
 
-To start working with your data in {kib}, use one of the many ingest options,
-available from the home page.
-You can collect data from an app or service,
-or upload a file that contains your data.  If you're not ready to use your own data,
-add a sample data set and give {kib} a test drive.
+The best way to add data to the Elastic Stack is to use one of our many integrations,
+which are pre-packaged assets that are available for a wide array of popular
+services and platforms. With integrations, you can add monitoring for logs and
+metrics, protect systems from security threats, and more.
+
+All integrations are available in a single view, and
+{kib} guides you there from the *Welcome* screen, home page, and main menu.
 
 [role="screenshot"]
-image::images/addData_home_7.15.0.png[Built-in options for adding data to Kibana:  Add data, Add Elastic Agent, Upload a file]
+image::images/add-integration.png[Integrations page from which you can choose integrations to start collecting and analyzing data]
+
+NOTE: When an integration is available for both
+https://www.elastic.co/guide/en/fleet/master/beats-agent-comparison.html[Elastic Agent and Beats],
+the *Integrations* view defaults to the
+Elastic Agent integration, if it is generally available (GA).
+To show a
+Beats integration, use the filter below the side navigation.
 
 [float]
-[[add-data-tutorial-kibana]]
-=== Add data
+=== Add data with Elastic solutions
 
-Want to ingest logs, metrics, security, or application data?
-Install and configure a Beats data shipper or other module to periodically collect the data
-and send it to {es}. You can then use the pre-built dashboards to explore and analyze the data.
+A good place to start is with one of our Elastic solutions, which
+offer experiences for common use cases.
+
+* *Web site search crawler.*
+Discover, extract, and index your web content into App Search engines using the
+{app-search-ref}/web-crawler.html[Enterprise Search web site crawler].
+Search across Google Drive, GitHub, Salesforce, and many other web services using
+{workplace-search-ref}/workplace-search-content-sources.html[Workplace Search content sources].
+
+* *Elastic APM.*
+Get logs, metrics, traces, and uptime data into the Elastic Stack.
+Integrations are available for popular services and platforms,
+such as Nginx, AWS, and MongoDB,
+and generic input types like log files.
+Refer to {observability-guide}/observability-introduction.html[Elastic Observability]
+for more information.
+
+* *Endpoint Security.*
+Protect your hosts and send logs, metrics, and endpoint security data
+to Elastic Security.
+Refer to {security-guide}/ingest-data.html[Ingest data to Elastic Security]
+for more information.
+
+[float]
+=== Add data with programming languages
+
+Add any data to the Elastic Stack using a programming language,
+such as JavaScript, Java, Python, and Ruby.
+Details for each programming language library that Elastic provides are in the
+https://www.elastic.co/guide/en/elasticsearch/client/index.html[{es} Client documentation].
+
+If you are running {kib} on our hosted {es} Service,
+click *View deployment details* on the *Integrations* view
+to verify your {es} endpoint and Cloud ID, and create API keys for integration.
+
+[float]
+=== Add sample data
+
+Sample data sets come with sample visualizations, dashboards, and more to help you
+explore {kib} before you add your own data.
+In the *Integrations* view, search for *Sample Data*, and then add the type of
+data you want.
 
 [role="screenshot"]
-image::images/add-data-tutorials.png[Add Data tutorials]
-
-[discrete]
-=== Add Elastic Agent
-
-*Elastic Agent* is the next generation of
-data integration modules, offering
-a centralized way to set up your integrations.
-
-With *Fleet*, you can add
-and manage integrations for popular services and platforms, providing
-an easy way to collect your data, and manage {elastic-agent} installations in standalone or {fleet} mode. The integrations
-ship with dashboards and visualizations,
-so you can quickly get insights into your data, and {fleet} mode offers several advantages:
-
-* A central place to configure and monitor your {agents}.
-
-* An overview of the data ingest in your {es} cluster.
-
-* Multiple integrations to collect and transform data.
-
-[role="screenshot"]
-image::images/addData_fleet_7.15.0.png[Add data using Fleet]
-
-To get started, refer to
-{observability-guide}/ingest-logs-metrics-uptime.html[Ingest logs, metrics, and uptime data with {agent}].
+image::images/add-sample-data.png[eCommerce, flights, and web logs sample data sets that you can explore in Kibana]
 
 [discrete]
 [[upload-data-kibana]]
-=== Upload a file
+=== Upload a data file
 
 If you have a log file or delimited CSV, TSV, or JSON file, you can upload it,
 view its fields and metrics, and optionally import it into {es}.
+In the *Integrations* view, search for *Upload a file*, and then drop your file on the target.
 
-NOTE: This feature is not intended for use as part of a repeated production
+By default, you can upload a file up to 100 MB. This value is configurable up to 1 GB in
+<<fileupload-maxfilesize,Advanced Settings>>.
+
+NOTE: The upload feature is not intended for use as part of a repeated production
 process, but rather for the initial exploration of your data.
-
-You can upload a file up to 100 MB. This value is configurable up to 1 GB in
-<<fileupload-maxfilesize,Advanced Settings>>. To upload a file with geospatial
-data, refer to <<import-geospatial-data,Import geospatial data>>.
 
 [role="screenshot"]
 image::images/add-data-fv.png[Uploading a file in {kib}]
@@ -70,22 +89,16 @@ The {stack-security-features} provide roles and privileges that control which
 users can upload files. To upload a file in {kib} and import it into an {es}
 index, you'll need:
 
-* `all` {kib} privileges for *Discover*
 * `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
 * `create`, `create_index`, `manage`, and `read` index privileges for the index
+* `all` {kib} privileges for *Discover* and *Data Views Management*
 
-You can manage your roles, privileges, and spaces in **{stack-manage-app}** in
-{kib}. For more information, refer to
-<<xpack-kibana-role-management,{kib} role management>>.
+You can manage your roles, privileges, and spaces in **{stack-manage-app}**.
 
 [discrete]
-=== Additional options for loading your data
+=== What's next?
 
-If the {kib} ingest options don't work for you, you can index your
-data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
-or https://www.elastic.co/guide/en/elasticsearch/client/index.html[client libraries].
-After you add your data, you're required to create a <<data-views,data view>> to tell
-{kib} where to find the data.
-
-* To add data for Elastic Observability, refer to {observability-guide}/add-observability-data.html[Send data to Elasticsearch].
-* To add data for Elastic Security, refer to https://www.elastic.co/guide/en/security/current/ingest-data.html[Ingest data to Elastic Security].
+To take your investigation
+to a deeper level, use <<discover, **Discover**>> and quickly gain insight to your data:
+search and filter your data, get information about the structure of the fields,
+and analyze your findings in a visualization.

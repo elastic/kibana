@@ -8,9 +8,10 @@
 import { get } from 'lodash';
 import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { LOGSTASH } from '../../../common/constants';
-import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { LogstashClusterMetric } from '../metrics';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 const { MEMORY, PERSISTED } = LOGSTASH.QUEUE_TYPES;
 
@@ -38,25 +39,36 @@ const getQueueTypes = (queueBuckets: Array<Bucket & { num_pipelines: { value: nu
  */
 export function getLogstashForClusters(
   req: LegacyRequest,
-  lsIndexPattern: string,
-  clusters: Array<{ cluster_uuid: string } | Cluster>
+  clusters: Array<{ cluster_uuid: string } | Cluster>,
+  ccs?: string
 ) {
-  checkParam(lsIndexPattern, 'lsIndexPattern in logstash/getLogstashForClusters');
-
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
-  const config = req.server.config();
+  const config = req.server.config;
+
+  const dataset = 'node_stats';
+  const type = 'logstash_stats';
+  const moduleType = 'logstash';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: ccs || req.payload.ccs,
+    moduleType,
+    dataset,
+  });
 
   return Promise.all(
     clusters.map((cluster) => {
       const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
+      const maxBucketSize = config.ui.max_bucket_size;
       const params = {
-        index: lsIndexPattern,
+        index: indexPatterns,
         size: 0,
         ignore_unavailable: true,
         body: {
           query: createQuery({
-            types: ['stats', 'logstash_stats'],
+            type,
+            dsDataset: `${moduleType}.${dataset}`,
+            metricset: dataset,
             start,
             end,
             clusterUuid,
@@ -66,7 +78,7 @@ export function getLogstashForClusters(
             logstash_uuids: {
               terms: {
                 field: 'logstash_stats.logstash.uuid',
-                size: config.get('monitoring.ui.max_bucket_size'),
+                size: maxBucketSize,
               },
               aggs: {
                 latest_report: {
@@ -125,7 +137,7 @@ export function getLogstashForClusters(
             logstash_versions: {
               terms: {
                 field: 'logstash_stats.logstash.version',
-                size: config.get('monitoring.ui.max_bucket_size'),
+                size: maxBucketSize,
               },
             },
             pipelines_nested: {
@@ -141,7 +153,7 @@ export function getLogstashForClusters(
                 queue_types: {
                   terms: {
                     field: 'logstash_stats.pipelines.queue.type',
-                    size: config.get('monitoring.ui.max_bucket_size'),
+                    size: maxBucketSize,
                   },
                   aggs: {
                     num_pipelines: {
@@ -166,7 +178,7 @@ export function getLogstashForClusters(
                 queue_types: {
                   terms: {
                     field: 'logstash.node.stats.pipelines.queue.type',
-                    size: config.get('monitoring.ui.max_bucket_size'),
+                    size: maxBucketSize,
                   },
                   aggs: {
                     num_pipelines: {

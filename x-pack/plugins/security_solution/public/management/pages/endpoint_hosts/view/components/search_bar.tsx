@@ -61,6 +61,7 @@ export const AdminSearchBar = memo(() => {
             indexPatterns={clonedIndexPatterns}
             timeHistory={timeHistory}
             onQuerySubmit={onQuerySubmit}
+            fillSubmitButton={true}
             isLoading={false}
             iconType="search"
             showFilterBar={false}

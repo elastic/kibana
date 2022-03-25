@@ -9,32 +9,43 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const policyName = 'testPolicy1';
-const repoName = 'test';
+const repoName = 'found-snapshots'; // this repo already exists on cloud
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexLifecycleManagement']);
   const log = getService('log');
   const retry = getService('retry');
   const esClient = getService('es');
+  const security = getService('security');
+  const deployment = getService('deployment');
 
   describe('Home page', function () {
     before(async () => {
-      await esClient.snapshot.createRepository({
-        name: repoName,
-        body: {
-          type: 'fs',
-          settings: {
-            // use one of the values defined in path.repo in test/functional/config.js
-            location: '/tmp/',
+      await security.testUser.setRoles(['manage_ilm']);
+      const isCloud = await deployment.isCloud();
+      if (!isCloud) {
+        await esClient.snapshot.createRepository({
+          name: repoName,
+          body: {
+            type: 'fs',
+            settings: {
+              // use one of the values defined in path.repo in test/functional/config.js
+              location: '/tmp/',
+            },
           },
-        },
-        verify: false,
-      });
+          verify: false,
+        });
+      }
+
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });
     after(async () => {
-      await esClient.snapshot.deleteRepository({ name: repoName });
+      const isCloud = await deployment.isCloud();
+      if (!isCloud) {
+        await esClient.snapshot.deleteRepository({ name: repoName });
+      }
       await esClient.ilm.deleteLifecycle({ name: policyName });
+      await security.testUser.restoreDefaults();
     });
 
     it('Loads the app', async () => {

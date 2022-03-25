@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNodes } from './get_service_nodes';
@@ -22,7 +21,18 @@ const serviceNodesRoute = createApmServerRoute({
     query: t.intersection([kueryRt, rangeRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    serviceNodes: Array<{
+      name: string;
+      cpu: number | null;
+      heapMemory: number | null;
+      hostName: string | null | undefined;
+      nonHeapMemory: number | null;
+      threadCount: number | null;
+    }>;
+  }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
@@ -40,5 +50,4 @@ const serviceNodesRoute = createApmServerRoute({
   },
 });
 
-export const serviceNodeRouteRepository =
-  createApmServerRouteRepository().add(serviceNodesRoute);
+export const serviceNodeRouteRepository = serviceNodesRoute;

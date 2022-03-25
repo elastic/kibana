@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from 'src/core/public/mocks';
 import { homePluginMock } from 'src/plugins/home/public/mocks';
 import { securityMock } from '../../security/public/mocks';
 import { fullStoryApiMock, initializeFullStoryMock } from './plugin.test.mocks';
 import { CloudPlugin, CloudConfigType, loadFullStoryUserId } from './plugin';
 import { Observable, Subject } from 'rxjs';
+import { KibanaExecutionContext } from 'kibana/public';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -24,12 +25,12 @@ describe('Cloud Plugin', () => {
         config = {},
         securityEnabled = true,
         currentUserProps = {},
-        currentAppId$ = undefined,
+        currentContext$ = undefined,
       }: {
         config?: Partial<CloudConfigType>;
         securityEnabled?: boolean;
         currentUserProps?: Record<string, any>;
-        currentAppId$?: Observable<string | undefined>;
+        currentContext$?: Observable<KibanaExecutionContext>;
       }) => {
         const initContext = coreMock.createPluginInitializerContext({
           id: 'cloudId',
@@ -40,6 +41,9 @@ describe('Cloud Plugin', () => {
           full_story: {
             enabled: false,
           },
+          chat: {
+            enabled: false,
+          },
           ...config,
         });
 
@@ -47,11 +51,15 @@ describe('Cloud Plugin', () => {
 
         const coreSetup = coreMock.createSetup();
         const coreStart = coreMock.createStart();
-        if (currentAppId$) {
-          coreStart.application.currentAppId$ = currentAppId$;
+
+        if (currentContext$) {
+          coreStart.executionContext.context$ = currentContext$;
         }
+
         coreSetup.getStartServices.mockResolvedValue([coreStart, {}, undefined]);
+
         const securitySetup = securityMock.createSetup();
+
         securitySetup.authc.getCurrentUser.mockResolvedValue(
           securityMock.createMockAuthenticatedUser(currentUserProps)
         );
@@ -87,44 +95,98 @@ describe('Cloud Plugin', () => {
         });
 
         expect(fullStoryApiMock.identify).toHaveBeenCalledWith(
-          '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',
+          '5ef112cfdae3dea57097bc276e275b2816e73ef2a398dc0ffaf5b6b4e3af2041',
           {
             version_str: 'version',
             version_major_int: -1,
             version_minor_int: -1,
             version_patch_int: -1,
+            org_id_str: 'cloudId',
           }
         );
       });
 
-      it('calls FS.setUserVars everytime an app changes', async () => {
-        const currentAppId$ = new Subject<string | undefined>();
+      it('user hash includes org id', async () => {
+        await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg1' },
+          currentUserProps: {
+            username: '1234',
+          },
+        });
+
+        const hashId1 = fullStoryApiMock.identify.mock.calls[0][0];
+
+        await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg2' },
+          currentUserProps: {
+            username: '1234',
+          },
+        });
+
+        const hashId2 = fullStoryApiMock.identify.mock.calls[1][0];
+
+        expect(hashId1).not.toEqual(hashId2);
+      });
+
+      it('calls FS.setVars everytime an app changes', async () => {
+        const currentContext$ = new Subject<KibanaExecutionContext>();
         const { plugin } = await setupPlugin({
           config: { full_story: { enabled: true, org_id: 'foo' } },
           currentUserProps: {
             username: '1234',
           },
-          currentAppId$,
+          currentContext$,
         });
 
-        expect(fullStoryApiMock.setUserVars).not.toHaveBeenCalled();
-        currentAppId$.next('App1');
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        // takes the app name
+        expect(fullStoryApiMock.setVars).not.toHaveBeenCalled();
+        currentContext$.next({
+          name: 'App1',
+          description: '123',
+        });
+
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
+          pageName: 'App1',
           app_id_str: 'App1',
         });
-        currentAppId$.next();
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
-          app_id_str: 'unknown',
+
+        // context clear
+        currentContext$.next({});
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
+          pageName: 'App1',
+          app_id_str: 'App1',
         });
 
-        currentAppId$.next('App2');
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        // different app
+        currentContext$.next({
+          name: 'App2',
+          page: 'page2',
+          id: '123',
+        });
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
+          pageName: 'App2:page2',
           app_id_str: 'App2',
+          page_str: 'page2',
+          ent_id_str: '123',
         });
 
-        expect(currentAppId$.observers.length).toBe(1);
+        // Back to first app
+        currentContext$.next({
+          name: 'App1',
+          page: 'page3',
+          id: '123',
+        });
+
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
+          pageName: 'App1:page3',
+          app_id_str: 'App1',
+          page_str: 'page3',
+          ent_id_str: '123',
+        });
+
+        expect(currentContext$.observers.length).toBe(1);
         plugin.stop();
-        expect(currentAppId$.observers.length).toBe(0);
+        expect(currentContext$.observers.length).toBe(0);
       });
 
       it('does not call FS.identify when security is not available', async () => {
@@ -212,6 +274,101 @@ describe('Cloud Plugin', () => {
       });
     });
 
+    describe('setupChat', () => {
+      let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
+
+      beforeEach(() => {
+        consoleMock = jest.spyOn(console, 'debug').mockImplementation(() => {});
+      });
+
+      afterEach(() => {
+        consoleMock.mockRestore();
+      });
+
+      const setupPlugin = async ({
+        config = {},
+        securityEnabled = true,
+        currentUserProps = {},
+        isCloudEnabled = true,
+        failHttp = false,
+      }: {
+        config?: Partial<CloudConfigType>;
+        securityEnabled?: boolean;
+        currentUserProps?: Record<string, any>;
+        isCloudEnabled?: boolean;
+        failHttp?: boolean;
+      }) => {
+        const initContext = coreMock.createPluginInitializerContext({
+          id: isCloudEnabled ? 'cloud-id' : null,
+          base_url: 'https://cloud.elastic.co',
+          deployment_url: '/abc123',
+          profile_url: '/profile/alice',
+          organization_url: '/org/myOrg',
+          full_story: {
+            enabled: false,
+          },
+          chat: {
+            enabled: false,
+          },
+          ...config,
+        });
+
+        const plugin = new CloudPlugin(initContext);
+
+        const coreSetup = coreMock.createSetup();
+        const coreStart = coreMock.createStart();
+
+        if (failHttp) {
+          coreSetup.http.get.mockImplementation(() => {
+            throw new Error('HTTP request failed');
+          });
+        }
+
+        coreSetup.getStartServices.mockResolvedValue([coreStart, {}, undefined]);
+
+        const securitySetup = securityMock.createSetup();
+        securitySetup.authc.getCurrentUser.mockResolvedValue(
+          securityMock.createMockAuthenticatedUser(currentUserProps)
+        );
+
+        const setup = plugin.setup(coreSetup, securityEnabled ? { security: securitySetup } : {});
+
+        return { initContext, plugin, setup, coreSetup };
+      };
+
+      it('chatConfig is not retrieved if cloud is not enabled', async () => {
+        const { coreSetup } = await setupPlugin({ isCloudEnabled: false });
+        expect(coreSetup.http.get).not.toHaveBeenCalled();
+      });
+
+      it('chatConfig is not retrieved if security is not enabled', async () => {
+        const { coreSetup } = await setupPlugin({ securityEnabled: false });
+        expect(coreSetup.http.get).not.toHaveBeenCalled();
+      });
+
+      it('chatConfig is not retrieved if chat is enabled but url is not provided', async () => {
+        // @ts-expect-error 2741
+        const { coreSetup } = await setupPlugin({ config: { chat: { enabled: true } } });
+        expect(coreSetup.http.get).not.toHaveBeenCalled();
+      });
+
+      it('chatConfig is not retrieved if internal API fails', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { chat: { enabled: true, chatURL: 'http://chat.elastic.co' } },
+          failHttp: true,
+        });
+        expect(coreSetup.http.get).toHaveBeenCalled();
+        expect(consoleMock).toHaveBeenCalled();
+      });
+
+      it('chatConfig is retrieved if chat is enabled and url is provided', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { chat: { enabled: true, chatURL: 'http://chat.elastic.co' } },
+        });
+        expect(coreSetup.http.get).toHaveBeenCalled();
+      });
+    });
+
     describe('interface', () => {
       const setupPlugin = () => {
         const initContext = coreMock.createPluginInitializerContext({
@@ -221,6 +378,12 @@ describe('Cloud Plugin', () => {
           deployment_url: '/abc123',
           profile_url: '/user/settings/',
           organization_url: '/account/',
+          chat: {
+            enabled: false,
+          },
+          full_story: {
+            enabled: false,
+          },
         });
         const plugin = new CloudPlugin(initContext);
 
@@ -284,6 +447,9 @@ describe('Cloud Plugin', () => {
           full_story: {
             enabled: false,
           },
+          chat: {
+            enabled: false,
+          },
         })
       );
       const coreSetup = coreMock.createSetup();
@@ -304,7 +470,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setHelpSupportUrl).toHaveBeenCalledTimes(1);
       expect(coreStart.chrome.setHelpSupportUrl.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "https://support.elastic.co/",
+          "https://cloud.elastic.co/support",
         ]
       `);
     });

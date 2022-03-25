@@ -15,8 +15,7 @@ export default function ({ getService, getPageObjects }) {
   const pipelinesList = getService('monitoringLogstashPipelines');
   const lsClusterSummaryStatus = getService('monitoringLogstashSummaryStatus');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/116070
-  describe.skip('Logstash pipelines', () => {
+  describe('Logstash pipelines', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
@@ -51,43 +50,36 @@ export default function ({ getService, getPageObjects }) {
 
       await pipelinesList.clickIdCol();
 
-      const pipelinesAll = await pipelinesList.getPipelinesAll();
+      // retry in case the table hasn't had time to re-render
+      await retry.try(async () => {
+        const pipelinesAll = await pipelinesList.getPipelinesAll();
 
-      const tableData = [
-        { id: 'main', eventsEmittedRate: '162.5 e/s', nodeCount: '1' },
-        { id: 'nginx_logs', eventsEmittedRate: '62.5 e/s', nodeCount: '1' },
-        { id: 'test_interpolation', eventsEmittedRate: '0 e/s', nodeCount: '1' },
-        { id: 'tweets_about_labradoodles', eventsEmittedRate: '1.2 e/s', nodeCount: '1' },
-      ];
-
-      // check the all data in the table
-      pipelinesAll.forEach((obj, index) => {
-        expect(pipelinesAll[index].id).to.be(tableData[index].id);
-        expect(pipelinesAll[index].eventsEmittedRate).to.be(tableData[index].eventsEmittedRate);
-        expect(pipelinesAll[index].nodeCount).to.be(tableData[index].nodeCount);
+        expect(pipelinesAll).to.eql([
+          { id: 'main', eventsEmittedRate: '162.5 e/s', nodeCount: '1' },
+          { id: 'nginx_logs', eventsEmittedRate: '62.5 e/s', nodeCount: '1' },
+          { id: 'test_interpolation', eventsEmittedRate: '0 e/s', nodeCount: '1' },
+          { id: 'tweets_about_labradoodles', eventsEmittedRate: '1.2 e/s', nodeCount: '1' },
+        ]);
       });
     });
 
     it('should have Pipelines Table showing correct rows after sorting by Events Emitted Rate Asc', async () => {
       await pipelinesList.clickEventsEmittedRateCol();
 
-      const rows = await pipelinesList.getRows();
-      expect(rows.length).to.be(4);
+      // retry in case the table hasn't had time to re-render
+      await retry.try(async () => {
+        const rows = await pipelinesList.getRows();
 
-      const pipelinesAll = await pipelinesList.getPipelinesAll();
+        expect(rows.length).to.be(4);
 
-      const tableData = [
-        { id: 'test_interpolation', eventsEmittedRate: '0 e/s', nodeCount: '1' },
-        { id: 'tweets_about_labradoodles', eventsEmittedRate: '1.2 e/s', nodeCount: '1' },
-        { id: 'nginx_logs', eventsEmittedRate: '62.5 e/s', nodeCount: '1' },
-        { id: 'main', eventsEmittedRate: '162.5 e/s', nodeCount: '1' },
-      ];
+        const pipelinesAll = await pipelinesList.getPipelinesAll();
 
-      // check the all data in the table
-      pipelinesAll.forEach((obj, index) => {
-        expect(pipelinesAll[index].id).to.be(tableData[index].id);
-        expect(pipelinesAll[index].eventsEmittedRate).to.be(tableData[index].eventsEmittedRate);
-        expect(pipelinesAll[index].nodeCount).to.be(tableData[index].nodeCount);
+        expect(pipelinesAll).to.eql([
+          { id: 'test_interpolation', eventsEmittedRate: '0 e/s', nodeCount: '1' },
+          { id: 'tweets_about_labradoodles', eventsEmittedRate: '1.2 e/s', nodeCount: '1' },
+          { id: 'nginx_logs', eventsEmittedRate: '62.5 e/s', nodeCount: '1' },
+          { id: 'main', eventsEmittedRate: '162.5 e/s', nodeCount: '1' },
+        ]);
       });
     });
 

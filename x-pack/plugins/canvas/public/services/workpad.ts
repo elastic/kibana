@@ -24,11 +24,14 @@ export interface ResolveWorkpadResponse {
   workpad: CanvasWorkpad;
   outcome: SavedObjectsResolveResponse['outcome'];
   aliasId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
+
 export interface CanvasWorkpadService {
   get: (id: string) => Promise<CanvasWorkpad>;
   resolve: (id: string) => Promise<ResolveWorkpadResponse>;
   create: (workpad: CanvasWorkpad) => Promise<CanvasWorkpad>;
+  import: (workpad: CanvasWorkpad) => Promise<CanvasWorkpad>;
   createFromTemplate: (templateId: string) => Promise<CanvasWorkpad>;
   find: (term: string) => Promise<WorkpadFindResponse>;
   remove: (id: string) => Promise<void>;

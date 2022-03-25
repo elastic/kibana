@@ -7,9 +7,17 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,7 +25,13 @@ import { AddDomainLogic } from './add_domain_logic';
 import { ValidationStepPanel } from './validation_step_panel';
 
 export const AddDomainValidation: React.FC = () => {
-  const { addDomainFormInputValue, domainValidationResult } = useValues(AddDomainLogic);
+  const {
+    addDomainFormInputValue,
+    canIgnoreValidationFailure,
+    domainValidationResult,
+    ignoreValidationFailure,
+  } = useValues(AddDomainLogic);
+  const { setIgnoreValidationFailure } = useActions(AddDomainLogic);
 
   return (
     <>
@@ -72,11 +86,44 @@ export const AddDomainValidation: React.FC = () => {
             label={i18n.translate(
               'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.contentVerificationLabel',
               {
-                defaultMessage: 'Content Verification',
+                defaultMessage: 'Content verification',
               }
             )}
           />
         </EuiFlexItem>
+        {canIgnoreValidationFailure && (
+          <EuiFlexItem>
+            <EuiPanel hasShadow={false}>
+              <EuiCheckbox
+                id={`crawler_domain_${addDomainFormInputValue}`}
+                label={
+                  <>
+                    <EuiText size="s">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.ignoreValidationTitle',
+                        {
+                          defaultMessage: 'Ignore validation failures and continue',
+                        }
+                      )}
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    <EuiText color="subdued" size="xs">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.ignoreValidationDescription',
+                        {
+                          defaultMessage:
+                            'The web crawler will be unable to index any content on this domain until the errors above are addressed.',
+                        }
+                      )}
+                    </EuiText>
+                  </>
+                }
+                checked={ignoreValidationFailure}
+                onChange={(e) => setIgnoreValidationFailure(e.target.checked)}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

@@ -9,7 +9,6 @@ import React, { FC, Fragment, useEffect, useMemo, useState, useCallback, useRef 
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
   EuiPageBody,
   EuiPageContentBody,
   EuiPageContentHeader,
@@ -19,8 +18,6 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
@@ -34,7 +31,6 @@ import {
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
 import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
 import { OverallStats } from '../../types/overall_stats';
-import { getActions } from '../../../common/components/field_data_row/action_menu';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
@@ -43,16 +39,16 @@ import { JobFieldType, SavedSearchSavedObject } from '../../../../../common/type
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
-import { OMIT_FIELDS } from '../../../../../common';
+import { OMIT_FIELDS } from '../../../../../common/constants';
 import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
 import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper';
 import { HelpMenu } from '../../../common/components/help_menu';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
-import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
+import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { ResultLink } from '../../../common/components/results_links';
-import { IndexPatternField, IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataView, DataViewField } from '../../../../../../../../src/plugins/data_views/public';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import './_index.scss';
@@ -111,8 +107,9 @@ export const getDefaultDataVisualizerListState = (
 });
 
 export interface IndexDataVisualizerViewProps {
-  currentIndexPattern: IndexPattern;
+  currentDataView: DataView;
   currentSavedSearch: SavedSearchSavedObject | null;
+  currentSessionId?: string;
   additionalLinks?: ResultLink[];
 }
 const restorableDefaults = getDefaultDataVisualizerListState();
@@ -132,7 +129,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { currentIndexPattern, additionalLinks } = dataVisualizerProps;
+  const { currentDataView, additionalLinks, currentSessionId } = dataVisualizerProps;
 
   useEffect(() => {
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
@@ -141,31 +138,31 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   }, [dataVisualizerProps?.currentSavedSearch]);
 
   useEffect(() => {
-    if (!currentIndexPattern.isTimeBased()) {
+    if (!currentDataView.isTimeBased()) {
       toasts.addWarning({
         title: i18n.translate(
-          'xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationTitle',
+          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationTitle',
           {
-            defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
-            values: { indexPatternTitle: currentIndexPattern.title },
+            defaultMessage: 'The data view {dataViewTitle} is not based on a time series',
+            values: { dataViewTitle: currentDataView.title },
           }
         ),
         text: i18n.translate(
-          'xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationDescription',
+          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationDescription',
           {
             defaultMessage: 'Anomaly detection only runs over time-based indices',
           }
         ),
       });
     }
-  }, [currentIndexPattern, toasts]);
+  }, [currentDataView, toasts]);
 
-  const indexPatternFields: IndexPatternField[] = currentIndexPattern.fields;
+  const dataViewFields: DataViewField[] = currentDataView.fields;
 
   const fieldTypes = useMemo(() => {
     // Obtain the list of non metric field types which appear in the index pattern.
     const indexedFieldTypes: JobFieldType[] = [];
-    indexPatternFields.forEach((field) => {
+    dataViewFields.forEach((field) => {
       if (!OMIT_FIELDS.includes(field.name) && field.scripted !== true) {
         const dataVisualizerType: JobFieldType | undefined = kbnTypeToJobType(field);
         if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
@@ -174,7 +171,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       }
     });
     return indexedFieldTypes.sort();
-  }, [indexPatternFields]);
+  }, [dataViewFields]);
 
   const setSearchParams = useCallback(
     (searchParams: {
@@ -229,12 +226,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const input: DataVisualizerGridInput = useMemo(() => {
     return {
-      indexPattern: currentIndexPattern,
+      dataView: currentDataView,
       savedSearch: currentSavedSearch,
+      sessionId: currentSessionId,
       visibleFieldNames,
+      allowEditDataView: true,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndexPattern.id, currentSavedSearch?.id, visibleFieldNames]);
+  }, [currentDataView.id, currentSavedSearch?.id, visibleFieldNames, currentSessionId]);
 
   const {
     configs,
@@ -247,6 +246,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     timefilter,
     setLastRefresh,
     progress,
+    extendedColumns,
   } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
 
   useEffect(() => {
@@ -256,12 +256,12 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       // to make sure new page doesn't have unrelated filters
       data.query.filterManager.removeAll();
     };
-  }, [currentIndexPattern.id, data.query.filterManager]);
+  }, [currentDataView.id, data.query.filterManager]);
 
   useEffect(() => {
     // Force refresh on index pattern change
     setLastRefresh(Date.now());
-  }, [currentIndexPattern.id, setLastRefresh]);
+  }, [currentDataView.id, setLastRefresh]);
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
@@ -281,13 +281,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
 
   const onAddFilter = useCallback(
-    (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
+    (field: DataViewField | string, values: string, operation: '+' | '-') => {
       const newFilters = generateFilters(
         data.query.filterManager,
         field,
         values,
         operation,
-        String(currentIndexPattern.id)
+        String(currentDataView.id)
       );
       if (newFilters) {
         data.query.filterManager.addFilters(newFilters);
@@ -305,7 +305,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           language: searchQueryLanguage,
         },
         data.query.filterManager.getFilters() ?? [],
-        currentIndexPattern,
+        currentDataView,
         uiSettings
       );
 
@@ -317,7 +317,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       });
     },
     [
-      currentIndexPattern,
+      currentDataView,
       data.query.filterManager,
       searchQueryLanguage,
       searchString,
@@ -356,7 +356,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           m[fieldName] = (
             <IndexBasedDataVisualizerExpandedRow
               item={item}
-              indexPattern={currentIndexPattern}
+              dataView={currentDataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={onAddFilter}
             />
@@ -365,7 +365,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentIndexPattern, searchQueryLanguage, searchString, onAddFilter]
+    [currentDataView, searchQueryLanguage, searchString, onAddFilter]
   );
 
   // Some actions open up fly-out or popup
@@ -381,139 +381,118 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     };
   }, []);
 
-  // Inject custom action column for the index based visualizer
-  // Hide the column completely if no access to any of the plugins
-  const extendedColumns = useMemo(() => {
-    const actions = getActions(
-      currentIndexPattern,
-      services,
-      {
-        searchQueryLanguage,
-        searchString,
-      },
-      actionFlyoutRef
-    );
-    if (!Array.isArray(actions) || actions.length < 1) return;
-
-    const actionColumn: EuiTableActionsColumnType<FieldVisConfig> = {
-      name: (
-        <FormattedMessage
-          id="xpack.dataVisualizer.index.dataGrid.actionsColumnLabel"
-          defaultMessage="Actions"
-        />
-      ),
-      actions,
-      width: '100px',
-    };
-
-    return [actionColumn];
-  }, [currentIndexPattern, services, searchQueryLanguage, searchString]);
-
+  useEffect(() => {
+    // Update data query manager if input string is updated
+    data?.query.queryString.setQuery({
+      query: searchString,
+      language: searchQueryLanguage,
+    });
+  }, [data, searchQueryLanguage, searchString]);
   const helpLink = docLinks.links.ml.guide;
 
   return (
     <Fragment>
-      <EuiPage data-test-subj="dataVisualizerIndexPage">
-        <EuiPageBody>
+      <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <EuiPageContentHeader className="dataVisualizerPageHeader">
+              <EuiPageContentHeaderSection>
+                <div className="dataViewTitleHeader">
+                  <EuiTitle>
+                    <h1>{currentDataView.title}</h1>
+                  </EuiTitle>
+                  <DataVisualizerDataViewManagement
+                    currentDataView={currentDataView}
+                    useNewFieldsApi={true}
+                  />
+                </div>
+              </EuiPageContentHeaderSection>
+
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="flexEnd"
+                gutterSize="s"
+                data-test-subj="dataVisualizerTimeRangeSelectorSection"
+              >
+                {currentDataView.timeFieldName !== undefined && (
+                  <EuiFlexItem grow={false}>
+                    <FullTimeRangeSelector
+                      dataView={currentDataView}
+                      query={undefined}
+                      disabled={false}
+                      timefilter={timefilter}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <DatePickerWrapper />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPageContentHeader>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiPageContentBody>
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
-              <EuiPageContentHeader className="dataVisualizerPageHeader">
-                <EuiPageContentHeaderSection>
-                  <div className="dataViewTitleHeader">
-                    <EuiTitle>
-                      <h1>{currentIndexPattern.title}</h1>
-                    </EuiTitle>
-                    <DataVisualizerIndexPatternManagement
-                      currentIndexPattern={currentIndexPattern}
-                      useNewFieldsApi={true}
+              <EuiPanel hasShadow={false} hasBorder>
+                {overallStats?.totalCount !== undefined && (
+                  <EuiFlexItem grow={true}>
+                    <DocumentCountContent
+                      documentCountStats={documentCountStats}
+                      totalCount={overallStats.totalCount}
                     />
-                  </div>
-                </EuiPageContentHeaderSection>
-
-                <EuiFlexGroup
-                  alignItems="center"
-                  justifyContent="flexEnd"
-                  gutterSize="s"
-                  data-test-subj="dataVisualizerTimeRangeSelectorSection"
-                >
-                  {currentIndexPattern.timeFieldName !== undefined && (
-                    <EuiFlexItem grow={false}>
-                      <FullTimeRangeSelector
-                        indexPattern={currentIndexPattern}
-                        query={undefined}
-                        disabled={false}
-                        timefilter={timefilter}
-                      />
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <DatePickerWrapper />
                   </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPageContentHeader>
+                )}
+                <SearchPanel
+                  dataView={currentDataView}
+                  searchString={searchString}
+                  searchQuery={searchQuery}
+                  searchQueryLanguage={searchQueryLanguage}
+                  setSearchParams={setSearchParams}
+                  samplerShardSize={samplerShardSize}
+                  setSamplerShardSize={setSamplerShardSize}
+                  overallStats={overallStats}
+                  indexedFieldTypes={fieldTypes}
+                  setVisibleFieldTypes={setVisibleFieldTypes}
+                  visibleFieldTypes={visibleFieldTypes}
+                  visibleFieldNames={visibleFieldNames}
+                  setVisibleFieldNames={setVisibleFieldNames}
+                  showEmptyFields={showEmptyFields}
+                  onAddFilter={onAddFilter}
+                />
+                <EuiSpacer size={'m'} />
+                <FieldCountPanel
+                  showEmptyFields={showEmptyFields}
+                  toggleShowEmptyFields={toggleShowEmptyFields}
+                  fieldsCountStats={fieldsCountStats}
+                  metricsStats={metricsStats}
+                />
+                <EuiSpacer size={'m'} />
+                <EuiProgress value={progress} max={100} size={'xs'} />
+                <DataVisualizerTable<FieldVisConfig>
+                  items={configs}
+                  pageState={dataVisualizerListState}
+                  updatePageState={setDataVisualizerListState}
+                  getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+                  extendedColumns={extendedColumns}
+                  loading={progress < 100}
+                  showPreviewByDefault={dataVisualizerListState.showDistributions ?? true}
+                  onChange={setDataVisualizerListState}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
+              <ActionsPanel
+                dataView={currentDataView}
+                searchQueryLanguage={searchQueryLanguage}
+                searchString={searchString}
+                additionalLinks={additionalLinks ?? []}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <EuiPageContentBody>
-            <EuiFlexGroup gutterSize="m">
-              <EuiFlexItem>
-                <EuiPanel>
-                  {overallStats?.totalCount !== undefined && (
-                    <EuiFlexItem grow={true}>
-                      <DocumentCountContent
-                        documentCountStats={documentCountStats}
-                        totalCount={overallStats.totalCount}
-                      />
-                    </EuiFlexItem>
-                  )}
-                  <SearchPanel
-                    indexPattern={currentIndexPattern}
-                    searchString={searchString}
-                    searchQuery={searchQuery}
-                    searchQueryLanguage={searchQueryLanguage}
-                    setSearchParams={setSearchParams}
-                    samplerShardSize={samplerShardSize}
-                    setSamplerShardSize={setSamplerShardSize}
-                    overallStats={overallStats}
-                    indexedFieldTypes={fieldTypes}
-                    setVisibleFieldTypes={setVisibleFieldTypes}
-                    visibleFieldTypes={visibleFieldTypes}
-                    visibleFieldNames={visibleFieldNames}
-                    setVisibleFieldNames={setVisibleFieldNames}
-                    showEmptyFields={showEmptyFields}
-                    onAddFilter={onAddFilter}
-                  />
-                  <EuiSpacer size={'m'} />
-                  <FieldCountPanel
-                    showEmptyFields={showEmptyFields}
-                    toggleShowEmptyFields={toggleShowEmptyFields}
-                    fieldsCountStats={fieldsCountStats}
-                    metricsStats={metricsStats}
-                  />
-                  <EuiSpacer size={'m'} />
-                  <EuiProgress value={progress} max={100} size={'xs'} />
-                  <DataVisualizerTable<FieldVisConfig>
-                    items={configs}
-                    pageState={dataVisualizerListState}
-                    updatePageState={setDataVisualizerListState}
-                    getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
-                    extendedColumns={extendedColumns}
-                    loading={progress < 100}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
-                <ActionsPanel
-                  indexPattern={currentIndexPattern}
-                  searchQueryLanguage={searchQueryLanguage}
-                  searchString={searchString}
-                  additionalLinks={additionalLinks ?? []}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentBody>
-        </EuiPageBody>
-      </EuiPage>
+        </EuiPageContentBody>
+      </EuiPageBody>
 
       <HelpMenu docLink={helpLink} />
     </Fragment>

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps, useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
@@ -22,10 +22,14 @@ interface Props {
   sourcePipeline?: Pipeline;
 }
 
+interface LocationState {
+  sourcePipeline?: Pipeline;
+}
+
 export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
-  history,
   sourcePipeline,
 }) => {
+  const history = useHistory<LocationState>();
   const { services } = useKibana();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -61,7 +65,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
     }
 
     if (history.location.state?.sourcePipeline) {
-      return history.location.state.sourcePipeline as Pipeline;
+      return history.location.state.sourcePipeline;
     }
   }, [sourcePipeline, history]);
 
@@ -81,7 +85,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={services.documentation.getPutPipelineApiUrl()}
+            href={services.documentation.getCreatePipelineUrl()}
             target="_blank"
             iconType="help"
             data-test-subj="documentationLink"

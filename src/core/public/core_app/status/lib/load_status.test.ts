@@ -229,13 +229,23 @@ describe('response processing', () => {
     expect(names).toEqual([
       'Heap total',
       'Heap used',
-      'Load',
-      'Response time avg',
-      'Response time max',
       'Requests per second',
+      'Load',
+      'Delay',
+      'Response time avg',
     ]);
-
     const values = data.metrics.map((m) => m.value);
-    expect(values).toEqual([1000000, 100, [4.1, 2.1, 0.1], 4000, 8000, 400]);
+    expect(values).toEqual([1000000, 100, 400, [4.1, 2.1, 0.1], 1, 4000]);
+  });
+
+  test('adds meta details to Load, Delay and Response time', async () => {
+    const data = await loadStatus({ http, notifications });
+    const metricNames = data.metrics.filter((met) => met.meta);
+    expect(metricNames.map((item) => item.name)).toEqual(['Load', 'Delay', 'Response time avg']);
+    expect(metricNames.map((item) => item.meta!.description)).toEqual([
+      'Load interval',
+      'Percentiles',
+      'Response time max',
+    ]);
   });
 });

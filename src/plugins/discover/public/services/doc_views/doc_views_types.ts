@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ComponentType } from 'react';
-
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IndexPattern } from '../../../../data/public';
-
-export type ElasticSearchHit<T = unknown> = estypes.SearchHit<T>;
+import { DataView, DataViewField } from '../../../../data_views/public';
+import { ElasticSearchHit } from '../../types';
+import { IgnoredReason } from '../../utils/get_ignored_reason';
 
 export interface FieldMapping {
   filterable?: boolean;
@@ -29,14 +26,14 @@ export type DocViewFilterFn = (
 ) => void;
 
 export interface DocViewRenderProps {
+  hit: ElasticSearchHit;
+  indexPattern: DataView;
   columns?: string[];
   filter?: DocViewFilterFn;
-  hit: ElasticSearchHit;
-  indexPattern: IndexPattern;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }
-export type DocViewerComponent = ComponentType<DocViewRenderProps>;
+export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (
   domeNode: HTMLDivElement,
   renderProps: DocViewRenderProps
@@ -67,3 +64,23 @@ export type DocView = DocViewInput & {
 };
 
 export type DocViewInputFn = () => DocViewInput;
+
+export interface FieldRecordLegacy {
+  action: {
+    isActive: boolean;
+    onFilter?: DocViewFilterFn;
+    onToggleColumn: (field: string) => void;
+    flattenedField: unknown;
+  };
+  field: {
+    displayName: string;
+    field: string;
+    scripted: boolean;
+    fieldType?: string;
+    fieldMapping?: DataViewField;
+  };
+  value: {
+    formattedValue: string;
+    ignored?: IgnoredReason;
+  };
+}

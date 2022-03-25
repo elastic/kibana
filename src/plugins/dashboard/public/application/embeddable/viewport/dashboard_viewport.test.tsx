@@ -11,7 +11,7 @@ import React from 'react';
 import { skip } from 'rxjs/operators';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
@@ -27,6 +27,7 @@ import {
   CONTACT_CARD_EMBEDDABLE,
 } from '../../../../../embeddable/public/lib/test_samples';
 import { getStubPluginServices } from '../../../../../presentation_util/public';
+import { screenshotModePluginMock } from '../../../../../screenshot_mode/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;
 const presentationUtil = getStubPluginServices();
@@ -48,6 +49,7 @@ function getProps(props?: Partial<DashboardViewportProps>): {
     application: applicationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreMock.createStart().http,
+    theme: coreMock.createStart().theme,
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
       getEmbeddablePanel: jest.fn(),
@@ -65,6 +67,7 @@ function getProps(props?: Partial<DashboardViewportProps>): {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
     presentationUtil,
+    screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
 
   const input = getSampleDashboardInput({

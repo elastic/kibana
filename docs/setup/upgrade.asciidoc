@@ -1,107 +1,72 @@
 [[upgrade]]
 == Upgrade {kib}
 
-You can always upgrade to the latest patch release or from one minor version 
-to another within the same major version series.
+To upgrade from 7.16.0 or earlier to {version},
+**you must first upgrade to {prev-major-last}**, which enables you to use the *Upgrade Assistant* to
+{stack-ref}/upgrading-elastic-stack.html#prepare-to-upgrade[prepare for the upgrade].
+Before you upgrade, you must resolve all critical issues identified by the *Upgrade Assistant*.
 
-For major version upgrades:
+Rolling upgrades are unsupported in {kib}. To upgrade,
+you must shut down all {kib} instances, install the new software, and restart {kib}.
+Upgrading while older {kib} instances are running can cause data loss or upgrade failures.
 
-. Upgrade to the last minor version released before the new major version.
-. Use the Upgrade Assistant to determine what changes you need to make before the major version upgrade.
-. When you've addressed all the critical issues, upgrade {es} and then upgrade {kib}.
+[WARNING]
+====
+When required, {kib} automatically migrates <<saved-object-migrations, saved objects>>.
+In case of an upgrade failure, you can roll back to an
+earlier version of {kib}. To roll back, you **must** have a
+{ref}/snapshot-restore.html[backup snapshot] that includes the `kibana` feature
+state. By default, snapshots include the `kibana` feature state.
+====
 
-IMPORTANT: You can upgrade to pre-release versions of 8.0 for testing, 
-but upgrading from a pre-release to the final GA version is not supported.
-Pre-releases should only be used for testing in a temporary environment.
+For more information about upgrading,
+refer to {stack-ref}/upgrading-elastic-stack.html[Upgrading to Elastic {version}.]
 
-[discrete]
-[[upgrade-paths]]
-=== Recommended upgrade paths to 8.0
-
-[cols="<1,3",options="header",]
-|====
-|Upgrading from   
-|Upgrade path 
-
-|7.16
-|Upgrade to 8.0
-
-|6.8–7.15
-a|
-
-. Upgrade to 7.16
-. Upgrade to 8.0
-
-|6.0–6.7
-a|
-
-. Upgrade to 6.8
-. Upgrade to 7.16
-. Upgrade to 8.0
-|====
+IMPORTANT: You can upgrade to pre-release versions for testing,
+but upgrading from a pre-release to the General Available version is unsupported.
+You should use pre-release versions only for testing in a temporary environment.
 
 [float]
-[[upgrade-before-you-begin]]
-=== Before you begin
+=== Upgrading multiple {kib} instances
+When upgrading several {kib} instances connected to the same {es} cluster,
+ensure that all outdated instances are shut down before starting the upgrade.
 
-WARNING: {kib} automatically runs upgrade migrations when required. To roll back to an earlier version in case of an upgrade failure, you **must** have a {ref}/snapshot-restore.html[backup snapshot] available. This snapshot must include the `kibana` feature state or all `kibana*` indices. For more information see <<upgrade-migrations, upgrade migrations>>.
+Rolling upgrades are unsupported in {kib}. However, when outdated instances are shut down, you can start all upgraded instances in parallel,
+which allows all instances to participate in the upgrade migration in parallel.
 
-Before you upgrade {kib}:
-
-* Consult the <<breaking-changes,breaking changes>>.
-* {ref}/snapshots-take-snapshot.html[Take a snapshot] of your data. To roll back to an earlier version, the snapshot must include the `kibana` feature state or all `.kibana*` indices. 
-* Although not a requirement for rollbacks, we recommend taking a snapshot of all {kib} indices created by the plugins you use such as the `.reporting*` indices created by the reporting plugin.  
-* Before you upgrade production servers, test the upgrades in a dev environment.
-* See <<preventing-migration-failures, preventing migration failures>> for common reasons upgrades fail and how to prevent these.
-* If you are using custom plugins, check that a compatible version is
-  available.
-* Shut down all {kib} instances. Running more than one {kib} version against
-  the same Elasticseach index is unsupported. Upgrading while older {kib}
-  instances are running can cause data loss or upgrade failures.
-  
-NOTE: {kib} logging system may have changed, depending on your target version. For details, see <<logging-configuration, Configure logging>>.
-
-To identify the changes you need to make to upgrade, and to enable you to
-perform an Elasticsearch rolling upgrade with no downtime, you must upgrade to
-6.7 before you upgrade to 7.0.
-
-For a comprehensive overview of the upgrade process, refer to
-*{stack-ref}/upgrading-elastic-stack.html[Upgrading the Elastic Stack]*.
+For large deployments with more than 10 {kib} instances, and more than 10,000 saved objects,
+you can reduce the upgrade downtime by bringing up a single {kib} instance and waiting for it to
+complete the upgrade migration before bringing up the remaining instances.
 
 [float]
-[[upgrade-5x-earlier]]
-=== Upgrade from 5.x or earlier
-{es} can read indices created in the previous major version. Before you upgrade
-to 7.0.0, you must reindex or delete any indices created in 5.x or earlier.
-For more information, refer to
-{stack-ref}/upgrading-elastic-stack.html[Upgrading the Elastic Stack].
+[[preventing-migration-failures]]
+=== Preparing for migration
 
-When your reindex is complete, follow the <<upgrade-standard, Standard upgrade>>
-instructions.
+Take these extra steps to ensure you are ready for migration.
 
 [float]
-[[upgrade-6x]]
-=== Upgrade from 6.x
+==== Ensure your {es} cluster is healthy
+Problems with your {es} cluster can prevent {kib} upgrades from succeeding. Ensure that your cluster has:
 
-The recommended path is to upgrade to 6.8 before upgrading to 7.0. This makes it
-easier to identify the required changes, and enables you to use the Upgrade
-Assistant to prepare for your upgrade to 7.0.
-
-TIP: The ability to import {kib} 6.x saved searches, visualizations, and
-dashboards is supported.
+ * Enough free disk space, at least twice the amount of storage taken up by the `.kibana` and `.kibana_task_manager` indices
+ * Sufficient heap size
+ * A "green" cluster status
 
 [float]
-[[upgrade-67]]
-=== Upgrade from 6.8
-To help you prepare for your upgrade to 7.0, 6.8 includes an https://www.elastic.co/guide/en/kibana/6.8/upgrade-assistant.html[Upgrade Assistant]
-To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
+==== Ensure that all {kib} instances are the same
+When you perform an upgrade migration of different {kib} versions, the migration can fail.
+Ensure that all {kib} instances are running the same version, configuration, and plugins.
 
-After you have addressed any issues that were identified by the Upgrade
-Assistant, <<upgrade-standard,upgrade to 7.0>>.
+[float]
+==== Back up your data
+Be sure to have a {ref}/snapshot-restore.html[snapshot] of all your data before attempting a migration.
+If something goes wrong during migration, you can restore from the snapshot and try again.
+
+Review the <<resolve-migrations-failures,common causes of {kib} upgrade failures>> and how to prevent them.
 
 
-include::upgrade/upgrade-standard.asciidoc[]
+include::upgrade/saved-objects-migration.asciidoc[]
 
-include::upgrade/upgrade-migrations.asciidoc[]
+include::upgrade/resolving-migration-failures.asciidoc[]
 
-include::upgrade/logging-configuration-changes.asciidoc[]
+include::upgrade/rollback-migration.asciidoc[]

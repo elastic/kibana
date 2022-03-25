@@ -6,6 +6,7 @@
  */
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../../../services';
@@ -44,6 +45,7 @@ describe('EPM install', () => {
     const templatePriorityDatasetIsPrefixUnset = 200;
     await installTemplate({
       esClient,
+      logger: loggerMock.create(),
       fields,
       dataStream: dataStreamDatasetIsPrefixUnset,
       packageVersion: pkg.version,
@@ -61,9 +63,7 @@ describe('EPM install', () => {
 
   it('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to false', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClient.indices.getIndexTemplate.mockImplementation(() =>
-      elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] })
-    );
+    esClient.indices.getIndexTemplate.mockResponse({ index_templates: [] });
 
     const fields: Field[] = [];
     const dataStreamDatasetIsPrefixFalse = {
@@ -84,6 +84,7 @@ describe('EPM install', () => {
     const templatePriorityDatasetIsPrefixFalse = 200;
     await installTemplate({
       esClient,
+      logger: loggerMock.create(),
       fields,
       dataStream: dataStreamDatasetIsPrefixFalse,
       packageVersion: pkg.version,
@@ -101,9 +102,7 @@ describe('EPM install', () => {
 
   it('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to true', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClient.indices.getIndexTemplate.mockImplementation(() =>
-      elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] })
-    );
+    esClient.indices.getIndexTemplate.mockResponse({ index_templates: [] });
 
     const fields: Field[] = [];
     const dataStreamDatasetIsPrefixTrue = {
@@ -124,6 +123,7 @@ describe('EPM install', () => {
     const templatePriorityDatasetIsPrefixTrue = 150;
     await installTemplate({
       esClient,
+      logger: loggerMock.create(),
       fields,
       dataStream: dataStreamDatasetIsPrefixTrue,
       packageVersion: pkg.version,
@@ -141,20 +141,19 @@ describe('EPM install', () => {
 
   it('tests installPackage remove the aliases property if the property existed', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    // @ts-expect-error not full interface
-    esClient.indices.getIndexTemplate.mockImplementation(() =>
-      elasticsearchServiceMock.createSuccessTransportRequestPromise({
-        index_templates: [
-          {
-            name: 'metrics-package.dataset',
-            index_template: {
-              index_patterns: ['metrics-package.dataset-*'],
-              template: { aliases: {} },
-            },
+
+    esClient.indices.getIndexTemplate.mockResponse({
+      index_templates: [
+        {
+          name: 'metrics-package.dataset',
+          // @ts-expect-error not full interface
+          index_template: {
+            index_patterns: ['metrics-package.dataset-*'],
+            template: { aliases: {} },
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     const fields: Field[] = [];
     const dataStreamDatasetIsPrefixUnset = {
@@ -174,6 +173,7 @@ describe('EPM install', () => {
     const templatePriorityDatasetIsPrefixUnset = 200;
     await installTemplate({
       esClient,
+      logger: loggerMock.create(),
       fields,
       dataStream: dataStreamDatasetIsPrefixUnset,
       packageVersion: pkg.version,

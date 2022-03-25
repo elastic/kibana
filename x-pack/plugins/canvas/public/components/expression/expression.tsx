@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, MutableRefObject, useRef } from 'react';
+import React, { FC, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiPanel,
@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { Shortcuts } from 'react-shortcuts';
 
+import { ExpressionInputEditorRef } from 'src/plugins/presentation_util/public';
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { ExpressionFunction } from '../../../types';
@@ -58,15 +59,11 @@ const strings = {
     }),
 };
 
-const shortcut = (
-  ref: MutableRefObject<ExpressionInput | null>,
-  cmd: string,
-  callback: () => void
-) => (
+const shortcut = (ref: ExpressionInputEditorRef, cmd: string, callback: () => void) => (
   <Shortcuts
     name="EXPRESSION"
     handler={(command: string) => {
-      const isInputActive = ref.current && ref.current.editor && ref.current.editor.hasTextFocus();
+      const isInputActive = ref.current && ref.current && ref.current.hasTextFocus();
       if (isInputActive && command === cmd) {
         callback();
       }
@@ -98,7 +95,7 @@ export const Expression: FC<Props> = ({
   isCompact,
   toggleCompactView,
 }) => {
-  const refExpressionInput = useRef<null | ExpressionInput>(null);
+  const refExpressionInput: ExpressionInputEditorRef = useRef(null);
 
   const handleRun = () => {
     setExpression(formState.expression);
@@ -124,12 +121,12 @@ export const Expression: FC<Props> = ({
       {/* Error code below is to pass a non breaking space so the editor does not jump */}
 
       <ExpressionInput
-        ref={refExpressionInput}
         isCompact={isCompact}
-        functionDefinitions={functionDefinitions}
+        expressionFunctions={functionDefinitions}
         error={error ? error : `\u00A0`}
-        value={formState.expression}
+        expression={formState.expression}
         onChange={updateValue}
+        editorRef={refExpressionInput}
       />
       <div className="canvasExpression__settings">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

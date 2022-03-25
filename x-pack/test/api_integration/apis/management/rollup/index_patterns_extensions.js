@@ -43,7 +43,7 @@ export default function ({ getService }) {
             { sort: false }
           )}`;
           ({ body } = await supertest.get(uri).expect(404));
-          expect(body.message).to.contain('No indices match pattern "foo"');
+          expect(body.message).to.contain('No indices match "foo"');
         });
       });
 

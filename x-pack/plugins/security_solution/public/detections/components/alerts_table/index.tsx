@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import type { Filter } from '@kbn/es-query';
+import { APP_ID } from '../../../../common/constants';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
@@ -24,7 +25,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
-import { useKibana } from '../../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import * as i18nCommon from '../../../common/translations';
@@ -40,9 +41,7 @@ import { updateAlertStatusAction } from './actions';
 import { AditionalFiltersAction, AlertsUtilityBar } from './alerts_utility_bar';
 import {
   alertsDefaultModel,
-  alertsDefaultModelRuleRegistry,
   buildAlertStatusFilter,
-  buildAlertStatusFilterRuleRegistry,
   requiredFieldsForActions,
 } from './default_config';
 import { buildTimeRangeFilter } from './helpers';
@@ -100,14 +99,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     browserFields,
     indexPattern: indexPatterns,
-    loading: indexPatternsLoading,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
-  // TODO: Once we are past experimental phase this code should be removed
-  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
   const ACTION_BUTTON_COUNT = 4;
 
   const getGlobalQuery = useCallback(
@@ -247,14 +243,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       refetchQuery: inputsModel.Refetch,
       { status, selectedStatus }: UpdateAlertsStatusProps
     ) => {
-      // TODO: Once we are past experimental phase this code should be removed
-      const currentStatusFilter = ruleRegistryEnabled
-        ? buildAlertStatusFilterRuleRegistry(status)
-        : buildAlertStatusFilter(status);
-
       await updateAlertStatusAction({
         query: showClearSelectionAction
-          ? getGlobalQuery(currentStatusFilter)?.filterQuery
+          ? getGlobalQuery(buildAlertStatusFilter(status))?.filterQuery
           : undefined,
         alertIds: Object.keys(selectedEventIds),
         selectedStatus,
@@ -273,7 +264,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       showClearSelectionAction,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
-      ruleRegistryEnabled,
     ]
   );
 
@@ -316,34 +306,35 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ]
   );
 
-  const additionalFiltersComponent = (
-    <AditionalFiltersAction
-      areEventsLoading={loadingEventIds.length > 0}
-      onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
-      showBuildingBlockAlerts={showBuildingBlockAlerts}
-      onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
-      showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-    />
+  const additionalFiltersComponent = useMemo(
+    () => (
+      <AditionalFiltersAction
+        areEventsLoading={loadingEventIds.length > 0}
+        onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+        showBuildingBlockAlerts={showBuildingBlockAlerts}
+        onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
+        showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+      />
+    ),
+    [
+      loadingEventIds.length,
+      onShowBuildingBlockAlertsChanged,
+      onShowOnlyThreatIndicatorAlertsChanged,
+      showBuildingBlockAlerts,
+      showOnlyThreatIndicatorAlerts,
+    ]
   );
 
   const defaultFiltersMemo = useMemo(() => {
-    // TODO: Once we are past experimental phase this code should be removed
-    const alertStatusFilter = ruleRegistryEnabled
-      ? buildAlertStatusFilterRuleRegistry(filterGroup)
-      : buildAlertStatusFilter(filterGroup);
+    const alertStatusFilter = buildAlertStatusFilter(filterGroup);
 
     if (isEmpty(defaultFilters)) {
       return alertStatusFilter;
     } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
       return [...defaultFilters, ...alertStatusFilter];
     }
-  }, [defaultFilters, filterGroup, ruleRegistryEnabled]);
+  }, [defaultFilters, filterGroup]);
   const { filterManager } = useKibana().services.data.query;
-
-  // TODO: Once we are past experimental phase this code should be removed
-  const defaultTimelineModel = ruleRegistryEnabled
-    ? alertsDefaultModelRuleRegistry
-    : alertsDefaultModel;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
@@ -359,7 +350,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             : c
         ),
         documentType: i18n.ALERTS_DOCUMENT_TYPE,
-        excludedRowRendererIds: defaultTimelineModel.excludedRowRendererIds as RowRendererId[],
+        excludedRowRendererIds: alertsDefaultModel.excludedRowRendererIds as RowRendererId[],
         filterManager,
         footerText: i18n.TOTAL_COUNT_OF_ALERTS,
         id: timelineId,
@@ -370,33 +361,38 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         showCheckboxes: true,
       })
     );
-  }, [dispatch, defaultTimelineModel, filterManager, tGridEnabled, timelineId]);
+  }, [dispatch, filterManager, tGridEnabled, timelineId]);
 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
-  if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
+  const casesPermissions = useGetUserCasesPermissions();
+  const CasesContext = kibana.services.cases.ui.getCasesContext();
+
+  if (loading || isEmpty(selectedPatterns)) {
     return null;
   }
 
   return (
-    <StatefulEventsViewer
-      additionalFilters={additionalFiltersComponent}
-      currentFilter={filterGroup}
-      defaultCellActions={defaultCellActions}
-      defaultModel={defaultTimelineModel}
-      end={to}
-      entityType="events"
-      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
-      id={timelineId}
-      leadingControlColumns={leadingControlColumns}
-      onRuleChange={onRuleChange}
-      pageFilters={defaultFiltersMemo}
-      renderCellValue={RenderCellValue}
-      rowRenderers={defaultRowRenderers}
-      scopeId={SourcererScopeName.detections}
-      start={from}
-      utilityBar={utilityBarCallback}
-    />
+    <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
+      <StatefulEventsViewer
+        additionalFilters={additionalFiltersComponent}
+        currentFilter={filterGroup}
+        defaultCellActions={defaultCellActions}
+        defaultModel={alertsDefaultModel}
+        end={to}
+        entityType="events"
+        hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
+        id={timelineId}
+        leadingControlColumns={leadingControlColumns}
+        onRuleChange={onRuleChange}
+        pageFilters={defaultFiltersMemo}
+        renderCellValue={RenderCellValue}
+        rowRenderers={defaultRowRenderers}
+        scopeId={SourcererScopeName.detections}
+        start={from}
+        utilityBar={utilityBarCallback}
+      />
+    </CasesContext>
   );
 };
 

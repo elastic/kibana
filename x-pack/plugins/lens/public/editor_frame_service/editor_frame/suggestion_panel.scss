@@ -88,3 +88,7 @@
   text-align: center;
   flex-grow: 0;
 }
+
+.lnsSuggestionPanel__applyChangesPrompt {
+  height: $lnsSuggestionHeight;
+}

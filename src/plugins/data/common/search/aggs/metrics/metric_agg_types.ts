@@ -27,6 +27,7 @@ export enum METRIC_TYPES {
   SERIAL_DIFF = 'serial_diff',
   SUM = 'sum',
   TOP_HITS = 'top_hits',
+  TOP_METRICS = 'top_metrics',
   PERCENTILES = 'percentiles',
   PERCENTILE_RANKS = 'percentile_ranks',
   STD_DEV = 'std_dev',

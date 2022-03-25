@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../../../saved_objects/public';
 import { SavedSearch, SaveSavedSearchOptions } from '../../../../services/saved_searches';
-import { IndexPattern } from '../../../../../../data/common';
+import { DataView } from '../../../../../../data_views/public';
 import { DiscoverServices } from '../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
@@ -24,7 +24,7 @@ async function saveDataSource({
   services,
   state,
 }: {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
@@ -89,7 +89,7 @@ export async function onSaveSearch({
   services,
   state,
 }: {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;

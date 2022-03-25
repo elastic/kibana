@@ -7,7 +7,7 @@
  */
 
 import { searchSourceCommonMock } from '../../../common/search/search_source/mocks';
-import { ISearchStart } from '../types';
+import type { ISearchStart } from '../types';
 
 function createStartContract(): jest.Mocked<ISearchStart['searchSource']> {
   return searchSourceCommonMock;

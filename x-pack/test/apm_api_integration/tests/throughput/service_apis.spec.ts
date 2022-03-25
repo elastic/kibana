@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
-import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -101,35 +100,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   }
 
-  let throughputMetricValues: PromiseReturnType<typeof getThroughputValues>;
-  let throughputTransactionValues: PromiseReturnType<typeof getThroughputValues>;
+  let throughputMetricValues: Awaited<ReturnType<typeof getThroughputValues>>;
+  let throughputTransactionValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
   registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
       before(async () => {
-        const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
-          'instance-a'
-        );
-        const serviceGoDevInstance = service(serviceName, 'development', 'go').instance(
-          'instance-b'
-        );
+        const serviceGoProdInstance = apm
+          .service(serviceName, 'production', 'go')
+          .instance('instance-a');
+        const serviceGoDevInstance = apm
+          .service(serviceName, 'development', 'go')
+          .instance('instance-b');
+
         await synthtraceEsClient.index([
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
-            .flatMap((timestamp) =>
+            .spans((timestamp) =>
               serviceGoProdInstance
                 .transaction('GET /api/product/list')
                 .duration(1000)
                 .timestamp(timestamp)
                 .serialize()
             ),
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_DEV_RATE)
-            .flatMap((timestamp) =>
+            .spans((timestamp) =>
               serviceGoDevInstance
                 .transaction('GET /api/product/:id')
                 .duration(1000)

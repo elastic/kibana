@@ -60,35 +60,31 @@ export type YamlCodeEditorWithPlaceholderProps = Pick<CodeEditorProps, 'value' |
   disabled?: boolean;
 };
 
-export const YamlCodeEditorWithPlaceholder: React.FunctionComponent<YamlCodeEditorWithPlaceholderProps> =
-  (props) => {
-    const { placeholder, disabled, ...editorProps } = props;
+export const YamlCodeEditorWithPlaceholder: React.FunctionComponent<
+  YamlCodeEditorWithPlaceholderProps
+> = (props) => {
+  const { placeholder, disabled, ...editorProps } = props;
 
-    if (disabled) {
-      return (
-        <EuiCodeBlock
-          style={{ height: '116px' }}
-          language="yaml"
-          isCopyable={false}
-          paddingSize="s"
-        >
-          <pre>{editorProps.value}</pre>
-        </EuiCodeBlock>
-      );
-    }
-
+  if (disabled) {
     return (
-      <CodeEditorContainer>
-        <CodeEditor
-          languageId="yaml"
-          width="100%"
-          height="116px"
-          options={CODE_EDITOR_OPTIONS}
-          {...editorProps}
-        />
-        {(!editorProps.value || editorProps.value === '') && (
-          <CodeEditorPlaceholder>{placeholder}</CodeEditorPlaceholder>
-        )}
-      </CodeEditorContainer>
+      <EuiCodeBlock style={{ height: '116px' }} language="yaml" isCopyable={false} paddingSize="s">
+        <pre>{editorProps.value}</pre>
+      </EuiCodeBlock>
     );
-  };
+  }
+
+  return (
+    <CodeEditorContainer>
+      <CodeEditor
+        languageId="yaml"
+        width="100%"
+        height="116px"
+        options={CODE_EDITOR_OPTIONS}
+        {...editorProps}
+      />
+      {(!editorProps.value || editorProps.value === '') && (
+        <CodeEditorPlaceholder>{placeholder}</CodeEditorPlaceholder>
+      )}
+    </CodeEditorContainer>
+  );
+};

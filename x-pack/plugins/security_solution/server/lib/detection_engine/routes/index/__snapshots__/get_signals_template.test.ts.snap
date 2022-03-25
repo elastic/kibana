@@ -3,7 +3,7 @@
 exports[`get_signals_template backwards compatibility mappings for version 45 should match snapshot 1`] = `
 Object {
   "_meta": Object {
-    "aliases_version": 1,
+    "aliases_version": 3,
     "version": 45,
   },
   "properties": Object {
@@ -29,6 +29,14 @@ Object {
     },
     "kibana.alert.depth": Object {
       "path": "signal.depth",
+      "type": "alias",
+    },
+    "kibana.alert.group.id": Object {
+      "path": "signal.group.id",
+      "type": "alias",
+    },
+    "kibana.alert.group.index": Object {
+      "path": "signal.group.index",
       "type": "alias",
     },
     "kibana.alert.original_event.action": Object {
@@ -159,16 +167,8 @@ Object {
       "path": "signal.rule.immutable",
       "type": "alias",
     },
-    "kibana.alert.rule.index": Object {
-      "path": "signal.rule.index",
-      "type": "alias",
-    },
     "kibana.alert.rule.interval": Object {
       "path": "signal.rule.interval",
-      "type": "alias",
-    },
-    "kibana.alert.rule.language": Object {
-      "path": "signal.rule.language",
       "type": "alias",
     },
     "kibana.alert.rule.license": Object {
@@ -187,24 +187,8 @@ Object {
       "path": "signal.rule.note",
       "type": "alias",
     },
-    "kibana.alert.rule.query": Object {
-      "path": "signal.rule.query",
-      "type": "alias",
-    },
     "kibana.alert.rule.references": Object {
       "path": "signal.rule.references",
-      "type": "alias",
-    },
-    "kibana.alert.rule.risk_score_mapping.field": Object {
-      "path": "signal.rule.risk_score_mapping.field",
-      "type": "alias",
-    },
-    "kibana.alert.rule.risk_score_mapping.operator": Object {
-      "path": "signal.rule.risk_score_mapping.operator",
-      "type": "alias",
-    },
-    "kibana.alert.rule.risk_score_mapping.value": Object {
-      "path": "signal.rule.risk_score_mapping.value",
       "type": "alias",
     },
     "kibana.alert.rule.rule_id": Object {
@@ -213,26 +197,6 @@ Object {
     },
     "kibana.alert.rule.rule_name_override": Object {
       "path": "signal.rule.rule_name_override",
-      "type": "alias",
-    },
-    "kibana.alert.rule.saved_id": Object {
-      "path": "signal.rule.saved_id",
-      "type": "alias",
-    },
-    "kibana.alert.rule.severity_mapping.field": Object {
-      "path": "signal.rule.severity_mapping.field",
-      "type": "alias",
-    },
-    "kibana.alert.rule.severity_mapping.operator": Object {
-      "path": "signal.rule.severity_mapping.operator",
-      "type": "alias",
-    },
-    "kibana.alert.rule.severity_mapping.severity": Object {
-      "path": "signal.rule.severity_mapping.severity",
-      "type": "alias",
-    },
-    "kibana.alert.rule.severity_mapping.value": Object {
-      "path": "signal.rule.severity_mapping.value",
       "type": "alias",
     },
     "kibana.alert.rule.tags": Object {
@@ -279,48 +243,16 @@ Object {
       "path": "signal.rule.threat.technique.subtechnique.reference",
       "type": "alias",
     },
-    "kibana.alert.rule.threat_index": Object {
-      "path": "signal.rule.threat_index",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_indicator_path": Object {
-      "path": "signal.rule.threat_indicator_path",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_language": Object {
-      "path": "signal.rule.threat_language",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_mapping.entries.field": Object {
-      "path": "signal.rule.threat_mapping.entries.field",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_mapping.entries.type": Object {
-      "path": "signal.rule.threat_mapping.entries.type",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_mapping.entries.value": Object {
-      "path": "signal.rule.threat_mapping.entries.value",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_query": Object {
-      "path": "signal.rule.threat_query",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threshold.field": Object {
-      "path": "signal.rule.threshold.field",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threshold.value": Object {
-      "path": "signal.rule.threshold.value",
-      "type": "alias",
-    },
     "kibana.alert.rule.timeline_id": Object {
       "path": "signal.rule.timeline_id",
       "type": "alias",
     },
     "kibana.alert.rule.timeline_title": Object {
       "path": "signal.rule.timeline_title",
+      "type": "alias",
+    },
+    "kibana.alert.rule.timestamp_override": Object {
+      "path": "signal.rule.timestamp_override",
       "type": "alias",
     },
     "kibana.alert.rule.to": Object {
@@ -547,6 +479,9 @@ Object {
               },
               "type": "object",
             },
+            "timestamp_override": Object {
+              "type": "keyword",
+            },
           },
           "type": "object",
         },
@@ -598,8 +533,521 @@ Object {
 exports[`get_signals_template backwards compatibility mappings for version 57 should match snapshot 1`] = `
 Object {
   "_meta": Object {
-    "aliases_version": 1,
+    "aliases_version": 3,
     "version": 57,
+  },
+  "properties": Object {
+    "kibana.alert.ancestors.depth": Object {
+      "path": "signal.ancestors.depth",
+      "type": "alias",
+    },
+    "kibana.alert.ancestors.id": Object {
+      "path": "signal.ancestors.id",
+      "type": "alias",
+    },
+    "kibana.alert.ancestors.index": Object {
+      "path": "signal.ancestors.index",
+      "type": "alias",
+    },
+    "kibana.alert.ancestors.type": Object {
+      "path": "signal.ancestors.type",
+      "type": "alias",
+    },
+    "kibana.alert.building_block_type": Object {
+      "path": "signal.rule.building_block_type",
+      "type": "alias",
+    },
+    "kibana.alert.depth": Object {
+      "path": "signal.depth",
+      "type": "alias",
+    },
+    "kibana.alert.group.id": Object {
+      "path": "signal.group.id",
+      "type": "alias",
+    },
+    "kibana.alert.group.index": Object {
+      "path": "signal.group.index",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.action": Object {
+      "path": "signal.original_event.action",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.category": Object {
+      "path": "signal.original_event.category",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.code": Object {
+      "path": "signal.original_event.code",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.created": Object {
+      "path": "signal.original_event.created",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.dataset": Object {
+      "path": "signal.original_event.dataset",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.duration": Object {
+      "path": "signal.original_event.duration",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.end": Object {
+      "path": "signal.original_event.end",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.hash": Object {
+      "path": "signal.original_event.hash",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.id": Object {
+      "path": "signal.original_event.id",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.kind": Object {
+      "path": "signal.original_event.kind",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.module": Object {
+      "path": "signal.original_event.module",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.outcome": Object {
+      "path": "signal.original_event.outcome",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.provider": Object {
+      "path": "signal.original_event.provider",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.reason": Object {
+      "path": "signal.original_event.reason",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.risk_score": Object {
+      "path": "signal.original_event.risk_score",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.risk_score_norm": Object {
+      "path": "signal.original_event.risk_score_norm",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.sequence": Object {
+      "path": "signal.original_event.sequence",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.severity": Object {
+      "path": "signal.original_event.severity",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.start": Object {
+      "path": "signal.original_event.start",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.timezone": Object {
+      "path": "signal.original_event.timezone",
+      "type": "alias",
+    },
+    "kibana.alert.original_event.type": Object {
+      "path": "signal.original_event.type",
+      "type": "alias",
+    },
+    "kibana.alert.original_time": Object {
+      "path": "signal.original_time",
+      "type": "alias",
+    },
+    "kibana.alert.reason": Object {
+      "path": "signal.reason",
+      "type": "alias",
+    },
+    "kibana.alert.risk_score": Object {
+      "path": "signal.rule.risk_score",
+      "type": "alias",
+    },
+    "kibana.alert.rule.author": Object {
+      "path": "signal.rule.author",
+      "type": "alias",
+    },
+    "kibana.alert.rule.created_at": Object {
+      "path": "signal.rule.created_at",
+      "type": "alias",
+    },
+    "kibana.alert.rule.created_by": Object {
+      "path": "signal.rule.created_by",
+      "type": "alias",
+    },
+    "kibana.alert.rule.description": Object {
+      "path": "signal.rule.description",
+      "type": "alias",
+    },
+    "kibana.alert.rule.enabled": Object {
+      "path": "signal.rule.enabled",
+      "type": "alias",
+    },
+    "kibana.alert.rule.false_positives": Object {
+      "path": "signal.rule.false_positives",
+      "type": "alias",
+    },
+    "kibana.alert.rule.from": Object {
+      "path": "signal.rule.from",
+      "type": "alias",
+    },
+    "kibana.alert.rule.immutable": Object {
+      "path": "signal.rule.immutable",
+      "type": "alias",
+    },
+    "kibana.alert.rule.interval": Object {
+      "path": "signal.rule.interval",
+      "type": "alias",
+    },
+    "kibana.alert.rule.license": Object {
+      "path": "signal.rule.license",
+      "type": "alias",
+    },
+    "kibana.alert.rule.max_signals": Object {
+      "path": "signal.rule.max_signals",
+      "type": "alias",
+    },
+    "kibana.alert.rule.name": Object {
+      "path": "signal.rule.name",
+      "type": "alias",
+    },
+    "kibana.alert.rule.note": Object {
+      "path": "signal.rule.note",
+      "type": "alias",
+    },
+    "kibana.alert.rule.references": Object {
+      "path": "signal.rule.references",
+      "type": "alias",
+    },
+    "kibana.alert.rule.rule_id": Object {
+      "path": "signal.rule.rule_id",
+      "type": "alias",
+    },
+    "kibana.alert.rule.rule_name_override": Object {
+      "path": "signal.rule.rule_name_override",
+      "type": "alias",
+    },
+    "kibana.alert.rule.tags": Object {
+      "path": "signal.rule.tags",
+      "type": "alias",
+    },
+    "kibana.alert.rule.threat.framework": Object {
+      "path": "signal.rule.threat.framework",
+      "type": "alias",
+    },
+    "kibana.alert.rule.threat.tactic.id": Object {
+      "path": "signal.rule.threat.tactic.id",
+      "type": "alias",
+    },
+    "kibana.alert.rule.threat.tactic.name": Object {
+      "path": "signal.rule.threat.tactic.name",
+      "type": "alias",
+    },
+    "kibana.alert.rule.threat.tactic.reference": Object {
+      "path": "signal.rule.threat.tactic.reference",
+      "type": "alias",
+    },
+    "kibana.alert.rule.threat.technique.id": Object {
+      "path": "signal.rule.threat.technique.id",
+      "type": "alias",
+    },
+    "kibana.alert.rule.threat.technique.name": Object {
+      "path": "signal.rule.threat.technique.name",
+      "type": "alias",
+    },
+    "kibana.alert.rule.threat.technique.reference": Object {
+      "path": "signal.rule.threat.technique.reference",
+      "type": "alias",
+    },
+    "kibana.alert.rule.threat.technique.subtechnique.id": Object {
+      "path": "signal.rule.threat.technique.subtechnique.id",
+      "type": "alias",
+    },
+    "kibana.alert.rule.threat.technique.subtechnique.name": Object {
+      "path": "signal.rule.threat.technique.subtechnique.name",
+      "type": "alias",
+    },
+    "kibana.alert.rule.threat.technique.subtechnique.reference": Object {
+      "path": "signal.rule.threat.technique.subtechnique.reference",
+      "type": "alias",
+    },
+    "kibana.alert.rule.timeline_id": Object {
+      "path": "signal.rule.timeline_id",
+      "type": "alias",
+    },
+    "kibana.alert.rule.timeline_title": Object {
+      "path": "signal.rule.timeline_title",
+      "type": "alias",
+    },
+    "kibana.alert.rule.timestamp_override": Object {
+      "path": "signal.rule.timestamp_override",
+      "type": "alias",
+    },
+    "kibana.alert.rule.to": Object {
+      "path": "signal.rule.to",
+      "type": "alias",
+    },
+    "kibana.alert.rule.type": Object {
+      "path": "signal.rule.type",
+      "type": "alias",
+    },
+    "kibana.alert.rule.updated_at": Object {
+      "path": "signal.rule.updated_at",
+      "type": "alias",
+    },
+    "kibana.alert.rule.updated_by": Object {
+      "path": "signal.rule.updated_by",
+      "type": "alias",
+    },
+    "kibana.alert.rule.uuid": Object {
+      "path": "signal.rule.id",
+      "type": "alias",
+    },
+    "kibana.alert.rule.version": Object {
+      "path": "signal.rule.version",
+      "type": "alias",
+    },
+    "kibana.alert.severity": Object {
+      "path": "signal.rule.severity",
+      "type": "alias",
+    },
+    "kibana.alert.threshold_result.cardinality.field": Object {
+      "path": "signal.threshold_result.cardinality.field",
+      "type": "alias",
+    },
+    "kibana.alert.threshold_result.cardinality.value": Object {
+      "path": "signal.threshold_result.cardinality.value",
+      "type": "alias",
+    },
+    "kibana.alert.threshold_result.count": Object {
+      "path": "signal.threshold_result.count",
+      "type": "alias",
+    },
+    "kibana.alert.threshold_result.from": Object {
+      "path": "signal.threshold_result.from",
+      "type": "alias",
+    },
+    "kibana.alert.threshold_result.terms.field": Object {
+      "path": "signal.threshold_result.terms.field",
+      "type": "alias",
+    },
+    "kibana.alert.threshold_result.terms.value": Object {
+      "path": "signal.threshold_result.terms.value",
+      "type": "alias",
+    },
+    "kibana.alert.workflow_status": Object {
+      "path": "signal.status",
+      "type": "alias",
+    },
+    "signal": Object {
+      "properties": Object {
+        "_meta": Object {
+          "properties": Object {
+            "version": Object {
+              "type": "long",
+            },
+          },
+          "type": "object",
+        },
+        "ancestors": Object {
+          "properties": Object {
+            "depth": Object {
+              "type": "long",
+            },
+            "id": Object {
+              "type": "keyword",
+            },
+            "index": Object {
+              "type": "keyword",
+            },
+            "rule": Object {
+              "type": "keyword",
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+          },
+        },
+        "depth": Object {
+          "type": "integer",
+        },
+        "group": Object {
+          "properties": Object {
+            "id": Object {
+              "type": "keyword",
+            },
+            "index": Object {
+              "type": "integer",
+            },
+          },
+          "type": "object",
+        },
+        "original_event": Object {
+          "properties": Object {
+            "reason": Object {
+              "type": "keyword",
+            },
+          },
+          "type": "object",
+        },
+        "reason": Object {
+          "type": "keyword",
+        },
+        "rule": Object {
+          "properties": Object {
+            "author": Object {
+              "type": "keyword",
+            },
+            "building_block_type": Object {
+              "type": "keyword",
+            },
+            "license": Object {
+              "type": "keyword",
+            },
+            "note": Object {
+              "type": "text",
+            },
+            "risk_score_mapping": Object {
+              "properties": Object {
+                "field": Object {
+                  "type": "keyword",
+                },
+                "operator": Object {
+                  "type": "keyword",
+                },
+                "value": Object {
+                  "type": "keyword",
+                },
+              },
+              "type": "object",
+            },
+            "rule_name_override": Object {
+              "type": "keyword",
+            },
+            "severity_mapping": Object {
+              "properties": Object {
+                "field": Object {
+                  "type": "keyword",
+                },
+                "operator": Object {
+                  "type": "keyword",
+                },
+                "severity": Object {
+                  "type": "keyword",
+                },
+                "value": Object {
+                  "type": "keyword",
+                },
+              },
+              "type": "object",
+            },
+            "threat": Object {
+              "properties": Object {
+                "technique": Object {
+                  "properties": Object {
+                    "subtechnique": Object {
+                      "properties": Object {
+                        "id": Object {
+                          "type": "keyword",
+                        },
+                        "name": Object {
+                          "type": "keyword",
+                        },
+                        "reference": Object {
+                          "type": "keyword",
+                        },
+                      },
+                      "type": "object",
+                    },
+                  },
+                  "type": "object",
+                },
+              },
+              "type": "object",
+            },
+            "threat_index": Object {
+              "type": "keyword",
+            },
+            "threat_indicator_path": Object {
+              "type": "keyword",
+            },
+            "threat_language": Object {
+              "type": "keyword",
+            },
+            "threat_mapping": Object {
+              "properties": Object {
+                "entries": Object {
+                  "properties": Object {
+                    "field": Object {
+                      "type": "keyword",
+                    },
+                    "type": Object {
+                      "type": "keyword",
+                    },
+                    "value": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "object",
+                },
+              },
+              "type": "object",
+            },
+            "threat_query": Object {
+              "type": "keyword",
+            },
+            "threshold": Object {
+              "properties": Object {
+                "field": Object {
+                  "type": "keyword",
+                },
+                "value": Object {
+                  "type": "float",
+                },
+              },
+              "type": "object",
+            },
+            "timestamp_override": Object {
+              "type": "keyword",
+            },
+          },
+          "type": "object",
+        },
+        "threshold_result": Object {
+          "properties": Object {
+            "cardinality": Object {
+              "properties": Object {
+                "field": Object {
+                  "type": "keyword",
+                },
+                "value": Object {
+                  "type": "long",
+                },
+              },
+            },
+            "count": Object {
+              "type": "long",
+            },
+            "from": Object {
+              "type": "date",
+            },
+            "terms": Object {
+              "properties": Object {
+                "field": Object {
+                  "type": "keyword",
+                },
+                "value": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+          },
+        },
+      },
+      "type": "object",
+    },
   },
 }
 `;
@@ -610,10 +1058,15 @@ Object {
     "test-index-*",
   ],
   "template": Object {
+    "aliases": Object {
+      ".alerts-security.alerts-space-id": Object {
+        "is_write_index": false,
+      },
+    },
     "mappings": Object {
       "_meta": Object {
-        "aliases_version": 1,
-        "version": 57,
+        "aliases_version": 3,
+        "version": 67,
       },
       "dynamic": false,
       "properties": Object {
@@ -2314,6 +2767,14 @@ Object {
           "path": "signal.depth",
           "type": "alias",
         },
+        "kibana.alert.group.id": Object {
+          "path": "signal.group.id",
+          "type": "alias",
+        },
+        "kibana.alert.group.index": Object {
+          "path": "signal.group.index",
+          "type": "alias",
+        },
         "kibana.alert.original_event.action": Object {
           "path": "signal.original_event.action",
           "type": "alias",
@@ -2442,16 +2903,8 @@ Object {
           "path": "signal.rule.immutable",
           "type": "alias",
         },
-        "kibana.alert.rule.index": Object {
-          "path": "signal.rule.index",
-          "type": "alias",
-        },
         "kibana.alert.rule.interval": Object {
           "path": "signal.rule.interval",
-          "type": "alias",
-        },
-        "kibana.alert.rule.language": Object {
-          "path": "signal.rule.language",
           "type": "alias",
         },
         "kibana.alert.rule.license": Object {
@@ -2470,24 +2923,8 @@ Object {
           "path": "signal.rule.note",
           "type": "alias",
         },
-        "kibana.alert.rule.query": Object {
-          "path": "signal.rule.query",
-          "type": "alias",
-        },
         "kibana.alert.rule.references": Object {
           "path": "signal.rule.references",
-          "type": "alias",
-        },
-        "kibana.alert.rule.risk_score_mapping.field": Object {
-          "path": "signal.rule.risk_score_mapping.field",
-          "type": "alias",
-        },
-        "kibana.alert.rule.risk_score_mapping.operator": Object {
-          "path": "signal.rule.risk_score_mapping.operator",
-          "type": "alias",
-        },
-        "kibana.alert.rule.risk_score_mapping.value": Object {
-          "path": "signal.rule.risk_score_mapping.value",
           "type": "alias",
         },
         "kibana.alert.rule.rule_id": Object {
@@ -2496,26 +2933,6 @@ Object {
         },
         "kibana.alert.rule.rule_name_override": Object {
           "path": "signal.rule.rule_name_override",
-          "type": "alias",
-        },
-        "kibana.alert.rule.saved_id": Object {
-          "path": "signal.rule.saved_id",
-          "type": "alias",
-        },
-        "kibana.alert.rule.severity_mapping.field": Object {
-          "path": "signal.rule.severity_mapping.field",
-          "type": "alias",
-        },
-        "kibana.alert.rule.severity_mapping.operator": Object {
-          "path": "signal.rule.severity_mapping.operator",
-          "type": "alias",
-        },
-        "kibana.alert.rule.severity_mapping.severity": Object {
-          "path": "signal.rule.severity_mapping.severity",
-          "type": "alias",
-        },
-        "kibana.alert.rule.severity_mapping.value": Object {
-          "path": "signal.rule.severity_mapping.value",
           "type": "alias",
         },
         "kibana.alert.rule.tags": Object {
@@ -2562,48 +2979,16 @@ Object {
           "path": "signal.rule.threat.technique.subtechnique.reference",
           "type": "alias",
         },
-        "kibana.alert.rule.threat_index": Object {
-          "path": "signal.rule.threat_index",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_indicator_path": Object {
-          "path": "signal.rule.threat_indicator_path",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_language": Object {
-          "path": "signal.rule.threat_language",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_mapping.entries.field": Object {
-          "path": "signal.rule.threat_mapping.entries.field",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_mapping.entries.type": Object {
-          "path": "signal.rule.threat_mapping.entries.type",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_mapping.entries.value": Object {
-          "path": "signal.rule.threat_mapping.entries.value",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_query": Object {
-          "path": "signal.rule.threat_query",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threshold.field": Object {
-          "path": "signal.rule.threshold.field",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threshold.value": Object {
-          "path": "signal.rule.threshold.value",
-          "type": "alias",
-        },
         "kibana.alert.rule.timeline_id": Object {
           "path": "signal.rule.timeline_id",
           "type": "alias",
         },
         "kibana.alert.rule.timeline_title": Object {
           "path": "signal.rule.timeline_title",
+          "type": "alias",
+        },
+        "kibana.alert.rule.timestamp_override": Object {
+          "path": "signal.rule.timestamp_override",
           "type": "alias",
         },
         "kibana.alert.rule.to": Object {
@@ -4291,6 +4676,13 @@ Object {
                 },
                 "enabled": Object {
                   "type": "keyword",
+                },
+                "execution": Object {
+                  "properties": Object {
+                    "uuid": Object {
+                      "type": "keyword",
+                    },
+                  },
                 },
                 "false_positives": Object {
                   "type": "keyword",
@@ -6348,6 +6740,6 @@ Object {
       },
     },
   },
-  "version": 57,
+  "version": 67,
 }
 `;

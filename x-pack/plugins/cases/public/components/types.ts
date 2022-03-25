@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export type { CaseActionConnector } from '../../common';
+export type { CaseActionConnector } from '../../common/ui/types';
+
+export type ReleasePhase = 'experimental' | 'beta' | 'ga';

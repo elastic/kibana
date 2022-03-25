@@ -1,0 +1,44 @@
+parameters:
+  - schema:
+      type: string
+    name: keyId
+    in: path
+    required: true
+get:
+  summary: Enrollment API Key - Info
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/enrollment_api_key.yaml
+            required:
+              - item
+  operationId: get-enrollment-api-key
+  deprecated: true
+delete:
+  summary: Enrollment API Key - Delete
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              action:
+                type: string
+                enum:
+                  - deleted
+            required:
+              - action
+  operationId: delete-enrollment-api-key
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  deprecated: true

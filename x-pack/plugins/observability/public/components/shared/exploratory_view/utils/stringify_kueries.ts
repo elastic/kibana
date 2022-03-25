@@ -19,11 +19,17 @@ const buildOrCondition = (values: string[]) => {
   }
   return `(${values.join(' or ')})`;
 };
+
+function addSlashes(str: string) {
+  return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+}
+
 export const urlFiltersToKueryString = (urlFilters: UrlFilter[]): string => {
   let kueryString = '';
+
   urlFilters.forEach(({ field, values, notValues, wildcards, notWildcards }) => {
-    const valuesT = values?.map((val) => `"${val}"`);
-    const notValuesT = notValues?.map((val) => `"${val}"`);
+    const valuesT = values?.map((val) => `"${addSlashes(val)}"`);
+    const notValuesT = notValues?.map((val) => `"${addSlashes(val)}"`);
     const wildcardsT = wildcards?.map((val) => `*${val}*`);
     const notWildcardsT = notWildcards?.map((val) => `*${val}*`);
 

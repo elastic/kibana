@@ -11,8 +11,18 @@ import React from 'react';
 
 import AddToTimelineButton, { ADD_TO_TIMELINE_KEYBOARD_SHORTCUT } from './add_to_timeline';
 import { DataProvider, IS_OPERATOR } from '../../../../common/types';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { TestProviders } from '../../../mock';
 import * as i18n from './translations';
+
+const mockAddSuccess = jest.fn();
+jest.mock('../../../hooks/use_app_toasts', () => ({
+  useAppToasts: () => ({
+    addSuccess: mockAddSuccess,
+  }),
+}));
+
+jest.mock('../../../hooks/use_selector');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -72,6 +82,7 @@ const providerB: DataProvider = {
 describe('add to timeline', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    (useDeepEqualSelector as jest.Mock).mockReturnValue({ timelineType: 'default' });
   });
 
   const field = 'user.name';
@@ -367,6 +378,34 @@ describe('add to timeline', () => {
 
         expect(mockStartDragToTimeline).not.toBeCalled();
       });
+    });
+  });
+
+  describe('it shows the appropriate text based on timeline type', () => {
+    test('Add success is called with "timeline" if timeline type is timeline', () => {
+      render(
+        <TestProviders>
+          <AddToTimelineButton dataProvider={providerA} field={field} ownFocus={false} />
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByRole('button'));
+
+      expect(mockAddSuccess).toBeCalledWith('Added a to timeline');
+    });
+
+    test('Add success is called with "template" if timeline type is template', () => {
+      (useDeepEqualSelector as jest.Mock).mockReturnValue({ timelineType: 'template' });
+
+      render(
+        <TestProviders>
+          <AddToTimelineButton dataProvider={providerA} field={field} ownFocus={false} />
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByRole('button'));
+
+      expect(mockAddSuccess).toBeCalledWith('Added a to template');
     });
   });
 });

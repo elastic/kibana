@@ -16,8 +16,6 @@ import { isPopulatedObject } from '../../../../../plugins/ml/common/util/object_
 const moduleIds = [
   'apache_data_stream',
   'apache_ecs',
-  'apm_jsbase',
-  'apm_nodejs',
   'apm_transaction',
   'auditbeat_process_docker_ecs',
   'auditbeat_process_hosts_ecs',
@@ -48,11 +46,11 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   async function executeGetModuleRequest(module: string, user: USER, rspCode: number) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/api/ml/modules/get_module/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(rspCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;
   }

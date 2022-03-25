@@ -9,8 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getNodes } from '../../../../lib/logstash/get_nodes';
 import { handleError } from '../../../../lib/errors';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
-import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 
 /*
  * Logstash Nodes route.
@@ -44,15 +42,12 @@ export function logstashNodesRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       try {
         const [clusterStatus, nodes] = await Promise.all([
-          getClusterStatus(req, lsIndexPattern, { clusterUuid }),
-          getNodes(req, lsIndexPattern, { clusterUuid }),
+          getClusterStatus(req, { clusterUuid }),
+          getNodes(req, { clusterUuid }),
         ]);
 
         return {

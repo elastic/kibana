@@ -8,12 +8,11 @@
 import expect from '@kbn/expect';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createApmApiClient, SupertestReturnType } from '../../common/apm_api_supertest';
+import { SupertestReturnType } from '../../common/apm_api_supertest';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('supertest');
-  const apmApiSupertest = createApmApiClient(supertest);
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -21,7 +20,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Trace does not exist', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
-      const response = await apmApiSupertest({
+      const response = await apmApiClient.readUser({
         endpoint: `GET /internal/apm/traces/{traceId}`,
         params: {
           path: { traceId: 'foo' },
@@ -37,7 +36,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Trace exists', { config: 'basic', archives: [archiveName] }, () => {
     let response: SupertestReturnType<`GET /internal/apm/traces/{traceId}`>;
     before(async () => {
-      response = await apmApiSupertest({
+      response = await apmApiClient.readUser({
         endpoint: `GET /internal/apm/traces/{traceId}`,
         params: {
           path: { traceId: '64d0014f7530df24e549dd17cc0a8895' },
@@ -60,11 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       `);
       expectSnapshot(
         response.body.traceDocs.map((doc) =>
-          doc.processor.event === 'transaction'
-            ? // @ts-expect-error
-              `${doc.transaction.name} (transaction)`
-            : // @ts-expect-error
-              `${doc.span.name} (span)`
+          'span' in doc ? `${doc.span.name} (span)` : `${doc.transaction.name} (transaction)`
         )
       ).toMatchInline(`
         Array [

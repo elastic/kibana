@@ -23,7 +23,6 @@ type ValidMetaFieldNames = keyof Pick<
   | '_seq_no'
   | '_shard'
   | '_source'
-  | '_type'
   | '_version'
 >;
 const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
@@ -37,7 +36,6 @@ const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
   '_seq_no',
   '_shard',
   '_source',
-  '_type',
   '_version',
 ];
 
@@ -48,7 +46,7 @@ function isValidMetaFieldName(field: string): field is ValidMetaFieldNames {
   return (VALID_META_FIELD_NAMES as string[]).includes(field);
 }
 
-export interface TabifyDocsOptions {
+interface TabifyDocsOptions {
   shallow?: boolean;
   /**
    * If set to `false` the _source of the document, if requested, won't be

@@ -12,21 +12,22 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
 import realHits from '../../../../__fixtures__/real_hits.js';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
+import { flattenHit } from '../../../../../../data/public';
+import { DataViewAttributes } from '../../../../../../data_views/public';
 import { SavedObject } from '../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
-import { ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-
-jest.mock('../../../../kibana_services', () => ({
-  getServices: () => mockDiscoverServices,
-}));
+import { ElasticSearchHit } from '../../../../types';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { BehaviorSubject } from 'rxjs';
+import { FetchStatus } from '../../../types';
+import { AvailableFields$ } from '../../utils/use_saved_search';
 
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
@@ -37,9 +38,9 @@ function getCompProps(): DiscoverSidebarProps {
   > as ElasticSearchHit[];
 
   const indexPatternList = [
-    { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
-    { id: '1', attributes: { title: 'a' } } as SavedObject<IndexPatternAttributes>,
-    { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
+    { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
+    { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
+    { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
   ];
 
   const fieldCounts: Record<string, number> = {};
@@ -49,6 +50,11 @@ function getCompProps(): DiscoverSidebarProps {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
+  const availableFields$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$;
+
   return {
     columns: ['extension'],
     fieldCounts,
@@ -59,7 +65,6 @@ function getCompProps(): DiscoverSidebarProps {
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
-    services: mockDiscoverServices,
     state: {},
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),
@@ -67,6 +72,9 @@ function getCompProps(): DiscoverSidebarProps {
     onEditRuntimeField: jest.fn(),
     editField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    createNewDataView: jest.fn(),
+    onDataViewCreated: jest.fn(),
+    availableFields$,
   };
 }
 
@@ -76,7 +84,11 @@ describe('discover sidebar', function () {
 
   beforeAll(() => {
     props = getCompProps();
-    comp = mountWithIntl(<DiscoverSidebar {...props} />);
+    comp = mountWithIntl(
+      <KibanaContextProvider services={mockDiscoverServices}>
+        <DiscoverSidebar {...props} />
+      </KibanaContextProvider>
+    );
   });
 
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
@@ -84,7 +96,7 @@ describe('discover sidebar', function () {
     const selected = findTestSubject(comp, 'fieldList-selected');
     const unpopular = findTestSubject(comp, 'fieldList-unpopular');
     expect(popular.children().length).toBe(1);
-    expect(unpopular.children().length).toBe(7);
+    expect(unpopular.children().length).toBe(6);
     expect(selected.children().length).toBe(1);
   });
   it('should allow selecting fields', function () {

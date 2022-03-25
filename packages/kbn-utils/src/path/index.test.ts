@@ -7,10 +7,17 @@
  */
 
 import { accessSync, constants } from 'fs';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 import { getConfigPath, getDataPath, getLogsPath, getConfigDirectory } from './';
+import { REPO_ROOT } from '../repo_root';
 
-expect.addSnapshotSerializer(createAbsolutePathSerializer());
+expect.addSnapshotSerializer(
+  ((rootPath: string = REPO_ROOT, replacement = '<absolute path>') => {
+    return {
+      test: (value: any) => typeof value === 'string' && value.startsWith(rootPath),
+      serialize: (value: string) => value.replace(rootPath, replacement).replace(/\\/g, '/'),
+    };
+  })()
+);
 
 describe('Default path finder', () => {
   it('should expose a path to the config directory', () => {

@@ -48,7 +48,7 @@ export interface PolicyTestResourceInfo {
   /**
    * Information about the endpoint package
    */
-  packageInfo: Immutable<GetPackagesResponse['response'][0]>;
+  packageInfo: Immutable<GetPackagesResponse['items'][0]>;
   /** will clean up (delete) the objects created (Agent Policy + Package Policy) */
   cleanup: () => Promise<void>;
 }
@@ -72,7 +72,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     // so we'll retrieve a list of packages for a category of Security, and will then find the
     // endpoint package info. in the list. The request is kicked off here, but handled below after
     // Agent Policy creation so that they can be executed concurrently
-    let apiRequest: Promise<GetPackagesResponse['response'][0] | undefined>;
+    let apiRequest: Promise<GetPackagesResponse['items'][0] | undefined>;
 
     return () => {
       if (!apiRequest) {
@@ -94,7 +94,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             })
             .then((response: { body: GetPackagesResponse }) => {
               const { body: secPackages } = response;
-              const endpointPackageInfo = secPackages.response.find(
+              const endpointPackageInfo = secPackages.items.find(
                 (epmPackage) => epmPackage.name === 'endpoint'
               );
               if (!endpointPackageInfo) {
@@ -102,6 +102,9 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
                   `Endpoint package was not in response from ${SECURITY_PACKAGES_ROUTE}`
                 );
               }
+
+              log.info(`Endpoint package version: ${endpointPackageInfo.version}`);
+
               return Promise.resolve(endpointPackageInfo);
             });
         });
@@ -124,11 +127,11 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     /**
      * Retrieves the currently installed endpoint package
      */
-    async getEndpointPackage(): Promise<Immutable<GetPackagesResponse['response'][0]>> {
+    async getEndpointPackage(): Promise<Immutable<GetPackagesResponse['items'][0]>> {
       const endpointPackage = await retrieveEndpointPackageInfo();
 
       if (!endpointPackage) {
-        throw new EndpointError(`endpoint package not instealled`);
+        throw new EndpointError(`endpoint package not installed`);
       }
 
       return endpointPackage;
@@ -216,6 +219,11 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       } catch (error) {
         return logSupertestApiErrorAndThrow(`Unable to create Package Policy via Ingest!`, error);
       }
+
+      log.info(
+        `Created Fleet Agent Policy: ${agentPolicy.id}\n`,
+        `Created Fleet Endpoint Package Policy: ${packagePolicy.id}`
+      );
 
       return {
         agentPolicy,

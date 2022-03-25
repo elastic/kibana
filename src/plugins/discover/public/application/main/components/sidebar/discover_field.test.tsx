@@ -8,11 +8,12 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DiscoverField } from './discover_field';
-import { IndexPatternField } from '../../../../../../data/public';
-import { stubIndexPattern } from '../../../../../../data/common/stubs';
+import { DataViewField } from '../../../../../../data_views/public';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { stubDataView } from '../../../../../../data_views/common/data_view.stub';
 
 jest.mock('../../../../kibana_services', () => ({
   getUiActions: jest.fn(() => {
@@ -20,7 +21,41 @@ jest.mock('../../../../kibana_services', () => ({
       getTriggerCompatibleActions: jest.fn(() => []),
     };
   }),
-  getServices: () => ({
+}));
+
+function getComponent({
+  selected = false,
+  showDetails = false,
+  field,
+}: {
+  selected?: boolean;
+  showDetails?: boolean;
+  field?: DataViewField;
+}) {
+  const finalField =
+    field ??
+    new DataViewField({
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
+
+  const props = {
+    indexPattern: stubDataView,
+    field: finalField,
+    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
+    onAddFilter: jest.fn(),
+    onAddField: jest.fn(),
+    onRemoveField: jest.fn(),
+    showDetails,
+    selected,
+  };
+  const services = {
     history: () => ({
       location: {
         search: '',
@@ -38,42 +73,12 @@ jest.mock('../../../../kibana_services', () => ({
         }
       },
     },
-  }),
-}));
-
-function getComponent({
-  selected = false,
-  showDetails = false,
-  field,
-}: {
-  selected?: boolean;
-  showDetails?: boolean;
-  field?: IndexPatternField;
-}) {
-  const finalField =
-    field ??
-    new IndexPatternField({
-      name: 'bytes',
-      type: 'number',
-      esTypes: ['long'],
-      count: 10,
-      scripted: false,
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: true,
-    });
-
-  const props = {
-    indexPattern: stubIndexPattern,
-    field: finalField,
-    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
-    onAddFilter: jest.fn(),
-    onAddField: jest.fn(),
-    onRemoveField: jest.fn(),
-    showDetails,
-    selected,
   };
-  const comp = mountWithIntl(<DiscoverField {...props} />);
+  const comp = mountWithIntl(
+    <KibanaContextProvider services={services}>
+      <DiscoverField {...props} />
+    </KibanaContextProvider>
+  );
   return { comp, props };
 }
 
@@ -94,7 +99,7 @@ describe('discover sidebar field', function () {
     expect(props.getDetails).toHaveBeenCalledWith(props.field);
   });
   it('should not allow clicking on _source', function () {
-    const field = new IndexPatternField({
+    const field = new DataViewField({
       name: '_source',
       type: '_source',
       esTypes: ['_source'],
@@ -110,7 +115,7 @@ describe('discover sidebar field', function () {
     expect(props.getDetails).not.toHaveBeenCalled();
   });
   it('displays warning for conflicting fields', function () {
-    const field = new IndexPatternField({
+    const field = new DataViewField({
       name: 'troubled_field',
       type: 'conflict',
       esTypes: ['integer', 'text'],

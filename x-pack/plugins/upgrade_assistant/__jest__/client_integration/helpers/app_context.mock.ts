@@ -22,10 +22,29 @@ import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { cloudMock } from '../../../../../../x-pack/plugins/cloud/public/mocks';
 
+const data = dataPluginMock.createStartContract();
+const dataViews = { ...data.dataViews };
+const findDataView = (id: string) =>
+  Promise.resolve([
+    {
+      id,
+      title: id,
+      getFieldByName: jest.fn((name: string) => ({
+        name,
+      })),
+    },
+  ]);
+
 const servicesMock = {
   api: apiService,
   breadcrumbs: breadcrumbService,
-  data: dataPluginMock.createStartContract(),
+  data: {
+    ...data,
+    dataViews: {
+      ...dataViews,
+      find: findDataView,
+    },
+  },
 };
 
 // We'll mock these values to avoid testing the locators themselves.
@@ -69,7 +88,14 @@ export const getAppContextMock = (kibanaVersion: SemVer) => ({
       notifications: notificationServiceMock.createStartContract(),
       docLinks: docLinksServiceMock.createStartContract(),
       history: scopedHistoryMock.create(),
-      application: applicationServiceMock.createStartContract(),
+      application: {
+        ...applicationServiceMock.createStartContract(),
+        capabilities: {
+          spaces: {
+            manage: true,
+          },
+        },
+      },
     },
   },
   plugins: {

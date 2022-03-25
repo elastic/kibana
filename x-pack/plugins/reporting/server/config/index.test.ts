@@ -40,7 +40,7 @@ describe('deprecations', () => {
     const { messages } = applyReportingDeprecations({ roles: { enabled: true } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Use Kibana application privileges to grant reporting privileges. Using  \\"xpack.reporting.roles.allow\\" to grant reporting privileges is deprecated. The \\"xpack.reporting.roles.enabled\\" setting will default to false in a future release.",
+        "The default mechanism for Reporting privileges will work differently in future versions, which will affect the behavior of this cluster. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
       ]
     `);
   });

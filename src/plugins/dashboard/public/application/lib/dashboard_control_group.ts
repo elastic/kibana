@@ -8,21 +8,19 @@
 
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 
-import { DashboardContainer } from '..';
+import { pick } from 'lodash';
+import { DashboardContainer, DashboardContainerControlGroupInput } from '..';
 import { DashboardState } from '../../types';
-import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
 import { DashboardContainerInput, DashboardSavedObject } from '../..';
-import { ControlGroupContainer, ControlGroupInput } from '../../../../presentation_util/public';
-
-// only part of the control group input should be stored in dashboard state. The rest is passed down from the dashboard.
-export interface DashboardControlGroupInput {
-  panels: ControlGroupInput['panels'];
-  controlStyle: ControlGroupInput['controlStyle'];
-}
-
+import { ControlGroupContainer, ControlGroupInput } from '../../../../controls/public';
+import {
+  controlGroupInputToRawAttributes,
+  getDefaultDashboardControlGroupInput,
+  rawAttributesToControlGroupInput,
+} from '../../../common';
 interface DiffChecks {
   [key: string]: (a?: unknown, b?: unknown) => boolean;
 }
@@ -56,6 +54,8 @@ export const syncDashboardControlGroup = async ({
   const controlGroupDiff: DiffChecks = {
     panels: deepEqual,
     controlStyle: deepEqual,
+    chainingSystem: deepEqual,
+    ignoreParentSettings: deepEqual,
   };
 
   subscriptions.add(
@@ -67,17 +67,21 @@ export const syncDashboardControlGroup = async ({
         )
       )
       .subscribe(() => {
-        const { panels, controlStyle } = controlGroup.getInput();
+        const { panels, controlStyle, chainingSystem, ignoreParentSettings } =
+          controlGroup.getInput();
         if (!isControlGroupInputEqual()) {
-          dashboardContainer.updateInput({ controlGroupInput: { panels, controlStyle } });
+          dashboardContainer.updateInput({
+            controlGroupInput: { panels, controlStyle, chainingSystem, ignoreParentSettings },
+          });
         }
       })
   );
 
+  const compareAllFilters = (a?: Filter[], b?: Filter[]) =>
+    compareFilters(a ?? [], b ?? [], COMPARE_ALL_OPTIONS);
+
   const dashboardRefetchDiff: DiffChecks = {
-    filters: (a, b) =>
-      compareFilters((a as Filter[]) ?? [], (b as Filter[]) ?? [], COMPARE_ALL_OPTIONS),
-    lastReloadRequestTime: deepEqual,
+    filters: (a, b) => compareAllFilters(a as Filter[], b as Filter[]),
     timeRange: deepEqual,
     query: deepEqual,
     viewMode: deepEqual,
@@ -130,7 +134,14 @@ export const syncDashboardControlGroup = async ({
   subscriptions.add(
     controlGroup
       .getOutput$()
-      .subscribe(() => dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() }))
+      .pipe(
+        distinctUntilChanged(({ filters: filtersA }, { filters: filtersB }) =>
+          compareAllFilters(filtersA, filtersB)
+        )
+      )
+      .subscribe(() => {
+        dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() });
+      })
   );
 
   return {
@@ -142,17 +153,17 @@ export const syncDashboardControlGroup = async ({
 };
 
 export const controlGroupInputIsEqual = (
-  a: DashboardControlGroupInput | undefined,
-  b: DashboardControlGroupInput | undefined
+  a: DashboardContainerControlGroupInput | undefined,
+  b: DashboardContainerControlGroupInput | undefined
 ) => {
   const defaultInput = getDefaultDashboardControlGroupInput();
   const inputA = {
-    panels: a?.panels ?? defaultInput.panels,
-    controlStyle: a?.controlStyle ?? defaultInput.controlStyle,
+    ...defaultInput,
+    ...pick(a, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
   };
   const inputB = {
-    panels: b?.panels ?? defaultInput.panels,
-    controlStyle: b?.controlStyle ?? defaultInput.controlStyle,
+    ...defaultInput,
+    ...pick(b, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
   };
   if (deepEqual(inputA, inputB)) return true;
   return false;
@@ -163,15 +174,19 @@ export const serializeControlGroupToDashboardSavedObject = (
   dashboardState: DashboardState
 ) => {
   // only save to saved object if control group is not default
-  if (controlGroupInputIsEqual(dashboardState.controlGroupInput, {} as ControlGroupInput)) {
+  if (
+    controlGroupInputIsEqual(
+      dashboardState.controlGroupInput,
+      getDefaultDashboardControlGroupInput()
+    )
+  ) {
     dashboardSavedObject.controlGroupInput = undefined;
     return;
   }
   if (dashboardState.controlGroupInput) {
-    dashboardSavedObject.controlGroupInput = {
-      controlStyle: dashboardState.controlGroupInput.controlStyle,
-      panelsJSON: JSON.stringify(dashboardState.controlGroupInput.panels),
-    };
+    dashboardSavedObject.controlGroupInput = controlGroupInputToRawAttributes(
+      dashboardState.controlGroupInput
+    );
   }
 };
 
@@ -179,15 +194,7 @@ export const deserializeControlGroupFromDashboardSavedObject = (
   dashboardSavedObject: DashboardSavedObject
 ): Omit<ControlGroupInput, 'id'> | undefined => {
   if (!dashboardSavedObject.controlGroupInput) return;
-
-  const defaultControlGroupInput = getDefaultDashboardControlGroupInput();
-  return {
-    controlStyle:
-      dashboardSavedObject.controlGroupInput?.controlStyle ?? defaultControlGroupInput.controlStyle,
-    panels: dashboardSavedObject.controlGroupInput?.panelsJSON
-      ? JSON.parse(dashboardSavedObject.controlGroupInput?.panelsJSON)
-      : {},
-  };
+  return rawAttributesToControlGroupInput(dashboardSavedObject.controlGroupInput);
 };
 
 export const combineDashboardFiltersWithControlGroupFilters = (

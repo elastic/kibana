@@ -178,16 +178,15 @@ export class EuiSuperSelect<T extends string> extends Component<EuiSuperSelectPr
       itemClassName,
       itemLayoutAlign,
       fullWidth,
-      popoverClassName,
+      popoverProps,
       compressed,
       ...rest
     } = this.props;
 
-    const popoverClasses = classNames('euiSuperSelect', popoverClassName);
+    const popoverClasses = classNames('euiSuperSelect', popoverProps?.className);
 
     const buttonClasses = classNames(
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'euiSuperSelect--isOpen__button': this.state.isPopoverOpen,
       },
       className
@@ -196,7 +195,6 @@ export class EuiSuperSelect<T extends string> extends Component<EuiSuperSelectPr
     const itemClasses = classNames(
       'euiSuperSelect__item',
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'euiSuperSelect__item--hasDividers': hasDividers,
       },
       itemClassName
@@ -240,6 +238,7 @@ export class EuiSuperSelect<T extends string> extends Component<EuiSuperSelectPr
 
     return (
       <EuiInputPopover
+        {...popoverProps}
         className={popoverClasses}
         input={button}
         isOpen={isOpen || this.state.isPopoverOpen}

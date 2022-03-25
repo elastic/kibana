@@ -11,6 +11,7 @@ import { get, isPlainObject } from 'lodash';
 import { overwrite } from '../helpers';
 
 import { calculateLabel } from '../../../../common/calculate_label';
+import { SERIES_SEPARATOR } from '../../../../common/constants';
 import { getLastMetric } from './get_last_metric';
 import { formatKey } from './format_key';
 
@@ -42,7 +43,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   resp: TRawResponse,
   panel: Panel,
   series: Series,
-  meta: TMeta,
+  meta: TMeta | undefined,
   extractFields: Function
 ): Promise<Array<SplittedData<TMeta>>> {
   if (!meta) {
@@ -52,13 +53,21 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   const color = new Color(series.color);
   const metric = getLastMetric(series);
   const buckets = get(resp, `aggregations.${series.id}.buckets`);
-  const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
+
+  const fieldsForSeries = meta?.dataViewId ? await extractFields({ id: meta.dataViewId }) : [];
   const splitByLabel = calculateLabel(metric, series.metrics, fieldsForSeries);
 
   if (buckets) {
     if (Array.isArray(buckets)) {
       return buckets.map((bucket) => {
-        bucket.id = `${series.id}:${bucket.key}`;
+        if (bucket.column_filter) {
+          bucket = {
+            ...bucket,
+            ...bucket.column_filter,
+          };
+        }
+
+        bucket.id = `${series.id}${SERIES_SEPARATOR}${bucket.key}`;
         bucket.splitByLabel = splitByLabel;
         bucket.label = formatKey(bucket.key, series);
         bucket.labelFormatted = bucket.key_as_string ? formatKey(bucket.key_as_string, series) : '';
@@ -71,7 +80,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
     if (series.split_mode === 'filters' && isPlainObject(buckets)) {
       return (series.split_filters || []).map((filter) => {
         const bucket = get(resp, `aggregations.${series.id}.buckets.${filter.id}`);
-        bucket.id = `${series.id}:${filter.id}`;
+        bucket.id = `${series.id}${SERIES_SEPARATOR}${filter.id}`;
         bucket.key = filter.id;
         bucket.splitByLabel = splitByLabel;
         bucket.color = filter.color;
@@ -101,7 +110,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
       label: series.label || splitByLabel,
       color: color.string(),
       ...mergeObj,
-      meta,
+      meta: meta!,
     },
   ];
 }

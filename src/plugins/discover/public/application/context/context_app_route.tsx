@@ -10,40 +10,36 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DiscoverServices } from '../../build_services';
 import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
-
-export interface ContextAppProps {
-  /**
-   * Kibana core services used by discover
-   */
-  services: DiscoverServices;
-}
+import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 export interface ContextUrlParams {
   indexPatternId: string;
   id: string;
 }
 
-export function ContextAppRoute(props: ContextAppProps) {
-  const { services } = props;
+export function ContextAppRoute() {
+  const services = useDiscoverServices();
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
+  const anchorId = decodeURIComponent(id);
+  const breadcrumb = useMainRouteBreadcrumb();
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(),
+      ...getRootBreadcrumbs(breadcrumb),
       {
         text: i18n.translate('discover.context.breadcrumb', {
           defaultMessage: 'Surrounding documents',
         }),
       },
     ]);
-  }, [chrome]);
+  }, [chrome, breadcrumb]);
 
   const { indexPattern, error } = useIndexPattern(services.indexPatterns, indexPatternId);
 
@@ -73,5 +69,5 @@ export function ContextAppRoute(props: ContextAppProps) {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp anchorId={id} indexPattern={indexPattern} />;
+  return <ContextApp anchorId={anchorId} indexPattern={indexPattern} />;
 }

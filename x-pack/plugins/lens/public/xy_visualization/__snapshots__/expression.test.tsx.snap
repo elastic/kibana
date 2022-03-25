@@ -1,11 +1,225 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`xy_expression XYChart component annotations should render basic annotation 1`] = `
+<LineAnnotation
+  dataValues={
+    Array [
+      Object {
+        "dataValue": 1647591917125,
+        "details": "Annotation",
+        "header": "2022-03-18T08:25:17.140Z",
+      },
+    ]
+  }
+  domainType="xDomain"
+  id="annotation"
+  key="annotation"
+  marker={
+    <Marker
+      config={
+        Object {
+          "axisMode": "bottom",
+          "label": "Annotation",
+          "roundedTimestamp": 1647591917100,
+          "time": "2022-03-18T08:25:17.140Z",
+          "type": "manual_event_annotation",
+        }
+      }
+      hasReducedPadding={false}
+      isHorizontal={true}
+      label="Annotation"
+    />
+  }
+  markerBody={
+    <MarkerBody
+      isHorizontal={true}
+    />
+  }
+  markerPosition="top"
+  style={
+    Object {
+      "line": Object {
+        "dash": undefined,
+        "opacity": 1,
+        "stroke": "#f04e98",
+        "strokeWidth": 1,
+      },
+    }
+  }
+/>
+`;
+
+exports[`xy_expression XYChart component annotations should render grouped annotations preserving the shared styles 1`] = `
+<LineAnnotation
+  customTooltipDetails={[Function]}
+  dataValues={
+    Array [
+      Object {
+        "dataValue": 1647591900025,
+        "details": "Event 1",
+        "header": 1647591900000,
+      },
+    ]
+  }
+  domainType="xDomain"
+  id="event_1"
+  key="event_1"
+  marker={
+    <Marker
+      config={
+        Object {
+          "axisMode": "bottom",
+          "color": "red",
+          "customTooltipDetails": [Function],
+          "icon": "3",
+          "label": "Event 1",
+          "lineStyle": "dashed",
+          "lineWidth": 3,
+          "roundedTimestamp": 1647591900000,
+          "textVisibility": undefined,
+          "time": "2022-03-18T08:25:00.000Z",
+          "type": "manual_event_annotation",
+        }
+      }
+      hasReducedPadding={true}
+      isHorizontal={true}
+      label="Event 1"
+    />
+  }
+  markerBody={
+    <MarkerBody
+      isHorizontal={true}
+    />
+  }
+  markerPosition="top"
+  style={
+    Object {
+      "line": Object {
+        "dash": Array [
+          9,
+          3,
+        ],
+        "opacity": 1,
+        "stroke": "red",
+        "strokeWidth": 3,
+      },
+    }
+  }
+/>
+`;
+
+exports[`xy_expression XYChart component annotations should render grouped annotations with default styles 1`] = `
+<LineAnnotation
+  customTooltipDetails={[Function]}
+  dataValues={
+    Array [
+      Object {
+        "dataValue": 1647591900025,
+        "details": "Event 1",
+        "header": 1647591900000,
+      },
+    ]
+  }
+  domainType="xDomain"
+  id="event_1"
+  key="event_1"
+  marker={
+    <Marker
+      config={
+        Object {
+          "axisMode": "bottom",
+          "color": "#f04e98",
+          "customTooltipDetails": [Function],
+          "icon": "2",
+          "label": "Event 1",
+          "lineStyle": "solid",
+          "lineWidth": 1,
+          "roundedTimestamp": 1647591900000,
+          "textVisibility": undefined,
+          "time": "2022-03-18T08:25:00.000Z",
+          "type": "manual_event_annotation",
+        }
+      }
+      hasReducedPadding={true}
+      isHorizontal={true}
+      label="Event 1"
+    />
+  }
+  markerBody={
+    <MarkerBody
+      isHorizontal={true}
+    />
+  }
+  markerPosition="top"
+  style={
+    Object {
+      "line": Object {
+        "dash": undefined,
+        "opacity": 1,
+        "stroke": "#f04e98",
+        "strokeWidth": 1,
+      },
+    }
+  }
+/>
+`;
+
+exports[`xy_expression XYChart component annotations should render simplified annotation when hide is true 1`] = `
+<LineAnnotation
+  dataValues={
+    Array [
+      Object {
+        "dataValue": 1647591917125,
+        "details": "Annotation",
+        "header": "2022-03-18T08:25:17.140Z",
+      },
+    ]
+  }
+  domainType="xDomain"
+  id="annotation"
+  key="annotation"
+  marker={
+    <Marker
+      config={
+        Object {
+          "axisMode": "bottom",
+          "label": "Annotation",
+          "roundedTimestamp": 1647591917100,
+          "time": "2022-03-18T08:25:17.140Z",
+          "type": "manual_event_annotation",
+        }
+      }
+      hasReducedPadding={false}
+      isHorizontal={true}
+      label="Annotation"
+    />
+  }
+  markerBody={
+    <MarkerBody
+      isHorizontal={true}
+    />
+  }
+  markerPosition="top"
+  style={
+    Object {
+      "line": Object {
+        "dash": undefined,
+        "opacity": 1,
+        "stroke": "#f04e98",
+        "strokeWidth": 1,
+      },
+    }
+  }
+/>
+`;
+
 exports[`xy_expression XYChart component it renders area 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
     allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -43,7 +257,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
         "strokeWidth": 1,
@@ -70,7 +284,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
     domain={
       Object {
         "fit": false,
@@ -108,7 +322,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <Connect(SpecInstance)
+  <AreaSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -137,6 +351,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
@@ -168,7 +383,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <AreaSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -197,6 +412,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
@@ -235,8 +451,9 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
     allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -274,7 +491,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
         "strokeWidth": 1,
@@ -301,7 +518,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
     domain={
       Object {
         "fit": false,
@@ -339,7 +556,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -406,7 +623,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -480,8 +697,9 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
     allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -519,7 +737,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
         "strokeWidth": 1,
@@ -546,7 +764,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
     domain={
       Object {
         "fit": false,
@@ -584,7 +802,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -651,7 +869,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -725,8 +943,9 @@ exports[`xy_expression XYChart component it renders line 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
     allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -764,7 +983,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
         "strokeWidth": 1,
@@ -791,7 +1010,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
     domain={
       Object {
         "fit": false,
@@ -829,7 +1048,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <Connect(SpecInstance)
+  <LineSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -858,6 +1077,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
@@ -889,7 +1109,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <LineSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -918,6 +1138,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
@@ -956,8 +1177,9 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
     allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -995,7 +1217,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
         "strokeWidth": 1,
@@ -1022,7 +1244,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
     domain={
       Object {
         "fit": false,
@@ -1060,7 +1282,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <Connect(SpecInstance)
+  <AreaSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -1089,6 +1311,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
@@ -1124,7 +1347,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <AreaSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -1153,6 +1376,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     enableHistogramMode={false}
     fit={
       Object {
+        "endValue": undefined,
         "type": "none",
       }
     }
@@ -1195,8 +1419,9 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
     allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -1234,7 +1459,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
         "strokeWidth": 1,
@@ -1261,7 +1486,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
     domain={
       Object {
         "fit": false,
@@ -1299,7 +1524,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -1370,7 +1595,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -1448,8 +1673,9 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
     allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
     legendAction={
@@ -1487,7 +1713,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
       }
     }
   />
-  <Connect(SpecInstance)
+  <Component
     gridLine={
       Object {
         "strokeWidth": 1,
@@ -1514,7 +1740,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     timeAxisLayerCount={0}
     title="c"
   />
-  <Connect(SpecInstance)
+  <Component
     domain={
       Object {
         "fit": false,
@@ -1552,7 +1778,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     darkMode={false}
     histogramMode={false}
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {
@@ -1623,7 +1849,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     yScaleType="linear"
   />
-  <Connect(SpecInstance)
+  <BarSeries
     areaSeriesStyle={
       Object {
         "point": Object {

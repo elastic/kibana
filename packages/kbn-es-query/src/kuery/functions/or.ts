@@ -8,7 +8,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as ast from '../ast';
-import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
+import { DataViewBase, KueryNode, KueryQueryOptions } from '../..';
 
 export function buildNodeParams(children: KueryNode[]) {
   return {
@@ -18,7 +18,7 @@ export function buildNodeParams(children: KueryNode[]) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: Record<string, any> = {}
 ): estypes.QueryDslQueryContainer {

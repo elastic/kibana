@@ -33,6 +33,15 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
       ...type,
     })
   );
+  registry.registerType({
+    name: LEGACY_URL_ALIAS_TYPE,
+    namespaceType: 'agnostic',
+    hidden: false,
+    mappings: { properties: {} },
+    migrations: {
+      '0.1.2': () => ({} as SavedObjectUnsanitizedDoc), // the migration version is non-existent and the result doesn't matter, this migration function is never applied, we just want to assert that aliases are marked as "up-to-date"
+    },
+  });
   return registry;
 };
 
@@ -664,39 +673,6 @@ describe('DocumentMigrator', () => {
       );
     });
 
-    it('allows updating a migrationVersion prop to a later version', () => {
-      const migrator = new DocumentMigrator({
-        ...testOpts(),
-        typeRegistry: createRegistry({
-          name: 'cat',
-          migrations: {
-            '1.0.0': setAttr('migrationVersion.cat', '2.9.1'),
-            '2.0.0': () => {
-              throw new Error('POW!');
-            },
-            '2.9.1': () => {
-              throw new Error('BANG!');
-            },
-            '3.0.0': setAttr('attributes.name', 'Shiny'),
-          },
-        }),
-      });
-      migrator.prepareMigrations();
-      const actual = migrator.migrate({
-        id: 'smelly',
-        type: 'cat',
-        attributes: { name: 'Boo' },
-        migrationVersion: { cat: '0.5.6' },
-      });
-      expect(actual).toEqual({
-        id: 'smelly',
-        type: 'cat',
-        attributes: { name: 'Shiny' },
-        migrationVersion: { cat: '3.0.0' },
-        coreMigrationVersion: kibanaVersion,
-      });
-    });
-
     it('allows adding props to migrationVersion', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
@@ -816,6 +792,7 @@ describe('DocumentMigrator', () => {
         aaa: '10.4.0',
         bbb: '3.2.3',
         ccc: '11.0.0',
+        [LEGACY_URL_ALIAS_TYPE]: '0.1.2',
       });
     });
 
@@ -981,8 +958,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);
@@ -1056,8 +1034,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);
@@ -1072,7 +1051,8 @@ describe('DocumentMigrator', () => {
               name: 'dog',
               namespaceType: 'single',
               migrations: {
-                '1.0.0': setAttr('migrationVersion.dog', '2.0.0'),
+                '1.1.0': setAttr('attributes.age', '12'),
+                '1.5.0': setAttr('attributes.color', 'tri-color'),
                 '2.0.0': (doc) => doc, // noop
               },
             },
@@ -1083,9 +1063,10 @@ describe('DocumentMigrator', () => {
         const obj = {
           id: 'sleepy',
           type: 'dog',
-          attributes: { name: 'Patches' },
-          migrationVersion: {},
+          attributes: { name: 'Patches', age: '11' },
+          migrationVersion: { dog: '1.1.0' }, // skip the first migration transform, only apply the second and third
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+          coreMigrationVersion: undefined, // this is intentional
         };
 
         it('in the default space', () => {
@@ -1095,7 +1076,7 @@ describe('DocumentMigrator', () => {
             {
               id: 'sleepy',
               type: 'dog',
-              attributes: { name: 'Patches' },
+              attributes: { name: 'Patches', age: '11', color: 'tri-color' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
               coreMigrationVersion: kibanaVersion,
@@ -1111,7 +1092,7 @@ describe('DocumentMigrator', () => {
             {
               id: 'sleepy',
               type: 'dog',
-              attributes: { name: 'Patches' },
+              attributes: { name: 'Patches', age: '11', color: 'tri-color' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
               coreMigrationVersion: kibanaVersion,
@@ -1179,8 +1160,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);
@@ -1262,8 +1244,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);

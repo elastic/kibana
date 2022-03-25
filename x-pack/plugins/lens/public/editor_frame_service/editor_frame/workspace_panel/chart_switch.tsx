@@ -26,8 +26,9 @@ import {
   VisualizationType,
   VisualizationMap,
   DatasourceMap,
+  Suggestion,
 } from '../../../types';
-import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
+import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 import {
@@ -131,7 +132,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         ...selection,
         visualizationState: selection.getVisualizationState(),
       },
-      true
+      { clearStagedPreview: true }
     );
 
     if (
@@ -247,10 +248,13 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       if (!flyoutOpen) {
         return { visualizationTypes: [], visualizationsLookup: {} };
       }
-      const subVisualizationId = getCurrentVisualizationId(
-        props.visualizationMap[visualization.activeId || ''],
-        visualization.state
-      );
+      const subVisualizationId =
+        visualization.activeId && props.visualizationMap[visualization.activeId]
+          ? getCurrentVisualizationId(
+              props.visualizationMap[visualization.activeId],
+              visualization.state
+            )
+          : undefined;
       const lowercasedSearchTerm = searchTerm.toLowerCase();
       // reorganize visualizations in groups
       const grouped: Record<
@@ -366,7 +370,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                               <EuiBadge color="hollow">
                                 <FormattedMessage
                                   id="xpack.lens.chartSwitch.experimentalLabel"
-                                  defaultMessage="Experimental"
+                                  defaultMessage="Technical preview"
                                 />
                               </EuiBadge>
                             </EuiFlexItem>
@@ -434,10 +438,9 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           isPreFiltered
           data-test-subj="lnsChartSwitchList"
           searchProps={{
-            incremental: true,
             className: 'lnsChartSwitch__search',
             'data-test-subj': 'lnsChartSwitchSearch',
-            onSearch: (value) => setSearchTerm(value),
+            onChange: (value) => setSearchTerm(value),
           }}
           options={visualizationTypes}
           onChange={(newOptions) => {

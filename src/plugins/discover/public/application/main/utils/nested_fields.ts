@@ -7,8 +7,8 @@
  */
 
 import { escapeRegExp } from 'lodash/fp';
-import type { IndexPattern } from 'src/plugins/data/public';
-import { getFieldSubtypeNested } from '../../../../../data/common';
+import { getFieldSubtypeNested } from '../../../../../data_views/public';
+import type { DataView } from '../../../../../data_views/public';
 
 /**
  * This function checks if the given field in a given index pattern is a nested field's parent.
@@ -46,7 +46,7 @@ import { getFieldSubtypeNested } from '../../../../../data/common';
  * to the index pattern, but that has its own complications which you can read more about in the following
  * issue: https://github.com/elastic/kibana/issues/54957
  */
-export function isNestedFieldParent(fieldName: string, indexPattern: IndexPattern): boolean {
+export function isNestedFieldParent(fieldName: string, indexPattern: DataView): boolean {
   return (
     !indexPattern.fields.getByName(fieldName) &&
     !!indexPattern.fields.getAll().find((patternField) => {

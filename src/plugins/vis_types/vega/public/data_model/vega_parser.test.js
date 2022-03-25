@@ -7,7 +7,8 @@
  */
 import { cloneDeep } from 'lodash';
 import 'jest-canvas-mock';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { TimeCache } from './time_cache';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
@@ -226,7 +227,12 @@ describe('VegaParser._resolveEsQueries', () => {
           },
         };
       };
-      const vp = new VegaParser(spec, searchApiStub, 0, 0, mockGetServiceSettings);
+      const tc = new (class extends TimeCache {
+        getTimeBounds() {
+          return { min: 123456, max: 654321 };
+        }
+      })();
+      const vp = new VegaParser(spec, searchApiStub, tc, 0, mockGetServiceSettings);
       await vp._resolveDataUrls();
 
       expect(vp.spec).toEqual(expected);
@@ -263,6 +269,20 @@ describe('VegaParser._resolveEsQueries', () => {
     check(
       { data: { url: { '%type%': 'emsfile', name: 'file1' } } },
       { data: { url: bypassExternalUrlCheck('url1') } }
+    )
+  );
+  test(
+    'timefilter_min',
+    check(
+      { data: { url: 'http://example.com?min=%timefilter_min%' } },
+      { data: { url: 'http://example.com?min=123456' } }
+    )
+  );
+  test(
+    'timefilter_max',
+    check(
+      { data: { url: 'http://example.com?min=%timefilter_max%' } },
+      { data: { url: 'http://example.com?min=654321' } }
     )
   );
 });

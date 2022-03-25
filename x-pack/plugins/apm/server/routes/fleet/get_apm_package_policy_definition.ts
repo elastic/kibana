@@ -6,20 +6,28 @@
  */
 
 import {
+  isPrereleaseVersion,
   POLICY_ELASTIC_AGENT_ON_CLOUD,
   SUPPORTED_APM_PACKAGE_VERSION,
 } from '../../../common/fleet';
-import { APMPluginSetupDependencies } from '../../types';
+import {
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies,
+} from '../../types';
 import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 
 interface GetApmPackagePolicyDefinitionOptions {
   apmServerSchema: Record<string, any>;
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
+  fleetPluginStart: APMPluginStartDependencies['fleet'];
+  kibanaVersion: string;
 }
-export function getApmPackagePolicyDefinition(
+export async function getApmPackagePolicyDefinition(
   options: GetApmPackagePolicyDefinitionOptions
 ) {
-  const { apmServerSchema, cloudPluginSetup } = options;
+  const { apmServerSchema, cloudPluginSetup, fleetPluginStart, kibanaVersion } =
+    options;
+
   return {
     name: 'Elastic APM',
     namespace: 'default',
@@ -33,16 +41,36 @@ export function getApmPackagePolicyDefinition(
         streams: [],
         vars: getApmPackageInputVars({
           cloudPluginSetup,
+          fleetPluginStart,
           apmServerSchema: preprocessLegacyFields({ apmServerSchema }),
+          kibanaVersion,
         }),
       },
     ],
     package: {
       name: APM_PACKAGE_NAME,
-      version: SUPPORTED_APM_PACKAGE_VERSION,
+      version: await getApmPackageVersion(fleetPluginStart, kibanaVersion),
       title: 'Elastic APM',
     },
   };
+}
+
+async function getApmPackageVersion(
+  fleetPluginStart: APMPluginStartDependencies['fleet'],
+  kibanaVersion: string
+) {
+  if (fleetPluginStart && isPrereleaseVersion(kibanaVersion)) {
+    try {
+      const latestApmPackage =
+        await fleetPluginStart.packageService.asInternalUser.fetchFindLatestPackage(
+          'apm'
+        );
+      return latestApmPackage.version;
+    } catch (error) {
+      return SUPPORTED_APM_PACKAGE_VERSION;
+    }
+  }
+  return SUPPORTED_APM_PACKAGE_VERSION;
 }
 
 export function preprocessLegacyFields({
@@ -250,5 +278,17 @@ export const apmConfigMapping: Record<
   'apm-server.auth.anonymous.rate_limit.event_limit': {
     name: 'anonymous_rate_limit_event_limit',
     type: 'integer',
+  },
+  'apm-server.sampling.tail.enabled': {
+    name: 'tail_sampling_enabled',
+    type: 'bool',
+  },
+  'apm-server.sampling.tail.interval': {
+    name: 'tail_sampling_interval',
+    type: 'text',
+  },
+  'apm-server.sampling.tail.policies': {
+    name: 'tail_sampling_policies',
+    type: 'yaml',
   },
 };

@@ -50,7 +50,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       }),
       enableRouting: false,
       disabled: false,
-      mount: async ({ element }) => {
+      mount: async ({ element, theme$ }) => {
         const [core] = await getStartServices();
 
         const {
@@ -76,6 +76,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
           uiSettings,
           links: getLinks(docLinks),
           chrome,
+          theme$,
         });
 
         return () => {

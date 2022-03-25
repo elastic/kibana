@@ -37,7 +37,7 @@ import {
 } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 
-function displayError(toastNotifications: ToastsStart, indexPattern: string, err: any) {
+function displayError(toastNotifications: ToastsStart, index: string, err: any) {
   if (err.statusCode === 500) {
     toastNotifications.addError(err, {
       title: i18n.translate('xpack.dataVisualizer.index.dataLoader.internalServerErrorMessage', {
@@ -45,7 +45,7 @@ function displayError(toastNotifications: ToastsStart, indexPattern: string, err
           'Error loading data in index {index}. {message}. ' +
           'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
         values: {
-          index: indexPattern,
+          index,
           message: err.error ?? err.message,
         },
       }),
@@ -55,7 +55,7 @@ function displayError(toastNotifications: ToastsStart, indexPattern: string, err
       title: i18n.translate('xpack.dataVisualizer.index.errorLoadingDataMessage', {
         defaultMessage: 'Error loading data in index {index}. {message}.',
         values: {
-          index: indexPattern,
+          index,
           message: err.error ?? err.message,
         },
       }),
@@ -109,6 +109,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       intervalMs,
       runtimeFieldMap,
       samplerShardSize,
+      fieldsToFetch,
     } = searchStrategyParams;
 
     const searchOptions: ISearchOptions = {
@@ -182,7 +183,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     );
 
     const documentCountStats$ =
-      timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
+      !fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
         ? data.search.search(
             {
               params: getDocumentCountStatsRequest(searchStrategyParams),

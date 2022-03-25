@@ -20,11 +20,15 @@ describe('HostRiskSummary', () => {
       isModuleEnabled: true,
       result: [
         {
+          '@timestamp': '1641902481',
           host: {
             name: 'test-host-name',
           },
-          risk_score: 9999,
           risk: riskKeyword,
+          risk_stats: {
+            risk_score: 9999,
+            rule_risks: [],
+          },
         },
       ],
     };
@@ -60,11 +64,15 @@ describe('HostRiskSummary', () => {
       isModuleEnabled: false,
       result: [
         {
+          '@timestamp': '1641902530',
           host: {
             name: 'test-host-name',
           },
-          risk_score: 9999,
           risk: 'test-risk',
+          risk_stats: {
+            risk_score: 9999,
+            rule_risks: [],
+          },
         },
       ],
     };

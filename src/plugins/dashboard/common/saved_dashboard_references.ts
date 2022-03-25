@@ -19,7 +19,6 @@ import {
   convertSavedDashboardPanelToPanelState,
 } from './embeddable/embeddable_saved_object_converters';
 import { SavedDashboardPanel } from './types';
-import { CONTROL_GROUP_TYPE } from '../../presentation_util/common/lib';
 
 export interface ExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
@@ -51,7 +50,6 @@ function dashboardAttributesToState(attributes: SavedObjectAttributes): {
       if (controlGroupPanels && typeof controlGroupPanels === 'object') {
         controlGroupInput = {
           ...rawControlGroupInput,
-          type: CONTROL_GROUP_TYPE,
           panels: controlGroupPanels,
         };
       }

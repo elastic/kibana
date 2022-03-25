@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ControlStyle } from '../../presentation_util/public';
-
 export const DASHBOARD_STATE_STORAGE_KEY = '_a';
+export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 export const DashboardConstants = {
   LANDING_PAGE_PATH: '/list',
   CREATE_NEW_DASHBOARD_URL: '/create',
   VIEW_DASHBOARD_URL: '/view',
+  PRINT_DASHBOARD_URL: '/print',
   ADD_EMBEDDABLE_ID: 'addEmbeddableId',
   ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
   DASHBOARDS_ID: 'dashboards',
@@ -22,11 +22,6 @@ export const DashboardConstants = {
   CHANGE_CHECK_DEBOUNCE: 100,
   CHANGE_APPLY_DEBOUNCE: 50,
 };
-
-export const getDefaultDashboardControlGroupInput = () => ({
-  controlStyle: 'oneLine' as ControlStyle,
-  panels: {},
-});
 
 export function createDashboardEditUrl(id?: string, editMode?: boolean) {
   if (!id) {

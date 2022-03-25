@@ -14,6 +14,7 @@ import { Ping } from '../../../common/runtime_types/ping';
 import { createEsQuery } from '../../../common/utils/es_search';
 import { UptimeESClient } from '../lib';
 import { UNNAMED_LOCATION } from '../../../common/constants';
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../observability/common';
 
 export interface GetMonitorStatusParams {
   filters?: JsonObject;
@@ -30,6 +31,31 @@ export interface GetMonitorStatusResult {
   count: number;
   monitorInfo: Ping;
 }
+
+export interface GetMonitorDownStatusMessageParams {
+  info: Ping;
+  count: number;
+  interval?: string;
+  numTimes: number;
+}
+
+export const getMonitorDownStatusMessageParams = (
+  info: Ping,
+  count: number,
+  numTimes: number,
+  timerangeCount: number,
+  timerangeUnit: string,
+  oldVersionTimeRange: { from: string; to: string }
+) => {
+  return {
+    info,
+    count,
+    interval: oldVersionTimeRange
+      ? oldVersionTimeRange.from.slice(-3)
+      : formatDurationFromTimeUnitChar(timerangeCount, timerangeUnit as TimeUnitChar),
+    numTimes,
+  };
+};
 
 const getLocationClause = (locations: string[]) => ({
   bool: {
@@ -189,6 +215,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
     monitors = monitors.concat(monitorRes);
   } while (afterKey !== undefined);
 
+  // @ts-ignore 4.3.5 upgrade - Expression produces a union type that is too complex to represent.ts(2590)
   return monitors
     .filter((monitor) => monitor?.doc_count >= numTimes)
     .map(({ key, doc_count: count, fields }) => ({

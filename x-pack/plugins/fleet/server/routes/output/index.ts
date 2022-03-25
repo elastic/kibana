@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
-
-import { PLUGIN_ID, OUTPUT_API_ROUTES } from '../../constants';
+import { OUTPUT_API_ROUTES } from '../../constants';
 import {
   DeleteOutputRequestSchema,
   GetOneOutputRequestSchema,
@@ -15,6 +13,7 @@ import {
   PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
+import type { FleetAuthzRouter } from '../security';
 
 import {
   deleteOutputHandler,
@@ -22,14 +21,17 @@ import {
   getOutputsHandler,
   postOuputHandler,
   putOuputHandler,
+  postLogstashApiKeyHandler,
 } from './handler';
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter) => {
   router.get(
     {
       path: OUTPUT_API_ROUTES.LIST_PATTERN,
       validate: GetOutputsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     getOutputsHandler
   );
@@ -37,7 +39,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: OUTPUT_API_ROUTES.INFO_PATTERN,
       validate: GetOneOutputRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     getOneOuputHandler
   );
@@ -45,7 +49,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
       validate: PutOutputRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     putOuputHandler
   );
@@ -54,7 +60,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: OUTPUT_API_ROUTES.CREATE_PATTERN,
       validate: PostOutputRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     postOuputHandler
   );
@@ -63,8 +71,21 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: OUTPUT_API_ROUTES.DELETE_PATTERN,
       validate: DeleteOutputRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     deleteOutputHandler
+  );
+
+  router.post(
+    {
+      path: OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
+      validate: false,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    postLogstashApiKeyHandler
   );
 };

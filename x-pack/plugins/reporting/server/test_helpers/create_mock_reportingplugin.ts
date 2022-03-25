@@ -7,73 +7,78 @@
 
 jest.mock('../routes');
 jest.mock('../usage');
-jest.mock('../browsers');
 
 import _ from 'lodash';
-import * as Rx from 'rxjs';
-import { coreMock, elasticsearchServiceMock, statusServiceMock } from 'src/core/server/mocks';
+import { BehaviorSubject } from 'rxjs';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  statusServiceMock,
+} from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
+import { fieldFormatsMock } from 'src/plugins/field_formats/common/mocks';
+import { DeepPartial } from 'utility-types';
 import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
+import { licensingMock } from '../../../licensing/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createMockScreenshottingStart } from '../../../screenshotting/server/mock';
 import { securityMock } from '../../../security/server/mocks';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
-import {
-  chromium,
-  HeadlessChromiumDriverFactory,
-  initializeBrowserDriverFactory,
-} from '../browsers';
-import { ReportingConfigType } from '../config';
+import { buildConfig, ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
 import { setFieldFormats } from '../services';
-import { createMockLevelLogger } from './create_mock_levellogger';
 
-(
-  initializeBrowserDriverFactory as jest.Mock<Promise<HeadlessChromiumDriverFactory>>
-).mockImplementation(() => Promise.resolve({} as HeadlessChromiumDriverFactory));
-
-(chromium as any).createDriverFactory.mockImplementation(() => ({}));
-
-export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
+export const createMockPluginSetup = (
+  setupMock: Partial<Record<keyof ReportingInternalSetup, any>>
+): ReportingInternalSetup => {
   return {
     features: featuresPluginMock.createSetup(),
     basePath: { set: jest.fn() },
-    router: setupMock.router,
+    router: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
     security: securityMock.createSetup(),
-    licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
     taskManager: taskManagerMock.createSetup(),
-    logger: createMockLevelLogger(),
+    logger: loggingSystemMock.createLogger(),
     status: statusServiceMock.createSetupContract(),
     ...setupMock,
   };
 };
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 
-const createMockReportingStore = () => ({} as ReportingStore);
+const createMockReportingStore = async (config: ReportingConfigType) => {
+  const mockConfigSchema = createMockConfigSchema(config);
+  const mockContext = coreMock.createPluginInitializerContext(mockConfigSchema);
+  const mockCore = new ReportingCore(logger, mockContext);
+  mockCore.setConfig(await buildConfig(mockContext, coreMock.createSetup(), logger));
+  return new ReportingStore(mockCore, logger);
+};
 
-export const createMockPluginStart = (
-  mockReportingCore: ReportingCore | undefined,
-  startMock?: any
-): ReportingInternalStart => {
-  const store = mockReportingCore
-    ? new ReportingStore(mockReportingCore, logger)
-    : createMockReportingStore();
-
+export const createMockPluginStart = async (
+  startMock: Partial<Record<keyof ReportingInternalStart, any>>,
+  config: ReportingConfigType
+): Promise<ReportingInternalStart> => {
   return {
-    browserDriverFactory: startMock.browserDriverFactory,
     esClient: elasticsearchServiceMock.createClusterClient(),
-    savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
-    uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
-    data: startMock.data || dataPluginMock.createStartContract(),
-    store,
+    savedObjects: { getScopedClient: jest.fn() },
+    uiSettings: { asScopedToClient: () => ({ get: jest.fn() }) },
+    data: dataPluginMock.createStartContract(),
+    fieldFormats: () => Promise.resolve(fieldFormatsMock),
+    store: await createMockReportingStore(config),
     taskManager: {
       schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
       ensureScheduled: jest.fn(),
-    } as any,
-    logger: createMockLevelLogger(),
+    },
+    licensing: {
+      ...licensingMock.createStart(),
+      license$: new BehaviorSubject({ isAvailable: true, isActive: true, type: 'basic' }),
+    },
+    logger,
+    screenshotting: createMockScreenshottingStart(),
     ...startMock,
   };
 };
@@ -85,12 +90,10 @@ interface ReportingConfigTestType {
   kibanaServer: Partial<ReportingConfigType['kibanaServer']>;
   csv: Partial<ReportingConfigType['csv']>;
   roles?: Partial<ReportingConfigType['roles']>;
-  capture: any;
-  server?: any;
 }
 
 export const createMockConfigSchema = (
-  overrides: Partial<ReportingConfigTestType> = {}
+  overrides: DeepPartial<ReportingConfigType> = {}
 ): ReportingConfigType => {
   // deeply merge the defaults and the provided partial schema
   return {
@@ -101,14 +104,6 @@ export const createMockConfigSchema = (
       hostname: 'localhost',
       port: 80,
       ...overrides.kibanaServer,
-    },
-    capture: {
-      browser: {
-        chromium: {
-          disableSandbox: true,
-        },
-      },
-      ...overrides.capture,
     },
     queue: {
       indexInterval: 'week',
@@ -124,7 +119,17 @@ export const createMockConfigSchema = (
       enabled: false,
       ...overrides.roles,
     },
-  } as any;
+    capture: {
+      maxAttempts: 1,
+      loadDelay: 1,
+      timeouts: {
+        openUrl: 100,
+        renderComplete: 100,
+        waitForElements: 100,
+      },
+      zoom: 1,
+    },
+  } as ReportingConfigType;
 };
 
 export const createMockConfig = (
@@ -144,17 +149,8 @@ export const createMockReportingCore = async (
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
   startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
-  const mockReportingCore = {
-    getConfig: () => createMockConfig(config),
-    getEsClient: () => startDepsMock?.esClient,
-    getDataService: () => startDepsMock?.data,
-  } as unknown as ReportingCore;
-
   if (!setupDepsMock) {
     setupDepsMock = createMockPluginSetup({});
-  }
-  if (!startDepsMock) {
-    startDepsMock = createMockPluginStart(mockReportingCore, {});
   }
 
   const context = coreMock.createPluginInitializerContext(createMockConfigSchema());
@@ -167,7 +163,7 @@ export const createMockReportingCore = async (
   await core.pluginSetsUp();
 
   if (!startDepsMock) {
-    startDepsMock = createMockPluginStart(core, context);
+    startDepsMock = await createMockPluginStart(context, config);
   }
   await core.pluginStart(startDepsMock);
   await core.pluginStartsUp();

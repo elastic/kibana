@@ -6,128 +6,165 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import { DashboardPanelState } from '..';
-import { esFilters, Filter } from '../../services/data';
-import {
-  DashboardContainerInput,
-  DashboardOptions,
-  DashboardPanelMap,
-  DashboardState,
-} from '../../types';
+import { xor, omit, isEmpty } from 'lodash';
+import fastIsEqual from 'fast-deep-equal';
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter, isFilterPinned } from '@kbn/es-query';
+
+import { DashboardContainerInput } from '../..';
 import { controlGroupInputIsEqual } from './dashboard_control_group';
+import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
+import { IEmbeddable } from '../../services/embeddable';
 
-interface DashboardDiffCommon {
-  [key: string]: unknown;
-}
+const stateKeystoIgnore = ['expandedPanelId', 'fullScreenMode', 'savedQuery', 'viewMode', 'tags'];
+type DashboardStateToCompare = Omit<DashboardState, typeof stateKeystoIgnore[number]>;
 
-type DashboardDiffCommonFilters = DashboardDiffCommon & { filters: Filter[] };
+const inputKeystoIgnore = ['searchSessionId', 'lastReloadRequestTime', 'executionContext'] as const;
+type DashboardInputToCompare = Omit<DashboardContainerInput, typeof inputKeystoIgnore[number]>;
 
+/**
+ * The diff dashboard Container method is used to sync redux state and the dashboard container input.
+ * It should eventually be replaced with a usage of the dashboardContainer.isInputEqual function
+ **/
 export const diffDashboardContainerInput = (
   originalInput: DashboardContainerInput,
   newInput: DashboardContainerInput
-) => {
-  return commonDiffFilters<DashboardContainerInput>(
-    originalInput as unknown as DashboardDiffCommonFilters,
-    newInput as unknown as DashboardDiffCommonFilters,
-    ['searchSessionId', 'lastReloadRequestTime', 'executionContext']
-  );
-};
+): Partial<DashboardContainerInput> => {
+  const { filters: originalFilters, ...commonOriginal } = omit(originalInput, inputKeystoIgnore);
+  const { filters: newFilters, ...commonNew } = omit(newInput, inputKeystoIgnore);
 
-export const diffDashboardState = (
-  original: DashboardState,
-  newState: DashboardState
-): Partial<DashboardState> => {
-  const common = commonDiffFilters<DashboardState>(
-    original as unknown as DashboardDiffCommonFilters,
-    newState as unknown as DashboardDiffCommonFilters,
-    ['viewMode', 'panels', 'options', 'savedQuery', 'expandedPanelId', 'controlGroupInput'],
-    true
-  );
+  const commonInputDiff: Partial<DashboardInputToCompare> = commonDiff(commonOriginal, commonNew);
+  const filtersAreEqual = getFiltersAreEqual(originalInput.filters, newInput.filters);
 
   return {
-    ...common,
-    ...(panelsAreEqual(original.panels, newState.panels) ? {} : { panels: newState.panels }),
-    ...(optionsAreEqual(original.options, newState.options) ? {} : { options: newState.options }),
-    ...(controlGroupInputIsEqual(original.controlGroupInput, newState.controlGroupInput)
-      ? {}
-      : { controlGroupInput: newState.controlGroupInput }),
+    ...commonInputDiff,
+    ...(filtersAreEqual ? {} : { filters: newInput.filters }),
   };
 };
 
-const optionsAreEqual = (optionsA: DashboardOptions, optionsB: DashboardOptions): boolean => {
-  const optionKeys = [...Object.keys(optionsA), ...Object.keys(optionsB)];
+/**
+ * The diff dashboard state method compares dashboard state keys to determine which state keys
+ * have changed, and therefore should be backed up.
+ **/
+export const diffDashboardState = async ({
+  originalState,
+  newState,
+  getEmbeddable,
+}: {
+  originalState: DashboardState;
+  newState: DashboardState;
+  getEmbeddable: (id: string) => Promise<IEmbeddable>;
+}): Promise<Partial<DashboardState>> => {
+  if (!newState.timeRestore) {
+    stateKeystoIgnore.push('timeRange');
+  }
+  const {
+    controlGroupInput: originalControlGroupInput,
+    options: originalOptions,
+    filters: originalFilters,
+    panels: originalPanels,
+    ...commonCompareOriginal
+  } = omit(originalState, stateKeystoIgnore);
+  const {
+    controlGroupInput: newControlGroupInput,
+    options: newOptions,
+    filters: newFilters,
+    panels: newPanels,
+    ...commonCompareNew
+  } = omit(newState, stateKeystoIgnore);
+
+  const commonStateDiff: Partial<DashboardStateToCompare> = commonDiff(
+    commonCompareOriginal,
+    commonCompareNew
+  );
+
+  const panelsAreEqual = await getPanelsAreEqual(
+    originalState.panels,
+    newState.panels,
+    getEmbeddable
+  );
+  const optionsAreEqual = getOptionsAreEqual(originalState.options, newState.options);
+  const filtersAreEqual = getFiltersAreEqual(originalState.filters, newState.filters, true);
+  const controlGroupIsEqual = controlGroupInputIsEqual(
+    originalState.controlGroupInput,
+    newState.controlGroupInput
+  );
+
+  return {
+    ...commonStateDiff,
+    ...(panelsAreEqual ? {} : { panels: newState.panels }),
+    ...(filtersAreEqual ? {} : { filters: newState.filters }),
+    ...(optionsAreEqual ? {} : { options: newState.options }),
+    ...(controlGroupIsEqual ? {} : { controlGroupInput: newState.controlGroupInput }),
+  };
+};
+
+const getFiltersAreEqual = (
+  filtersA: Filter[],
+  filtersB: Filter[],
+  ignorePinned?: boolean
+): boolean => {
+  return compareFilters(
+    filtersA,
+    ignorePinned ? filtersB.filter((f) => !isFilterPinned(f)) : filtersB,
+    COMPARE_ALL_OPTIONS
+  );
+};
+
+const getOptionsAreEqual = (optionsA: DashboardOptions, optionsB: DashboardOptions): boolean => {
+  const optionKeys = [
+    ...(Object.keys(optionsA) as Array<keyof DashboardOptions>),
+    ...(Object.keys(optionsB) as Array<keyof DashboardOptions>),
+  ];
   for (const key of optionKeys) {
-    if (
-      Boolean((optionsA as unknown as { [key: string]: boolean })[key]) !==
-      Boolean((optionsB as unknown as { [key: string]: boolean })[key])
-    ) {
-      return false;
-    }
+    if (Boolean(optionsA[key]) !== Boolean(optionsB[key])) return false;
   }
   return true;
 };
 
-const panelsAreEqual = (panelsA: DashboardPanelMap, panelsB: DashboardPanelMap): boolean => {
-  const embeddableIdsA = Object.keys(panelsA);
-  const embeddableIdsB = Object.keys(panelsB);
-  if (
-    embeddableIdsA.length !== embeddableIdsB.length ||
-    _.xor(embeddableIdsA, embeddableIdsB).length > 0
-  ) {
+const getPanelsAreEqual = async (
+  originalPanels: DashboardPanelMap,
+  newPanels: DashboardPanelMap,
+  getEmbeddable: (id: string) => Promise<IEmbeddable>
+): Promise<boolean> => {
+  const originalEmbeddableIds = Object.keys(originalPanels);
+  const newEmbeddableIds = Object.keys(newPanels);
+
+  const embeddableIdDiff = xor(originalEmbeddableIds, newEmbeddableIds);
+  if (embeddableIdDiff.length > 0) {
     return false;
   }
-  // embeddable ids are equal so let's compare individual panels.
-  for (const id of embeddableIdsA) {
-    if (
-      Object.keys(
-        commonDiff<DashboardPanelState>(
-          panelsA[id] as unknown as DashboardDiffCommon,
-          panelsB[id] as unknown as DashboardDiffCommon,
-          ['panelRefName']
-        )
-      ).length > 0
-    ) {
-      return false;
-    }
-  }
 
+  // embeddable ids are equal so let's compare individual panels.
+  for (const embeddableId of newEmbeddableIds) {
+    const {
+      explicitInput: originalExplicitInput,
+      panelRefName: panelRefA,
+      ...commonPanelDiffOriginal
+    } = originalPanels[embeddableId];
+    const {
+      explicitInput: newExplicitInput,
+      panelRefName: panelRefB,
+      ...commonPanelDiffNew
+    } = newPanels[embeddableId];
+
+    if (!isEmpty(commonDiff(commonPanelDiffOriginal, commonPanelDiffNew))) return false;
+
+    // the position and type of this embeddable is equal. Now we compare the embeddable input
+    const embeddable = await getEmbeddable(embeddableId);
+    if (!(await embeddable.getExplicitInputIsEqual(originalExplicitInput))) return false;
+  }
   return true;
 };
 
-const commonDiffFilters = <T extends { filters: Filter[] }>(
-  originalObj: DashboardDiffCommonFilters,
-  newObj: DashboardDiffCommonFilters,
-  omitKeys: string[],
-  ignorePinned?: boolean
-): Partial<T> => {
-  const filtersAreDifferent = () =>
-    !esFilters.compareFilters(
-      originalObj.filters,
-      ignorePinned ? newObj.filters.filter((f) => !esFilters.isFilterPinned(f)) : newObj.filters,
-      esFilters.COMPARE_ALL_OPTIONS
-    );
-  const otherDifferences = commonDiff<T>(originalObj, newObj, [...omitKeys, 'filters']);
-  return _.cloneDeep({
-    ...otherDifferences,
-    ...(filtersAreDifferent() ? { filters: newObj.filters } : {}),
-  });
-};
-
-const commonDiff = <T>(
-  originalObj: DashboardDiffCommon,
-  newObj: DashboardDiffCommon,
-  omitKeys: string[]
-) => {
+const commonDiff = <T>(originalObj: Partial<T>, newObj: Partial<T>) => {
   const differences: Partial<T> = {};
-  const keys = [...Object.keys(originalObj), ...Object.keys(newObj)].filter(
-    (key) => !omitKeys.includes(key)
-  );
-  keys.forEach((key) => {
-    if (key === undefined) return;
-    if (!_.isEqual(originalObj[key], newObj[key])) {
-      (differences as { [key: string]: unknown })[key] = newObj[key];
-    }
-  });
+  const keys = [
+    ...(Object.keys(originalObj) as Array<keyof T>),
+    ...(Object.keys(newObj) as Array<keyof T>),
+  ];
+  for (const key of keys) {
+    if (key === undefined) continue;
+    if (!fastIsEqual(originalObj[key], newObj[key])) differences[key] = newObj[key];
+  }
   return differences;
 };

@@ -125,18 +125,18 @@ image::images/rule-concepts-summary.svg[Rules, connectors, alerts and actions wo
 [[alerting-concepts-differences]]
 == Differences from Watcher
 
-{kib} alerting and <<watcher-ui,Watcher>> are both used to detect conditions and can trigger actions in response, but they are completely independent alerting systems.
+Alerting and <<watcher-ui,Watcher>> are both used to detect conditions and can trigger actions in response, but they are completely independent alerting systems.
 
 This section will clarify some of the important differences in the function and intent of the two systems.
 
-Functionally, {kib} alerting differs in that: 
+Functionally, Alerting differs in that: 
 
 * Scheduled checks are run on {kib} instead of {es}
 * {kib} <<alerting-concepts-conditions, rules hide the details of detecting conditions>> through *rule types*, whereas watches provide low-level control over inputs, conditions, and transformations.
 * {kib} rules track and persist the state of each detected condition through *alerts*. This makes it possible to mute and throttle individual alerts, and detect changes in state such as resolution.
-* Actions are linked to *alerts* in {kib} alerting. Actions are fired for each occurrence of a detected condition, rather than for the entire rule.
+* Actions are linked to *alerts* in Alerting. Actions are fired for each occurrence of a detected condition, rather than for the entire rule.
 
-At a higher level, {kib} alerting allows rich integrations across use cases like <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, and <<uptime-app,*Uptime*>>.
+At a higher level, Alerting allows rich integrations across use cases like <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, and <<uptime-app,*Uptime*>>.
 Pre-packaged *rule types* simplify setup and hide the details of complex, domain-specific detections, while providing a consistent interface across {kib}.
 
 --

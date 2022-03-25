@@ -15,7 +15,8 @@ import {
   AppState as ContextState,
   GetStateReturn as ContextGetStateReturn,
 } from '../../../application/context/services/context_state';
-import { IndexPattern, IndexPatternsContract } from '../../../../../data/public';
+import { DataViewsContract } from '../../../../../data/public';
+import { DataView } from '../../../../../data_views/public';
 import { popularizeField } from '../../../utils/popularize_field';
 
 /**
@@ -71,8 +72,8 @@ export function getStateColumnActions({
 }: {
   capabilities: Capabilities;
   config: IUiSettingsClient;
-  indexPattern: IndexPattern;
-  indexPatterns: IndexPatternsContract;
+  indexPattern: DataView;
+  indexPatterns: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
   state: DiscoverState | ContextState;

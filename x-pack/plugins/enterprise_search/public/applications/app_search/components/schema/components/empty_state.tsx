@@ -13,7 +13,7 @@ import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SchemaAddFieldModal } from '../../../../shared/schema';
-import { DOCS_PREFIX } from '../../../routes';
+import { INDEXING_SCHEMA_DOCS_URL } from '../../../routes';
 import { SchemaLogic } from '../schema_logic';
 
 export const EmptyState: React.FC = () => {
@@ -40,12 +40,7 @@ export const EmptyState: React.FC = () => {
           </p>
         }
         actions={
-          <EuiButton
-            size="s"
-            target="_blank"
-            iconType="popout"
-            href={`${DOCS_PREFIX}/indexing-documents-guide.html#indexing-documents-guide-schema`}
-          >
+          <EuiButton size="s" target="_blank" iconType="popout" href={INDEXING_SCHEMA_DOCS_URL}>
             {i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.empty.buttonLabel', {
               defaultMessage: 'Read the indexing schema guide',
             })}

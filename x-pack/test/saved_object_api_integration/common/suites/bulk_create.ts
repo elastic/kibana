@@ -109,17 +109,34 @@ export function bulkCreateTestSuiteFactory(esArchiver: any, supertest: SuperTest
             const { type, id } = testCase;
             expect(object.type).to.eql(type);
             expect(object.id).to.eql(id);
-            let metadata;
+            let expectedMetadata;
             if (testCase.fail409Param === 'unresolvableConflict') {
-              metadata = { isNotOverwritable: true };
+              expectedMetadata = { isNotOverwritable: true };
+            } else if (testCase.fail409Param === 'aliasConflictDefaultSpace') {
+              expectedMetadata = { spacesWithConflictingAliases: ['default'] };
             } else if (testCase.fail409Param === 'aliasConflictSpace1') {
-              metadata = { spacesWithConflictingAliases: ['space_1'] };
+              expectedMetadata = { spacesWithConflictingAliases: ['space_1'] };
             } else if (testCase.fail409Param === 'aliasConflictAllSpaces') {
-              metadata = { spacesWithConflictingAliases: ['space_1', 'space_x'] };
+              expectedMetadata = {
+                spacesWithConflictingAliases: ['default', 'space_1', 'space_x'],
+              };
             }
-            const error = SavedObjectsErrorHelpers.createConflictError(type, id);
-            const payload = { ...error.output.payload, ...(metadata && { metadata }) };
-            expect(object.error).to.eql(payload);
+            const expectedError = SavedObjectsErrorHelpers.createConflictError(type, id).output
+              .payload;
+            expect(object.error).be.an('object');
+            expect(object.error.statusCode).to.eql(expectedError.statusCode);
+            expect(object.error.error).to.eql(expectedError.error);
+            expect(object.error.message).to.eql(expectedError.message);
+            if (expectedMetadata) {
+              const actualMetadata = object.error.metadata ?? {};
+              if (actualMetadata.spacesWithConflictingAliases) {
+                actualMetadata.spacesWithConflictingAliases =
+                  actualMetadata.spacesWithConflictingAliases.sort();
+              }
+              expect(actualMetadata).to.eql(expectedMetadata);
+            } else {
+              expect(object.error.metadata).to.be(undefined);
+            }
             continue;
           }
           await expectResponses.permitted(object, testCase);

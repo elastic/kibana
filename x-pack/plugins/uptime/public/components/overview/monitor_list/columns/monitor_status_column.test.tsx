@@ -229,7 +229,12 @@ describe('MonitorListStatusColumn', () => {
   it('provides expected tooltip and display times', async () => {
     const { getByText } = render(
       <EuiThemeProvider darkMode={false}>
-        <MonitorListStatusColumn status="up" timestamp="2314123" summaryPings={[]} />
+        <MonitorListStatusColumn
+          status="up"
+          timestamp="2314123"
+          summaryPings={[]}
+          monitorType="http"
+        />
       </EuiThemeProvider>
     );
 
@@ -244,7 +249,12 @@ describe('MonitorListStatusColumn', () => {
   it('can handle a non-numeric timestamp value', () => {
     const { getByText } = render(
       <EuiThemeProvider darkMode={false}>
-        <MonitorListStatusColumn status="up" timestamp={new Date().toString()} summaryPings={[]} />
+        <MonitorListStatusColumn
+          status="up"
+          timestamp={new Date().toString()}
+          summaryPings={[]}
+          monitorType="http"
+        />
       </EuiThemeProvider>
     );
 
@@ -259,6 +269,7 @@ describe('MonitorListStatusColumn', () => {
         <MonitorListStatusColumn
           status="up"
           timestamp={new Date().toString()}
+          monitorType="http"
           summaryPings={summaryPings.filter((ping) => ping.observer!.geo!.name! === 'Islamabad')}
         />
       </EuiThemeProvider>
@@ -278,6 +289,7 @@ describe('MonitorListStatusColumn', () => {
           status="up"
           timestamp={new Date().toString()}
           summaryPings={summaryPings}
+          monitorType="http"
         />
       </EuiThemeProvider>
     );
@@ -295,6 +307,7 @@ describe('MonitorListStatusColumn', () => {
       <EuiThemeProvider darkMode={false}>
         <MonitorListStatusColumn
           status="up"
+          monitorType="http"
           timestamp={new Date().toString()}
           summaryPings={summaryPings}
         />

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { Position } from '@elastic/charts';
 import type { FramePublicAPI } from '../../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
@@ -16,6 +16,7 @@ import { ToolbarPopover, ValueLabelsSettings } from '../../../shared_components'
 import { MissingValuesOptions } from './missing_values_option';
 import { FillOpacityOption } from './fill_opacity_option';
 import { layerTypes } from '../../../../common';
+import { XYDataLayerConfig } from '../../../../common/expressions';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;
@@ -52,7 +53,7 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_stacked' }],
+          layers: [{ ...state.layers[0], seriesType: 'bar_stacked' } as XYDataLayerConfig],
         }}
       />
     );
@@ -68,7 +69,9 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' }],
+          layers: [
+            { ...state.layers[0], seriesType: 'area_percentage_stacked' } as XYDataLayerConfig,
+          ],
         }}
       />
     );
@@ -85,7 +88,9 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' }],
+          layers: [
+            { ...state.layers[0], seriesType: 'area_percentage_stacked' } as XYDataLayerConfig,
+          ],
         }}
       />
     );
@@ -101,7 +106,9 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' }],
+          layers: [
+            { ...state.layers[0], seriesType: 'area_percentage_stacked' } as XYDataLayerConfig,
+          ],
         }}
       />
     );
@@ -138,7 +145,7 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }],
+          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
           fittingFunction: 'Carry',
         }}
       />
@@ -155,7 +162,7 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }],
+          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
           fittingFunction: 'Carry',
         }}
       />
@@ -172,7 +179,7 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'line' }],
+          layers: [{ ...state.layers[0], seriesType: 'line' } as XYDataLayerConfig],
           fittingFunction: 'Carry',
         }}
       />
@@ -190,7 +197,7 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }],
+          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
           fittingFunction: 'Carry',
         }}
       />
@@ -207,7 +214,7 @@ describe('Visual options popover', () => {
         setState={jest.fn()}
         state={{
           ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area' }],
+          layers: [{ ...state.layers[0], seriesType: 'area' } as XYDataLayerConfig],
           fittingFunction: 'Carry',
         }}
       />
@@ -230,7 +237,7 @@ describe('Visual options popover', () => {
         state={{
           ...state,
           layers: [
-            { ...state.layers[0], seriesType: 'bar' },
+            { ...state.layers[0], seriesType: 'bar' } as XYDataLayerConfig,
             {
               seriesType: 'bar',
               layerType: layerTypes.DATA,

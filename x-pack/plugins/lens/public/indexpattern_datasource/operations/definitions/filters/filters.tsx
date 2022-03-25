@@ -101,6 +101,15 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
               language: 'kuery',
             },
           },
+          ...((
+            previousColumn as { params?: { secondaryFields?: string[] } }
+          ).params?.secondaryFields?.map((field) => ({
+            label: '',
+            input: {
+              query: `${field} : *`,
+              language: 'kuery',
+            },
+          })) ?? []),
         ],
       };
     }
@@ -255,7 +264,7 @@ export const FilterList = ({
                 setFilter={(f: FilterValue) => {
                   onChangeValue(f.id, f.input, f.label);
                 }}
-                Button={() => (
+                button={
                   <EuiLink
                     className="lnsFiltersOperation__popoverButton"
                     data-test-subj="indexPattern-filters-existingFilterTrigger"
@@ -267,7 +276,7 @@ export const FilterList = ({
                   >
                     {filter.label || filter.input.query || defaultLabel}
                   </EuiLink>
-                )}
+                }
               />
             </DraggableBucketContainer>
           );

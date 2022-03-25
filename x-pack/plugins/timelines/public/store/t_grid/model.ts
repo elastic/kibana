@@ -50,7 +50,7 @@ export interface TGridModel extends TGridModelSettings {
     end: string;
   };
   /** Kibana data view id **/
-  dataViewId: string;
+  dataViewId: string | null; // null if legacy pre-8.0 timeline
   /** Events to not be rendered **/
   deletedEventIds: string[];
   /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
@@ -66,8 +66,6 @@ export interface TGridModel extends TGridModelSettings {
   /** Uniquely identifies the timeline */
   id: string;
   indexNames: string[];
-  isAddToExistingCaseOpen: boolean;
-  isCreateNewCaseOpen: boolean;
   isLoading: boolean;
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
@@ -84,6 +82,7 @@ export interface TGridModel extends TGridModelSettings {
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for bulk actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
+  timelineType: 'default' | 'template';
   version: string | null;
   initialized?: boolean;
 }

@@ -7,8 +7,6 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 8.0.
 
-coming[8.0.0]
-
 See also <<whats-new>> and <<release-notes>>.
 
 * <<breaking_80_index_pattern_changes>>
@@ -65,7 +63,7 @@ If you are currently using one of these settings in your Kibana config, please r
 ==== Default logging timezone is now the system's timezone
 *Details:* In prior releases the timezone used in logs defaulted to UTC. We now use the host machine's timezone by default.
 
-*Impact:* To restore the previous behavior, in kibana.yml use the pattern layout, with a date modifier:
+*Impact:* To restore the previous behavior, in kibana.yml use the pattern layout, with a {kibana-ref}/logging-configuration.html#date-format[date modifier]:
 [source,yaml]
 -------------------
 logging:
@@ -100,7 +98,7 @@ See https://github.com/elastic/kibana/pull/87939 for more details.
 
 [float]
 ==== Logging destination is specified by the appender
-*Details:* Previously log destination would be `stdout` and could be changed to `file` using `logging.dest`. With the new logging configuration, you can specify the destination using appenders. 
+*Details:* Previously log destination would be `stdout` and could be changed to `file` using `logging.dest`. With the new logging configuration, you can specify the destination using {kibana-ref}/logging-configuration.html#logging-appenders[appenders]. 
 
 *Impact:* To restore the previous behavior and log records to *stdout*, in `kibana.yml` use an appender with `type: console`.
 [source,yaml]
@@ -131,7 +129,7 @@ logging:
 
 [float]
 ==== Set log verbosity with root
-*Details:* Previously logging output would be specified by `logging.silent` (none), `logging.quiet` (error messages only) and `logging.verbose` (all). With the new logging configuration, set the minimum required log level.
+*Details:* Previously logging output would be specified by `logging.silent` (none), `logging.quiet` (error messages only) and `logging.verbose` (all). With the new logging configuration, set the minimum required {kibana-ref}/logging-configuration.html#log-level[log level].
 
 *Impact:* To restore the previous behavior, in `kibana.yml` specify `logging.root.level`:
 [source,yaml]
@@ -188,7 +186,7 @@ logging:
 ==== Configure log rotation with the rolling-file appender
 *Details:* Previously log rotation would be enabled when `logging.rotate.enabled` was true.
 
-*Impact:* To restore the previous behavior, in `kibana.yml` use the `rolling-file` appender.
+*Impact:* To restore the previous behavior, in `kibana.yml` use the {kibana-ref}/logging-configuration.html#rolling-file-appender[`rolling-file`] appender.
 
 [source,yaml]
 -------------------

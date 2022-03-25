@@ -8,14 +8,14 @@
 
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
-import { IndexPattern, IndexPatternField } from '../../../../../../../data/public';
-import { ElasticSearchHit } from '../../../../../services/doc_views/doc_views_types';
+import { DataView, DataViewField } from '../../../../../../../data_views/public';
+import { ElasticSearchHit } from '../../../../../types';
 
 export function getDetails(
-  field: IndexPatternField,
+  field: DataViewField,
   hits: ElasticSearchHit[] | undefined,
   columns: string[],
-  indexPattern?: IndexPattern
+  indexPattern?: DataView
 ) {
   if (!indexPattern || !hits) {
     return {};

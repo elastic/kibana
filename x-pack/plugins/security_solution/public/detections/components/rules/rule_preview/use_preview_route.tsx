@@ -9,9 +9,10 @@ import { useEffect, useState, useCallback } from 'react';
 import { Unit } from '@elastic/datemath';
 import { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FieldValueQueryBar } from '../query_bar';
-import { QUERY_PREVIEW_NOISE_WARNING } from './translations';
 import { usePreviewRule } from '../../../containers/detection_engine/rules/use_preview_rule';
 import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
+import { FieldValueThreshold } from '../threshold_input';
+import { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
 
 interface PreviewRouteParams {
   isDisabled: boolean;
@@ -22,6 +23,9 @@ interface PreviewRouteParams {
   ruleType: Type;
   timeFrame: Unit;
   threatMapping: ThreatMapping;
+  threshold: FieldValueThreshold;
+  machineLearningJobId: string[];
+  anomalyThreshold: number;
 }
 
 export const usePreviewRoute = ({
@@ -33,25 +37,32 @@ export const usePreviewRoute = ({
   timeFrame,
   ruleType,
   threatMapping,
+  threshold,
+  machineLearningJobId,
+  anomalyThreshold,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
-  const { isLoading, response, rule, setRule } = usePreviewRule();
-  const [warnings, setWarnings] = useState<string[]>(response.warnings ?? []);
+  const { isLoading, response, rule, setRule } = usePreviewRule(timeFrame);
+  const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
+  const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);
+  const [hasNoiseWarning, setHasNoiseWarning] = useState<boolean>(false);
 
   useEffect(() => {
-    setWarnings(response.warnings ?? []);
+    setLogs(response.logs ?? []);
+    setIsAborted(!!response.isAborted);
   }, [response]);
 
-  const addNoiseWarning = useCallback(
-    () => setWarnings([QUERY_PREVIEW_NOISE_WARNING, ...warnings]),
-    [warnings]
-  );
+  const addNoiseWarning = useCallback(() => {
+    setHasNoiseWarning(true);
+  }, [setHasNoiseWarning]);
 
   const clearPreview = useCallback(() => {
     setRule(null);
-    setWarnings([]);
+    setLogs([]);
+    setIsAborted(false);
     setIsRequestTriggered(false);
+    setHasNoiseWarning(false);
   }, [setRule]);
 
   useEffect(() => {
@@ -66,6 +77,9 @@ export const usePreviewRoute = ({
     timeFrame,
     ruleType,
     threatMapping,
+    threshold,
+    machineLearningJobId,
+    anomalyThreshold,
   ]);
 
   useEffect(() => {
@@ -79,6 +93,9 @@ export const usePreviewRoute = ({
           threatMapping,
           threatQuery,
           timeFrame,
+          threshold,
+          machineLearningJobId,
+          anomalyThreshold,
         })
       );
     }
@@ -93,15 +110,19 @@ export const usePreviewRoute = ({
     threatMapping,
     threatQuery,
     timeFrame,
+    threshold,
+    machineLearningJobId,
+    anomalyThreshold,
   ]);
 
   return {
+    hasNoiseWarning,
     addNoiseWarning,
     createPreview: () => setIsRequestTriggered(true),
     clearPreview,
-    errors: response.errors ?? [],
     isPreviewRequestInProgress: isLoading,
     previewId: response.previewId ?? '',
-    warnings,
+    logs,
+    isAborted,
   };
 };

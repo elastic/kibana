@@ -12,7 +12,7 @@ import {
 } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
@@ -136,6 +136,9 @@ describe('CrawlerLogic', () => {
             type: CrawlType.Full,
             crawlConfig: {
               domainAllowlist: ['elastic.co'],
+              seedUrls: [],
+              sitemapUrls: [],
+              maxCrawlDepth: 10,
             },
           },
         ],
@@ -223,7 +226,7 @@ describe('CrawlerLogic', () => {
           CrawlerStatus.Running,
           CrawlerStatus.Canceling,
         ].forEach((status) => {
-          it(`creates a new timeout for status ${status}`, async () => {
+          it(`creates a new timeout for most recent crawl request status ${status}`, async () => {
             jest.spyOn(CrawlerLogic.actions, 'createNewTimeoutForCrawlerData');
             http.get.mockReturnValueOnce(
               Promise.resolve({
@@ -257,6 +260,27 @@ describe('CrawlerLogic', () => {
             expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalled();
           });
         });
+
+        it('clears the timeout if no events are active', async () => {
+          jest.spyOn(CrawlerLogic.actions, 'clearTimeoutId');
+
+          http.get.mockReturnValueOnce(
+            Promise.resolve({
+              ...MOCK_SERVER_CRAWLER_DATA,
+              events: [
+                {
+                  status: CrawlerStatus.Failed,
+                  crawl_config: {},
+                },
+              ],
+            })
+          );
+
+          CrawlerLogic.actions.fetchCrawlerData();
+          await nextTick();
+
+          expect(CrawlerLogic.actions.clearTimeoutId).toHaveBeenCalled();
+        });
       });
 
       it('calls flashApiErrors when there is an error on the request for crawler data', async () => {
@@ -273,22 +297,35 @@ describe('CrawlerLogic', () => {
 
     describe('startCrawl', () => {
       describe('success path', () => {
-        it('creates a new crawl request and then fetches the latest crawler data', async () => {
+        it('creates a new crawl request, fetches latest crawler data, then marks the request complete', async () => {
           jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
+          jest.spyOn(CrawlerLogic.actions, 'onStartCrawlRequestComplete');
           http.post.mockReturnValueOnce(Promise.resolve());
 
           CrawlerLogic.actions.startCrawl();
           await nextTick();
 
           expect(http.post).toHaveBeenCalledWith(
-            '/internal/app_search/engines/some-engine/crawler/crawl_requests'
+            '/internal/app_search/engines/some-engine/crawler/crawl_requests',
+            { body: JSON.stringify({ overrides: {} }) }
           );
           expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalled();
+          expect(CrawlerLogic.actions.onStartCrawlRequestComplete).toHaveBeenCalled();
         });
       });
 
       itShowsServerErrorAsFlashMessage(http.post, () => {
         CrawlerLogic.actions.startCrawl();
+      });
+
+      it('marks the request complete even after an error', async () => {
+        jest.spyOn(CrawlerLogic.actions, 'onStartCrawlRequestComplete');
+        http.post.mockReturnValueOnce(Promise.reject());
+
+        CrawlerLogic.actions.startCrawl();
+        await nextTick();
+
+        expect(CrawlerLogic.actions.onStartCrawlRequestComplete).toHaveBeenCalled();
       });
     });
 

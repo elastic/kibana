@@ -7,11 +7,24 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { DataView, DataViewField } from 'src/plugins/data_views/public';
 import { TableHeader } from './table_header';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
+import { FORMATS_UI_SETTINGS } from '../../../../../../field_formats/common';
+
+const defaultUiSettings = {
+  get: (key: string) => {
+    if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
+      return false;
+    } else if (key === FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE) {
+      return false;
+    }
+  },
+};
 
 function getMockIndexPattern() {
   return {
@@ -29,7 +42,7 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: true,
-        } as IndexPatternField;
+        } as DataViewField;
       } else {
         return {
           name,
@@ -38,10 +51,10 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: false,
-        } as IndexPatternField;
+        } as DataViewField;
       }
     },
-  } as unknown as IndexPattern;
+  } as unknown as DataView;
 }
 
 function getMockProps(props = {}) {
@@ -66,11 +79,13 @@ describe('TableHeader with time column', () => {
   const props = getMockProps();
 
   const wrapper = mountWithIntl(
-    <table>
-      <thead>
-        <TableHeader {...props} />
-      </thead>
-    </table>
+    <KibanaContextProvider services={{ uiSettings: defaultUiSettings }}>
+      <table>
+        <thead>
+          <TableHeader {...props} />
+        </thead>
+      </table>
+    </KibanaContextProvider>
   );
 
   test('renders correctly', () => {
@@ -140,11 +155,24 @@ describe('TableHeader without time column', () => {
   const props = getMockProps({ hideTimeColumn: true });
 
   const wrapper = mountWithIntl(
-    <table>
-      <thead>
-        <TableHeader {...props} />
-      </thead>
-    </table>
+    <KibanaContextProvider
+      services={{
+        ...defaultUiSettings,
+        uiSettings: {
+          get: (key: string) => {
+            if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
+              return true;
+            }
+          },
+        },
+      }}
+    >
+      <table>
+        <thead>
+          <TableHeader {...props} />
+        </thead>
+      </table>
+    </KibanaContextProvider>
   );
 
   test('renders correctly', () => {

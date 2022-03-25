@@ -46,7 +46,10 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
     if (initialAlert) {
       return triggersActionsUi.getEditAlertFlyout({
         ...commonProps,
-        initialAlert,
+        initialRule: {
+          ...initialAlert,
+          ruleTypeId: initialAlert.alertTypeId,
+        },
       });
     }
 
@@ -54,7 +57,7 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
       ...commonProps,
       consumer: 'stackAlerts',
       canChangeTrigger: false,
-      alertTypeId: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
+      ruleTypeId: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
       metadata: {},
       initialValues: {
         params: ruleParams!,

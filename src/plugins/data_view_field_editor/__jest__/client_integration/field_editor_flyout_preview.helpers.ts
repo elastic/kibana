@@ -7,7 +7,7 @@
  */
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { Context } from '../../public/components/field_editor_context';

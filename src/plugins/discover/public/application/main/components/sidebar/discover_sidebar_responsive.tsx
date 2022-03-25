@@ -26,18 +26,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { IndexPatternAttributes } from '../../../../../../data/common';
+import type {
+  DataViewField,
+  DataView,
+  DataViewAttributes,
+} from '../../../../../../data_views/public';
 import { SavedObject } from '../../../../../../../core/types';
-import { IndexPatternField, IndexPattern } from '../../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { DiscoverServices } from '../../../../build_services';
 import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import { DataDocuments$ } from '../../utils/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { FetchStatus } from '../../../types';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -55,7 +59,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: Array<SavedObject<DataViewAttributes>>;
   /**
    * Has been toggled closed
    */
@@ -67,7 +71,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Callback function when adding a filter from sidebar
    */
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback function when changing an index pattern
    */
@@ -80,11 +84,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern?: IndexPattern;
-  /**
-   * Discover plugin services;
-   */
-  services: DiscoverServices;
+  selectedIndexPattern?: DataView;
   /**
    * Discover App state
    */
@@ -108,9 +108,17 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onEditRuntimeField: () => void;
   /**
+   * callback to execute on create dataview
+   */
+  onDataViewCreated: (dataView: DataView) => void;
+  /**
    * Discover view mode
    */
   viewMode: VIEW_MODE;
+  /**
+   * list of available fields fetched from ES
+   */
+  availableFields$: AvailableFields$;
 }
 
 /**
@@ -119,20 +127,22 @@ export interface DiscoverSidebarResponsiveProps {
  * Mobile: Index pattern selector is visible and a button to trigger a flyout with all elements
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
-  const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onChangeIndexPattern } = props;
+  const services = useDiscoverServices();
+  const {
+    selectedIndexPattern,
+    onEditRuntimeField,
+    useNewFieldsApi,
+    onChangeIndexPattern,
+    onDataViewCreated,
+  } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**
-   * needed for merging new with old field counts, high likely legacy, but kept this behavior
-   * because not 100% sure in this case
+   * fieldCounts are used to determine which fields are actually used in the given set of documents
    */
   const fieldCounts = useRef<Record<string, number> | null>(null);
   if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(
-      {},
-      props.documents$.getValue().result,
-      selectedIndexPattern
-    );
+    fieldCounts.current = calcFieldCounts(props.documents$.getValue().result, selectedIndexPattern);
   }
 
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
@@ -140,11 +150,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     const subscription = props.documents$.subscribe((next) => {
       if (next.fetchStatus !== documentState.fetchStatus) {
         if (next.result) {
-          fieldCounts.current = calcFieldCounts(
-            next.result.length && fieldCounts.current ? fieldCounts.current : {},
-            next.result,
-            selectedIndexPattern!
-          );
+          fieldCounts.current = calcFieldCounts(next.result, selectedIndexPattern!);
         }
         setDocumentState({ ...documentState, ...next });
       }
@@ -159,11 +165,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [selectedIndexPattern]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
+  const closeDataViewEditor = useRef<() => void | undefined>();
 
   useEffect(() => {
     const cleanup = () => {
       if (closeFieldEditor?.current) {
         closeFieldEditor?.current();
+      }
+      if (closeDataViewEditor?.current) {
+        closeDataViewEditor?.current();
       }
     };
     return () => {
@@ -176,21 +186,51 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     closeFieldEditor.current = ref;
   }, []);
 
+  const setDataViewEditorRef = useCallback((ref: () => void | undefined) => {
+    closeDataViewEditor.current = ref;
+  }, []);
+
   const closeFlyout = useCallback(() => {
     setIsFlyoutVisible(false);
   }, []);
 
-  const { indexPatternFieldEditor } = props.services;
+  const { dataViewFieldEditor, dataViewEditor } = services;
+  const { availableFields$ } = props;
+
+  useEffect(
+    () => {
+      // For an external embeddable like the Field stats
+      // it is useful to know what fields are populated in the docs fetched
+      // or what fields are selected by the user
+
+      const fieldCnts = fieldCounts.current ?? {};
+
+      const availableFields = props.columns.length > 0 ? props.columns : Object.keys(fieldCnts);
+      availableFields$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        fields: availableFields,
+      });
+    },
+    // Using columns.length here instead of columns to avoid array reference changing
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      selectedIndexPattern,
+      availableFields$,
+      fieldCounts.current,
+      documentState.result,
+      props.columns.length,
+    ]
+  );
 
   const editField = useCallback(
     (fieldName?: string) => {
       const indexPatternFieldEditPermission =
-        indexPatternFieldEditor?.userPermissions.editIndexPattern();
+        dataViewFieldEditor?.userPermissions.editIndexPattern();
       const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
       if (!canEditIndexPatternField || !selectedIndexPattern) {
         return;
       }
-      const ref = indexPatternFieldEditor.openEditor({
+      const ref = dataViewFieldEditor.openEditor({
         ctx: {
           dataView: selectedIndexPattern,
         },
@@ -208,13 +248,31 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     },
     [
       closeFlyout,
-      indexPatternFieldEditor,
+      dataViewFieldEditor,
       selectedIndexPattern,
       setFieldEditorRef,
       onEditRuntimeField,
       useNewFieldsApi,
     ]
   );
+
+  const createNewDataView = useCallback(() => {
+    const indexPatternFieldEditPermission = dataViewEditor.userPermissions.editDataView;
+    if (!indexPatternFieldEditPermission) {
+      return;
+    }
+    const ref = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        onDataViewCreated(dataView);
+      },
+    });
+    if (setDataViewEditorRef) {
+      setDataViewEditorRef(ref);
+    }
+    if (closeFlyout) {
+      closeFlyout();
+    }
+  }, [dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]);
 
   if (!selectedIndexPattern) {
     return null;
@@ -231,6 +289,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}
             editField={editField}
+            createNewDataView={createNewDataView}
           />
         </EuiHideFor>
       )}
@@ -254,10 +313,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <DiscoverIndexPatternManagement
-                  services={props.services}
                   selectedIndexPattern={selectedIndexPattern}
                   editField={editField}
                   useNewFieldsApi={useNewFieldsApi}
+                  createNewDataView={createNewDataView}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -321,6 +380,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   setFieldEditorRef={setFieldEditorRef}
                   closeFlyout={closeFlyout}
                   editField={editField}
+                  createNewDataView={createNewDataView}
                 />
               </div>
             </EuiFlyout>

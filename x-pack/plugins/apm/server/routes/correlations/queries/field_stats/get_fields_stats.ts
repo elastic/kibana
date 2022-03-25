@@ -8,10 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { chunk } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import {
-  FieldValuePair,
-  CorrelationsParams,
-} from '../../../../../common/correlations/types';
+import { FieldValuePair } from '../../../../../common/correlations/types';
 import {
   FieldStats,
   FieldStatsCommonRequestParams,
@@ -23,7 +20,7 @@ import { fetchBooleanFieldStats } from './get_boolean_field_stats';
 
 export const fetchFieldsStats = async (
   esClient: ElasticsearchClient,
-  params: CorrelationsParams,
+  fieldStatsParams: FieldStatsCommonRequestParams,
   fieldsToSample: string[],
   termFilters?: FieldValuePair[]
 ): Promise<{ stats: FieldStats[]; errors: any[] }> => {
@@ -33,15 +30,11 @@ export const fetchFieldsStats = async (
   if (fieldsToSample.length === 0) return { stats, errors };
 
   const respMapping = await esClient.fieldCaps({
-    ...getRequestBase(params),
+    ...getRequestBase(fieldStatsParams),
     fields: fieldsToSample,
   });
 
-  const fieldStatsParams: FieldStatsCommonRequestParams = {
-    ...params,
-    samplerShardSize: 5000,
-  };
-  const fieldStatsPromises = Object.entries(respMapping.body.fields)
+  const fieldStatsPromises = Object.entries(respMapping.fields)
     .map(([key, value], idx) => {
       const field: FieldValuePair = { fieldName: key, fieldValue: '' };
       const fieldTypes = Object.keys(value);

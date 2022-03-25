@@ -53,4 +53,5 @@ export interface RequestStatistic {
 
 export interface Response {
   json?: object;
+  time?: number;
 }

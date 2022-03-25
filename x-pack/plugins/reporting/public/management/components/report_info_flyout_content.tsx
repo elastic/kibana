@@ -7,10 +7,19 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDescriptionList, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiDescriptionListProps,
+  EuiTitle,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
+import moment from 'moment';
+
+import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
 
 import type { Job } from '../../lib/job';
-import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
+import { useKibana } from '../../shared_imports';
 
 const NA = i18n.translate('xpack.reporting.listing.infoPanel.notApplicableLabel', {
   defaultMessage: 'N/A',
@@ -20,68 +29,63 @@ const UNKNOWN = i18n.translate('xpack.reporting.listing.infoPanel.unknownLabel',
   defaultMessage: 'unknown',
 });
 
-const getDimensions = (info: Job): string => {
-  const defaultDimensions = { width: null, height: null };
-  const { width, height } = info.layout?.dimensions || defaultDimensions;
-  if (width && height) {
-    return `Width: ${width} x Height: ${height}`;
-  }
-  return UNKNOWN;
-};
-
 interface Props {
   info: Job;
 }
 
-export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
-  const timeout = info.timeout ? info.timeout.toString() : NA;
+const createDateFormatter = (format: string, tz: string) => (date: string) => {
+  const m = moment.tz(date, tz);
+  return m.isValid() ? m.format(format) : NA;
+};
 
-  const jobInfo = [
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.titleInfo', {
-        defaultMessage: 'Title',
-      }),
-      description: info.title || NA,
-    },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.createdAtInfo', {
-        defaultMessage: 'Created at',
-      }),
-      description: info.getCreatedAtLabel(),
-    },
+export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
+  const timezone =
+    uiSettings.get('dateFormat:tz') === 'Browser'
+      ? moment.tz.guess()
+      : uiSettings.get('dateFormat:tz');
+
+  const formatDate = createDateFormatter(uiSettings.get('dateFormat'), timezone);
+
+  const cpuInPercentage = info.metrics?.pdf?.cpuInPercentage ?? info.metrics?.png?.cpuInPercentage;
+  const memoryInMegabytes =
+    info.metrics?.pdf?.memoryInMegabytes ?? info.metrics?.png?.memoryInMegabytes;
+  const hasCsvRows = info.metrics?.csv?.rows != null;
+  const hasScreenshot = USES_HEADLESS_JOB_TYPES.includes(info.jobtype);
+  const hasPdfPagesMetric = info.metrics?.pdf?.pages != null;
+
+  const outputInfo = [
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.statusInfo', {
         defaultMessage: 'Status',
       }),
-      description: info.getStatus(),
+      description: info.prettyStatus,
+    },
+    Boolean(info.version) && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.kibanaVersion', {
+        defaultMessage: 'Kibana version',
+      }),
+      description: info.version,
+    },
+    Boolean(info.spaceId) && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.space', {
+        defaultMessage: 'Kibana space',
+      }),
+      description: info.spaceId,
     },
     {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.tzInfo', {
-        defaultMessage: 'Time zone',
+      title: i18n.translate('xpack.reporting.listing.infoPanel.attemptsInfo', {
+        defaultMessage: 'Attempts',
       }),
-      description: info.browserTimezone || NA,
-    },
-  ];
-
-  const processingInfo = [
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.startedAtInfo', {
-        defaultMessage: 'Started at',
-      }),
-      description: info.started_at || NA,
-    },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.completedAtInfo', {
-        defaultMessage: 'Completed at',
-      }),
-      description: info.completed_at || NA,
-    },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.processedByInfo', {
-        defaultMessage: 'Processed by',
-      }),
-      description:
-        info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : NA,
+      description: info.max_attempts
+        ? i18n.translate('xpack.reporting.listing.infoPanel.attempts', {
+            defaultMessage: '{attempts} of {maxAttempts}',
+            values: { attempts: info.attempts, maxAttempts: info.max_attempts },
+          })
+        : info.attempts,
     },
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.contentTypeInfo', {
@@ -95,99 +99,140 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.size?.toString() || NA,
     },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.attemptsInfo', {
-        defaultMessage: 'Attempts',
+    hasCsvRows && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.csvRows', {
+        defaultMessage: 'CSV rows',
       }),
-      description: info.attempts.toString(),
+      description: info.metrics?.csv?.rows?.toString() || NA,
     },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.maxAttemptsInfo', {
-        defaultMessage: 'Max attempts',
+
+    hasScreenshot && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfoHeight', {
+        defaultMessage: 'Height in pixels',
       }),
-      description: info.max_attempts?.toString() || NA,
+      description:
+        info.layout?.dimensions?.height != null
+          ? Math.ceil(info.layout.dimensions.height)
+          : UNKNOWN,
+    },
+    hasScreenshot && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfoWidth', {
+        defaultMessage: 'Width in pixels',
+      }),
+      description:
+        info.layout?.dimensions?.width != null ? Math.ceil(info.layout.dimensions.width) : UNKNOWN,
+    },
+    hasPdfPagesMetric && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.pdfPagesInfo', {
+        defaultMessage: 'Pages count',
+      }),
+      description: info.metrics?.pdf?.pages,
+    },
+
+    {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.processedByInfo', {
+        defaultMessage: 'Processed by',
+      }),
+      description:
+        info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : NA,
     },
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.timeoutInfo', {
         defaultMessage: 'Timeout',
       }),
-      description: timeout,
-    },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.exportTypeInfo', {
-        defaultMessage: 'Export type',
-      }),
-      description: info.isDeprecated
-        ? i18n.translate('xpack.reporting.listing.table.reportCalloutExportTypeDeprecated', {
-            defaultMessage: '{jobtype} (DEPRECATED)',
-            values: { jobtype: info.jobtype },
-          })
-        : info.jobtype,
+      description: info.prettyTimeout,
     },
 
-    // TODO: when https://github.com/elastic/kibana/pull/106137 is merged, add kibana version field
-  ];
+    cpuInPercentage != null && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.cpuInfo', {
+        defaultMessage: 'CPU usage',
+      }),
+      description: `${cpuInPercentage}%`,
+    },
 
-  const jobScreenshot = [
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfo', {
-        defaultMessage: 'Dimensions',
+    memoryInMegabytes != null && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.memoryInfo', {
+        defaultMessage: 'RAM usage',
       }),
-      description: getDimensions(info),
+      description: `${memoryInMegabytes}MB`,
+    },
+  ].filter(Boolean) as EuiDescriptionListProps['listItems'];
+
+  const timestampsInfo = [
+    {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.tzInfo', {
+        defaultMessage: 'Time zone',
+      }),
+      description: info.browserTimezone || NA,
     },
     {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.layoutInfo', {
-        defaultMessage: 'Layout',
+      title: i18n.translate('xpack.reporting.listing.infoPanel.createdAtInfo', {
+        defaultMessage: 'Created at',
       }),
-      description: info.layout?.id || UNKNOWN,
+      description: info.created_at ? formatDate(info.created_at) : NA,
     },
     {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.browserTypeInfo', {
-        defaultMessage: 'Browser type',
+      title: i18n.translate('xpack.reporting.listing.infoPanel.startedAtInfo', {
+        defaultMessage: 'Started at',
       }),
-      description: info.browser_type || NA,
+      description: info.started_at ? formatDate(info.started_at) : NA,
+    },
+    {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.completedAtInfo', {
+        defaultMessage: 'Completed at',
+      }),
+      description: info.completed_at ? formatDate(info.completed_at) : NA,
     },
   ];
 
   const warnings = info.getWarnings();
-  const warningsInfo = warnings && [
-    {
-      title: <EuiText color="danger">Warnings</EuiText>,
-      description: <EuiText color="warning">{warnings}</EuiText>,
-    },
-  ];
-
   const errored = info.getError();
-  const errorInfo = errored && [
-    {
-      title: <EuiText color="danger">Error</EuiText>,
-      description: <EuiText color="danger">{errored}</EuiText>,
-    },
-  ];
 
   return (
     <>
-      <EuiDescriptionList listItems={jobInfo} type="column" align="center" compressed />
+      {Boolean(errored) && (
+        <EuiCallOut
+          title={i18n.translate('xpack.reporting.listing.infoPanel.callout.failedReportTitle', {
+            defaultMessage: 'Report failed',
+          })}
+          color="danger"
+        >
+          {errored}
+        </EuiCallOut>
+      )}
+      {Boolean(warnings) && (
+        <>
+          {Boolean(errored) && <EuiSpacer size="s" />}
+          <EuiCallOut
+            title={i18n.translate('xpack.reporting.listing.infoPanel.callout.warningsTitle', {
+              defaultMessage: 'Report contains warnings',
+            })}
+            color="warning"
+          >
+            {warnings}
+          </EuiCallOut>
+        </>
+      )}
+      <EuiTitle size="s">
+        <h3>
+          {i18n.translate('xpack.reporting.listing.infoPanel.outputSectionTitle', {
+            defaultMessage: 'Output',
+          })}
+        </h3>
+      </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiDescriptionList listItems={processingInfo} type="column" align="center" compressed />
-      {USES_HEADLESS_JOB_TYPES.includes(info.jobtype) ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList listItems={jobScreenshot} type="column" align="center" compressed />
-        </>
-      ) : null}
-      {warningsInfo ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList listItems={warningsInfo} type="column" align="center" compressed />
-        </>
-      ) : null}
-      {errorInfo ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList listItems={errorInfo} type="column" align="center" compressed />
-        </>
-      ) : null}
+      <EuiDescriptionList listItems={outputInfo} type="column" align="center" compressed />
+
+      <EuiSpacer />
+      <EuiTitle size="s">
+        <h3>
+          {i18n.translate('xpack.reporting.listing.infoPanel.timestampSectionTitle', {
+            defaultMessage: 'Timestamps',
+          })}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiDescriptionList listItems={timestampsInfo} type="column" align="center" compressed />
     </>
   );
 };

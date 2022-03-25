@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPattern, getFieldSubtypeMulti } from '../../../data/common';
+import { getFieldSubtypeMulti } from '../../../data_views/public';
+import type { DataView } from '../../../data_views/public';
 
 export const getFieldsToShow = (
   fields: string[],
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   showMultiFields: boolean
 ) => {
   const childParentFieldsMap = {} as Record<string, string>;

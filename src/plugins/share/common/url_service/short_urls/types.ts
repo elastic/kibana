@@ -16,13 +16,14 @@ import type { LocatorPublic, ILocatorClient, LocatorData } from '../locators';
  * request and the current Kibana version. On the client, the Short URL Service
  * needs no dependencies.
  */
-export interface IShortUrlClientFactory<D> {
-  get(dependencies: D): IShortUrlClient;
+export interface IShortUrlClientFactory<D, Client extends IShortUrlClient = IShortUrlClient> {
+  get(dependencies: D): Client;
 }
 
-export type IShortUrlClientFactoryProvider<D> = (params: {
-  locators: ILocatorClient;
-}) => IShortUrlClientFactory<D>;
+export type IShortUrlClientFactoryProvider<
+  D,
+  ShortUrlClient extends IShortUrlClient = IShortUrlClient
+> = (params: { locators: ILocatorClient }) => IShortUrlClientFactory<D, ShortUrlClient>;
 
 /**
  * CRUD-like API for short URLs.
