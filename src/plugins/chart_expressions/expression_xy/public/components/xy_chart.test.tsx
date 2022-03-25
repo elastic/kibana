@@ -145,8 +145,8 @@ describe('XYChart component', () => {
 
   describe('date range', () => {
     const timeSampleLayer: DataLayerConfigResult = {
-      layerId: 'first',
       type: 'dataLayer',
+      layerId: 'first',
       layerType: LayerTypes.DATA,
       seriesType: 'line',
       xAccessor: 'c',
@@ -245,8 +245,8 @@ describe('XYChart component', () => {
 
     describe('axis time', () => {
       const defaultTimeLayer: DataLayerConfigResult = {
-        layerId: 'first',
         type: 'dataLayer',
+        layerId: 'first',
         layerType: LayerTypes.DATA,
         seriesType: 'line',
         xAccessor: 'c',
@@ -844,8 +844,8 @@ describe('XYChart component', () => {
     const { args } = sampleArgs();
 
     const numberLayer: DataLayerConfigResult = {
-      layerId: 'numberLayer',
       type: 'dataLayer',
+      layerId: 'numberLayer',
       layerType: LayerTypes.DATA,
       hide: false,
       xAccessor: 'xAccessorId',
@@ -966,8 +966,8 @@ describe('XYChart component', () => {
           ...args,
           layers: [
             {
-              layerId: 'first',
               type: 'dataLayer',
+              layerId: 'first',
               layerType: LayerTypes.DATA,
               isHistogram: true,
               seriesType: 'bar_stacked',
@@ -1055,8 +1055,8 @@ describe('XYChart component', () => {
     const { args } = sampleArgs();
 
     const numberLayer: DataLayerConfigResult = {
-      layerId: 'numberLayer',
       type: 'dataLayer',
+      layerId: 'numberLayer',
       layerType: LayerTypes.DATA,
       hide: false,
       xAccessor: 'xAccessorId',
@@ -1175,8 +1175,8 @@ describe('XYChart component', () => {
           ...args,
           layers: [
             {
-              layerId: 'first',
               type: 'dataLayer',
+              layerId: 'first',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
               xAccessor: 'd',
@@ -1223,9 +1223,9 @@ describe('XYChart component', () => {
           ...args,
           layers: [
             {
+              type: 'dataLayer',
               layerId: 'first',
               layerType: LayerTypes.DATA,
-              type: 'dataLayer',
               seriesType: 'line',
               xAccessor: 'd',
               accessors: ['a', 'b'],
@@ -1254,10 +1254,10 @@ describe('XYChart component', () => {
           ...args,
           layers: [
             {
+              type: 'dataLayer',
               layerId: 'first',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
-              type: 'dataLayer',
               xAccessor: 'd',
               accessors: ['a', 'b'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
@@ -2121,8 +2121,8 @@ describe('XYChart component', () => {
       },
       layers: [
         {
-          layerId: 'first',
           type: 'dataLayer',
+          layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
           xAccessor: 'a',
@@ -2135,8 +2135,8 @@ describe('XYChart component', () => {
           palette: mockPaletteOutput,
         },
         {
-          layerId: 'second',
           type: 'dataLayer',
+          layerId: 'second',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
           xAccessor: 'a',
@@ -2213,8 +2213,8 @@ describe('XYChart component', () => {
       },
       layers: [
         {
-          layerId: 'first',
           type: 'dataLayer',
+          layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
           xAccessor: 'a',
@@ -2289,8 +2289,8 @@ describe('XYChart component', () => {
       },
       layers: [
         {
-          layerId: 'first',
           type: 'dataLayer',
+          layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
           xAccessor: 'a',
@@ -2524,8 +2524,8 @@ describe('XYChart component', () => {
       },
     };
     const timeSampleLayer: DataLayerConfigResult = {
-      layerId: 'first',
       type: 'dataLayer',
+      layerId: 'first',
       layerType: LayerTypes.DATA,
       seriesType: 'line',
       xAccessor: 'c',
@@ -2604,7 +2604,7 @@ describe('XYChart component', () => {
     });
     test('should render simplified annotation when hide is true', () => {
       const { data, args } = sampleArgsWithAnnotation();
-      (args.layers[0] as DataLayerConfigResult).hide = true;
+      (args.layers[0] as AnnotationLayerConfigResult).hide = true;
       const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
       expect(component.find('LineAnnotation')).toMatchSnapshot();
     });

@@ -183,8 +183,9 @@ export function XYChart({
 
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
-    ({ id }) => isDataLayer(filteredLayers[0]) && id === filteredLayers[0].xAccessor
+    ({ id }) => id === filteredLayers[0].xAccessor
   );
+
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
   const layersAlreadyFormatted: Record<string, boolean> = {};
 
@@ -197,7 +198,7 @@ export function XYChart({
   const chartHasMoreThanOneSeries =
     filteredLayers.length > 1 ||
     filteredLayers.some((layer) => layer.accessors.length > 1) ||
-    filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
+    filteredLayers.some((layer) => layer.splitAccessor);
   const shouldRotate = isHorizontalChart(filteredLayers);
 
   const yAxesConfiguration = getAxesConfiguration(
