@@ -7,8 +7,8 @@
  */
 import { Logger } from 'kibana/server';
 import {
-  buildCallerCalleeIntermediateRoot,
   CallerCalleeNode,
+  createCallerCalleeIntermediateRoot,
   fromCallerCalleeIntermediateNode,
 } from './callercallee';
 import {
@@ -18,7 +18,7 @@ import {
   StackTrace,
   StackFrame,
   Executable,
-  buildStackFrameMetadata,
+  createStackFrameMetadata,
   StackFrameMetadata,
 } from './profiling';
 
@@ -31,7 +31,7 @@ function checkIfStringHasParentheses(s: string) {
   return /\(|\)/.test(s);
 }
 
-function getFunctionName(frame: any) {
+function getFunctionName(frame: StackFrame) {
   return frame.FunctionName !== '' && !checkIfStringHasParentheses(frame.FunctionName)
     ? `${frame.FunctionName}()`
     : frame.FunctionName;
@@ -75,6 +75,36 @@ export class FlameGraph {
     this.logger = logger;
   }
 
+  // getFrameMetadataForTraces collects all of the per-stack-frame metadata for a
+  // given set of trace IDs and their respective stack frames.
+  //
+  // This is similar to GetTraceMetaData in pf-storage-backend/storagebackend/storagebackendv1/reads_webservice.go
+  private getFrameMetadataForTraces(): Map<StackTraceID, StackFrameMetadata[]> {
+    const frameMetadataForTraces = new Map<StackTraceID, StackFrameMetadata[]>();
+    for (const [stackTraceID, trace] of this.stacktraces) {
+      const frameMetadata = new Array<StackFrameMetadata>();
+      for (let i = 0; i < trace.FrameID.length; i++) {
+        const frame = this.stackframes.get(trace.FrameID[i])!;
+        const executable = this.executables.get(trace.FileID[i])!;
+
+        const metadata = createStackFrameMetadata({
+          FileID: Buffer.from(trace.FileID[i], 'base64url').toString('hex'),
+          FrameType: trace.Type[i],
+          AddressOrLine: frame.LineNumber,
+          FunctionName: frame.FunctionName,
+          FunctionOffset: frame.FunctionOffset,
+          SourceLine: frame.LineNumber,
+          ExeFileName: executable.FileName,
+          Index: i,
+        });
+
+        frameMetadata.push(metadata);
+      }
+      frameMetadataForTraces.set(stackTraceID, frameMetadata);
+    }
+    return frameMetadataForTraces;
+  }
+
   private getExeFileName(exe: any, type: number) {
     if (exe?.FileName === undefined) {
       this.logger.warn('missing executable FileName');
@@ -110,7 +140,7 @@ export class FlameGraph {
   // Generates the label for a flamegraph node
   //
   // This is slightly modified from the original code in elastic/prodfiler_ui
-  private getLabel(frame: any, executable: any, type: number) {
+  private getLabel(frame: StackFrame, executable: Executable, type: number) {
     if (frame.FunctionName !== '') {
       return `${this.getExeFileName(executable, type)}: ${getFunctionName(frame)} in #${
         frame.LineNumber
@@ -127,9 +157,9 @@ export class FlameGraph {
       const path = ['root'];
       for (let i = 0; i < trace.FrameID.length; i++) {
         const label = this.getLabel(
-          this.stackframes.get(trace.FrameID[i]),
-          this.executables.get(trace.FileID[i]),
-          parseInt(trace.Type[i], 10)
+          this.stackframes.get(trace.FrameID[i])!,
+          this.executables.get(trace.FileID[i])!,
+          trace.Type[i]
         );
 
         if (label.length === 0) {
@@ -157,9 +187,13 @@ export class FlameGraph {
   }
 
   toPixi(): PixiFlameGraph {
-    const rootFrame = buildStackFrameMetadata();
-    const metadataForTraces = new Map<StackTraceID, StackFrameMetadata[]>();
-    const diagram = buildCallerCalleeIntermediateRoot(rootFrame, this.events, metadataForTraces);
+    const rootFrame = createStackFrameMetadata();
+    const frameMetadataForTraces = this.getFrameMetadataForTraces();
+    const diagram = createCallerCalleeIntermediateRoot(
+      rootFrame,
+      this.events,
+      frameMetadataForTraces
+    );
     return {
       ...fromCallerCalleeIntermediateNode(diagram),
       TotalTraces: this.totalCount,
