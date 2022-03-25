@@ -20,8 +20,8 @@ import { isEqual } from 'lodash';
 import {
   AxesSettingsConfig,
   AxisExtentConfig,
-  XYLayerConfig,
 } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { XYLayerConfig } from '../types';
 import {
   ToolbarPopover,
   useDebouncedValue,

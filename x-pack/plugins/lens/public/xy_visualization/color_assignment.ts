@@ -12,13 +12,10 @@ import { euiLightVars } from '@kbn/ui-theme';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory } from '../../common';
-import {
-  XYDataLayerConfig,
-  XYLayerConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
 import { getReferenceLineAccessorColorConfig } from './reference_line_helpers';
+import { XYDataLayerConfig, XYLayerConfig } from './types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 

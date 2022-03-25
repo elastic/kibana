@@ -6,15 +6,13 @@
  */
 
 import { FormatFactory } from '../../common';
-import {
-  AxisExtentConfig,
-  XYDataLayerConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { AxisExtentConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import type {
   IFieldFormat,
   SerializedFieldFormat,
 } from '../../../../../src/plugins/field_formats/common';
+import { XYDataLayerConfig } from './types';
 
 interface FormattedMetric {
   layer: string;

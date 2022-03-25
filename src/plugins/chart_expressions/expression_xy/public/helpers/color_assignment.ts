@@ -12,7 +12,6 @@ import type { Datatable } from '../../../../expressions';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
 import { DataLayerConfigResult, XYLayerConfigResult } from '../../common';
-import { XYLayerConfig } from '../../common/types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -27,7 +26,7 @@ export type ColorAssignments = Record<
 >;
 
 export function getColorAssignments(
-  layers: Array<XYLayerConfig | XYLayerConfigResult>,
+  layers: XYLayerConfigResult[],
   data: { tables: Record<string, Datatable> },
   formatFactory: FormatFactory
 ): ColorAssignments {

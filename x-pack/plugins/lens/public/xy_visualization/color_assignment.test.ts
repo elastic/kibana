@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { XYDataLayerConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { getColorAssignments } from './color_assignment';
 import type { FormatFactory, LensMultiTable } from '../../common';
 import { layerTypes } from '../../common';
+import { XYDataLayerConfig } from './types';
 
 describe('color_assignment', () => {
   const layers: XYDataLayerConfig[] = [

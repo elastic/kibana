@@ -11,11 +11,13 @@ import type {
   SeriesType,
   YConfig,
   ValidLayer,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import {
+  visualizationTypes,
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { visualizationTypes } from './types';
+} from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {

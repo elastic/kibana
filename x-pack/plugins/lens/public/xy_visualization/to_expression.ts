@@ -10,15 +10,17 @@ import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 
 import { EventAnnotationServiceType } from 'src/plugins/event_annotation/public';
-import { State } from './types';
+import {
+  State,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYAnnotationLayerConfig,
+} from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type {
   ValidLayer,
   YConfig,
-  XYDataLayerConfig,
-  XYReferenceLineLayerConfig,
-  XYAnnotationLayerConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';

@@ -8,15 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { DatasourcePublicAPI, OperationMetadata, VisualizationType } from '../types';
-import { State, visualizationTypes, XYState } from './types';
-import { isHorizontalChart } from './state_helpers';
 import {
-  SeriesType,
+  State,
+  visualizationTypes,
+  XYState,
   XYAnnotationLayerConfig,
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+} from './types';
+import { isHorizontalChart } from './state_helpers';
+import { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '..';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';

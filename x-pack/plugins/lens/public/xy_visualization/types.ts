@@ -18,6 +18,7 @@ import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizo
 import { LensIconChartLine } from '../assets/chart_line';
 
 import type { VisualizationType, Suggestion } from '../types';
+import { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import type {
   SeriesType,
   LegendConfig,
@@ -27,9 +28,41 @@ import type {
   FittingFunction,
   LabelsOrientationConfig,
   EndValue,
-  XYLayerConfig,
+  YConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { EventAnnotationConfig } from '../../../../../src/plugins/event_annotation/common';
 import type { ValueLabelConfig } from '../../common/types';
+
+export interface XYDataLayerConfig {
+  layerId: string;
+  accessors: string[];
+  layerType: 'data';
+  seriesType: SeriesType;
+  xAccessor?: string;
+  hide?: boolean;
+  yConfig?: YConfig[];
+  splitAccessor?: string;
+  palette?: PaletteOutput;
+}
+
+export interface XYReferenceLineLayerConfig {
+  layerId: string;
+  accessors: string[];
+  yConfig?: YConfig[];
+  layerType: 'referenceLine';
+}
+
+export interface XYAnnotationLayerConfig {
+  layerId: string;
+  layerType: 'annotations';
+  annotations: EventAnnotationConfig[];
+  hide?: boolean;
+}
+
+export type XYLayerConfig =
+  | XYDataLayerConfig
+  | XYReferenceLineLayerConfig
+  | XYAnnotationLayerConfig;
 
 // Persisted parts of the state
 export interface XYState {
