@@ -13,14 +13,14 @@ import {
 import { useMemo } from 'react';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { TemporaryProcessingPluginsType } from './types';
-import { KibanaServices, useKibanaCapabilities } from '../../common/lib/kibana';
+import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
 import * as lensMarkdownPlugin from './plugins/lens';
 import { ID as LensPluginId } from './plugins/lens/constants';
 
 export const usePlugins = (disabledPlugins?: string[]) => {
   const kibanaConfig = KibanaServices.getConfig();
   const timelinePlugins = useTimelineContext()?.editor_plugins;
-  const appCapabilities = useKibanaCapabilities();
+  const appCapabilities = useApplicationCapabilities();
 
   return useMemo(() => {
     const uiPlugins = getDefaultEuiMarkdownUiPlugins();
@@ -40,7 +40,7 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     if (
       kibanaConfig?.markdownPlugins?.lens &&
       !disabledPlugins?.includes(LensPluginId) &&
-      appCapabilities?.visualize
+      appCapabilities?.visualize.crud
     ) {
       uiPlugins.push(lensMarkdownPlugin.plugin);
     }
@@ -55,7 +55,7 @@ export const usePlugins = (disabledPlugins?: string[]) => {
       processingPlugins,
     };
   }, [
-    appCapabilities?.visualize,
+    appCapabilities?.visualize.crud,
     disabledPlugins,
     kibanaConfig?.markdownPlugins?.lens,
     timelinePlugins,
