@@ -10,8 +10,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
-import { useRulesFeatureTourContext } from './rules_feature_tour_context';
-import { OptionalEuiTourStep } from './optional_eui_tour_step';
 
 const ToolbarLayout = styled.div`
   display: grid;
@@ -24,7 +22,6 @@ const ToolbarLayout = styled.div`
 interface RulesTableToolbarProps {
   activeTab: AllRulesTabs;
   onTabChange: (tab: AllRulesTabs) => void;
-  loading: boolean;
 }
 
 export enum AllRulesTabs {
@@ -46,16 +43,11 @@ const allRulesTabs = [
 ];
 
 export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
-  ({ onTabChange, activeTab, loading }) => {
+  ({ onTabChange, activeTab }) => {
     const {
       state: { isInMemorySorting },
       actions: { setIsInMemorySorting },
     } = useRulesTableContext();
-
-    const {
-      steps: { inMemoryTableStepProps },
-      goToNextStep,
-    } = useRulesFeatureTourContext();
 
     return (
       <ToolbarLayout>
@@ -72,22 +64,13 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
             </EuiTab>
           ))}
         </EuiTabs>
-        {/* delaying render of tour due to EuiPopover can't react to layout changes
-        https://github.com/elastic/kibana/pull/124343#issuecomment-1032467614 */}
-        <OptionalEuiTourStep stepProps={loading ? undefined : inMemoryTableStepProps}>
-          <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
-            <EuiSwitch
-              label={isInMemorySorting ? i18n.EXPERIMENTAL_ON : i18n.EXPERIMENTAL_OFF}
-              checked={isInMemorySorting}
-              onChange={(e) => {
-                if (inMemoryTableStepProps.isStepOpen) {
-                  goToNextStep();
-                }
-                setIsInMemorySorting(e.target.checked);
-              }}
-            />
-          </EuiToolTip>
-        </OptionalEuiTourStep>
+        <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
+          <EuiSwitch
+            label={isInMemorySorting ? i18n.EXPERIMENTAL_ON : i18n.EXPERIMENTAL_OFF}
+            checked={isInMemorySorting}
+            onChange={(e) => setIsInMemorySorting(e.target.checked)}
+          />
+        </EuiToolTip>
       </ToolbarLayout>
     );
   }

@@ -131,7 +131,7 @@ interface ExplorerUIProps {
   timefilter: TimefilterContract;
   // TODO Remove
   timeBuckets: TimeBuckets;
-  selectedCells: AppStateSelectedCells | undefined;
+  selectedCells: AppStateSelectedCells | undefined | null;
   swimLaneSeverity?: number;
 }
 
@@ -149,7 +149,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   overallSwimlaneData,
 }) => {
   const { displayWarningToast, displayDangerToast } = useToastNotificationService();
-  const { anomalyTimelineStateService, anomalyExplorerCommonStateService } =
+  const { anomalyTimelineStateService, anomalyExplorerCommonStateService, chartsStateService } =
     useAnomalyExplorerContext();
 
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
@@ -246,7 +246,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   const {
     annotations,
-    chartsData,
     filterPlaceHolder,
     indexPattern,
     influencers,
@@ -254,6 +253,11 @@ export const Explorer: FC<ExplorerUIProps> = ({
     noInfluencersConfigured,
     tableData,
   } = explorerState;
+
+  const chartsData = useObservable(
+    chartsStateService.getChartsData$(),
+    chartsStateService.getChartsData()
+  );
 
   const { filterActive, queryString } = filterSettings;
 
