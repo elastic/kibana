@@ -191,8 +191,8 @@ export function XYChart({
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
     xAxisColumn && layersAlreadyFormatted[xAxisColumn.id]
-      ? (value as string)
-      : xAxisFormatter.convert(value);
+      ? String(value)
+      : String(xAxisFormatter.convert(value));
 
   const chartHasMoreThanOneSeries =
     filteredLayers.length > 1 ||

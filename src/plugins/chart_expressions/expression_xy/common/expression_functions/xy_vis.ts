@@ -7,12 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  ExpressionFunctionDefinition,
-  TablesAdapter,
-  Datatable,
-} from '../../../../expressions';
+import type { ExpressionFunctionDefinition } from '../../../../expressions';
 import { LensMultiTable, XYArgs, XYRender } from '../types';
+import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
 import {
   XY_VIS,
   DATA_LAYER,
@@ -30,13 +27,26 @@ import {
   AXIS_TITLES_VISIBILITY_CONFIG,
   EndValues,
   ANNOTATION_LAYER,
+  LayerTypes,
 } from '../constants';
 
-export const logDataTable = (
-  tableAdapter: TablesAdapter,
-  datatables: Record<string, Datatable> = {}
-) => {
-  Object.entries(datatables).forEach(([key, table]) => tableAdapter.logDatatable(key, table));
+const strings = {
+  getMetricHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.metric', {
+      defaultMessage: 'Vertical axis',
+    }),
+  getXAxisHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.x', {
+      defaultMessage: 'Horizontal axis',
+    }),
+  getBreakdownHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.breakDown', {
+      defaultMessage: 'Break down by',
+    }),
+  getReferenceLineHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.breakDown', {
+      defaultMessage: 'Break down by',
+    }),
 };
 
 export const xyVisFunction: ExpressionFunctionDefinition<
@@ -190,7 +200,34 @@ export const xyVisFunction: ExpressionFunctionDefinition<
   },
   fn(data, args, handlers) {
     if (handlers?.inspectorAdapters?.tables) {
-      logDataTable(handlers.inspectorAdapters.tables, data.tables);
+      args.layers.forEach((layer) => {
+        if (layer.layerType === LayerTypes.ANNOTATIONS) {
+          return;
+        }
+
+        let xAccessor;
+        let splitAccessor;
+        if (layer.layerType === LayerTypes.DATA) {
+          xAccessor = layer.xAccessor;
+          splitAccessor = layer.splitAccessor;
+        }
+
+        const { layerId, accessors, layerType } = layer;
+        const logTable = prepareLogTable(
+          data.tables[layerId],
+          [
+            [
+              accessors ? accessors : undefined,
+              layerType === 'data' ? strings.getMetricHelp() : strings.getReferenceLineHelp(),
+            ],
+            [xAccessor ? [xAccessor] : undefined, strings.getXAxisHelp()],
+            [splitAccessor ? [splitAccessor] : undefined, strings.getBreakdownHelp()],
+          ],
+          true
+        );
+
+        handlers.inspectorAdapters.tables.logDatatable(layerId, logTable);
+      });
     }
 
     return {

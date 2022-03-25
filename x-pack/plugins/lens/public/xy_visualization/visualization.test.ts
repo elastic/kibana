@@ -36,6 +36,15 @@ const exampleAnnotation: EventAnnotationConfig = {
   },
   icon: 'circle',
 };
+const exampleAnnotation2: EventAnnotationConfig = {
+  icon: 'circle',
+  id: 'an2',
+  key: {
+    timestamp: '2022-04-18T11:01:59.135Z',
+    type: 'point_in_time',
+  },
+  label: 'Annotation2',
+};
 
 function exampleState(): XYState {
   return {
@@ -459,6 +468,56 @@ describe('xy_visualization', () => {
               label: 'Event',
             },
           ],
+        });
+      });
+      it('should copy previous column if passed and assign a new id', () => {
+        expect(
+          xyVisualization.setDimension({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'annotation',
+                  layerType: layerTypes.ANNOTATIONS,
+                  annotations: [exampleAnnotation2],
+                },
+              ],
+            },
+            layerId: 'annotation',
+            groupId: 'xAnnotation',
+            previousColumn: 'an2',
+            columnId: 'newColId',
+          }).layers[0]
+        ).toEqual({
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
+        });
+      });
+      it('should reorder a dimension to a annotation layer', () => {
+        expect(
+          xyVisualization.setDimension({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'annotation',
+                  layerType: layerTypes.ANNOTATIONS,
+                  annotations: [exampleAnnotation, exampleAnnotation2],
+                },
+              ],
+            },
+            layerId: 'annotation',
+            groupId: 'xAnnotation',
+            previousColumn: 'an2',
+            columnId: 'an1',
+          }).layers[0]
+        ).toEqual({
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2, exampleAnnotation],
         });
       });
     });

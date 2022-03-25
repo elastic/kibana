@@ -114,32 +114,42 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
   if (!foundLayer || !isAnnotationsLayer(foundLayer)) {
     return prevState;
   }
-  const dataLayers = getDataLayers(prevState.layers);
-  const newLayer = { ...foundLayer } as XYAnnotationLayerConfig;
-
-  const hasConfig = newLayer.annotations?.some(({ id }) => id === columnId);
+  const inputAnnotations = foundLayer.annotations as XYAnnotationLayerConfig['annotations'];
+  const currentConfig = inputAnnotations?.find(({ id }) => id === columnId);
   const previousConfig = previousColumn
-    ? newLayer.annotations?.find(({ id }) => id === previousColumn)
-    : false;
-  if (!hasConfig) {
-    const newTimestamp = getStaticDate(dataLayers, frame?.activeData);
-    newLayer.annotations = [
-      ...(newLayer.annotations || []),
-      {
-        label: defaultAnnotationLabel,
-        key: {
-          type: 'point_in_time',
-          timestamp: newTimestamp,
-        },
-        icon: 'triangle',
-        ...previousConfig,
-        id: columnId,
+    ? inputAnnotations?.find(({ id }) => id === previousColumn)
+    : undefined;
+
+  let resultAnnotations = [...inputAnnotations] as XYAnnotationLayerConfig['annotations'];
+  if (!currentConfig) {
+    resultAnnotations.push({
+      label: defaultAnnotationLabel,
+      key: {
+        type: 'point_in_time',
+        timestamp: getStaticDate(getDataLayers(prevState.layers), frame?.activeData),
       },
-    ];
+      icon: 'triangle',
+      ...previousConfig,
+      id: columnId,
+    });
+  } else if (currentConfig && previousConfig) {
+    // TODO: reordering should not live in setDimension, to be refactored
+    resultAnnotations = inputAnnotations.filter((c) => c.id !== previousConfig.id);
+    const targetPosition = resultAnnotations.findIndex((c) => c.id === currentConfig.id);
+    const targetIndex = inputAnnotations.indexOf(previousConfig);
+    const sourceIndex = inputAnnotations.indexOf(currentConfig);
+    resultAnnotations.splice(
+      targetIndex < sourceIndex ? targetPosition + 1 : targetPosition,
+      0,
+      previousConfig
+    );
   }
+
   return {
     ...prevState,
-    layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
+    layers: prevState.layers.map((l) =>
+      l.layerId === layerId ? { ...foundLayer, annotations: resultAnnotations } : l
+    ),
   };
 };
 

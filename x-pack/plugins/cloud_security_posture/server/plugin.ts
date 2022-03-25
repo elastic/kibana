@@ -21,8 +21,9 @@ import type {
   CspRequestHandlerContext,
 } from './types';
 import { defineRoutes } from './routes';
-import { cspRuleAssetType } from './saved_objects/cis_1_4_1/csp_rule_type';
-import { initializeCspRules } from './saved_objects/cis_1_4_1/initialize_rules';
+import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
+import { cspRuleAssetType } from './saved_objects/csp_rule_type';
+import { initializeCspRules } from './saved_objects/initialize_rules';
 import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
 
 export interface CspAppContext {
@@ -55,6 +56,7 @@ export class CspPlugin
     };
 
     core.savedObjects.registerType(cspRuleAssetType);
+    core.savedObjects.registerType(cspRuleTemplateAssetType);
 
     const router = core.http.createRouter<CspRequestHandlerContext>();
 

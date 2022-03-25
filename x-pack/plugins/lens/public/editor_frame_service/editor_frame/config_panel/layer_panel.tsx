@@ -179,60 +179,69 @@ export function LayerPanel(
         setNextFocusedButtonId(columnId);
       }
 
-      const group = groups.find(({ groupId: gId }) => gId === groupId);
+      if (layerDatasource) {
+        const group = groups.find(({ groupId: gId }) => gId === groupId);
+        const filterOperations = group?.filterOperations || (() => false);
+        const dropResult = layerDatasourceOnDrop({
+          ...layerDatasourceDropProps,
+          droppedItem,
+          columnId,
+          layerId: targetLayerId,
+          filterOperations,
+          dimensionGroups: groups,
+          groupId,
+          dropType,
+        });
+        if (dropResult) {
+          let previousColumn =
+            typeof droppedItem.column === 'string' ? droppedItem.column : undefined;
 
-      const filterOperations = group?.filterOperations || (() => false);
-
-      const dropResult = layerDatasource
-        ? layerDatasourceOnDrop({
-            ...layerDatasourceDropProps,
-            droppedItem,
+          // make it inherit only for moving and duplicate
+          if (!previousColumn) {
+            // when duplicating check if the previous column is required
+            if (
+              dropType === 'duplicate_compatible' &&
+              typeof droppedItem.columnId === 'string' &&
+              group?.requiresPreviousColumnOnDuplicate
+            ) {
+              previousColumn = droppedItem.columnId;
+            } else {
+              previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;
+            }
+          }
+          const newVisState = setDimension({
             columnId,
-            layerId: targetLayerId,
-            filterOperations,
-            dimensionGroups: groups,
             groupId,
-            dropType,
-          })
-        : false;
-      if (dropResult) {
-        let previousColumn =
-          typeof droppedItem.column === 'string' ? droppedItem.column : undefined;
+            layerId: targetLayerId,
+            prevState: props.visualizationState,
+            previousColumn,
+            frame: framePublicAPI,
+          });
 
-        // make it inherit only for moving and duplicate
-        if (!previousColumn) {
-          // when duplicating check if the previous column is required
-          if (
-            dropType === 'duplicate_compatible' &&
-            typeof droppedItem.columnId === 'string' &&
-            group?.requiresPreviousColumnOnDuplicate
-          ) {
-            previousColumn = droppedItem.columnId;
+          if (typeof dropResult === 'object') {
+            // When a column is moved, we delete the reference to the old
+            updateVisualization(
+              removeDimension({
+                columnId: dropResult.deleted,
+                layerId: targetLayerId,
+                prevState: newVisState,
+                frame: framePublicAPI,
+              })
+            );
           } else {
-            previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;
+            updateVisualization(newVisState);
           }
         }
-
-        const newVisState = setDimension({
-          columnId,
-          groupId,
-          layerId: targetLayerId,
-          prevState: props.visualizationState,
-          previousColumn,
-          frame: framePublicAPI,
-        });
-
-        if (typeof dropResult === 'object') {
-          // When a column is moved, we delete the reference to the old
-          updateVisualization(
-            removeDimension({
-              columnId: dropResult.deleted,
-              layerId: targetLayerId,
-              prevState: newVisState,
-              frame: framePublicAPI,
-            })
-          );
-        } else {
+      } else {
+        if (dropType === 'duplicate_compatible' || dropType === 'reorder') {
+          const newVisState = setDimension({
+            columnId,
+            groupId,
+            layerId: targetLayerId,
+            prevState: props.visualizationState,
+            previousColumn: droppedItem.id,
+            frame: framePublicAPI,
+          });
           updateVisualization(newVisState);
         }
       }
