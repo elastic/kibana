@@ -52,7 +52,7 @@ export function orderServiceItems({
   tiebreakerField: ServiceInventoryFieldName;
   sortDirection: 'asc' | 'desc';
 }): ServiceListItem[] {
-  // For healthStatus, sort items by healthStatus first, then by name
+  // For healthStatus, sort items by healthStatus first, then by tie-breaker
 
   const sortFn = sorts[primarySortField as ServiceInventoryFieldName];
 
