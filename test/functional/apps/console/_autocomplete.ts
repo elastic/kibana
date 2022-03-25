@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
-    describe('with a missing comma in query', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/126414
+    describe.skip('with a missing comma in query', () => {
       const LINE_NUMBER = 4;
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
