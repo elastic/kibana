@@ -240,7 +240,10 @@ describe('PluginStatusService', () => {
       const statusUpdates: Array<Record<PluginName, ServiceStatus>> = [];
       const subscription = service
         .getAll$()
-        .pipe(skip(1)) // the first emission happens right after core services emit
+        // If we subscribe to the $getAll() Observable BEFORE setting a custom status Observable
+        // for a given plugin ('a' in this test), then the first emission will happen
+        // right after core$ services Observable emits
+        .pipe(skip(1))
         .subscribe((pluginStatuses) => statusUpdates.push(pluginStatuses));
 
       service.set('a', of({ level: ServiceStatusLevels.degraded, summary: 'a degraded' }));
@@ -263,7 +266,8 @@ describe('PluginStatusService', () => {
       const statusUpdates: Array<Record<PluginName, ServiceStatus>> = [];
       const subscription = service
         .getAll$()
-        .pipe(skip(1)) // the first emission happens right after core services emit
+        // the first emission happens right after core services emit (see explanation above)
+        .pipe(skip(1))
         .subscribe((pluginStatuses) => statusUpdates.push(pluginStatuses));
 
       const aStatus$ = new BehaviorSubject<ServiceStatus>({
@@ -291,12 +295,12 @@ describe('PluginStatusService', () => {
             ['b', ['a']],
           ]),
         },
-        10
+        10 // set a small timeout so that the registered status Observable for 'a' times out quickly
       );
 
       const pluginA$ = new ReplaySubject<ServiceStatus>(1);
       service.set('a', pluginA$);
-      // the first emission happens right after core services emit
+      // the first emission happens right after core$ services emit
       const firstEmission = service.getAll$().pipe(skip(1), first()).toPromise();
 
       expect(await firstEmission).toEqual({

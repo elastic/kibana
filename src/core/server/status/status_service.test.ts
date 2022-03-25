@@ -239,20 +239,20 @@ describe('StatusService', () => {
 
         // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
         elasticsearch$.next(available);
-        await delay(200);
+        await delay(100);
         elasticsearch$.next(available);
-        await delay(200);
+        await delay(100);
         elasticsearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
-        await delay(200);
+        await delay(100);
         savedObjects$.next(degraded);
-        await delay(200);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(200);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(200);
+        await delay(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -300,9 +300,9 @@ describe('StatusService', () => {
         savedObjects$.next(available);
         savedObjects$.next(degraded);
         // Waiting for the debounce timeout should cut a new update
-        await delay(230);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(230);
+        await delay(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -410,20 +410,20 @@ describe('StatusService', () => {
 
         // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
         elasticsearch$.next(available);
-        await delay(200);
+        await delay(100);
         elasticsearch$.next(available);
-        await delay(200);
+        await delay(100);
         elasticsearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
-        await delay(200);
+        await delay(100);
         savedObjects$.next(degraded);
-        await delay(200);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(200);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(200);
+        await delay(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -471,9 +471,9 @@ describe('StatusService', () => {
         savedObjects$.next(available);
         savedObjects$.next(degraded);
         // Waiting for the debounce timeout should cut a new update
-        await delay(200);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(200);
+        await delay(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
