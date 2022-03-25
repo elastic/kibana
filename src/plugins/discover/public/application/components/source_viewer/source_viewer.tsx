@@ -35,11 +35,11 @@ export const MAX_LINES_CLASSIC_TABLE = 500;
 export const MARGIN_BOTTOM = 25;
 
 export const SourceViewer = ({
- id,
- index,
- indexPattern,
- width,
- hasLineNumbers,
+  id,
+  index,
+  indexPattern,
+  width,
+  hasLineNumbers,
 }: SourceViewerProps) => {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [jsonValue, setJsonValue] = useState<string>('');
@@ -132,8 +132,7 @@ export const SourceViewer = ({
     />
   );
 };
-  
 
- // Required for usage in React.lazy
- // eslint-disable-next-line import/no-default-export
- export default SourceViewer;
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default SourceViewer;
