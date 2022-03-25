@@ -10,10 +10,8 @@ import {
   DiscoverAppLocatorParams,
   SearchInput,
 } from '../../../../../../src/plugins/discover/public';
-import {
-  ApplyGlobalFilterActionContext,
-  esFilters,
-} from '../../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../../src/plugins/data/public';
+import { ApplyGlobalFilterActionContext } from '../../../../../../src/plugins/unified_search/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { KibanaLocation } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';

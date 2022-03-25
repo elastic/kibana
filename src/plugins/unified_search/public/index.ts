@@ -20,6 +20,8 @@ export { SuggestionsComponent } from './typeahead';
 export type { UnifiedSearchPublicPluginStart } from './types';
 export { FilterLabel, FilterItem } from './filter_bar';
 
+export { ApplyGlobalFilterActionContext, ACTION_GLOBAL_APPLY_FILTER } from './actions';
+
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
