@@ -40,13 +40,6 @@ export function getRemoteRoutePaths() {
   };
 }
 
-// override combines the template object and the overrides to produce a new
-// object. Any missing properties from the partial object will be set by the
-// template object.
-export function override<T>(template: T, overrides: Partial<T>): T {
-  return { ...template, ...overrides };
-}
-
 function toMilliseconds(seconds: string): number {
   return parseInt(seconds, 10) * 1000;
 }

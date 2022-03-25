@@ -6,22 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { override } from '.';
-
 export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
 
-export interface StackTraceEvent {
+export type StackTraceEvent = {
   StackTraceID: StackTraceID;
   Count: number;
-}
+};
 
-export interface StackTrace {
+export type StackTrace = {
   FileID: string[];
   FrameID: string[];
-  Type: string[];
-}
+  Type: number[];
+};
 
 export type StackFrame = {
   FileName: string;
@@ -31,56 +29,71 @@ export type StackFrame = {
   SourceType: number;
 };
 
-export type StackFrameMetadata = {
-  FileID: FileID;
-  AddressOrLine: number;
-
-  FunctionName: string;
-  SourceID: FileID;
-  SourceLine: number;
-  FunctionOffset: number;
-
-  CommitHash: string;
-  SourceCodeURL: string;
-  SourcePackageHash: string;
-  FrameTypeString: string;
-  SourceFilename: string;
-  ExeFileName: string;
-  SourcePackageURL: string;
-  FrameType: number;
-  FunctionLine: number;
-  SourceType: number;
-};
-
-const defaultStackFrameMetadata: StackFrameMetadata = {
-  FileID: '',
-  AddressOrLine: 0,
-
-  FunctionName: '',
-  SourceID: '',
-  SourceLine: 0,
-  FunctionOffset: 0,
-
-  CommitHash: '',
-  SourceCodeURL: '',
-  SourcePackageHash: '',
-  FrameTypeString: '',
-  SourceFilename: '',
-  ExeFileName: '',
-  SourcePackageURL: '',
-  FrameType: 0,
-  FunctionLine: 0,
-  SourceType: 0,
-};
-
-export function buildStackFrameMetadata(
-  metadata: Partial<StackFrameMetadata> = {}
-): StackFrameMetadata {
-  return override(defaultStackFrameMetadata, metadata);
-}
-
-export interface Executable {
+export type Executable = {
   FileName: string;
+};
+
+export type StackFrameMetadata = {
+  // StackTrace.FileID
+  FileID: FileID;
+  // StackTrace.Type
+  FrameType: number;
+  // stringified FrameType -- FrameType.String()
+  FrameTypeString: string;
+
+  // StackFrame.LineNumber?
+  AddressOrLine: number;
+  // StackFrame.FunctionName
+  FunctionName: string;
+  // StackFrame.FunctionOffset
+  FunctionOffset: number;
+  // should this be StackFrame.SourceID?
+  SourceID: FileID;
+  // StackFrame.LineNumber
+  SourceLine: number;
+
+  // Executable.FileName
+  ExeFileName: string;
+
+  // unused atm due to lack of symbolization metadata
+  CommitHash: string;
+  // unused atm due to lack of symbolization metadata
+  SourceCodeURL: string;
+  // unused atm due to lack of symbolization metadata
+  SourceFilename: string;
+  // unused atm due to lack of symbolization metadata
+  SourcePackageHash: string;
+  // unused atm due to lack of symbolization metadata
+  SourcePackageURL: string;
+  // unused atm due to lack of symbolization metadata
+  SourceType: number;
+
+  Index: number;
+};
+
+export function createStackFrameMetadata(
+  options: Partial<StackFrameMetadata> = {}
+): StackFrameMetadata {
+  const metadata = {} as StackFrameMetadata;
+
+  metadata.FileID = options.FileID ?? '';
+  metadata.FrameType = options.FrameType ?? 0;
+  metadata.FrameTypeString = options.FrameTypeString ?? '';
+  metadata.AddressOrLine = options.AddressOrLine ?? 0;
+  metadata.FunctionName = options.FunctionName ?? '';
+  metadata.FunctionOffset = options.FunctionOffset ?? 0;
+  metadata.SourceID = options.SourceID ?? '';
+  metadata.SourceLine = options.SourceLine ?? 0;
+  metadata.ExeFileName = options.ExeFileName ?? '';
+  metadata.CommitHash = options.CommitHash ?? '';
+  metadata.SourceCodeURL = options.SourceCodeURL ?? '';
+  metadata.SourceFilename = options.SourceFilename ?? '';
+  metadata.SourcePackageHash = options.SourcePackageHash ?? '';
+  metadata.SourcePackageURL = options.SourcePackageURL ?? '';
+  metadata.SourceType = options.SourceType ?? 0;
+  metadata.Index = options.Index ?? 0;
+
+  return metadata;
 }
 
 export type FrameGroup = Pick<
@@ -88,18 +101,18 @@ export type FrameGroup = Pick<
   'FileID' | 'ExeFileName' | 'FunctionName' | 'AddressOrLine' | 'SourceFilename'
 >;
 
-const defaultFrameGroup: FrameGroup = {
-  FileID: '',
-  ExeFileName: '',
-  FunctionName: '',
-  AddressOrLine: 0,
-  SourceFilename: '',
-};
-
-// This is a convenience function to build a FrameGroup value with
+// This is a convenience function to create a FrameGroup value with
 // defaults for missing fields
-export function buildFrameGroup(frameGroup: Partial<FrameGroup> = {}): FrameGroup {
-  return override(defaultFrameGroup, frameGroup);
+export function createFrameGroup(options: Partial<FrameGroup> = {}): FrameGroup {
+  const frameGroup = {} as FrameGroup;
+
+  frameGroup.FileID = options.FileID ?? '';
+  frameGroup.ExeFileName = options.ExeFileName ?? '';
+  frameGroup.FunctionName = options.FunctionName ?? '';
+  frameGroup.AddressOrLine = options.AddressOrLine ?? 0;
+  frameGroup.SourceFilename = options.SourceFilename ?? '';
+
+  return frameGroup;
 }
 
 export function compareFrameGroup(a: FrameGroup, b: FrameGroup): number {
@@ -116,16 +129,14 @@ export function compareFrameGroup(a: FrameGroup, b: FrameGroup): number {
   return 0;
 }
 
-export type FrameGroupID = string;
-
 // defaultGroupBy is the "standard" way of grouping frames, by commonly
 // shared group identifiers.
 //
 // For ELF-symbolized frames, group by FunctionName and FileID.
 // For non-symbolized frames, group by FileID and AddressOrLine.
 // Otherwise group by ExeFileName, SourceFilename and FunctionName.
-export function defaultGroupBy(frame: StackFrameMetadata): FrameGroupID {
-  const frameGroup = buildFrameGroup();
+export function defaultGroupBy(frame: StackFrameMetadata): FrameGroup {
+  const frameGroup = createFrameGroup();
 
   if (frame.FunctionName === '') {
     // Non-symbolized frame where we only have FileID and AddressOrLine
@@ -142,6 +153,12 @@ export function defaultGroupBy(frame: StackFrameMetadata): FrameGroupID {
     frameGroup.FunctionName = frame.FunctionName;
   }
 
-  // We serialize to JSON string to use FrameGroup as a key
+  return frameGroup;
+}
+
+export type FrameGroupID = string;
+
+export function hashFrameGroup(frameGroup: FrameGroup): FrameGroupID {
+  // We use serialized JSON as the unique value of a frame group for now
   return JSON.stringify(frameGroup);
 }
