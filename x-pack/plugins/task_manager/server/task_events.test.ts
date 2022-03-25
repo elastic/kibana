@@ -7,13 +7,22 @@
 
 import { startTaskTimer, startTaskTimerWithEventLoopMonitoring } from './task_events';
 
-const TimingSlop = 10; // to account for math/timer rounding errors
 const DelayIterations = 4;
 const DelayMillis = 250;
-const DelayTotal = DelayIterations * DelayMillis - TimingSlop;
+const DelayTotal = DelayIterations * DelayMillis;
+
+async function basicNonBlockingDelay(millis: number) {
+  await new Promise((resolve) => setTimeout(resolve, millis));
+}
 
 async function nonBlockingDelay(millis: number) {
-  await new Promise((resolve) => setTimeout(resolve, millis));
+  // can't just use basicNonBlockingDelay because:
+  // https://github.com/nodejs/node/issues/26578
+  const end = Date.now() + millis;
+
+  while (Date.now() <= end) {
+    await basicNonBlockingDelay(millis);
+  }
 }
 
 async function blockingDelay(millis: number) {
@@ -21,8 +30,9 @@ async function blockingDelay(millis: number) {
   await nonBlockingDelay(0);
 
   const end = Date.now() + millis;
+
   // eslint-disable-next-line no-empty
-  while (Date.now() < end) {}
+  while (Date.now() <= end) {}
 }
 
 async function nonBlockingTask() {
@@ -46,7 +56,6 @@ describe('task_events', () => {
     expect(result.eventLoopBlockMs).toBe(undefined);
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/128441
   describe('startTaskTimerWithEventLoopMonitoring', () => {
     test('non-blocking', async () => {
       const stopTaskTimer = startTaskTimerWithEventLoopMonitoring({
