@@ -160,6 +160,13 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Enables relative precentage mode',
       }),
     },
+    respectRanges: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionGauge.functions.gauge.respectRanges.help', {
+        defaultMessage: 'Respect max and min values from ranges',
+      }),
+    },
     ariaLabel: {
       types: ['string'],
       help: i18n.translate('expressionGauge.functions.gaugeChart.config.ariaLabel.help', {
