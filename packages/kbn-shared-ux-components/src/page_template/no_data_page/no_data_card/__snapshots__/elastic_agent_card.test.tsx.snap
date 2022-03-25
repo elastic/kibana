@@ -170,11 +170,6 @@ exports[`ElasticAgentCard renders 1`] = `
             title="Add Elastic Agent"
           >
             <EuiCard
-              betaBadgeProps={
-                Object {
-                  "label": undefined,
-                }
-              }
               css={
                 Object {
                   "maxWidth": 400,
