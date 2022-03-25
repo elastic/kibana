@@ -14,7 +14,6 @@ import {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-  LensMultiTable,
   AnnotationLayerConfigResult,
 } from '../../common/types';
 import { LayerTypes } from '../../common/constants';

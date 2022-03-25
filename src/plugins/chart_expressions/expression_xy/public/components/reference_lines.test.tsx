@@ -109,6 +109,7 @@ describe('ReferenceLineAnnotations', () => {
                 axisMode,
                 lineStyle: 'solid',
                 fill,
+                type: 'yConfig',
               },
             ])}
           />
@@ -146,6 +147,7 @@ describe('ReferenceLineAnnotations', () => {
                 forAccessor: `${layerPrefix}FirstId`,
                 axisMode: 'bottom',
                 lineStyle: 'solid',
+                type: 'yConfig',
                 fill,
               },
             ])}
@@ -187,12 +189,14 @@ describe('ReferenceLineAnnotations', () => {
                 forAccessor: `${layerPrefix}FirstId`,
                 axisMode,
                 lineStyle: 'solid',
+                type: 'yConfig',
                 fill,
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 axisMode,
                 lineStyle: 'solid',
+                type: 'yConfig',
                 fill,
               },
             ])}
@@ -235,12 +239,14 @@ describe('ReferenceLineAnnotations', () => {
                 forAccessor: `${layerPrefix}FirstId`,
                 axisMode: 'bottom',
                 lineStyle: 'solid',
+                type: 'yConfig',
                 fill,
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 axisMode: 'bottom',
                 lineStyle: 'solid',
+                type: 'yConfig',
                 fill,
               },
             ])}
@@ -283,12 +289,14 @@ describe('ReferenceLineAnnotations', () => {
                 axisMode,
                 lineStyle: 'solid',
                 fill: 'above',
+                type: 'yConfig',
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 axisMode,
                 lineStyle: 'solid',
                 fill: 'below',
+                type: 'yConfig',
               },
             ])}
           />
@@ -331,12 +339,14 @@ describe('ReferenceLineAnnotations', () => {
                 axisMode: 'left',
                 lineStyle: 'solid',
                 fill,
+                type: 'yConfig',
               },
               {
                 forAccessor: `yAccessorRightSecondId`,
                 axisMode: 'right',
                 lineStyle: 'solid',
                 fill,
+                type: 'yConfig',
               },
             ])}
           />

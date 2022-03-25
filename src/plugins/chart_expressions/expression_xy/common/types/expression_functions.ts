@@ -97,13 +97,14 @@ export interface ValidLayer extends DataLayerConfigResult {
   xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
 }
 
-export type DataLayerArgs = Omit<XYDataLayerConfig, 'layerType'> & {
+export type DataLayerArgs = Omit<XYDataLayerConfig, 'layerType' | 'yConfig'> & {
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
   // palette will always be set on the expression
   palette: PaletteOutput;
+  yConfig?: YConfigResult[];
 };
 
 export interface LegendConfig {
@@ -209,8 +210,9 @@ export interface XYReferenceLineLayerConfig {
   layerType: typeof LayerTypes.REFERENCELINE;
 }
 
-export type ReferenceLineLayerArgs = Omit<XYReferenceLineLayerConfig, 'layerType'> & {
+export type ReferenceLineLayerArgs = Omit<XYReferenceLineLayerConfig, 'layerType' | 'yConfig'> & {
   columnToLabel?: string;
+  yConfig?: YConfigResult[];
 };
 
 export type XYLayerArgs = DataLayerArgs | ReferenceLineLayerArgs | AnnotationLayerArgs;

@@ -209,7 +209,7 @@ export const getXyVisualization = ({
     });
 
     if (isReferenceLayer(layer)) {
-      return getReferenceConfiguration({ state, frame, layer, sortedAccessors, mappedAccessors });
+      return getReferenceConfiguration({ state, frame, layer, sortedAccessors });
     }
 
     const dataLayer: XYDataLayerConfig = layer;

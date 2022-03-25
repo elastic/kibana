@@ -14,7 +14,6 @@ import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FieldFormat } from '../../../../field_formats/common';
-import type { PaletteRegistry } from '../../../../charts/public';
 import type { IconPosition, ReferenceLineLayerArgs, YAxisMode } from '../../common/types';
 import type { LensMultiTable } from '../../common/types';
 import { hasIcon } from '../helpers';
