@@ -128,6 +128,7 @@ export interface DocLinks {
     readonly security: string;
     readonly serviceNow: string;
     readonly sharePoint: string;
+    readonly sharePointServer: string;
     readonly slack: string;
     readonly synch: string;
     readonly zendesk: string;

@@ -5,9 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiHorizontalRule,
+  EuiButton,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useRef, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo, useRef, useCallback, useState } from 'react';
 import { observabilityFeatureId } from '../../../common';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../..';
@@ -33,6 +45,8 @@ import { ObservabilityAppServices } from '../../application/types';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { paths } from '../../config';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
+import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
+import { ObservabilityStatus } from '../../components/app/observability_status';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -53,6 +67,7 @@ export function OverviewPage({ routeParams }: Props) {
       }),
     },
   ]);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const indexNames = useAlertIndexNames();
   const { cases, docLinks, http } = useKibana<ObservabilityAppServices>().services;
@@ -110,6 +125,12 @@ export function OverviewPage({ routeParams }: Props) {
           ? {
               pageTitle: overviewPageTitle,
               rightSideItems: [
+                <EuiButton color="text" iconType="wrench" onClick={() => setIsFlyoutVisible(true)}>
+                  <FormattedMessage
+                    id="xpack.observability.overview.guidedSetupButton"
+                    defaultMessage="Guided setup"
+                  />
+                </EuiButton>,
                 <DatePicker
                   rangeFrom={relativeStart}
                   rangeTo={relativeEnd}
@@ -125,6 +146,7 @@ export function OverviewPage({ routeParams }: Props) {
       {hasData && (
         <>
           <ObservabilityHeaderMenu />
+          <ObservabilityStatusProgress onViewDetailsClick={() => setIsFlyoutVisible(true)} />
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <SectionContainer
@@ -176,6 +198,37 @@ export function OverviewPage({ routeParams }: Props) {
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
+      )}
+      {isFlyoutVisible && (
+        <EuiFlyout
+          size="s"
+          ownFocus
+          onClose={() => setIsFlyoutVisible(false)}
+          aria-labelledby="statusVisualizationFlyoutTitle"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id="statusVisualizationFlyoutTitle">
+                <FormattedMessage
+                  id="xpack.observability.overview.statusVisualizationFlyoutTitle"
+                  defaultMessage="Guided setup"
+                />
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.observability.overview.statusVisualizationFlyoutDescription"
+                  defaultMessage="Track your progress towards adding observability integrations and features."
+                />
+              </p>
+            </EuiText>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <ObservabilityStatus />
+          </EuiFlyoutBody>
+        </EuiFlyout>
       )}
     </ObservabilityPageTemplate>
   );

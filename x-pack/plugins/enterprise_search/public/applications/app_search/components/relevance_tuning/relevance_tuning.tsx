@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { SAVE_BUTTON_LABEL } from '../../../shared/constants';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../constants';
-import { getEngineBreadcrumbs } from '../engine';
+import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
 import { EmptyState } from './components';
@@ -31,20 +31,30 @@ export const RelevanceTuning: React.FC = () => {
   const { dataLoading, engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
   const { initializeRelevanceTuning, resetSearchSettings, updateSearchSettings } =
     useActions(RelevanceTuningLogic);
+  const { isElasticsearchEngine } = useValues(EngineLogic);
 
   useEffect(() => {
     initializeRelevanceTuning();
   }, []);
+
+  const APP_SEARCH_MANAGED_DESCRIPTION = i18n.translate(
+    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
+    { defaultMessage: 'Manage precision and relevance settings for your engine' }
+  );
+
+  const ELASTICSEARCH_MANAGED_DESCRIPTION = i18n.translate(
+    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.elasticsearch.description',
+    { defaultMessage: 'Manage relevance settings for your engine' }
+  );
 
   return (
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([RELEVANCE_TUNING_TITLE])}
       pageHeader={{
         pageTitle: RELEVANCE_TUNING_TITLE,
-        description: i18n.translate(
-          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
-          { defaultMessage: 'Manage precision and relevance settings for your engine' }
-        ),
+        description: isElasticsearchEngine
+          ? ELASTICSEARCH_MANAGED_DESCRIPTION
+          : APP_SEARCH_MANAGED_DESCRIPTION,
         rightSideItems: engineHasSchemaFields
           ? [
               <EuiButton
@@ -75,8 +85,12 @@ export const RelevanceTuning: React.FC = () => {
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={3}>
           <EuiSpacer size="m" />
-          <PrecisionSlider />
-          <EuiSpacer />
+          {!isElasticsearchEngine && (
+            <>
+              <PrecisionSlider />
+              <EuiSpacer />
+            </>
+          )}
           <RelevanceTuningForm />
         </EuiFlexItem>
         <EuiFlexItem grow={4}>
