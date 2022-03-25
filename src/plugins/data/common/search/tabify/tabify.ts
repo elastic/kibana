@@ -7,6 +7,7 @@
  */
 
 import { get } from 'lodash';
+import type { Datatable } from 'src/plugins/expressions';
 import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
 import type { TabbedResponseWriterOptions } from './types';
@@ -20,7 +21,7 @@ export function tabifyAggResponse(
   aggConfigs: IAggConfigs,
   esResponse: Record<string, any>,
   respOpts?: Partial<TabbedResponseWriterOptions>
-) {
+): Datatable {
   /**
    * read an aggregation from a bucket, which *might* be found at key (if
    * the response came in object form), and will recurse down the aggregation
@@ -152,5 +153,14 @@ export function tabifyAggResponse(
 
   collectBucket(aggConfigs, write, topLevelBucket, '', 1);
 
-  return write.response();
+  return {
+    ...write.response(),
+    meta: {
+      type: 'esaggs',
+      source: aggConfigs.indexPattern.id,
+      statistics: {
+        totalCount: esResponse.hits?.total,
+      },
+    },
+  };
 }

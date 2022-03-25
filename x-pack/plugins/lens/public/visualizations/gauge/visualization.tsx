@@ -399,22 +399,16 @@ export const getGaugeVisualization = ({
               {
                 groupId: 'min',
                 columnId: generateId(),
-                dataType: 'number',
-                label: 'minAccessor',
                 staticValue: minValue,
               },
               {
                 groupId: 'max',
                 columnId: generateId(),
-                dataType: 'number',
-                label: 'maxAccessor',
                 staticValue: maxValue,
               },
               {
                 groupId: 'goal',
                 columnId: generateId(),
-                dataType: 'number',
-                label: 'goalAccessor',
                 staticValue: goalValue,
               },
             ]

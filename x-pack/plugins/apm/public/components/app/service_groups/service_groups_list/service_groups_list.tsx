@@ -38,6 +38,7 @@ export function ServiceGroupsListItems({ items }: Props) {
         />
       ))}
       <ServiceGroupsCard
+        withTour
         serviceGroup={{
           groupName: i18n.translate(
             'xpack.apm.serviceGroups.list.allServices.name',
