@@ -23,7 +23,7 @@ const CasesAppComponent: React.FC = () => {
       {getCasesLazy({
         owner: [APP_OWNER],
         useFetchAlertData: () => [false, {}],
-        userCanCrud: userCapabilities.crud,
+        userCanCrud: userCapabilities.generalCases.crud,
         basePath: '/',
         features: { alerts: { enabled: false } },
         releasePhase: 'experimental',

@@ -33,6 +33,15 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
       ...type,
     })
   );
+  registry.registerType({
+    name: LEGACY_URL_ALIAS_TYPE,
+    namespaceType: 'agnostic',
+    hidden: false,
+    mappings: { properties: {} },
+    migrations: {
+      '0.1.2': () => ({} as SavedObjectUnsanitizedDoc), // the migration version is non-existent and the result doesn't matter, this migration function is never applied, we just want to assert that aliases are marked as "up-to-date"
+    },
+  });
   return registry;
 };
 
@@ -783,6 +792,7 @@ describe('DocumentMigrator', () => {
         aaa: '10.4.0',
         bbb: '3.2.3',
         ccc: '11.0.0',
+        [LEGACY_URL_ALIAS_TYPE]: '0.1.2',
       });
     });
 
@@ -948,8 +958,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);
@@ -1023,8 +1034,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);
@@ -1148,8 +1160,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);
@@ -1231,8 +1244,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);

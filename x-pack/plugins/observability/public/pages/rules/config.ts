@@ -12,6 +12,10 @@ import {
   RULE_STATUS_ERROR,
   RULE_STATUS_PENDING,
   RULE_STATUS_UNKNOWN,
+  RULE_STATUS_WARNING,
+  RULE_STATUS_ENABLED,
+  RULE_STATUS_DISABLED,
+  RULE_STATUS_SNOOZED_INDEFINITELY,
 } from './translations';
 import { AlertExecutionStatuses } from '../../../../alerting/common';
 import { Rule, RuleTypeIndex, RuleType } from '../../../../triggers_actions_ui/public';
@@ -19,11 +23,15 @@ import { Rule, RuleTypeIndex, RuleType } from '../../../../triggers_actions_ui/p
 export const statusMap: Status = {
   [RuleStatus.enabled]: {
     color: 'primary',
-    label: 'Enabled',
+    label: RULE_STATUS_ENABLED,
   },
   [RuleStatus.disabled]: {
     color: 'default',
-    label: 'Disabled',
+    label: RULE_STATUS_DISABLED,
+  },
+  [RuleStatus.snoozed]: {
+    color: 'warning',
+    label: RULE_STATUS_SNOOZED_INDEFINITELY,
   },
 };
 
@@ -50,6 +58,7 @@ export const rulesStatusesTranslationsMapping = {
   error: RULE_STATUS_ERROR,
   pending: RULE_STATUS_PENDING,
   unknown: RULE_STATUS_UNKNOWN,
+  warning: RULE_STATUS_WARNING,
 };
 
 export const OBSERVABILITY_RULE_TYPES = [
@@ -91,3 +100,8 @@ export function convertRulesToTableItems(
     enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
   }));
 }
+
+type Capabilities = Record<string, any>;
+
+export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
+  capabilities?.actions?.execute;

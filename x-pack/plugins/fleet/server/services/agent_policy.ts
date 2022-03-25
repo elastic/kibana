@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq, omit } from 'lodash';
+import { uniq, omit, isEqual } from 'lodash';
 import uuid from 'uuid/v4';
 import uuidv5 from 'uuid/v5';
 import { safeDump } from 'js-yaml';
@@ -38,6 +38,7 @@ import {
   packageToPackagePolicy,
   AGENT_POLICY_INDEX,
   UUID_V5_NAMESPACE,
+  FLEET_APM_PACKAGE,
 } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
@@ -67,6 +68,8 @@ import { validateOutputForPolicy } from './agent_policies';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
+const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
+
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
     soClient: SavedObjectsClientContract,
@@ -85,26 +88,31 @@ class AgentPolicyService {
     user?: AuthenticatedUser,
     options: { bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentPolicy> {
-    const oldAgentPolicy = await this.get(soClient, id, false);
+    const existingAgentPolicy = await this.get(soClient, id, true);
 
-    if (!oldAgentPolicy) {
+    if (!existingAgentPolicy) {
       throw new Error('Agent policy not found');
     }
 
     if (
-      oldAgentPolicy.status === agentPolicyStatuses.Inactive &&
+      existingAgentPolicy.status === agentPolicyStatuses.Inactive &&
       agentPolicy.status !== agentPolicyStatuses.Active
     ) {
       throw new Error(
-        `Agent policy ${id} cannot be updated because it is ${oldAgentPolicy.status}`
+        `Agent policy ${id} cannot be updated because it is ${existingAgentPolicy.status}`
       );
     }
 
-    await validateOutputForPolicy(agentPolicy);
+    await validateOutputForPolicy(
+      soClient,
+      agentPolicy,
+      existingAgentPolicy,
+      this.hasAPMIntegration(existingAgentPolicy)
+    );
 
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
-      ...(options.bumpRevision ? { revision: oldAgentPolicy.revision + 1 } : {}),
+      ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
@@ -164,6 +172,12 @@ class AgentPolicyService {
     };
   }
 
+  public hasAPMIntegration(agentPolicy: AgentPolicy) {
+    return agentPolicy.package_policies.some(
+      (p) => typeof p !== 'string' && p.package?.name === FLEET_APM_PACKAGE
+    );
+  }
+
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -172,7 +186,7 @@ class AgentPolicyService {
   ): Promise<AgentPolicy> {
     await this.requireUniqueName(soClient, agentPolicy);
 
-    await validateOutputForPolicy(agentPolicy);
+    await validateOutputForPolicy(soClient, agentPolicy);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
@@ -297,8 +311,9 @@ class AgentPolicyService {
       }
     }
 
-    const agentPolicies = await Promise.all(
-      agentPoliciesSO.saved_objects.map(async (agentPolicySO) => {
+    const agentPolicies = await pMap(
+      agentPoliciesSO.saved_objects,
+      async (agentPolicySO) => {
         const agentPolicy = {
           id: agentPolicySO.id,
           ...agentPolicySO.attributes,
@@ -314,7 +329,8 @@ class AgentPolicyService {
           }
         }
         return agentPolicy;
-      })
+      },
+      { concurrency: 50 }
     );
 
     return {
@@ -330,7 +346,7 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     agentPolicy: Partial<AgentPolicy>,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser; force?: boolean }
   ): Promise<AgentPolicy> {
     if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
@@ -338,6 +354,23 @@ class AgentPolicyService {
         name: agentPolicy.name,
       });
     }
+
+    const existingAgentPolicy = await this.get(soClient, id, true);
+
+    if (!existingAgentPolicy) {
+      throw new Error('Agent policy not found');
+    }
+
+    if (existingAgentPolicy.is_managed && !options?.force) {
+      Object.entries(agentPolicy)
+        .filter(([key]) => !KEY_EDITABLE_FOR_MANAGED_POLICIES.includes(key))
+        .forEach(([key, val]) => {
+          if (!isEqual(existingAgentPolicy[key as keyof AgentPolicy], val)) {
+            throw new HostedAgentPolicyRestrictionRelatedError(`Cannot update ${key}`);
+          }
+        });
+    }
+
     return this._update(soClient, esClient, id, agentPolicy, options?.user);
   }
 

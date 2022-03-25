@@ -13,6 +13,7 @@ import {
 } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
+  APP_DETECTION_RESPONSE_PATH,
   APP_RULES_PATH,
   APP_ALERTS_PATH,
   APP_EXCEPTIONS_PATH,
@@ -29,6 +30,7 @@ import {
   SecurityPageName,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
   APP_USERS_PATH,
+  APP_LANDING_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -38,6 +40,20 @@ export const navTabs: SecurityNav = {
     href: APP_OVERVIEW_PATH,
     disabled: false,
     urlKey: 'overview',
+  },
+  [SecurityPageName.landing]: {
+    id: SecurityPageName.landing,
+    name: i18n.GETTING_STARTED,
+    href: APP_LANDING_PATH,
+    disabled: false,
+    urlKey: 'get_started',
+  },
+  [SecurityPageName.detectionAndResponse]: {
+    id: SecurityPageName.detectionAndResponse,
+    name: i18n.DETECTION_RESPONSE,
+    href: APP_DETECTION_RESPONSE_PATH,
+    disabled: false,
+    urlKey: 'detection_response',
   },
   [SecurityPageName.alerts]: {
     id: SecurityPageName.alerts,

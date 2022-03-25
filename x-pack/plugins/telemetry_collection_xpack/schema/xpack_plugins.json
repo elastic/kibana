@@ -1731,6 +1731,218 @@
               "type": "long"
             }
           }
+        },
+        "avg_es_search_duration_per_day": {
+          "type": "long"
+        },
+        "avg_es_search_duration_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "avg_total_search_duration_per_day": {
+          "type": "long"
+        },
+        "avg_total_search_duration_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
         }
       }
     },
@@ -5818,23 +6030,7 @@
             "deprecated": {
               "type": "long"
             },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -5855,6 +6051,22 @@
                   "type": "long"
                 },
                 "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
                   "type": "long"
                 }
               }
@@ -5892,23 +6104,7 @@
             "deprecated": {
               "type": "long"
             },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -5929,6 +6125,22 @@
                   "type": "long"
                 },
                 "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
                   "type": "long"
                 }
               }
@@ -5966,23 +6178,7 @@
             "deprecated": {
               "type": "long"
             },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -6003,6 +6199,22 @@
                   "type": "long"
                 },
                 "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
                   "type": "long"
                 }
               }
@@ -6056,23 +6268,7 @@
             "deprecated": {
               "type": "long"
             },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -6093,6 +6289,22 @@
                   "type": "long"
                 },
                 "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
                   "type": "long"
                 }
               }
@@ -6146,23 +6358,7 @@
             "deprecated": {
               "type": "long"
             },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -6183,6 +6379,22 @@
                   "type": "long"
                 },
                 "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
                   "type": "long"
                 }
               }
@@ -6265,23 +6477,7 @@
             "deprecated": {
               "type": "long"
             },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -6302,6 +6498,22 @@
                   "type": "long"
                 },
                 "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
                   "type": "long"
                 }
               }
@@ -6924,6 +7136,12 @@
             }
           }
         },
+        "available": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
         "last7Days": {
           "properties": {
             "csv_searchsource": {
@@ -6937,23 +7155,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -6974,6 +7176,22 @@
                       "type": "long"
                     },
                     "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7011,23 +7229,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -7048,6 +7250,22 @@
                       "type": "long"
                     },
                     "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7085,23 +7303,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -7122,6 +7324,22 @@
                       "type": "long"
                     },
                     "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7175,23 +7393,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -7212,6 +7414,22 @@
                       "type": "long"
                     },
                     "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7265,23 +7483,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -7302,6 +7504,22 @@
                       "type": "long"
                     },
                     "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -7384,23 +7602,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -7421,6 +7623,22 @@
                       "type": "long"
                     },
                     "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
                       "type": "long"
                     }
                   }
@@ -8044,12 +8262,6 @@
               }
             }
           }
-        },
-        "available": {
-          "type": "boolean"
-        },
-        "enabled": {
-          "type": "boolean"
         }
       }
     },
