@@ -8,14 +8,22 @@
 
 // TODO: This needs to be removed and properly typed
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { flow, get, mapValues } from 'lodash';
-import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from 'kibana/server';
+import type {
+  SavedObjectAttributes,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
+} from 'kibana/server';
 import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/server';
 import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
-import type { SavedSearchAttributes } from '../../common/types';
 import type { SerializedSearchSourceFields } from '../../../data/common';
+
+export interface SavedSearchMigrationAttributes extends SavedObjectAttributes {
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: string;
+  };
+}
 
 /**
  * This migration script is related to:
@@ -132,7 +140,7 @@ const getSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObjec
     searchSourceMigrations,
     (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
       (state) => {
-        const _state = state as unknown as { attributes: SavedSearchAttributes };
+        const _state = state as unknown as { attributes: SavedSearchMigrationAttributes };
 
         const parsedSearchSourceJSON = _state.attributes.kibanaSavedObjectMeta.searchSourceJSON;
 

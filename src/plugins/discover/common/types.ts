@@ -12,16 +12,6 @@ import { SavedObjectAttributes } from '../../../core/types';
 import { VIEW_MODE } from './constants';
 
 /** @internal **/
-export interface DiscoverGridSettingsColumn {
-  width?: number;
-}
-/** @internal **/
-export interface DiscoverGridSavedSearch {
-  columns?: {
-    [key: string]: DiscoverGridSettingsColumn;
-  };
-}
-/** @internal **/
 export interface SavedSearchGridAttributes extends SavedObjectAttributes {
   columns?: {
     [key: string]: {
@@ -31,9 +21,8 @@ export interface SavedSearchGridAttributes extends SavedObjectAttributes {
 }
 
 /** @internal **/
-export interface SavedSearchAttributes extends SavedObjectAttributes {
+export interface SavedSearchAttributes {
   title: string;
-  // @ts-expect-error
   sort: SortOrder[];
   columns: string[];
   description: string;
