@@ -8,7 +8,6 @@
 import './space_selector.scss';
 
 import {
-  EuiButtonEmpty,
   EuiFieldSearch,
   EuiLoadingSpinner,
   EuiPanel,
@@ -160,15 +159,6 @@ export class SpaceSelector extends Component<Props, State> {
                   {`"${this.state.searchTerm}"`}
                 </h2>
               </EuiTitle>
-
-              <p>
-                <EuiButtonEmpty onClick={() => this.onSearch('')} size="s">
-                  <FormattedMessage
-                    id="xpack.spaces.spaceSelector.clearSearchButtonLabel"
-                    defaultMessage="Clear search"
-                  />
-                </EuiButtonEmpty>
-              </p>
             </EuiPanel>
           </Fragment>
         )}
