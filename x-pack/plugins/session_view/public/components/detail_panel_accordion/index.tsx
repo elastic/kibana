@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { ReactNode } from 'react';
-import { EuiAccordion, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { useStyles } from './styles';
 import { DetailPanelDescriptionList } from '../detail_panel_description_list';
 
@@ -55,18 +55,18 @@ export const DetailPanelAccordion = ({
           )}
         </EuiFlexGroup>
       }
-      extraAction={
-        extraActionTitle ? (
-          <EuiButtonEmpty
-            size="s"
-            color="primary"
-            onClick={onExtraActionClick}
-            data-test-subj="sessionView:detail-panel-accordion-action"
-          >
-            {extraActionTitle}
-          </EuiButtonEmpty>
-        ) : null
-      }
+      // extraAction={
+      //   extraActionTitle ? (
+      //     <EuiButtonEmpty
+      //       size="s"
+      //       color="primary"
+      //       onClick={onExtraActionClick}
+      //       data-test-subj="sessionView:detail-panel-accordion-action"
+      //     >
+      //       {extraActionTitle}
+      //     </EuiButtonEmpty>
+      //   ) : null
+      // }
       css={styles.accordion}
       data-test-subj="sessionView:detail-panel-accordion"
     >
