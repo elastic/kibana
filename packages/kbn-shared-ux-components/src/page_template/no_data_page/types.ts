@@ -11,10 +11,6 @@ import { MouseEventHandler, ReactNode } from 'react';
 
 export type NoDataPageActions = Partial<EuiCardProps> & {
   /**
-   * Applies the `Recommended` beta badge and makes the button `fill`
-   */
-  recommended?: boolean;
-  /**
    * Provide just a string for the button's label, or a whole component
    */
   button?: string | ReactNode;

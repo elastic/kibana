@@ -9,7 +9,7 @@
 import React, { useMemo, FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ElasticAgentCard, NoDataCard } from './no_data_card';
+import { ElasticAgentCard } from './no_data_card';
 import { NoDataPageBody } from './no_data_page_body';
 import { NoDataPageProps } from './types';
 
@@ -23,16 +23,14 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
 }) => {
   const actionKeys = Object.keys(action);
 
-  const actionCards = useMemo(() => {
-    return actionKeys.map((actionKey) => {
-      const isAgent = actionKey === 'elasticAgent';
-      const key = isAgent ? 'empty-page-agent-action' : `empty-page-${actionKey}-action`;
-      return isAgent ? (
-        <ElasticAgentCard key={key} {...action[actionKey]} />
-      ) : (
-        <NoDataCard key={key} {...action[actionKey]} />
-      );
-    });
+  const actionCard = useMemo(() => {
+    if (actionKeys.length !== 1) {
+      return null;
+    }
+    const actionKey = actionKeys[0];
+    const key =
+      actionKey === 'elasticAgent' ? 'empty-page-agent-action' : `empty-page-${actionKey}-action`;
+    return <ElasticAgentCard key={key} {...action[actionKey]} />;
   }, [action, actionKeys]);
 
   const title =
@@ -46,7 +44,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     <div {...rest}>
       <NoDataPageBody
         pageTitle={title}
-        actionCard={actionCards.length > 0 ? actionCards[0] : null}
+        actionCard={actionCard}
         logo={logo}
         solution={solution}
         docsLink={docsLink}

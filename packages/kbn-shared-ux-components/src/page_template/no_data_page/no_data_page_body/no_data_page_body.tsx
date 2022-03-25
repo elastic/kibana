@@ -10,11 +10,11 @@ import { EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 import React, { ReactElement } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPageProps } from '../types';
-import { ElasticAgentCard, NoDataCard } from '../no_data_card';
+import { ElasticAgentCard } from '../no_data_card';
 import { KibanaSolutionAvatar } from '../../../solution_avatar';
 
 export type NoDataPageBodyProps = {
-  actionCard: ReactElement<typeof NoDataCard> | ReactElement<typeof ElasticAgentCard> | null;
+  actionCard: ReactElement<typeof ElasticAgentCard> | null;
 } & Omit<NoDataPageProps, 'action'>;
 
 export const NoDataPageBody = (props: NoDataPageBodyProps) => {
