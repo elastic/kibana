@@ -16,6 +16,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -117,12 +118,12 @@ export const DocumentExplorerCallout = () => {
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <a href={docLinks.links.discover.documentExplorer}>
+          <EuiLink href={docLinks.links.discover.documentExplorer}>
             <FormattedMessage
               id="discover.docExplorerCallout.learnMore"
               defaultMessage="Learn more"
             />
-          </a>
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCallOut>
