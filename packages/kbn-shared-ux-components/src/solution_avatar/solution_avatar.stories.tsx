@@ -11,7 +11,7 @@ import { KibanaSolutionAvatar, KibanaSolutionAvatarProps } from './solution_avat
 
 export default {
   title: 'Solution Avatar',
-  description: 'A wrapper around EuiAvatar, with some extra styling',
+  description: 'A wrapper around EuiAvatar, specifically to stylize Elastic Solutions',
 };
 
 type Params = Pick<KibanaSolutionAvatarProps, 'size' | 'name'>;
@@ -23,10 +23,11 @@ export const PureComponent = (params: Params) => {
 PureComponent.argTypes = {
   name: {
     control: 'text',
-    defaultValue: 'Solution Name',
+    defaultValue: 'Kibana',
   },
   size: {
     control: 'radio',
     options: ['s', 'm', 'l', 'xl', 'xxl'],
+    defaultValue: 'xxl',
   },
 };

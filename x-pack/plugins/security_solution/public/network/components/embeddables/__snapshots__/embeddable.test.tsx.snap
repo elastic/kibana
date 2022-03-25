@@ -3,6 +3,7 @@
 exports[`Embeddable it renders 1`] = `
 <section
   className="siemEmbeddable"
+  data-test-subj="siemEmbeddable"
 >
   <Panel
     hasBorder={true}

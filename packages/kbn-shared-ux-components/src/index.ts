@@ -94,6 +94,7 @@ export const LazyIconButtonGroup = React.lazy(() =>
  * The IconButtonGroup component that is wrapped by the `withSuspence` HOC.
  */
 export const IconButtonGroup = withSuspense(LazyIconButtonGroup);
+
 /**
  * The lazily loaded `KibanaPageTemplateSolutionNav` component that is wrapped by the `withSuspense` HOC. Consumers should use
  * `React.Suspense` or `withSuspense` HOC to load this component.
@@ -121,4 +122,9 @@ export const KibanaSolutionAvatarLazy = React.lazy(() =>
   }))
 );
 
+/**
+ * A `KibanaSolutionAvatar` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `KibanaPageTemplateSolutionNavAvatarLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
 export const KibanaSolutionAvatar = withSuspense(KibanaSolutionAvatarLazy);
