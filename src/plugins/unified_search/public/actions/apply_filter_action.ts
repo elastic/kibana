@@ -12,14 +12,20 @@ import { toMountPoint } from '../../../kibana_react/public';
 import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../apply_filters';
-import {
-  Filter,
-  FilterManager,
-  TimefilterContract,
-  esFilters,
-  ACTION_GLOBAL_APPLY_FILTER,
-} from '../../../data/public';
-import type { ApplyGlobalFilterActionContext } from '../../../data/public';
+import { Filter, FilterManager, TimefilterContract, esFilters } from '../../../data/public';
+
+export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
+
+export interface ApplyGlobalFilterActionContext {
+  filters: Filter[];
+  timeFieldName?: string;
+  // Need to make this unknown to prevent circular dependencies.
+  // Apps using this property will need to cast to `IEmbeddable`.
+  embeddable?: unknown;
+  // controlledBy is an optional key in filter.meta that identifies the owner of a filter
+  // Pass controlledBy to cleanup an existing filter(s) owned by embeddable prior to adding new filters
+  controlledBy?: string;
+}
 
 async function isCompatible(context: ApplyGlobalFilterActionContext) {
   return context.filters !== undefined;

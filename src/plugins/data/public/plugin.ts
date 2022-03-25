@@ -29,13 +29,12 @@ import {
   setTheme,
 } from './services';
 import {
-  ACTION_GLOBAL_APPLY_FILTER,
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
   createValueClickAction,
   createSelectRangeAction,
 } from './actions';
-import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
+import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
 import { getAggsFormats, DatatableUtilitiesService } from '../common';
@@ -150,11 +149,6 @@ export class DataPublicPlugin
       createValueClickAction(() => ({
         uiActions,
       }))
-    );
-
-    uiActions.addTriggerAction(
-      APPLY_FILTER_TRIGGER,
-      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
     );
 
     const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);

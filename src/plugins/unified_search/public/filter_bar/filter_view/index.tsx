@@ -62,10 +62,13 @@ export const FilterView: FC<Props> = ({
         tabIndex: -1,
       }}
       iconOnClick={iconOnClick}
-      iconOnClickAriaLabel={i18n.translate('unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel', {
-        defaultMessage: 'Delete {filter}',
-        values: { filter: innerText },
-      })}
+      iconOnClickAriaLabel={i18n.translate(
+        'unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel',
+        {
+          defaultMessage: 'Delete {filter}',
+          values: { filter: innerText },
+        }
+      )}
       onClick={onClick}
       onClickAriaLabel={i18n.translate('unifiedSearch.filter.filterBar.filterItemBadgeAriaLabel', {
         defaultMessage: 'Filter actions',
