@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  EventKind,
   AlertStatusEventEntityIdMap,
   Process,
   ProcessEvent,
@@ -50,7 +51,11 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
       processMap[id] = process;
     }
 
-    process.addEvent(event);
+    if (event.event.kind === EventKind.signal) {
+      process.addAlert(event);
+    } else {
+      process.addEvent(event);
+    }
   });
 
   return processMap;

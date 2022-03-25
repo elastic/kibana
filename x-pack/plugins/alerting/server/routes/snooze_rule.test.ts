@@ -21,17 +21,10 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-const SNOOZE_END_TIME = '2025-03-07T00:00:00.000Z';
+// These tests don't test for future snooze time validation, so this date doesn't need to be in the future
+const SNOOZE_END_TIME = '2021-03-07T00:00:00.000Z';
 
 describe('snoozeAlertRoute', () => {
-  beforeAll(() => {
-    jest.useFakeTimers('modern');
-    jest.setSystemTime(new Date(2020, 3, 1));
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
   it('snoozes an alert', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

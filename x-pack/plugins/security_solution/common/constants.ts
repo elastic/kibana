@@ -435,5 +435,11 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrenc
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
 
+/**
+ * A local storage key we use to store the state of the feature tour UI for the Rule Management page.
+ *
+ * NOTE: As soon as we want to show a new tour for features in the current Kibana version,
+ * we will need to update this constant with the corresponding version.
+ */
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
   'securitySolution.rulesManagementPage.newFeaturesTour.v8.1';

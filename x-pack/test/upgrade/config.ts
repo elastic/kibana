@@ -35,6 +35,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName: 'Upgrade Tests',
     },
 
+    timeouts: {
+      kibanaReportCompletion: 120000,
+    },
+
     security: {
       disableTestUser: true,
     },
