@@ -46,6 +46,7 @@ type TransactionGroupDetailedStatistics =
 export function getColumns({
   serviceName,
   latencyAggregationType,
+  transactionGroupDetailedStatisticsLoading,
   transactionGroupDetailedStatistics,
   comparisonEnabled,
   shouldShowSparkPlots = true,
@@ -53,6 +54,7 @@ export function getColumns({
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
+  transactionGroupDetailedStatisticsLoading: boolean;
   transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
@@ -106,6 +108,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
@@ -140,6 +143,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
@@ -196,6 +200,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined

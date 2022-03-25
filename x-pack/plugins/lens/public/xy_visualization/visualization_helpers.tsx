@@ -11,8 +11,12 @@ import { DatasourcePublicAPI, OperationMetadata, VisualizationType } from '../ty
 import { State, visualizationTypes, XYState } from './types';
 import { isHorizontalChart } from './state_helpers';
 import {
+  AnnotationLayerArgs,
+  DataLayerArgs,
   SeriesType,
+  XYAnnotationLayerConfig,
   XYDataLayerConfig,
+  XYLayerArgs,
   XYLayerConfig,
   XYReferenceLineLayerConfig,
 } from '../../common/expressions';
@@ -130,8 +134,11 @@ export function checkScaleOperation(
 export const isDataLayer = (layer: Pick<XYLayerConfig, 'layerType'>): layer is XYDataLayerConfig =>
   layer.layerType === layerTypes.DATA || !layer.layerType;
 
-export const getDataLayers = (layers: XYLayerConfig[]) =>
+export const getDataLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYDataLayerConfig => isDataLayer(layer));
+
+export const getDataLayersArgs = (layers: XYLayerArgs[]) =>
+  (layers || []).filter((layer): layer is DataLayerArgs => isDataLayer(layer));
 
 export const getFirstDataLayer = (layers: XYLayerConfig[]) =>
   (layers || []).find((layer): layer is XYDataLayerConfig => isDataLayer(layer));
@@ -140,8 +147,33 @@ export const isReferenceLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
 ): layer is XYReferenceLineLayerConfig => layer.layerType === layerTypes.REFERENCELINE;
 
-export const getReferenceLayers = (layers: XYLayerConfig[]) =>
+export const getReferenceLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYReferenceLineLayerConfig => isReferenceLayer(layer));
+
+export const isAnnotationsLayer = (
+  layer: Pick<XYLayerConfig, 'layerType'>
+): layer is XYAnnotationLayerConfig => layer.layerType === layerTypes.ANNOTATIONS;
+
+export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
+  (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
+
+export const getAnnotationsLayersArgs = (layers: XYLayerArgs[]) =>
+  (layers || []).filter((layer): layer is AnnotationLayerArgs => isAnnotationsLayer(layer));
+
+export interface LayerTypeToLayer {
+  [layerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;
+  [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => XYReferenceLineLayerConfig;
+  [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => XYAnnotationLayerConfig;
+}
+
+export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLayer) => {
+  if (isDataLayer(layer)) {
+    return options[layerTypes.DATA](layer);
+  } else if (isReferenceLayer(layer)) {
+    return options[layerTypes.REFERENCELINE](layer);
+  }
+  return options[layerTypes.ANNOTATIONS](layer);
+};
 
 export function getVisualizationType(state: State): VisualizationType | 'mixed' {
   if (!state.layers.length) {
@@ -254,6 +286,11 @@ const newLayerFn = {
     layerId,
     layerType: layerTypes.REFERENCELINE,
     accessors: [],
+  }),
+  [layerTypes.ANNOTATIONS]: ({ layerId }: { layerId: string }): XYAnnotationLayerConfig => ({
+    layerId,
+    layerType: layerTypes.ANNOTATIONS,
+    annotations: [],
   }),
 };
 

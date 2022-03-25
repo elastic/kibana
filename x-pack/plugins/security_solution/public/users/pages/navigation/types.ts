@@ -10,7 +10,11 @@ import { ESTermQuery } from '../../../../common/typed_json';
 import { DocValueFields } from '../../../../../timelines/common';
 import { NavTab } from '../../../common/components/navigation/types';
 
-type KeyUsersNavTabWithoutMlPermission = UsersTableType.allUsers & UsersTableType.risk;
+type KeyUsersNavTabWithoutMlPermission = UsersTableType.allUsers &
+  UsersTableType.risk &
+  UsersTableType.events &
+  UsersTableType.alerts;
+
 type KeyUsersNavTabWithMlPermission = KeyUsersNavTabWithoutMlPermission & UsersTableType.anomalies;
 
 type KeyUsersNavTab = KeyUsersNavTabWithoutMlPermission | KeyUsersNavTabWithMlPermission;

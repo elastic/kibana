@@ -8,6 +8,7 @@ import _ from 'lodash';
 import memoizeOne from 'memoize-one';
 import { useState, useEffect } from 'react';
 import {
+  AlertStatusEventEntityIdMap,
   EventAction,
   EventKind,
   Process,
@@ -15,18 +16,27 @@ import {
   ProcessMap,
   ProcessEventsPage,
 } from '../../../common/types/process_tree';
-import { processNewEvents, searchProcessTree, autoExpandProcessTree } from './helpers';
+import {
+  updateAlertEventStatus,
+  processNewEvents,
+  searchProcessTree,
+  autoExpandProcessTree,
+  updateProcessMap,
+} from './helpers';
 import { sortProcesses } from '../../../common/utils/sort_processes';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
   data: ProcessEventsPage[];
+  alerts: ProcessEvent[];
   searchQuery?: string;
+  updatedAlertsStatus: AlertStatusEventEntityIdMap;
 }
 
 export class ProcessImpl implements Process {
   id: string;
   events: ProcessEvent[];
+  alerts: ProcessEvent[];
   children: Process[];
   parent: Process | undefined;
   autoExpand: boolean;
@@ -36,6 +46,7 @@ export class ProcessImpl implements Process {
   constructor(id: string) {
     this.id = id;
     this.events = [];
+    this.alerts = [];
     this.children = [];
     this.orphans = [];
     this.autoExpand = false;
@@ -46,6 +57,10 @@ export class ProcessImpl implements Process {
     // rather than push new events on the array, we return a new one
     // this helps the below memoizeOne functions to behave correctly.
     this.events = this.events.concat(event);
+  }
+
+  addAlert(alert: ProcessEvent) {
+    this.alerts = this.alerts.concat(alert);
   }
 
   clearSearch() {
@@ -96,11 +111,15 @@ export class ProcessImpl implements Process {
   }
 
   hasAlerts() {
-    return !!this.findEventByKind(this.events, EventKind.signal);
+    return !!this.alerts.length;
   }
 
   getAlerts() {
-    return this.filterEventsByKind(this.events, EventKind.signal);
+    return this.alerts;
+  }
+
+  updateAlertsStatus(updatedAlertsStatus: AlertStatusEventEntityIdMap) {
+    this.alerts = updateAlertEventStatus(this.alerts, updatedAlertsStatus);
   }
 
   hasExec() {
@@ -129,6 +148,7 @@ export class ProcessImpl implements Process {
   // only used to auto expand parts of the tree that could be of interest.
   isUserEntered() {
     const event = this.getDetails();
+
     const {
       pid,
       tty,
@@ -181,7 +201,13 @@ export class ProcessImpl implements Process {
   });
 }
 
-export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProcessTreeDeps) => {
+export const useProcessTree = ({
+  sessionEntityId,
+  data,
+  alerts,
+  searchQuery,
+  updatedAlertsStatus,
+}: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   // we add a fake session leader event, sourced from wide event data.
   // this is because we might not always have a session leader event
@@ -204,6 +230,7 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);
   const [processedPages, setProcessedPages] = useState<ProcessEventsPage[]>([]);
+  const [alertsProcessed, setAlertsProcessed] = useState(false);
   const [searchResults, setSearchResults] = useState<Process[]>([]);
   const [orphans, setOrphans] = useState<Process[]>([]);
 
@@ -241,6 +268,15 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
   }, [data, processMap, orphans, processedPages, sessionEntityId]);
 
   useEffect(() => {
+    // currently we are loading a single page of alerts, with no pagination
+    // so we only need to add these alert events to processMap once.
+    if (!alertsProcessed) {
+      updateProcessMap(processMap, alerts);
+      setAlertsProcessed(true);
+    }
+  }, [processMap, alerts, alertsProcessed]);
+
+  useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));
     autoExpandProcessTree(processMap);
   }, [searchQuery, processMap]);
@@ -249,6 +285,14 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
   const sessionLeader = processMap[sessionEntityId];
 
   sessionLeader.orphans = orphans;
+
+  // update alert status in processMap for alerts in updatedAlertsStatus
+  Object.keys(updatedAlertsStatus).forEach((alertUuid) => {
+    const process = processMap[updatedAlertsStatus[alertUuid].processEntityId];
+    if (process) {
+      process.updateAlertsStatus(updatedAlertsStatus);
+    }
+  });
 
   return { sessionLeader: processMap[sessionEntityId], processMap, searchResults };
 };

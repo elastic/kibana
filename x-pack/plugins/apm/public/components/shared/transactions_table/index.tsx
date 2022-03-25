@@ -200,7 +200,10 @@ export function TransactionsTable({
     },
   } = data;
 
-  const { data: transactionGroupDetailedStatistics } = useFetcher(
+  const {
+    data: transactionGroupDetailedStatistics,
+    status: transactionGroupDetailedStatisticsStatus,
+  } = useFetcher(
     (callApmApi) => {
       if (
         transactionGroupsTotalItems &&
@@ -243,6 +246,9 @@ export function TransactionsTable({
   const columns = getColumns({
     serviceName,
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    transactionGroupDetailedStatisticsLoading:
+      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
+      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED,
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,

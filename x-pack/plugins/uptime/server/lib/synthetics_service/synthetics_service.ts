@@ -28,6 +28,7 @@ import {
   MonitorFields,
   ServiceLocations,
   SyntheticsMonitor,
+  ThrottlingOptions,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
@@ -50,32 +51,30 @@ export class SyntheticsService {
   private apiKey: SyntheticsServiceApiKey | undefined;
 
   public locations: ServiceLocations;
+  public throttling: ThrottlingOptions | undefined;
 
   private indexTemplateExists?: boolean;
   private indexTemplateInstalling?: boolean;
+
+  public isAllowed: boolean;
 
   constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
     this.config = config;
+    this.isAllowed = false;
 
     this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
 
     this.locations = [];
-
-    this.registerServiceLocations();
   }
 
-  public init() {
-    // TODO: Figure out fake kibana requests to handle API keys on start up
-    // getAPIKeyForSyntheticsService({ server: this.server }).then((apiKey) => {
-    //   if (apiKey) {
-    //     this.apiKey = apiKey;
-    //   }
-    // });
-    this.setupIndexTemplates();
+  public async init() {
+    await this.registerServiceLocations();
+
+    this.isAllowed = await this.apiClient.checkIfAccountAllowed();
   }
 
   private setupIndexTemplates() {
@@ -105,12 +104,17 @@ export class SyntheticsService {
     }
   }
 
-  public registerServiceLocations() {
+  public async registerServiceLocations() {
     const service = this;
-    getServiceLocations(service.server).then((result) => {
+
+    try {
+      const result = await getServiceLocations(service.server);
+      service.throttling = result.throttling;
       service.locations = result.locations;
       service.apiClient.locations = result.locations;
-    });
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   public registerSyncTask(taskManager: TaskManagerSetupContract) {
@@ -130,10 +134,14 @@ export class SyntheticsService {
             async run() {
               const { state } = taskInstance;
 
-              service.setupIndexTemplates();
-              service.registerServiceLocations();
+              await service.registerServiceLocations();
 
-              await service.pushConfigs();
+              service.isAllowed = await service.apiClient.checkIfAccountAllowed();
+
+              if (service.isAllowed) {
+                service.setupIndexTemplates();
+                await service.pushConfigs();
+              }
 
               return { state };
             },
