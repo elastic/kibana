@@ -112,7 +112,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       kqlMode,
       sessionViewId,
       showCheckboxes,
-      sessionViewId,
       sort,
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, id));
