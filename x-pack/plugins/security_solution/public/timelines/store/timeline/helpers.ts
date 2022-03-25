@@ -287,13 +287,13 @@ export const updateGraphEventId = ({
   };
 };
 
-export const updateSessionViewEventId = ({
+export const updateSessionViewSessionId = ({
   id,
   eventId,
   timelineById,
 }: {
   id: string;
-  eventId: string;
+  eventId: string | null;
   timelineById: TimelineById;
 }): TimelineById => {
   const timeline = timelineById[id];
@@ -303,26 +303,6 @@ export const updateSessionViewEventId = ({
     [id]: {
       ...timeline,
       sessionViewId: eventId,
-    },
-  };
-};
-
-export const updateSessionViewSessionId = ({
-  id,
-  eventId,
-  timelineById,
-}: {
-  id: string;
-  eventId: string;
-  timelineById: TimelineById;
-}): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      sessionViewSessionId: eventId,
     },
   };
 };

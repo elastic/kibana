@@ -38,7 +38,9 @@ const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewId
   );
   const sessionViewMain = useMemo(() => {
-    return sessionViewId !== null ? sessionView.getSessionView(sessionViewId) : null;
+    return sessionViewId !== null
+      ? sessionView.getSessionView({ sessionEntityId: sessionViewId })
+      : null;
   }, [sessionView, sessionViewId]);
 
   return <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>;

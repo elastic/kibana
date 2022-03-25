@@ -81,11 +81,6 @@ export const updateTimelineGraphEventId = actionCreator<{ id: string; graphEvent
   'UPDATE_TIMELINE_GRAPH_EVENT_ID'
 );
 
-export const updateTimelineSessionViewEventId = actionCreator<{
-  id: string;
-  eventId: string | null;
-}>('UPDATE_TIMELINE_SESSION_VIEW_EVENT_ID');
-
 export const updateTimelineSessionViewSessionId = actionCreator<{
   id: string;
   eventId: string | null;

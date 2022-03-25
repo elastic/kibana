@@ -192,7 +192,7 @@ export function ProcessTreeNode({
   const shouldRenderChildren = childrenExpanded && children && children.length > 0;
   const childrenTreeDepth = depth + 1;
 
-  const showUserEscalation = user.id !== parent.user.id;
+  const showUserEscalation = user.id && user.id !== parent.user?.id;
   const interactiveSession = !!tty;
   const sessionIcon = interactiveSession ? 'consoleApp' : 'compute';
   const iconTestSubj = hasExec

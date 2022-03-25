@@ -45,6 +45,7 @@ import {
 } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
+import { ENABLE_SESSION_VIEW_PLUGIN } from '../../../../../common/constants';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -202,8 +203,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
-  const ACTION_BUTTON_COUNT = 6;
 
+  const isSessionViewEnabled = uiSettings.get(ENABLE_SESSION_VIEW_PLUGIN);
+
+  const ACTION_BUTTON_COUNT = isSessionViewEnabled ? 6 : 5;
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
     getManageTimeline(state, timelineId ?? '')
@@ -330,7 +333,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         ...x,
         headerCellRender: HeaderActions,
       })),
-    []
+    [ACTION_BUTTON_COUNT]
   );
 
   return (

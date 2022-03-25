@@ -70,5 +70,5 @@ export interface SessionViewStart {
   }: {
     onOpenSessionView: (eventId: string) => void;
   }) => JSX.Element;
-  getSessionView: (sessionEntityId: string) => JSX.Element;
+  getSessionView: (props: SessionViewDeps) => JSX.Element;
 }

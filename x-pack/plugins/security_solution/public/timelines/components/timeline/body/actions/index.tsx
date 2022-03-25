@@ -25,7 +25,6 @@ import {
   setActiveTabTimeline,
   updateTimelineGraphEventId,
   updateTimelineSessionViewSessionId,
-  updateTimelineSessionViewEventId,
 } from '../../../../store/timeline/actions';
 import {
   useGlobalFullScreen,
@@ -144,7 +143,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
     if (entryLeader !== null) {
       dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
       dispatch(updateTimelineSessionViewSessionId({ id: timelineId, eventId: entryLeader }));
-      dispatch(updateTimelineSessionViewEventId({ id: timelineId, eventId: entryLeader }));
     }
   }, [dispatch, timelineId, entryLeader]);
 
