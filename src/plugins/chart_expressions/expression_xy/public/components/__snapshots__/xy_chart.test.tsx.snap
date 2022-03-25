@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`xy_expression XYChart component annotations should render basic annotation 1`] = `
+exports[`XYChart component annotations should render basic annotation 1`] = `
 <LineAnnotation
   dataValues={
     Array [
@@ -49,7 +49,7 @@ exports[`xy_expression XYChart component annotations should render basic annotat
 />
 `;
 
-exports[`xy_expression XYChart component annotations should render grouped annotations preserving the shared styles 1`] = `
+exports[`XYChart component annotations should render grouped annotations preserving the shared styles 1`] = `
 <LineAnnotation
   customTooltipDetails={[Function]}
   dataValues={
@@ -108,7 +108,7 @@ exports[`xy_expression XYChart component annotations should render grouped annot
 />
 `;
 
-exports[`xy_expression XYChart component annotations should render grouped annotations with default styles 1`] = `
+exports[`XYChart component annotations should render grouped annotations with default styles 1`] = `
 <LineAnnotation
   customTooltipDetails={[Function]}
   dataValues={
@@ -164,7 +164,7 @@ exports[`xy_expression XYChart component annotations should render grouped annot
 />
 `;
 
-exports[`xy_expression XYChart component annotations should render simplified annotation when hide is true 1`] = `
+exports[`XYChart component annotations should render simplified annotation when hide is true 1`] = `
 <LineAnnotation
   dataValues={
     Array [
@@ -213,7 +213,7 @@ exports[`xy_expression XYChart component annotations should render simplified an
 />
 `;
 
-exports[`xy_expression XYChart component it renders area 1`] = `
+exports[`XYChart component it renders area 1`] = `
 <Chart
   renderer="canvas"
 >
@@ -375,7 +375,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     stackAccessors={Array []}
     timeZone="UTC"
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "a",
@@ -436,7 +436,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     stackAccessors={Array []}
     timeZone="UTC"
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "b",
@@ -615,7 +615,7 @@ exports[`XYChart component it renders bar 1`] = `
     stackAccessors={Array []}
     timeZone="UTC"
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "a",
@@ -682,7 +682,7 @@ exports[`XYChart component it renders bar 1`] = `
     stackAccessors={Array []}
     timeZone="UTC"
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "b",
@@ -861,7 +861,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     stackAccessors={Array []}
     timeZone="UTC"
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "a",
@@ -928,7 +928,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     stackAccessors={Array []}
     timeZone="UTC"
     xAccessor="c"
-    xScaleType="linear"
+    xScaleType="ordinal"
     yAccessors={
       Array [
         "b",
