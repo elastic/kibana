@@ -177,7 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const [{ id: alertId }] = await getAlertsByName(RULE_NAME);
     await queryBar.setQuery(`alert_id:${alertId}`);
-    await retry.waitForWithTimeout('doc table contains alert', 5000, async () => {
+    await retry.waitFor('document explorer contains alert', async () => {
       await queryBar.submitQuery();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       return (await dataGrid.getDocCount()) > 0;
