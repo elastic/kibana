@@ -82,7 +82,6 @@ export class SpaceSelector extends Component<Props, State> {
         this.setState({
           loading: false,
           spaces,
-          // error: { name: 'Name' },
         });
       })
       .catch((err) => {
