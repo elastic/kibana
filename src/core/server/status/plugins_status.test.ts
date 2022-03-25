@@ -15,7 +15,6 @@ import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
-// FIXME temporarily skipping these tests to asses performance of this solution for https://github.com/elastic/kibana/issues/128061
 describe('PluginStatusService', () => {
   const coreAllAvailable$: Observable<CoreStatus> = of({
     elasticsearch: { level: ServiceStatusLevels.available, summary: 'elasticsearch avail' },
