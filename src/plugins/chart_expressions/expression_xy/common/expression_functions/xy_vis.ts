@@ -29,6 +29,7 @@ import {
   LABELS_ORIENTATION_CONFIG,
   AXIS_TITLES_VISIBILITY_CONFIG,
   EndValues,
+  ANNOTATION_LAYER,
 } from '../constants';
 
 export const logDataTable = (
@@ -146,7 +147,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       }),
     },
     layers: {
-      types: [DATA_LAYER, REFERENCE_LINE_LAYER],
+      types: [DATA_LAYER, REFERENCE_LINE_LAYER, ANNOTATION_LAYER],
       help: i18n.translate('expressionXY.xyVis.layers.help', {
         defaultMessage: 'Layers of visual series',
       }),

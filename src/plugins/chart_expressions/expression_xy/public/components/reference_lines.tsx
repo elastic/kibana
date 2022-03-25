@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import './expression_reference_lines.scss';
+import './reference_lines.scss';
 
 import React from 'react';
 import { groupBy } from 'lodash';

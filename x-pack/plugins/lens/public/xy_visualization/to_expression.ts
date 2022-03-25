@@ -414,11 +414,10 @@ const annotationLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'lens_xy_annotation_layer',
+        function: 'annotationLayer',
         arguments: {
           hide: [Boolean(layer.hide)],
           layerId: [layer.layerId],
-          layerType: [layerTypes.ANNOTATIONS],
           annotations: layer.annotations
             ? layer.annotations.map(
                 (ann): Ast =>

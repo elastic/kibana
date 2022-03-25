@@ -9,13 +9,10 @@
 import { LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { chartPluginMock } from '../../../../charts/public/mocks';
 import { FieldFormat } from '../../../../field_formats/common';
 import { LensMultiTable } from '../../common';
 import { ReferenceLineLayerArgs, YConfig } from '../../common/types';
 import { ReferenceLineAnnotations, ReferenceLineAnnotationsProps } from './reference_lines';
-
-const paletteService = chartPluginMock.createPaletteRegistry();
 
 const row: Record<string, number> = {
   xAccessorFirstId: 1,
@@ -112,7 +109,6 @@ describe('ReferenceLineAnnotations', () => {
                 axisMode,
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
               },
             ])}
           />
@@ -151,7 +147,6 @@ describe('ReferenceLineAnnotations', () => {
                 axisMode: 'bottom',
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
               },
             ])}
           />
@@ -193,14 +188,12 @@ describe('ReferenceLineAnnotations', () => {
                 axisMode,
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 axisMode,
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
               },
             ])}
           />
@@ -243,14 +236,12 @@ describe('ReferenceLineAnnotations', () => {
                 axisMode: 'bottom',
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 axisMode: 'bottom',
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
               },
             ])}
           />
@@ -292,14 +283,12 @@ describe('ReferenceLineAnnotations', () => {
                 axisMode,
                 lineStyle: 'solid',
                 fill: 'above',
-                type: 'yConfig',
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 axisMode,
                 lineStyle: 'solid',
                 fill: 'below',
-                type: 'yConfig',
               },
             ])}
           />
@@ -342,14 +331,12 @@ describe('ReferenceLineAnnotations', () => {
                 axisMode: 'left',
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
               },
               {
                 forAccessor: `yAccessorRightSecondId`,
                 axisMode: 'right',
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
               },
             ])}
           />

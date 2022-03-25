@@ -5,22 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React from 'react';
-import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import { Position } from '@elastic/charts';
-import classnames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { IconPosition, YAxisMode, YConfig } from '../../common/types';
 import { hasIcon } from './icon';
-import { annotationsIconSet } from './annotations_icon_set';
 import type { XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../../common/types';
 import type { FramePublicAPI } from '../types';
 import { getAnnotationsLayersConfig } from './visualization';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
-
-import './expression_reference_lines.scss';
 
 export const LINES_MARKER_SIZE = 20;
 
@@ -138,127 +131,7 @@ export function getBaseIconPlacement(
   return Position.Top;
 }
 
-export function MarkerBody({
-  label,
-  isHorizontal,
-}: {
-  label: string | undefined;
-  isHorizontal: boolean;
-}) {
-  if (!label) {
-    return null;
-  }
-  if (isHorizontal) {
-    return (
-      <div className="eui-textTruncate" style={{ maxWidth: LINES_MARKER_SIZE * 3 }}>
-        {label}
-      </div>
-    );
-  }
-  return (
-    <div
-      className="lnsXyDecorationRotatedWrapper"
-      style={{
-        width: LINES_MARKER_SIZE,
-      }}
-    >
-      <div
-        className="eui-textTruncate lnsXyDecorationRotatedWrapper__label"
-        style={{
-          maxWidth: LINES_MARKER_SIZE * 3,
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
-
-const isNumericalString = (value: string) => !isNaN(Number(value));
-
-function NumberIcon({ number }: { number: number }) {
-  return (
-    <EuiFlexGroup
-      justifyContent="spaceAround"
-      className="lnsXyAnnotationNumberIcon"
-      gutterSize="none"
-      alignItems="center"
-    >
-      <EuiText color="ghost" className="lnsXyAnnotationNumberIcon__text">
-        {number < 10 ? number : `9+`}
-      </EuiText>
-    </EuiFlexGroup>
-  );
-}
-
-interface MarkerConfig {
-  axisMode?: YAxisMode;
-  icon?: string;
-  textVisibility?: boolean;
-  iconPosition?: IconPosition;
-}
-
-export const AnnotationIcon = ({
-  type,
-  rotateClassName = '',
-  isHorizontal,
-  renderedInChart,
-  ...rest
-}: {
-  type: string;
-  rotateClassName?: string;
-  isHorizontal?: boolean;
-  renderedInChart?: boolean;
-} & EuiIconProps) => {
-  if (isNumericalString(type)) {
-    return <NumberIcon number={Number(type)} />;
-  }
-  const iconConfig = annotationsIconSet.find((i) => i.value === type);
-  if (!iconConfig) {
-    return null;
-  }
-  return (
-    <EuiIcon
-      {...rest}
-      type={iconConfig.icon || type}
-      className={classnames(
-        { [rotateClassName]: iconConfig.shouldRotate },
-        {
-          lensAnnotationIconFill: renderedInChart && iconConfig.canFill,
-        }
-      )}
-    />
-  );
-};
-
-export function Marker({
-  config,
-  isHorizontal,
-  hasReducedPadding,
-  label,
-  rotateClassName,
-}: {
-  config: MarkerConfig;
-  isHorizontal: boolean;
-  hasReducedPadding: boolean;
-  label?: string;
-  rotateClassName?: string;
-}) {
-  if (hasIcon(config.icon)) {
-    return (
-      <AnnotationIcon type={config.icon} rotateClassName={rotateClassName} renderedInChart={true} />
-    );
-  }
-
-  // if there's some text, check whether to show it as marker, or just show some padding for the icon
-  if (config.textVisibility) {
-    if (hasReducedPadding) {
-      return <MarkerBody label={label} isHorizontal={isHorizontal} />;
-    }
-    return <EuiIcon type="empty" />;
-  }
-  return null;
-}
+export const isNumericalString = (value: string) => !isNaN(Number(value));
 
 const MAX_DATE = 8640000000000000;
 const MIN_DATE = -8640000000000000;
