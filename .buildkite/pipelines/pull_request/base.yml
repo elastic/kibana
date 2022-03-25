@@ -174,7 +174,7 @@ steps:
     label: 'Build API Docs'
     agents:
       queue: n2-4
-    key: storybooks
+    key: build_api_docs
     timeout_in_minutes: 60
 
   - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
