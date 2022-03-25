@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import './document_explorer_callout.scss';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,13 +16,14 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 import { Storage } from '../../../../../../kibana_utils/public';
 
-export const CALLOUT_STATE_KEY = 'discover:docExplorerCalloutClosed';
+export const CALLOUT_STATE_KEY = 'discover:docExplorerUpdateCalloutClosed';
 
 const getStoredCalloutState = (storage: Storage): boolean => {
   const calloutClosed = storage.get(CALLOUT_STATE_KEY);
@@ -33,8 +34,16 @@ const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
 };
 
 export const DocumentExplorerCallout = () => {
+  const { euiTheme } = useEuiTheme();
   const { storage, capabilities, docLinks, addBasePath } = useDiscoverServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
+
+  const style = useMemo(
+    () => css`
+      font-weight: ${euiTheme.font.weight.semiBold};
+    `,
+    [euiTheme.font.weight.semiBold]
+  );
 
   const onCloseCallout = useCallback(() => {
     updateStoredCalloutState(true, storage);
@@ -52,10 +61,42 @@ export const DocumentExplorerCallout = () => {
       iconType="search"
     >
       <p>
-        <FormattedMessage
-          id="discover.docExplorerCallout.bodyMessage"
-          defaultMessage="Quickly sort, select, and compare data, resize columns, and view documents in fullscreen with the Document Explorer."
-        />
+        <span>
+          <FormattedMessage
+            id="discover.docExplorerCallout.bodyMessageOne"
+            defaultMessage="Experience the new "
+          />
+        </span>
+        <span css={style}>
+          <FormattedMessage
+            id="discover.docExplorerCallout.bodyMessageTwo"
+            defaultMessage="Document Explorer"
+          />
+        </span>
+        <span>
+          <FormattedMessage
+            id="discover.docExplorerCallout.bodyMessageThree"
+            defaultMessage=". Understand the shape of your data with "
+          />
+        </span>
+        <span css={style}>
+          <FormattedMessage
+            id="discover.docExplorerCallout.bodyMessageThree"
+            defaultMessage="Field Statistics"
+          />
+        </span>
+        <span>
+          <FormattedMessage
+            id="discover.docExplorerCallout.bodyMessageFour"
+            defaultMessage=". Take action on your search results with "
+          />
+        </span>
+        <span css={style}>
+          <FormattedMessage
+            id="discover.docExplorerCallout.bodyMessageFive"
+            defaultMessage="Alerts"
+          />
+        </span>
       </p>
       <EuiFlexGroup
         justifyContent="flexStart"
@@ -75,13 +116,13 @@ export const DocumentExplorerCallout = () => {
             />
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiLink href={docLinks.links.discover.documentExplorer}>
+        <EuiFlexItem grow={false}>
+          <a href={docLinks.links.discover.documentExplorer}>
             <FormattedMessage
               id="discover.docExplorerCallout.learnMore"
               defaultMessage="Learn more"
             />
-          </EuiLink>
+          </a>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCallOut>
