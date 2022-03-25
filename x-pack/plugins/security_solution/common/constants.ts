@@ -181,6 +181,9 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 
+/** This Kibana Advanced Setting enables the session view component in the UI */
+export const ENABLE_SESSION_VIEW_PLUGIN = 'securitySolution:enableSessionView' as const;
+
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
 
@@ -432,5 +435,11 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrenc
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
 
+/**
+ * A local storage key we use to store the state of the feature tour UI for the Rule Management page.
+ *
+ * NOTE: As soon as we want to show a new tour for features in the current Kibana version,
+ * we will need to update this constant with the corresponding version.
+ */
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
   'securitySolution.rulesManagementPage.newFeaturesTour.v8.1';

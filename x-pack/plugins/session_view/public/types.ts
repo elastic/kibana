@@ -7,7 +7,7 @@
 import { ReactNode } from 'react';
 import { CoreStart } from '../../../../src/core/public';
 import { TimelinesUIStart } from '../../timelines/public';
-import { ProcessEvent } from '../common/types/process_tree';
+import { ProcessEvent, Teletype } from '../common/types/process_tree';
 
 export type SessionViewServices = CoreStart & {
   timelines: TimelinesUIStart;
@@ -42,9 +42,12 @@ export interface DetailPanelProcess {
   start: string;
   end: string;
   exit_code: number;
-  user: string;
+  userName: string;
+  groupName: string;
   args: string[];
   executable: string[][];
+  working_directory: string;
+  tty: Teletype;
   pid: number;
   entryLeader: DetailPanelProcessLeader;
   sessionLeader: DetailPanelProcessLeader;
@@ -56,10 +59,15 @@ export interface DetailPanelProcessLeader {
   id: string;
   name: string;
   start: string;
-  entryMetaType: string;
+  end?: string;
+  exit_code?: number;
   userName: string;
-  interactive: boolean;
+  groupName: string;
+  working_directory: string;
+  tty: Teletype;
+  args: string[];
   pid: number;
+  entryMetaType: string;
   entryMetaSourceIp: string;
   executable: string;
 }
@@ -70,5 +78,5 @@ export interface SessionViewStart {
   }: {
     onOpenSessionView: (eventId: string) => void;
   }) => JSX.Element;
-  getSessionView: (sessionDeps: SessionViewDeps) => JSX.Element;
+  getSessionView: (props: SessionViewDeps) => JSX.Element;
 }

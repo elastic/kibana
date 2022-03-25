@@ -24,6 +24,7 @@ import { InPortal } from 'react-reverse-portal';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { CellValueElementProps } from '../cell_rendering';
 import { TimelineItem } from '../../../../../common/search_strategy';
+import { ENABLE_SESSION_VIEW_PLUGIN } from '../../../../../common/constants';
 import { useTimelineEvents } from '../../../containers/index';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
@@ -56,6 +57,7 @@ import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { Sort } from '../body/sort';
 import { Sourcerer } from '../../../../common/components/sourcerer';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -181,7 +183,11 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
-  const ACTION_BUTTON_COUNT = 5;
+  const { uiSettings } = useKibana().services;
+
+  const isSessionViewEnabled = uiSettings.get(ENABLE_SESSION_VIEW_PLUGIN);
+
+  const ACTION_BUTTON_COUNT = isSessionViewEnabled ? 6 : 5;
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
@@ -252,7 +258,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         ...x,
         headerCellRender: HeaderActions,
       })),
-    []
+    [ACTION_BUTTON_COUNT]
   );
 
   return (

@@ -36,7 +36,6 @@ import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
 import {
   updateTimelineGraphEventId,
-  updateTimelineSessionViewEventId,
   updateTimelineSessionViewSessionId,
 } from '../../../timelines/store/timeline/actions';
 import { inputsActions } from '../../../common/store/actions';
@@ -205,7 +204,6 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDe
       }
     }
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
-    dispatch(updateTimelineSessionViewEventId({ id: timelineId, eventId: null }));
     dispatch(updateTimelineSessionViewSessionId({ id: timelineId, eventId: null }));
   }, [dispatch, timelineId, setTimelineFullScreen, setGlobalFullScreen]);
 
