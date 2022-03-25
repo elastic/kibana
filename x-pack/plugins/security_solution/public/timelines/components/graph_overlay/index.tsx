@@ -80,7 +80,8 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   width: 100%;
 `;
 
-interface OwnProps {
+interface GraphOverlayProps {
+  openDetailsPanel: (eventId?: string, onClose?: () => void) => void;
   timelineId: TimelineId;
 }
 
@@ -132,7 +133,7 @@ NavigationComponent.displayName = 'NavigationComponent';
 
 const Navigation = React.memo(NavigationComponent);
 
-const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
+const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDetailsPanel }) => {
   const dispatch = useDispatch();
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
@@ -147,9 +148,12 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
   );
   const sessionViewMain = useMemo(() => {
     return sessionViewId !== null
-      ? sessionView.getSessionView({ sessionEntityId: sessionViewId })
+      ? sessionView.getSessionView({
+          sessionEntityId: sessionViewId,
+          loadAlertDetails: openDetailsPanel,
+        })
       : null;
-  }, [sessionView, sessionViewId]);
+  }, [sessionView, sessionViewId, openDetailsPanel]);
 
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
