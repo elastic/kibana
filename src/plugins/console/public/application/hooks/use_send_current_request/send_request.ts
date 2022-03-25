@@ -15,12 +15,12 @@ import { BaseResponseType } from '../../../types';
 
 const { collapseLiteralStrings } = XJson;
 
-export interface EsRequestArgs {
+export interface RequestArgs {
   http: HttpSetup;
   requests: Array<{ url: string; method: string; data: string[] }>;
 }
 
-export interface ESResponseObject<V = unknown> {
+export interface ResponseObject<V = unknown> {
   statusCode: number;
   statusText: string;
   timeMs: number;
@@ -28,17 +28,17 @@ export interface ESResponseObject<V = unknown> {
   value: V;
 }
 
-export interface ESRequestResult<V = unknown> {
+export interface RequestResult<V = unknown> {
   request: { data: string; method: string; path: string };
-  response: ESResponseObject<V>;
+  response: ResponseObject<V>;
 }
 
 let CURRENT_REQ_ID = 0;
-export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]> {
+export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
   const requests = args.requests.slice();
   return new Promise((resolve, reject) => {
     const reqId = ++CURRENT_REQ_ID;
-    const results: ESRequestResult[] = [];
+    const results: RequestResult[] = [];
     if (reqId !== CURRENT_REQ_ID) {
       return;
     }

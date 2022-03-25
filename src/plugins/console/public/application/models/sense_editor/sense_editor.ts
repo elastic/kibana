@@ -19,6 +19,7 @@ import * as es from '../../../lib/es/es';
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
 import createAutocompleter from '../../../lib/autocomplete/autocomplete';
+import { KIBANA_API_KEYWORD } from '../../../lib/es/es';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -461,27 +462,34 @@ export class SenseEditor {
 
   getRequestsAsCURL = async (elasticsearchBaseUrl: string, range?: Range): Promise<string> => {
     const requests = await this.getRequestsInRange(range, true);
+    // There should be another way of getting kibana base path??
+    const kibanaBaseUrl = window.location.origin;
     const result = _.map(requests, (req) => {
       if (typeof req === 'string') {
         // no request block
         return req;
       }
 
-      const esPath = req.url;
-      const esMethod = req.method;
-      const esData = req.data;
+      let path = req.url;
+      const method = req.method;
+      const data = req.data;
 
       // this is the first url defined in elasticsearch.hosts
-      const url = es.constructESUrl(elasticsearchBaseUrl, esPath);
+      let url = es.constructUrl(elasticsearchBaseUrl, path);
 
-      let ret = 'curl -X' + esMethod + ' "' + url + '"';
-      if (esData && esData.length) {
-        ret += " -H 'Content-Type: application/json' -d'\n";
-        const dataAsString = collapseLiteralStrings(esData.join('\n'));
+      if (path.includes(KIBANA_API_KEYWORD)) {
+        path = path.replace(KIBANA_API_KEYWORD, '');
+        url = es.constructUrl(kibanaBaseUrl, path);
+      }
+
+      let ret = 'curl -X' + method + ' "' + url + '"';
+      if (data && data.length) {
+        ret += " -H 'Content-Type: application/json' -H 'kbn-xsrf: reporting' -d'\n";
+        const dataAsString = collapseLiteralStrings(data.join('\n'));
 
         // We escape single quoted strings that that are wrapped in single quoted strings
         ret += dataAsString.replace(/'/g, "'\\''");
-        if (esData.length > 1) {
+        if (data.length > 1) {
           ret += '\n';
         } // end with a new line
         ret += "'";

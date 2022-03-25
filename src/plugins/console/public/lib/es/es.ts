@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { HttpFetchOptions, HttpResponse, HttpSetup } from '@kbn/core/public';
+import type { HttpResponse, HttpSetup } from 'kibana/public';
+import { parse } from 'query-string';
 import { API_BASE_PATH } from '../../../common/constants';
 
 const esVersion: string[] = [];
+export const KIBANA_API_KEYWORD = 'kbn:';
 
 export function getVersion() {
   return esVersion;
@@ -39,17 +41,34 @@ export async function send({
   withProductOrigin = false,
   asResponse = false,
 }: SendProps) {
-  const options: HttpFetchOptions = {
+  const isKibanaApiRequest = path.includes(KIBANA_API_KEYWORD);
+
+  if (isKibanaApiRequest) {
+    const _method = method.toLowerCase() as 'get' | 'post';
+    const hasQueryParams = path.includes('?');
+    const [pathname, queryString] = path.split('?');
+    const url = hasQueryParams
+      ? `/${pathname.split(KIBANA_API_KEYWORD)[1]}`
+      : `/${path.split(KIBANA_API_KEYWORD)[1]}`;
+    const query = hasQueryParams ? parse(queryString) : {};
+
+    return await http[_method]<HttpResponse>(url, {
+      ...(data && { body: data }),
+      query,
+      asResponse,
+      asSystemRequest,
+    });
+  }
+
+  return await http.post<HttpResponse>(`${API_BASE_PATH}/proxy`, {
     query: { path, method, ...(withProductOrigin && { withProductOrigin }) },
     body: data,
     asResponse,
     asSystemRequest,
-  };
-
-  return await http.post<HttpResponse>(`${API_BASE_PATH}/proxy`, options);
+  });
 }
 
-export function constructESUrl(baseUri: string, path: string) {
+export function constructUrl(baseUri: string, path: string) {
   baseUri = baseUri.replace(/\/+$/, '');
   path = path.replace(/^\/+/, '');
   return baseUri + '/' + path;
