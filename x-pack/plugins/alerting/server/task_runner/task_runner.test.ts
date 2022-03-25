@@ -507,7 +507,8 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner(
         ruleType,
         mockedTaskInstance,
-        taskRunnerFactoryInitializerParams
+        taskRunnerFactoryInitializerParams,
+        inMemoryMetrics
       );
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
