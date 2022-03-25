@@ -51,6 +51,7 @@ interface PackFormProps {
 }
 
 const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = false }) => {
+  const isReadOnly = !!defaultValue?.read_only;
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
@@ -183,18 +184,20 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
     setShowConfirmationModal(false);
   }, [submit]);
 
+  const euiFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
+
   return (
     <>
       <Form form={form}>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <CommonUseField path="name" />
+            <CommonUseField path="name" euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiFlexGroup>
           <EuiFlexItem>
-            <CommonUseField path="description" />
+            <CommonUseField path="description" euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -213,6 +216,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
           path="queries"
           component={QueriesField}
           handleNameChange={handleNameChange}
+          euiFieldProps={euiFieldProps}
         />
 
         <CommonUseField path="enabled" component={GhostFormField} />

@@ -3,6 +3,7 @@
 exports[`KibanaSolutionAvatar renders 1`] = `
 <EuiAvatar
   className="kbnSolutionAvatar"
+  color="plain"
   iconType="logoElastic"
   name="Solution"
 />

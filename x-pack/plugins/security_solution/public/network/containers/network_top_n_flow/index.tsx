@@ -32,7 +32,7 @@ import * as i18n from './translations';
 import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkTopNFlowQuery';
+export const ID = 'networkTopNFlowQuery';
 
 export interface NetworkTopNFlowArgs {
   id: string;
@@ -214,6 +214,14 @@ export const useNetworkTopNFlow = ({
       abortCtrl.current.abort();
     };
   }, [networkTopNFlowRequest, networkTopNFlowSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkTopNFlowResponse];
 };

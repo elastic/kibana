@@ -29,12 +29,12 @@ import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/com
 
 interface EditTransformFlyoutFormProps {
   editTransformFlyout: UseEditTransformFlyoutReturnType;
-  indexPatternId?: string;
+  dataViewId?: string;
 }
 
 export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   editTransformFlyout: [state, dispatch],
-  indexPatternId,
+  dataViewId,
 }) => {
   const { formFields, formSections } = state;
   const [dateFieldNames, setDateFieldNames] = useState<string[]>([]);
@@ -43,16 +43,16 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   const isRetentionPolicyAvailable = dateFieldNames.length > 0;
 
   const appDeps = useAppDependencies();
-  const indexPatternsClient = appDeps.data.indexPatterns;
+  const dataViewsClient = appDeps.data.dataViews;
   const api = useApi();
 
   useEffect(
     function getDateFields() {
       let unmounted = false;
-      if (indexPatternId !== undefined) {
-        indexPatternsClient.get(indexPatternId).then((indexPattern) => {
-          if (indexPattern) {
-            const dateTimeFields = indexPattern.fields
+      if (dataViewId !== undefined) {
+        dataViewsClient.get(dataViewId).then((dataView) => {
+          if (dataView) {
+            const dateTimeFields = dataView.fields
               .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
               .map((f) => f.name)
               .sort();
@@ -66,7 +66,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         };
       }
     },
-    [indexPatternId, indexPatternsClient]
+    [dataViewId, dataViewsClient]
   );
 
   useEffect(function fetchPipelinesOnMount() {
@@ -153,7 +153,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
           {
             // If data view or date fields info not available
             // gracefully defaults to text input
-            indexPatternId ? (
+            dataViewId ? (
               <EuiFormRow
                 label={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',

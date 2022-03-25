@@ -8,9 +8,9 @@
 import './solution_avatar.scss';
 
 import React from 'react';
+import classNames from 'classnames';
 
 import { DistributiveOmit, EuiAvatar, EuiAvatarProps } from '@elastic/eui';
-import classNames from 'classnames';
 
 export type KibanaSolutionAvatarProps = DistributiveOmit<EuiAvatarProps, 'size'> & {
   /**
@@ -20,11 +20,12 @@ export type KibanaSolutionAvatarProps = DistributiveOmit<EuiAvatarProps, 'size'>
 };
 
 /**
- * Applies extra styling to a typical EuiAvatar
+ * Applies extra styling to a typical EuiAvatar;
+ * The `name` value will be appended to 'logo' to configure the `iconType` unless `iconType` is provided.
  */
 export const KibanaSolutionAvatar = ({ className, size, ...rest }: KibanaSolutionAvatarProps) => {
   return (
-    // @ts-ignore
+    // @ts-ignore Complains about ExclusiveUnion between `iconSize` and `iconType`, but works fine
     <EuiAvatar
       className={classNames(
         'kbnSolutionAvatar',
@@ -33,8 +34,10 @@ export const KibanaSolutionAvatar = ({ className, size, ...rest }: KibanaSolutio
         },
         className
       )}
+      color="plain"
       size={size === 'xxl' ? 'xl' : size}
       iconSize={size}
+      iconType={`logo${rest.name}`}
       {...rest}
     />
   );

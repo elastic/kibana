@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { flow } from 'lodash';
+import { escapeKuery } from '@kbn/es-query';
 
 /**
  * Escapes backslashes and double-quotes. (Useful when putting a string in quotes to use as a value
@@ -16,23 +16,5 @@ export function escapeQuotes(str: string) {
   return str.replace(/[\\"]/g, '\\$&');
 }
 
-export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);
-
-// See the SpecialCharacter rule in kuery.peg
-function escapeSpecialCharacters(str: string) {
-  return str.replace(/[\\():<>"*]/g, '\\$&'); // $& means the whole matched string
-}
-
-// See the Keyword rule in kuery.peg
-function escapeAndOr(str: string) {
-  return str.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
-}
-
-function escapeNot(str: string) {
-  return str.replace(/not(\s+)/gi, '\\$&');
-}
-
-// See the Space rule in kuery.peg
-function escapeWhitespace(str: string) {
-  return str.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
-}
+// Re-export this function from the @kbn/es-query package to avoid refactoring
+export { escapeKuery };
