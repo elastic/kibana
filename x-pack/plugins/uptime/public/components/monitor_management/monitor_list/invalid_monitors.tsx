@@ -8,8 +8,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { MonitorManagementList, MonitorManagementListPageState } from './monitor_list';
-import { MonitorManagementListResult, Ping } from '../../../../common/runtime_types';
 import { monitorManagementListSelector } from '../../../state/selectors';
+import {
+  MonitorManagementListResult,
+  Ping,
+  DEFAULT_THROTTLING,
+} from '../../../../common/runtime_types';
 
 interface Props {
   loading: boolean;
@@ -49,6 +53,7 @@ export const InvalidMonitors = ({
         loading: { monitorList: summariesLoading, serviceLocations: false },
         locations: monitorList.locations,
         syntheticsService: monitorList.syntheticsService,
+        throttling: DEFAULT_THROTTLING,
       }}
       onPageStateChange={onPageStateChange}
       onUpdate={onUpdate}
