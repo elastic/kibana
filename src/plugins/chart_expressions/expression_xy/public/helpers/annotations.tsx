@@ -187,7 +187,7 @@ export const getUniqueLabels = (layers: XYLayerConfig[]) => {
 
     while (counts[uniqueLabel] >= 0) {
       const num = ++counts[uniqueLabel];
-      uniqueLabel = i18n.translate('xpack.lens.uniqueLabel', {
+      uniqueLabel = i18n.translate('expressionXY.uniqueLabel', {
         defaultMessage: '{label} [{num}]',
         values: { label, num },
       });

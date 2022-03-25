@@ -32,19 +32,19 @@ import {
 
 const strings = {
   getMetricHelp: () =>
-    i18n.translate('xpack.lens.xy.logDatatable.metric', {
+    i18n.translate('expressionXY.xyVis.logDatatable.metric', {
       defaultMessage: 'Vertical axis',
     }),
   getXAxisHelp: () =>
-    i18n.translate('xpack.lens.xy.logDatatable.x', {
+    i18n.translate('expressionXY.xyVis.logDatatable.x', {
       defaultMessage: 'Horizontal axis',
     }),
   getBreakdownHelp: () =>
-    i18n.translate('xpack.lens.xy.logDatatable.breakDown', {
+    i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
       defaultMessage: 'Break down by',
     }),
   getReferenceLineHelp: () =>
-    i18n.translate('xpack.lens.xy.logDatatable.breakDown', {
+    i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
       defaultMessage: 'Break down by',
     }),
 };

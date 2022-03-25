@@ -12,37 +12,37 @@ import { TriangleIcon, CircleIcon } from '../icons';
 export const annotationsIconSet = [
   {
     value: 'asterisk',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.asteriskIconLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.asteriskIconLabel', {
       defaultMessage: 'Asterisk',
     }),
   },
   {
     value: 'alert',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.alertIconLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.alertIconLabel', {
       defaultMessage: 'Alert',
     }),
   },
   {
     value: 'bell',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.bellIconLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.bellIconLabel', {
       defaultMessage: 'Bell',
     }),
   },
   {
     value: 'bolt',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.boltIconLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.boltIconLabel', {
       defaultMessage: 'Bolt',
     }),
   },
   {
     value: 'bug',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.bugIconLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.bugIconLabel', {
       defaultMessage: 'Bug',
     }),
   },
   {
     value: 'circle',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.circleIconLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.circleIconLabel', {
       defaultMessage: 'Circle',
     }),
     icon: CircleIcon,
@@ -51,45 +51,47 @@ export const annotationsIconSet = [
 
   {
     value: 'editorComment',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.commentIconLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.commentIconLabel', {
       defaultMessage: 'Comment',
     }),
   },
   {
     value: 'flag',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.flagIconLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.flagIconLabel', {
       defaultMessage: 'Flag',
     }),
   },
   {
     value: 'heart',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.heartLabel', { defaultMessage: 'Heart' }),
+    label: i18n.translate('expressionXY.xyChart.iconSelect.heartLabel', {
+      defaultMessage: 'Heart',
+    }),
   },
   {
     value: 'mapMarker',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.mapMarkerLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.mapMarkerLabel', {
       defaultMessage: 'Map Marker',
     }),
   },
   {
     value: 'pinFilled',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.mapPinLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.mapPinLabel', {
       defaultMessage: 'Map Pin',
     }),
   },
   {
     value: 'starEmpty',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.starLabel', { defaultMessage: 'Star' }),
+    label: i18n.translate('expressionXY.xyChart.iconSelect.starLabel', { defaultMessage: 'Star' }),
   },
   {
     value: 'tag',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.tagIconLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.tagIconLabel', {
       defaultMessage: 'Tag',
     }),
   },
   {
     value: 'triangle',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.triangleIconLabel', {
+    label: i18n.translate('expressionXY.xyChart.iconSelect.triangleIconLabel', {
       defaultMessage: 'Triangle',
     }),
     icon: TriangleIcon,
