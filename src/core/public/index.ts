@@ -60,6 +60,7 @@ import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
 import type { ThemeServiceSetup, ThemeServiceStart } from './theme';
 import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from './analytics';
 
 export type {
   PackageInfo,
@@ -70,6 +71,21 @@ export type {
 export type { CoreContext, CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
+
+export type {
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  AnalyticsClient,
+  Event,
+  EventContext,
+  EventType,
+  EventTypeOpts,
+  IShipper,
+  ShipperClassConstructor,
+  OptInConfig,
+  ContextProviderOpts,
+  TelemetryCounter,
+} from './analytics';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
@@ -210,6 +226,8 @@ export type {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+  /** {@link AnalyticsServiceSetup} */
+  analytics: AnalyticsServiceSetup;
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
   /** {@link FatalErrorsSetup} */
@@ -260,6 +278,8 @@ export type StartServicesAccessor<
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreStart {
+  /** {@link AnalyticsServiceStart} */
+  analytics: AnalyticsServiceStart;
   /** {@link ApplicationStart} */
   application: ApplicationStart;
   /** {@link ChromeStart} */

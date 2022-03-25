@@ -32,6 +32,7 @@ import { ThemeService } from './theme';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { ExecutionContextService } from './execution_context';
+import { AnalyticsService } from './analytics';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -69,6 +70,7 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
  * @internal
  */
 export class CoreSystem {
+  private readonly analytics: AnalyticsService;
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
   private readonly notifications: NotificationsService;
@@ -102,6 +104,8 @@ export class CoreSystem {
       injectedMetadata,
     });
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
+
+    this.analytics = new AnalyticsService(this.coreContext);
 
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
@@ -141,6 +145,8 @@ export class CoreSystem {
       await this.integrations.setup();
       this.docLinks.setup();
 
+      const analytics = this.analytics.setup();
+
       const executionContext = this.executionContext.setup();
       const http = this.http.setup({
         injectedMetadata,
@@ -155,6 +161,7 @@ export class CoreSystem {
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
+        analytics,
         application,
         fatalErrors: this.fatalErrorsSetup,
         http,
@@ -182,6 +189,7 @@ export class CoreSystem {
 
   public async start() {
     try {
+      const analytics = this.analytics.start();
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
@@ -228,6 +236,7 @@ export class CoreSystem {
       this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
 
       const core: InternalCoreStart = {
+        analytics,
         application,
         chrome,
         docLinks,

@@ -7,11 +7,13 @@
 /// <reference types="node" />
 
 import { Action } from 'history';
+import { AnalyticsClient } from '@elastic/analytics';
 import Boom from '@hapi/boom';
 import type { ButtonColor } from '@elastic/eui';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Client } from '@elastic/elasticsearch';
 import { ConfigPath } from '@kbn/config';
+import { ContextProviderOpts } from '@elastic/analytics';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
 import { EnvironmentMode } from '@kbn/config';
@@ -22,10 +24,15 @@ import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EuiOverlayMaskProps } from '@elastic/eui';
+import { Event as Event_2 } from '@elastic/analytics';
+import { EventContext } from '@elastic/analytics';
+import { EventType } from '@elastic/analytics';
+import { EventTypeOpts } from '@elastic/analytics';
 import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
+import { IShipper } from '@elastic/analytics';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -33,6 +40,7 @@ import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { OptInConfig } from '@elastic/analytics';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PeerCertificate } from 'tls';
@@ -43,6 +51,8 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
+import { ShipperClassConstructor } from '@elastic/analytics';
+import { TelemetryCounter } from '@elastic/analytics';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { TransitionPromptHook } from 'history';
 import { Type } from '@kbn/config-schema';
@@ -54,6 +64,18 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 
 // @internal (undocumented)
 export function __kbnBootstrap__(): Promise<void>;
+
+export { AnalyticsClient }
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServiceSetup = AnalyticsClient;
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServiceStart = AnalyticsClient;
 
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> extends AppNavOptions {
@@ -373,6 +395,8 @@ export interface ChromeUserBanner {
     content: MountPoint<HTMLDivElement>;
 }
 
+export { ContextProviderOpts }
+
 // @internal (undocumented)
 export interface CoreContext {
     // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
@@ -388,6 +412,8 @@ export interface CoreContext {
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+    // (undocumented)
+    analytics: AnalyticsServiceSetup;
     // (undocumented)
     application: ApplicationSetup;
     // (undocumented)
@@ -412,6 +438,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    analytics: AnalyticsServiceStart;
     // (undocumented)
     application: ApplicationStart;
     // (undocumented)
@@ -505,6 +533,14 @@ export interface ErrorToastOptions extends ToastOptions {
     title: string;
     toastMessage?: string;
 }
+
+export { Event_2 as Event }
+
+export { EventContext }
+
+export { EventType }
+
+export { EventTypeOpts }
 
 // @public
 export interface ExecutionContextSetup {
@@ -736,6 +772,8 @@ export interface IHttpResponseInterceptorOverrides<TResponseBody = unknown> {
     readonly response?: Readonly<Response>;
 }
 
+export { IShipper }
+
 // @public
 export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'>;
 
@@ -797,6 +835,8 @@ export interface NotificationsStart {
     // (undocumented)
     toasts: ToastsStart;
 }
+
+export { OptInConfig }
 
 // @public (undocumented)
 export interface OverlayBannersStart {
@@ -1389,6 +1429,8 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History_2<
     replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
 }
 
+export { ShipperClassConstructor }
+
 // @public
 export class SimpleSavedObject<T = unknown> {
     constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, updated_at: updatedAt, }: SavedObject<T>);
@@ -1425,6 +1467,8 @@ export class SimpleSavedObject<T = unknown> {
 
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+export { TelemetryCounter }
 
 // @public (undocumented)
 export interface ThemeServiceSetup {
@@ -1534,6 +1578,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:183:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:190:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```
