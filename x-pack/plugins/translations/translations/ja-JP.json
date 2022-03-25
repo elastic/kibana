@@ -7853,8 +7853,6 @@
     "xpack.apm.transactionsTable.cardinalityWarning.docsLink": "詳細はドキュメントをご覧ください",
     "xpack.apm.transactionsTable.cardinalityWarning.title": "このビューには、報告されたトランザクションのサブセットが表示されます。",
     "xpack.apm.transactionsTable.linkText": "トランザクションを表示",
-    "xpack.apm.transactionsTable.loading": "読み込み中...",
-    "xpack.apm.transactionsTable.noResults": "トランザクショングループが見つかりません",
     "xpack.apm.transactionsTable.title": "トランザクション",
     "xpack.apm.transactionTypesSelectCustomOptionText": "新しいトランザクションタイプとして\\{searchValue\\}を追加",
     "xpack.apm.transactionTypesSelectPlaceholder": "トランザクションタイプを選択",
