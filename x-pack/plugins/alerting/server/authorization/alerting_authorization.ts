@@ -46,6 +46,7 @@ export enum WriteOperations {
   MuteAlert = 'muteAlert',
   UnmuteAlert = 'unmuteAlert',
   Snooze = 'snooze',
+  Unsnooze = 'unsnooze',
 }
 
 export interface EnsureAuthorizedOpts {

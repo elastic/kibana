@@ -174,7 +174,9 @@ export const ProcessTree = ({
 
       if (process) {
         onProcessSelected(process);
-        selectProcess(process);
+      } else {
+        // auto selects the session leader process if jumpToEvent is not found in processMap
+        onProcessSelected(sessionLeader);
       }
     } else if (!selectedProcess) {
       // auto selects the session leader process if no selection is made yet
