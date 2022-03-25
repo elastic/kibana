@@ -9,11 +9,8 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPopover, EuiSelectable, EuiText, EuiPopoverTitle } from '@elastic/eui';
 import type { VisualizationLayerWidgetProps, VisualizationType } from '../../types';
-import { State, visualizationTypes } from '../types';
-import {
-  DataLayerConfigResult,
-  SeriesType,
-} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { State, visualizationTypes, XYDataLayerConfig } from '../types';
+import { SeriesType } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { StaticHeader } from '../../shared_components';
@@ -61,7 +58,7 @@ function AnnotationsLayerHeader() {
 function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const { state, layerId } = props;
-  const layers = state.layers as DataLayerConfigResult[];
+  const layers = state.layers as XYDataLayerConfig[];
   const index = layers.findIndex((l) => l.layerId === layerId);
   const layer = layers[index];
   const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
