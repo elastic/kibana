@@ -76,7 +76,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
         bucket.labelFormatted = bucket.key_as_string ? formatKey(bucket.key_as_string, series) : '';
         bucket.color = color.string();
         bucket.meta = meta;
-        bucket.termsSplitValue = bucket.key?.length ? new MultiFieldKey(bucket) : bucket.key;
+        bucket.termsSplitValue = Array.isArray(bucket.key) ? new MultiFieldKey(bucket) : bucket.key;
         return bucket;
       });
     }

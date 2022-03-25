@@ -167,7 +167,10 @@ export const convertSeriesToDataTable = async (
           [rowId++]: rowData[1],
         };
         return isGroupedByTerms || filtersColumn
-          ? { ...rowsData, [rowId]: isSplitByTerms ? termsSplitValue : [label].flat()[0] }
+          ? {
+              ...rowsData,
+              [rowId]: isSplitByTerms && termsSplitValue ? termsSplitValue : [label].flat()[0],
+            }
           : rowsData;
       });
       rows = [...rows, ...seriesData];
