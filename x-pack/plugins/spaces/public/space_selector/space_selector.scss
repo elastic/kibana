@@ -9,7 +9,7 @@
 
 // Fix forced focus outline on text that isn't a link to just be an underline
 .spcSpaceSelector__pageHeader {
-  &:focus:focus-visible {
+  &:focus {
     outline: none;
     text-decoration: underline;
   }
