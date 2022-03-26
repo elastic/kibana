@@ -82,19 +82,19 @@ export const DocumentExplorerCallout = () => {
         </span>
         <span css={style}>
           <FormattedMessage
-            id="discover.docExplorerCallout.bodyMessageThree"
+            id="discover.docExplorerCallout.bodyMessageFour"
             defaultMessage="Field Statistics"
           />
         </span>
         <span>
           <FormattedMessage
-            id="discover.docExplorerCallout.bodyMessageFour"
+            id="discover.docExplorerCallout.bodyMessageFive"
             defaultMessage=". Take action on your search results with "
           />
         </span>
         <span css={style}>
           <FormattedMessage
-            id="discover.docExplorerCallout.bodyMessageFive"
+            id="discover.docExplorerCallout.bodyMessageSix"
             defaultMessage="Alerts"
           />
         </span>
