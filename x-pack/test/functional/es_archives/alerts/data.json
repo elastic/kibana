@@ -896,3 +896,91 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:5195d200-ad1e-11ec-ab9e-5f5932f4fad8",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "name": "test-server-connector",
+        "alertTypeId": ".server-log",
+        "isMissingSecrets": false,
+        "config": {},
+      },
+      "type": "action",
+      "updated_at": "2022-03-26T16:03:47.121Z",
+      "migrationVersion": {
+        "alert": "8.0.0"
+      },
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "123",
+        "alertTypeId": ".es-query",
+        "consumer": "alerts",
+        "params": {
+          "esQuery": "{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}",
+          "size": 100,
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
+          "threshold": [
+            1000
+          ],
+          "thresholdComparator": ">",
+          "index": [
+            "kibana_sample_data_ecommerce"
+          ],
+          "timeField": "order_date"
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+          {
+            "group": "query matched",
+            "params": {
+              "level": "info",
+              "message": "Elasticsearch query alert '{{alertName}}' is active:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+            },
+            "actionRef": "action_0",
+            "actionTypeId": ".server-log"
+          }
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2022-03-26T16:04:50.698Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "migrationVersion": {
+        "alert": "8.0.1"
+      },
+      "references": [
+        {
+          "id": "5195d200-ad1e-11ec-ab9e-5f5932f4fad8",
+          "name": "action_0",
+          "type": "action"
+        }
+      ]
+    }
+  }
+}

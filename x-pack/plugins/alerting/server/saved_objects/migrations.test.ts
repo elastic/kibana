@@ -2251,6 +2251,24 @@ describe('successful migrations', () => {
           severity: '60-high',
         });
       });
+
+      test('migrates es_query alert params', () => {
+        const migration820 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.2.0'];
+        const alert = getMockData(
+          {
+            params: { esQuery: '{ "query": "test-query" }' },
+            alertTypeId: '.es-query',
+          },
+          true
+        );
+
+        const migratedAlert820 = migration820(alert, migrationContext);
+
+        expect(migratedAlert820.attributes.params).toEqual({
+          esQuery: '{ "query": "test-query" }',
+          searchType: 'esQuery',
+        });
+      });
     });
 
     describe('Metrics Inventory Threshold rule', () => {

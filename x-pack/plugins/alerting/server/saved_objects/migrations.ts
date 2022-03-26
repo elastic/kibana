@@ -59,6 +59,9 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawRu
 export const isSiemSignalsRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
 
+export const isEsQueryRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>) =>
+  doc.attributes.alertTypeId === '.es-query';
+
 export const isDetectionEngineAADRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   (Object.values(ruleTypeMappings) as string[]).includes(doc.attributes.alertTypeId);
 
@@ -149,7 +152,7 @@ export function getMigrations(
   const migrationRules820 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addMappedParams)
+    pipeMigrations(addMappedParams, addSearchType)
   );
 
   return {
@@ -684,6 +687,23 @@ function addSecuritySolutionAADRuleTypes(
           params: {
             ...doc.attributes.params,
             outputIndex: '',
+          },
+        },
+      }
+    : doc;
+}
+
+function addSearchType(doc: SavedObjectUnsanitizedDoc<RawRule>) {
+  const searchType = doc.attributes.params.searchType;
+
+  return isEsQueryRuleType(doc) && !searchType
+    ? {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          params: {
+            ...doc.attributes.params,
+            searchType: 'esQuery',
           },
         },
       }
