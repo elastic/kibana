@@ -38,7 +38,7 @@ export const ElasticsearchCard: React.FC = () => {
           <EuiSpacer size="xs" />
           {/* div is needed to prevent button from stretching */}
           <div>
-            <EuiButtonTo to={`${ELASTICSEARCH_GUIDE_PATH}`}>
+            <EuiButtonTo to={ELASTICSEARCH_GUIDE_PATH}>
               {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchCard.button', {
                 defaultMessage: 'Get Started',
               })}
