@@ -58,7 +58,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
     sandbox.restore();
   });
 
-  it('calls send current request to ES', async () => {
+  it('calls send current request', async () => {
     (getEndpointFromPosition as jest.Mock).mockReturnValue({ patterns: [] });
     (sendRequest as jest.Mock).mockRejectedValue({});
     const editor = doMount();

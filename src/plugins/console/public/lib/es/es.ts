@@ -44,7 +44,7 @@ export async function send({
   const isKibanaApiRequest = path.includes(KIBANA_API_KEYWORD);
 
   if (isKibanaApiRequest) {
-    const _method = method.toLowerCase() as 'get' | 'post';
+    const _method = method.toLowerCase() as 'get' | 'post' | 'delete' | 'put' | 'head';
     const hasQueryParams = path.includes('?');
     const [pathname, queryString] = path.split('?');
     const url = hasQueryParams
