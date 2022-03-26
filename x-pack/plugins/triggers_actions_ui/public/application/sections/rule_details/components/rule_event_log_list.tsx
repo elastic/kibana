@@ -408,6 +408,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSuperDatePicker
+            data-test-subj="ruleEventLogListDatePicker"
             width="auto"
             isLoading={isLoading}
             start={dateStart}

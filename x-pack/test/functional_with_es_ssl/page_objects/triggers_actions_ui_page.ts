@@ -201,5 +201,32 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         expect(title.toLowerCase()).to.eql(expectedStatus.toLowerCase());
       });
     },
+    async ensureEventLogColumnExists(columnId: string) {
+      const columnsButton = await testSubjects.find('dataGridColumnSelectorButton');
+      await columnsButton.click();
+
+      const button = await testSubjects.find(
+        `dataGridColumnSelectorToggleColumnVisibility-${columnId}`
+      );
+      const isChecked = await button.getAttribute('aria-checked');
+
+      if (isChecked === 'false') {
+        await button.click();
+      }
+
+      await columnsButton.click();
+    },
+    async sortEventLogColumn(columnId: string, direction: string) {
+      await testSubjects.click(`dataGridHeaderCell-${columnId}`);
+      const popover = await testSubjects.find(`dataGridHeaderCellActionGroup-${columnId}`);
+      const popoverListItems = await popover.findAllByCssSelector('li');
+
+      if (direction === 'asc') {
+        await popoverListItems[1].click();
+      }
+      if (direction === 'desc') {
+        await popoverListItems[2].click();
+      }
+    },
   };
 }
