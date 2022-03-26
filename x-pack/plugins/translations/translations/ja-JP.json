@@ -2720,7 +2720,6 @@
     "discover.doc.loadingDescription": "読み込み中…",
     "discover.doc.somethingWentWrongDescription": "{indexName}が見つかりません。",
     "discover.doc.somethingWentWrongDescriptionAddon": "インデックスが存在することを確認してください。",
-    "discover.docExplorerCallout.bodyMessage": "ドキュメントエクスプローラーでは、データの並べ替え、選択、比較のほか、列のサイズ変更やドキュメントの全画面表示をすばやく実行できます。",
     "discover.docExplorerCallout.closeButtonAriaLabel": "閉じる",
     "discover.docExplorerCallout.headerMessage": "より効率的な探索方法",
     "discover.docExplorerCallout.tryDocumentExplorer": "ドキュメントエクスプローラーを試す",
