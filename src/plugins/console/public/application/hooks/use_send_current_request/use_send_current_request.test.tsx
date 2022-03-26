@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-jest.mock('./send_request', () => ({ sendRequestToES: jest.fn() }));
+jest.mock('./send_request', () => ({ sendRequest: jest.fn() }));
 jest.mock('../../contexts/editor_context/editor_registry', () => ({
   instance: { getInputEditor: jest.fn() },
 }));

@@ -459,7 +459,7 @@ curl -XGET "http://localhost:9200/_stats?level=shards"
 
 #in between comment
 
-curl -XPUT "http://localhost:9200/index_1/type1/1" -H 'Content-Type: application/json' -d'
+curl -XPUT "http://localhost:9200/index_1/type1/1" -H 'Content-Type: application/json' -H 'kbn-xsrf: reporting' -d'
 {
   "f": 1
 }'`.trim()
@@ -470,7 +470,7 @@ curl -XPUT "http://localhost:9200/index_1/type1/1" -H 'Content-Type: application
     editorInput1,
     { start: { lineNumber: 29 }, end: { lineNumber: 33 } },
     `
-curl -XPOST "http://localhost:9200/_sql?format=txt" -H 'Content-Type: application/json' -d'
+curl -XPOST "http://localhost:9200/_sql?format=txt" -H 'Content-Type: application/json' -H 'kbn-xsrf: reporting' -d'
 {
   "query": "SELECT prenom FROM claude_index WHERE prenom = '\\''claude'\\'' ",
   "fetch_size": 1
