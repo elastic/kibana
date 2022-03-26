@@ -20,6 +20,7 @@ import { RuleType } from './types';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
 import { dataPluginMock } from '../../../../src/plugins/data/server/mocks';
+import { monitoringCollectionMock } from '../../monitoring_collection/server/mocks';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -71,6 +72,7 @@ describe('Alerting Plugin', () => {
       eventLog: eventLogServiceMock.create(),
       actions: actionsMock.createSetup(),
       statusService: statusServiceMock.createSetupContract(),
+      monitoringCollection: monitoringCollectionMock.createSetup(),
     };
 
     let plugin: AlertingPlugin;
@@ -262,6 +264,7 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogServiceMock.create(),
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
+          monitoringCollection: monitoringCollectionMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -299,6 +302,7 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogServiceMock.create(),
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
+          monitoringCollection: monitoringCollectionMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -347,6 +351,7 @@ describe('Alerting Plugin', () => {
         eventLog: eventLogServiceMock.create(),
         actions: actionsMock.createSetup(),
         statusService: statusServiceMock.createSetupContract(),
+        monitoringCollection: monitoringCollectionMock.createSetup(),
       });
 
       const startContract = plugin.start(coreMock.createStart(), {

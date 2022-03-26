@@ -19,6 +19,6 @@
     "licensing",
     "taskManager"
   ],
-  "optionalPlugins": ["usageCollection", "spaces", "security"],
+  "optionalPlugins": ["usageCollection", "spaces", "security", "monitoringCollection"],
   "extraPublicDirs": ["common", "common/parse_duration"]
 }
