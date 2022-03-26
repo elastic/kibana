@@ -43,8 +43,6 @@ export function CasesCreateViewServiceProvider({ getService, getPageObject }: Ft
       description: string;
       tag: string;
     }) {
-      await this.openCreateCasePage();
-
       // case name
       await testSubjects.setValue('input', title);
 

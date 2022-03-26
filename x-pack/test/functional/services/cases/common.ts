@@ -28,7 +28,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       });
     },
 
-    async changeCaseStatusAndVerify(status: CaseStatuses) {
+    async changeCaseStatusViaDropdownAndVerify(status: CaseStatuses) {
       this.openCaseSetStatusDropdown();
       await testSubjects.click(`case-view-status-dropdown-${status}`);
       await header.waitUntilLoadingHasFinished();

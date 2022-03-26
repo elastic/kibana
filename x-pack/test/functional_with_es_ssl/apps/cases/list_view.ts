@@ -51,10 +51,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('deleting', () => {
-      const NUMBER_CASES = 9;
-
       before(async () => {
-        await cases.api.createNthRandomCases(NUMBER_CASES);
+        await cases.api.createNthRandomCases(8);
+        await cases.api.createCase({ title: 'delete me', tags: ['one'] });
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -67,6 +66,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('action-delete');
         await testSubjects.click('confirmModalConfirmButton');
         await testSubjects.existOrFail('euiToastHeader');
+        await retry.tryForTime(2000, async () => {
+          const firstRow = await testSubjects.find('case-details-link');
+          expect(await firstRow.getVisibleText()).not.to.be('delete me');
+        });
       });
 
       it('bulk delete cases from the list', async () => {
@@ -76,16 +79,23 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('filtering', () => {
-      const NUMBER_CASES = 2;
       const id = uuid.v4();
       const caseTitle = 'matchme-' + id;
 
       before(async () => {
-        await cases.api.createNthRandomCases(NUMBER_CASES);
+        await cases.api.createNthRandomCases(2);
         await cases.api.createCase({ title: caseTitle, tags: ['one'] });
         await cases.api.createCase({ tags: ['two'] });
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
+      });
+
+      beforeEach(async () => {
+        /**
+         * There is no easy way to clear the filtering.
+         * Refreshing the page seems to be easier.
+         */
+        await cases.navigation.navigateToApp();
       });
 
       after(async () => {
@@ -105,7 +115,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         await testSubjects.click('clearSearchButton');
-        await cases.casesTable.validateCasesTableHasNthRows(NUMBER_CASES);
+        await cases.casesTable.validateCasesTableHasNthRows(4);
       });
 
       it('filters cases by tags', async () => {
@@ -118,7 +128,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('filters cases by status', async () => {
-        await cases.common.changeCaseStatusAndVerify(CaseStatuses['in-progress']);
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
         await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });
@@ -135,10 +145,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('pagination', () => {
-      const NUMBER_CASES = 8;
-
       before(async () => {
-        await cases.api.createNthRandomCases(NUMBER_CASES);
+        await cases.api.createNthRandomCases(8);
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -157,10 +165,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('changes status from the list', () => {
-      const NUMBER_CASES = 1;
-
       before(async () => {
-        await cases.api.createNthRandomCases(NUMBER_CASES);
+        await cases.api.createNthRandomCases(1);
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -170,15 +176,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('to in progress', async () => {
-        await cases.common.changeCaseStatusAndVerify(CaseStatuses['in-progress']);
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
       });
 
       it('to closed', async () => {
-        await cases.common.changeCaseStatusAndVerify(CaseStatuses.closed);
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
       });
 
       it('to open', async () => {
-        await cases.common.changeCaseStatusAndVerify(CaseStatuses.open);
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
       });
     });
   });

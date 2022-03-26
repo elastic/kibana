@@ -91,7 +91,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('changes a case status to in-progress via dropdown menu', async () => {
-        await cases.common.changeCaseStatusAndVerify(CaseStatuses['in-progress']);
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
         // validate user action
         await find.byCssSelector(
           '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-in-progress"]'
@@ -101,7 +101,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('changes a case status to closed via dropdown-menu', async () => {
-        await cases.common.changeCaseStatusAndVerify(CaseStatuses.closed);
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
 
         // validate user action
         await find.byCssSelector(
@@ -112,7 +112,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it("reopens a case from the 'reopen case' button", async () => {
-        await cases.common.changeCaseStatusAndVerify(CaseStatuses.closed);
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
         await header.waitUntilLoadingHasFinished();
         await testSubjects.click('case-view-status-action-button');
         await header.waitUntilLoadingHasFinished();
@@ -130,7 +130,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it("marks in progress a case from the 'mark in progress' button", async () => {
-        await cases.common.changeCaseStatusAndVerify(CaseStatuses.open);
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
         await header.waitUntilLoadingHasFinished();
         await testSubjects.click('case-view-status-action-button');
         await header.waitUntilLoadingHasFinished();
@@ -148,7 +148,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it("closes a case from the 'close case' button", async () => {
-        await cases.common.changeCaseStatusAndVerify(CaseStatuses['in-progress']);
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
         await header.waitUntilLoadingHasFinished();
         await testSubjects.click('case-view-status-action-button');
         await header.waitUntilLoadingHasFinished();
