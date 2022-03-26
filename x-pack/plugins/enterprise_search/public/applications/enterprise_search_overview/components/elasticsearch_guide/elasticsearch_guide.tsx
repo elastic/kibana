@@ -56,7 +56,8 @@ export const ElasticsearchGuide: React.FC = () => {
   return (
     <EuiPageTemplate>
       <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={3}>
+        {/* maxWidth is needed to prevent code blocks with long unbreakable strings (Kibana PR Cloud ID) from stretching the column */}
+        <EuiFlexItem grow={3} style={{ maxWidth: 800 }}>
           <EuiText>
             <h2>
               {i18n.translate(
