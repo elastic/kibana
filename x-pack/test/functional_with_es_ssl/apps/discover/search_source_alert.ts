@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
   const queryBar = getService('queryBar');
+  const security = getService('security');
 
   const SOURCE_DATA_INDEX = 'search-source-alert';
   const OUTPUT_DATA_INDEX = 'search-source-alert-output';
@@ -227,6 +228,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Search source Alert', () => {
     before(async () => {
+      await security.testUser.setRoles(['discover_alert']);
       await createSourceIndex();
       await generateNewDocs(5);
       await createOutputDataIndex();
@@ -246,6 +248,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await deleteConnector(connectorId);
       const alertsToDelete = await getAlertsByName(RULE_NAME);
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
+      await security.testUser.restoreDefaults();
     });
 
     it('should navigate to discover via view in app link', async () => {

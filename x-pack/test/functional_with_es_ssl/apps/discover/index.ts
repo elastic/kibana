@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   describe('Discover alerting', function () {
-    this.tags('ciGroup10');
+    this.tags('ciGroup6');
     loadTestFile(require.resolve('./search_source_alert'));
   });
 };
