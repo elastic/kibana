@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import queryString from 'query-string';
 
@@ -52,6 +52,12 @@ export const ElasticsearchGuide: React.FC = () => {
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedLanguage(e.target.value);
   };
+
+  // TODO: The page keeps the scroll position if being opened from Enterpise Search Overview,
+  // This is a temporary solution for demoing
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <EuiPageTemplate>
