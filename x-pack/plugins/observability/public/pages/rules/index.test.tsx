@@ -18,17 +18,22 @@ jest.mock('../../utils/kibana_react', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 
+jest.mock('../../hooks/use_breadcrumbs', () => ({
+  useBreadcrumbs: jest.fn(),
+}));
+
 jest.mock('./config', () => ({
   hasExecuteActionsCapability: jest.fn(() => true),
+  convertRulesToTableItems: jest.fn(),
 }));
 
 describe('RulesPage', () => {
   async function setup() {}
   it('renders empty screen', async () => {
     await setup();
+
     const wrapper = shallow(<RulesPage />);
 
-    expect(wrapper.find('[title="Rules"]')).toBeTruthy();
     expect(wrapper.find(RulesTable)).toHaveLength(1);
   });
 });
