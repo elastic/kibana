@@ -219,18 +219,18 @@ export function DiscoverChart({
       </EuiFlexItem>
       {isTimeBased && !hideChart && (
         <EuiFlexItem grow={false}>
-          <div>Random sampler</div>
           <section
             ref={(element) => (chartRefRandom.current.element = element)}
             tabIndex={-1}
             aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
-              defaultMessage: '[Random] Histogram of found documents',
+              defaultMessage: '[Random sampler] Histogram of found documents',
             })}
             className="dscTimechart"
           >
             <DiscoverHistogramMemoized
               savedSearchData$={savedSearchRandomSamplingCharts$}
               timefilterUpdateHandler={timefilterUpdateHandler}
+              random={true}
             />
           </section>
           <EuiSpacer size="s" />

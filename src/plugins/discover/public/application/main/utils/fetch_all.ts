@@ -88,6 +88,8 @@ export function fetchAll(
 
     const { hideChart, sort } = appStateContainer.getState();
 
+    const startTime = Date.now();
+
     // Update the base searchSource, base for all child fetches
     updateSearchSource(searchSource, false, {
       indexPattern,
@@ -168,6 +170,7 @@ export function fetchAll(
           fetchStatus: FetchStatus.COMPLETE,
           chartData: chart.chartData,
           bucketInterval: chart.bucketInterval,
+          duration: Date.now() - startTime,
         });
 
         checkHitCount(chart.totalHits);
@@ -180,6 +183,7 @@ export function fetchAll(
           fetchStatus: FetchStatus.COMPLETE,
           chartData: chart.chartData,
           bucketInterval: chart.bucketInterval,
+          duration: Date.now() - startTime,
         });
 
         checkHitCount(chart.totalHits);

@@ -49,6 +49,7 @@ import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
+  random?: boolean;
 }
 
 function getTimezone(uiSettings: IUiSettingsClient) {
@@ -64,6 +65,7 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 export function DiscoverHistogram({
   savedSearchData$,
   timefilterUpdateHandler,
+  random,
 }: DiscoverHistogramProps) {
   const { data, theme, uiSettings } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
@@ -72,8 +74,9 @@ export function DiscoverHistogram({
   const dataState: DataChartsMessage = useDataState(savedSearchData$);
 
   const timeZone = getTimezone(uiSettings);
-  const { chartData, bucketInterval, fetchStatus, error } = dataState;
+  const { chartData, bucketInterval, fetchStatus, error, duration } = dataState;
 
+  console.log('dataState', dataState);
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
       if (!x) {
@@ -302,7 +305,7 @@ export function DiscoverHistogram({
           />
         </Chart>
       </div>
-      {timeRange}
+      [{duration}ms] {random && `[Random sampler]`} {timeRange}
     </React.Fragment>
   );
 }
