@@ -8,10 +8,10 @@
 
 import { ThemeServiceStart, OverlayStart } from 'src/core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
-import { DataViewsContract } from '../../data_views/public';
+import { IndexPatternsContract } from '../../data_views/public';
 
 export const [getIndexPatterns, setIndexPatterns] =
-  createGetterSetter<DataViewsContract>('IndexPatterns');
+  createGetterSetter<IndexPatternsContract>('IndexPatterns');
 
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 

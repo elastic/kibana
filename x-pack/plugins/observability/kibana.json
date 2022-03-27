@@ -29,7 +29,8 @@
     "ruleRegistry",
     "timelines",
     "triggersActionsUi",
-    "inspector"
+    "inspector",
+    "unifiedSearch"
   ],
   "ui": true,
   "server": true,
