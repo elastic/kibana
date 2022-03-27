@@ -28,7 +28,7 @@ export const EditMonitorPage: React.FC = () => {
   }, [monitorId]);
 
   const monitor = data?.attributes as MonitorFields;
-  const { error: locationsError, loading: locationsLoading } = useLocations();
+  const { error: locationsError, loading: locationsLoading, throttling } = useLocations();
 
   return (
     <Loader
@@ -38,7 +38,7 @@ export const EditMonitorPage: React.FC = () => {
       errorTitle={ERROR_HEADING_LABEL}
       errorBody={locationsError ? SERVICE_LOCATIONS_ERROR_LABEL : MONITOR_LOADING_ERROR_LABEL}
     >
-      {monitor && <EditMonitorConfig monitor={monitor} />}
+      {monitor && <EditMonitorConfig monitor={monitor} throttling={throttling} />}
     </Loader>
   );
 };
