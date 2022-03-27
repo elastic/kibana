@@ -63,6 +63,8 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
+import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
+import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getExecutionConfigForRuleType } from './lib/get_rules_config';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 
@@ -125,6 +127,7 @@ export interface AlertingPluginsSetup {
   usageCollection?: UsageCollectionSetup;
   eventLog: IEventLogService;
   statusService: StatusServiceSetup;
+  monitoringCollection: MonitoringCollectionSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -154,6 +157,7 @@ export class AlertingPlugin {
   private eventLogger?: IEventLogger;
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
+  private inMemoryMetrics: InMemoryMetrics;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -163,6 +167,7 @@ export class AlertingPlugin {
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
   }
 
   public setup(
@@ -206,6 +211,7 @@ export class AlertingPlugin {
       licenseState: this.licenseState,
       licensing: plugins.licensing,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+      inMemoryMetrics: this.inMemoryMetrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
@@ -255,6 +261,17 @@ export class AlertingPlugin {
       'alerting',
       this.createRouteHandlerContext(core)
     );
+
+    if (plugins.monitoringCollection) {
+      registerNodeCollector({
+        monitoringCollection: plugins.monitoringCollection,
+        inMemoryMetrics: this.inMemoryMetrics,
+      });
+      registerClusterCollector({
+        monitoringCollection: plugins.monitoringCollection,
+        core,
+      });
+    }
 
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();
