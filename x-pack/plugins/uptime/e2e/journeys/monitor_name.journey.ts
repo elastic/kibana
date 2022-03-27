@@ -23,12 +23,6 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
     await uptime.waitForLoadingToFinish();
   });
 
-  after(async () => {
-    await uptime.navigateToMonitorManagement();
-    await uptime.deleteMonitor();
-    await uptime.enableMonitorManagement(false);
-  });
-
   step('Go to monitor-management', async () => {
     await uptime.navigateToMonitorManagement();
   });
@@ -62,5 +56,11 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
     });
 
     expect(await page.isEnabled(byTestId('monitorTestNowRunBtn'))).toBeTruthy();
+  });
+
+  step('delete monitor', async () => {
+    await uptime.navigateToMonitorManagement();
+    await uptime.deleteMonitors();
+    await uptime.enableMonitorManagement(false);
   });
 });

@@ -6,36 +6,20 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiSwitch, EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { MONITOR_ADD_ROUTE } from '../../../common/constants';
-import { getSyntheticsEnablement, disableSynthetics, enableSynthetics } from '../../state/actions';
-import { monitorManagementListSelector } from '../../state/selectors';
-
 import { kibanaService } from '../../state/kibana_service';
+import { MONITOR_ADD_ROUTE } from '../../../common/constants';
+import { useEnablement } from './hooks/use_enablement';
 
 export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
   const history = useHistory();
   const [isEnabling, setIsEnabling] = useState(false);
   const [isDisabling, setIsDisabling] = useState(false);
-
-  const dispatch = useDispatch();
-
-  const {
-    loading: { enablement: loading },
-    error: { enablement: error },
-    enablement,
-  } = useSelector(monitorManagementListSelector);
-
-  const { canEnable, isEnabled, areApiKeysEnabled } = enablement || {};
-
-  useEffect(() => {
-    if (!enablement) {
-      dispatch(getSyntheticsEnablement());
-    }
-  }, [dispatch, enablement]);
+  const { error, loading, enablement, disableSynthetics, enableSynthetics, totalMonitors } =
+    useEnablement();
+  const { isEnabled, canEnable, areApiKeysEnabled } = enablement || {};
 
   useEffect(() => {
     if (isEnabling && isEnabled) {
@@ -67,10 +51,18 @@ export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
   const handleSwitch = () => {
     if (isEnabled) {
       setIsDisabling(true);
-      dispatch(disableSynthetics());
+      disableSynthetics();
     } else {
       setIsEnabling(true);
-      dispatch(enableSynthetics());
+      enableSynthetics();
+    }
+  };
+
+  const getShowSwitch = () => {
+    if (isEnabled) {
+      return canEnable;
+    } else if (!isEnabled) {
+      return canEnable && (totalMonitors || 0) > 0;
     }
   };
 
@@ -88,12 +80,8 @@ export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
 
   return (
     <EuiFlexGroup alignItems="center">
-      <EuiFlexItem
-        style={{ alignItems: 'flex-end' }}
-        grow={false}
-        data-test-subj="addMonitorButton"
-      >
-        {canEnable && (
+      <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
+        {getShowSwitch() && !loading && (
           <EuiToolTip content={getSwitchToolTipContent()}>
             <EuiSwitch
               checked={Boolean(isEnabled)}
@@ -104,19 +92,23 @@ export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
             />
           </EuiToolTip>
         )}
+        {getShowSwitch() && loading && (
+          <EuiSwitch
+            checked={Boolean(isEnabled)}
+            label={SYNTHETICS_ENABLE_LABEL}
+            disabled={true}
+            onChange={() => {}}
+          />
+        )}
       </EuiFlexItem>
-      <EuiFlexItem
-        style={{ alignItems: 'flex-end' }}
-        grow={false}
-        data-test-subj="addMonitorButton"
-      >
+      <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
         <EuiToolTip content={!isEnabled && !canEnable ? SYNTHETICS_DISABLED_MESSAGE : ''}>
           <EuiButton
             isLoading={loading}
             fill
             isDisabled={isDisabled || !isEnabled}
             iconType="plus"
-            data-test-subj="addMonitorBtn"
+            data-test-subj="syntheticsAddMonitorBtn"
             href={history.createHref({
               pathname: MONITOR_ADD_ROUTE,
             })}

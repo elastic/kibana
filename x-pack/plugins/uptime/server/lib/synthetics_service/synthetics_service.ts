@@ -179,7 +179,7 @@ export class SyntheticsService {
     }
   }
 
-  async getOutput() {
+  async getApiKey() {
     try {
       this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server });
     } catch (err) {
@@ -187,17 +187,13 @@ export class SyntheticsService {
       throw err;
     }
 
-    if (!this.apiKey) {
-      const error = new SyntheticsDisabledError();
-      this.logger.error(error);
-      throw error;
-    }
+    return this.apiKey;
+  }
 
-    this.logger.debug('Found api key and esHosts for service.');
-
+  async getOutput(apiKey: SyntheticsServiceApiKey) {
     return {
       hosts: this.esHosts,
-      api_key: `${this.apiKey?.id}:${this.apiKey?.apiKey}`,
+      api_key: `${apiKey?.id}:${apiKey?.apiKey}`,
     };
   }
 
@@ -214,9 +210,16 @@ export class SyntheticsService {
       this.logger.debug('No monitor found which can be pushed to service.');
       return;
     }
+
+    this.apiKey = await this.getApiKey();
+
+    if (!this.apiKey) {
+      return null;
+    }
+
     const data = {
       monitors,
-      output: await this.getOutput(),
+      output: await this.getOutput(this.apiKey),
     };
 
     this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
@@ -241,9 +244,15 @@ export class SyntheticsService {
     if (monitors.length === 0) {
       return;
     }
+    this.apiKey = await this.getApiKey();
+
+    if (!this.apiKey) {
+      return null;
+    }
+
     const data = {
       monitors,
-      output: await this.getOutput(),
+      output: await this.getOutput(this.apiKey),
     };
 
     try {
@@ -267,9 +276,16 @@ export class SyntheticsService {
     if (monitors.length === 0) {
       return;
     }
+
+    this.apiKey = await this.getApiKey();
+
+    if (!this.apiKey) {
+      return null;
+    }
+
     const data = {
       monitors,
-      output: await this.getOutput(),
+      output: await this.getOutput(this.apiKey),
     };
 
     try {
@@ -281,9 +297,15 @@ export class SyntheticsService {
   }
 
   async deleteConfigs(configs: SyntheticsMonitorWithId[]) {
+    this.apiKey = await this.getApiKey();
+
+    if (!this.apiKey) {
+      return null;
+    }
+
     const data = {
       monitors: this.formatConfigs(configs),
-      output: await this.getOutput(),
+      output: await this.getOutput(this.apiKey),
     };
     return await this.apiClient.delete(data);
   }
@@ -326,15 +348,6 @@ export class SyntheticsService {
     return configs.map((config: Partial<MonitorFields>) =>
       formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
     );
-  }
-}
-
-class SyntheticsDisabledError extends Error {
-  constructor() {
-    super();
-    this.message =
-      'Synthetics is currently disabled. API key is needed for the Synthetics service. Please contact an administrator to enable Synthetics.';
-    this.name = 'SyntheticsDisabledError';
   }
 }
 

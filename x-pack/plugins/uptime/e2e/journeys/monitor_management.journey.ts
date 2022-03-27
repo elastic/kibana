@@ -96,11 +96,6 @@ const createMonitorJourney = ({
     async ({ page, params }: { page: Page; params: any }) => {
       const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
       const isRemote = process.env.SYNTHETICS_REMOTE_ENABLED;
-      const deleteMonitor = async () => {
-        await uptime.navigateToMonitorManagement();
-        const isSuccessful = await uptime.deleteMonitor();
-        expect(isSuccessful).toBeTruthy();
-      };
 
       before(async () => {
         await uptime.waitForLoadingToFinish();
@@ -108,7 +103,6 @@ const createMonitorJourney = ({
 
       after(async () => {
         await uptime.navigateToMonitorManagement();
-        await deleteMonitor();
         await uptime.enableMonitorManagement(false);
       });
 
@@ -144,6 +138,12 @@ const createMonitorJourney = ({
           await page.waitForSelector(`text=${monitorName}`, { timeout: 160 * 1000 });
         });
       }
+
+      step('delete monitor', async () => {
+        await uptime.navigateToMonitorManagement();
+        const isSuccessful = await uptime.deleteMonitors();
+        expect(isSuccessful).toBeTruthy();
+      });
     }
   );
 };
@@ -219,7 +219,7 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
 
   step('delete monitor', async () => {
     await uptime.navigateToMonitorManagement();
-    const isSuccessful = await uptime.deleteMonitor();
+    const isSuccessful = await uptime.deleteMonitors();
     expect(isSuccessful).toBeTruthy();
   });
 });

@@ -38,13 +38,35 @@ export function monitorManagementPageProvider({
       await page.goto(monitorManagement, {
         waitUntil: 'networkidle',
       });
+      await this.waitForMonitorManagementLoadingToFinish();
+    },
+
+    async waitForMonitorManagementLoadingToFinish() {
+      while (true) {
+        if ((await page.$(this.byTestId('uptimeLoader'))) === null) break;
+        await page.waitForTimeout(5 * 1000);
+      }
     },
 
     async enableMonitorManagement(shouldEnable: boolean = true) {
-      const toggle = await this.getEnableToggle();
       const isEnabled = await this.checkIsEnabled();
-      if (isEnabled !== shouldEnable) {
-        await toggle.click();
+      if (isEnabled === shouldEnable) {
+        return;
+      }
+      const [toggle, button] = await Promise.all([
+        page.$(this.byTestId('syntheticsEnableSwitch')),
+        page.$(this.byTestId('syntheticsEnableButton')),
+      ]);
+
+      if (toggle === null && button === null) {
+        return null;
+      }
+      if (toggle) {
+        if (isEnabled !== shouldEnable) {
+          await toggle.click();
+        }
+      } else {
+        await button?.click();
       }
       if (shouldEnable) {
         await this.findByText('Monitor Management enabled successfully.');
@@ -57,10 +79,19 @@ export function monitorManagementPageProvider({
       return await this.findByTestSubj('syntheticsEnableSwitch');
     },
 
+    async getEnableButton() {
+      return await this.findByTestSubj('syntheticsEnableSwitch');
+    },
+
+    async getAddMonitorButton() {
+      return await this.findByTestSubj('syntheticsAddMonitorBtn');
+    },
+
     async checkIsEnabled() {
-      const toggle = await this.getEnableToggle();
-      const isChecked = await toggle.getAttribute('aria-checked');
-      return isChecked === 'true' ? true : false;
+      await page.waitForTimeout(5 * 1000);
+      const addMonitorBtn = await this.getAddMonitorButton();
+      const isDisabled = await addMonitorBtn.isDisabled();
+      return !isDisabled;
     },
 
     async navigateToAddMonitor() {
@@ -79,10 +110,17 @@ export function monitorManagementPageProvider({
       await page.click('text=Add monitor');
     },
 
-    async deleteMonitor() {
-      await this.clickByTestSubj('monitorManagementDeleteMonitor');
-      await this.clickByTestSubj('confirmModalConfirmButton');
-      return await this.findByTestSubj('uptimeDeleteMonitorSuccess');
+    async deleteMonitors() {
+      let isSuccessful: boolean = false;
+      await page.waitForSelector('[data-test-subj="monitorManagementDeleteMonitor"]');
+      while (true) {
+        if ((await page.$(this.byTestId('monitorManagementDeleteMonitor'))) === null) break;
+        await this.clickByTestSubj('monitorManagementDeleteMonitor');
+        await this.clickByTestSubj('confirmModalConfirmButton');
+        isSuccessful = Boolean(this.findByTestSubj('uptimeDeleteMonitorSuccess'));
+        await page.waitForTimeout(5 * 1000);
+      }
+      return isSuccessful;
     },
 
     async editMonitor() {

@@ -9,10 +9,9 @@ import { journey, step, expect, before, after, Page } from '@elastic/synthetics'
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 
 journey(
-  'MonitorManagement-enablement-superuser',
+  'Monitor Management-enablement-superuser',
   async ({ page, params }: { page: Page; params: any }) => {
     const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
-    const monitorButtonLocator = await page.locator('text=Add monitor');
 
     before(async () => {
       await uptime.waitForLoadingToFinish();
@@ -35,12 +34,12 @@ journey(
     });
 
     step('check add monitor button', async () => {
-      expect(await monitorButtonLocator.isDisabled()).toBe(true);
+      expect(await uptime.checkIsEnabled()).toBe(false);
     });
 
     step('enable monitor management', async () => {
       await uptime.enableMonitorManagement();
-      expect(await monitorButtonLocator.isDisabled()).toBe(false);
+      expect(await uptime.checkIsEnabled()).toBe(true);
     });
   }
 );
@@ -49,7 +48,6 @@ journey(
   'MonitorManagement-enablement-obs-admin',
   async ({ page, params }: { page: Page; params: any }) => {
     const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
-    const monitorButtonLocator = await page.locator('text=Add monitor');
 
     before(async () => {
       await uptime.waitForLoadingToFinish();
@@ -67,8 +65,8 @@ journey(
       expect(await invalid.isVisible()).toBeFalsy();
     });
 
-    step('enable monitor management', async () => {
-      expect(await monitorButtonLocator.isDisabled()).toBe(true);
+    step('check add monitor button', async () => {
+      expect(await uptime.checkIsEnabled()).toBe(false);
     });
 
     step('check that enabled toggle does not appear', async () => {
