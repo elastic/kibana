@@ -13,7 +13,7 @@ import { RuleRegistryPluginStartContract } from '../../../rule_registry/server';
 
 export const registerRoutes = (router: IRouter, ruleRegistry: RuleRegistryPluginStartContract) => {
   registerProcessEventsRoute(router);
-  registerAlertStatusRoute(router);
   sessionEntryLeadersRoute(router);
   registerAlertsRoute(router, ruleRegistry);
+  registerAlertStatusRoute(router, ruleRegistry);
 };

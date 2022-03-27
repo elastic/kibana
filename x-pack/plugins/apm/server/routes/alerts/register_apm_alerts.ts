@@ -10,7 +10,7 @@ import { IBasePath, Logger } from 'kibana/server';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../alerting/server';
 import { IRuleDataClient } from '../../../../rule_registry/server';
 import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
-import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
+import { registerAnomalyAlertType } from './register_anomaly_alert_type';
 import { registerErrorCountAlertType } from './register_error_count_alert_type';
 import { APMConfig } from '../..';
 import { MlPluginSetup } from '../../../../ml/server';
@@ -27,7 +27,7 @@ export interface RegisterRuleDependencies {
 
 export function registerApmAlerts(dependencies: RegisterRuleDependencies) {
   registerTransactionDurationAlertType(dependencies);
-  registerTransactionDurationAnomalyAlertType(dependencies);
+  registerAnomalyAlertType(dependencies);
   registerErrorCountAlertType(dependencies);
   registerTransactionErrorRateAlertType(dependencies);
 }
