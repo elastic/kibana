@@ -7,10 +7,12 @@
 
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DevToolsSetup } from '../../../../src/plugins/dev_tools/public';
+import { SharePluginSetup } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
 export interface AppPublicPluginDependencies {
   licensing: LicensingPluginSetup;
   home: HomePublicPluginSetup;
   devTools: DevToolsSetup;
+  share: SharePluginSetup;
 }
