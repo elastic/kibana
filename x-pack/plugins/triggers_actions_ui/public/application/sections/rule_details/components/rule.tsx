@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiHealth,
@@ -41,10 +41,14 @@ import {
   shouldShowDurationWarning,
 } from '../../../lib/execution_duration_utils';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
-import { RuleAlertList } from './rule_alert_list';
-import { RuleEventLogListWithApi } from './rule_event_log_list';
+// import { RuleEventLogListWithApi } from './rule_event_log_list';
 import { AlertListItem } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
+
+const RuleEventLogListWithApi = lazy(() => import('./rule_event_log_list'));
+
+const RuleAlertList = lazy(() => import('./rule_alert_list'));
 
 type RuleProps = {
   rule: Rule;
@@ -98,7 +102,14 @@ export function RuleComponent({
     : rulesStatusesTranslationsMapping[rule.executionStatus.status];
 
   const renderRuleAlertList = () => {
-    return <RuleAlertList items={alerts} readOnly={readOnly} onMuteAction={onMuteAction} />;
+    return suspendedComponentWithProps(
+      RuleAlertList,
+      'xl'
+    )({
+      items: alerts,
+      readOnly,
+      onMuteAction,
+    });
   };
 
   const tabs = [
@@ -108,7 +119,7 @@ export function RuleComponent({
         defaultMessage: 'Execution History',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: <RuleEventLogListWithApi rule={rule} />,
+      content: suspendedComponentWithProps(RuleEventLogListWithApi, 'xl')({ rule }),
     },
     {
       id: ALERT_LIST_TAB,

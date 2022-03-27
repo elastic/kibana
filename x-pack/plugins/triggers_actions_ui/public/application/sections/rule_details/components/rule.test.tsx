@@ -15,7 +15,6 @@ import { AlertListItem } from './types';
 import { RuleAlertList } from './rule_alert_list';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
-import { RuleEventLogListWithApi } from './rule_event_log_list';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -37,7 +36,7 @@ const mockAPIs = {
 };
 
 beforeAll(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
   global.Date.now = jest.fn(() => fakeNow.getTime());
 });
 
@@ -46,7 +45,7 @@ beforeEach(() => {
 });
 
 describe('rules', () => {
-  it('render a list of rules', () => {
+  it('render a list of rules', async () => {
     const rule = mockRule();
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary({
@@ -71,7 +70,7 @@ describe('rules', () => {
       alertToListItem(fakeNow.getTime(), ruleType, 'first_rule', ruleSummary.alerts.first_rule),
     ];
 
-    const wrapper = shallow(
+    const wrapper = mountWithIntl(
       <RuleComponent
         {...mockAPIs}
         rule={rule}
@@ -80,6 +79,11 @@ describe('rules', () => {
         readOnly={false}
       />
     );
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      wrapper.update();
+    });
 
     expect(wrapper.find(RuleAlertList).prop('items')).toEqual(rules);
   });
@@ -105,7 +109,7 @@ describe('rules', () => {
     ).toEqual(fake2MinutesAgo.getTime());
   });
 
-  it('render all active rules', () => {
+  it('render all active rules', async () => {
     const rule = mockRule();
     const ruleType = mockRuleType();
     const alerts: Record<string, AlertStatus> = {
@@ -118,27 +122,31 @@ describe('rules', () => {
         muted: false,
       },
     };
-    expect(
-      shallow(
-        <RuleComponent
-          {...mockAPIs}
-          rule={rule}
-          ruleType={ruleType}
-          readOnly={false}
-          ruleSummary={mockRuleSummary({
-            alerts,
-          })}
-        />
-      )
-        .find(RuleAlertList)
-        .prop('items')
-    ).toEqual([
+
+    const wrapper = mountWithIntl(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        readOnly={false}
+        ruleSummary={mockRuleSummary({
+          alerts,
+        })}
+      />
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      wrapper.update();
+    });
+
+    expect(wrapper.find(RuleAlertList).prop('items')).toEqual([
       alertToListItem(fakeNow.getTime(), ruleType, 'us-central', alerts['us-central']),
       alertToListItem(fakeNow.getTime(), ruleType, 'us-east', alerts['us-east']),
     ]);
   });
 
-  it('render all inactive rules', () => {
+  it('render all inactive rules', async () => {
     const rule = mockRule({
       mutedInstanceIds: ['us-west', 'us-east'],
     });
@@ -146,30 +154,33 @@ describe('rules', () => {
     const ruleUsWest: AlertStatus = { status: 'OK', muted: false };
     const ruleUsEast: AlertStatus = { status: 'OK', muted: false };
 
-    expect(
-      shallow(
-        <RuleComponent
-          {...mockAPIs}
-          rule={rule}
-          ruleType={ruleType}
-          readOnly={false}
-          ruleSummary={mockRuleSummary({
-            alerts: {
-              'us-west': {
-                status: 'OK',
-                muted: false,
-              },
-              'us-east': {
-                status: 'OK',
-                muted: false,
-              },
+    const wrapper = mountWithIntl(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        readOnly={false}
+        ruleSummary={mockRuleSummary({
+          alerts: {
+            'us-west': {
+              status: 'OK',
+              muted: false,
             },
-          })}
-        />
-      )
-        .find(RuleAlertList)
-        .prop('items')
-    ).toEqual([
+            'us-east': {
+              status: 'OK',
+              muted: false,
+            },
+          },
+        })}
+      />
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      wrapper.update();
+    });
+
+    expect(wrapper.find(RuleAlertList).prop('items')).toEqual([
       alertToListItem(fakeNow.getTime(), ruleType, 'us-west', ruleUsWest),
       alertToListItem(fakeNow.getTime(), ruleType, 'us-east', ruleUsEast),
     ]);
@@ -427,17 +438,23 @@ describe('tabbed content', () => {
     (tabbedContent.instance() as any).focusTab = jest.fn();
     tabbedContent.update();
 
-    expect(tabbedContent.find(RuleEventLogListWithApi).exists()).toBeTruthy();
-    expect(tabbedContent.find(RuleAlertList).exists()).toBeFalsy();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      tabbedContent.update();
+    });
+
+    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
+    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
 
     tabbedContent.find('[data-test-subj="ruleAlertListTab"]').simulate('click');
 
-    expect(tabbedContent.find(RuleEventLogListWithApi).exists()).toBeFalsy();
-    expect(tabbedContent.find(RuleAlertList).exists()).toBeTruthy();
+    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
+    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
 
     tabbedContent.find('[data-test-subj="eventLogListTab"]').simulate('click');
-    expect(tabbedContent.find(RuleEventLogListWithApi).exists()).toBeTruthy();
-    expect(tabbedContent.find(RuleAlertList).exists()).toBeFalsy();
+
+    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
+    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
   });
 });
 

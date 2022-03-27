@@ -163,3 +163,6 @@ export const RuleAlertList = (props: RuleAlertListProps) => {
     />
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { RuleAlertList as default };

@@ -440,3 +440,6 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
 };
 
 export const RuleEventLogListWithApi = withBulkRuleOperations(RuleEventLogList);
+
+// eslint-disable-next-line import/no-default-export
+export { RuleEventLogListWithApi as default };
