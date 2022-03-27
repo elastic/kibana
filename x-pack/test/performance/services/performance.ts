@@ -17,9 +17,9 @@ import { FtrService, FtrProviderContext } from '../ftr_provider_context';
 type StorageState = Awaited<ReturnType<BrowserContext['storageState']>>;
 
 apm.start({
-  secretToken: 'Q5q5rWQEw6tKeirBpw',
-  serverUrl: 'https://2fad4006bf784bb8a54e52f4a5862609.apm.us-west1.gcp.cloud.es.io:443',
   serviceName: 'functional test runner',
+  serverUrl: 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443',
+  secretToken: 'CTs9y3cvcfq13bQqsB',
 });
 
 interface StepCtx {
