@@ -28,6 +28,7 @@ import {
   MonitorFields,
   ServiceLocations,
   SyntheticsMonitor,
+  ThrottlingOptions,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
@@ -50,6 +51,7 @@ export class SyntheticsService {
   private apiKey: SyntheticsServiceApiKey | undefined;
 
   public locations: ServiceLocations;
+  public throttling: ThrottlingOptions | undefined;
 
   private indexTemplateExists?: boolean;
   private indexTemplateInstalling?: boolean;
@@ -104,8 +106,10 @@ export class SyntheticsService {
 
   public async registerServiceLocations() {
     const service = this;
+
     try {
       const result = await getServiceLocations(service.server);
+      service.throttling = result.throttling;
       service.locations = result.locations;
       service.apiClient.locations = result.locations;
     } catch (e) {
