@@ -131,6 +131,8 @@ export function createExecutionHandler<
         continue;
       }
 
+      alertExecutionStore.numberOfTriggeredActions++;
+
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
       const enqueueOptions = {
@@ -163,12 +165,9 @@ export function createExecutionHandler<
           if (isEphemeralTaskRejectedDueToCapacityError(err)) {
             await actionsClient.enqueueExecution(enqueueOptions);
           }
-        } finally {
-          alertExecutionStore.numberOfTriggeredActions++;
         }
       } else {
         await actionsClient.enqueueExecution(enqueueOptions);
-        alertExecutionStore.numberOfTriggeredActions++;
       }
 
       const event = createAlertEventLogRecordObject({
