@@ -12,7 +12,7 @@ import { configSchema } from './config';
 
 export type { MonitoringCollectionConfig } from './config';
 
-export type { MonitoringCollectionSetup, MetricResult } from './plugin';
+export type { MonitoringCollectionSetup, MetricResult, Metric } from './plugin';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new MonitoringCollectionPlugin(initContext);
