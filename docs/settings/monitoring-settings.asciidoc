@@ -65,7 +65,7 @@ in {kib}  to the {es} monitoring cluster and to verify licensing status on the {
 monitoring cluster when using `monitoring.ui.elasticsearch.hosts`.
 +
 All other requests performed by *{stack-monitor-app}* to the monitoring {es}
-cluster uses the authenticated user's credentials, which must be the same on
+cluster use the authenticated user's credentials, which must be the same on
 both the {es} monitoring cluster and the {es} production cluster.
 +
 If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.password`>> setting.
