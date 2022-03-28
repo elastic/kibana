@@ -12,7 +12,7 @@ import { EuiSwitch } from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition, ParamEditorProps } from './index';
-import { FieldBasedIndexPatternColumn, FormatParams } from './column_types';
+import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import { IndexPatternField } from '../../types';
 import {
   getInvalidFieldMessage,
@@ -36,7 +36,7 @@ export type CountIndexPatternColumn = FieldBasedIndexPatternColumn & {
   operationType: 'count';
   params?: {
     emptyAsNull?: boolean;
-    format?: FormatParams;
+    format?: ValueFormatConfig;
   };
 };
 
