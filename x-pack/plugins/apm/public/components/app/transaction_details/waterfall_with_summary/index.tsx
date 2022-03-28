@@ -26,10 +26,8 @@ import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import { TransactionTabs } from './transaction_tabs';
 import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 interface Props {
-  status: FETCH_STATUS;
   urlParams: ApmUrlParams;
   waterfall: IWaterfall;
   isLoading: boolean;
@@ -37,7 +35,6 @@ interface Props {
 }
 
 export function WaterfallWithSummary({
-  status,
   urlParams,
   waterfall,
   isLoading,

@@ -193,7 +193,6 @@ export function TransactionDistribution({
         <WaterfallWithSummary
           urlParams={urlParams}
           waterfall={waterfall}
-          status={waterfallStatus}
           isLoading={isLoading}
           traceSamples={traceSamples}
         />
