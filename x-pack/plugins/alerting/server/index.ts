@@ -60,5 +60,12 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
       'xpack.alerting.invalidateApiKeysTask.removalDelay',
       { level: 'warning' }
     ),
+    renameFromRoot(
+      'xpack.alerting.defaultRuleTaskTimeout',
+      'xpack.alerting.rules.execution.timeout',
+      {
+        level: 'warning',
+      }
+    ),
   ],
 };

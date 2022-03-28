@@ -634,3 +634,10 @@ export const staticCustomSourceData: SourceDataItem = {
   accountContextOnly: false,
   customConnectorAvailable: true,
 };
+
+export const getSourceData = (serviceType: string): SourceDataItem => {
+  return (
+    staticSourceData.find((staticSource) => staticSource.serviceType === serviceType) ||
+    staticCustomSourceData
+  );
+};
