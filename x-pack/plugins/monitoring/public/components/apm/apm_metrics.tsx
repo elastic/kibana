@@ -22,8 +22,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 // @ts-ignore could not find declaration file
 import { MonitoringTimeseriesContainer } from '../chart';
-// @ts-ignore could not find declaration file
-import { Status } from './instance/status';
 import { checkAgentTypeMetric } from '../../lib/apm_agent';
 
 interface TitleType {
