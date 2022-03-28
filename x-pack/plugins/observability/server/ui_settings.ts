@@ -17,6 +17,7 @@ import {
   defaultApmServiceEnvironment,
   enableRandomSampling,
   enableServiceGroups,
+  apmServiceInventoryOptimizedSorting,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -108,5 +109,23 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
+  },
+  [apmServiceInventoryOptimizedSorting]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
+      defaultMessage: 'Optimize APM Service Inventory page load performance',
+    }),
+    description: i18n.translate(
+      'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
+      {
+        defaultMessage:
+          '{technicalPreviewLabel} Default APM Service Inventory page sort (for Services without Machine Learning applied) to sort by Service Name',
+        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+      }
+    ),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: false,
+    type: 'boolean',
   },
 };

@@ -12,3 +12,5 @@ export const enableInfrastructureView = 'observability:enableInfrastructureView'
 export const defaultApmServiceEnvironment = 'observability:apmDefaultServiceEnvironment';
 export const enableRandomSampling = 'observability:enableRandomSampling';
 export const enableServiceGroups = 'observability:enableServiceGroups';
+export const apmServiceInventoryOptimizedSorting =
+  'observability:apmServiceInventoryOptimizedSorting';

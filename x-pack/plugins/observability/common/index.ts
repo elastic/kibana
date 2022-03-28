@@ -16,6 +16,7 @@ export {
   enableInfrastructureView,
   defaultApmServiceEnvironment,
   enableRandomSampling,
+  apmServiceInventoryOptimizedSorting,
 } from './ui_settings_keys';
 
 export const casesFeatureId = 'observabilityCases';

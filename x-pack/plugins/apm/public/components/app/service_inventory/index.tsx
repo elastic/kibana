@@ -20,6 +20,10 @@ import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { apmServiceInventoryOptimizedSorting } from '../../../../../observability/common';
+import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
+import { orderServiceItems } from './service_list/order_service_items';
 
 const initialData = {
   requestId: '',
@@ -171,10 +175,36 @@ export function ServiceInventory() {
     />
   );
 
+  const mainStatisticsItems = mainStatisticsFetch.data?.items ?? [];
+  const preloadedServices = sortedAndFilteredServicesFetch.data?.services || [];
+
+  const displayHealthStatus = [
+    ...mainStatisticsItems,
+    ...preloadedServices,
+  ].some((item) => 'healthStatus' in item);
+
+  const tiebreakerField = useKibana().services.uiSettings?.get<boolean>(
+    apmServiceInventoryOptimizedSorting
+  )
+    ? ServiceInventoryFieldName.ServiceName
+    : ServiceInventoryFieldName.Throughput;
+
+  const initialSortField = displayHealthStatus
+    ? ServiceInventoryFieldName.HealthStatus
+    : tiebreakerField;
+
+  const initialSortDirection =
+    initialSortField === ServiceInventoryFieldName.ServiceName ? 'asc' : 'desc';
+
   const items = joinByKey(
     [
-      ...(sortedAndFilteredServicesFetch.data?.services ?? []),
-      ...(mainStatisticsFetch.data?.items ?? []),
+      // only use preloaded services if tiebreaker field is service.name,
+      // otherwise ignore them to prevent re-sorting of the table
+      // once the tiebreaking metric comes in
+      ...(tiebreakerField === ServiceInventoryFieldName.ServiceName
+        ? preloadedServices
+        : []),
+      ...mainStatisticsItems,
     ],
     'serviceName'
   );
@@ -201,6 +231,17 @@ export function ServiceInventory() {
               comparisonFetch.status === FETCH_STATUS.LOADING ||
               comparisonFetch.status === FETCH_STATUS.NOT_INITIATED
             }
+            displayHealthStatus={displayHealthStatus}
+            initialSortField={initialSortField}
+            initialSortDirection={initialSortDirection}
+            sortFn={(itemsToSort, sortField, sortDirection) => {
+              return orderServiceItems({
+                items: itemsToSort,
+                primarySortField: sortField,
+                sortDirection,
+                tiebreakerField,
+              });
+            }}
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
           />
