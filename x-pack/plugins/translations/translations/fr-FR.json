@@ -1616,7 +1616,6 @@
     "data.kueryAutocomplete.equalOperatorDescription.equalsText": "égale",
     "data.kueryAutocomplete.existOperatorDescription": "{exists} sous un certain format",
     "data.kueryAutocomplete.existOperatorDescription.existsText": "existe",
-    "data.kueryAutocomplete.filterResultsDescription": "Filtrer les résultats contenant {fieldName}",
     "data.kueryAutocomplete.greaterThanOperatorDescription": "est {greaterThan} une certaine valeur",
     "data.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText": "supérieur à",
     "data.kueryAutocomplete.greaterThanOrEqualOperatorDescription": "est {greaterThanOrEqualTo} une certaine valeur",
