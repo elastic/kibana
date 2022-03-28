@@ -32,13 +32,21 @@ export async function startHistoricalDataUpload(
   const { generate } = await scenario(runOptions);
 
   const cores = cpus().length;
+  // settle on a reasonable max concurrency arbitrarily capping at 10.
   let maxConcurrency = Math.min(10, cores - 1);
+  // maxWorkers to be spawned is double that of maxConcurrency. We estimate the number of ranges over
+  // maxConcurrency, if that is too conservative this provides more available workers to complete the job.
+  // If any worker finds that work is already completed they will spin down immediately.
   let maxWorkers = maxConcurrency * 2;
   logger.info(
     `Discovered ${cores} cores, splitting work over ${maxWorkers} workers with limited concurrency: ${maxConcurrency}`
   );
+
+  // if --workers N is specified it should take precedence over inferred maximum workers
   if (runOptions.workers) {
+    // ensure maxWorkers is at least 1
     maxWorkers = Math.max(1, runOptions.workers);
+    // ensure max concurrency is at least 1 or the ceil of --workers N / 2
     maxConcurrency = Math.ceil(Math.max(1, maxWorkers / 2));
     logger.info(
       `updating maxWorkers to ${maxWorkers} and maxConcurrency to ${maxConcurrency} because it was explicitly set through --workers`
@@ -50,44 +58,38 @@ export async function startHistoricalDataUpload(
   logger.info(
     `Scenario is generating ${ratePerMinute.toLocaleString()} events per minute interval`
   );
-  let to2 = to;
-  let intervals = [{ bucketFrom: from, bucketTo: to, workerIndex: 0 }];
+  let rangeEnd = to;
   if (runOptions.maxDocs) {
-    to2 = moment(from)
+    // estimate a more accurate range end for when --maxDocs is specified
+    rangeEnd = moment(from)
       // ratePerMinute() is not exact if the generator is yielding variable documents
       // the rate is calculated by peeking the first yielded event and its children.
       // for real complex cases manually specifying --to is encouraged.
       .subtract((runOptions.maxDocs / ratePerMinute) * runOptions.maxDocsConfidence, 'm')
       .toDate();
-    const diff = moment(from).diff(to2);
-    const d = moment.duration(diff, 'ms');
-    logger.info(
-      `Estimated interval length ${d.days()} days, ${d.hours()} hours ${d.minutes()} minutes ${d.seconds()} seconds`
-    );
-    // make sure ranges cover at least 100k documents
-    const minIntervalSpan = moment.duration(100000 / ratePerMinute, 'm');
-    const minNumberOfRanges = d.asMilliseconds() / minIntervalSpan.asMilliseconds();
-    if (!runOptions.workers && minNumberOfRanges < maxWorkers) {
-      maxWorkers = Math.floor(minNumberOfRanges);
-      maxConcurrency = Math.max(1, maxWorkers / 2);
+  }
+  const diff = moment(from).diff(rangeEnd);
+  const d = moment.duration(Math.abs(diff), 'ms');
+  logger.info(
+    `Range: ${d.years()} days ${d.days()} days, ${d.hours()} hours ${d.minutes()} minutes ${d.seconds()} seconds`
+  );
+  // make sure ranges cover at least 100k documents
+  const minIntervalSpan = moment.duration(100000 / ratePerMinute, 'm');
+  const minNumberOfRanges = d.asMilliseconds() / minIntervalSpan.asMilliseconds();
+  if (minNumberOfRanges < maxWorkers) {
+    maxWorkers = Math.max(1, Math.floor(minNumberOfRanges));
+    maxConcurrency = Math.max(1, maxWorkers / 2);
+    if (runOptions.workers) {
       logger.info(
-        `updating maxWorkers to ${maxWorkers} and maxConcurrency to ${maxConcurrency} to ensure each worker does enough work`
+        `Ignoring --workers ${runOptions.workers} since each worker would not see enough data`
       );
     }
-
-    const intervalSpan = diff / maxWorkers;
-    intervals = range(0, maxWorkers)
-      .map((i) => intervalSpan * i)
-      .map((interval, index) => ({
-        workerIndex: index,
-        bucketFrom: moment(from).subtract(interval, 'ms').toDate(),
-        bucketTo: moment(from)
-          .subtract(interval + intervalSpan, 'ms')
-          .toDate(),
-      }));
+    logger.info(
+      `updating maxWorkers to ${maxWorkers} and maxConcurrency to ${maxConcurrency} to ensure each worker does enough work`
+    );
   }
 
-  logger.info(`Generating data from ${from.toISOString()} to ${to2.toISOString()}`);
+  logger.info(`Generating data from ${from.toISOString()} to ${rangeEnd.toISOString()}`);
 
   type WorkerMessages =
     | { log: LogLevel; args: any[] }
@@ -103,6 +105,23 @@ export async function startHistoricalDataUpload(
     lastTimestamp?: Date;
   }
 
+  function rangeStep(interval: number) {
+    if (from > rangeEnd) return moment(from).subtract(interval, 'ms').toDate();
+    return moment(from).add(interval, 'ms').toDate();
+  }
+
+  // precalculate intervals to spawn workers over.
+  // abs() the difference to make add/subtract explicit in rangeStep() in favor of subtracting a negative number
+  const intervalSpan = Math.abs(diff / maxWorkers);
+  const intervals = range(0, maxWorkers)
+    .map((i) => intervalSpan * i)
+    .map((interval, index) => ({
+      workerIndex: index,
+      bucketFrom: rangeStep(interval),
+      bucketTo: rangeStep(interval + intervalSpan),
+    }));
+
+  // precalculate interval state for each worker to report on.
   let totalProcessed = 0;
   const workerProcessed = range(0, maxWorkers).reduce<Record<number, WorkerTotals>>((p, c, i) => {
     p[i] = { total: 0, bucketFrom: intervals[i].bucketFrom, bucketTo: intervals[i].bucketTo };
