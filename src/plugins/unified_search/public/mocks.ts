@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { UnifiedSearchPlugin } from '../../unified_search/public';
+import { UnifiedSearchPublicPlugin } from './plugin';
 
-export type Setup = jest.Mocked<ReturnType<UnifiedSearchPlugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<UnifiedSearchPlugin['start']>>;
+export type Setup = jest.Mocked<ReturnType<UnifiedSearchPublicPlugin['setup']>>;
+export type Start = jest.Mocked<ReturnType<UnifiedSearchPublicPlugin['start']>>;
 
 const createStartContract = (): Start => {
   return {
