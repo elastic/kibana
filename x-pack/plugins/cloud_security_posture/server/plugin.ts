@@ -23,8 +23,13 @@ import type {
 import { defineRoutes } from './routes';
 import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
 import { cspRuleAssetType } from './saved_objects/csp_rule_type';
-import { initializeCspRules } from './saved_objects/initialize_rules';
+// import { initializeCspRules } from './saved_objects/initialize_rules';
+import { initializeCspRuleTemplates } from './assets/initialize_rule_templates';
 import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
+import {
+  getPackagePolicyCreateCallback,
+  getPackagePolicyDeleteCallback,
+} from './fleet_integration/fleet_integration';
 
 export interface CspAppContext {
   logger: Logger;
@@ -58,6 +63,11 @@ export class CspPlugin
     core.savedObjects.registerType(cspRuleAssetType);
     core.savedObjects.registerType(cspRuleTemplateAssetType);
 
+    core.getStartServices().then(([coreStart]) => {
+      initializeCspRuleTemplates(coreStart.savedObjects.createInternalRepository());
+      this.logger.debug('csp rule templates has been installed');
+    });
+
     const router = core.http.createRouter<CspRequestHandlerContext>();
 
     // Register server side APIs
@@ -66,13 +76,28 @@ export class CspPlugin
     return {};
   }
 
-  public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
+  public async start(
+    core: CoreStart,
+    plugins: CspServerPluginStartDeps
+  ): Promise<CspServerPluginStart> {
     this.CspAppService.start({
       ...plugins.fleet,
     });
 
-    initializeCspRules(core.savedObjects.createInternalRepository());
+    // initializeCspRules(core.savedObjects.createInternalRepository());
     initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+
+    await plugins.fleet.fleetSetupCompleted;
+
+    plugins.fleet.registerExternalCallback(
+      'packagePolicyCreate',
+      getPackagePolicyCreateCallback(this.logger)
+    );
+
+    plugins.fleet.registerExternalCallback(
+      'postPackagePolicyDelete',
+      getPackagePolicyDeleteCallback(core.savedObjects.createInternalRepository())
+    );
     return {};
   }
   public stop() {}
