@@ -94,6 +94,7 @@ const withCore = makeDecorator({
               },
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
+              kibanaFeatures: [],
             }}
           >
             <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
