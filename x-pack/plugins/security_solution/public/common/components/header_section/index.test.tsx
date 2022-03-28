@@ -180,4 +180,94 @@ describe('HeaderSection', () => {
 
     expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(false);
   });
+
+  test('it does not render query-toggle-header when no arguments provided', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection id="an id" title="Test title">
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="query-toggle-header"]').first().exists()).toBe(false);
+  });
+
+  test('it does render query-toggle-header when toggleQuery arguments provided', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection id="an id" title="Test title" toggleQuery={jest.fn()} toggleStatus={true}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="query-toggle-header"]').first().exists()).toBe(true);
+  });
+
+  test('it does render everything but title when toggleStatus = true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection
+          id="an id"
+          title="Test title"
+          subtitle="subtitle"
+          headerFilters="headerFilters"
+          toggleQuery={jest.fn()}
+          toggleStatus={true}
+        >
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="query-toggle-header"]').first().prop('iconType')).toBe(
+      'arrowDown'
+    );
+    expect(wrapper.find('[data-test-subj="header-section-supplements"]').first().exists()).toBe(
+      true
+    );
+    expect(wrapper.find('[data-test-subj="header-section-subtitle"]').first().exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-section-filters"]').first().exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(true);
+  });
+  test('it does not render anything but title when toggleStatus = false', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection
+          id="an id"
+          title="Test title"
+          subtitle="subtitle"
+          headerFilters="headerFilters"
+          toggleQuery={jest.fn()}
+          toggleStatus={false}
+        >
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="query-toggle-header"]').first().prop('iconType')).toBe(
+      'arrowRight'
+    );
+    expect(wrapper.find('[data-test-subj="header-section-supplements"]').first().exists()).toBe(
+      false
+    );
+    expect(wrapper.find('[data-test-subj="header-section-filters"]').first().exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="header-section-subtitle"]').first().exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(false);
+  });
+
+  test('it toggles query when icon is clicked', () => {
+    const mockToggle = jest.fn();
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection id="an id" title="Test title" toggleQuery={mockToggle} toggleStatus={true}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+    wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
+    expect(mockToggle).toBeCalledWith(false);
+  });
 });

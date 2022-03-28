@@ -17,7 +17,6 @@ import {
 } from '../../common/constants';
 import { UptimeApp, UptimeAppProps } from './uptime_app';
 import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
-import { UptimeUiConfig } from '../../common/config';
 import { uptimeOverviewNavigatorParams } from './locators/overview';
 
 export function renderApp(
@@ -25,7 +24,7 @@ export function renderApp(
   plugins: ClientPluginsSetup,
   startPlugins: ClientPluginsStart,
   appMountParameters: AppMountParameters,
-  config: UptimeUiConfig
+  isDev: boolean
 ) {
   const {
     application: { capabilities },
@@ -45,6 +44,7 @@ export function renderApp(
   plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
 
   const props: UptimeAppProps = {
+    isDev,
     plugins,
     canSave,
     core,
@@ -75,7 +75,6 @@ export function renderApp(
     setBadge,
     appMountParameters,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
-    config,
   };
 
   ReactDOM.render(<UptimeApp {...props} />, appMountParameters.element);
