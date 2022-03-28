@@ -15,7 +15,7 @@ import { ToolbarButton, Props as ButtonProps } from '../buttons/primary/primary'
 type AllowedButtonProps = Omit<ButtonProps, 'onClick' | 'fill'>;
 type AllowedPopoverProps = Omit<
   EuiPopoverProps,
-  'button' | 'isOpen' | 'closePopover' | 'anchorPosition'
+  'button' | 'isOpen' | 'closePopover' | 'anchorPosition' | 'css'
 >;
 
 export type Props = AllowedButtonProps &
