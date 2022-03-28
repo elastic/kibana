@@ -20,18 +20,14 @@ import { stubWebWorker } from '@kbn/test/jest';
 stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: HomeTestBed;
-
-  afterAll(() => {
-    server.restore();
-  });
 
   describe('on component mount', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([]);
 
-      testBed = await setup();
+      testBed = await setup(httpSetup);
 
       await act(async () => {
         const { component } = testBed;
