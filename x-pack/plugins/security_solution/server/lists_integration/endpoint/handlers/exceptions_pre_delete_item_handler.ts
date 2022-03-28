@@ -12,6 +12,7 @@ import {
   TrustedAppValidator,
   HostIsolationExceptionsValidator,
   EventFilterValidator,
+  BlocklistValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreDeleteItemServerExtension['callback'];
@@ -54,6 +55,12 @@ export const getExceptionsPreDeleteItemHandler = (
     // Event Filter validation
     if (EventFilterValidator.isEventFilter({ listId })) {
       await new EventFilterValidator(endpointAppContextService, request).validatePreDeleteItem();
+      return data;
+    }
+
+    // Validate Blocklists
+    if (BlocklistValidator.isBlocklist({ listId })) {
+      await new BlocklistValidator(endpointAppContextService, request).validatePreDeleteItem();
       return data;
     }
 

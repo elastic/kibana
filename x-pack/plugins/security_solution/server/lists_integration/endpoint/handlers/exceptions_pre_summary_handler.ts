@@ -11,6 +11,7 @@ import {
   TrustedAppValidator,
   HostIsolationExceptionsValidator,
   EventFilterValidator,
+  BlocklistValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreSummaryServerExtension['callback'];
@@ -38,6 +39,7 @@ export const getExceptionsPreSummaryHandler = (
       await new TrustedAppValidator(endpointAppContextService, request).validatePreGetListSummary();
       return data;
     }
+
     // Host Isolation Exceptions
     if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
       await new HostIsolationExceptionsValidator(
@@ -50,6 +52,12 @@ export const getExceptionsPreSummaryHandler = (
     // Event Filter Exceptions
     if (EventFilterValidator.isEventFilter({ listId })) {
       await new EventFilterValidator(endpointAppContextService, request).validatePreSummary();
+      return data;
+    }
+
+    // Validate Blocklists
+    if (BlocklistValidator.isBlocklist({ listId })) {
+      await new BlocklistValidator(endpointAppContextService, request).validatePreGetListSummary();
       return data;
     }
 
