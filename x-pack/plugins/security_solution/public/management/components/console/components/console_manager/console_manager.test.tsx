@@ -41,4 +41,28 @@ describe('When using ConsoleManager', () => {
 
     it.todo('should un-register the console when `.terminate() is called');
   });
+
+  describe('and when the console popup is opened', () => {
+    it.todo('should show the title');
+
+    it.todo('should show the console');
+
+    it.todo('should show `terminate` button');
+
+    it.todo('should show `hide` button');
+
+    it.todo('should hide the popup');
+
+    it.todo('should show confirmation when terminate button is clicked');
+
+    describe('and the terminate confirmation is shown', () => {
+      it.todo('should show message confirmation');
+
+      it.todo('should show cancel and terminate buttons');
+
+      it.todo('should hide the confirmation when cancel is clicked');
+
+      it.todo('should terminate when terminate is clicked');
+    });
+  });
 });
