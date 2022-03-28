@@ -12,16 +12,18 @@ import React from 'react';
 import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
 import { OverlayRef } from '../../../../../core/public';
-import { DEFAULT_CONTROL_WIDTH } from './editor_constants';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlWidth, ControlInput, IEditableControlFactory } from '../../types';
 import { toMountPoint } from '../../../../kibana_react/public';
+import { DEFAULT_CONTROL_WIDTH } from '../../../common/control_group/control_group_constants';
 
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
 export interface CreateControlButtonProps {
   defaultControlWidth?: ControlWidth;
   updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
   addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
+  setLastUsedDataViewId?: (newDataViewId: string) => void;
+  getRelevantDataViewId?: () => string | undefined;
   buttonType: CreateControlButtonTypes;
   closePopover?: () => void;
 }
@@ -37,6 +39,8 @@ export const CreateControlButton = ({
   addNewEmbeddable,
   buttonType,
   closePopover,
+  setLastUsedDataViewId,
+  getRelevantDataViewId,
 }: CreateControlButtonProps) => {
   // Controls Services Context
   const { overlays, controls } = pluginServices.getServices();
@@ -72,6 +76,8 @@ export const CreateControlButton = ({
         toMountPoint(
           <PresentationUtilProvider>
             <ControlEditor
+              setLastUsedDataViewId={setLastUsedDataViewId}
+              getRelevantDataViewId={getRelevantDataViewId}
               isCreate={true}
               width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
@@ -92,6 +98,7 @@ export const CreateControlButton = ({
           </PresentationUtilProvider>
         ),
         {
+          outsideClickCloses: false,
           onClose: (flyout) => onCancel(flyout),
         }
       );

@@ -36,7 +36,7 @@ export const SyntheticsProviders = ({
   policyDefaultValues,
 }: Props) => {
   return (
-    <PolicyConfigContextProvider {...(policyDefaultValues || {})}>
+    <PolicyConfigContextProvider {...policyDefaultValues}>
       <HTTPContextProvider defaultValues={httpDefaultValues}>
         <TCPContextProvider defaultValues={tcpDefaultValues}>
           <TLSFieldsContextProvider defaultValues={tlsDefaultValues}>

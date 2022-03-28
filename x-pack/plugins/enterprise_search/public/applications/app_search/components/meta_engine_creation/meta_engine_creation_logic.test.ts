@@ -104,6 +104,7 @@ describe('MetaEngineCreationLogic', () => {
   describe('listeners', () => {
     describe('fetchIndexedEngineNames', () => {
       beforeEach(() => {
+        mount();
         jest.clearAllMocks();
       });
 
@@ -118,6 +119,22 @@ describe('MetaEngineCreationLogic', () => {
         jest.spyOn(MetaEngineCreationLogic.actions, 'setIndexedEngineNames');
         http.get.mockReturnValueOnce(
           Promise.resolve({ results: [{ name: 'foo' }], meta: { page: { total_pages: 1 } } })
+        );
+        MetaEngineCreationLogic.actions.fetchIndexedEngineNames();
+        await nextTick();
+        expect(MetaEngineCreationLogic.actions.setIndexedEngineNames).toHaveBeenCalledWith(['foo']);
+      });
+
+      it('filters out elasticsearch type engines', async () => {
+        jest.spyOn(MetaEngineCreationLogic.actions, 'setIndexedEngineNames');
+        http.get.mockReturnValueOnce(
+          Promise.resolve({
+            results: [
+              { name: 'foo', type: 'default' },
+              { name: 'elasticsearch-engine', type: 'elasticsearch' },
+            ],
+            meta: { page: { total_pages: 1 } },
+          })
         );
         MetaEngineCreationLogic.actions.fetchIndexedEngineNames();
         await nextTick();

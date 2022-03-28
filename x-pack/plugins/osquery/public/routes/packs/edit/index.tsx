@@ -112,6 +112,7 @@ const EditPackPageComponent = () => {
           }
           onCancel={handleCloseDeleteConfirmationModal}
           onConfirm={handleDeleteConfirmClick}
+          confirmButtonDisabled={deletePackMutation.isLoading}
           cancelButtonText={
             <FormattedMessage
               id="xpack.osquery.deletePack.confirmationModal.cancelButtonLabel"

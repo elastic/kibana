@@ -48,6 +48,7 @@ async function setup(actualShaSums?: Record<string, string>) {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    dockerCrossCompile: false,
     dockerPush: false,
     dockerTagQualifier: '',
   });

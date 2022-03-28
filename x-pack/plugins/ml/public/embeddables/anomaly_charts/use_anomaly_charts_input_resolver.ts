@@ -6,12 +6,10 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { combineLatest, forkJoin, from, Observable, of, Subject } from 'rxjs';
+import { combineLatest, Observable, of, Subject } from 'rxjs';
 import { catchError, debounceTime, skipWhile, startWith, switchMap, tap } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
-import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import {
   AppStateSelectedCells,
   getSelectionInfluencers,
@@ -24,7 +22,6 @@ import {
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsServices,
 } from '..';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
 import { processFilters } from '../common/process_filters';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
@@ -39,29 +36,19 @@ export function useAnomalyChartsInputResolver(
   services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
   chartWidth: number,
   severity: number
-): { chartsData: ExplorerChartsData; isLoading: boolean; error: Error | null | undefined } {
-  const [
-    { uiSettings },
-    { data: dataServices },
-    { anomalyDetectorService, anomalyExplorerService },
-  ] = services;
-  const { timefilter } = dataServices.query.timefilter;
+): {
+  chartsData: ExplorerChartsData | undefined;
+  isLoading: boolean;
+  error: Error | null | undefined;
+} {
+  const [, , { anomalyDetectorService, anomalyExplorerService }] = services;
 
-  const [chartsData, setChartsData] = useState<any>();
+  const [chartsData, setChartsData] = useState<ExplorerChartsData>();
   const [error, setError] = useState<Error | null>();
   const [isLoading, setIsLoading] = useState(false);
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
   const severity$ = useMemo(() => new Subject<number>(), []);
-
-  const timeBuckets = useMemo(() => {
-    return new TimeBuckets({
-      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: uiSettings.get('dateFormat'),
-      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-    });
-  }, []);
 
   useEffect(() => {
     const subscription = combineLatest([
@@ -108,43 +95,17 @@ export function useAnomalyChartsInputResolver(
 
           const jobIds = getSelectionJobIds(selections, explorerJobs);
 
-          const bucketInterval = timeBuckets.getInterval();
+          const timeRange = getSelectionTimeRange(selections, bounds);
 
-          const timeRange = getSelectionTimeRange(selections, bucketInterval.asSeconds(), bounds);
-          return forkJoin({
-            combinedJobs: anomalyExplorerService.getCombinedJobs(jobIds),
-            anomalyChartRecords: anomalyExplorerService.loadDataForCharts$(
-              jobIds,
-              timeRange.earliestMs,
-              timeRange.latestMs,
-              selectionInfluencers,
-              selections,
-              influencersFilterQuery
-            ),
-          }).pipe(
-            switchMap(({ combinedJobs, anomalyChartRecords }) => {
-              const combinedJobRecords: Record<string, CombinedJob> = (
-                combinedJobs as CombinedJob[]
-              ).reduce((acc, job) => {
-                return { ...acc, [job.job_id]: job };
-              }, {});
-
-              return forkJoin({
-                chartsData: from(
-                  anomalyExplorerService.getAnomalyData(
-                    undefined,
-                    combinedJobRecords,
-                    embeddableContainerWidth,
-                    anomalyChartRecords,
-                    timeRange.earliestMs,
-                    timeRange.latestMs,
-                    timefilter,
-                    severityValue,
-                    maxSeriesToPlot
-                  )
-                ),
-              });
-            })
+          return anomalyExplorerService.getAnomalyData$(
+            jobIds,
+            embeddableContainerWidth,
+            timeRange.earliestMs,
+            timeRange.latestMs,
+            influencersFilterQuery,
+            selectionInfluencers,
+            severityValue ?? 0,
+            maxSeriesToPlot
           );
         }),
         catchError((e) => {
@@ -155,7 +116,7 @@ export function useAnomalyChartsInputResolver(
       .subscribe((results) => {
         if (results !== undefined) {
           setError(null);
-          setChartsData(results.chartsData);
+          setChartsData(results);
           setIsLoading(false);
         }
       });
