@@ -21,7 +21,7 @@ import {
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
-import { buildRangeFilter, constructQueryOptions } from '../utils';
+import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import { CasesClientArgs } from '..';
@@ -54,6 +54,8 @@ export const find = async (
       sortByField: queryParams.sortField,
       status: queryParams.status,
       owner: queryParams.owner,
+      from: queryParams.from,
+      to: queryParams.to,
     };
 
     const statusStatsOptions = constructQueryOptions({
@@ -62,7 +64,6 @@ export const find = async (
       authorizationFilter,
     });
     const caseQueryOptions = constructQueryOptions({ ...queryArgs, authorizationFilter });
-    const rangeFilter = buildRangeFilter({ from: queryParams.from, to: queryParams.to });
 
     const [cases, statusStats] = await Promise.all([
       caseService.findCasesGroupedByID({
@@ -71,12 +72,11 @@ export const find = async (
           ...caseQueryOptions,
           searchFields: asArray(queryParams.searchFields),
           fields: includeFieldsRequiredForAuthentication(fields),
-          filter: rangeFilter,
           defaultSearchOperator: 'AND',
         },
       }),
       caseService.getCaseStatusStats({
-        searchOptions: { ...statusStatsOptions, filter: rangeFilter, defaultSearchOperator: 'AND' },
+        searchOptions: { ...statusStatsOptions, defaultSearchOperator: 'AND' },
       }),
     ]);
 

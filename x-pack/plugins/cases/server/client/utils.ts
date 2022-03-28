@@ -6,7 +6,7 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { get, isPlainObject, isString } from 'lodash';
+import { get, isPlainObject } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -215,6 +215,8 @@ export const constructQueryOptions = ({
   sortByField,
   owner,
   authorizationFilter,
+  from,
+  to,
 }: {
   tags?: string | string[];
   reporters?: string | string[];
@@ -222,6 +224,8 @@ export const constructQueryOptions = ({
   sortByField?: string;
   owner?: string | string[];
   authorizationFilter?: KueryNode;
+  from?: string;
+  to?: string;
 }): SavedObjectFindOptionsKueryNode => {
   const kueryNodeExists = (filter: KueryNode | null | undefined): filter is KueryNode =>
     filter != null;
@@ -236,10 +240,15 @@ export const constructQueryOptions = ({
   const ownerFilter = buildFilter({ filters: owner ?? [], field: OWNER_FIELD, operator: 'or' });
 
   const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
+  const rangeFilter = buildRangeFilter({ from, to });
 
-  const filters: KueryNode[] = [statusFilter, tagsFilter, reportersFilter, ownerFilter].filter(
-    kueryNodeExists
-  );
+  const filters: KueryNode[] = [
+    statusFilter,
+    tagsFilter,
+    reportersFilter,
+    rangeFilter,
+    ownerFilter,
+  ].filter(kueryNodeExists);
 
   const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 

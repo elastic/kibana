@@ -20,7 +20,7 @@ import {
 } from '../../../common/api';
 import { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
-import { buildRangeFilter, constructQueryOptions } from '../utils';
+import { constructQueryOptions } from '../utils';
 import { createCaseError } from '../../common/error';
 
 export async function getStatusTotalsByType(
@@ -41,13 +41,13 @@ export async function getStatusTotalsByType(
 
     const options = constructQueryOptions({
       owner: queryParams.owner,
+      from: queryParams.from,
+      to: queryParams.to,
       authorizationFilter,
     });
 
-    const rangeFilter = buildRangeFilter({ from: queryParams.from, to: queryParams.to });
-
     const statusStats = await caseService.getCaseStatusStats({
-      searchOptions: { ...options, filter: rangeFilter, defaultSearchOperator: 'AND' },
+      searchOptions: options,
     });
 
     return CasesStatusResponseRt.encode({
