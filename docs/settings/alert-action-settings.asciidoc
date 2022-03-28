@@ -185,13 +185,6 @@ For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
 `xpack.alerting.maxEphemeralActionsPerAlert`::
 Sets the number of actions that will be executed ephemerally. To use this, enable ephemeral tasks in task manager first with <<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
 
-`xpack.alerting.defaultRuleTaskTimeout`::
-Specifies the default timeout for the all rule types tasks. The time is formatted as:
-+
-`<count>[ms,s,m,h,d,w,M,Y]` 
-+
-For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
-
 `xpack.alerting.cancelAlertsOnRuleTimeout`::
 Specifies whether to skip writing alerts and scheduling actions if rule execution is cancelled due to timeout. Default: `true`. This setting can be overridden by individual rule types.
 
@@ -207,3 +200,22 @@ Specifies the behavior when a new or changed rule has a schedule interval less t
 
 `xpack.alerting.rules.execution.actions.max`::
 Specifies the maximum number of actions that a rule can trigger each time detection checks run.
+
+`xpack.alerting.rules.execution.timeout`::
+Specifies the default timeout for tasks associated with all types of rules. The time is formatted as:
++
+`<count>[ms,s,m,h,d,w,M,Y]`
++
+For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
+
+`xpack.alerting.rules.execution.ruleTypeOverrides`::
+Overrides the configs under `xpack.alerting.rules.execution` for the rule type with the given ID. List the rule identifier and its settings in an array of objects.
++
+For example:
+```
+xpack.alerting.rules.execution:
+    timeout: '5m'
+    ruleTypeOverrides:
+        - id: '.index-threshold'
+          timeout: '15m'
+```

@@ -31,6 +31,11 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock('../../../../common/lib/config_api', () => ({
+  triggersActionsUiConfig: jest
+    .fn()
+    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+}));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
@@ -140,6 +145,24 @@ describe('rule_details', () => {
         </EuiText>
       )
     ).toBeTruthy();
+  });
+
+  it('displays a toast message when interval is less than configured minimum', async () => {
+    const rule = mockRule({
+      schedule: {
+        interval: '1s',
+      },
+    });
+    const wrapper = mountWithIntl(
+      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(useKibanaMock().services.notifications.toasts.addInfo).toHaveBeenCalled();
   });
 
   describe('actions', () => {

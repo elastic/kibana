@@ -96,8 +96,11 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
                 break;
               case 'infra_logs':
-                const resultInfra = await getDataHandler(app)?.hasData();
-                updateState({ hasData: resultInfra });
+                const resultInfraLogs = await getDataHandler(app)?.hasData();
+                updateState({
+                  hasData: resultInfraLogs?.hasData,
+                  indices: resultInfraLogs?.indices,
+                });
                 break;
               case 'infra_metrics':
                 const resultInfraMetrics = await getDataHandler(app)?.hasData();

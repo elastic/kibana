@@ -27,11 +27,18 @@ import {
   EuiPageTemplate,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { AlertExecutionStatusErrorReasons, parseDuration } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import { Rule, RuleType, ActionType, ActionConnector } from '../../../../types';
+import {
+  Rule,
+  RuleType,
+  ActionType,
+  ActionConnector,
+  TriggersActionsUiConfig,
+} from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkRuleOperations,
@@ -47,6 +54,7 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
+import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -75,6 +83,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     setBreadcrumbs,
     chrome,
     http,
+    notifications: { toasts },
   } = useKibana().services;
   const [{}, dispatch] = useReducer(ruleReducer, { rule });
   const setInitialRule = (value: Rule) => {
@@ -83,6 +92,14 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
+
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+
+  useEffect(() => {
+    (async () => {
+      setConfig(await triggersActionsUiConfig({ http }));
+    })();
+  }, [http]);
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -140,6 +157,53 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [dismissRuleErrors, setDismissRuleErrors] = useState<boolean>(false);
   const [dismissRuleWarning, setDismissRuleWarning] = useState<boolean>(false);
+
+  // Check whether interval is below configured minium
+  useEffect(() => {
+    if (rule.schedule.interval && config.minimumScheduleInterval) {
+      if (
+        parseDuration(rule.schedule.interval) < parseDuration(config.minimumScheduleInterval.value)
+      ) {
+        const configurationToast = toasts.addInfo({
+          'data-test-subj': 'intervalConfigToast',
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastTitle',
+            {
+              defaultMessage: 'Configuration settings',
+            }
+          ),
+          text: toMountPoint(
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessage"
+                  defaultMessage="This rule has an interval set below the minimum configured interval. This may impact performance."
+                />
+              </p>
+              {hasEditButton && (
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="ruleIntervalToastEditButton"
+                      onClick={() => {
+                        toasts.remove(configurationToast);
+                        setEditFlyoutVisibility(true);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessageButton"
+                        defaultMessage="Edit rule"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </>
+          ),
+        });
+      }
+    }
+  }, [rule.schedule.interval, config.minimumScheduleInterval, toasts, hasEditButton]);
 
   const setRule = async () => {
     history.push(routeToRuleDetails.replace(`:ruleId`, rule.id));
