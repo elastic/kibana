@@ -351,11 +351,6 @@ describe('<IndexManagementHome />', () => {
         `${API_BASE_PATH}/indices/reload`,
         expect.anything()
       );
-
-      // Open context menu once again, since clicking an action will close it.
-      await actions.clickManageContextMenuButton();
-      // The unfreeze action should not be present anymore
-      expect(exists('unfreezeIndexMenuButton')).toBe(false);
     });
 
     test('should be able to force merge an index', async () => {

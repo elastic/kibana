@@ -114,25 +114,25 @@ describe('<TemplateEdit />', () => {
         actions.clickNextButton();
       });
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      const { version } = templateToEdit;
-
-      const expected = {
-        name: 'index_template_without_mappings',
-        indexPatterns: ['indexPattern1'],
-        dataStream: {
-          hidden: true,
-          anyUnknownKey: 'should_be_kept',
-        },
-        version,
-        _kbnMeta: {
-          type: 'default',
-          isLegacy: templateToEdit._kbnMeta.isLegacy,
-          hasDatastream: true,
-        },
-      };
-
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates/index_template_without_mappings`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'index_template_without_mappings',
+            indexPatterns: ['indexPattern1'],
+            version: templateToEdit.version,
+            dataStream: {
+              hidden: true,
+              anyUnknownKey: 'should_be_kept',
+            },
+            _kbnMeta: {
+              type: 'default',
+              hasDatastream: true,
+              isLegacy: templateToEdit._kbnMeta.isLegacy,
+            },
+          }),
+        })
+      );
     });
 
     it('allows you to view the "Request" tab of an unmodified template', async () => {
@@ -364,24 +364,9 @@ describe('<TemplateEdit />', () => {
           actions.clickNextButton();
         });
 
-        const { version, template, name, indexPatterns, _kbnMeta, order } = legacyTemplateToEdit;
-
         expect(httpSetup.put).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/index_templates/${TEMPLATE_NAME}`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name,
-              indexPatterns,
-              version,
-              order,
-              template: {
-                aliases: undefined,
-                mappings: template!.mappings,
-                settings: undefined,
-              },
-              _kbnMeta,
-            }),
-          })
+          `${API_BASE_PATH}/index_templates/${legacyTemplateToEdit.name}`,
+          expect.anything()
         );
       });
     });
