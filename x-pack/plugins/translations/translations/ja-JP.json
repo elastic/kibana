@@ -1939,7 +1939,6 @@
     "data.kueryAutocomplete.equalOperatorDescription.equalsText": "一致する",
     "data.kueryAutocomplete.existOperatorDescription": "いずれかの形式中に{exists}",
     "data.kueryAutocomplete.existOperatorDescription.existsText": "存在する",
-    "data.kueryAutocomplete.filterResultsDescription": "{fieldName}を含む結果をフィルタリング",
     "data.kueryAutocomplete.greaterThanOperatorDescription": "が一部の値{greaterThan}",
     "data.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText": "より大きい",
     "data.kueryAutocomplete.greaterThanOrEqualOperatorDescription": "が一部の値{greaterThanOrEqualTo}",
