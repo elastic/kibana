@@ -10,6 +10,7 @@ import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/chart
 import { $Values } from '@kbn/utility-types';
 import { Datatable } from '../../../../expressions';
 import { PaletteOutput } from '../../../../charts/common';
+import { EventAnnotationOutput } from '../../../../event_annotation/common';
 import {
   AxisExtentModes,
   FillStyles,
@@ -35,7 +36,9 @@ import {
   AXIS_EXTENT_CONFIG,
   EXTENDED_DATA_LAYER,
   EXTENDED_REFERENCE_LINE_LAYER,
+  ANNOTATION_LAYER,
   EndValues,
+  EXTENDED_ANNOTATION_LAYER,
 } from '../constants';
 
 export type EndValue = $Values<typeof EndValues>;
@@ -81,44 +84,41 @@ export interface YConfig {
   textVisibility?: boolean;
 }
 
-export interface XYDataLayerConfig {
+export interface DataLayerArgs {
   accessors: string[];
   seriesType: SeriesType;
   xAccessor?: string;
   hide?: boolean;
-  yConfig?: YConfigResult[];
   splitAccessor?: string;
-  palette?: PaletteOutput;
-}
-
-export interface XYExtendedDataLayerConfig {
-  accessors: string[];
-  seriesType: SeriesType;
-  xAccessor?: string;
-  hide?: boolean;
-  yConfig?: YConfigResult[];
-  splitAccessor?: string;
-  palette?: PaletteOutput;
-}
-
-export type DataLayerArgs = XYDataLayerConfig & {
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
   // palette will always be set on the expression
   palette: PaletteOutput;
-};
+  yConfig?: YConfigResult[];
+}
 
-export type ExtendedDataLayerArgs = XYExtendedDataLayerConfig & {
+export interface ValidLayer extends DataLayerConfigResult {
+  xAccessor: NonNullable<DataLayerConfigResult['xAccessor']>;
+}
+
+export interface ExtendedDataLayerArgs {
+  accessors: string[];
+  seriesType: SeriesType;
+  xAccessor?: string;
+  hide?: boolean;
+  splitAccessor?: string;
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
   // palette will always be set on the expression
   palette: PaletteOutput;
+  // palette will always be set on the expression
+  yConfig?: YConfigResult[];
   table?: Datatable;
-};
+}
 
 export interface LegendConfig {
   /**
@@ -249,29 +249,53 @@ export interface XYProps {
   ariaLabel?: string;
 }
 
-export interface XYReferenceLineLayerConfig {
-  accessors: string[];
-  yConfig?: YConfigResult[];
+export interface AnnotationLayerArgs {
+  annotations: EventAnnotationOutput[];
+  hide?: boolean;
 }
 
-export interface XYExtendedReferenceLineLayerConfig {
-  accessors: string[];
-  yConfig?: YConfigResult[];
-}
-
-export type ReferenceLineLayerArgs = XYReferenceLineLayerConfig & {
-  columnToLabel?: string;
-};
-
-export type ExtendedReferenceLineLayerArgs = XYExtendedReferenceLineLayerConfig & {
-  columnToLabel?: string;
+export interface ExtendedAnnotationLayerArgs {
+  annotations: EventAnnotationOutput[];
+  hide?: boolean;
   table?: Datatable;
+}
+
+export type AnnotationLayerConfigResult = AnnotationLayerArgs & {
+  type: typeof ANNOTATION_LAYER;
+  layerType: typeof LayerTypes.ANNOTATIONS;
+  table: Datatable;
 };
 
-export type XYLayerConfigResult = DataLayerConfigResult | ReferenceLineLayerConfigResult;
+export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & {
+  type: typeof EXTENDED_ANNOTATION_LAYER;
+  layerType: typeof LayerTypes.ANNOTATIONS;
+  table: Datatable;
+};
+
+export interface ReferenceLineLayerArgs {
+  accessors: string[];
+  columnToLabel?: string;
+  yConfig?: YConfigResult[];
+}
+
+export interface ExtendedReferenceLineLayerArgs {
+  accessors: string[];
+  columnToLabel?: string;
+  yConfig?: YConfigResult[];
+  table?: Datatable;
+}
+
+export type XYLayerArgs = DataLayerArgs | ReferenceLineLayerArgs | AnnotationLayerArgs;
+
+export type XYLayerConfigResult =
+  | DataLayerConfigResult
+  | ReferenceLineLayerConfigResult
+  | AnnotationLayerConfigResult;
+
 export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
-  | ExtendedReferenceLineLayerConfigResult;
+  | ExtendedReferenceLineLayerConfigResult
+  | ExtendedAnnotationLayerConfigResult;
 
 export interface LensMultiTable {
   type: typeof MULTITABLE;
@@ -285,6 +309,7 @@ export interface LensMultiTable {
 export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
   type: typeof REFERENCE_LINE_LAYER;
   layerType: typeof LayerTypes.REFERENCELINE;
+  yConfig?: YConfigResult[];
   table: Datatable;
 };
 
@@ -294,15 +319,17 @@ export type ExtendedReferenceLineLayerConfigResult = ExtendedReferenceLineLayerA
   table: Datatable;
 };
 
-export type DataLayerConfigResult = DataLayerArgs & {
+export type DataLayerConfigResult = Omit<DataLayerArgs, 'palette'> & {
   type: typeof DATA_LAYER;
   layerType: typeof LayerTypes.DATA;
+  palette: PaletteOutput;
   table: Datatable;
 };
 
-export type ExtendedDataLayerConfigResult = ExtendedDataLayerArgs & {
+export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette'> & {
   type: typeof EXTENDED_DATA_LAYER;
   layerType: typeof LayerTypes.DATA;
+  palette: PaletteOutput;
   table: Datatable;
 };
 
@@ -326,3 +353,7 @@ export type CommonXYDataLayerConfigResult = DataLayerConfigResult | ExtendedData
 export type CommonXYReferenceLineLayerConfigResult =
   | ReferenceLineLayerConfigResult
   | ExtendedReferenceLineLayerConfigResult;
+
+export type CommonXYAnnotationLayerConfigResult =
+  | AnnotationLayerConfigResult
+  | ExtendedAnnotationLayerConfigResult;

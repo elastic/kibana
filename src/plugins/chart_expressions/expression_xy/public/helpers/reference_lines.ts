@@ -9,7 +9,7 @@
 import { partition } from 'lodash';
 import type { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common';
 import { isStackedChart } from './state';
-import { isDataLayer } from './visualization';
+import { isAnnotationsLayer, isDataLayer } from './visualization';
 
 export function computeOverallDataDomain(
   layers: CommonXYLayerConfigResult[],
@@ -24,11 +24,11 @@ export function computeOverallDataDomain(
     (layer) => isDataLayer(layer) && isStackedChart(layer.seriesType) && allowStacking
   );
 
-  for (const { accessors, table } of unstacked) {
-    if (table) {
-      for (const accessor of accessors) {
+  for (const layer of unstacked) {
+    if (!isAnnotationsLayer(layer) && layer.table) {
+      for (const accessor of layer.accessors) {
         if (accessorMap.has(accessor)) {
-          for (const row of table.rows) {
+          for (const row of layer.table.rows) {
             const value = row[accessor];
             if (typeof value === 'number') {
               // when not stacked, do not keep the 0

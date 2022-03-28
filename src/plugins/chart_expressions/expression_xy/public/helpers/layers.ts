@@ -6,22 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { CommonXYLayerConfigResult, CommonXYDataLayerConfigResult } from '../../common';
+import {
+  CommonXYDataLayerConfigResult,
+  CommonXYLayerConfigResult,
+  CommonXYReferenceLineLayerConfigResult,
+} from '../../common';
+import { isDataLayer, isReferenceLayer } from './visualization';
 
 export function getFilteredLayers(layers: CommonXYLayerConfigResult[]) {
-  return layers.filter<CommonXYLayerConfigResult>((layer): layer is CommonXYLayerConfigResult => {
-    const { accessors, table } = layer;
-    const { xAccessor, splitAccessor } = layer as CommonXYDataLayerConfigResult;
+  return layers.filter<CommonXYReferenceLineLayerConfigResult | CommonXYDataLayerConfigResult>(
+    (layer): layer is CommonXYReferenceLineLayerConfigResult | CommonXYDataLayerConfigResult => {
+      const { table } = layer;
+      let accessors: string[] = [];
+      let xAccessor: undefined | string | number;
+      let splitAccessor: undefined | string | number;
 
-    return !(
-      !accessors.length ||
-      !table ||
-      table.rows.length === 0 ||
-      (xAccessor && table.rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
-      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
-      (!xAccessor &&
-        splitAccessor &&
-        table.rows.every((row) => typeof row[splitAccessor] === 'undefined'))
-    );
-  });
+      if (isDataLayer(layer)) {
+        xAccessor = layer.xAccessor;
+        splitAccessor = layer.splitAccessor;
+      }
+
+      if (isDataLayer(layer) || isReferenceLayer(layer)) {
+        accessors = layer.accessors;
+      }
+
+      return !(
+        !accessors.length ||
+        !table ||
+        table.rows.length === 0 ||
+        (xAccessor &&
+          table.rows.every((row) => xAccessor && typeof row[xAccessor] === 'undefined')) ||
+        // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
+        (!xAccessor &&
+          splitAccessor &&
+          table.rows.every((row) => splitAccessor && typeof row[splitAccessor] === 'undefined'))
+      );
+    }
+  );
 }

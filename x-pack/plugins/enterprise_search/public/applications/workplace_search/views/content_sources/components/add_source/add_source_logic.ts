@@ -25,7 +25,10 @@ import { SourceDataItem } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
 
-import { ExternalConnectorLogic, isValidExternalUrl } from './external_connector_logic';
+import {
+  ExternalConnectorLogic,
+  isValidExternalUrl,
+} from './add_external_connector/external_connector_logic';
 
 export interface AddSourceProps {
   sourceData: SourceDataItem;

@@ -13,9 +13,6 @@ import { XYDataLayerConfig } from './types';
 describe('color_assignment', () => {
   const layers: XYDataLayerConfig[] = [
     {
-      yScaleType: 'linear',
-      xScaleType: 'linear',
-      isHistogram: true,
       seriesType: 'bar',
       palette: { type: 'palette', name: 'palette1' },
       layerId: '1',
@@ -24,9 +21,6 @@ describe('color_assignment', () => {
       accessors: ['y1', 'y2'],
     },
     {
-      yScaleType: 'linear',
-      xScaleType: 'linear',
-      isHistogram: true,
       seriesType: 'bar',
       palette: { type: 'palette', name: 'palette2' },
       layerId: '2',

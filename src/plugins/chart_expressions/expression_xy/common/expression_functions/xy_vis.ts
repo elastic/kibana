@@ -7,12 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  ExpressionFunctionDefinition,
-  TablesAdapter,
-  Datatable,
-} from '../../../../expressions';
-import { XYArgs, XYLayerConfigResult, XYRender } from '../types';
+import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions';
+import { DataLayerConfigResult, ReferenceLineLayerConfigResult, XYArgs, XYRender } from '../types';
+import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
 import {
   XY_VIS,
   DATA_LAYER,
@@ -28,10 +25,26 @@ import {
   LABELS_ORIENTATION_CONFIG,
   AXIS_TITLES_VISIBILITY_CONFIG,
   EndValues,
+  LayerTypes,
 } from '../constants';
 
-const logDataTable = (tableAdapter: TablesAdapter, datatables: Record<string, Datatable> = {}) => {
-  Object.entries(datatables).forEach(([key, table]) => tableAdapter.logDatatable(key, table));
+const strings = {
+  getMetricHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.metric', {
+      defaultMessage: 'Vertical axis',
+    }),
+  getXAxisHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.x', {
+      defaultMessage: 'Horizontal axis',
+    }),
+  getBreakdownHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
+      defaultMessage: 'Break down by',
+    }),
+  getReferenceLineHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
+      defaultMessage: 'Break down by',
+    }),
 };
 
 export const xyVisFunction: ExpressionFunctionDefinition<
@@ -190,17 +203,37 @@ export const xyVisFunction: ExpressionFunctionDefinition<
   },
   fn(data, args, handlers) {
     const { dataLayer, referenceLineLayer, ...restArgs } = args;
-    const layers = [dataLayer, referenceLineLayer].filter<XYLayerConfigResult>(
-      (layer): layer is XYLayerConfigResult => layer !== undefined
+    const layers = [dataLayer, referenceLineLayer].filter(
+      (layer): layer is DataLayerConfigResult | ReferenceLineLayerConfigResult =>
+        layer !== undefined
     );
 
-    const tables = layers.reduce<Record<string, Datatable>>((t, layer, index) => {
-      t[index] = data;
-      return t;
-    }, {});
-
     if (handlers?.inspectorAdapters?.tables) {
-      logDataTable(handlers.inspectorAdapters.tables, tables);
+      layers.forEach((layer) => {
+        let xAccessor;
+        let splitAccessor;
+        if (layer.layerType === LayerTypes.DATA) {
+          xAccessor = layer.xAccessor;
+          splitAccessor = layer.splitAccessor;
+        }
+
+        const { table, accessors, layerType } = layer;
+        const logTable = prepareLogTable(
+          table,
+          [
+            [
+              accessors ? accessors : undefined,
+              layerType === 'data' ? strings.getMetricHelp() : strings.getReferenceLineHelp(),
+            ],
+            [xAccessor ? [xAccessor] : undefined, strings.getXAxisHelp()],
+            [splitAccessor ? [splitAccessor] : undefined, strings.getBreakdownHelp()],
+          ],
+          true
+        );
+
+        /* TODO: solve the problem with layerId  */
+        handlers.inspectorAdapters.tables.logDatatable('layerId', logTable);
+      });
     }
 
     return {

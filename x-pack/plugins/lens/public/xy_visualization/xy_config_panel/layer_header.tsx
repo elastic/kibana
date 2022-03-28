@@ -16,8 +16,9 @@ import { trackUiEvent } from '../../lens_ui_telemetry';
 import { StaticHeader } from '../../shared_components';
 import { ToolbarButton } from '../../../../../../src/plugins/kibana_react/public';
 import { LensIconChartBarReferenceLine } from '../../assets/chart_bar_reference_line';
+import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
 import { updateLayer } from '.';
-import { isDataLayer, isReferenceLayer } from '../visualization_helpers';
+import { isAnnotationsLayer, isDataLayer, isReferenceLayer } from '../visualization_helpers';
 
 export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
@@ -26,6 +27,8 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   }
   if (isReferenceLayer(layer)) {
     return <ReferenceLayerHeader />;
+  } else if (isAnnotationsLayer(layer)) {
+    return <AnnotationsLayerHeader />;
   }
   return <DataLayerHeader {...props} />;
 }
@@ -36,6 +39,17 @@ function ReferenceLayerHeader() {
       icon={LensIconChartBarReferenceLine}
       label={i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
         defaultMessage: 'Reference lines',
+      })}
+    />
+  );
+}
+
+function AnnotationsLayerHeader() {
+  return (
+    <StaticHeader
+      icon={LensIconChartBarAnnotations}
+      label={i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
+        defaultMessage: 'Annotations',
       })}
     />
   );

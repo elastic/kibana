@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { ThemeServiceStart } from 'kibana/public';
+import { EventAnnotationServiceType } from '../../../../../src/plugins/event_annotation/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { getSuggestions } from './xy_suggestions';
@@ -20,13 +21,13 @@ import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
-import { State, visualizationTypes, XYSuggestion, XYLayerConfig } from './types';
 import {
   FillStyle,
   SeriesType,
   YAxisMode,
   YConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConfig } from './types';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
@@ -39,6 +40,12 @@ import {
   setReferenceDimension,
 } from './reference_line_helpers';
 import {
+  getAnnotationsConfiguration,
+  getAnnotationsSupportedLayer,
+  setAnnotationsDimension,
+  getUniqueLabels,
+} from './annotations/helpers';
+import {
   checkXAccessorCompatibility,
   defaultSeriesType,
   getAxisName,
@@ -46,7 +53,9 @@ import {
   getDescription,
   getFirstDataLayer,
   getLayersByType,
+  getReferenceLayers,
   getVisualizationType,
+  isAnnotationsLayer,
   isBucketed,
   isDataLayer,
   isNumericDynamicMetric,
@@ -56,16 +65,20 @@ import {
   validateLayersForDimension,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
-import { XYState, XYDataLayerConfig } from './types';
+import { XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_panel';
+import { DimensionTrigger } from '../shared_components/dimension_trigger';
+import { AnnotationsPanel, defaultAnnotationLabel } from './annotations/config_panel';
 
 export const getXyVisualization = ({
   paletteService,
   fieldFormats,
   useLegacyTimeAxis,
   kibanaTheme,
+  eventAnnotationService,
 }: {
   paletteService: PaletteRegistry;
+  eventAnnotationService: EventAnnotationServiceType;
   fieldFormats: FieldFormatsStart;
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
@@ -159,7 +172,11 @@ export const getXyVisualization = ({
   },
 
   getSupportedLayers(state, frame) {
-    return [supportedDataLayer, getReferenceSupportedLayer(state, frame)];
+    return [
+      supportedDataLayer,
+      getAnnotationsSupportedLayer(state, frame),
+      getReferenceSupportedLayer(state, frame),
+    ];
   },
 
   getConfiguration({ state, frame, layerId }) {
@@ -168,10 +185,18 @@ export const getXyVisualization = ({
       return { groups: [] };
     }
 
+    if (isAnnotationsLayer(layer)) {
+      return getAnnotationsConfiguration({ state, frame, layer });
+    }
+
     const sortedAccessors: string[] = getSortedAccessors(
       frame.datasourceLayers[layer.layerId],
       layer
     );
+    if (isReferenceLayer(layer)) {
+      return getReferenceConfiguration({ state, frame, layer, sortedAccessors });
+    }
+
     const mappedAccessors = getMappedAccessors({
       state,
       frame,
@@ -182,13 +207,12 @@ export const getXyVisualization = ({
     });
 
     if (isReferenceLayer(layer)) {
-      return getReferenceConfiguration({ state, frame, layer, sortedAccessors, mappedAccessors });
+      return getReferenceConfiguration({ state, frame, layer, sortedAccessors });
     }
 
     const dataLayer: XYDataLayerConfig = layer;
 
     const dataLayers = getDataLayers(state.layers);
-
     const isHorizontal = isHorizontalChart(state.layers);
     const { left, right } = groupAxesByType([layer], frame.activeData);
     // Check locally if it has one accessor OR one accessor per axis
@@ -285,6 +309,9 @@ export const getXyVisualization = ({
     if (isReferenceLayer(foundLayer)) {
       return setReferenceDimension(props);
     }
+    if (isAnnotationsLayer(foundLayer)) {
+      return setAnnotationsDimension(props);
+    }
 
     const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
     if (groupId === 'x') {
@@ -305,7 +332,7 @@ export const getXyVisualization = ({
   updateLayersConfigurationFromContext({ prevState, layerId, context }) {
     const { chartType, axisPosition, palette, metrics } = context;
     const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
-    if (!foundLayer) {
+    if (!foundLayer || !isDataLayer(foundLayer)) {
       return prevState;
     }
     const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
@@ -387,7 +414,16 @@ export const getXyVisualization = ({
     if (!foundLayer) {
       return prevState;
     }
-    const dataLayers = getDataLayers(prevState.layers);
+    if (isAnnotationsLayer(foundLayer)) {
+      const newLayer = { ...foundLayer };
+      newLayer.annotations = newLayer.annotations.filter(({ id }) => id !== columnId);
+
+      const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
+      return {
+        ...prevState,
+        layers: newLayers,
+      };
+    }
     const newLayer = { ...foundLayer };
     if (isDataLayer(newLayer)) {
       if (newLayer.xAccessor === columnId) {
@@ -402,15 +438,15 @@ export const getXyVisualization = ({
       newLayer.accessors = newLayer.accessors.filter((a) => a !== columnId);
     }
 
-    if (newLayer.yConfig) {
-      newLayer.yConfig = newLayer.yConfig.filter(({ forAccessor }) => forAccessor !== columnId);
+    if ('yConfig' in newLayer) {
+      newLayer.yConfig = newLayer.yConfig?.filter(({ forAccessor }) => forAccessor !== columnId);
     }
 
     let newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
     // check if there's any reference layer and pull it off if all data layers have no dimensions set
     // check for data layers if they all still have xAccessors
     const groupsAvailable = getGroupsAvailableInData(
-      dataLayers,
+      getDataLayers(prevState.layers),
       frame.datasourceLayers,
       frame?.activeData
     );
@@ -420,7 +456,9 @@ export const getXyVisualization = ({
         (id) => !groupsAvailable[id]
       )
     ) {
-      newLayers = newLayers.filter((layer) => isDataLayer(layer) || layer.accessors.length);
+      newLayers = newLayers.filter(
+        (layer) => isDataLayer(layer) || ('accessors' in layer && layer.accessors.length)
+      );
     }
 
     return {
@@ -460,9 +498,12 @@ export const getXyVisualization = ({
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
+    ) : isAnnotationsLayer(layer) ? (
+      <AnnotationsPanel {...allProps} />
     ) : (
       <DimensionEditor {...allProps} />
     );
+
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
         <I18nProvider>{dimensionEditor}</I18nProvider>
@@ -474,10 +515,23 @@ export const getXyVisualization = ({
   shouldBuildDatasourceExpressionManually: () => true,
 
   toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
-    toExpression(state, layers, paletteService, attributes, datasourceExpressionsByLayers),
+    toExpression(
+      state,
+      layers,
+      paletteService,
+      attributes,
+      datasourceExpressionsByLayers,
+      eventAnnotationService
+    ),
 
   toPreviewExpression: (state, layers, datasourceExpressionsByLayers = {}) =>
-    toPreviewExpression(state, layers, paletteService, datasourceExpressionsByLayers),
+    toPreviewExpression(
+      state,
+      layers,
+      paletteService,
+      datasourceExpressionsByLayers,
+      eventAnnotationService
+    ),
 
   getErrorMessages(state, datasourceLayers) {
     // Data error handling below here
@@ -518,7 +572,7 @@ export const getXyVisualization = ({
       // temporary fix for #87068
       errors.push(...checkXAccessorCompatibility(state, datasourceLayers));
 
-      for (const layer of state.layers) {
+      for (const layer of getDataLayers(state.layers)) {
         const datasourceAPI = datasourceLayers[layer.layerId];
         if (datasourceAPI) {
           for (const accessor of layer.accessors) {
@@ -554,9 +608,10 @@ export const getXyVisualization = ({
       return;
     }
 
-    const layers = state.layers;
-
-    const filteredLayers = layers.filter(({ accessors }: XYLayerConfig) => accessors.length > 0);
+    const filteredLayers = [
+      ...getDataLayers(state.layers),
+      ...getReferenceLayers(state.layers),
+    ].filter(({ accessors }) => accessors.length > 0);
     const accessorsWithArrayValues = [];
     for (const layer of filteredLayers) {
       const { layerId, accessors } = layer;
@@ -583,6 +638,35 @@ export const getXyVisualization = ({
       />
     ));
   },
+  getUniqueLabels(state) {
+    return getUniqueLabels(state.layers);
+  },
+  renderDimensionTrigger({
+    columnId,
+    label,
+    hideTooltip,
+    invalid,
+    invalidMessage,
+  }: {
+    columnId: string;
+    label?: string;
+    hideTooltip?: boolean;
+    invalid?: boolean;
+    invalidMessage?: string;
+  }) {
+    if (label) {
+      return (
+        <DimensionTrigger
+          id={columnId}
+          hideTooltip={hideTooltip}
+          isInvalid={invalid}
+          invalidMessage={invalidMessage}
+          label={label || defaultAnnotationLabel}
+        />
+      );
+    }
+    return null;
+  },
 });
 
 const getMappedAccessors = ({
@@ -598,7 +682,7 @@ const getMappedAccessors = ({
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
   state: XYState;
-  layer: XYLayerConfig;
+  layer: XYDataLayerConfig;
 }) => {
   let mappedAccessors: AccessorConfig[] = accessors.map((accessor) => ({
     columnId: accessor,
@@ -606,7 +690,7 @@ const getMappedAccessors = ({
 
   if (frame.activeData) {
     const colorAssignments = getColorAssignments(
-      state.layers,
+      getDataLayers(state.layers),
       { tables: frame.activeData },
       fieldFormats.deserialize
     );

@@ -19,8 +19,9 @@ import {
 import { isHorizontalChart } from '../state_helpers';
 import { ColorPicker } from './color_picker';
 import { PalettePicker, useDebouncedValue } from '../../shared_components';
-import { isReferenceLayer } from '../visualization_helpers';
+import { isAnnotationsLayer, isReferenceLayer } from '../visualization_helpers';
 import { ReferenceLinePanel } from './reference_line_panel';
+import { AnnotationsPanel } from '../annotations/config_panel';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -48,7 +49,7 @@ export function DimensionEditor(
 ) {
   const { state, setState, layerId, accessor } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
-  const layer = state.layers[index];
+  const layer = state.layers[index] as XYDataLayerConfig;
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: props.state,
@@ -79,6 +80,10 @@ export function DimensionEditor(
     },
     [accessor, index, localState, layer, setLocalState]
   );
+
+  if (isAnnotationsLayer(layer)) {
+    return <AnnotationsPanel {...props} />;
+  }
 
   if (isReferenceLayer(layer)) {
     return <ReferenceLinePanel {...props} />;

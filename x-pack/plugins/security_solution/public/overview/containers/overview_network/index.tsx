@@ -147,5 +147,12 @@ export const useNetworkOverview = ({
     };
   }, [overviewNetworkRequest, overviewNetworkSearch]);
 
+  useEffect(() => {
+    if (skip) {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
+
   return [loading, overviewNetworkResponse];
 };

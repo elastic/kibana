@@ -18,6 +18,7 @@ import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizo
 import { LensIconChartLine } from '../assets/chart_line';
 
 import type { VisualizationType, Suggestion } from '../types';
+import { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import type {
   SeriesType,
   LegendConfig,
@@ -26,37 +27,49 @@ import type {
   AxesSettingsConfig,
   FittingFunction,
   LabelsOrientationConfig,
-  DataLayerArgs,
-  LayerType,
-  ReferenceLineLayerArgs,
-  YConfig,
-  XScaleType,
-  YScaleType,
   EndValue,
+  YConfig,
+  YScaleType,
+  XScaleType,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { PaletteOutput } from '../../../../../src/plugins/charts/common';
+import { EventAnnotationConfig } from '../../../../../src/plugins/event_annotation/common';
 import type { ValueLabelConfig } from '../../common/types';
 
-export interface XYDataLayerConfig
-  extends Omit<DataLayerArgs, 'yConfig' | 'palette' | 'isHistogram' | 'xScaleType' | 'yScaleType'> {
-  layerType: LayerType;
+export interface XYDataLayerConfig {
+  layerId: string;
+  accessors: string[];
+  layerType: 'data';
+  seriesType: SeriesType;
+  xAccessor?: string;
+  hide?: boolean;
   yConfig?: YConfig[];
+  splitAccessor?: string;
   palette?: PaletteOutput;
   yScaleType?: YScaleType;
   xScaleType?: XScaleType;
   isHistogram?: boolean;
-  layerId: string;
+  columnToLabel?: string;
 }
 
-export interface XYReferenceLineLayerConfig
-  extends Omit<ReferenceLineLayerArgs, 'yConfig' | 'palette'> {
-  layerType: LayerType;
+export interface XYReferenceLineLayerConfig {
+  layerId: string;
+  accessors: string[];
   yConfig?: YConfig[];
   palette?: PaletteOutput;
-  layerId: string;
+  layerType: 'referenceLine';
 }
 
-export type XYLayerConfig = XYDataLayerConfig | XYReferenceLineLayerConfig;
+export interface XYAnnotationLayerConfig {
+  layerId: string;
+  layerType: 'annotations';
+  annotations: EventAnnotationConfig[];
+  hide?: boolean;
+}
+
+export type XYLayerConfig =
+  | XYDataLayerConfig
+  | XYReferenceLineLayerConfig
+  | XYAnnotationLayerConfig;
 
 export interface ValidXYDataLayerConfig extends XYDataLayerConfig {
   xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
@@ -90,6 +103,7 @@ export interface XYState {
 }
 
 export type State = XYState;
+
 const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
   defaultMessage: 'Bar',
 });
