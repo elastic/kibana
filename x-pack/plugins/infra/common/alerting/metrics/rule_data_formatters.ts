@@ -14,19 +14,18 @@ export type ObservabilityRuleTypeFieldsOnly = (options: {
   fields: ParsedTechnicalFields & Record<string, any>;
 }) => { reason: string; link: string };
 
-export const formatReason: ObservabilityRuleTypeFieldsOnly = ({ fields }) => {
-  const reason = fields[ALERT_REASON] ?? '-';
+export const getInventoryViewInAppUrl = (
+  fields: ParsedTechnicalFields & Record<string, any>
+): string => {
   const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
   const nodeType = fields[nodeTypeField];
-  let link = '/app/metrics/link-to/inventory?';
-
+  let viwInAppUrl = '/app/metrics/link-to/inventory?';
   if (nodeType) {
     const linkToParams: Record<string, any> = {
       nodeType: fields[nodeTypeField][0],
       timestamp: Date.parse(fields[TIMESTAMP]),
       customMetric: '',
     };
-
     // We always pick the first criteria metric for the URL
     const criteriaMetric = fields[`${ALERT_RULE_PARAMETERS}.criteria.metric`][0];
     const criteriaCustomMetricId = fields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`][0];
@@ -47,12 +46,16 @@ export const formatReason: ObservabilityRuleTypeFieldsOnly = ({ fields }) => {
     } else {
       linkToParams.metric = encode({ type: criteriaMetric });
     }
-
-    link += stringify(linkToParams);
+    viwInAppUrl += stringify(linkToParams);
   }
+  return viwInAppUrl;
+};
+
+export const formatReason: ObservabilityRuleTypeFieldsOnly = ({ fields }) => {
+  const reason = fields[ALERT_REASON] ?? '-';
 
   return {
     reason,
-    link,
+    link: getInventoryViewInAppUrl(fields),
   };
 };

@@ -10,11 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { IBasePath } from 'kibana/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { formatReason } from '../../../../common/alerting/metrics/rule_data_formatters';
-import {
-  ParsedTechnicalFields,
-  parseTechnicalFields,
-} from '../../../../../rule_registry/common/parse_technical_fields';
+import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/rule_data_formatters';
+import { parseTechnicalFields } from '../../../../../rule_registry/common/parse_technical_fields';
 import {
   AlertExecutionDetails,
   InventoryMetricConditions,
@@ -91,9 +88,6 @@ export const getViewInAppUrl = (basePath: IBasePath, relativeViewInAppUrl: strin
     ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
     : relativeViewInAppUrl;
 
-interface OptionalTechnicalFields {
-  fields: ParsedTechnicalFields & Record<string, any>;
-}
 export const getViewInAppUrlInventory = (
   criteria: InventoryMetricConditions[],
   nodeType: string,
@@ -109,10 +103,7 @@ export const getViewInAppUrlInventory = (
     [`${ALERT_RULE_PARAMETERS}.nodeType`]: [nodeType],
     [TIMESTAMP]: timestamp,
   };
-  const parsed = parseTechnicalFields(fields, true);
-  const optionalTechnicalFields: OptionalTechnicalFields = {
-    fields: parsed,
-  };
-  const { link: relativeViewInAppUrl } = formatReason(optionalTechnicalFields);
+
+  const relativeViewInAppUrl = getInventoryViewInAppUrl(parseTechnicalFields(fields, true));
   return getViewInAppUrl(basePath, relativeViewInAppUrl);
 };
