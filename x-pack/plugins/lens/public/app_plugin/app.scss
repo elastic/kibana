@@ -34,6 +34,13 @@
     fill: makeGraphicContrastColor($euiColorVis0, $euiColorDarkShade);
   }
 }
+.lensAnnotationIconNoFill {
+  fill: none;
+}
+
+.lensAnnotationIconFill {
+  fill: $euiColorGhost;
+}
 
 // Less-than-ideal styles to add a vertical divider after this button. Consider restructuring markup for better semantics and styling options in the future.
 .lnsNavItem__goBack {

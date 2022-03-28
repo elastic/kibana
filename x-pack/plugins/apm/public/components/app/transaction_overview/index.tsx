@@ -81,6 +81,7 @@ export function TransactionOverview() {
           kuery={kuery}
           start={start}
           end={end}
+          saveTableOptionsToUrl
         />
       </EuiPanel>
     </>

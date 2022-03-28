@@ -22,7 +22,8 @@
     "dataViewFieldEditor",
     "dataViewEditor",
     "expressionGauge",
-    "expressionHeatmap"
+    "expressionHeatmap",
+    "eventAnnotation"
   ],
   "optionalPlugins": [
     "usageCollection",

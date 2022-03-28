@@ -198,6 +198,12 @@ interface ChartSettings {
   };
 }
 
+export type GetDropProps<T = unknown> = DatasourceDimensionDropProps<T> & {
+  groupId: string;
+  dragging: DragContextState['dragging'];
+  prioritizedOperation?: string;
+};
+
 /**
  * Interface for the datasource registry
  */
@@ -227,10 +233,8 @@ export interface Datasource<T = unknown, P = unknown> {
     layerId: string,
     value: {
       columnId: string;
-      label: string;
-      dataType: string;
-      staticValue?: unknown;
       groupId: string;
+      staticValue?: unknown;
     }
   ) => T;
 
@@ -251,11 +255,7 @@ export interface Datasource<T = unknown, P = unknown> {
     props: DatasourceLayerPanelProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   getDropProps: (
-    props: DatasourceDimensionDropProps<T> & {
-      groupId: string;
-      dragging: DragContextState['dragging'];
-      prioritizedOperation?: string;
-    }
+    props: GetDropProps<T>
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   /**
@@ -593,6 +593,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportStaticValue?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   supportFieldFormat?: boolean;
+  labels?: { buttonAriaLabel: string; buttonLabel: string };
 };
 
 interface VisualizationDimensionChangeProps<T> {
@@ -794,14 +795,13 @@ export interface Visualization<T = unknown> {
     type: LayerType;
     label: string;
     icon?: IconType;
+    noDatasource?: boolean;
     disabled?: boolean;
     toolTipContent?: string;
     initialDimensions?: Array<{
-      groupId: string;
       columnId: string;
-      dataType: string;
-      label: string;
-      staticValue: unknown;
+      groupId: string;
+      staticValue?: unknown;
     }>;
   }>;
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
@@ -866,7 +866,20 @@ export interface Visualization<T = unknown> {
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
-
+  /**
+   * Renders dimension trigger. Used only for noDatasource layers
+   */
+  renderDimensionTrigger?: (props: {
+    columnId: string;
+    label: string;
+    hideTooltip?: boolean;
+    invalid?: boolean;
+    invalidMessage?: string;
+  }) => JSX.Element | null;
+  /**
+   * Creates map of columns ids and unique lables. Used only for noDatasource layers
+   */
+  getUniqueLabels?: (state: T) => Record<string, string>;
   /**
    * The frame will call this function on all visualizations at different times. The
    * main use cases where visualization suggestions are requested are:
