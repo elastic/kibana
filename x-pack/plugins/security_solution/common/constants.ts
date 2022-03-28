@@ -118,6 +118,7 @@ export enum SecurityPageName {
   users = 'users',
   usersAnomalies = 'users-anomalies',
   usersRisk = 'users-risk',
+  sessions = 'sessions',
 }
 
 export const TIMELINES_PATH = '/timelines' as const;
