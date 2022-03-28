@@ -25,6 +25,7 @@ import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
 } from '../../metrics/by_agent/shared/memory';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
 interface ServiceInstanceSystemMetricPrimaryStatistics {
   serviceNodeName: string;
@@ -55,6 +56,7 @@ export async function getServiceInstancesSystemMetricStatistics<
   serviceNodeIds,
   numBuckets,
   isComparisonSearch,
+  offset,
 }: {
   setup: Setup;
   serviceName: string;
@@ -66,10 +68,21 @@ export async function getServiceInstancesSystemMetricStatistics<
   kuery: string;
   size?: number;
   isComparisonSearch: T;
+  offset?: string;
 }): Promise<Array<ServiceInstanceSystemMetricStatistics<T>>> {
   const { apmEventClient } = setup;
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
+
+  const { intervalString } = getBucketSize({
+    start: startWithOffset,
+    end: endWithOffset,
+    numBuckets,
+  });
 
   const systemMemoryFilter = {
     bool: {
@@ -99,8 +112,8 @@ export async function getServiceInstancesSystemMetricStatistics<
                 fixed_interval: intervalString,
                 min_doc_count: 0,
                 extended_bounds: {
-                  min: start,
-                  max: end,
+                  min: startWithOffset,
+                  max: endWithOffset,
                 },
               },
               aggs: { avg: { avg: agg } },
@@ -137,7 +150,7 @@ export async function getServiceInstancesSystemMetricStatistics<
           bool: {
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
-              ...rangeQuery(start, end),
+              ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
               ...(isComparisonSearch && serviceNodeIds

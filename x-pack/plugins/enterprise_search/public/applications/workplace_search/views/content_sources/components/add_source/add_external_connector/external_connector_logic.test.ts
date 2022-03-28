@@ -45,6 +45,16 @@ describe('ExternalConnectorLogic', () => {
     insecureUrl: true,
   };
 
+  const DEFAULT_VALUES_SUCCESS: ExternalConnectorValues = {
+    ...DEFAULT_VALUES,
+    externalConnectorApiKey: 'asdf1234',
+    externalConnectorUrl: 'https://www.elastic.co',
+    formDisabled: false,
+    insecureUrl: false,
+    dataLoading: false,
+    sourceConfigData,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     mount();
@@ -61,38 +71,56 @@ describe('ExternalConnectorLogic', () => {
       });
 
       it('turns off the data loading flag', () => {
-        expect(ExternalConnectorLogic.values.dataLoading).toEqual(false);
+        expect(ExternalConnectorLogic.values).toEqual({
+          ...DEFAULT_VALUES_SUCCESS,
+          dataLoading: false,
+        });
       });
 
       it('saves the external url', () => {
-        expect(ExternalConnectorLogic.values.externalConnectorUrl).toEqual(
-          sourceConfigData.configuredFields.externalConnectorUrl
-        );
+        expect(ExternalConnectorLogic.values).toEqual({
+          ...DEFAULT_VALUES_SUCCESS,
+          externalConnectorUrl: sourceConfigData.configuredFields.externalConnectorUrl,
+        });
       });
 
       it('saves the source config', () => {
-        expect(ExternalConnectorLogic.values.sourceConfigData).toEqual(sourceConfigData);
+        expect(ExternalConnectorLogic.values).toEqual({
+          ...DEFAULT_VALUES_SUCCESS,
+          sourceConfigData,
+        });
       });
 
       it('sets undefined url to empty string', () => {
-        ExternalConnectorLogic.actions.fetchExternalSourceSuccess({
+        const newSourceConfigData = {
           ...sourceConfigData,
           configuredFields: {
             ...sourceConfigData.configuredFields,
             externalConnectorUrl: undefined,
           },
+        };
+        ExternalConnectorLogic.actions.fetchExternalSourceSuccess(newSourceConfigData);
+        expect(ExternalConnectorLogic.values).toEqual({
+          ...DEFAULT_VALUES_SUCCESS,
+          externalConnectorUrl: '',
+          insecureUrl: true,
+          sourceConfigData: newSourceConfigData,
         });
-        expect(ExternalConnectorLogic.values.externalConnectorUrl).toEqual('');
       });
       it('sets undefined api key to empty string', () => {
-        ExternalConnectorLogic.actions.fetchExternalSourceSuccess({
+        const newSourceConfigData = {
           ...sourceConfigData,
           configuredFields: {
             ...sourceConfigData.configuredFields,
             externalConnectorApiKey: undefined,
           },
+        };
+        ExternalConnectorLogic.actions.fetchExternalSourceSuccess(newSourceConfigData);
+        expect(ExternalConnectorLogic.values).toEqual({
+          ...DEFAULT_VALUES_SUCCESS,
+          externalConnectorApiKey: '',
+          sourceConfigData: newSourceConfigData,
         });
-        expect(ExternalConnectorLogic.values.externalConnectorApiKey).toEqual('');
       });
     });
 
@@ -104,7 +132,19 @@ describe('ExternalConnectorLogic', () => {
 
         ExternalConnectorLogic.actions.saveExternalConnectorConfigSuccess('external');
 
-        expect(ExternalConnectorLogic.values.buttonLoading).toEqual(false);
+        expect(ExternalConnectorLogic.values).toEqual({ ...DEFAULT_VALUES, buttonLoading: false });
+      });
+    });
+
+    describe('saveExternalConnectorConfigError', () => {
+      it('turns off the button loading flag', () => {
+        mount({
+          buttonLoading: true,
+        });
+
+        ExternalConnectorLogic.actions.saveExternalConnectorConfigError();
+
+        expect(ExternalConnectorLogic.values).toEqual({ ...DEFAULT_VALUES, buttonLoading: false });
       });
     });
 
@@ -112,7 +152,10 @@ describe('ExternalConnectorLogic', () => {
       it('updates the api key', () => {
         ExternalConnectorLogic.actions.setExternalConnectorApiKey('abcd1234');
 
-        expect(ExternalConnectorLogic.values.externalConnectorApiKey).toEqual('abcd1234');
+        expect(ExternalConnectorLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          externalConnectorApiKey: 'abcd1234',
+        });
       });
     });
 
@@ -120,23 +163,28 @@ describe('ExternalConnectorLogic', () => {
       it('updates the url', () => {
         ExternalConnectorLogic.actions.setExternalConnectorUrl('https://www.elastic.co');
 
-        expect(ExternalConnectorLogic.values.externalConnectorUrl).toEqual(
-          'https://www.elastic.co'
-        );
+        expect(ExternalConnectorLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          externalConnectorUrl: 'https://www.elastic.co',
+          insecureUrl: false,
+        });
       });
     });
     describe('setUrlValidation', () => {
       it('updates the url validation', () => {
         ExternalConnectorLogic.actions.setUrlValidation(false);
 
-        expect(ExternalConnectorLogic.values.urlValid).toEqual(false);
+        expect(ExternalConnectorLogic.values).toEqual({ ...DEFAULT_VALUES, urlValid: false });
       });
     });
     describe('setShowInsecureUrlCallout', () => {
       it('updates the url validation', () => {
         ExternalConnectorLogic.actions.setShowInsecureUrlCallout(true);
 
-        expect(ExternalConnectorLogic.values.showInsecureUrlCallout).toEqual(true);
+        expect(ExternalConnectorLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          showInsecureUrlCallout: true,
+        });
       });
     });
   });

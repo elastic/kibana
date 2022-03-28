@@ -112,6 +112,8 @@ export function createExecutionHandler<
         }),
       }));
 
+    alertExecutionStore.numberOfScheduledActions += actions.length;
+
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
@@ -131,6 +133,8 @@ export function createExecutionHandler<
         );
         continue;
       }
+
+      alertExecutionStore.numberOfTriggeredActions++;
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
@@ -165,12 +169,9 @@ export function createExecutionHandler<
           if (isEphemeralTaskRejectedDueToCapacityError(err)) {
             await actionsClient.enqueueExecution(enqueueOptions);
           }
-        } finally {
-          alertExecutionStore.numberOfTriggeredActions++;
         }
       } else {
         await actionsClient.enqueueExecution(enqueueOptions);
-        alertExecutionStore.numberOfTriggeredActions++;
       }
 
       const event = createAlertEventLogRecordObject({
