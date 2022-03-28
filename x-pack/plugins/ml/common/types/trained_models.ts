@@ -158,6 +158,7 @@ export interface TrainedModelDeploymentStatsResponse {
     last_access: number;
     number_of_pending_requests: number;
     start_time: number;
+    throughput_last_minute: number;
   }>;
 }
 
