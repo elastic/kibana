@@ -16,7 +16,7 @@ export function setStartServices(core: CoreStart, plugins: FileUploadStartDepend
 }
 
 export const getDocLinks = () => coreStart.docLinks;
-export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
+export const getDataViewsService = () => pluginsStart.data.dataViews;
 export const getHttp = () => coreStart.http;
 export const getSavedObjectsClient = () => coreStart.savedObjects.client;
 export const getUiSettings = () => coreStart.uiSettings;

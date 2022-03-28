@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.applyChanges('workspace');
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
     });
 
     it('should hide suggestions when a change is made', async () => {

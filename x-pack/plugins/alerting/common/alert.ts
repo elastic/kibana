@@ -49,6 +49,7 @@ export enum AlertExecutionStatusWarningReasons {
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   numberOfTriggeredActions?: number;
+  numberOfScheduledActions?: number;
   metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
@@ -76,6 +77,7 @@ export interface AlertAggregations {
   alertExecutionStatus: { [status: string]: number };
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
+  ruleSnoozedStatus: { snoozed: number };
 }
 
 export interface MappedParamsProperties {
