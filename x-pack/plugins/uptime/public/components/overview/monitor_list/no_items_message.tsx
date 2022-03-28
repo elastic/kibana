@@ -26,7 +26,7 @@ export const NoItemsMessage = ({ loading, filters }: { loading: boolean; filters
     return <> {labels.LOADING}</>;
   }
 
-  if (!filters) {
+  if (filters) {
     return (
       <>
         <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -39,7 +39,8 @@ export const NoItemsMessage = ({ loading, filters }: { loading: boolean; filters
 
   return (
     <>
-      {labels.NO_DATA_MESSAGE}. {clockSyncError}
+      {labels.NO_DATA_MESSAGE}
+      {clockSyncError}
     </>
   );
 };
