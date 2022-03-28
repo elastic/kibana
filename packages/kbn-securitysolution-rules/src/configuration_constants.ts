@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './configuration_constants';
-export * from './rule_type_constants';
-export * from './rule_type_mappings';
-export * from './utils';
+/**
+ * Max number of execution events to aggregate in memory for the Rule Execution Log
+ */
+export const MAX_EXECUTION_EVENTS_DISPLAYED = 1000 as const;
