@@ -105,37 +105,16 @@ describe('Service Overview', () => {
       cy.visit(baseUrl);
     });
 
-    it('has no detectable a11y violations on load', () => {
+    it('renders all components on the page', () => {
       cy.contains('opbeans-node');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
-    });
-
-    it('transaction latency chart', () => {
       cy.get('[data-test-subj="latencyChart"]');
-    });
-
-    it('throughput chart', () => {
       cy.get('[data-test-subj="throughput"]');
-    });
-
-    it('transactions group table', () => {
       cy.get('[data-test-subj="transactionsGroupTable"]');
-    });
-
-    it('error table', () => {
       cy.get('[data-test-subj="serviceOverviewErrorsTable"]');
-    });
-
-    it('dependencies table', () => {
       cy.get('[data-test-subj="dependenciesTable"]');
-    });
-
-    it('instances latency distribution chart', () => {
       cy.get('[data-test-subj="instancesLatencyDistribution"]');
-    });
-
-    it('instances table', () => {
       cy.get('[data-test-subj="serviceOverviewInstancesTable"]');
     });
   });
