@@ -189,12 +189,16 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     }
 
     if (handlers?.inspectorAdapters?.tables) {
-      const logTable = prepareLogTable(data, [
-        [metric ? [metric] : undefined, strings.getMetricHelp()],
-        [min ? [min] : undefined, strings.getMinHelp()],
-        [max ? [max] : undefined, strings.getMaxHelp()],
-        [goal ? [goal] : undefined, strings.getGoalHelp()],
-      ]);
+      const logTable = prepareLogTable(
+        data,
+        [
+          [metric ? [metric] : undefined, strings.getMetricHelp()],
+          [min ? [min] : undefined, strings.getMinHelp()],
+          [max ? [max] : undefined, strings.getMaxHelp()],
+          [goal ? [goal] : undefined, strings.getGoalHelp()],
+        ],
+        true
+      );
 
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
