@@ -14,86 +14,33 @@
     "../../../typings/**/*"
   ],
   "references": [
-    {
-      "path": "../spaces/tsconfig.json"
-    },
-    {
-      "path": "../../../src/core/tsconfig.json"
-    },
-    {
-      "path": "../task_manager/tsconfig.json"
-    },
-    {
-      "path": "../global_search/tsconfig.json"
-    },
-    {
-      "path": "../saved_objects_tagging/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/data/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/data_views/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/data_view_field_editor/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/charts/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/expressions/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/navigation/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/url_forwarding/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/visualizations/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/dashboard/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/ui_actions/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/embeddable/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/share/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/usage_collection/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/saved_objects/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/kibana_utils/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/kibana_react/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/embeddable/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/presentation_util/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/field_formats/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/chart_expressions/expression_heatmap/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/chart_expressions/expression_gauge/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/event_annotation/tsconfig.json"
-    }
+    { "path": "../spaces/tsconfig.json" },
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../task_manager/tsconfig.json" },
+    { "path": "../global_search/tsconfig.json"},
+    { "path": "../saved_objects_tagging/tsconfig.json"},
+    { "path": "../../../src/plugins/data/tsconfig.json"},
+    { "path": "../../../src/plugins/data_views/tsconfig.json"},
+    { "path": "../../../src/plugins/data_view_field_editor/tsconfig.json"},
+    { "path": "../../../src/plugins/charts/tsconfig.json"},
+    { "path": "../../../src/plugins/expressions/tsconfig.json"},
+    { "path": "../../../src/plugins/navigation/tsconfig.json" },
+    { "path": "../../../src/plugins/url_forwarding/tsconfig.json" },
+    { "path": "../../../src/plugins/visualizations/tsconfig.json" },
+    { "path": "../../../src/plugins/dashboard/tsconfig.json" },
+    { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
+    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../../../src/plugins/share/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../../../src/plugins/saved_objects/tsconfig.json"},
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/embeddable/tsconfig.json"},
+    { "path": "../../../src/plugins/presentation_util/tsconfig.json"},
+    { "path": "../../../src/plugins/field_formats/tsconfig.json"},
+    { "path": "../../../src/plugins/chart_expressions/expression_xy/tsconfig.json"},
+    { "path": "../../../src/plugins/chart_expressions/expression_heatmap/tsconfig.json"},
+    { "path": "../../../src/plugins/chart_expressions/expression_gauge/tsconfig.json"},
+    { "path": "../../../src/plugins/event_annotation/tsconfig.json" }
   ]
 }

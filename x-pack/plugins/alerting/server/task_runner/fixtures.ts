@@ -211,6 +211,7 @@ export const generateEventLog = ({
   actionId,
   status,
   numberOfTriggeredActions,
+  numberOfScheduledActions,
   savedObjects = [generateAlertSO('1')],
 }: GeneratorParams = {}) => ({
   ...(status === 'error' && {
@@ -234,9 +235,10 @@ export const generateEventLog = ({
         ...(consumer && { consumer }),
         execution: {
           uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-          ...(!isNil(numberOfTriggeredActions) && {
+          ...((!isNil(numberOfTriggeredActions) || !isNil(numberOfScheduledActions)) && {
             metrics: {
               number_of_triggered_actions: numberOfTriggeredActions,
+              number_of_scheduled_actions: numberOfScheduledActions,
               number_of_searches: 3,
               es_search_duration_ms: 33,
               total_search_duration_ms: 23423,

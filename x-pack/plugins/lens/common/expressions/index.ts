@@ -11,6 +11,5 @@ export * from './rename_columns';
 export * from './merge_tables';
 export * from './time_scale';
 export * from './datatable';
-export * from './xy_chart';
 
 export * from './expression_types';

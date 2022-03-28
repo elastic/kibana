@@ -10,6 +10,7 @@ import { SimpleSavedObject } from 'kibana/public';
 import { MonitorFields } from '../../../../../plugins/uptime/common/runtime_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
+import { formatSecrets } from '../../../../../plugins/uptime/server/lib/synthetics_service/utils/secrets';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -85,13 +86,17 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('get one monitor', () => {
       it('should get by id', async () => {
-        const [{ id: id1, attributes: mon1 }] = await Promise.all(monitors.map(saveMonitor));
+        const [{ id: id1 }] = await Promise.all(monitors.map(saveMonitor));
 
         const apiResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS + '/' + id1)
           .expect(200);
 
-        expect(apiResponse.body.attributes).eql(mon1);
+        expect(apiResponse.body.attributes).eql({
+          ...monitors[0],
+          revision: 1,
+          secrets: formatSecrets(monitors[0]).secrets,
+        });
       });
 
       it('returns 404 if monitor id is not found', async () => {

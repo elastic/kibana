@@ -440,3 +440,6 @@ export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAG
  */
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
   'securitySolution.rulesManagementPage.newFeaturesTour.v8.1';
+
+export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
+  'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
