@@ -57,17 +57,23 @@ const getDimensionName = (
   }
 };
 
-export const prepareLogTable = (datatable: Datatable, dimensions: Dimension[]) => {
+export const prepareLogTable = (
+  datatable: Datatable,
+  dimensions: Dimension[],
+  removeUnmappedColumns: boolean = false
+) => {
   return {
     ...datatable,
-    columns: datatable.columns.map((column, columnIndex) => {
-      return {
-        ...column,
-        meta: {
-          ...column.meta,
-          dimensionName: getDimensionName(column, columnIndex, dimensions),
-        },
-      };
-    }),
+    columns: datatable.columns
+      .map((column, columnIndex) => {
+        return {
+          ...column,
+          meta: {
+            ...column.meta,
+            dimensionName: getDimensionName(column, columnIndex, dimensions),
+          },
+        };
+      })
+      .filter((column) => !removeUnmappedColumns || column.meta.dimensionName),
   };
 };

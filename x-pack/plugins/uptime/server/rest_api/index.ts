@@ -43,6 +43,7 @@ import {
   disableSyntheticsRoute,
   enableSyntheticsRoute,
 } from './synthetics_service/enablement';
+import { getServiceAllowedRoute } from './synthetics_service/get_service_allowed';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
@@ -79,4 +80,5 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   installIndexTemplatesRoute,
   runOnceSyntheticsMonitorRoute,
   testNowMonitorRoute,
+  getServiceAllowedRoute,
 ];

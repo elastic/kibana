@@ -12,13 +12,21 @@ import { useHistory } from 'react-router-dom';
 import { kibanaService } from '../../state/kibana_service';
 import { MONITOR_ADD_ROUTE } from '../../../common/constants';
 import { useEnablement } from './hooks/use_enablement';
+import { useSyntheticsServiceAllowed } from './hooks/use_service_allowed';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
-export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
+export const AddMonitorBtn = () => {
   const history = useHistory();
   const [isEnabling, setIsEnabling] = useState(false);
   const [isDisabling, setIsDisabling] = useState(false);
-  const { error, loading, enablement, disableSynthetics, enableSynthetics, totalMonitors } =
-    useEnablement();
+  const {
+    error,
+    loading: enablementLoading,
+    enablement,
+    disableSynthetics,
+    enableSynthetics,
+    totalMonitors,
+  } = useEnablement();
   const { isEnabled, canEnable, areApiKeysEnabled } = enablement || {};
 
   useEffect(() => {
@@ -78,6 +86,12 @@ export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
     }
   };
 
+  const { isAllowed, loading: allowedLoading } = useSyntheticsServiceAllowed();
+
+  const loading = allowedLoading || enablementLoading;
+
+  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
+
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
@@ -106,7 +120,7 @@ export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
           <EuiButton
             isLoading={loading}
             fill
-            isDisabled={isDisabled || !isEnabled}
+            isDisabled={!canSave || !isEnabled || !isAllowed}
             iconType="plus"
             data-test-subj="syntheticsAddMonitorBtn"
             href={history.createHref({

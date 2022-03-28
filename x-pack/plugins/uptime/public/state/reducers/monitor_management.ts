@@ -23,9 +23,16 @@ import {
   enableSynthetics,
   enableSyntheticsSuccess,
   enableSyntheticsFailure,
+  getSyntheticsServiceAllowed,
 } from '../actions';
-import { MonitorManagementListResult, ServiceLocations } from '../../../common/runtime_types';
-import { MonitorManagementEnablementResult } from '../../../common/runtime_types';
+import {
+  MonitorManagementEnablementResult,
+  MonitorManagementListResult,
+  ServiceLocations,
+  ThrottlingOptions,
+  DEFAULT_THROTTLING,
+} from '../../../common/runtime_types';
+import { SyntheticsServiceAllowed } from '../../../common/types';
 
 export interface MonitorManagementList {
   error: Record<'monitorList' | 'serviceLocations' | 'enablement', Error | null>;
@@ -33,6 +40,8 @@ export interface MonitorManagementList {
   list: MonitorManagementListResult;
   locations: ServiceLocations;
   enablement: MonitorManagementEnablementResult | null;
+  syntheticsService: { isAllowed?: boolean; loading: boolean };
+  throttling: ThrottlingOptions;
 }
 
 export const initialState: MonitorManagementList = {
@@ -54,6 +63,10 @@ export const initialState: MonitorManagementList = {
     serviceLocations: null,
     enablement: null,
   },
+  syntheticsService: {
+    loading: false,
+  },
+  throttling: DEFAULT_THROTTLING,
 };
 
 export const monitorManagementListReducer = createReducer(initialState, (builder) => {
@@ -106,7 +119,13 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
     }))
     .addCase(
       getServiceLocationsSuccess,
-      (state: WritableDraft<MonitorManagementList>, action: PayloadAction<ServiceLocations>) => ({
+      (
+        state: WritableDraft<MonitorManagementList>,
+        action: PayloadAction<{
+          throttling: ThrottlingOptions | undefined;
+          locations: ServiceLocations;
+        }>
+      ) => ({
         ...state,
         loading: {
           ...state.loading,
@@ -116,7 +135,8 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
           ...state.error,
           serviceLocations: null,
         },
-        locations: action.payload,
+        locations: action.payload.locations,
+        throttling: action.payload.throttling || DEFAULT_THROTTLING,
       })
     )
     .addCase(
@@ -240,6 +260,39 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         error: {
           ...state.error,
           enablement: action.payload,
+        },
+      })
+    )
+    .addCase(
+      String(getSyntheticsServiceAllowed.get),
+      (state: WritableDraft<MonitorManagementList>) => ({
+        ...state,
+        syntheticsService: {
+          isAllowed: state.syntheticsService?.isAllowed,
+          loading: true,
+        },
+      })
+    )
+    .addCase(
+      String(getSyntheticsServiceAllowed.success),
+      (
+        state: WritableDraft<MonitorManagementList>,
+        action: PayloadAction<SyntheticsServiceAllowed>
+      ) => ({
+        ...state,
+        syntheticsService: {
+          isAllowed: action.payload.serviceAllowed,
+          loading: false,
+        },
+      })
+    )
+    .addCase(
+      String(getSyntheticsServiceAllowed.fail),
+      (state: WritableDraft<MonitorManagementList>, action: PayloadAction<Error>) => ({
+        ...state,
+        syntheticsService: {
+          isAllowed: false,
+          loading: false,
         },
       })
     );

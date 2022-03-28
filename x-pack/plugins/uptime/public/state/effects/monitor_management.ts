@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { takeLatest } from 'redux-saga/effects';
+import { takeLatest, takeLeading } from 'redux-saga/effects';
 import {
   getMonitors,
   getMonitorsSuccess,
@@ -22,10 +22,12 @@ import {
   enableSynthetics,
   enableSyntheticsSuccess,
   enableSyntheticsFailure,
+  getSyntheticsServiceAllowed,
 } from '../actions';
 import {
   fetchMonitorManagementList,
   fetchServiceLocations,
+  fetchServiceAllowed,
   fetchGetSyntheticsEnablement,
   fetchDisableSynthetics,
   fetchEnableSynthetics,
@@ -60,5 +62,16 @@ export function* fetchMonitorManagementEffect() {
   yield takeLatest(
     enableSynthetics,
     fetchEffectFactory(fetchEnableSynthetics, enableSyntheticsSuccess, enableSyntheticsFailure)
+  );
+}
+
+export function* fetchSyntheticsServiceAllowedEffect() {
+  yield takeLeading(
+    getSyntheticsServiceAllowed.get,
+    fetchEffectFactory(
+      fetchServiceAllowed,
+      getSyntheticsServiceAllowed.success,
+      getSyntheticsServiceAllowed.fail
+    )
   );
 }
