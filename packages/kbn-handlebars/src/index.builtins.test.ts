@@ -85,6 +85,41 @@ describe('builtin helpers', () => {
         .toCompileTo('cruel world!');
     });
 
+    it('each with @index', () => {
+      expectTemplate('{{#each goodbyes}}{{@index}}. {{text}}! {{/each}}cruel {{world}}!')
+        .withInput({
+          goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
+          world: 'world',
+        })
+        .toCompileTo('0. goodbye! 1. Goodbye! 2. GOODBYE! cruel world!');
+    });
+
+    it('each with nested @index', () => {
+      expectTemplate(
+        '{{#each goodbyes}}{{@index}}. {{text}}! {{#each ../goodbyes}}{{@index}} {{/each}}After {{@index}} {{/each}}{{@index}}cruel {{world}}!'
+      )
+        .withInput({
+          goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
+          world: 'world',
+        })
+        .toCompileTo(
+          '0. goodbye! 0 1 2 After 0 1. Goodbye! 0 1 2 After 1 2. GOODBYE! 0 1 2 After 2 cruel world!'
+        );
+    });
+
+    it('each object with @index', () => {
+      expectTemplate('{{#each goodbyes}}{{@index}}. {{text}}! {{/each}}cruel {{world}}!')
+        .withInput({
+          goodbyes: {
+            a: { text: 'goodbye' },
+            b: { text: 'Goodbye' },
+            c: { text: 'GOODBYE' },
+          },
+          world: 'world',
+        })
+        .toCompileTo('0. goodbye! 1. Goodbye! 2. GOODBYE! cruel world!');
+    });
+
     it('each with @first', () => {
       expectTemplate('{{#each goodbyes}}{{#if @first}}{{text}}! {{/if}}{{/each}}cruel {{world}}!')
         .withInput({
@@ -161,6 +196,19 @@ describe('builtin helpers', () => {
           world: 'world',
         })
         .toCompileTo('cruel world!');
+    });
+
+    it('each object when last key is an empty string', () => {
+      expectTemplate('{{#each goodbyes}}{{@index}}. {{text}}! {{/each}}cruel {{world}}!')
+        .withInput({
+          goodbyes: {
+            a: { text: 'goodbye' },
+            b: { text: 'Goodbye' },
+            '': { text: 'GOODBYE' },
+          },
+          world: 'world',
+        })
+        .toCompileTo('0. goodbye! 1. Goodbye! 2. GOODBYE! cruel world!');
     });
 
     it('data passed to helpers', () => {

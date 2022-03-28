@@ -435,7 +435,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
     helper.fn = helper.fn ?? this.resolveNodes(node.path)[0];
 
-    if (!helper.fn) {
+    if (helper.fn === undefined) {
       if (this.compileOptions.strict) {
         helper.fn = this.container.strict(helper.context, name, node.loc);
       } else {
