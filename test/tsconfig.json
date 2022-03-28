@@ -18,6 +18,7 @@
   ],
   "exclude": [
     "target/**/*",
+    "analytics/__fixtures__/plugins/**/*",
     "interpreter_functional/plugins/**/*",
     "plugin_functional/plugins/**/*",
     "server_integration/__fixtures__/plugins/**/*",
