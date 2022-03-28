@@ -429,7 +429,7 @@ describe('bulkEdit()', () => {
       expect(authorization.ensureAuthorized).toHaveBeenLastCalledWith({
         consumer: 'myApp',
         entity: 'rule',
-        operation: 'update',
+        operation: 'bulkEdit',
         ruleTypeId: 'myType',
       });
     });
