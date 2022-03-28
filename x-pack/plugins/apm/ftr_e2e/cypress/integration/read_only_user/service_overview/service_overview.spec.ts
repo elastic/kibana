@@ -85,7 +85,8 @@ const aliasNamesWithComparison = apiRequestsToInterceptWithComparison.map(
 
 const aliasNames = [...aliasNamesNoComparison, ...aliasNamesWithComparison];
 
-describe('Service Overview', () => {
+// flaky test
+describe.skip('Service Overview', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({

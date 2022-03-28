@@ -28,7 +28,8 @@ const apisToIntercept = [
   },
 ];
 
-describe('Home page', () => {
+// flaky test
+describe.skip('Home page', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
