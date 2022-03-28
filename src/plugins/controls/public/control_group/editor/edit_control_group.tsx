@@ -59,6 +59,7 @@ export const EditControlGroup = ({
         </PresentationUtilProvider>
       ),
       {
+        outsideClickCloses: false,
         onClose: () => flyoutInstance.close(),
       }
     );
