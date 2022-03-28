@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
-export * from './all_users_query_tab_body';
-export * from './authentications_query_tab_body';
+export const ERROR_FETCHING_USERS_DATA = i18n.translate(
+  'xpack.securitySolution.userTab.errorFetchingsData',
+  {
+    defaultMessage: 'Failed to query users data',
+  }
+);
