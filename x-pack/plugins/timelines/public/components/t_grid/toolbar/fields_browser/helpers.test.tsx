@@ -172,14 +172,11 @@ describe('helpers', () => {
     });
 
     test("it returns the expected fields/categories when the substring is '.' and the browser fields are large", () => {
-      const start = Date.now();
-      const result = filterBrowserFieldsByFieldName({
-        browserFields: largeBrowserFields,
-        substring: '.',
-      });
-      console.log(`This took: ${Date.now() - start}ms.`);
       expect(
-        result
+        filterBrowserFieldsByFieldName({
+          browserFields: largeBrowserFields,
+          substring: '.',
+        })
       ).toMatchSnapshot();
     });
 
