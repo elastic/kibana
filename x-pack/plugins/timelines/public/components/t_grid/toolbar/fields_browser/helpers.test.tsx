@@ -17,6 +17,7 @@ import {
   filterBrowserFieldsByFieldName,
 } from './helpers';
 import { BrowserFields } from '../../../../../common/search_strategy';
+import largeMockBrowserFields from './large_browser_fields_for_testing_filter_browser_fields_by_field_name.json';
 
 const timelineId = 'test';
 
@@ -200,6 +201,17 @@ describe('helpers', () => {
           substring: '',
         })
       ).toEqual(mockBrowserFields);
+    });
+
+    test("it returns a collection with all the fields that has '.' in their name, organized into the correct categories, when browserFields is NOT empty, substring is '.', and when browser fields contains many fields", () => {
+      // Note: this test exists mainly for benchmarking purposes. We can remove this at any time, as it adds no meaningful extra coverage.
+      expect(
+        filterBrowserFieldsByFieldName({
+          // treat the JSON file as BrowserFields
+          browserFields: largeMockBrowserFields as BrowserFields,
+          substring: '.',
+        })
+      ).toMatchSnapshot();
     });
 
     test('it returns (only) non-empty categories, where each category contains only the fields matching the substring', () => {
