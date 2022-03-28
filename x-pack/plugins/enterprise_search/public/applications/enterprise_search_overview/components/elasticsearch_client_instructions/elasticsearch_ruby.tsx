@@ -70,7 +70,7 @@ export const ElasticsearchRuby: React.FC<{ cloudId?: string }> = ({ cloudId }) =
               elasticsearch-dsl
             </a>{' '}
             which provides a Ruby API for the{' '}
-            <a target="_blank" rel="noopener" href={docLinks.clientsRubyQueryDsl}>
+            <a target="_blank" rel="noopener" href={docLinks.queryDsl}>
               Elasticsearch Query DSL
             </a>
             .

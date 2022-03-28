@@ -47,7 +47,6 @@ class DocLinks {
   public clientsPythonOverview: string;
   public clientsRubyAuthentication: string;
   public clientsRubyOverview: string;
-  public clientsRubyQueryDsl: string;
   public clientsRustOverview: string;
   public cloudIndexManagement: string;
   public elasticsearchCreateIndex: string;
@@ -58,6 +57,7 @@ class DocLinks {
   public enterpriseSearchUsersAccess: string;
   public kibanaSecurity: string;
   public licenseManagement: string;
+  public queryDsl: string;
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
@@ -126,7 +126,6 @@ class DocLinks {
     this.clientsPythonOverview = '';
     this.clientsRubyAuthentication = '';
     this.clientsRubyOverview = '';
-    this.clientsRubyQueryDsl = '';
     this.clientsRustOverview = '';
     this.cloudIndexManagement = '';
     this.elasticsearchCreateIndex = '';
@@ -137,6 +136,7 @@ class DocLinks {
     this.enterpriseSearchUsersAccess = '';
     this.kibanaSecurity = '';
     this.licenseManagement = '';
+    this.queryDsl = '';
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
@@ -206,7 +206,6 @@ class DocLinks {
     this.clientsPythonOverview = docLinks.links.clients.pythonOverview;
     this.clientsRubyAuthentication = docLinks.links.clients.rubyAuthentication;
     this.clientsRubyOverview = docLinks.links.clients.rubyOverview;
-    this.clientsRubyQueryDsl = docLinks.links.clients.rubyQueryDsl;
     this.clientsRustOverview = docLinks.links.clients.rustOverview;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
@@ -217,6 +216,7 @@ class DocLinks {
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
+    this.queryDsl = docLinks.links.query.queryDsl;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;

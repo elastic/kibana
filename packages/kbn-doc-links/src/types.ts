@@ -382,7 +382,6 @@ export interface DocLinks {
     readonly pythonOverview: string;
     readonly rubyAuthentication: string;
     readonly rubyOverview: string;
-    readonly rubyQueryDsl: string;
     readonly rustGuide: string;
     readonly rustOverview: string;
   };
