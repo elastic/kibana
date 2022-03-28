@@ -81,7 +81,7 @@ const AlertsPage: React.FunctionComponent = () => {
     };
     data.search
       .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(request, {
-        strategy: 'ruleRegistryAlertsSearchStrategy',
+        strategy: 'privateRuleRegistryAlertsSearchStrategy',
         abortSignal: abortController.signal,
       })
       .subscribe({
