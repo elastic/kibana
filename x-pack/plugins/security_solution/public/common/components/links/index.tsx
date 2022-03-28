@@ -78,7 +78,7 @@ const UserDetailsLinkComponent: React.FC<{
       dataTestSubj="data-grid-user-details"
       href={formatUrl(getUsersDetailsUrl(encodedUserName))}
       onClick={onClick ?? goToUsersDetails}
-      title={title ?? encodedUserName}
+      title={title ?? userName}
     >
       {children ? children : userName}
     </GenericLinkButton>

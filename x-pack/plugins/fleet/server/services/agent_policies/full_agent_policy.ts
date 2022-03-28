@@ -179,7 +179,7 @@ export function transformOutputToFullPolicyOutput(
     ...configJs,
     type,
     hosts,
-    ca_sha256,
+    ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };

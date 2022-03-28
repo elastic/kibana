@@ -13,6 +13,7 @@ import {
   HOST_OS,
   OS_PLATFORM,
   SERVICE_VERSION,
+  URL_LABEL,
 } from '../constants/labels';
 
 export const MobileFields: Record<string, string> = {
@@ -23,4 +24,5 @@ export const MobileFields: Record<string, string> = {
   'network.carrier.name': CARRIER_NAME,
   'network.connection_type': CONNECTION_TYPE,
   'labels.device_model': DEVICE_MODEL,
+  'url.full': URL_LABEL,
 };

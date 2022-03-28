@@ -7,7 +7,21 @@
  */
 
 import { join } from 'path';
-import { isFile, mkdirp, tryRealpath, writeFile } from '../fs';
+import { isFile, tryRealpath, unlink } from '../fs';
+
+export async function removeYarnIntegrityFileIfExists(nodeModulesPath: string) {
+  try {
+    const nodeModulesRealPath = await tryRealpath(nodeModulesPath);
+    const yarnIntegrityFilePath = join(nodeModulesRealPath, '.yarn-integrity');
+
+    // check if the file exists and delete it in that case
+    if (await isFile(yarnIntegrityFilePath)) {
+      await unlink(yarnIntegrityFilePath);
+    }
+  } catch {
+    // no-op
+  }
+}
 
 export async function yarnIntegrityFileExists(nodeModulesPath: string) {
   try {
@@ -23,19 +37,4 @@ export async function yarnIntegrityFileExists(nodeModulesPath: string) {
   }
 
   return false;
-}
-
-export async function ensureYarnIntegrityFileExists(nodeModulesPath: string) {
-  try {
-    const nodeModulesRealPath = await tryRealpath(nodeModulesPath);
-    const yarnIntegrityFilePath = join(nodeModulesRealPath, '.yarn-integrity');
-
-    // ensure node_modules folder is created
-    await mkdirp(nodeModulesRealPath);
-
-    // write a blank file in case it doesn't exists
-    await writeFile(yarnIntegrityFilePath, '', { flag: 'wx' });
-  } catch {
-    // no-op
-  }
 }
