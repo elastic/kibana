@@ -51,7 +51,7 @@ const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.uptime.monitorManagement.
 const LOADING_MONITOR_MANAGEMENT_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.loading.label',
   {
-    defaultMessage: 'Loading monitor management',
+    defaultMessage: 'Loading Monitor Management',
   }
 );
 
