@@ -6,14 +6,10 @@
  */
 
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
+import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 import { getInventoryViewInAppUrl } from '../../../common/alerting/metrics/alert_link';
 
-export type ObservabilityRuleTypeFieldsOnly = (options: {
-  fields: ParsedTechnicalFields & Record<string, any>;
-}) => { reason: string; link: string };
-
-export const formatReason: ObservabilityRuleTypeFieldsOnly = ({ fields }) => {
+export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '-';
 
   return {
