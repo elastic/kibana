@@ -11,11 +11,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 
-import { PageLoading, PageError, Error, reactRouterNavigate } from '../../../../shared_imports';
+import {
+  PageLoading,
+  PageError,
+  Error,
+  reactRouterNavigate,
+  useExecutionContext,
+} from '../../../../shared_imports';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useLoadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
-import { useServices } from '../../../app_context';
+import { useAppContext, useServices } from '../../../app_context';
 import { useDecodedParams, SnapshotListParams, DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../../lib';
 
 import { SnapshotDetails } from './snapshot_details';
@@ -52,6 +58,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   } = useLoadSnapshots(listParams);
 
   const { uiMetricService } = useServices();
+  const { core } = useAppContext();
 
   const closeSnapshotDetails = () => {
     history.push(`${BASE_PATH}/snapshots`);
@@ -73,6 +80,11 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
       reload();
     }
   };
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'snapshotRestoreSnapshots',
+  });
 
   // Allow deeplinking to list pre-filtered by repository name or by policy name
   useEffect(() => {

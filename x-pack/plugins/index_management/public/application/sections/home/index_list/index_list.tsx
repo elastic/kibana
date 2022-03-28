@@ -8,11 +8,21 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { APP_WRAPPER_CLASS } from '../../../../shared_imports';
+import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
+import { useAppContext } from '../../../app_context';
 import { DetailPanel } from './detail_panel';
 import { IndexTable } from './index_table';
 
 export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+  const {
+    core: { executionContext },
+  } = useAppContext();
+
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'indexManagementIndices',
+  });
+
   return (
     <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">
       <IndexTable history={history} />
