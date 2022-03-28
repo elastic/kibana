@@ -41,7 +41,7 @@ export const DetailPanelAlertActions = ({
 
   const onJumpToAlert = useCallback(() => {
     const process = new ProcessImpl(event.process.entity_id);
-    process.addAlert(event);
+    process.addEvent(event);
 
     onProcessSelected(process);
     setPopover(false);

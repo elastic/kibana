@@ -20,7 +20,7 @@ describe('Users stats and tables', () => {
   });
 
   it(`renders all users`, () => {
-    const totalUsers = 35;
+    const totalUsers = 72;
     const usersPerPage = 10;
 
     cy.get(HEADER_SUBTITLE).should('have.text', `Showing: ${totalUsers} users`);

@@ -20,7 +20,7 @@ import {
 } from '../../../shared/charts/transaction_charts/helper';
 import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
 import * as urlHelpers from '../../../shared/links/url_helpers';
-import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
+import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
