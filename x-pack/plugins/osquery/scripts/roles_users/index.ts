@@ -5,4 +5,6 @@
  * 2.0.
  */
 
+export * from './reader';
 export * from './t1_analyst';
+export * from './t2_analyst';

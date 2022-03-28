@@ -201,7 +201,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param field  - the desired field for the dimension
      * */
-    async dragFieldToWorkspace(field: string) {
+    async dragFieldToWorkspace(field: string, visualizationTestSubj?: string) {
       const from = `lnsFieldListPanelField-${field}`;
       await find.existsByCssSelector(from);
       await browser.html5DragAndDrop(
@@ -209,7 +209,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector('lnsWorkspace')
       );
       await this.waitForLensDragDropToFinish();
-      await this.waitForVisualization();
+      await this.waitForVisualization(visualizationTestSubj);
     },
 
     /**

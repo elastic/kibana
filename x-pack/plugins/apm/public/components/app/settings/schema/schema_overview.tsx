@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import semverLt from 'semver/functions/lt';
-import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../../../common/fleet';
 import { PackagePolicy } from '../../../../../../fleet/common/types';
 import rocketLaunchGraphic from './blog_rocket_720x420.png';
 import { MigrationInProgressPanel } from './migration_in_progress_panel';
@@ -39,6 +38,7 @@ interface Props {
   hasCloudAgentPolicy: boolean;
   hasRequiredRole: boolean;
   cloudApmPackagePolicy: PackagePolicy | undefined;
+  latestApmPackageVersion: string;
 }
 export function SchemaOverview({
   onSwitch,
@@ -50,12 +50,13 @@ export function SchemaOverview({
   hasCloudAgentPolicy,
   hasRequiredRole,
   cloudApmPackagePolicy,
+  latestApmPackageVersion,
 }: Props) {
   const isDisabled =
     !cloudApmMigrationEnabled || !hasCloudAgentPolicy || !hasRequiredRole;
   const packageVersion = cloudApmPackagePolicy?.package?.version;
   const isUpgradeAvailable =
-    packageVersion && semverLt(packageVersion, SUPPORTED_APM_PACKAGE_VERSION);
+    packageVersion && semverLt(packageVersion, latestApmPackageVersion);
 
   if (isLoading) {
     return (

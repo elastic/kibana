@@ -109,6 +109,24 @@ describe('SourceEnginesLogic', () => {
           selectableEngineNames: ['source-engine-1', 'source-engine-2'],
         });
       });
+
+      it('sets indexedEngines filters out elasticsearch type engines', () => {
+        mount();
+
+        SourceEnginesLogic.actions.setIndexedEngines([
+          { name: 'source-engine-1' },
+          { name: 'source-engine-2' },
+          { name: 'source-engine-elasticsearch', type: 'elasticsearch' },
+        ] as EngineDetails[]);
+
+        expect(SourceEnginesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          indexedEngines: [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
+          // Selectors
+          indexedEngineNames: ['source-engine-1', 'source-engine-2'],
+          selectableEngineNames: ['source-engine-1', 'source-engine-2'],
+        });
+      });
     });
 
     describe('onSourceEnginesFetch', () => {
