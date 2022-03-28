@@ -17,6 +17,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiTitle,
+  EuiRange,
 } from '@elastic/eui';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
@@ -103,6 +104,7 @@ export const getDefaultDataVisualizerListState = (
   showDistributions: true,
   showAllFields: false,
   showEmptyFields: false,
+  samplingProbability: 0.1,
   ...overrides,
 });
 
@@ -128,6 +130,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const [currentSavedSearch, setCurrentSavedSearch] = useState(
     dataVisualizerProps.currentSavedSearch
   );
+  const [samplingProbability, setSamplingProbability] = useState(0.1);
 
   const { currentDataView, additionalLinks, currentSessionId } = dataVisualizerProps;
 
@@ -248,7 +251,12 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     setLastRefresh,
     progress,
     extendedColumns,
-  } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
+  } = useDataVisualizerGridData(
+    input,
+    dataVisualizerListState,
+    setGlobalState,
+    samplingProbability
+  );
 
   useEffect(() => {
     return () => {
@@ -437,6 +445,20 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
               <EuiPanel hasShadow={false} hasBorder>
+                <EuiFlexGroup direction="row" alignItems="center">
+                  <div style={{ paddingRight: 20 }}>
+                    Probability: <b>{samplingProbability}</b>
+                  </div>
+                  <EuiRange
+                    min={0.1}
+                    max={0.5}
+                    step={0.05}
+                    value={samplingProbability}
+                    onChange={(e) => setSamplingProbability(e.target.value)}
+                    showLabels
+                  />
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
                 {overallStats?.totalCount !== undefined && (
                   <EuiFlexItem grow={true}>
                     <DocumentCountContent

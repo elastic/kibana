@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DocumentCountChart, DocumentCountChartPoint } from './document_count_chart';
 import { TotalCountHeader } from './total_count_header';
 import { DocumentCountStats } from '../../../../../common/types/field_stats';
@@ -38,11 +39,12 @@ export const DocumentCountContent: FC<Props> = ({
 
   return (
     <>
-      <TotalCountHeader totalCount={totalCount} />
-      <div>
-        {random ?? 'random '}
-        {stats?.time}
-      </div>
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem>
+          [{stats?.time}ms] {random && `[Random sampler]`}
+        </EuiFlexItem>
+        <TotalCountHeader totalCount={totalCount} />
+      </EuiFlexGroup>
       <DocumentCountChart
         chartPoints={chartPoints}
         timeRangeEarliest={timeRangeEarliest}

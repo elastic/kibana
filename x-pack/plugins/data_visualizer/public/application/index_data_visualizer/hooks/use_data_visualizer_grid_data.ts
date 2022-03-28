@@ -54,7 +54,8 @@ function isDisplayField(fieldName: string): boolean {
 export const useDataVisualizerGridData = (
   input: DataVisualizerGridInput,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
-  onUpdate?: (params: Dictionary<unknown>) => void
+  onUpdate?: (params: Dictionary<unknown>) => void,
+  samplingProbability?: number
 ) => {
   const { services } = useDataVisualizerKibana();
   const { uiSettings, data } = services;
@@ -275,7 +276,7 @@ export const useDataVisualizerGridData = (
       const _documentCountStats = await data.search
         .search(
           {
-            params: getDocumentCountStatsRequest(fieldStatsRequest),
+            params: getDocumentCountStatsRequest({ ...fieldStatsRequest, samplingProbability }),
           },
           searchOptions
         )
@@ -309,7 +310,10 @@ export const useDataVisualizerGridData = (
       const _documentCountStatsRandom = await data.search
         .search(
           {
-            params: getDocumentCountStatsRequest(fieldStatsRequest, true),
+            params: getDocumentCountStatsRequest(
+              { ...fieldStatsRequest, samplingProbability },
+              true
+            ),
           },
           searchOptions
         )
@@ -329,7 +333,7 @@ export const useDataVisualizerGridData = (
     return () => {
       unmounted = true;
     };
-  }, [fieldStatsRequest]);
+  }, [fieldStatsRequest, samplingProbability]);
 
   const strategyResponse = useFieldStatsSearchStrategy(
     fieldStatsRequest,

@@ -26,6 +26,7 @@ export const getDocumentCountStatsRequest = (
     runtimeFieldMap,
     searchQuery,
     intervalMs,
+    samplingProbability,
   } = params;
 
   const size = 0;
@@ -36,7 +37,7 @@ export const getDocumentCountStatsRequest = (
     aggs = {
       sampling: {
         random_sampler: {
-          probability: 0.1,
+          probability: samplingProbability ?? 0.1,
         },
         aggs: {
           eventRate: {
