@@ -52893,7 +52893,7 @@ async function runBazelCommandWithRunner(bazelCommandRunner, bazelArgs, offline 
   try {
     await bazelProc;
   } catch {
-    _log__WEBPACK_IMPORTED_MODULE_5__["log"].error('HINT: when experiencing problems with node_modules try `yarn kbn bootstrap --force-install` or `yarn kbn reset` as last resort.');
+    _log__WEBPACK_IMPORTED_MODULE_5__["log"].error('HINT: If experiencing problems with node_modules try `yarn kbn bootstrap --force-install` or as last resort `yarn kbn reset && yarn kbn bootstrap`');
     throw new _errors__WEBPACK_IMPORTED_MODULE_6__["CliError"](`The bazel command that was running failed to complete.`);
   }
 
