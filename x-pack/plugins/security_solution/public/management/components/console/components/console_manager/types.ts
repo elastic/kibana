@@ -12,13 +12,13 @@ export interface ConsoleRegistrationInterface<Meta extends object = Record<strin
   id: string;
   /** The title for the console popup */
   title: ReactNode;
+  consoleProps: ConsoleProps;
+  onBeforeTerminate?: () => void;
   /**
    * Any additional metadata about the console. Helpful for when consuming Registered consoles
    * (ex. could hold the details data for the Host that the console is opened against)
    */
   meta?: Meta;
-  consoleProps: ConsoleProps;
-  onBeforeTerminate?: () => void;
 }
 
 export interface RegisteredConsoleClient<Meta extends object = Record<string, unknown>>

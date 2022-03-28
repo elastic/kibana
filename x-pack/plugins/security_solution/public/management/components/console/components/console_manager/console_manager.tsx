@@ -116,7 +116,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
   }, []);
 
   const getOne = useCallback<ConsoleManagerClient['getOne']>(
-    <Meta extends object = Record<string, unknown>>(id) => {
+    <Meta extends object = Record<string, unknown>>(id: string) => {
       if (consoleStorage[id]) {
         return consoleStorage[id].client as Readonly<RegisteredConsoleClient<Meta>>;
       }
@@ -133,12 +133,13 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
   }, [consoleStorage]);
 
   const register = useCallback<ConsoleManagerClient['register']>(
-    ({ id, title, ...otherRegisterProps }) => {
+    ({ id, title, meta, ...otherRegisterProps }) => {
       const managedConsole: ManagedConsole = {
         ...otherRegisterProps,
         client: {
           id,
           title,
+          meta,
           show: () => show(id),
           hide: () => hide(id),
           terminate: () => terminate(id),
@@ -160,7 +161,11 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       });
 
       managedConsole.console = (
-        <Console {...managedConsole.consoleProps} managedKey={managedConsole.key} />
+        <Console
+          {...managedConsole.consoleProps}
+          managedKey={managedConsole.key}
+          key={managedConsole.client.id}
+        />
       );
 
       return managedConsole.client;
