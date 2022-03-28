@@ -358,9 +358,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
   /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /api/ml/trained_models/:modelId/deployment/_stop Stop trained model deployment
-   * @apiName StopTrainedModelDeployment
-   * @apiDescription Stops trained model deployment.
+   * @api {post} /api/ml/trained_models/infer/:modelId Evaluates a trained model
+   * @apiName InferTrainedModelDeployment
+   * @apiDescription Evaluates a trained model.
    */
   router.post(
     {
@@ -396,9 +396,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
   /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /api/ml/trained_models/:modelId/deployment/_stop Stop trained model deployment
-   * @apiName StopTrainedModelDeployment
-   * @apiDescription Stops trained model deployment.
+   * @api {post} /api/ml/trained_models/ingest_pipeline_simulate Ingest pipeline simulate
+   * @apiName IngestPipelineSimulate
+   * @apiDescription Simulates an ingest pipeline call using supplied documents
    */
   router.post(
     {
