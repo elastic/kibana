@@ -5,40 +5,70 @@
  * 2.0.
  */
 
+import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) {
+export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
+  const remoteEsArchiver = getService('remoteEsArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['timePicker']);
+  const config = getService('config');
 
   describe('lens app', () => {
+    const localIndexPatternString = 'logstash-*';
+    const remoteIndexPatternString = 'ftr-remote:logstash-*';
+    const localFixtures = {
+      esArchive: 'x-pack/test/functional/es_archives/logstash_functional',
+      lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json',
+      lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/default',
+    };
+
+    const remoteFixtures = {
+      esArchive: 'x-pack/test/functional/es_archives/logstash_functional',
+      lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/lens_basic.json',
+      lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/default',
+    };
+    let esNode: EsArchiver;
+    let fixtureDirs: {
+      esArchive: string;
+      lensBasic: string;
+      lensDefault: string;
+    };
+    let indexPatternString: string;
     before(async () => {
-      log.debug('Starting lens before method');
+      await log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      try {
+        config.get('esTestCluster.ccs');
+        esNode = remoteEsArchiver;
+        fixtureDirs = remoteFixtures;
+        indexPatternString = remoteIndexPatternString;
+      } catch (error) {
+        esNode = esArchiver;
+        fixtureDirs = localFixtures;
+        indexPatternString = localIndexPatternString;
+      }
+      await log.debug(fixtureDirs);
+      await log.debug(esNode);
+      await esNode.load(fixtureDirs.esArchive);
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.uiSettings.update({ defaultIndex: 'logstash-*', 'dateFormat:tz': 'UTC' });
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
-      );
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
-      );
+      await kibanaServer.uiSettings.update({
+        defaultIndex: indexPatternString,
+        'dateFormat:tz': 'UTC',
+      });
+      await kibanaServer.importExport.load(fixtureDirs.lensBasic);
+      await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload(fixtureDirs.esArchive);
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
-      );
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/default'
-      );
+      await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
+      await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
     });
 
     describe('', function () {
@@ -83,4 +113,4 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./rollup'));
     });
   });
-}
+};
