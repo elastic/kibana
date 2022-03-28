@@ -28,7 +28,6 @@ export function useListArtifact(
     page: number;
     perPage: number;
     policies: string[];
-
     excludedPolicies: string[];
   }> = DEFAULT_OPTIONS,
   searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
