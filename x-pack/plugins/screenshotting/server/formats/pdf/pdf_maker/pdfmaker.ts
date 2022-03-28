@@ -204,12 +204,6 @@ export class PdfMaker {
         });
         this.worker.on('exit', () => {});
 
-        // Send the initial request
-        const generatePdfRequest: GeneratePdfRequest = {
-          data: this.getGeneratePdfRequestData(),
-        };
-        myPort.postMessage(generatePdfRequest);
-
         // We expect one message from the worker generating the PDF buffer.
         myPort.on('message', ({ error, data }: GeneratePdfResponse) => {
           if (error) {
@@ -223,6 +217,12 @@ export class PdfMaker {
           this.pageCount = data.metrics.pages;
           resolve(data.buffer);
         });
+
+        // Send the request
+        const generatePdfRequest: GeneratePdfRequest = {
+          data: this.getGeneratePdfRequestData(),
+        };
+        myPort.postMessage(generatePdfRequest);
       });
     } finally {
       await this.cleanupWorker();
