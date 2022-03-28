@@ -72,7 +72,7 @@ export const validateChangePasswordForm = (
     errors.password = i18n.translate(
       'xpack.security.management.users.changePasswordFlyout.passwordInvalidError',
       {
-        defaultMessage: 'Password must be at least 6 characters.',
+        defaultMessage: 'Enter at least 6 characters.',
       }
     );
   } else if (values.password !== values.confirm_password) {
@@ -258,7 +258,12 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
                 defaultMessage: 'New password',
               }
             )}
-            helpText="Password must be at least 6 characters."
+            helpText={i18n.translate(
+              'xpack.security.management.users.changePasswordFlyout.passwordHelpText',
+              {
+                defaultMessage: 'Password must be at least 6 characters.',
+              }
+            )}
             error={form.errors.password}
             isInvalid={form.touched.password && !!form.errors.password}
           >
