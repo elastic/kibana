@@ -18,7 +18,7 @@ export interface ConsoleRegistrationInterface<Meta extends object = Record<strin
    */
   meta?: Meta;
   consoleProps: ConsoleProps;
-  onBeforeClose?: () => void;
+  onBeforeTerminate?: () => void;
 }
 
 export interface RegisteredConsoleClient<Meta extends object = Record<string, unknown>>

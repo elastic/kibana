@@ -82,32 +82,44 @@ export const ConsolePopup = memo<ConsolePopupProps>(
     return (
       <ConsolePopupWrapper className={cssClassNames}>
         <div className="euiModal__flex modal-content">
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <h1>
-                <EuiIcon type="console" size="xl" /> {title}
-              </h1>
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
+          {!isHidden && (
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>
+                <h1>
+                  <EuiIcon type="console" size="xl" /> {title}
+                </h1>
+              </EuiModalHeaderTitle>
+            </EuiModalHeader>
+          )}
+
+          {/*
+            IMPORTANT:  The Modal body (below) is always shown. This is how the command history
+                        of each command is persisted - by allowing the consoles to still be
+                        rendered (Console takes care of hiding it own UI in this case)
+          */}
           <EuiModalBody>
             <div className="console-holder">{children}</div>
           </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButtonEmpty color="danger" onClick={handleTerminateOnClick}>
-              <FormattedMessage
-                id="xpack.securitySolution.console.manager.popup.terminateLabel"
-                defaultMessage="Terminate"
-              />
-            </EuiButtonEmpty>
-            <EuiButton onClick={onHide} fill>
-              <FormattedMessage
-                id="xpack.securitySolution.console.manager.popup.hideLabel"
-                defaultMessage="hide"
-              />
-            </EuiButton>
-          </EuiModalFooter>
+
+          {!isHidden && (
+            <EuiModalFooter>
+              <EuiButtonEmpty color="danger" onClick={handleTerminateOnClick}>
+                <FormattedMessage
+                  id="xpack.securitySolution.console.manager.popup.terminateLabel"
+                  defaultMessage="Terminate"
+                />
+              </EuiButtonEmpty>
+              <EuiButton onClick={onHide} fill>
+                <FormattedMessage
+                  id="xpack.securitySolution.console.manager.popup.hideLabel"
+                  defaultMessage="hide"
+                />
+              </EuiButton>
+            </EuiModalFooter>
+          )}
         </div>
-        {showTerminateConfirm && (
+
+        {!isHidden && showTerminateConfirm && (
           <ConfirmTerminate
             onConfirm={handleTerminateOnConfirm}
             onCancel={handleTerminateOnCancel}

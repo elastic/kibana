@@ -20,7 +20,7 @@ interface ManagedConsole {
   console: JSX.Element; // actual console component
   isOpen: boolean;
   key: symbol;
-  onBeforeClose?: ConsoleRegistrationInterface['onBeforeClose'];
+  onBeforeTerminate?: ConsoleRegistrationInterface['onBeforeTerminate'];
 }
 
 type RunningConsoleStorage = Record<string, ManagedConsole>;
@@ -102,10 +102,10 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         throw new Error(`Unable to terminate console id ${id}. Not found`);
       }
 
-      const { onBeforeClose } = prevState[id];
+      const { onBeforeTerminate } = prevState[id];
 
-      if (onBeforeClose) {
-        onBeforeClose();
+      if (onBeforeTerminate) {
+        onBeforeTerminate();
       }
 
       const newState = { ...prevState };
