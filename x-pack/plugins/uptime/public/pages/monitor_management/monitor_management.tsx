@@ -62,7 +62,7 @@ export const MonitorManagementPage: React.FC = () => {
         errorTitle={ERROR_HEADING_LABEL}
         errorBody={ERROR_HEADING_BODY}
       >
-        {isEnabled && <MonitorListContainer />}
+        {isEnabled || (!isEnabled && monitorList.total) ? <MonitorListContainer /> : null}
       </Loader>
       {isEnabled !== undefined && monitorList.total === 0 && (
         <EnablementEmptyState focusButton={shouldFocusEnablementButton} />
@@ -72,11 +72,11 @@ export const MonitorManagementPage: React.FC = () => {
 };
 
 const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorLoadingLabel', {
-  defaultMessage: 'Loading monitor management',
+  defaultMessage: 'Loading Monitor Management',
 });
 
 const ERROR_HEADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorError', {
-  defaultMessage: 'Error loading monitor management',
+  defaultMessage: 'Error loading Monitor Management',
 });
 
 const ERROR_HEADING_BODY = i18n.translate('xpack.uptime.monitorManagement.editMonitorError', {
