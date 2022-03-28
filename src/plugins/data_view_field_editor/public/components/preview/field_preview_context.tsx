@@ -337,7 +337,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       document: document!,
       context: `${type!}_field` as PainlessExecuteContext,
       script: script!,
-      documentId: currentDocId,
     });
 
     if (currentApiCall !== previewCount.current) {
