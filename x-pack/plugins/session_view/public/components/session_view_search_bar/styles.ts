@@ -9,7 +9,11 @@ import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 
-export const useStyles = () => {
+interface StylesDeps {
+  hasSearchResults: boolean;
+}
+
+export const useStyles = ({ hasSearchResults }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
@@ -19,10 +23,18 @@ export const useStyles = () => {
       right: euiTheme.size.xxl,
     };
 
+    const searchBarWithResult: CSSObject = {
+      position: 'relative',
+      'input.euiFieldSearch.euiFieldSearch-isClearable': {
+        paddingRight: hasSearchResults ? '200px' : '40px',
+      },
+    };
+
     return {
       pagination,
+      searchBarWithResult,
     };
-  }, [euiTheme]);
+  }, [euiTheme, hasSearchResults]);
 
   return cached;
 };

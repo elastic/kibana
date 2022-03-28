@@ -33,7 +33,9 @@ export const SessionViewSearchBar = ({
   onProcessSelected,
   searchResults,
 }: SessionViewSearchBarDeps) => {
-  const styles = useStyles();
+  const showPagination = !!searchResults?.length;
+
+  const styles = useStyles({ hasSearchResults: showPagination });
 
   const [selectedResult, setSelectedResult] = useState(0);
 
@@ -57,10 +59,8 @@ export const SessionViewSearchBar = ({
     }
   }, [searchResults, onProcessSelected, selectedResult]);
 
-  const showPagination = !!searchResults?.length;
-
   return (
-    <div data-test-subj="sessionView:searchInput" css={{ position: 'relative' }}>
+    <div data-test-subj="sessionView:searchInput" css={styles.searchBarWithResult}>
       <EuiSearchBar query={searchQuery} onChange={onSearch} box={translatePlaceholder} />
       {showPagination && (
         <EuiPagination

@@ -22,7 +22,6 @@ export const useStyles = ({ display }: StylesDeps) => {
       alignItems: 'center',
       padding: `0px ${euiTheme.size.s} `,
       width: '100%',
-      fontSize: '14px',
       fontWeight: 'inherit',
       height: '32px',
       lineHeight: euiTheme.size.l,
