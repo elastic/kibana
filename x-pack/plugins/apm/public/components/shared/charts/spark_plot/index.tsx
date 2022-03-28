@@ -25,7 +25,7 @@ import { useChartTheme } from '../../../../../../observability/public';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
-import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
+import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 
 function hasValidTimeseries(
   series?: Coordinate[] | null

@@ -36,7 +36,14 @@ export function getLogsHasDataFetcher(getStartServices: InfraClientStartServices
     const [, , { logViews }] = await getStartServices();
     const resolvedLogView = await logViews.client.getResolvedLogView(DEFAULT_SOURCE_ID);
     const logViewStatus = await logViews.client.getResolvedLogViewStatus(resolvedLogView);
-    return logViewStatus.index === 'available';
+
+    const hasData = logViewStatus.index === 'available';
+    const indices = resolvedLogView.indices;
+
+    return {
+      hasData,
+      indices,
+    };
   };
 }
 

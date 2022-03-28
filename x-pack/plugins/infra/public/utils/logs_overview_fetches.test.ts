@@ -48,6 +48,9 @@ describe('Logs UI Observability Homepage Functions', () => {
     it('should return true when non-empty indices exist', async () => {
       const { mockedGetStartServices, pluginStart } = setup();
 
+      pluginStart.logViews.client.getResolvedLogView.mockResolvedValue(
+        createResolvedLogViewMock({ indices: 'test-index' })
+      );
       pluginStart.logViews.client.getResolvedLogViewStatus.mockResolvedValue({
         index: 'available',
       });
@@ -56,12 +59,15 @@ describe('Logs UI Observability Homepage Functions', () => {
       const response = await hasData();
 
       expect(pluginStart.logViews.client.getResolvedLogViewStatus).toHaveBeenCalledTimes(1);
-      expect(response).toBe(true);
+      expect(response).toEqual({ hasData: true, indices: 'test-index' });
     });
 
     it('should return false when only empty indices exist', async () => {
       const { mockedGetStartServices, pluginStart } = setup();
 
+      pluginStart.logViews.client.getResolvedLogView.mockResolvedValue(
+        createResolvedLogViewMock({ indices: 'test-index' })
+      );
       pluginStart.logViews.client.getResolvedLogViewStatus.mockResolvedValue({
         index: 'empty',
       });
@@ -70,12 +76,15 @@ describe('Logs UI Observability Homepage Functions', () => {
       const response = await hasData();
 
       expect(pluginStart.logViews.client.getResolvedLogViewStatus).toHaveBeenCalledTimes(1);
-      expect(response).toBe(false);
+      expect(response).toEqual({ hasData: false, indices: 'test-index' });
     });
 
     it('should return false when no index exists', async () => {
       const { mockedGetStartServices, pluginStart } = setup();
 
+      pluginStart.logViews.client.getResolvedLogView.mockResolvedValue(
+        createResolvedLogViewMock({ indices: 'test-index' })
+      );
       pluginStart.logViews.client.getResolvedLogViewStatus.mockResolvedValue({
         index: 'missing',
       });
@@ -84,7 +93,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const response = await hasData();
 
       expect(pluginStart.logViews.client.getResolvedLogViewStatus).toHaveBeenCalledTimes(1);
-      expect(response).toBe(false);
+      expect(response).toEqual({ hasData: false, indices: 'test-index' });
     });
   });
 

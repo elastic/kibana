@@ -21,6 +21,7 @@ import {
   AlertInstanceState as AlertState,
   AlertTypeState as RuleTypeState,
 } from '../../../../../alerting/server';
+
 import {
   RuleParams,
   ruleParamsRT,
@@ -42,6 +43,7 @@ import {
   UngroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../common/runtime_types';
+import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InfraBackendLibs } from '../../infra_types';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
@@ -67,7 +69,8 @@ type LogThresholdAlertFactory = (
   id: string,
   reason: string,
   value: number,
-  threshold: number
+  threshold: number,
+  actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>
 ) => LogThresholdAlert;
 
 const COMPOSITE_GROUP_SIZE = 2000;
@@ -92,10 +95,13 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     LogThresholdAlertState,
     LogThresholdAlertContext,
     LogThresholdActionGroups
-  >(async ({ services, params }) => {
-    const { alertWithLifecycle, savedObjectsClient, scopedClusterClient } = services;
-    const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold) =>
-      alertWithLifecycle({
+  >(async ({ services, params, startedAt }) => {
+    const { alertWithLifecycle, savedObjectsClient, scopedClusterClient, getAlertStartedDate } =
+      services;
+    const { basePath } = libs;
+
+    const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold, actions) => {
+      const alert = alertWithLifecycle({
         id,
         fields: {
           [ALERT_EVALUATION_THRESHOLD]: threshold,
@@ -103,6 +109,30 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           [ALERT_REASON]: reason,
         },
       });
+
+      if (actions && actions.length > 0) {
+        const indexedStartedAt = getAlertStartedDate(id) ?? startedAt.toISOString();
+        const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
+        const viewInAppUrl = basePath.publicBaseUrl
+          ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
+          : relativeViewInAppUrl;
+
+        const sharedContext = {
+          timestamp: new Date().toISOString(),
+          viewInAppUrl,
+        };
+        actions.forEach((actionSet) => {
+          const { actionGroup, context } = actionSet;
+          alert.scheduleActions(actionGroup, { ...sharedContext, ...context });
+        });
+      }
+
+      alert.replaceState({
+        alertState: AlertStates.ALERT,
+      });
+
+      return alert;
+    };
 
     const [, , { logViews }] = await libs.getStartServices();
     const { indices, timestampField, runtimeMappings } = await logViews
@@ -151,19 +181,9 @@ async function executeAlert(
   }
 
   if (hasGroupBy(ruleParams)) {
-    processGroupByResults(
-      await getGroupedResults(query, esClient),
-      ruleParams,
-      alertFactory,
-      updateAlert
-    );
+    processGroupByResults(await getGroupedResults(query, esClient), ruleParams, alertFactory);
   } else {
-    processUngroupedResults(
-      await getUngroupedResults(query, esClient),
-      ruleParams,
-      alertFactory,
-      updateAlert
-    );
+    processUngroupedResults(await getUngroupedResults(query, esClient), ruleParams, alertFactory);
   }
 }
 
@@ -207,8 +227,7 @@ async function executeRatioAlert(
       numeratorGroupedResults,
       denominatorGroupedResults,
       ruleParams,
-      alertFactory,
-      updateAlert
+      alertFactory
     );
   } else {
     const [numeratorUngroupedResults, denominatorUngroupedResults] = await Promise.all([
@@ -219,8 +238,7 @@ async function executeRatioAlert(
       numeratorUngroupedResults,
       denominatorUngroupedResults,
       ruleParams,
-      alertFactory,
-      updateAlert
+      alertFactory
     );
   }
 }
@@ -239,8 +257,7 @@ const getESQuery = (
 export const processUngroupedResults = (
   results: UngroupedSearchQueryResponse,
   params: CountRuleParams,
-  alertFactory: LogThresholdAlertFactory,
-  alertUpdater: AlertUpdater
+  alertFactory: LogThresholdAlertFactory
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
@@ -251,9 +268,9 @@ export const processUngroupedResults = (
     timeSize,
     timeUnit
   );
+
   if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
-    const alert = alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value);
-    alertUpdater(alert, AlertStates.ALERT, [
+    const actions = [
       {
         actionGroup: FIRED_ACTIONS.id,
         context: {
@@ -264,7 +281,8 @@ export const processUngroupedResults = (
           reason: reasonMessage,
         },
       },
-    ]);
+    ];
+    alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value, actions);
   }
 };
 
@@ -272,8 +290,7 @@ export const processUngroupedRatioResults = (
   numeratorResults: UngroupedSearchQueryResponse,
   denominatorResults: UngroupedSearchQueryResponse,
   params: RatioRuleParams,
-  alertFactory: LogThresholdAlertFactory,
-  alertUpdater: AlertUpdater
+  alertFactory: LogThresholdAlertFactory
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -289,8 +306,7 @@ export const processUngroupedRatioResults = (
       timeSize,
       timeUnit
     );
-    const alert = alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value);
-    alertUpdater(alert, AlertStates.ALERT, [
+    const actions = [
       {
         actionGroup: FIRED_ACTIONS.id,
         context: {
@@ -302,7 +318,8 @@ export const processUngroupedRatioResults = (
           reason: reasonMessage,
         },
       },
-    ]);
+    ];
+    alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value, actions);
   }
 };
 
@@ -348,8 +365,7 @@ const getReducedGroupByResults = (
 export const processGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: CountRuleParams,
-  alertFactory: LogThresholdAlertFactory,
-  alertUpdater: AlertUpdater
+  alertFactory: LogThresholdAlertFactory
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -367,8 +383,7 @@ export const processGroupByResults = (
         timeSize,
         timeUnit
       );
-      const alert = alertFactory(group.name, reasonMessage, documentCount, count.value);
-      alertUpdater(alert, AlertStates.ALERT, [
+      const actions = [
         {
           actionGroup: FIRED_ACTIONS.id,
           context: {
@@ -379,7 +394,8 @@ export const processGroupByResults = (
             reason: reasonMessage,
           },
         },
-      ]);
+      ];
+      alertFactory(group.name, reasonMessage, documentCount, count.value, actions);
     }
   });
 };
@@ -388,8 +404,7 @@ export const processGroupByRatioResults = (
   numeratorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   denominatorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: RatioRuleParams,
-  alertFactory: LogThresholdAlertFactory,
-  alertUpdater: AlertUpdater
+  alertFactory: LogThresholdAlertFactory
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
@@ -417,8 +432,7 @@ export const processGroupByRatioResults = (
         timeSize,
         timeUnit
       );
-      const alert = alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value);
-      alertUpdater(alert, AlertStates.ALERT, [
+      const actions = [
         {
           actionGroup: FIRED_ACTIONS.id,
           context: {
@@ -430,30 +444,9 @@ export const processGroupByRatioResults = (
             reason: reasonMessage,
           },
         },
-      ]);
+      ];
+      alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value, actions);
     }
-  });
-};
-
-type AlertUpdater = (
-  alert: Alert<AlertState, AlertContext, LogThresholdActionGroups>,
-  state: AlertStates,
-  actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>
-) => void;
-
-export const updateAlert: AlertUpdater = (alert, state, actions) => {
-  if (actions && actions.length > 0) {
-    const sharedContext = {
-      timestamp: new Date().toISOString(),
-    };
-    actions.forEach((actionSet) => {
-      const { actionGroup, context } = actionSet;
-      alert.scheduleActions(actionGroup, { ...sharedContext, ...context });
-    });
-  }
-
-  alert.replaceState({
-    alertState: state,
   });
 };
 

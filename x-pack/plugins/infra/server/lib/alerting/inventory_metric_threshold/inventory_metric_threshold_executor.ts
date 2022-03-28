@@ -33,7 +33,7 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
-import { createScopedLogger } from '../common/utils';
+import { createScopedLogger, getViewInAppUrlInventory } from '../common/utils';
 import { evaluateCondition } from './evaluate_condition';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
@@ -63,12 +63,12 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertState,
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params, alertId, executionId }) => {
+  >(async ({ services, params, alertId, executionId, startedAt }) => {
     const startTime = Date.now();
     const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const logger = createScopedLogger(libs.logger, 'inventoryRule', { alertId, executionId });
-    const { alertWithLifecycle, savedObjectsClient } = services;
+    const { alertWithLifecycle, savedObjectsClient, getAlertStartedDate } = services;
     const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
         id,
@@ -87,10 +87,18 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory('*', reason);
+        const indexedStartedDate = getAlertStartedDate('*') ?? startedAt.toISOString();
+        const viewInAppUrl = getViewInAppUrlInventory(
+          criteria,
+          nodeType,
+          indexedStartedDate,
+          libs.basePath
+        );
         alert.scheduleActions(actionGroupId, {
           group: '*',
           alertState: stateToAlertMessage[AlertStates.ERROR],
           reason,
+          viewInAppUrl,
           timestamp: moment().toISOString(),
           value: null,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -191,7 +199,14 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
 
-        const alert = alertFactory(`${group}`, reason);
+        const alert = alertFactory(group, reason);
+        const indexedStartedDate = getAlertStartedDate(group) ?? startedAt.toISOString();
+        const viewInAppUrl = getViewInAppUrlInventory(
+          criteria,
+          nodeType,
+          indexedStartedDate,
+          libs.basePath
+        );
         scheduledActionsCount++;
         alert.scheduleActions(
           /**
@@ -203,6 +218,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             group,
             alertState: stateToAlertMessage[nextState],
             reason,
+            viewInAppUrl,
             timestamp: moment().toISOString(),
             value: mapToConditionsLookup(results, (result) =>
               formatMetric(result[group].metric, result[group].currentValue)

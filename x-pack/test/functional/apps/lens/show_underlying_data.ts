@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/128396
-  describe.skip('show underlying data', () => {
+  describe('show underlying data', () => {
     it('should show the open button for a compatible saved visualization', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -25,6 +24,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.waitForVisualization();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
+        operation: 'terms',
+        field: 'extension.raw',
+      });
+
+      await PageObjects.lens.waitForVisualization();
+
       // expect the button is shown and enabled
 
       await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
@@ -36,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('discoverChart');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
-      expect(columns).to.eql(['ip', '@timestamp', 'bytes']);
+      expect(columns).to.eql(['extension.raw', '@timestamp', 'bytes']);
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
     });
@@ -83,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('indexPattern-filter-by-input > switchQueryLanguageButton');
       // apparently setting a filter requires some time before and after typing to work properly
       await PageObjects.common.sleep(1000);
-      await PageObjects.lens.setFilterBy('memory');
+      await PageObjects.lens.setFilterBy('machine.ram:*');
       await PageObjects.common.sleep(1000);
 
       await PageObjects.lens.closeDimensionEditor();
@@ -98,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('discoverChart');
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
-        '( ( ip: "220.120.146.16" ) OR ( ip: "152.56.56.106" ) OR ( ip: "111.55.80.52" ) )'
+        '( ( extension.raw: "png" ) OR ( extension.raw: "css" ) OR ( extension.raw: "jpg" ) )'
       );
       const filterPills = await filterBar.getFiltersLabel();
       expect(filterPills.length).to.be(1);
@@ -118,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       const input = await find.activeElement();
-      await input.type(`bytes > 6000`);
+      await input.type(`bytes > 2000`);
       // the tooltip seems to be there as long as the focus is in the query string
       await input.pressKeys(browser.keys.RIGHT);
 
@@ -134,10 +142,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('discoverChart');
       // check the columns
       const columns = await PageObjects.discover.getColumnHeaders();
-      expect(columns).to.eql(['ip', '@timestamp', 'memory']);
+      expect(columns).to.eql(['extension.raw', '@timestamp', 'memory']);
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
-        '( ( bytes > 6000 ) AND ( ( ip: "0.53.251.53" ) OR ( ip: "0.108.3.2" ) OR ( ip: "0.209.80.244" ) ) )'
+        '( ( bytes > 2000 ) AND ( ( extension.raw: "css" ) OR ( extension.raw: "gif" ) OR ( extension.raw: "jpg" ) ) )'
       );
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
@@ -170,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
-        '( ( bytes > 4000 ) AND ( ( ip: "0.53.251.53" ) OR ( ip: "0.108.3.2" ) OR ( ip: "0.209.80.244" ) ) )'
+        '( ( bytes > 4000 ) AND ( ( extension.raw: "css" ) OR ( extension.raw: "gif" ) OR ( extension.raw: "jpg" ) ) )'
       );
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);

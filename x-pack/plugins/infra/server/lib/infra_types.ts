@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
+import type { IBasePath } from 'kibana/server';
 import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginCoreSetup } from '../types';
@@ -32,4 +33,5 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   metricsRules: RulesServiceSetup;
   getStartServices: InfraPluginCoreSetup['getStartServices'];
   logger: Logger;
+  basePath: IBasePath;
 }
