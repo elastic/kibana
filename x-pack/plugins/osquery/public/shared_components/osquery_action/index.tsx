@@ -6,7 +6,7 @@
  */
 
 import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
-import React, { useMemo, ReactElement } from 'react';
+import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
