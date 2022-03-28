@@ -50,6 +50,7 @@ const enabledActionTypes = [
   'test.no-attempts-rate-limit',
   'test.throw',
   'test.excluded',
+  'test.capped',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -163,6 +164,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+          `--xpack.alerting.rules.execution.actions.connectorTypeOverrides=${JSON.stringify([
+            { id: 'test.capped', max: '1' },
+          ])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,
