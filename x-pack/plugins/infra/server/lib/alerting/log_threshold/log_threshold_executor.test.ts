@@ -12,18 +12,16 @@ import {
   buildFiltersFromCriteria,
   getUngroupedESQuery,
   getGroupedESQuery,
-  // processUngroupedResults,
-  // processGroupByResults,
+  processUngroupedResults,
+  processGroupByResults,
 } from './log_threshold_executor';
 import {
   Comparator,
-  // AlertStates,
   RuleParams,
   Criterion,
-  // UngroupedSearchQueryResponse,
-  // GroupedSearchQueryResponse,
+  UngroupedSearchQueryResponse,
+  GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold';
-// import { alertsMock } from '../../../../../alerting/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 // Mocks //
@@ -31,7 +29,6 @@ const numericField = {
   field: 'numericField',
   value: 10,
 };
-
 const keywordField = {
   field: 'keywordField',
   value: 'error',
@@ -404,138 +401,115 @@ describe('Log threshold executor', () => {
     });
   });
 
-  // TODO: alertUpdater doesn't exists anymore, but we should keep and update the tests.https://github.com/elastic/kibana/issues/128452
+  describe('Results processors', () => {
+    describe('Can process ungrouped results', () => {
+      test('It handles the ALERT state correctly', () => {
+        const alertFactoryMock = jest.fn();
+        const ruleParams = {
+          ...baseRuleParams,
+          criteria: [positiveCriteria[0]],
+        };
+        const results = {
+          hits: {
+            total: {
+              value: 10,
+            },
+          },
+        } as UngroupedSearchQueryResponse;
 
-  // describe('Results processors', () => {
-  //   describe('Can process ungrouped results', () => {
-  //     test('It handles the ALERT state correctly', () => {
-  //       const alertUpdaterMock = jest.fn();
-  //       const ruleParams = {
-  //         ...baseRuleParams,
-  //         criteria: [positiveCriteria[0]],
-  //       };
-  //       const results = {
-  //         hits: {
-  //           total: {
-  //             value: 10,
-  //           },
-  //         },
-  //       } as UngroupedSearchQueryResponse;
+        processUngroupedResults(results, ruleParams, alertFactoryMock);
 
-  //       const viewInAppUrl = '/app/logs/link-to/default/logs?time=1647516371843';
-  //       processUngroupedResults(
-  //         results,
-  //         ruleParams,
-  //         alertsMock.createAlertFactory.create,
-  //         alertUpdaterMock,
-  //         viewInAppUrl
-  //       );
-  //       // First call, second argument
-  //       expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
-  //       // First call, third argument
-  //       expect(alertUpdaterMock.mock.calls[0][2]).toEqual([
-  //         {
-  //           actionGroup: 'logs.threshold.fired',
-  //           context: {
-  //             conditions: 'numericField more than 10',
-  //             group: null,
-  //             matchingDocuments: 10,
-  //             isRatio: false,
-  //             reason: '10 log entries in the last 5 mins. Alert when > 5.',
-  //             viewInAppUrl: `/app/logs/link-to/default/logs?time=1647516371843`,
-  //           },
-  //         },
-  //       ]);
-  //     });
-  //   });
+        // first call, fifth argument
+        expect(alertFactoryMock.mock.calls[0][4]).toEqual([
+          {
+            actionGroup: 'logs.threshold.fired',
+            context: {
+              conditions: 'numericField more than 10',
+              group: null,
+              matchingDocuments: 10,
+              isRatio: false,
+              reason: '10 log entries in the last 5 mins. Alert when > 5.',
+            },
+          },
+        ]);
+      });
+    });
 
-  //   describe('Can process grouped results', () => {
-  //     test('It handles the ALERT state correctly', () => {
-  //       const alertUpdaterMock = jest.fn();
-  //       const ruleParams = {
-  //         ...baseRuleParams,
-  //         criteria: [positiveCriteria[0]],
-  //         groupBy: ['host.name', 'event.dataset'],
-  //       };
-  //       // Two groups should fire, one shouldn't
-  //       const results = [
-  //         {
-  //           key: {
-  //             'host.name': 'i-am-a-host-name-1',
-  //             'event.dataset': 'i-am-a-dataset-1',
-  //           },
-  //           doc_count: 100,
-  //           filtered_results: {
-  //             doc_count: 10,
-  //           },
-  //         },
-  //         {
-  //           key: {
-  //             'host.name': 'i-am-a-host-name-2',
-  //             'event.dataset': 'i-am-a-dataset-2',
-  //           },
-  //           doc_count: 100,
-  //           filtered_results: {
-  //             doc_count: 2,
-  //           },
-  //         },
-  //         {
-  //           key: {
-  //             'host.name': 'i-am-a-host-name-3',
-  //             'event.dataset': 'i-am-a-dataset-3',
-  //           },
-  //           doc_count: 100,
-  //           filtered_results: {
-  //             doc_count: 20,
-  //           },
-  //         },
-  //       ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
+    describe('Can process grouped results', () => {
+      test('It handles the ALERT state correctly', () => {
+        const alertFactoryMock = jest.fn();
+        const ruleParams = {
+          ...baseRuleParams,
+          criteria: [positiveCriteria[0]],
+          groupBy: ['host.name', 'event.dataset'],
+        };
+        // Two groups should fire, one shouldn't
+        const results = [
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-1',
+              'event.dataset': 'i-am-a-dataset-1',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 10,
+            },
+          },
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-2',
+              'event.dataset': 'i-am-a-dataset-2',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 2,
+            },
+          },
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-3',
+              'event.dataset': 'i-am-a-dataset-3',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 20,
+            },
+          },
+        ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-  //       const viewInAppUrl = `http://localhost:5601/kibana/app/logs/link-to/default/logs?time=1647516371843`;
-  //       processGroupByResults(
-  //         results,
-  //         ruleParams,
-  //         alertsMock.createAlertFactory.create,
-  //         alertUpdaterMock,
-  //         viewInAppUrl
-  //       );
-  //       expect(alertUpdaterMock.mock.calls.length).toBe(2);
-  //       // First call, second argument
-  //       expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
-  //       // First call, third argument
-  //       expect(alertUpdaterMock.mock.calls[0][2]).toEqual([
-  //         {
-  //           actionGroup: 'logs.threshold.fired',
-  //           context: {
-  //             conditions: 'numericField more than 10',
-  //             group: 'i-am-a-host-name-1, i-am-a-dataset-1',
-  //             matchingDocuments: 10,
-  //             isRatio: false,
-  //             reason:
-  //               '10 log entries in the last 5 mins for i-am-a-host-name-1, i-am-a-dataset-1. Alert when > 5.',
-  //             viewInAppUrl,
-  //           },
-  //         },
-  //       ]);
+        processGroupByResults(results, ruleParams, alertFactoryMock);
+        expect(alertFactoryMock.mock.calls.length).toBe(2);
 
-  //       // Second call, second argument
-  //       expect(alertUpdaterMock.mock.calls[1][1]).toBe(AlertStates.ALERT);
-  //       // Second call, third argument
-  //       expect(alertUpdaterMock.mock.calls[1][2]).toEqual([
-  //         {
-  //           actionGroup: 'logs.threshold.fired',
-  //           context: {
-  //             conditions: 'numericField more than 10',
-  //             group: 'i-am-a-host-name-3, i-am-a-dataset-3',
-  //             matchingDocuments: 20,
-  //             isRatio: false,
-  //             reason:
-  //               '20 log entries in the last 5 mins for i-am-a-host-name-3, i-am-a-dataset-3. Alert when > 5.',
-  //             viewInAppUrl,
-  //           },
-  //         },
-  //       ]);
-  //     });
-  //   });
-  // });
+        // First call, fifth argument
+        expect(alertFactoryMock.mock.calls[0][4]).toEqual([
+          {
+            actionGroup: 'logs.threshold.fired',
+            context: {
+              conditions: 'numericField more than 10',
+              group: 'i-am-a-host-name-1, i-am-a-dataset-1',
+              matchingDocuments: 10,
+              isRatio: false,
+              reason:
+                '10 log entries in the last 5 mins for i-am-a-host-name-1, i-am-a-dataset-1. Alert when > 5.',
+            },
+          },
+        ]);
+
+        // Second call, fifth argument
+        expect(alertFactoryMock.mock.calls[1][4]).toEqual([
+          {
+            actionGroup: 'logs.threshold.fired',
+            context: {
+              conditions: 'numericField more than 10',
+              group: 'i-am-a-host-name-3, i-am-a-dataset-3',
+              matchingDocuments: 20,
+              isRatio: false,
+              reason:
+                '20 log entries in the last 5 mins for i-am-a-host-name-3, i-am-a-dataset-3. Alert when > 5.',
+            },
+          },
+        ]);
+      });
+    });
+  });
 });
