@@ -1,0 +1,108 @@
+[[cases-api-get-case]]
+== Get case API
+++++
+<titleabbrev>Get case</titleabbrev>
+++++
+
+Returns a specified case.
+
+=== Request
+
+`GET <kibana host>:<port>/api/cases/<case ID>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/<case ID>`
+
+=== Prerequisite
+
+You must have `read` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases you're seeking.
+
+=== Path parameters
+
+`<case_id>`::
+(Required, string) An identifier for the case to retrieve. Use 
+<<cases-api-find-cases>> to retrieve case IDs.
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== Query parameters
+
+`includeComments`::
+(Optional, boolean) Determines whether case comments are returned. Defaults to 
+`true`.
+
+`owner`::
+(Optional, string or array of strings) A filter to limit the retrieved cases to
+a specific set of applications. Valid values are: `cases`, `observability`,
+and `securitySolution`. If this parameter is omitted, the response contains all
+cases that the user has access to read.
+
+WARNING: The `includeComments` query parameter is deprecated and will be removed 
+in a future release.
+
+==== Response code
+
+`200`::
+   Indicates a successful call.
+
+==== Example
+
+Returns case ID `a18b38a0-71b0-11ea-a0b2-c51ea50a58e2` without comments:
+
+[source,sh]
+--------------------------------------------------
+GET api/cases/a18b38a0-71b0-11ea-a0b2-c51ea50a58e2?includeComments=false
+--------------------------------------------------
+// KIBANA
+
+The API returns a JSON object with the retrieved case. For example:
+
+[source,json]
+--------------------------------------------------
+{
+  "id": "a18b38a0-71b0-11ea-a0b2-c51ea50a58e2",
+  "version": "Wzk4LDFd",
+  "comments": [],
+  "totalComment": 0,
+  "closed_at": null,
+  "closed_by": null,
+  "created_at": "2020-03-29T11:30:02.658Z",
+  "created_by": {
+    "email": "ahunley@imf.usa.gov",
+    "full_name": "Alan Hunley",
+    "username": "ahunley"
+  },
+  "external_service": null,
+  "updated_at": "2020-03-29T12:01:50.244Z",
+  "updated_by": {
+    "full_name": "Classified",
+    "email": "classified@hms.oo.gov.uk",
+    "username": "M"
+  },
+  "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active!",
+  "title": "This case will self-destruct in 5 seconds",
+  "status": "open",
+  "connector": {
+    "id": "131d4448-abe0-4789-939d-8ef60680b498",
+    "name": "My connector",
+    "type": ".jira",
+    "fields": {
+      "issueType": "10006",
+      "priority": "High",
+    }
+  },
+  "settings": {
+    "syncAlerts": true
+  },
+  "owner": "securitySolution",
+  "tags": [
+    "phishing",
+    "social engineering",
+    "bubblegum"
+  ]
+}
+--------------------------------------------------
