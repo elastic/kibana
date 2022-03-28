@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
         const button = await testSubjects.find('visualizeEditInLensButton');
         await button.click();
-        await lens.waitForVisualization();
+        await lens.waitForVisualization('xyVisChart');
         await retry.try(async () => {
           const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
           expect(dimensions).to.have.length(2);
@@ -72,7 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         const button = await testSubjects.find('visualizeEditInLensButton');
         await button.click();
-        await lens.waitForVisualization();
+        await lens.waitForVisualization('xyVisChart');
 
         expect(await filterBar.hasFilter('extension', 'css')).to.be(true);
       });
@@ -86,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         const button = await testSubjects.find('visualizeEditInLensButton');
         await button.click();
-        await lens.waitForVisualization();
+        await lens.waitForVisualization('xyVisChart');
 
         expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
       });
@@ -128,7 +128,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const button = await testSubjects.find('visualizeEditInLensButton');
         await button.click();
-        await lens.waitForVisualization();
+        await lens.waitForVisualization('xyVisChart');
         await retry.try(async () => {
           const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
           expect(await dimensions[1].getVisibleText()).to.be('Count of records');
@@ -157,7 +157,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const button = await testSubjects.find('visualizeEditInLensButton');
         await button.click();
-        await lens.waitForVisualization();
+        await lens.waitForVisualization('mtrVis');
         await retry.try(async () => {
           const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
           expect(await dimensions[1].getVisibleText()).to.be('Count of records');

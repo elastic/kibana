@@ -92,6 +92,10 @@ import {
 import { IExecutionLogResult } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
+import {
+  formatExecutionErrorsResult,
+  IExecutionErrorsResult,
+} from '../lib/format_execution_log_errors';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -259,6 +263,7 @@ export interface GetExecutionLogByIdParams {
   sort: estypes.Sort;
 }
 
+export type IExecutionLogWithErrorsResult = IExecutionLogResult & IExecutionErrorsResult;
 interface ScheduleRuleOptions {
   id: string;
   consumer: string;
@@ -622,7 +627,6 @@ export class RulesClient {
       entity: AlertingAuthorizationEntity.Rule,
     });
 
-    // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
     const durationMillis = parseDuration(rule.schedule.interval) * (numberOfExecutions ?? 60);
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
@@ -688,7 +692,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
-  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogWithErrorsResult> {
     this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
@@ -725,23 +729,47 @@ export class RulesClient {
 
     const eventLogClient = await this.getEventLogClient();
 
-    const results = await eventLogClient.aggregateEventsBySavedObjectIds(
-      'alert',
-      [id],
-      {
-        start: parsedDateStart.toISOString(),
-        end: parsedDateEnd.toISOString(),
-        filter,
-        aggs: getExecutionLogAggregation({
-          page,
-          perPage,
-          sort,
-        }),
-      },
-      rule.legacyId !== null ? [rule.legacyId] : undefined
-    );
+    try {
+      const [aggResult, errorResult] = await Promise.all([
+        eventLogClient.aggregateEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            start: parsedDateStart.toISOString(),
+            end: parsedDateEnd.toISOString(),
+            filter,
+            aggs: getExecutionLogAggregation({
+              page,
+              perPage,
+              sort,
+            }),
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+        eventLogClient.findEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            start: parsedDateStart.toISOString(),
+            end: parsedDateEnd.toISOString(),
+            per_page: 500,
+            filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+            sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+      ]);
 
-    return formatExecutionLogResult(results);
+      return {
+        ...formatExecutionLogResult(aggResult),
+        ...formatExecutionErrorsResult(errorResult),
+      };
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
   }
 
   public async find<Params extends RuleTypeParams = never>({
