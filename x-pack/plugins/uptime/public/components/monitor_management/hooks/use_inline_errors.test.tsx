@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { MockRedux } from '../../../lib/helper/rtl_helpers';
 import { useInlineErrors } from './use_inline_errors';
+import { DEFAULT_THROTTLING } from '../../../../common/runtime_types';
 import * as obsvPlugin from '../../../../../observability/public/hooks/use_es_search';
 
 function mockNow(date: string | number | Date) {
@@ -74,6 +75,7 @@ describe('useInlineErrors', function () {
           syntheticsService: {
             loading: false,
           },
+          throttling: DEFAULT_THROTTLING,
         },
         1641081600000,
         true,

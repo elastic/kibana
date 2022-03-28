@@ -102,42 +102,42 @@ describe('Logs UI Observability Homepage Functions', () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexStatus: 'available' },
+        data: { logIndexStatus: 'available', indices: 'test-index' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
       const response = await hasData();
 
       expect(mockedCallFetchLogSourceStatusAPI).toHaveBeenCalledTimes(1);
-      expect(response).toBe(true);
+      expect(response).toEqual({ hasData: true, indices: 'test-index' });
     });
 
     it('should return false when only empty indices exist', async () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexStatus: 'empty' },
+        data: { logIndexStatus: 'empty', indices: 'test-index' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
       const response = await hasData();
 
       expect(mockedCallFetchLogSourceStatusAPI).toHaveBeenCalledTimes(1);
-      expect(response).toBe(false);
+      expect(response).toEqual({ hasData: false, indices: 'test-index' });
     });
 
     it('should return false when no index exists', async () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexStatus: 'missing' },
+        data: { logIndexStatus: 'missing', indices: 'test-index' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
       const response = await hasData();
 
       expect(mockedCallFetchLogSourceStatusAPI).toHaveBeenCalledTimes(1);
-      expect(response).toBe(false);
+      expect(response).toEqual({ hasData: false, indices: 'test-index' });
     });
   });
 
