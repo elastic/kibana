@@ -747,6 +747,10 @@ export interface NavigateToAppOptions {
   skipAppLeave?: boolean;
 }
 
+/**
+ * Options for the {@link ApplicationStart.navigateToUrl | navigateToUrl API}
+ * @public
+ */
 export interface NavigateToUrlOptions {
   /**
    * if true, will bypass the default onAppLeave behavior
