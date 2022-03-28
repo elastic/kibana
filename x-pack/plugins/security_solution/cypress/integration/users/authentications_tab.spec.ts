@@ -29,7 +29,7 @@ describe('Authentications stats and tables', () => {
 
   it(`renders all authentications`, () => {
     const totalUsers = 1;
-    const usersPerPage = 10;
+    const usersPerPage = 1;
 
     cy.get(AUTHENTICATIONS_TAB).click();
 
