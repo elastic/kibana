@@ -60,7 +60,6 @@ import {
 import { convertKueryToElasticSearchQuery } from '../../../common/lib/keury';
 import { getField, getFieldKey } from '../../../helpers';
 import {
-  isThresholdRule,
   replaceTemplateFieldFromQuery,
   replaceTemplateFieldFromMatchFilters,
   replaceTemplateFieldFromDataProviders,
@@ -270,11 +269,19 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
   );
 };
 
-export const isEqlRuleWithGroupId = (ecsData: Ecs): boolean => {
+export const isEqlAlertWithGroupId = (ecsData: Ecs): boolean => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
   const groupId = getField(ecsData, ALERT_GROUP_ID);
   const isEql = ruleType === 'eql' || (Array.isArray(ruleType) && ruleType[0] === 'eql');
   return isEql && groupId?.length > 0;
+};
+
+export const isThresholdAlert = (ecsData: Ecs): boolean => {
+  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  return (
+    ruleType === 'threshold' ||
+    (Array.isArray(ruleType) && ruleType.length > 0 && ruleType[0] === 'threshold')
+  );
 };
 
 export const buildAlertsKqlFilter = (
@@ -563,7 +570,7 @@ export const sendAlertToTimelineAction = async ({
           timeline.timelineType
         );
         // threshold with template
-        if (isThresholdRule(ecsData)) {
+        if (isThresholdAlert(ecsData)) {
           return createThresholdTimeline(
             ecsData,
             createTimeline,
@@ -627,11 +634,11 @@ export const sendAlertToTimelineAction = async ({
         to,
       });
     }
-  } else if (isThresholdRule(ecsData)) {
+  } else if (isThresholdAlert(ecsData)) {
     return createThresholdTimeline(ecsData, createTimeline, noteContent, {}, getExceptions);
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(alertIds ?? [], ecsData._id);
-    if (isEqlRuleWithGroupId(ecsData)) {
+    if (isEqlAlertWithGroupId(ecsData)) {
       const tempEql = buildEqlDataProviderOrFilter(alertIds ?? [], ecs);
       dataProviders = tempEql.dataProviders;
       filters = tempEql.filters;

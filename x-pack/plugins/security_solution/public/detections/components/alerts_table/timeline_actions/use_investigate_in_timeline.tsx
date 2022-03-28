@@ -40,11 +40,11 @@ export const useInvestigateInTimeline = ({
   ecsRowData,
   onInvestigateInTimelineAlertClick,
 }: UseInvestigateInTimelineActionProps) => {
+  const { addError } = useAppToasts();
   const {
     data: { search: searchStrategyClient, query },
   } = useKibana().services;
   const dispatch = useDispatch();
-  const { addError } = useAppToasts();
 
   const { services } = useKibana();
   const { getExceptionListsItems } = useApi(services.http);
