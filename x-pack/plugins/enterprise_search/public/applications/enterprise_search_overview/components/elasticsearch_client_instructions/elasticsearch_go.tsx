@@ -11,6 +11,8 @@ import dedent from 'dedent';
 
 import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { docLinks } from '../../../shared/doc_links';
+
 export const ElasticsearchGo: React.FC<{ cloudId?: string }> = ({ cloudId }) => {
   return (
     <>
@@ -25,10 +27,7 @@ export const ElasticsearchGo: React.FC<{ cloudId?: string }> = ({ cloudId }) => 
           <li>Helpers for convenience</li>
           <li>A rich set of examples in the documentation</li>
         </ul>
-        <EuiLink
-          target="_blank"
-          href="https://www.elastic.co/guide/en/elasticsearch/client/go-api/current/index.html"
-        >
+        <EuiLink target="_blank" href={docLinks.clientsGoIndex}>
           Learn more about the Go client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />

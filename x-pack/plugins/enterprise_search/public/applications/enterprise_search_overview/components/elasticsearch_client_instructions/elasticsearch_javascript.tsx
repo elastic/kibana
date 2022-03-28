@@ -11,6 +11,8 @@ import dedent from 'dedent';
 
 import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { docLinks } from '../../../shared/doc_links';
+
 export const ElasticsearchJavascript: React.FC<{ cloudId?: string }> = ({ cloudId }) => {
   return (
     <>
@@ -28,10 +30,7 @@ export const ElasticsearchJavascript: React.FC<{ cloudId?: string }> = ({ cloudI
           <li>Child client support.</li>
           <li>TypeScript support out of the box.</li>
         </ul>
-        <EuiLink
-          target="_blank"
-          href="https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/introduction.html"
-        >
+        <EuiLink target="_blank" href={docLinks.clientsJsIntro}>
           Learn more about the official Node.js client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
@@ -85,11 +84,7 @@ export const ElasticsearchJavascript: React.FC<{ cloudId?: string }> = ({ cloudI
             <p>
               There are several ways to connect and authenticate to Elasticsearch running outside of
               Cloud, including API keys, bearer tokens, and basic authentication.{' '}
-              <a
-                target="_blank"
-                rel="noopener"
-                href="https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-connecting.html"
-              >
+              <a target="_blank" rel="noopener" href={docLinks.clientsJsClientConnecting}>
                 Visit the client’s documentation to learn more
               </a>
               .

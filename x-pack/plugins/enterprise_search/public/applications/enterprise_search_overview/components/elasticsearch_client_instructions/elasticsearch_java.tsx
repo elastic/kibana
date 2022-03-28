@@ -11,6 +11,8 @@ import dedent from 'dedent';
 
 import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { docLinks } from '../../../shared/doc_links';
+
 export const ElasticsearchJava: React.FC = () => {
   return (
     <>
@@ -31,10 +33,7 @@ export const ElasticsearchJava: React.FC = () => {
             any JSON-B implementation.
           </li>
         </ul>
-        <EuiLink
-          target="_blank"
-          href="https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/introduction.html"
-        >
+        <EuiLink target="_blank" href={docLinks.clientsJavaIntroduction}>
           Learn more about the Elasticsearch JAVA API client
         </EuiLink>
         <EuiSpacer size="m" />
@@ -49,11 +48,7 @@ export const ElasticsearchJava: React.FC = () => {
         <h4>Installation</h4>
         <p>
           There are several ways to install the Java API client.{' '}
-          <a
-            target="_blank"
-            rel="noopener"
-            href="https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/installation.html"
-          >
+          <a target="_blank" rel="noopener" href={docLinks.clientsJavaInstallation}>
             Visit the client documentation to learn more
           </a>
           .
@@ -97,19 +92,11 @@ export const ElasticsearchJava: React.FC = () => {
       <EuiText>
         <p>
           Authentication is managed by the{' '}
-          <a
-            target="_blank"
-            rel="noopener"
-            href="https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/java-rest-low.html"
-          >
+          <a target="_blank" rel="noopener" href={docLinks.clientsJavaRestLow}>
             Java Low Level REST Client
           </a>
           . For further details on configuring authentication, refer to{' '}
-          <a
-            target="_blank"
-            rel="noopener"
-            href="https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/_basic_authentication.html"
-          >
+          <a target="_blank" rel="noopener" href={docLinks.clientsJavaBasicAuthentication}>
             its documentation
           </a>
           .

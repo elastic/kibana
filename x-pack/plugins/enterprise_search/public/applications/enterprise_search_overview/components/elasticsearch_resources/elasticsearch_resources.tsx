@@ -10,6 +10,8 @@ import React from 'react';
 import { EuiSpacer, EuiPanel, EuiTitle, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../shared/doc_links';
+
 export const ElasticsearchResources: React.FC = () => (
   <EuiPanel hasShadow={false} color="subdued">
     <EuiTitle size="xs">
@@ -21,27 +23,21 @@ export const ElasticsearchResources: React.FC = () => (
     </EuiTitle>
     <EuiSpacer size="s" />
     <EuiSpacer size="xs" />
-    <EuiLink
-      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started.html"
-      target="_blank"
-    >
+    <EuiLink href={docLinks.elasticsearchGettingStarted} target="_blank">
       {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchResources.gettingStarted', {
         defaultMessage: 'Getting started with Elasticsearch',
       })}
     </EuiLink>
     <EuiSpacer size="s" />
     <EuiSpacer size="xs" />
-    <EuiLink
-      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html"
-      target="_blank"
-    >
+    <EuiLink href={docLinks.elasticsearchCreateIndex} target="_blank">
       {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchResources.createIndex', {
         defaultMessage: 'Create a new index',
       })}
     </EuiLink>
     <EuiSpacer size="s" />
     <EuiSpacer size="xs" />
-    <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/client/index.html" target="_blank">
+    <EuiLink href={docLinks.clientsGuide} target="_blank">
       {i18n.translate(
         'xpack.enterpriseSearch.overview.elasticsearchResources.elasticsearchClients',
         { defaultMessage: 'Elasticsearch clients' }

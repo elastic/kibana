@@ -11,6 +11,8 @@ import dedent from 'dedent';
 
 import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { docLinks } from '../../../shared/doc_links';
+
 export const ElasticsearchPython: React.FC<{ cloudId?: string }> = ({ cloudId }) => {
   return (
     <>
@@ -20,10 +22,7 @@ export const ElasticsearchPython: React.FC<{ cloudId?: string }> = ({ cloudId })
           interacting with Elasticsearch’s REST API. It’s designed to be unopinionated and
           extendable.
         </p>
-        <EuiLink
-          target="_blank"
-          href="https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/overview.html"
-        >
+        <EuiLink target="_blank" href={docLinks.clientsPythonOverview}>
           Learn more about the Python client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
@@ -151,11 +150,7 @@ export const ElasticsearchPython: React.FC<{ cloudId?: string }> = ({ cloudId })
             <p>
               There are several ways to authenticate to Elasticsearch running outside of Cloud,
               including API keys, bearer tokens, and basic authentication.{' '}
-              <a
-                target="_blank"
-                rel="noopener"
-                href="https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html#authentication"
-              >
+              <a target="_blank" rel="noopener" href={docLinks.clientsPythonAuthentication}>
                 Visit the client’s documentation to learn more
               </a>
               .

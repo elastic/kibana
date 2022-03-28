@@ -11,6 +11,8 @@ import dedent from 'dedent';
 
 import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { docLinks } from '../../../shared/doc_links';
+
 export const ElasticsearchDotnet: React.FC = () => {
   return (
     <>
@@ -26,10 +28,7 @@ export const ElasticsearchDotnet: React.FC = () => {
             a strongly typed query DSL that maps 1 to 1 with the Elasticsearch query DSL.
           </li>
         </ul>
-        <EuiLink
-          target="_blank"
-          href="https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/introduction.html"
-        >
+        <EuiLink target="_blank" href={docLinks.clientsNetIntroduction}>
           Learn more about the official .NET clients for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
@@ -44,10 +43,7 @@ export const ElasticsearchDotnet: React.FC = () => {
           Getting started with Elasticsearch.Net
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink
-          target="_blank"
-          href="https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/nest.html"
-        >
+        <EuiLink target="_blank" href={docLinks.clientsNetNest}>
           Getting started with NEST
         </EuiLink>
       </EuiText>

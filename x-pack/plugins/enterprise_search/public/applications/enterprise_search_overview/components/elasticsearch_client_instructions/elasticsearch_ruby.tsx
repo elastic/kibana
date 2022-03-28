@@ -11,6 +11,8 @@ import dedent from 'dedent';
 
 import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { docLinks } from '../../../shared/doc_links';
+
 export const ElasticsearchRuby: React.FC<{ cloudId?: string }> = ({ cloudId }) => {
   return (
     <>
@@ -23,10 +25,7 @@ export const ElasticsearchRuby: React.FC<{ cloudId?: string }> = ({ cloudId }) =
           provides a low-level client for communicating with an Elasticsearch cluster, fully
           compatible with other official clients.
         </p>
-        <EuiLink
-          target="_blank"
-          href="https://www.elastic.co/guide/en/elasticsearch/client/ruby-api/current/ruby_client.html"
-        >
+        <EuiLink target="_blank" href={docLinks.clientsRubyOverview}>
           Learn more about the Ruby client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
@@ -71,11 +70,7 @@ export const ElasticsearchRuby: React.FC<{ cloudId?: string }> = ({ cloudId }) =
               elasticsearch-dsl
             </a>{' '}
             which provides a Ruby API for the{' '}
-            <a
-              target="_blank"
-              rel="noopener"
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html"
-            >
+            <a target="_blank" rel="noopener" href={docLinks.clientsRubyQueryDsl}>
               Elasticsearch Query DSL
             </a>
             .
@@ -153,11 +148,7 @@ export const ElasticsearchRuby: React.FC<{ cloudId?: string }> = ({ cloudId }) =
             <p>
               There are several ways to authenticate to Elasticsearch running outside of Cloud,
               including API keys, bearer tokens, and basic authentication.{' '}
-              <a
-                target="_blank"
-                rel="noopener"
-                href="https://www.elastic.co/guide/en/elasticsearch/client/ruby-api/current/connecting.html#client-auth"
-              >
+              <a target="_blank" rel="noopener" href={docLinks.clientsRubyAuthentication}>
                 Visit the client’s documentation to learn more
               </a>
               .

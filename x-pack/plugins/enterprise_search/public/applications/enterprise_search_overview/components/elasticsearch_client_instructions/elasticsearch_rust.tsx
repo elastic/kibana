@@ -11,6 +11,8 @@ import dedent from 'dedent';
 
 import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { docLinks } from '../../../shared/doc_links';
+
 export const ElasticsearchRust: React.FC = () => {
   return (
     <>
@@ -26,10 +28,7 @@ export const ElasticsearchRust: React.FC = () => {
           <li>Proxy support with authentication</li>
           <li>Async support with Tokio</li>
         </ul>
-        <EuiLink
-          target="_blank"
-          href="https://www.elastic.co/guide/en/elasticsearch/client/rust-api/current/overview.html"
-        >
+        <EuiLink target="_blank" href={docLinks.clientsRustOverview}>
           Learn more about the Rust client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />

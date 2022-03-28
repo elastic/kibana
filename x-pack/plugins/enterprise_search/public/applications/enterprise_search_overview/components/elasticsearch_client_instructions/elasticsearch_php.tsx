@@ -11,6 +11,8 @@ import dedent from 'dedent';
 
 import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { docLinks } from '../../../shared/doc_links';
+
 export const ElasticsearchPhp: React.FC<{ cloudId?: string }> = ({ cloudId }) => {
   return (
     <>
@@ -19,10 +21,7 @@ export const ElasticsearchPhp: React.FC<{ cloudId?: string }> = ({ cloudId }) =>
           This official PHP client for Elasticsearch is designed to be a low-level client that does
           not stray from the Elasticsearch REST API.
         </p>
-        <EuiLink
-          target="_blank"
-          href="https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/overview.html"
-        >
+        <EuiLink target="_blank" href={docLinks.clientsPhpOverview}>
           Learn more about the official PHP client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
@@ -58,11 +57,7 @@ export const ElasticsearchPhp: React.FC<{ cloudId?: string }> = ({ cloudId }) =>
           Composer is a package and dependency manager for PHP and makes it easy to install
           Elasticsearch-php.
         </p>
-        <a
-          target="_blank"
-          rel="noopener"
-          href="https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/installation.html"
-        >
+        <a target="_blank" rel="noopener" href={docLinks.clientsPhpInstallation}>
           Visit the documentation for more information.
         </a>
       </EuiText>
@@ -105,11 +100,7 @@ export const ElasticsearchPhp: React.FC<{ cloudId?: string }> = ({ cloudId }) =>
             <p>
               There are several ways to connect and authenticate to Elasticsearch running outside of
               Cloud, including API keys, bearer tokens, and basic authentication.{' '}
-              <a
-                target="_blank"
-                rel="noopener"
-                href="https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/connceting.html"
-              >
+              <a target="_blank" rel="noopener" href={docLinks.clientsPhpConnecting}>
                 Visit the client’s documentation to learn more
               </a>
               .

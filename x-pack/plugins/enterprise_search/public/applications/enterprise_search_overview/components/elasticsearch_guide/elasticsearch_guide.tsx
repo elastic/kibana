@@ -23,6 +23,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../shared/doc_links';
+
 import { ElasticsearchClientInstructions } from '../elasticsearch_client_instructions';
 import { ElasticsearchCloudId } from '../elasticsearch_cloud_id';
 import { ElasticsearchResources } from '../elasticsearch_resources';
@@ -106,10 +108,7 @@ export const ElasticsearchGuide: React.FC = () => {
                           }
                         )}
                       </p>
-                      <EuiLink
-                        href="https://www.elastic.co/guide/en/elasticsearch/client/index.html"
-                        target="_blank"
-                      >
+                      <EuiLink href={docLinks.clientsGuide} target="_blank">
                         {i18n.translate(
                           'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsLink',
                           { defaultMessage: 'Learn more about Elasticsearch clients' }
