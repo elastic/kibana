@@ -85,14 +85,14 @@ export const EnablementEmptyState = ({ focusButton }: { focusButton: boolean }) 
 };
 
 const MONITOR_MANAGEMENT_ENABLEMENT_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.emptyState.enablement.title',
+  'xpack.uptime.monitorManagement.emptyState.enablement.enabled.title',
   {
     defaultMessage: 'Enable monitor management',
   }
 );
 
 const MONITOR_MANAGEMENT_DISABLED_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.emptyState.enablement.title',
+  'xpack.uptime.monitorManagement.emptyState.enablement.disabled.title',
   {
     defaultMessage: 'Monitor management is disabled',
   }
@@ -107,10 +107,10 @@ const MONITOR_MANAGEMENT_ENABLEMENT_MESSAGE = i18n.translate(
 );
 
 const MONITOR_MANAGEMENT_DISABLED_MESSAGE = i18n.translate(
-  'xpack.uptime.monitorManagement.emptyState.enablement',
+  'xpack.uptime.monitorManagement.emptyState.enablement.disabledDescription',
   {
     defaultMessage:
-      'Montior Management is currently disabled. Monitor management allows you to run lightweight checks and real-browser monitors from hosted testing locations around the world. To enable monitor management, please contact an administrator.',
+      'Monitor Management is currently disabled. Monitor management allows you to run lightweight checks and real-browser monitors from hosted testing locations around the world. To enable monitor management, please contact an administrator.',
   }
 );
 

@@ -71,7 +71,7 @@ export const MonitorManagementPage: React.FC = () => {
   );
 };
 
-const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorLoadingLabel', {
+const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.manageMonitorLoadingLabel', {
   defaultMessage: 'Loading Monitor Management',
 });
 
@@ -79,6 +79,9 @@ const ERROR_HEADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editM
   defaultMessage: 'Error loading Monitor Management',
 });
 
-const ERROR_HEADING_BODY = i18n.translate('xpack.uptime.monitorManagement.editMonitorError', {
-  defaultMessage: 'Monitor Management settings could not be loaded. Please contact Support.',
-});
+const ERROR_HEADING_BODY = i18n.translate(
+  'xpack.uptime.monitorManagement.editMonitorError.description',
+  {
+    defaultMessage: 'Monitor Management settings could not be loaded. Please contact Support.',
+  }
+);
