@@ -19,7 +19,7 @@ import { settings } from './settings';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { ServiceGroupsRedirect } from './service_groups_redirect';
-import { comparisonTypeRt } from '../../../common/runtime_types/comparison_type_rt';
+import { offsetRt } from '../../../common/offset_rt';
 
 const ServiceGroupsBreadcrumnbLabel = i18n.translate(
   'xpack.apm.views.serviceGroups.breadcrumbLabel',
@@ -97,6 +97,7 @@ const apmRoutes = {
             t.type({
               rangeFrom: t.string,
               rangeTo: t.string,
+              comparisonEnabled: toBooleanRt,
             }),
             t.partial({
               serviceGroup: t.string,
@@ -104,9 +105,8 @@ const apmRoutes = {
             t.partial({
               refreshPaused: t.union([t.literal('true'), t.literal('false')]),
               refreshInterval: t.string,
-              comparisonEnabled: toBooleanRt,
-              comparisonType: comparisonTypeRt,
             }),
+            offsetRt,
           ]),
         }),
       },

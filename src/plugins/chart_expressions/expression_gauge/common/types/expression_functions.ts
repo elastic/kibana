@@ -48,6 +48,7 @@ export interface GaugeState {
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
   percentageMode?: boolean;
   respectRanges?: boolean;
+  commonLabel?: string;
 }
 
 export type GaugeArguments = GaugeState & {

@@ -41,7 +41,7 @@ Object {
           "palette",
         ],
         "labelMajorMode": Array [
-          "auto",
+          "none",
         ],
         "labelMinor": Array [
           "some custom sublabel",
