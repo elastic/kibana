@@ -274,7 +274,8 @@ export const getDataFilters = createSelector(
 export const getSpatialFiltersLayer = createSelector(
   getFilters,
   getMapSettings,
-  (filters, settings) => {
+  getCustomIcons,
+  (filters, settings, customIcons) => {
     const featureCollection: FeatureCollection = {
       type: 'FeatureCollection',
       features: extractFeaturesFromFilters(filters),
@@ -311,7 +312,7 @@ export const getSpatialFiltersLayer = createSelector(
         }),
       }),
       source: new GeoJsonFileSource(geoJsonSourceDescriptor),
-      customIcons: settings.customIcons,
+      customIcons,
     });
   }
 );

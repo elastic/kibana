@@ -26,9 +26,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     updateStyleDescriptor: (styleDescriptor: StyleDescriptor) => {
       dispatch(updateLayerStyleForSelectedLayer(styleDescriptor));
     },
-    updateCustomIcons: (customIcons: Record<string, CustomIcon>) => {
-      const customIconArray = Object.values(customIcons);
-      dispatch(updateCustomIcons(customIconArray));
+    updateCustomIcons: (customIcons: CustomIcon[]) => {
+      dispatch(updateCustomIcons(customIcons));
     },
   };
 }

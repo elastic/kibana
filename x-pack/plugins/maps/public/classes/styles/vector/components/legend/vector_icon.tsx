@@ -62,7 +62,7 @@ export function VectorIcon({
       fill={fillColor}
       stroke={strokeColor}
       style={borderStyle}
-      svg={svg}
+      svg={svg ?? ''}
     />
   );
 }

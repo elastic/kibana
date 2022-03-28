@@ -16,12 +16,12 @@ import { ILayer } from '../../../classes/layers/layer';
 export interface Props {
   layer: ILayer;
   updateStyleDescriptor: (styleDescriptor: StyleDescriptor) => void;
-  updateCustomIcons: (customIcons: Record<string, CustomIcon>) => void;
-  customIcons: CustomIcon[];
+  updateCustomIcons: (customIcons: CustomIcon[]) => void;
 }
 
 export function StyleSettings({ layer, updateStyleDescriptor, updateCustomIcons }: Props) {
-  const settingsEditor = layer.renderStyleEditor(updateStyleDescriptor, updateCustomIcons);
+  const onCustomIconsChange = (customIcons: Record<string, CustomIcon>) => updateCustomIcons(Object.values(customIcons))
+  const settingsEditor = layer.renderStyleEditor(updateStyleDescriptor, onCustomIconsChange);
 
   if (!settingsEditor) {
     return null;

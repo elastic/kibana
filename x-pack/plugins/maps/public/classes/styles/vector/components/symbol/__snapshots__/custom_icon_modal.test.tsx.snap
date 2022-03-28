@@ -32,6 +32,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
+          helpText="SVGs without sharp corners and intricate details work best. Modifying the settings under Advanced options may improve rendering."
           isInvalid={false}
           labelType="label"
         >
@@ -46,15 +47,6 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
             required={true}
           />
         </EuiFormRow>
-        <EuiText
-          className="mapsCustomIconForm__imageHelp"
-          grow={false}
-          size="xs"
-        >
-          <p>
-            SVGs without sharp corners and intricate details work best. Modifying the settings under Advanced options may improve rendering.
-          </p>
-        </EuiText>
         <EuiSpacer />
         <EuiFormRow
           describedByIds={Array []}
@@ -269,6 +261,7 @@ exports[`should render an empty custom icon modal 1`] = `
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
+          helpText="SVGs without sharp corners and intricate details work best. Modifying the settings under Advanced options may improve rendering."
           isInvalid={false}
           labelType="label"
         >
@@ -283,15 +276,6 @@ exports[`should render an empty custom icon modal 1`] = `
             required={true}
           />
         </EuiFormRow>
-        <EuiText
-          className="mapsCustomIconForm__imageHelp"
-          grow={false}
-          size="xs"
-        >
-          <p>
-            SVGs without sharp corners and intricate details work best. Modifying the settings under Advanced options may improve rendering.
-          </p>
-        </EuiText>
         <EuiSpacer />
       </EuiFlexItem>
     </EuiFlexGroup>

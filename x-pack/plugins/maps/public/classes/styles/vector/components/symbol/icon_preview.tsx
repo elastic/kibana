@@ -127,56 +127,52 @@ export class IconPreview extends Component<Props, State> {
     });
   }
 
-  _createMapInstance(): Promise<MapboxMap> {
-    return new Promise((resolve) => {
-      const map = new mapboxgl.Map({
-        container: this._containerRef!,
-        interactive: false,
-        center: [0, 0],
-        zoom: 2,
-        style: {
-          version: 8,
-          name: 'Empty',
-          sources: {},
-          layers: [
-            {
-              id: 'background',
-              type: 'background',
-              paint: {
-                'background-color': 'rgba(0,0,0,0)',
-              },
-            },
-          ],
-        },
-      });
-
-      map.on('load', () => {
-        map.addLayer({
-          id: 'icon-layer',
-          type: 'symbol',
-          source: {
-            type: 'geojson',
-            data: {
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: [0, 0],
-              },
-              properties: {},
+  _createMapInstance(): MapboxMap {
+    const map = new mapboxgl.Map({
+      container: this._containerRef!,
+      interactive: false,
+      center: [0, 0],
+      zoom: 2,
+      style: {
+        version: 8,
+        name: 'Empty',
+        sources: {},
+        layers: [
+          {
+            id: 'background',
+            type: 'background',
+            paint: {
+              'background-color': 'rgba(0,0,0,0)',
             },
           },
-        });
-        this._syncImageToMap();
-      });
-
-      resolve(map);
+        ],
+      },
     });
+
+    map.on('load', () => {
+      map.addLayer({
+        id: 'icon-layer',
+        type: 'symbol',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [0, 0],
+            },
+            properties: {},
+          },
+        },
+      });
+      this._syncImageToMap();
+    });
+
+    return map;
   }
 
-  async _initializeMap() {
-    const map: MapboxMap = await this._createMapInstance();
-
-    if (!this._isMounted) return;
+  _initializeMap() {
+    const map: MapboxMap = this._createMapInstance();
 
     this.setState({ map }, () => {
       this._initResizerChecker();

@@ -133,15 +133,15 @@ export function deleteCustomIcon(value: string) {
     const layersContainingCustomIcon = getLayerList(getState()).filter((layer) => {
       const style = layer.getCurrentStyle();
       if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
-        return;
+        return false;
       }
       return (style as IVectorStyle).getCustomIconIdsInUse().includes(value);
     });
-    const layerList = await asyncMap(layersContainingCustomIcon, async (layer) => {
-      return await layer.getDisplayName();
-    });
 
-    if (layerList.length > 0) {
+    if (layersContainingCustomIcon.length > 0) {
+      const layerList = await asyncMap(layersContainingCustomIcon, async (layer) => {
+        return await layer.getDisplayName();
+      });
       getToasts().addWarning(
         i18n.translate('xpack.maps.mapActions.deleteCustomIconWarning', {
           defaultMessage: `Unable to delete icon. The icon is in use by the {count, plural, one {layer} other {layers}}: {layerNames}`,

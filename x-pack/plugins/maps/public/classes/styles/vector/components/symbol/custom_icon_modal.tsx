@@ -23,7 +23,6 @@ import {
   EuiModalHeaderTitle,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -221,9 +220,11 @@ export class CustomIconModal extends Component<Props, State> {
           if (!this._isMounted) {
             return;
           }
-
           this.setState({ isFileInvalid: false, label, svg });
         } catch (err) {
+          if (!this._isMounted) {
+            return;
+          }
           this.setState({ isFileInvalid: true });
         }
       } else {
@@ -340,6 +341,7 @@ export class CustomIconModal extends Component<Props, State> {
                 display="rowCompressed"
                 isInvalid={!!fileError}
                 error={fileError}
+                helpText={strings.getImageInputDescription()}
               >
                 <EuiFilePicker
                   initialPromptText={strings.getImageFilePickerPlaceholder()}
@@ -350,9 +352,6 @@ export class CustomIconModal extends Component<Props, State> {
                   required
                 />
               </EuiFormRow>
-              <EuiText grow={false} className="mapsCustomIconForm__imageHelp" size="xs">
-                <p>{strings.getImageInputDescription()}</p>
-              </EuiText>
               <EuiSpacer />
               {this._renderIconForm()}
             </EuiFlexItem>

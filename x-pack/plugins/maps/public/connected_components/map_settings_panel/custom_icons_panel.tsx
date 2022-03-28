@@ -16,6 +16,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_CUSTOM_ICON_CUTOFF, DEFAULT_CUSTOM_ICON_RADIUS } from '../../../common/constants';
 import { getIsDarkMode } from '../../kibana_services';
@@ -43,18 +44,14 @@ export class CustomIconsPanel extends Component<Props, State> {
   };
 
   private _handleIconEdit = (icon: CustomIcon) => {
-    this.setState({ selectedIcon: icon, isModalVisible: true }, () => {
-      this._showModal();
-    });
+    this.setState({ selectedIcon: icon, isModalVisible: true });
   };
 
   private _handleNewIcon = () => {
-    this.setState({ isModalVisible: true }, () => {
-      this._showModal();
-    });
+    this.setState({ isModalVisible: true });
   };
 
-  private _showModal = () => {
+  private _renderModal = () => {
     if (!this.state.isModalVisible) {
       return null;
     }
@@ -62,7 +59,9 @@ export class CustomIconsPanel extends Component<Props, State> {
       const { symbolId, label, svg, cutoff, radius } = this.state.selectedIcon;
       return (
         <CustomIconModal
-          title="Edit custom icon"
+          title={i18n.translate('xpack.maps.mapSettingsPanel.editCustomIcon', {
+            defaultMessage: 'Edit custom icon',
+          })}
           symbolId={symbolId}
           label={label}
           svg={svg}
@@ -76,7 +75,9 @@ export class CustomIconsPanel extends Component<Props, State> {
     }
     return (
       <CustomIconModal
-        title="Add custom icon"
+        title={i18n.translate('xpack.maps.mapSettingsPanel.addCustomIcon', {
+          defaultMessage: 'Add custom icon',
+        })}
         cutoff={DEFAULT_CUSTOM_ICON_CUTOFF}
         radius={DEFAULT_CUSTOM_ICON_RADIUS}
         onSave={this._handleSave}
@@ -125,7 +126,7 @@ export class CustomIconsPanel extends Component<Props, State> {
           >
             <FormattedMessage
               id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
-              defaultMessage="Add custom icon"
+              defaultMessage="Add"
             />
           </EuiButtonEmpty>
         </EuiTextAlign>
@@ -194,7 +195,7 @@ export class CustomIconsPanel extends Component<Props, State> {
           <EuiSpacer size="m" />
           {this._renderCustomIconsList()}
         </EuiPanel>
-        {this._showModal()}
+        {this._renderModal()}
       </Fragment>
     );
   }
