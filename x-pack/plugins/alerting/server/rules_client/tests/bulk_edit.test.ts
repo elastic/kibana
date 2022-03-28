@@ -332,7 +332,39 @@ describe('bulkEdit()', () => {
         type: 'alert',
       });
     });
+    test('should call unsecuredSavedObjectsClient.find for aggregations when called with ids options', async () => {
+      await rulesClient.bulkEdit({
+        ids: ['2', '3'],
+        editActions: [
+          {
+            field: 'tags',
+            action: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
 
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
+        aggs: {
+          alertTypeId: {
+            multi_terms: {
+              terms: [
+                {
+                  field: 'alert.attributes.alertTypeId',
+                },
+                {
+                  field: 'alert.attributes.consumer',
+                },
+              ],
+            },
+          },
+        },
+        filter: 'alert.id:"alert:2" OR alert.id:"alert:3"',
+        page: 1,
+        perPage: 0,
+        type: 'alert',
+      });
+    });
     test('should throw if number of matched rules greater than 10_000', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
         aggregations: {
@@ -674,6 +706,26 @@ describe('bulkEdit()', () => {
           }),
         }),
       ]);
+    });
+  });
+
+  describe('method input validation', () => {
+    test('should throw error when both ids and filter supplied in method call', async () => {
+      await expect(
+        rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          ids: ['1', '2'],
+          editActions: [
+            {
+              field: 'tags',
+              action: 'add',
+              value: ['test-1'],
+            },
+          ],
+        })
+      ).rejects.toThrow(
+        "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
+      );
     });
   });
 });

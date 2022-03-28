@@ -18,26 +18,29 @@ const ruleActionSchema = schema.object({
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
+const editActionsSchema = schema.arrayOf(
+  schema.oneOf([
+    schema.object({
+      action: schema.oneOf([
+        schema.literal('add'),
+        schema.literal('delete'),
+        schema.literal('set'),
+      ]),
+      field: schema.literal('tags'),
+      value: schema.arrayOf(schema.string()),
+    }),
+    schema.object({
+      action: schema.oneOf([schema.literal('add'), schema.literal('set')]),
+      field: schema.literal('actions'),
+      value: schema.arrayOf(ruleActionSchema),
+    }),
+  ])
+);
+
 const bodySchema = schema.object({
-  filter: schema.string(),
-  editActions: schema.arrayOf(
-    schema.oneOf([
-      schema.object({
-        action: schema.oneOf([
-          schema.literal('add'),
-          schema.literal('delete'),
-          schema.literal('set'),
-        ]),
-        field: schema.literal('tags'),
-        value: schema.arrayOf(schema.string()),
-      }),
-      schema.object({
-        action: schema.oneOf([schema.literal('add'), schema.literal('set')]),
-        field: schema.literal('actions'),
-        value: schema.arrayOf(ruleActionSchema),
-      }),
-    ])
-  ),
+  filter: schema.maybe(schema.string()),
+  ids: schema.maybe(schema.arrayOf(schema.string())),
+  editActions: editActionsSchema,
 });
 
 interface BuildBulkEditRulesRouteParams {
@@ -57,11 +60,12 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = context.alerting.getRulesClient();
-        const { filter, editActions } = req.body;
+        const { filter, editActions, ids = [] } = req.body;
 
         const bulkEditResults = await rulesClient.bulkEdit({
           filter,
           editActions,
+          ids,
         });
         return res.ok({
           body: bulkEditResults,
@@ -74,10 +78,9 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
 export const bulkEditInternalRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
-) => {
+) =>
   buildBulkEditRulesRoute({
     licenseState,
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`,
     router,
   });
-};

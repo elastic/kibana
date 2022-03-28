@@ -244,11 +244,21 @@ export type BulkEditActionRule =
 
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
 
-export interface BulkEditOptions<Params extends RuleTypeParams> {
+export interface BulkEditOptionsFilter<Params extends RuleTypeParams> {
   filter: string | KueryNode;
   editActions: BulkEditActionRule[];
   paramsModifier?: RuleParamsModifier<Params>;
 }
+
+export interface BulkEditOptionsIds<Params extends RuleTypeParams> {
+  ids: string[];
+  editActions: BulkEditActionRule[];
+  paramsModifier?: RuleParamsModifier<Params>;
+}
+
+export type BulkEditOptions<Params extends RuleTypeParams> =
+  | BulkEditOptionsFilter<Params>
+  | BulkEditOptionsIds<Params>;
 
 export interface BulkEditError {
   message: string;
@@ -1307,14 +1317,26 @@ export class RulesClient {
     );
   }
 
-  public async bulkEdit<Params extends RuleTypeParams>({
-    filter,
-    editActions,
-    paramsModifier,
-  }: BulkEditOptions<Params>): Promise<{
+  public async bulkEdit<Params extends RuleTypeParams>(
+    options: BulkEditOptions<Params>
+  ): Promise<{
     rules: Array<SanitizedRule<Params>>;
     errors: BulkEditError[];
   }> {
+    let filter = (options as BulkEditOptionsFilter<Params>).filter;
+    const ids = (options as BulkEditOptionsIds<Params>).ids;
+
+    if (ids) {
+      if (filter) {
+        throw Error(
+          "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
+        );
+      }
+      filter = this.convertIdsToFilterQuery(ids);
+    }
+
+    const { editActions, paramsModifier } = options;
+
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
@@ -2596,6 +2618,10 @@ export class RulesClient {
     }
 
     return rule;
+  }
+
+  private convertIdsToFilterQuery(ids: string[]): string {
+    return ids.map((id) => `alert.id:"alert:${id}"`).join(' OR ');
   }
 }
 
