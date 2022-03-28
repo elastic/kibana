@@ -88,7 +88,14 @@ export const getAppContextMock = (kibanaVersion: SemVer) => ({
       notifications: notificationServiceMock.createStartContract(),
       docLinks: docLinksServiceMock.createStartContract(),
       history: scopedHistoryMock.create(),
-      application: applicationServiceMock.createStartContract(),
+      application: {
+        ...applicationServiceMock.createStartContract(),
+        capabilities: {
+          spaces: {
+            manage: true,
+          },
+        },
+      },
     },
   },
   plugins: {
