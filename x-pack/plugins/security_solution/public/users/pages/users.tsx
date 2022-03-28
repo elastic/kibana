@@ -46,6 +46,9 @@ import { UpdateDateRange } from '../../common/components/charts/common';
 import { LastEventIndexKey } from '../../../common/search_strategy';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
+import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
+import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const ID = 'UsersQueryId';
 
@@ -157,6 +160,13 @@ const UsersComponent = () => {
     [dispatch]
   );
 
+  const capabilities = useMlCapabilities();
+  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
+  const navTabs = useMemo(
+    () => navTabsUsers(hasMlUserPermissions(capabilities), riskyUsersFeatureEnabled),
+    [capabilities, riskyUsersFeatureEnabled]
+  );
+
   return (
     <>
       {indicesExist ? (
@@ -191,7 +201,7 @@ const UsersComponent = () => {
 
             <EuiSpacer />
 
-            <SecuritySolutionTabNavigation navTabs={navTabsUsers} />
+            <SecuritySolutionTabNavigation navTabs={navTabs} />
 
             <EuiSpacer />
 

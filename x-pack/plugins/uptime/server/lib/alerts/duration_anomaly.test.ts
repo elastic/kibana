@@ -16,7 +16,7 @@ import { DynamicSettings } from '../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
 import { Ping } from '../../../common/runtime_types/ping';
-import { ALERT_REASON_MSG } from './action_variables';
+import { ALERT_REASON_MSG, VIEW_IN_APP_URL } from './action_variables';
 
 interface MockAnomaly {
   severity: AnomaliesTableRecord['severity'];
@@ -219,6 +219,7 @@ Response times as high as ${slowestResponse} ms have been detected from location
           "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
             "${ALERT_REASON_MSG}": "${reasonMessages[0]}",
+            "${VIEW_IN_APP_URL}": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MA==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
           },
         ]
       `);
@@ -227,6 +228,7 @@ Response times as high as ${slowestResponse} ms have been detected from location
           "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
             "${ALERT_REASON_MSG}": "${reasonMessages[1]}",
+            "${VIEW_IN_APP_URL}": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
           },
         ]
       `);

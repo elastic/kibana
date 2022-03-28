@@ -43,6 +43,22 @@ describe('eqlRawResponse', () => {
       const result = eqlRawResponse.to!.datatable(response, {});
       expect(result).toMatchSnapshot();
     });
+
+    test('extracts total hits number', () => {
+      const response: EqlRawResponse = {
+        type: 'eql_raw_response',
+        body: {
+          hits: {
+            events: [],
+            total: {
+              value: 2,
+            },
+          },
+        },
+      };
+      const result = eqlRawResponse.to!.datatable(response, {});
+      expect(result).toHaveProperty('meta.statistics.totalCount', 2);
+    });
   });
 
   describe('converts sequences to table', () => {
