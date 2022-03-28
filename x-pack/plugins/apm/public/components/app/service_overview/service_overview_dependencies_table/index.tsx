@@ -18,7 +18,6 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/service_link';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
@@ -41,19 +40,12 @@ export function ServiceOverviewDependenciesTable({
       rangeTo,
       serviceGroup,
       comparisonEnabled,
-      comparisonType,
+      offset,
       latencyAggregationType,
     },
   } = useApmParams('/services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
 
   const { serviceName, transactionType } = useApmServiceContext();
 
@@ -70,12 +62,18 @@ export function ServiceOverviewDependenciesTable({
         {
           params: {
             path: { serviceName },
-            query: { start, end, environment, numBuckets: 20, offset },
+            query: {
+              start,
+              end,
+              environment,
+              numBuckets: 20,
+              offset: comparisonEnabled ? offset : undefined,
+            },
           },
         }
       );
     },
-    [start, end, serviceName, environment, offset]
+    [start, end, serviceName, environment, offset, comparisonEnabled]
   );
 
   const dependencies =
@@ -90,7 +88,7 @@ export function ServiceOverviewDependenciesTable({
             query={{
               backendName: location.backendName,
               comparisonEnabled,
-              comparisonType,
+              offset,
               environment,
               kuery,
               rangeFrom,
@@ -110,7 +108,7 @@ export function ServiceOverviewDependenciesTable({
             agentName={location.agentName}
             query={{
               comparisonEnabled,
-              comparisonType,
+              offset,
               environment,
               kuery,
               rangeFrom,

@@ -6,71 +6,35 @@
  */
 
 import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 import { OverviewEmpty } from '.';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
+import { getAppLandingUrl } from '../../../common/components/link_to/redirect_to_overview';
 
-const endpointPackageVersion = '0.19.1';
+const mockNavigateToApp = jest.fn();
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../management/pages/endpoint_hosts/view/hooks', () => ({
-  useIngestUrl: jest
-    .fn()
-    .mockReturnValue({ appId: 'ingestAppId', appPath: 'ingestPath', url: 'ingestUrl' }),
-  useEndpointSelector: jest.fn().mockReturnValue({ endpointPackageVersion }),
-}));
-
-jest.mock('../../../common/components/user_privileges', () => ({
-  useUserPrivileges: jest
-    .fn()
-    .mockReturnValue({ endpointPrivileges: { loading: false, canAccessFleet: true } }),
-}));
-
-jest.mock('../../../common/hooks/endpoint/use_navigate_to_app_event_handler', () => ({
-  useNavigateToAppEventHandler: jest.fn(),
-}));
-
-describe('OverviewEmpty', () => {
-  describe('When isIngestEnabled = true', () => {
-    let wrapper: ShallowWrapper;
-    beforeAll(() => {
-      wrapper = shallow(<OverviewEmpty />);
-    });
-
-    afterAll(() => {
-      (useUserPrivileges as jest.Mock).mockReset();
-    });
-
-    it('render with correct actions ', () => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
-        elasticAgent: {
-          category: 'security',
-          description:
-            'Use Elastic Agent to collect security events and protect your endpoints from threats.',
-          title: 'Add a Security integration',
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          ...original.useKibana().services.application,
+          navigateToApp: mockNavigateToApp,
         },
-      });
-    });
-  });
+      },
+    }),
+  };
+});
 
-  describe('When isIngestEnabled = false', () => {
-    let wrapper: ShallowWrapper;
-    beforeAll(() => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
-        endpointPrivileges: { loading: false, canAccessFleet: false },
-      });
-      wrapper = shallow(<OverviewEmpty />);
-    });
-
-    it('render with correct actions ', () => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
-        elasticAgent: {
-          category: 'security',
-          description:
-            'Use Elastic Agent to collect security events and protect your endpoints from threats.',
-          title: 'Add a Security integration',
-        },
-      });
+describe('Redirect to landing page', () => {
+  it('render with correct actions ', () => {
+    shallow(<OverviewEmpty />);
+    expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
+      deepLinkId: SecurityPageName.landing,
+      path: getAppLandingUrl(),
     });
   });
 });
