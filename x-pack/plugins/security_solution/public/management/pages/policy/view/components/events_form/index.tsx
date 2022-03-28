@@ -60,95 +60,95 @@ export interface EventsFormProps<T extends OperatingSystem> {
   supplementalOptions?: ReadonlyArray<SupplementalEventFormOption<T>>;
 }
 
-export const EventsForm = React.memo(
-  <T extends OperatingSystem>({
-    os,
-    options,
-    selection,
-    onValueSelection,
-    supplementalOptions,
-  }: EventsFormProps<T>) => {
-    const theme = useContext(ThemeContext);
-    const countSelected = useCallback(() => {
-      const supplementalSelectionFields: string[] = supplementalOptions
-        ? supplementalOptions.map((value) => value.protectionField as string)
-        : [];
-      return Object.entries(selection).filter(([key, value]) =>
-        !supplementalSelectionFields.includes(key) ? value : false
-      ).length;
-    }, [selection, supplementalOptions]);
+const InnerEventsForm = <T extends OperatingSystem>({
+  os,
+  options,
+  selection,
+  onValueSelection,
+  supplementalOptions,
+}: EventsFormProps<T>) => {
+  const theme = useContext(ThemeContext);
+  const countSelected = useCallback(() => {
+    const supplementalSelectionFields: string[] = supplementalOptions
+      ? supplementalOptions.map((value) => value.protectionField as string)
+      : [];
+    return Object.entries(selection).filter(([key, value]) =>
+      !supplementalSelectionFields.includes(key) ? value : false
+    ).length;
+  }, [selection, supplementalOptions]);
 
-    return (
-      <ConfigForm
-        type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
-          defaultMessage: 'Event collection',
+  return (
+    <ConfigForm
+      type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
+        defaultMessage: 'Event collection',
+      })}
+      supportedOss={[os]}
+      rightCorner={
+        <EuiText size="s" color="subdued">
+          {i18n.translate(
+            'xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled',
+            {
+              defaultMessage: '{selected} / {total} event collections enabled',
+              values: {
+                selected: countSelected(),
+                total: options.length,
+              },
+            }
+          )}
+        </EuiText>
+      }
+    >
+      <ConfigFormHeading>
+        {i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.eventingEvents', {
+          defaultMessage: 'Events',
         })}
-        supportedOss={[os]}
-        rightCorner={
-          <EuiText size="s" color="subdued">
-            {i18n.translate(
-              'xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled',
-              {
-                defaultMessage: '{selected} / {total} event collections enabled',
-                values: {
-                  selected: countSelected(),
-                  total: options.length,
-                },
-              }
-            )}
-          </EuiText>
-        }
-      >
-        <ConfigFormHeading>
-          {i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.eventingEvents', {
-            defaultMessage: 'Events',
-          })}
-        </ConfigFormHeading>
-        <EuiSpacer size="s" />
-        {options.map(({ name, protectionField }) => {
+      </ConfigFormHeading>
+      <EuiSpacer size="s" />
+      {options.map(({ name, protectionField }) => {
+        return (
+          <EuiCheckbox
+            key={String(protectionField)}
+            id={htmlIdGenerator()()}
+            label={name}
+            data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
+            checked={selection[protectionField]}
+            onChange={(event) => onValueSelection(protectionField, event.target.checked)}
+          />
+        );
+      })}
+      {supplementalOptions &&
+        supplementalOptions.map(({ name, protectionField, tooltipText, beta }) => {
           return (
-            <EuiCheckbox
-              key={String(protectionField)}
-              id={htmlIdGenerator()()}
-              label={name}
-              data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
-              checked={selection[protectionField]}
-              onChange={(event) => onValueSelection(protectionField, event.target.checked)}
-            />
+            <div key={String(protectionField)} style={{ paddingLeft: theme.eui.paddingSizes.s }}>
+              <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiSpacer size="s" />
+                  <EuiSwitch
+                    id={htmlIdGenerator()()}
+                    label={name}
+                    data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
+                    checked={selection[protectionField]}
+                    onChange={(event) => onValueSelection(protectionField, event.target.checked)}
+                  />
+                </EuiFlexItem>
+                {tooltipText && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip position="right" content={tooltipText} />
+                  </EuiFlexItem>
+                )}
+                {beta && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge label="beta" size="s" />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </div>
           );
         })}
-        {supplementalOptions &&
-          supplementalOptions.map(({ name, protectionField, tooltipText, beta }) => {
-            return (
-              <div key={String(protectionField)} style={{ paddingLeft: theme.eui.paddingSizes.s }}>
-                <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiSpacer size="s" />
-                    <EuiSwitch
-                      id={htmlIdGenerator()()}
-                      label={name}
-                      data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
-                      checked={selection[protectionField]}
-                      onChange={(event) => onValueSelection(protectionField, event.target.checked)}
-                    />
-                  </EuiFlexItem>
-                  {tooltipText && (
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip position="right" content={tooltipText} />
-                    </EuiFlexItem>
-                  )}
-                  {beta && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBetaBadge label="beta" size="s" />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </div>
-            );
-          })}
-      </ConfigForm>
-    );
-  }
-);
+    </ConfigForm>
+  );
+};
 
-EventsForm.displayName = 'EventsForm';
+InnerEventsForm.displayName = 'EventsForm';
+
+export const EventsForm = React.memo(InnerEventsForm) as typeof InnerEventsForm;
