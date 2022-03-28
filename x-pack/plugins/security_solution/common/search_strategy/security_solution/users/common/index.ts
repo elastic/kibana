@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Maybe, RiskSeverity } from '../../..';
+import { Maybe, RiskSeverity, SortField } from '../../..';
 import { HostEcs } from '../../../../ecs/host';
 import { UserEcs } from '../../../../ecs/user';
 
@@ -30,9 +30,14 @@ export interface UserItem {
   firstSeen?: Maybe<string>;
 }
 
+export type SortableUsersFields = Exclude<UsersFields, typeof UsersFields.domain>;
+
+export type SortUsersField = SortField<SortableUsersFields>;
+
 export enum UsersFields {
   lastSeen = 'lastSeen',
-  hostName = 'userName',
+  name = 'name',
+  domain = 'domain',
 }
 
 export interface UserAggEsItem {
@@ -51,4 +56,18 @@ export interface UserBuckets {
     key: string;
     doc_count: number;
   }>;
+}
+
+export interface AllUsersAggEsItem {
+  key: string;
+  domain?: UsersDomainHitsItem;
+  lastSeen?: { value_as_string: string };
+}
+
+export interface UsersDomainHitsItem {
+  hits: {
+    hits: Array<{
+      _source: { user: { domain: Maybe<string> } };
+    }>;
+  };
 }

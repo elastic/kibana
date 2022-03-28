@@ -30,7 +30,7 @@ export const setupCapabilities = (
     const { hasImportPermission } = await checkFileUploadPrivileges({
       authorization: security?.authz,
       request,
-      checkCreateIndexPattern: true,
+      checkCreateDataView: true,
       checkHasManagePipeline: false,
     });
 
