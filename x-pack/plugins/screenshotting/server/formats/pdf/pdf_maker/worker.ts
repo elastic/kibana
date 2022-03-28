@@ -52,11 +52,11 @@ export interface ErrorResponse {
 }
 
 console.log('WORKER================> isMainThread', isMainThread);
-if (!isMainThread) {
-  const { port } = workerData as WorkerData;
-  console.log('WORKER================> listening for execute request');
-  port.on('message', execute);
-}
+// if (!isMainThread) {
+const { port } = workerData as WorkerData;
+console.log('WORKER================> listening for execute request');
+port.on('message', execute);
+// }
 
 const getPageCount = (pdfDoc: PDFKit.PDFDocument): number => {
   const pageRange = pdfDoc.bufferedPageRange();
