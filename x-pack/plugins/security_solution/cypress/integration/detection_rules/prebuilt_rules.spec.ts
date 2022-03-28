@@ -81,7 +81,7 @@ describe('Prebuilt rules', () => {
   });
 
   describe('Actions with prebuilt rules', () => {
-    beforeEach(() => {
+    before(() => {
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     });
 
@@ -111,6 +111,7 @@ describe('Prebuilt rules', () => {
         const expectedNumberOfRulesAfterDeletion = totalNumberOfPrebuiltRules - 1;
         const expectedNumberOfRulesAfterRecovering = totalNumberOfPrebuiltRules;
 
+        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
         deleteFirstRule();
 
         cy.get(ELASTIC_RULES_BTN).should(

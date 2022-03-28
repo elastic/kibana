@@ -9,7 +9,6 @@ import { AUTHENTICATIONS_TABLE } from '../../screens/hosts/authentications';
 import { INSPECT_MODAL } from '../../screens/inspect';
 import { ALL_USERS_TABLE } from '../../screens/users/all_users';
 import { AUTHENTICATIONS_TAB } from '../../screens/users/user_authentications';
-import { cleanKibana } from '../../tasks/common';
 
 import { clickInspectButton, closesModal } from '../../tasks/inspect';
 import { login, visit } from '../../tasks/login';

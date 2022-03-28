@@ -11,17 +11,15 @@ import {
   HEADER_SUBTITLE,
   USER_NAME_CELL,
 } from '../../screens/users/user_authentications';
-import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 
 import { USERS_URL } from '../../urls/navigation';
 
 describe('Authentications stats and tables', () => {
   before(() => {
-    cleanKibana();
-
-    loginAndWaitForPage(USERS_URL);
+    login();
+    visit(USERS_URL);
   });
 
   it(`renders all authentications`, () => {
