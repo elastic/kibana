@@ -21,6 +21,8 @@ import { OutputUnauthorizedError, OutputInvalidError } from '../errors';
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 
+type Nullable<T> = { [P in keyof T]: T[P] | null };
+
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
@@ -309,12 +311,24 @@ class OutputService {
       );
     }
 
-    const updateData = { ...data };
+    const updateData: Nullable<Partial<Output>> = { ...data };
     const mergedType = data.type ?? originalOutput.type;
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
 
     if (mergedType === outputType.Logstash) {
       await validateLogstashOutputNotUsedInAPMPolicy(soClient, id, mergedIsDefault);
+    }
+
+    // If the output type changed
+    if (data.type && data.type !== originalOutput.type) {
+      if (data.type === outputType.Logstash) {
+        // remove ES specific field
+        updateData.ca_trusted_fingerprint = null;
+        updateData.ca_sha256 = null;
+      } else {
+        // remove logstash specific field
+        updateData.ssl = null;
+      }
     }
 
     // ensure only default output exists
@@ -345,7 +359,7 @@ class OutputService {
     if (mergedType === outputType.Elasticsearch && updateData.hosts) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
-    const outputSO = await soClient.update<OutputSOAttributes>(
+    const outputSO = await soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
       updateData
