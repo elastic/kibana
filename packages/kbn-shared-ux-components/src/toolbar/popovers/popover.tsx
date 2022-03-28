@@ -29,10 +29,10 @@ export const ToolbarPopover = ({ label, iconType, children, ...popover }: Props)
   const onButtonClick = () => setIsOpen((status) => !status);
   const closePopover = () => setIsOpen(false);
 
-  const button = <ToolbarButton onClick={onButtonClick} {...{ label }} />;
+  const button = <ToolbarButton onClick={onButtonClick} iconType={iconType} {...{ label }} />;
 
   return (
-    <EuiPopover {...{ isOpen, button, closePopover }} {...popover}>
+    <EuiPopover color="primary" {...{ isOpen, button, closePopover }} {...popover}>
       {children({ closePopover })}
     </EuiPopover>
   );
