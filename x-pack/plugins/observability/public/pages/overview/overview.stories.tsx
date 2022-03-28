@@ -226,7 +226,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -245,7 +245,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
 
     return (
@@ -260,7 +260,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -282,7 +282,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -306,7 +306,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -338,7 +338,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -370,7 +370,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -404,7 +404,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -435,7 +435,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: async () => emptyLogsResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -471,7 +471,7 @@ storiesOf('app/Overview', module)
         fetchData: async () => {
           throw new Error('Error fetching Logs data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',

@@ -6,6 +6,7 @@
  */
 
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
@@ -19,8 +20,6 @@ const testBedConfig: AsyncTestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
-
 export interface HomeTestBed extends TestBed<TestSubjects> {
   actions: {
     selectHomeTab: (tab: 'indicesTab' | 'templatesTab') => void;
@@ -28,7 +27,11 @@ export interface HomeTestBed extends TestBed<TestSubjects> {
   };
 }
 
-export const setup = async (): Promise<HomeTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<HomeTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(IndexManagementHome, httpSetup),
+    testBedConfig
+  );
   const testBed = await initTestBed();
   const { find } = testBed;
 
