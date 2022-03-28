@@ -12,7 +12,7 @@ import { UnifiedSearchPublicPlugin } from './plugin';
 export type { IndexPatternSelectProps } from './index_pattern_select';
 export type { QueryStringInputProps } from './query_string_input';
 export { QueryStringInput } from './query_string_input';
-export type { StatefulSearchBarProps } from './search_bar';
+export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
 export type { UnifiedSearchPublicPluginStart } from './types';
 
 export type { ApplyGlobalFilterActionContext } from './actions';
