@@ -33,7 +33,6 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   handleEsError: typeof handleEsError;
   logsRules: RulesServiceSetup;
   metricsRules: RulesServiceSetup;
-  basePath: IBasePath;
   logger: Logger;
   basePath: IBasePath;
 }
