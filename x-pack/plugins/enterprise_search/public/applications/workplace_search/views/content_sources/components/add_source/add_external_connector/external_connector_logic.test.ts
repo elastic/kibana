@@ -108,6 +108,18 @@ describe('ExternalConnectorLogic', () => {
       });
     });
 
+    describe('saveExternalConnectorConfigError', () => {
+      it('turns off the button loading flag', () => {
+        mount({
+          buttonLoading: true,
+        });
+
+        ExternalConnectorLogic.actions.saveExternalConnectorConfigError();
+
+        expect(ExternalConnectorLogic.values.buttonLoading).toEqual(false);
+      });
+    });
+
     describe('setExternalConnectorApiKey', () => {
       it('updates the api key', () => {
         ExternalConnectorLogic.actions.setExternalConnectorApiKey('abcd1234');
