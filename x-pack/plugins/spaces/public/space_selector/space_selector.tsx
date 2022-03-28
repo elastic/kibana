@@ -155,8 +155,8 @@ export class SpaceSelector extends Component<Props, State> {
                   {i18n.translate(
                     'xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription',
                     {
-                      defaultMessage: 'No spaces match "{searchTerm}"',
-                      values: { searchTerm: this.state.searchTerm },
+                      defaultMessage: 'No spaces match {searchTerm}',
+                      values: { searchTerm: `"${this.state.searchTerm}"` },
                     }
                   )}
                 </h2>
