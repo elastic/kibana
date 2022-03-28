@@ -12,9 +12,19 @@ import { ToolbarPopover } from './popover';
 
 describe('<ToolbarPopover />', () => {
   test('is rendered', () => {
-    const isOpen = false;
+    const isOpen = true;
     const component = enzymeMount(<ToolbarPopover label="test" children={() => !isOpen} />);
 
     expect(component).toMatchSnapshot();
+  });
+
+  test('accepts an onClick handler', () => {
+    const isOpen = true;
+    const mockHandler = jest.fn();
+    const component = enzymeMount(
+      <ToolbarPopover label="test" children={() => !isOpen} onClick={mockHandler} />
+    );
+    component.simulate('click');
+    expect(mockHandler).toHaveBeenCalled();
   });
 });
