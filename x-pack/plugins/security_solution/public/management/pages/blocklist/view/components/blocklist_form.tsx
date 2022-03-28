@@ -65,6 +65,7 @@ import { useLicense } from '../../../../../common/hooks/use_license';
 import { isValidHash } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
+import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 
 interface BlocklistEntry {
   field: BlocklistConditionEntryField;
@@ -106,14 +107,34 @@ export const BlockListForm = memo(
     const warningsRef = useRef<ItemValidation>({});
     const errorsRef = useRef<ItemValidation>({});
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const isGlobal = useMemo(() => isArtifactGlobal(item as ExceptionListItemSchema), [item]);
+    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(item.tags));
+    const [hasFormChanged, setHasFormChanged] = useState(false);
+
+    const showAssignmentSection = useMemo(() => {
+      return (
+        isPlatinumPlus ||
+        (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
+      );
+    }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
+
+    // set initial state of `wasByPolicy` that checks if the initial state of the exception was by policy or not
+    useEffect(() => {
+      if (!hasFormChanged && item.tags) {
+        setWasByPolicy(!isGlobalPolicyEffected(item.tags));
+      }
+    }, [item.tags, hasFormChanged]);
 
     // select policies if editing
     useEffect(() => {
+      if (hasFormChanged) return;
       const policyIds = item.tags?.map((tag) => tag.split(':')[1]) ?? [];
       if (!policyIds.length) return;
       const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
+
       setSelectedPolicies(policiesData);
-    }, [item.tags, policies]);
+    }, [hasFormChanged, item.tags, policies]);
 
     const blocklistEntry = useMemo((): BlocklistEntry => {
       if (!item.entries.length) {
@@ -248,6 +269,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item]
     );
@@ -261,6 +283,7 @@ export const BlockListForm = memo(
             description: event.target.value,
           },
         });
+        setHasFormChanged(true);
       },
       [onChange, item]
     );
@@ -286,6 +309,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, blocklistEntry, onChange, item]
     );
@@ -302,6 +326,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item, blocklistEntry]
     );
@@ -320,6 +345,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item, blocklistEntry]
     );
@@ -341,6 +367,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item, blocklistEntry]
     );
@@ -351,16 +378,20 @@ export const BlockListForm = memo(
           ? [GLOBAL_ARTIFACT_TAG]
           : change.selected.map((policy) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`);
 
-        setSelectedPolicies(change.selected);
+        const nextItem = { ...item, tags };
+
+        // Preserve old selected policies when switching to global
+        if (!change.isGlobal) {
+          setSelectedPolicies(change.selected);
+        }
+        validateValues(nextItem);
         onChange({
           isValid: isValid(errorsRef.current),
-          item: {
-            ...item,
-            tags,
-          },
+          item: nextItem,
         });
+        setHasFormChanged(true);
       },
-      [onChange, item]
+      [validateValues, onChange, item]
     );
 
     return (
@@ -461,20 +492,22 @@ export const BlockListForm = memo(
           />
         </EuiFormRow>
 
-        <>
-          <EuiHorizontalRule />
-          <EuiFormRow fullWidth>
-            <EffectedPolicySelect
-              isGlobal={isArtifactGlobal(item as ExceptionListItemSchema)}
-              isPlatinumPlus={useLicense().isPlatinumPlus()}
-              selected={selectedPolicies}
-              options={policies}
-              onChange={handleOnPolicyChange}
-              isLoading={policiesIsLoading}
-              description={POLICY_SELECT_DESCRIPTION}
-            />
-          </EuiFormRow>
-        </>
+        {showAssignmentSection && (
+          <>
+            <EuiHorizontalRule />
+            <EuiFormRow fullWidth>
+              <EffectedPolicySelect
+                isGlobal={isGlobal}
+                isPlatinumPlus={isPlatinumPlus}
+                selected={selectedPolicies}
+                options={policies}
+                onChange={handleOnPolicyChange}
+                isLoading={policiesIsLoading}
+                description={POLICY_SELECT_DESCRIPTION}
+              />
+            </EuiFormRow>
+          </>
+        )}
       </EuiForm>
     );
   }

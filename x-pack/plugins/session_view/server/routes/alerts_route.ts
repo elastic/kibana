@@ -10,6 +10,7 @@ import {
   ALERTS_ROUTE,
   ALERTS_PER_PAGE,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
+  PREVIEW_ALERTS_INDEX,
 } from '../../common/constants';
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 import type { AlertsClient, RuleRegistryPluginStartContract } from '../../../rule_registry/server';
@@ -27,7 +28,7 @@ export const registerAlertsRoute = (
         }),
       },
     },
-    async (context, request, response) => {
+    async (_context, request, response) => {
       const client = await ruleRegistry.getRacClientWithRequest(request);
       const { sessionEntityId } = request.query;
       const body = await doSearch(client, sessionEntityId);
@@ -38,7 +39,9 @@ export const registerAlertsRoute = (
 };
 
 export const doSearch = async (client: AlertsClient, sessionEntityId: string) => {
-  const indices = await client.getAuthorizedAlertsIndices(['siem']);
+  const indices = (await client.getAuthorizedAlertsIndices(['siem']))?.filter(
+    (index) => index !== PREVIEW_ALERTS_INDEX
+  );
 
   if (!indices) {
     return { events: [] };
