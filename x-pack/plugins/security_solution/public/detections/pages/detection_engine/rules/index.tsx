@@ -41,12 +41,22 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { RulesTableContextProvider } from './all/rules_table/rules_table_context';
 import { useInvalidateRules } from '../../../containers/detection_engine/rules/use_find_rules_query';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { useExecutionContext } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListModalVisible, showValueListModal, hideValueListModal] = useBoolState();
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    executionContext,
+  } = useKibana().services;
   const invalidateRules = useInvalidateRules();
+
+  // Application ID and current URL are traced automatically.
+  useExecutionContext(executionContext, {
+    page: SecurityPageName.rules,
+    id: 'management',
+  });
 
   const [
     {

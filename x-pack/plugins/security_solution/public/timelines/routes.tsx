@@ -9,14 +9,25 @@ import React from 'react';
 import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
 import { Timelines } from './pages';
 import { TIMELINES_PATH } from '../../common/constants';
+import { useExecutionContext } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../common/lib/kibana';
 
 import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 
-const TimelinesRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.timelines}>
-    <Timelines />
-  </TrackApplicationView>
-);
+const TimelinesRoutes = () => {
+  const { executionContext } = useKibana().services;
+
+  // Application ID and current URL are traced automatically.
+  useExecutionContext(executionContext, {
+    page: SecurityPageName.timelines,
+  });
+
+  return (
+    <TrackApplicationView viewId={SecurityPageName.timelines}>
+      <Timelines />
+    </TrackApplicationView>
+  );
+};
 
 export const routes: SecuritySubPluginRoutes = [
   {

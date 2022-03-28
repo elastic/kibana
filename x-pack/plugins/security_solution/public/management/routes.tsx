@@ -10,15 +10,26 @@ import { MANAGEMENT_PATH } from '../../common/constants';
 import { ManagementContainer } from './pages';
 import { SecuritySubPluginRoutes } from '../app/types';
 import { CurrentLicense } from '../common/components/current_license';
+import { useExecutionContext } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../common/lib/kibana';
 
 /**
  * Returns the React Router Routes for the management area
  */
-const ManagementRoutes = () => (
-  <CurrentLicense>
-    <ManagementContainer />
-  </CurrentLicense>
-);
+const ManagementRoutes = () => {
+  const { executionContext } = useKibana().services;
+
+  // Application ID and current URL are traced automatically.
+  useExecutionContext(executionContext, {
+    page: 'Manage',
+  });
+
+  return (
+    <CurrentLicense>
+      <ManagementContainer />
+    </CurrentLicense>
+  );
+};
 
 export const routes: SecuritySubPluginRoutes = [
   {

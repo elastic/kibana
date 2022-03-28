@@ -49,6 +49,7 @@ import { ruleStepsOrder } from '../utils';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { HeaderPage } from '../../../../../common/components/header_page';
+import { useExecutionContext } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -86,7 +87,17 @@ const CreateRulePageComponent: React.FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    executionContext,
+  } = useKibana().services;
+
+  // Application ID and current URL are traced automatically.
+  useExecutionContext(executionContext, {
+    page: SecurityPageName.rules,
+    id: 'create',
+  });
+
   const loading = userInfoLoading || listsConfigLoading;
   const [, dispatchToaster] = useStateToaster();
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);

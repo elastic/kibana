@@ -57,6 +57,7 @@ import { ruleStepsOrder } from '../utils';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { HeaderPage } from '../../../../../common/components/header_page';
+import { useExecutionContext } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -73,11 +74,20 @@ const EditRulePageComponent: FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    executionContext,
+  } = useKibana().services;
 
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
   const [ruleLoading, rule] = useRule(ruleId);
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
+
+  // Application ID and current URL are traced automatically.
+  useExecutionContext(executionContext, {
+    page: SecurityPageName.rules,
+    id: 'edit',
+  });
 
   const formHooks = useRef<RuleStepsFormHooks>({
     [RuleStep.defineRule]: formHookNoop,

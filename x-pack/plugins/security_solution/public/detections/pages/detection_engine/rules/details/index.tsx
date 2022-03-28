@@ -121,6 +121,7 @@ import {
 } from '../../../../components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../../common/components/header_page';
+import { useExecutionContext } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -165,10 +166,20 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearEventsLoading,
   clearSelected,
 }) => {
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    executionContext,
+  } = useKibana().services;
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  // Application ID and current URL are traced automatically.
+  useExecutionContext(executionContext, {
+    page: SecurityPageName.rules,
+    id: 'details',
+  });
+
   const graphEventId = useShallowEqualSelector(
     (state) =>
       (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).graphEventId
