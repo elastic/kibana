@@ -59,18 +59,16 @@ export function MaybeViewTraceLink({
   // the traceroot cannot be found, so we cannot link to it
   if (!rootTransaction) {
     return (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.transactionDetails.noTraceParentButtonTooltip',
-            {
-              defaultMessage: 'The trace parent cannot be found',
-            }
-          )}
-        >
-          <FullTraceButton isDisabled />
-        </EuiToolTip>
-      </EuiFlexItem>
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.apm.transactionDetails.noTraceParentButtonTooltip',
+          {
+            defaultMessage: 'The trace parent cannot be found',
+          }
+        )}
+      >
+        <FullTraceButton isDisabled />
+      </EuiToolTip>
     );
   }
 
@@ -79,18 +77,16 @@ export function MaybeViewTraceLink({
   // the user is already viewing the full trace, so don't link to it
   if (isRoot) {
     return (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.transactionDetails.viewingFullTraceButtonTooltip',
-            {
-              defaultMessage: 'Currently viewing the full trace',
-            }
-          )}
-        >
-          <FullTraceButton isDisabled />
-        </EuiToolTip>
-      </EuiFlexItem>
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.apm.transactionDetails.viewingFullTraceButtonTooltip',
+          {
+            defaultMessage: 'Currently viewing the full trace',
+          }
+        )}
+      >
+        <FullTraceButton isDisabled />
+      </EuiToolTip>
     );
 
     // the user is viewing a zoomed in version of the trace. Link to the full trace

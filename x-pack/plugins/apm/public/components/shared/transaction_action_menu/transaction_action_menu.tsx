@@ -75,12 +75,8 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
           />
         }
       >
-        <div>
-          <ActionMenuSections transaction={transaction} />
-          {hasGoldLicense && (
-            <CustomLinkMenuSection transaction={transaction} />
-          )}
-        </div>
+        <ActionMenuSections transaction={transaction} />
+        {hasGoldLicense && <CustomLinkMenuSection transaction={transaction} />}
       </ActionMenu>
     </>
   );
