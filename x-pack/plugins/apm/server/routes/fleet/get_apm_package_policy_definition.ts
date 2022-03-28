@@ -10,6 +10,7 @@ import { RegistryVarsEntry } from '../../../../fleet/common';
 import {
   POLICY_ELASTIC_AGENT_ON_CLOUD,
   INPUT_VAR_NAME_TO_SCHEMA_PATH,
+  ELASTIC_CLOUD_APM_AGENT_POLICY_ID,
 } from '../../../common/fleet';
 import {
   APMPluginSetupDependencies,
@@ -35,6 +36,7 @@ export async function getApmPackagePolicyDefinition({
   });
 
   return {
+    id: ELASTIC_CLOUD_APM_AGENT_POLICY_ID,
     name: 'Elastic APM',
     namespace: 'default',
     enabled: true,

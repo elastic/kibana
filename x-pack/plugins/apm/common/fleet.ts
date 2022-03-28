@@ -60,3 +60,5 @@ export const LEGACY_TO_CURRENT_SCHEMA_PATHS: Record<string, string> = {
   'apm-server.secret_token': 'apm-server.auth.secret_token',
   'apm-server.api_key.enabled': 'apm-server.auth.api_key.enabled',
 };
+
+export const ELASTIC_CLOUD_APM_AGENT_POLICY_ID = 'elastic-cloud-apm';
