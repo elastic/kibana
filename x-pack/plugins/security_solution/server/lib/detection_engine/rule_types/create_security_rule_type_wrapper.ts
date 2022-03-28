@@ -50,6 +50,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
     return persistenceRuleType({
       ...type,
+      cancelAlertsOnRuleTimeout: false,
       useSavedObjectReferences: {
         extractReferences: (params) => extractReferences({ logger, params }),
         injectReferences: (params, savedObjectReferences) =>
@@ -304,51 +305,52 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
             }
 
-            if (result.success) {
-              const createdSignalsCount = result.createdSignals.length;
+            const createdSignalsCount = result.createdSignals.length;
 
-              if (actions.length) {
-                const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
-                const toInMs = parseScheduleDates('now')?.format('x');
-                const resultsLink = getNotificationResultsLink({
-                  from: fromInMs,
-                  to: toInMs,
+            if (actions.length) {
+              const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
+              const toInMs = parseScheduleDates('now')?.format('x');
+              const resultsLink = getNotificationResultsLink({
+                from: fromInMs,
+                to: toInMs,
+                id: alertId,
+                kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                  ?.kibana_siem_app_url,
+              });
+
+              logger.debug(
+                buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`)
+              );
+
+              if (completeRule.ruleConfig.throttle != null) {
+                // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
+                await scheduleThrottledNotificationActions({
+                  alertInstance: services.alertFactory.create(alertId),
+                  throttle: completeRule.ruleConfig.throttle ?? '',
+                  startedAt,
                   id: alertId,
                   kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
                     ?.kibana_siem_app_url,
+                  outputIndex: ruleDataClient.indexNameWithNamespace(spaceId),
+                  ruleId,
+                  esClient: services.scopedClusterClient.asCurrentUser,
+                  notificationRuleParams,
+                  signals: result.createdSignals,
+                  logger,
                 });
-
-                logger.debug(
-                  buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`)
-                );
-
-                if (completeRule.ruleConfig.throttle != null) {
-                  await scheduleThrottledNotificationActions({
-                    alertInstance: services.alertFactory.create(alertId),
-                    throttle: completeRule.ruleConfig.throttle ?? '',
-                    startedAt,
-                    id: alertId,
-                    kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-                      ?.kibana_siem_app_url,
-                    outputIndex: ruleDataClient.indexNameWithNamespace(spaceId),
-                    ruleId,
-                    esClient: services.scopedClusterClient.asCurrentUser,
-                    notificationRuleParams,
-                    signals: result.createdSignals,
-                    logger,
-                  });
-                } else if (createdSignalsCount) {
-                  const alertInstance = services.alertFactory.create(alertId);
-                  scheduleNotificationActions({
-                    alertInstance,
-                    signalsCount: createdSignalsCount,
-                    signals: result.createdSignals,
-                    resultsLink,
-                    ruleParams: notificationRuleParams,
-                  });
-                }
+              } else if (createdSignalsCount) {
+                const alertInstance = services.alertFactory.create(alertId);
+                scheduleNotificationActions({
+                  alertInstance,
+                  signalsCount: createdSignalsCount,
+                  signals: result.createdSignals,
+                  resultsLink,
+                  ruleParams: notificationRuleParams,
+                });
               }
+            }
 
+            if (result.success) {
               logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
               logger.debug(
                 buildRuleMessage(
@@ -392,23 +394,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                 },
               });
-              // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
-              if (completeRule.ruleConfig.throttle != null) {
-                await scheduleThrottledNotificationActions({
-                  alertInstance: services.alertFactory.create(alertId),
-                  throttle: completeRule.ruleConfig.throttle ?? '',
-                  startedAt,
-                  id: completeRule.alertId,
-                  kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-                    ?.kibana_siem_app_url,
-                  outputIndex: ruleDataClient.indexNameWithNamespace(spaceId),
-                  ruleId,
-                  esClient: services.scopedClusterClient.asCurrentUser,
-                  notificationRuleParams,
-                  signals: result.createdSignals,
-                  logger,
-                });
-              }
             }
           } catch (error) {
             const errorMessage = error.message ?? '(no error message given)';
@@ -426,8 +411,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 indexingDurations: result.bulkCreateTimes,
               },
             });
+
             // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
-            if (completeRule.ruleConfig.throttle != null) {
+            if (actions.length && completeRule.ruleConfig.throttle != null) {
               await scheduleThrottledNotificationActions({
                 alertInstance: services.alertFactory.create(alertId),
                 throttle: completeRule.ruleConfig.throttle ?? '',
