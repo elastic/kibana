@@ -186,14 +186,6 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                         defaultMessage="Username"
                       />
                     }
-                    helpText={
-                      !isReservedUser ? (
-                        <FormattedMessage
-                          id="xpack.security.accountManagement.userProfile.usernameDisabledHelpText"
-                          defaultMessage="Username can't be changed once created."
-                        />
-                      ) : null
-                    }
                     fullWidth
                     isDisabled
                   >
@@ -210,7 +202,15 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                           />
                         </FormLabel>
                       }
-                      labelAppend={<OptionalText />}
+                      helpText={
+                        !canChangeDetails ? (
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.userProfile.fullNameHelpText"
+                            defaultMessage="You can't change this information."
+                          />
+                        ) : null
+                      }
+                      labelAppend={canChangeDetails ? <OptionalText /> : null}
                       isDisabled={!canChangeDetails}
                       fullWidth
                     >
@@ -226,7 +226,15 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                           />
                         </FormLabel>
                       }
-                      labelAppend={<OptionalText />}
+                      helpText={
+                        !canChangeDetails ? (
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.userProfile.emailHelpText"
+                            defaultMessage="You can't change this information."
+                          />
+                        ) : null
+                      }
+                      labelAppend={canChangeDetails ? <OptionalText /> : null}
                       isDisabled={!canChangeDetails}
                       fullWidth
                     >

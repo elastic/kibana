@@ -33,6 +33,14 @@ describe('useUserProfileForm', () => {
   beforeEach(() => {
     history = scopedHistoryMock.create();
     authc.getCurrentUser.mockReset();
+    // @ts-ignore Capabilities are marked as readonly without a way of overriding.
+    coreStart.application.capabilities = {
+      management: {
+        security: {
+          users: true,
+        },
+      },
+    };
     coreStart.http.delete.mockReset();
     coreStart.http.get.mockReset();
     coreStart.http.post.mockReset();
@@ -105,6 +113,26 @@ describe('useUserProfileForm', () => {
     });
 
     expect(coreStart.http.post).toHaveBeenCalledTimes(2);
+  });
+
+  it("should save user profile only when user details can't be updated", async () => {
+    // @ts-ignore Capabilities are marked as readonly without a way of overriding.
+    coreStart.application.capabilities = {
+      management: {
+        security: {
+          users: false,
+        },
+      },
+    };
+
+    const data: UserData = {};
+    const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+    await act(async () => {
+      await result.current.submitForm();
+    });
+
+    expect(coreStart.http.post).toHaveBeenCalledTimes(1);
   });
 
   it('should add toast after submitting form successfully', async () => {
