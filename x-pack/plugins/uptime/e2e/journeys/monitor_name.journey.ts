@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import { journey, step, expect, after, before, Page } from '@elastic/synthetics';
+import { journey, step, expect, before, Page } from '@elastic/synthetics';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 import { byTestId } from './utils';
 
