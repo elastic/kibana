@@ -22,9 +22,6 @@ import {
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
 import * as i18n from '../translations';
-import { useRulesFeatureTourContextOptional } from './rules_feature_tour_context';
-
-import { OptionalEuiTourStep } from './optional_eui_tour_step';
 
 interface AllRulesUtilityBarProps {
   canBulkEdit: boolean;
@@ -58,9 +55,6 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     isBulkActionInProgress,
     hasDisabledActions,
   }) => {
-    // use optional rulesFeatureTourContext as AllRulesUtilityBar can be used outside the context
-    const featureTour = useRulesFeatureTourContextOptional();
-
     const handleGetBulkItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
         if (onGetBulkItemsPopoverContent != null) {
@@ -140,24 +134,17 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                 )}
 
                 {canBulkEdit && (
-                  <OptionalEuiTourStep stepProps={featureTour?.steps?.bulkActionsStepProps}>
-                    <UtilityBarAction
-                      disabled={hasDisabledActions}
-                      inProgress={isBulkActionInProgress}
-                      dataTestSubj="bulkActions"
-                      iconSide="right"
-                      iconType="arrowDown"
-                      popoverPanelPaddingSize="none"
-                      popoverContent={handleGetBulkItemsPopoverContent}
-                      onClick={() => {
-                        if (featureTour?.steps?.bulkActionsStepProps?.isStepOpen) {
-                          featureTour?.finishTour();
-                        }
-                      }}
-                    >
-                      {i18n.BATCH_ACTIONS}
-                    </UtilityBarAction>
-                  </OptionalEuiTourStep>
+                  <UtilityBarAction
+                    disabled={hasDisabledActions}
+                    inProgress={isBulkActionInProgress}
+                    dataTestSubj="bulkActions"
+                    iconSide="right"
+                    iconType="arrowDown"
+                    popoverPanelPaddingSize="none"
+                    popoverContent={handleGetBulkItemsPopoverContent}
+                  >
+                    {i18n.BATCH_ACTIONS}
+                  </UtilityBarAction>
                 )}
 
                 <UtilityBarAction

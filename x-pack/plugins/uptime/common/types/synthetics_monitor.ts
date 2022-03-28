@@ -15,3 +15,7 @@ export interface MonitorIdParam {
 export type SyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor> & {
   updated_at: string;
 };
+
+export interface SyntheticsServiceAllowed {
+  serviceAllowed: boolean;
+}

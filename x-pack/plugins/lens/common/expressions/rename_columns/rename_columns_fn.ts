@@ -28,7 +28,7 @@ export const renameColumnFn: RenameColumnsExpressionFunction['fn'] = (
   const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn>;
 
   return {
-    type: 'datatable',
+    ...data,
     rows: data.rows.map((row) => {
       const mappedRow: Record<string, unknown> = {};
       Object.entries(idMap).forEach(([fromId, toId]) => {

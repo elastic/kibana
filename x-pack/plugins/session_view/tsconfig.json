@@ -37,6 +37,7 @@
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../infra/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" }
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../rule_registry/tsconfig.json" }
   ]
 }

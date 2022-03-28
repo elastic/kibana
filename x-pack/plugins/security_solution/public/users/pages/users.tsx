@@ -162,6 +162,10 @@ const UsersComponent = () => {
 
   const capabilities = useMlCapabilities();
   const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
+  const navTabs = useMemo(
+    () => navTabsUsers(hasMlUserPermissions(capabilities), riskyUsersFeatureEnabled),
+    [capabilities, riskyUsersFeatureEnabled]
+  );
 
   return (
     <>
@@ -197,9 +201,7 @@ const UsersComponent = () => {
 
             <EuiSpacer />
 
-            <SecuritySolutionTabNavigation
-              navTabs={navTabsUsers(hasMlUserPermissions(capabilities), riskyUsersFeatureEnabled)}
-            />
+            <SecuritySolutionTabNavigation navTabs={navTabs} />
 
             <EuiSpacer />
 
