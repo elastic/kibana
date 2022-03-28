@@ -45,11 +45,9 @@ import { ObservabilityAppServices } from '../../application/types';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { paths } from '../../config';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
-import {
-  LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY,
-  ObservabilityStatusProgress,
-} from '../../components/app/observability_status/observability_status_progress';
+import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
 import { ObservabilityStatus } from '../../components/app/observability_status';
+import { useGuidedSetup } from '../../hooks/use_guided_setup';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -85,6 +83,8 @@ export function OverviewPage({ routeParams }: Props) {
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
 
+  const { isGuidedSetupHidden } = useGuidedSetup();
+
   const bucketSize = useMemo(
     () =>
       calculateBucketSize({
@@ -99,12 +99,12 @@ export function OverviewPage({ routeParams }: Props) {
   }, []);
 
   const handleGuidedSetupClick = useCallback(() => {
-    if (window.localStorage.getItem(LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY) === 'true') {
+    if (isGuidedSetupHidden) {
       trackMetric({ metric: 'guided_setup_view_details_after_dismiss' });
     }
 
     setIsFlyoutVisible(true);
-  }, [trackMetric]);
+  }, [trackMetric, isGuidedSetupHidden]);
 
   const onTimeRangeRefresh = useCallback(() => {
     return refetch.current && refetch.current();

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiPanel,
   EuiProgress,
@@ -20,8 +20,7 @@ import { reduce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasData } from '../../../hooks/use_has_data';
 import { useUiTracker } from '../../../hooks/use_track_metric';
-
-export const LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY = 'HIDE_GUIDED_SETUP';
+import { useGuidedSetup } from '../../../hooks/use_guided_setup';
 
 interface ObservabilityStatusProgressProps {
   onViewDetailsClick: () => void;
@@ -31,12 +30,8 @@ export function ObservabilityStatusProgress({
 }: ObservabilityStatusProgressProps) {
   const { hasDataMap, isAllRequestsComplete } = useHasData();
   const trackMetric = useUiTracker({ app: 'observability-overview' });
-  const hideGuidedSetupLocalStorageKey = window.localStorage.getItem(
-    LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY
-  );
-  const [isGuidedSetupHidden, setIsGuidedSetupHidden] = useState(
-    JSON.parse(hideGuidedSetupLocalStorageKey || 'false')
-  );
+  const { isGuidedSetupHidden, hideGuidedSetup } = useGuidedSetup();
+
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -55,11 +50,10 @@ export function ObservabilityStatusProgress({
     }
   }, [isAllRequestsComplete, hasDataMap]);
 
-  const hideGuidedSetup = () => {
-    window.localStorage.setItem(LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY, 'true');
-    setIsGuidedSetupHidden(true);
+  const dismissGuidedSetup = useCallback(() => {
+    hideGuidedSetup();
     trackMetric({ metric: 'guided_setup_progress_dismiss' });
-  };
+  }, [hideGuidedSetup, trackMetric]);
 
   const showDetails = () => {
     onViewDetailsClick();
@@ -93,7 +87,7 @@ export function ObservabilityStatusProgress({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} direction="row" alignItems="center">
               <EuiFlexItem>
-                <EuiButtonEmpty size="s" onClick={hideGuidedSetup}>
+                <EuiButtonEmpty size="s" onClick={dismissGuidedSetup}>
                   <FormattedMessage
                     id="xpack.observability.status.progressBarDismiss"
                     defaultMessage="Dismiss"
