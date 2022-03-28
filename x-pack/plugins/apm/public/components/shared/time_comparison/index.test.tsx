@@ -18,22 +18,17 @@ import * as urlHelpers from '../../shared/links/url_helpers';
 import moment from 'moment';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import {
-  TimeRangeComparisonType,
-  TimeRangeComparisonEnum,
-} from '../../../../common/runtime_types/comparison_type_rt';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 
 function getWrapper({
   rangeFrom,
   rangeTo,
-  comparisonType,
+  offset,
   comparisonEnabled,
   environment = ENVIRONMENT_ALL.value,
 }: {
   rangeFrom: string;
   rangeTo: string;
-  comparisonType?: TimeRangeComparisonType;
+  offset?: string;
   comparisonEnabled?: boolean;
   environment?: string;
 }) {
@@ -41,16 +36,12 @@ function getWrapper({
     return (
       <MemoryRouter
         initialEntries={[
-          `/services?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&environment=${environment}`,
+          `/services?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&environment=${environment}&offset=${offset}&comparisonEnabled=${comparisonEnabled}`,
         ]}
       >
-        <MockUrlParamsContextProvider
-          params={{ comparisonType, comparisonEnabled }}
-        >
-          <MockApmPluginContextWrapper>
-            <EuiThemeProvider>{children}</EuiThemeProvider>
-          </MockApmPluginContextWrapper>
-        </MockUrlParamsContextProvider>
+        <MockApmPluginContextWrapper>
+          <EuiThemeProvider>{children}</EuiThemeProvider>
+        </MockApmPluginContextWrapper>
       </MemoryRouter>
     );
   };
@@ -76,8 +67,7 @@ describe('TimeComparison component', () => {
       render(<TimeComparison />, { wrapper: Wrapper });
       expect(spy).toHaveBeenCalledWith(expect.anything(), {
         query: {
-          comparisonEnabled: 'true',
-          comparisonType: TimeRangeComparisonEnum.DayBefore,
+          offset: '1d',
         },
       });
     });
@@ -87,7 +77,7 @@ describe('TimeComparison component', () => {
         rangeFrom: '2021-06-04T16:17:02.335Z',
         rangeTo: '2021-06-04T16:32:02.335Z',
         comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonEnum.DayBefore,
+        offset: '1d',
       });
       const component = render(<TimeComparison />, { wrapper: Wrapper });
       expectTextsInDocument(component, ['Day before', 'Week before']);
@@ -102,7 +92,7 @@ describe('TimeComparison component', () => {
         rangeFrom: '2021-06-03T16:31:35.748Z',
         rangeTo: '2021-06-04T16:31:35.748Z',
         comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonEnum.DayBefore,
+        offset: '1d',
       });
       const component = render(<TimeComparison />, { wrapper: Wrapper });
       expectTextsInDocument(component, ['Day before', 'Week before']);
@@ -119,7 +109,7 @@ describe('TimeComparison component', () => {
         rangeFrom: '2021-06-02T12:32:00.000Z',
         rangeTo: '2021-06-03T13:32:09.079Z',
         comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonEnum.WeekBefore,
+        offset: '1w',
       });
       const component = render(<TimeComparison />, {
         wrapper: Wrapper,
@@ -138,8 +128,7 @@ describe('TimeComparison component', () => {
       });
       expect(spy).toHaveBeenCalledWith(expect.anything(), {
         query: {
-          comparisonEnabled: 'true',
-          comparisonType: TimeRangeComparisonEnum.WeekBefore,
+          offset: '1w',
         },
       });
     });
@@ -149,7 +138,7 @@ describe('TimeComparison component', () => {
         rangeFrom: '2021-06-02T12:32:00.000Z',
         rangeTo: '2021-06-03T13:32:09.079Z',
         comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonEnum.WeekBefore,
+        offset: '1w',
       });
       const component = render(<TimeComparison />, {
         wrapper: Wrapper,
@@ -169,7 +158,7 @@ describe('TimeComparison component', () => {
         rangeFrom: '2021-05-27T16:32:46.747Z',
         rangeTo: '2021-06-04T16:32:46.747Z',
         comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonEnum.PeriodBefore,
+        offset: '691200000ms',
       });
       const component = render(<TimeComparison />, {
         wrapper: Wrapper,
@@ -187,7 +176,7 @@ describe('TimeComparison component', () => {
         rangeFrom: '2020-05-27T16:32:46.747Z',
         rangeTo: '2021-06-04T16:32:46.747Z',
         comparisonEnabled: true,
-        comparisonType: TimeRangeComparisonEnum.PeriodBefore,
+        offset: '32227200000ms',
       });
       const component = render(<TimeComparison />, {
         wrapper: Wrapper,
