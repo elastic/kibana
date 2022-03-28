@@ -11,6 +11,7 @@ import { last } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const log = getService('log');
   const es = getService('es');
   const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects([
@@ -232,8 +233,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await createSourceIndex();
       await generateNewDocs(5);
       await createOutputDataIndex();
+
+      log.debug('create data views');
       const [sourceDataViewResponse, outputDataViewResponse] = await createDataViews();
+
+      log.debug('create connector');
       connectorId = await createConnector();
+
       sourceDataViewId = sourceDataViewResponse.body.data_view.id;
       outputDataViewId = outputDataViewResponse.body.data_view.id;
     });
