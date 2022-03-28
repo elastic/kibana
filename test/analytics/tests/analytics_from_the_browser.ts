@@ -15,6 +15,7 @@ import '../__fixtures__/plugins/analytics_plugin_a/public/types';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
   const browser = getService('browser');
+  const ebtUIHelper = getService('kibana_ebt_ui');
 
   describe('analytics service: public side', () => {
     const getTelemetryCounters = async (
@@ -60,14 +61,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('after setting opt-in, it should extend the contexts and send the events', async () => {
-      await browser.execute(() => window.__analyticsPluginA__.setOptIn(true));
+      await ebtUIHelper.setOptIn(true);
 
       const actions = await getActions(3);
-      // Treating the PID as remote because the tests may run the server in a separate process to the suites
-      const remoteUserAgent = actions[1].meta.user_agent;
+
+      // Validating the remote user_agent because that's the only field that it's added by the FTR plugin.
+      const context = actions[1].meta;
+      expect(context).to.have.property('user_agent');
+      expect(context.user_agent).to.be.a('string');
+
       expect(actions).to.eql([
         { action: 'optIn', meta: true },
-        { action: 'extendContext', meta: { user_agent: remoteUserAgent } },
+        { action: 'extendContext', meta: context },
         {
           action: 'reportEvents',
           meta: [
@@ -80,14 +85,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               timestamp: actions[2].meta[1].timestamp,
               event_type: 'test-plugin-lifecycle',
-              context: { user_agent: remoteUserAgent },
+              context,
               properties: { plugin: 'analyticsPluginA', step: 'start' },
             },
           ],
         },
       ]);
 
-      expect(remoteUserAgent).to.be.a('string');
+      // Testing the FTR helper as well
+      expect(await ebtUIHelper.getLastEvents(2, ['test-plugin-lifecycle'])).to.eql([
+        {
+          timestamp: actions[2].meta[0].timestamp,
+          event_type: 'test-plugin-lifecycle',
+          context: {},
+          properties: { plugin: 'analyticsPluginA', step: 'setup' },
+        },
+        {
+          timestamp: actions[2].meta[1].timestamp,
+          event_type: 'test-plugin-lifecycle',
+          context,
+          properties: { plugin: 'analyticsPluginA', step: 'start' },
+        },
+      ]);
 
       const telemetryCounters = await getTelemetryCounters(3);
       expect(telemetryCounters).to.eql([

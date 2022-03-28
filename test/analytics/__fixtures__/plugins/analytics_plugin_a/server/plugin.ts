@@ -7,16 +7,15 @@
  */
 
 import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import { take, toArray } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import type { Plugin, CoreSetup, CoreStart, TelemetryCounter } from 'src/core/server';
-import { take, toArray } from 'rxjs/operators';
 import type { Action } from './custom_shipper';
 import { CustomShipper } from './custom_shipper';
 
 export class AnalyticsPluginAPlugin implements Plugin {
   public setup({ analytics, http }: CoreSetup, deps: {}) {
     const {
-      optIn,
       registerContextProvider,
       registerEventType,
       registerShipper,
@@ -56,24 +55,6 @@ export class AnalyticsPluginAPlugin implements Plugin {
 
     const router = http.createRouter();
 
-    router.post(
-      {
-        path: '/internal/analytics_plugin_a/opt_in',
-        validate: {
-          query: schema.object({
-            consent: schema.boolean(),
-          }),
-        },
-      },
-      (context, req, res) => {
-        const { consent } = req.query;
-
-        optIn({ global: { enabled: consent } });
-
-        return res.ok();
-      }
-    );
-
     const context$ = new Subject();
     registerContextProvider({
       context$,
@@ -87,40 +68,6 @@ export class AnalyticsPluginAPlugin implements Plugin {
         },
       },
     });
-
-    router.post(
-      {
-        path: '/internal/analytics_plugin_a/enrich_context',
-        validate: {
-          body: schema.object({
-            context: schema.recordOf(schema.string(), schema.any()),
-          }),
-        },
-      },
-      (context, req, res) => {
-        context$.next({ custom_context: req.body.context });
-
-        return res.ok();
-      }
-    );
-
-    router.post(
-      {
-        path: '/internal/analytics_plugin_a/report_event',
-        validate: {
-          body: schema.object({
-            eventName: schema.string(),
-            event: schema.recordOf(schema.string(), schema.any()),
-          }),
-        },
-      },
-      (context, req, res) => {
-        // this is likely to fail because the event type is not registered
-        reportEvent(req.body.eventName, req.body.event);
-
-        return res.ok();
-      }
-    );
 
     router.get(
       {

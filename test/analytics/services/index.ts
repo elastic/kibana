@@ -11,13 +11,13 @@ import { services as commonServices } from '../../common/services';
 import { services as functionalServices } from '../../functional/services';
 import { pageObjects } from '../../functional/page_objects';
 
-// import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
+import { KibanaEBTServerProvider, KibanaEBTUIProvider } from './kibana_ebt';
 
 export const services = {
   ...commonServices,
   ...functionalServices,
-  // supertest: KibanaSupertestProvider,
-  // esSupertest: ElasticsearchSupertestProvider,
+  kibana_ebt_server: KibanaEBTServerProvider,
+  kibana_ebt_ui: KibanaEBTUIProvider,
 };
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

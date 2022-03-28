@@ -35,6 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${path.resolve(__dirname, './__fixtures__/plugins/analytics_plugin_a')}`,
+        `--plugin-path=${path.resolve(__dirname, './__fixtures__/plugins/analytics_ftr_helpers')}`,
       ],
     },
   };

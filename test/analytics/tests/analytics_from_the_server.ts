@@ -13,6 +13,7 @@ import { Action } from '../__fixtures__/plugins/analytics_plugin_a/server/custom
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const ebtServerHelper = getService('kibana_ebt_server');
 
   const getTelemetryCounters = async (
     takeNumberOfCounters: number
@@ -59,18 +60,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('after setting opt-in, it should extend the contexts and send the events', async () => {
-      await supertest
-        .post(`/internal/analytics_plugin_a/opt_in`)
-        .set('kbn-xsrf', 'xxx')
-        .query({ consent: true })
-        .expect(200);
+      await ebtServerHelper.setOptIn(true);
 
       const actions = await getActions(3);
-      // Treating the PID as remote because the tests may run the server in a separate process to the suites
-      const remotePID = actions[1].meta.pid;
+      // Validating the remote PID because that's the only field that it's added by the FTR plugin.
+      const context = actions[1].meta;
+      expect(context).to.have.property('pid');
+      expect(context.pid).to.be.a('number');
+
       expect(actions).to.eql([
         { action: 'optIn', meta: true },
-        { action: 'extendContext', meta: { pid: remotePID } },
+        { action: 'extendContext', meta: context },
         {
           action: 'reportEvents',
           meta: [
@@ -83,10 +83,27 @@ export default function ({ getService }: FtrProviderContext) {
             {
               timestamp: actions[2].meta[1].timestamp,
               event_type: 'test-plugin-lifecycle',
-              context: { pid: remotePID },
+              context,
               properties: { plugin: 'analyticsPluginA', step: 'start' },
             },
           ],
+        },
+      ]);
+
+      // This helps us to also test the helpers
+      const events = await ebtServerHelper.getLastEvents(2, ['test-plugin-lifecycle']);
+      expect(events).to.eql([
+        {
+          timestamp: actions[2].meta[0].timestamp,
+          event_type: 'test-plugin-lifecycle',
+          context: {},
+          properties: { plugin: 'analyticsPluginA', step: 'setup' },
+        },
+        {
+          timestamp: actions[2].meta[1].timestamp,
+          event_type: 'test-plugin-lifecycle',
+          context,
+          properties: { plugin: 'analyticsPluginA', step: 'start' },
         },
       ]);
 

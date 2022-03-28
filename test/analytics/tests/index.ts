@@ -10,7 +10,15 @@ import { FtrProviderContext } from '../services';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('analytics', () => {
-    loadTestFile(require.resolve('./analytics_from_the_browser'));
-    loadTestFile(require.resolve('./analytics_from_the_server'));
+    // These tests need to run before the other tests because they require the initial `unknown` opt-in state
+    describe('analytics service', () => {
+      loadTestFile(require.resolve('./analytics_from_the_browser'));
+      loadTestFile(require.resolve('./analytics_from_the_server'));
+    });
+
+    describe('instrumented events', () => {
+      loadTestFile(require.resolve('./instrumented_events/from_the_browser'));
+      loadTestFile(require.resolve('./instrumented_events/from_the_server'));
+    });
   });
 }
