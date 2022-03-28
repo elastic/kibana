@@ -6,9 +6,8 @@ these APIs:
 
 * {security-guide}/cases-api-add-comment.html[Add comment]
 * <<cases-api-create>>
-* {security-guide}/cases-api-delete-case.html[Delete case]
-* {security-guide}/cases-api-delete-all-comments.html[Delete all comments]
-* {security-guide}/cases-api-delete-comment.html[Delete comment]
+* <<cases-api-delete-cases>>
+* <<cases-api-delete-comments>>
 * {security-guide}/cases-api-find-alert.html[Find all alerts attached to a case]
 * <<cases-api-find-cases>>
 * {security-guide}/cases-api-find-cases-by-alert.html[Find cases by alert]
@@ -29,6 +28,9 @@ these APIs:
 
 //CREATE
 include::cases/cases-api-create.asciidoc[leveloffset=+1]
+//DELETE
+include::cases/cases-api-delete-cases.asciidoc[leveloffset=+1]
+include::cases/cases-api-delete-comments.asciidoc[leveloffset=+1]
 //FIND
 include::cases/cases-api-find-cases.asciidoc[leveloffset=+1]
 include::cases/cases-api-find-connectors.asciidoc[leveloffset=+1]
