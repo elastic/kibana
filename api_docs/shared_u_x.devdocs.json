@@ -2,148 +2,7 @@
   "id": "sharedUX",
   "client": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "sharedUX",
-        "id": "def-public.ExitFullScreenButton",
-        "type": "Function",
-        "tags": [],
-        "label": "ExitFullScreenButton",
-        "description": [
-          "\nA `ExitFullScreenButton` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `LazyExitFullScreenButton` component lazily with\na predefined fallback and error boundary."
-        ],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "Props",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "src/plugins/shared_ux/public/components/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "sharedUX",
-            "id": "def-public.ExitFullScreenButton.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "sharedUX",
-        "id": "def-public.LazyExitFullScreenButton",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyExitFullScreenButton",
-        "description": [
-          "\nThe Lazily-loaded `ExitFullScreenButton` component.  Consumers should use `React.Suspennse` or the\n`withSuspense` HOC to load this component."
-        ],
-        "signature": [
-          "React.ExoticComponent<",
-          "Props",
-          "> & { readonly _result: ({ onExit, toggleChrome }: ",
-          "Props",
-          ") => JSX.Element; }"
-        ],
-        "path": "src/plugins/shared_ux/public/components/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "sharedUX",
-            "id": "def-public.LazyExitFullScreenButton.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "sharedUX",
-        "id": "def-public.LazyNoDataViewsPage",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyNoDataViewsPage",
-        "description": [
-          "\nThe Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the\n`withSuspense` HOC to load this component."
-        ],
-        "signature": [
-          "React.ExoticComponent<",
-          "Props",
-          "> & { readonly _result: ({ onDataViewCreated, dataViewsDocLink }: ",
-          "Props",
-          ") => JSX.Element; }"
-        ],
-        "path": "src/plugins/shared_ux/public/components/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "sharedUX",
-            "id": "def-public.LazyNoDataViewsPage.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "sharedUX",
-        "id": "def-public.NoDataViewsPage",
-        "type": "Function",
-        "tags": [],
-        "label": "NoDataViewsPage",
-        "description": [
-          "\nA `NoDataViewsPage` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `LazyNoDataViewsPage` component lazily with\na predefined fallback and error boundary."
-        ],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "Props",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "src/plugins/shared_ux/public/components/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "sharedUX",
-            "id": "def-public.NoDataViewsPage.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -162,47 +21,21 @@
       "children": [
         {
           "parentPluginId": "sharedUX",
-          "id": "def-public.SharedUXPluginStart.ServicesContext",
+          "id": "def-public.SharedUXPluginStart.getContextServices",
           "type": "Function",
           "tags": [],
-          "label": "ServicesContext",
+          "label": "getContextServices",
           "description": [
-            "\nA React component that provides a pre-wired `React.Context` which connects components to Shared UX services."
+            "\nA set of pre-wired services for use with `SharedUxServicesProvider`.\n\n```\nimport { SharedUxServicesProvider } from '@kbn/shared-ux-services';\n\npublic start(coreStart: CoreStart, startPlugins: MyPluginStartDeps): MyPluginStart {\n  const services = startPlugins.sharedUX.getContextServices();\n  return {\n    ServicesContext: ({ children }) => <SharedUxServicesProvider {...services}>{children}</SharedUxServicesProvider>,\n  };\n}\n```\n\nor\n\n```\nimport { SharedUxServicesProvider } from '@kbn/shared-ux-services';\n\npublic setup(coreSetup: CoreSetup, setupPlugins: MyPluginSetupDeps): MyPluginSetup {\n  const [coreStart, startPlugins] = await coreSetup.getStartServices();\n  coreSetup.application.register({\n    mount: async (params: AppMountParameters) => {\n      ReactDOM.render(\n        <SharedUxServicesProvider {...startPlugins.sharedUX.getContextServices()}>\n          <MyApp />\n        </SharedUxServicesProvider>,\n        params.element\n      );\n    }\n  );\n}\n```"
           ],
           "signature": [
-            "React.FunctionComponent<{}>"
+            "() => ",
+            "SharedUxServices"
           ],
           "path": "src/plugins/shared_ux/public/types/index.ts",
           "deprecated": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "sharedUX",
-              "id": "def-public.SharedUXPluginStart.ServicesContext.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "P & { children?: React.ReactNode; }"
-              ],
-              "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
-            },
-            {
-              "parentPluginId": "sharedUX",
-              "id": "def-public.SharedUXPluginStart.ServicesContext.$2",
-              "type": "Any",
-              "tags": [],
-              "label": "context",
-              "description": [],
-              "signature": [
-                "any"
-              ],
-              "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
-            }
-          ]
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

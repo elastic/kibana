@@ -35,6 +35,7 @@ export function executionStatusFromState(state: RuleExecutionState): AlertExecut
   return {
     metrics: state.metrics,
     numberOfTriggeredActions: state.alertExecutionStore.numberOfTriggeredActions,
+    numberOfScheduledActions: state.alertExecutionStore.numberOfScheduledActions,
     lastExecutionDate: new Date(),
     status,
     ...(hasIncompleteAlertExecution && {
@@ -84,7 +85,6 @@ export function ruleExecutionStatusFromRaw(
   const {
     lastExecutionDate,
     lastDuration,
-    numberOfTriggeredActions,
     status = 'unknown',
     error,
     warning,
@@ -105,10 +105,6 @@ export function ruleExecutionStatusFromRaw(
 
   if (null != lastDuration) {
     executionStatus.lastDuration = lastDuration;
-  }
-
-  if (null != numberOfTriggeredActions) {
-    executionStatus.numberOfTriggeredActions = numberOfTriggeredActions;
   }
 
   if (error) {
