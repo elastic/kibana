@@ -309,6 +309,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
+      showFullScreenSelector: !addToTimeline,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -380,6 +381,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             pagination={tablePagination}
             height="500px"
             toolbarVisibility={toolbarVisibility}
+            full
           />
         </DataContext.Provider>
       )}
