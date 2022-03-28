@@ -10,7 +10,7 @@ import { monaco } from '@kbn/monaco';
 import { getHeight } from './get_height';
 
 describe('getHeight', () => {
-  Object.defineProperty(window, 'innerHeight', {writable: true, configurable: true, value: 500})
+  Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 500 });
 
   const getMonacoMock = (lineCount: number) => {
     return {

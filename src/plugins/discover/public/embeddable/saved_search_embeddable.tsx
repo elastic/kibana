@@ -19,11 +19,7 @@ import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import {
-  APPLY_FILTER_TRIGGER,
-  FilterManager,
-  generateFilters,
-} from '../../../data/public';
+import { APPLY_FILTER_TRIGGER, FilterManager, generateFilters } from '../../../data/public';
 import { DiscoverServices } from '../build_services';
 import { ISearchSource, Query, TimeRange, FilterStateStore } from '../../../data/public';
 import { DataView, DataViewField } from '../../../data_views/public';

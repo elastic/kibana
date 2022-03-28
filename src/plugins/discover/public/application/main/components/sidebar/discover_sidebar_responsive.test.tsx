@@ -73,7 +73,9 @@ jest.mock('../../utils/calc_field_counts', () => ({
 function getCompProps(): DiscoverSidebarResponsiveProps {
   const indexPattern = stubLogstashIndexPattern;
 
-  const hits = each(cloneDeep(realHits), (hit) => flattenHit(hit, indexPattern)) as unknown as ElasticSearchHit[];
+  const hits = each(cloneDeep(realHits), (hit) =>
+    flattenHit(hit, indexPattern)
+  ) as unknown as ElasticSearchHit[];
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
