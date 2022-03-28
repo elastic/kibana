@@ -259,6 +259,14 @@ export interface GetExecutionLogByIdParams {
   sort: estypes.Sort;
 }
 
+interface ScheduleRuleOptions {
+  id: string;
+  consumer: string;
+  ruleTypeId: string;
+  schedule: IntervalSchedule;
+  throwOnConflict: boolean; // whether to throw conflict errors or swallow them
+}
+
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 
@@ -450,12 +458,13 @@ export class RulesClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleRule(
-          createdAlert.id,
-          rawRule.alertTypeId,
-          data.schedule,
-          true
-        );
+        scheduledTask = await this.scheduleRule({
+          id: createdAlert.id,
+          consumer: data.consumer,
+          ruleTypeId: rawRule.alertTypeId,
+          schedule: data.schedule,
+          throwOnConflict: true,
+        });
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
         try {
@@ -1445,12 +1454,13 @@ export class RulesClient {
         );
         throw e;
       }
-      const scheduledTask = await this.scheduleRule(
+      const scheduledTask = await this.scheduleRule({
         id,
-        attributes.alertTypeId,
-        attributes.schedule as IntervalSchedule,
-        false
-      );
+        consumer: attributes.consumer,
+        ruleTypeId: attributes.alertTypeId,
+        schedule: attributes.schedule as IntervalSchedule,
+        throwOnConflict: false,
+      });
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
       });
@@ -1519,6 +1529,7 @@ export class RulesClient {
             ruleId: id,
             ruleName: attributes.name,
             ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
+            consumer: attributes.consumer,
             instanceId,
             action: EVENT_LOG_ACTIONS.recoveredInstance,
             message,
@@ -1526,6 +1537,7 @@ export class RulesClient {
             group: actionGroup,
             subgroup: actionSubgroup,
             namespace: this.namespace,
+            spaceId: this.spaceId,
             savedObjects: [
               {
                 id,
@@ -2010,12 +2022,8 @@ export class RulesClient {
     return this.spaceId;
   }
 
-  private async scheduleRule(
-    id: string,
-    ruleTypeId: string,
-    schedule: IntervalSchedule,
-    throwOnConflict: boolean // whether to throw conflict errors or swallow them
-  ) {
+  private async scheduleRule(opts: ScheduleRuleOptions) {
+    const { id, consumer, ruleTypeId, schedule, throwOnConflict } = opts;
     const taskInstance = {
       id, // use the same ID for task document as the rule
       taskType: `alerting:${ruleTypeId}`,
@@ -2023,6 +2031,7 @@ export class RulesClient {
       params: {
         alertId: id,
         spaceId: this.spaceId,
+        consumer,
       },
       state: {
         previousStartedAt: null,
@@ -2107,12 +2116,15 @@ export class RulesClient {
       executionStatus,
       schedule,
       actions,
+      snoozeEndTime,
       ...partialRawRule
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
     excludeFromPublicApi: boolean = false
   ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
+    const snoozeEndTimeDate = snoozeEndTime != null ? new Date(snoozeEndTime) : snoozeEndTime;
+    const includeSnoozeEndTime = snoozeEndTimeDate !== undefined && !excludeFromPublicApi;
     const rule = {
       id,
       notifyWhen,
@@ -2122,6 +2134,7 @@ export class RulesClient {
       schedule: schedule as IntervalSchedule,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
+      ...(includeSnoozeEndTime ? { snoozeEndTime: snoozeEndTimeDate } : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
