@@ -9,13 +9,14 @@ import type { AxisExtentConfigResult, AxisTitlesVisibilityConfigResult } from '.
 import type { FittingFunction } from './fitting_function';
 import type { EndValue } from './end_value';
 import type { GridlinesConfigResult } from './grid_lines_config';
-import type { DataLayerArgs } from './layer_config';
+import type { AnnotationLayerArgs, DataLayerArgs } from './layer_config';
 import type { LegendConfigResult } from './legend_config';
 import type { TickLabelsConfigResult } from './tick_labels_config';
 import type { LabelsOrientationConfigResult } from './labels_orientation_config';
 import type { ValueLabelConfig } from '../../types';
 
 export type XYCurveType = 'LINEAR' | 'CURVE_MONOTONE_X';
+export type XYLayerArgs = DataLayerArgs | AnnotationLayerArgs;
 
 // Arguments to XY chart expression, with computed properties
 export interface XYArgs {
@@ -28,7 +29,7 @@ export interface XYArgs {
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
   valueLabels: ValueLabelConfig;
-  layers: DataLayerArgs[];
+  layers: XYLayerArgs[];
   fittingFunction?: FittingFunction;
   endValue?: EndValue;
   emphasizeFitting?: boolean;

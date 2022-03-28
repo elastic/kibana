@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { NetworkWithIndexComponentsQueryTableProps } from './types';
-import { useNetworkTopCountries } from '../../containers/network_top_countries';
+import { useNetworkTopCountries, ID } from '../../containers/network_top_countries';
 import { NetworkTopCountriesTable } from '../../components/network_top_countries_table';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
 
@@ -26,6 +27,11 @@ export const NetworkTopCountriesQueryTable = ({
   type,
   indexPattern,
 }: NetworkWithIndexComponentsQueryTableProps) => {
+  const { toggleStatus } = useQueryToggle(`${ID}-${flowTarget}`);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [
     loading,
     { id, inspect, isInspected, loadPage, networkTopCountries, pageInfo, refetch, totalCount },
@@ -35,7 +41,7 @@ export const NetworkTopCountriesQueryTable = ({
     filterQuery,
     indexNames,
     ip,
-    skip,
+    skip: querySkip,
     startDate,
     type,
   });
@@ -53,6 +59,7 @@ export const NetworkTopCountriesQueryTable = ({
       loadPage={loadPage}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}

@@ -17,7 +17,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const browser = getService('browser');
 
-  describe('cases list', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/128468
+  describe.skip('cases list', () => {
     before(async () => {
       await cases.navigation.navigateToApp();
     });
