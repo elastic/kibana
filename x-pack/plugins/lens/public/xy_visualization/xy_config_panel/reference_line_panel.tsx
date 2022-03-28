@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYState, XYReferenceLineLayerConfig, YLensConfig as YConfig } from '../types';
+import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../types';
 import { FormatFactory } from '../../../common';
 import { FillStyle } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 

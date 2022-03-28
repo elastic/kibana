@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYState, XYDataLayerConfig, YLensConfig as YConfig } from '../types';
+import { State, XYState, XYDataLayerConfig, YConfig } from '../types';
 import { FormatFactory } from '../../../common';
 import { YAxisMode } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart } from '../state_helpers';

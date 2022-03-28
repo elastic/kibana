@@ -6,7 +6,6 @@
  */
 
 import { FramePublicAPI } from '../types';
-import { LensDataLayerConfigResult as DataLayerConfigResult } from './types';
 import { computeOverallDataDomain, getStaticValue } from './reference_line_helpers';
 import { XYDataLayerConfig } from './types';
 

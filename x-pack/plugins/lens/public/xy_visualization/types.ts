@@ -29,6 +29,8 @@ import type {
   LabelsOrientationConfig,
   EndValue,
   YConfig,
+  YScaleType,
+  XScaleType,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { EventAnnotationConfig } from '../../../../../src/plugins/event_annotation/common';
 import type { ValueLabelConfig } from '../../common/types';
@@ -42,6 +44,10 @@ export interface XYDataLayerConfig {
   hide?: boolean;
   yConfig?: YConfig[];
   splitAccessor?: string;
+  columnToLabel?: string;
+  yScaleType?: YScaleType;
+  xScaleType?: XScaleType;
+  isHistogram?: boolean;
   palette?: PaletteOutput;
 }
 
@@ -64,11 +70,10 @@ export type XYLayerConfig =
   | XYReferenceLineLayerConfig
   | XYAnnotationLayerConfig;
 
-export interface ValidLayer extends DataLayerConfigResult {
+export interface ValidLayer extends XYDataLayerConfig {
   xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
   splitAccessor?: string;
   accessors: string[];
-  yConfig?: YLensConfigResult[];
 }
 
 // Persisted parts of the state

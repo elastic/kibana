@@ -14,7 +14,7 @@ import {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   ValidLayer,
-  YLensConfig as YConfig,
+  YConfig,
 } from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 

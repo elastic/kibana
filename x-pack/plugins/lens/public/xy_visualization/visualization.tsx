@@ -26,7 +26,14 @@ import {
   SeriesType,
   YAxisMode,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConfig } from './types';
+import {
+  State,
+  visualizationTypes,
+  XYSuggestion,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  YConfig,
+} from './types';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';

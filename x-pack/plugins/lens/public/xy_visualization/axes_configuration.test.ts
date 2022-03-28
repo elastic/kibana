@@ -8,7 +8,7 @@
 import { layerTypes } from '../../common';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
-import { LensDataLayerConfigResult as DataLayerConfigResult } from './types';
+import { XYDataLayerConfig } from './types';
 
 describe('axes_configuration', () => {
   const tables: Record<string, Datatable> = {
@@ -219,8 +219,7 @@ describe('axes_configuration', () => {
     },
   };
 
-  const sampleLayer: DataLayerConfigResult = {
-    type: 'dataLayer',
+  const sampleLayer: XYDataLayerConfig = {
     layerId: 'first',
     layerType: layerTypes.DATA,
     seriesType: 'line',

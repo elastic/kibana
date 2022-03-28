@@ -8,6 +8,7 @@
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
+import type { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { Datatable } from '../../../../expressions';
 import { PaletteOutput } from '../../../../charts/common';
 import { EventAnnotationOutput } from '../../../../event_annotation/common';
@@ -192,12 +193,8 @@ export type AnnotationLayerConfigResult = AnnotationLayerArgs & {
 
 export interface ReferenceLineLayerArgs {
   layerId: string;
-<<<<<<< HEAD
   accessors: Array<string | ExpressionValueVisDimension>;
-=======
-  accessors: string[];
   columnToLabel?: string;
->>>>>>> Kunzetsov/chart_expressions-xy
   yConfig?: YConfigResult[];
 }
 
