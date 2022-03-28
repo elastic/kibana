@@ -103,6 +103,7 @@ export class TaskRunner<
   private logger: Logger;
   private taskInstance: RuleTaskInstance;
   private ruleName: string | null;
+  private ruleConsumer: string | null;
   private ruleType: NormalizedRuleType<
     Params,
     ExtractedParams,
@@ -138,6 +139,7 @@ export class TaskRunner<
     this.usageCounter = context.usageCounter;
     this.ruleType = ruleType;
     this.ruleName = null;
+    this.ruleConsumer = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
@@ -149,19 +151,19 @@ export class TaskRunner<
   private async getDecryptedAttributes(
     ruleId: string,
     spaceId: string
-  ): Promise<{ apiKey: string | null; enabled: boolean }> {
+  ): Promise<{ apiKey: string | null; enabled: boolean; consumer: string }> {
     const namespace = this.context.spaceIdToNamespace(spaceId);
     // Only fetch encrypted attributes here, we'll create a saved objects client
     // scoped with the API key to fetch the remaining data.
     const {
-      attributes: { apiKey, enabled },
+      attributes: { apiKey, enabled, consumer },
     } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
       'alert',
       ruleId,
       { namespace }
     );
 
-    return { apiKey, enabled };
+    return { apiKey, enabled, consumer };
   }
 
   private getFakeKibanaRequest(spaceId: string, apiKey: RawRule['apiKey']) {
@@ -214,6 +216,7 @@ export class TaskRunner<
     >({
       ruleId,
       ruleName,
+      ruleConsumer: this.ruleConsumer!,
       tags,
       executionId: this.executionId,
       logger: this.logger,
@@ -247,6 +250,18 @@ export class TaskRunner<
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
     }
+  }
+
+  private isRuleSnoozed(rule: SanitizedAlert<Params>): boolean {
+    if (rule.muteAll) {
+      return true;
+    }
+
+    if (rule.snoozeEndTime == null) {
+      return false;
+    }
+
+    return Date.now() < rule.snoozeEndTime.getTime();
   }
 
   private shouldLogAndScheduleActionsForAlerts() {
@@ -309,7 +324,6 @@ export class TaskRunner<
       schedule,
       throttle,
       notifyWhen,
-      muteAll,
       mutedInstanceIds,
       name,
       tags,
@@ -472,6 +486,7 @@ export class TaskRunner<
         namespace,
         ruleType,
         rule,
+        spaceId,
       });
     }
 
@@ -480,7 +495,8 @@ export class TaskRunner<
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
-    if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
+    const ruleIsSnoozed = this.isRuleSnoozed(rule);
+    if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
       const alertsWithExecutableActions = Object.entries(alertsWithScheduledActions).filter(
@@ -531,8 +547,8 @@ export class TaskRunner<
         alertExecutionStore,
       });
     } else {
-      if (muteAll) {
-        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is muted.`);
+      if (ruleIsSnoozed) {
+        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
       }
       if (!this.shouldLogAndScheduleActionsForAlerts()) {
         this.logger.debug(
@@ -592,13 +608,17 @@ export class TaskRunner<
     } = this.taskInstance;
     let enabled: boolean;
     let apiKey: string | null;
+    let consumer: string;
     try {
       const decryptedAttributes = await this.getDecryptedAttributes(ruleId, spaceId);
       apiKey = decryptedAttributes.apiKey;
       enabled = decryptedAttributes.enabled;
+      consumer = decryptedAttributes.consumer;
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
+
+    this.ruleConsumer = consumer;
 
     if (!enabled) {
       throw new ErrorWithReason(
@@ -661,11 +681,23 @@ export class TaskRunner<
 
   async run(): Promise<RuleTaskRunResult> {
     const {
-      params: { alertId: ruleId, spaceId },
+      params: { alertId: ruleId, spaceId, consumer },
       startedAt,
       state: originalState,
       schedule: taskSchedule,
     } = this.taskInstance;
+
+    // Initially use consumer as stored inside the task instance
+    // Replace this with consumer as read from the rule saved object after
+    // we successfully read the rule SO. This allows us to populate a consumer
+    // value for `execute-start` events (which are written before the rule SO is read)
+    // and in the event of decryption errors (where we cannot read the rule SO)
+    // Because "consumer" is set when a rule is created, this value should be static
+    // for the life of a rule but there may be edge cases where migrations cause
+    // the consumer values to become out of sync.
+    if (consumer) {
+      this.ruleConsumer = consumer;
+    }
 
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule`;
@@ -685,8 +717,10 @@ export class TaskRunner<
     const event = createAlertEventLogRecordObject({
       ruleId,
       ruleType: this.ruleType as UntypedNormalizedRuleType,
+      consumer: this.ruleConsumer!,
       action: EVENT_LOG_ACTIONS.execute,
       namespace,
+      spaceId,
       executionId: this.executionId,
       task: {
         scheduled: this.taskInstance.scheduledAt.toISOString(),
@@ -712,6 +746,7 @@ export class TaskRunner<
       },
       message: `rule execution start: "${ruleId}"`,
     });
+
     eventLogger.logEvent(startEvent);
 
     const { state, schedule, monitoring } = await errorAsRuleTaskRunResult(
@@ -747,6 +782,10 @@ export class TaskRunner<
 
     eventLogger.stopTiming(event);
     set(event, 'kibana.alerting.status', executionStatus.status);
+
+    if (this.ruleConsumer) {
+      set(event, 'kibana.alert.rule.consumer', this.ruleConsumer);
+    }
 
     const monitoringHistory: RuleMonitoringHistory = {
       success: true,
@@ -883,9 +922,13 @@ export class TaskRunner<
 
     // Write event log entry
     const {
-      params: { alertId: ruleId, spaceId },
+      params: { alertId: ruleId, spaceId, consumer },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
+
+    if (consumer && !this.ruleConsumer) {
+      this.ruleConsumer = consumer;
+    }
 
     this.logger.debug(
       `Cancelling rule type ${this.ruleType.id} with id ${ruleId} - execution exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`
@@ -911,9 +954,11 @@ export class TaskRunner<
       kibana: {
         alert: {
           rule: {
+            ...(this.ruleConsumer ? { consumer: this.ruleConsumer } : {}),
             execution: {
               uuid: this.executionId,
             },
+            rule_type_id: this.ruleType.id,
           },
         },
         saved_objects: [
@@ -925,6 +970,7 @@ export class TaskRunner<
             namespace,
           },
         ],
+        space_ids: [spaceId],
       },
       rule: {
         id: ruleId,
@@ -1016,6 +1062,7 @@ function generateNewAndRecoveredAlertEvents<
     recoveredAlerts,
     rule,
     ruleType,
+    spaceId,
   } = params;
   const originalAlertIds = Object.keys(originalAlerts);
   const currentAlertIds = Object.keys(currentAlerts);
@@ -1090,9 +1137,11 @@ function generateNewAndRecoveredAlertEvents<
       kibana: {
         alert: {
           rule: {
+            consumer: rule.consumer,
             execution: {
               uuid: executionId,
             },
+            rule_type_id: ruleType.id,
           },
         },
         alerting: {
@@ -1109,6 +1158,7 @@ function generateNewAndRecoveredAlertEvents<
             namespace,
           },
         ],
+        space_ids: [spaceId],
       },
       message,
       rule: {

@@ -25,7 +25,7 @@ export function MaybeViewTraceLink({
   environment: Environment;
 }) {
   const {
-    query: { latencyAggregationType, comparisonEnabled, comparisonType },
+    query: { latencyAggregationType, comparisonEnabled, offset },
   } = useApmParams('/services/{serviceName}/transactions/view');
 
   const viewFullTraceButtonLabel = i18n.translate(
@@ -95,7 +95,7 @@ export function MaybeViewTraceLink({
           environment={nextEnvironment}
           latencyAggregationType={latencyAggregationType}
           comparisonEnabled={comparisonEnabled}
-          comparisonType={comparisonType}
+          offset={offset}
         >
           <EuiButton fill iconType="apmTrace">
             {viewFullTraceButtonLabel}

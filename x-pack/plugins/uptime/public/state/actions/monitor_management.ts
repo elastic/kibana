@@ -9,6 +9,7 @@ import { createAction } from '@reduxjs/toolkit';
 import {
   MonitorManagementListResult,
   ServiceLocations,
+  ThrottlingOptions,
   FetchMonitorManagementListQueryArgs,
 } from '../../../common/runtime_types';
 import { createAsyncAction } from './utils';
@@ -23,9 +24,10 @@ export const getMonitorsSuccess = createAction<MonitorManagementListResult>(
 export const getMonitorsFailure = createAction<Error>('GET_MONITOR_MANAGEMENT_LIST_FAILURE');
 
 export const getServiceLocations = createAction('GET_SERVICE_LOCATIONS_LIST');
-export const getServiceLocationsSuccess = createAction<ServiceLocations>(
-  'GET_SERVICE_LOCATIONS_LIST_SUCCESS'
-);
+export const getServiceLocationsSuccess = createAction<{
+  throttling: ThrottlingOptions | undefined;
+  locations: ServiceLocations;
+}>('GET_SERVICE_LOCATIONS_LIST_SUCCESS');
 export const getServiceLocationsFailure = createAction<Error>('GET_SERVICE_LOCATIONS_LIST_FAILURE');
 
 export const getSyntheticsServiceAllowed = createAsyncAction<void, SyntheticsServiceAllowed>(

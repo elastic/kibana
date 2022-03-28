@@ -71,7 +71,7 @@ describe.skip('Service overview: Time Comparison', () => {
 
   it('enables by default the time comparison feature with Last 24 hours selected', () => {
     cy.visit(serviceOverviewPath);
-    cy.url().should('include', 'comparisonEnabled=true&comparisonType=day');
+    cy.url().should('include', 'comparisonEnabled=true&offset=1d');
   });
 
   describe('when comparison is toggled off', () => {
@@ -95,17 +95,13 @@ describe.skip('Service overview: Time Comparison', () => {
       cy.contains('opbeans-java');
 
       cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
-      const comparisonStartEnd = `comparisonStart=${encodeURIComponent(
-        moment(start).subtract(1, 'day').toISOString()
-      )}&comparisonEnd=${encodeURIComponent(
-        moment(end).subtract(1, 'day').toISOString()
-      )}`;
+      const offset = `offset=1d`;
 
       // When the page loads it fetches all APIs with comparison time range
       cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
         (interceptions) => {
           interceptions.map((interception) => {
-            expect(interception.request.url).include(comparisonStartEnd);
+            expect(interception.request.url).include(offset);
           });
         }
       );
@@ -117,7 +113,7 @@ describe.skip('Service overview: Time Comparison', () => {
       cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
         (interceptions) => {
           interceptions.map((interception) => {
-            expect(interception.request.url).not.include(comparisonStartEnd);
+            expect(interception.request.url).not.include(offset);
           });
         }
       );

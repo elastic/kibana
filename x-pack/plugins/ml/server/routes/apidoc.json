@@ -55,6 +55,7 @@
     "AnomalySearch",
     "GetCategorizerStats",
     "GetCategoryStoppedPartitions",
+    "GetAnomalyChartsData",
 
     "Modules",
     "DataRecognizer",
