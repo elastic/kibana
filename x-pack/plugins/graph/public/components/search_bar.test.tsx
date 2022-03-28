@@ -7,7 +7,7 @@
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SearchBar, SearchBarProps, SearchBarComponent, SearchBarStateProps } from './search_bar';
-import React, { Component, ReactElement } from 'react';
+import React, { Component } from 'react';
 import {
   DocLinksStart,
   HttpStart,
@@ -194,9 +194,7 @@ describe('search_bar', () => {
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    (
-      instance.find(QueryStringInput).prop('prepend') as ReactElement
-    ).props.children.props.onClick();
+    instance.find('[data-test-subj="graphDatasourceButton"]').first().simulate('click');
 
     expect(openSourceModal).toHaveBeenCalled();
   });
