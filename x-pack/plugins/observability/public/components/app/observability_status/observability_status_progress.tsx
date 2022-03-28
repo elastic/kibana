@@ -20,7 +20,7 @@ import { reduce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasData } from '../../../hooks/use_has_data';
 import { useUiTracker } from '../../../hooks/use_track_metric';
-import { useGuidedSetup } from '../../../hooks/use_guided_setup';
+import { useGuidedSetupProgress } from '../../../hooks/use_guided_setup_progress';
 
 interface ObservabilityStatusProgressProps {
   onViewDetailsClick: () => void;
@@ -30,7 +30,7 @@ export function ObservabilityStatusProgress({
 }: ObservabilityStatusProgressProps) {
   const { hasDataMap, isAllRequestsComplete } = useHasData();
   const trackMetric = useUiTracker({ app: 'observability-overview' });
-  const { isGuidedSetupHidden, hideGuidedSetup } = useGuidedSetup();
+  const { isGuidedSetupProgressDismissed, dismissGuidedSetupProgress } = useGuidedSetupProgress();
 
   const [progress, setProgress] = useState(0);
 
@@ -51,16 +51,16 @@ export function ObservabilityStatusProgress({
   }, [isAllRequestsComplete, hasDataMap]);
 
   const dismissGuidedSetup = useCallback(() => {
-    hideGuidedSetup();
+    dismissGuidedSetupProgress();
     trackMetric({ metric: 'guided_setup_progress_dismiss' });
-  }, [hideGuidedSetup, trackMetric]);
+  }, [dismissGuidedSetupProgress, trackMetric]);
 
   const showDetails = () => {
     onViewDetailsClick();
     trackMetric({ metric: 'guided_setup_progress_view_details' });
   };
 
-  return !isGuidedSetupHidden ? (
+  return !isGuidedSetupProgressDismissed ? (
     <>
       <EuiPanel color="primary" data-test-subj="status-progress">
         <EuiProgress color="primary" value={progress} max={100} size="m" />

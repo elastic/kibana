@@ -47,7 +47,7 @@ import { paths } from '../../config';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
 import { ObservabilityStatus } from '../../components/app/observability_status';
-import { useGuidedSetup } from '../../hooks/use_guided_setup';
+import { useGuidedSetupProgress } from '../../hooks/use_guided_setup_progress';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -83,7 +83,7 @@ export function OverviewPage({ routeParams }: Props) {
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
 
-  const { isGuidedSetupHidden } = useGuidedSetup();
+  const { isGuidedSetupProgressDismissed } = useGuidedSetupProgress();
 
   const bucketSize = useMemo(
     () =>
@@ -99,12 +99,12 @@ export function OverviewPage({ routeParams }: Props) {
   }, []);
 
   const handleGuidedSetupClick = useCallback(() => {
-    if (isGuidedSetupHidden) {
+    if (isGuidedSetupProgressDismissed) {
       trackMetric({ metric: 'guided_setup_view_details_after_dismiss' });
     }
 
     setIsFlyoutVisible(true);
-  }, [trackMetric, isGuidedSetupHidden]);
+  }, [trackMetric, isGuidedSetupProgressDismissed]);
 
   const onTimeRangeRefresh = useCallback(() => {
     return refetch.current && refetch.current();
