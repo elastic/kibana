@@ -501,14 +501,15 @@ export class LensAttributes {
 
   getMainYAxis(layerConfig: LayerConfig, layerId: string, columnFilter: string) {
     const { breakdown } = layerConfig;
-    const { sourceField, operationType, label } = layerConfig.seriesConfig.yAxisColumns[0];
+    const { sourceField, operationType, label, timeScale } =
+      layerConfig.seriesConfig.yAxisColumns[0];
 
     if (sourceField === RECORDS_PERCENTAGE_FIELD) {
       return getDistributionInPercentageColumn({ label, layerId, columnFilter }).main;
     }
 
     if (sourceField === RECORDS_FIELD || !sourceField) {
-      return this.getRecordsColumn(label);
+      return this.getRecordsColumn(label, undefined, timeScale);
     }
 
     return this.getColumnBasedOnType({
@@ -628,6 +629,7 @@ export class LensAttributes {
     });
 
     const urlFilters = urlFiltersToKueryString(filters ?? []);
+
     if (!baseFilters) {
       return urlFilters;
     }
@@ -682,7 +684,6 @@ export class LensAttributes {
       const columnFilter = this.getLayerFilters(layerConfig, layerConfigs.length);
       const timeShift = this.getTimeShift(this.layerConfigs[0], layerConfig, index);
       const mainYAxis = this.getMainYAxis(layerConfig, layerId, columnFilter);
-
       const { sourceField } = seriesConfig.xAxisColumn;
 
       const label = timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label;
