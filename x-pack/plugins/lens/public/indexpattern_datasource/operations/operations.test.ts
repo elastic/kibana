@@ -336,7 +336,7 @@ describe('getOperationTypesForField', () => {
                 "type": "fullReference",
               },
               Object {
-                "operationType": "time_scale",
+                "operationType": "normalize_by_unit",
                 "type": "fullReference",
               },
               Object {
