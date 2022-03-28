@@ -22,7 +22,7 @@ describe('KeyUXMetrics', () => {
       status: FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getAllByText, getByText } = render(
+    const { getAllByText } = render(
       <KeyUXMetrics
         loading={false}
         data={{
