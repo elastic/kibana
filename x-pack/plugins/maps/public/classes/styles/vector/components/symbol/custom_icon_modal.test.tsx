@@ -29,7 +29,7 @@ test('should render a custom icon modal with an existing icon', () => {
     <CustomIconModal
       {...defaultProps}
       cutoff={0.3}
-      name="square"
+      label="square"
       onDelete={() => {}}
       radius={0.15}
       svg='<svg width="200" height="250" xmlns="http://www.w3.org/2000/svg"><path stroke="#000" fill="transparent" stroke-width="5" d="M10 10h30v30H10z"/></svg>'

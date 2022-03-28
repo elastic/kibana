@@ -74,13 +74,13 @@ const defaultProps = {
   isPointsOnly: true,
   isLinesOnly: false,
   onIsTimeAwareChange: (isTimeAware: boolean) => {},
-  onCustomIconsChange: (customIcons: CustomIcon[]) => {},
+  onCustomIconsChange: (customIcons: Record<string, CustomIcon>) => {},
   handlePropertyChange: (propertyName: VECTOR_STYLES, stylePropertyDescriptor: unknown) => {},
   hasBorder: true,
   styleProperties,
   isTimeAware: true,
   showIsTimeAware: true,
-  customIcons: [],
+  customIcons: {},
 };
 
 test('should render', async () => {

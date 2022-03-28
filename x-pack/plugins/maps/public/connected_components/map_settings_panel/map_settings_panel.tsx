@@ -31,7 +31,7 @@ export interface Props {
   hasMapSettingsChanges: boolean;
   keepChanges: () => void;
   settings: MapSettings;
-  customIcons: CustomIcon[],
+  customIcons: CustomIcon[];
   updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => void;
   updateCustomIcons: (customIcons: CustomIcon[]) => void;
   deleteCustomIcon: (symbolId: string) => void;
