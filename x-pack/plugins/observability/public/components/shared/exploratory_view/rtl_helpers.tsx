@@ -47,7 +47,7 @@ import { setIndexPatterns } from '../../../../../../../src/plugins/unified_searc
 import type {
   DataView,
   DataViewsContract,
-} from '../../../../../../../src/plugins/data_views/common';
+} from '../../../../../../../src/plugins/data_views/public';
 
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
 import { createStubDataView } from '../../../../../../../src/plugins/data_views/common/stubs';
