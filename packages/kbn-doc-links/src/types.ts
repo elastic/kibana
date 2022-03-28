@@ -371,6 +371,7 @@ export interface DocLinks {
     readonly netGuide: string;
     readonly netIntroduction: string;
     readonly netNest: string;
+    readonly netSingleNode: string;
     readonly perlGuide: string;
     readonly phpGuide: string;
     readonly phpConnecting: string;
