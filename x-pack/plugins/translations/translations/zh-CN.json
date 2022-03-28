@@ -7665,8 +7665,6 @@
     "xpack.apm.transactionsTable.cardinalityWarning.docsLink": "在文档中了解详情",
     "xpack.apm.transactionsTable.cardinalityWarning.title": "此视图显示已报告事务的子集。",
     "xpack.apm.transactionsTable.linkText": "查看事务",
-    "xpack.apm.transactionsTable.loading": "正在加载……",
-    "xpack.apm.transactionsTable.noResults": "未找到事务组",
     "xpack.apm.transactionsTable.title": "事务",
     "xpack.apm.transactionTypesSelectCustomOptionText": "将 \\{searchValue\\} 添加为新事务类型",
     "xpack.apm.transactionTypesSelectPlaceholder": "选择事务类型",

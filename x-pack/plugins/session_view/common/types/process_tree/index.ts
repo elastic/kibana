@@ -29,6 +29,11 @@ export interface User {
   name: string;
 }
 
+export interface Group {
+  id: string;
+  name: string;
+}
+
 export interface ProcessEventResults {
   events: any[];
 }
@@ -50,8 +55,6 @@ export interface EntryMeta {
 }
 
 export interface Teletype {
-  descriptor: number;
-  type: string;
   char_device: {
     major: number;
     minor: number;
@@ -71,12 +74,13 @@ export interface ProcessFields {
   start: string;
   end?: string;
   user: User;
+  group: Group;
   exit_code?: number;
   entry_meta?: EntryMeta;
   tty: Teletype;
 }
 
-export interface ProcessSelf extends Omit<ProcessFields, 'user'> {
+export interface ProcessSelf extends ProcessFields {
   parent: ProcessFields;
   session_leader: ProcessFields;
   entry_leader: ProcessFields;
@@ -132,6 +136,7 @@ export interface ProcessEvent {
     action: EventAction;
   };
   user: User;
+  group: Group;
   host: ProcessEventHost;
   process: ProcessSelf;
   kibana?: {
