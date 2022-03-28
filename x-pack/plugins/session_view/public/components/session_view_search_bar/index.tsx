@@ -18,6 +18,12 @@ interface SessionViewSearchBarDeps {
   onProcessSelected(process: Process): void;
 }
 
+const translatePlaceholder = {
+  placeholder: i18n.translate('xpack.sessionView.searchBar.searchBarKeyPlaceholder', {
+    defaultMessage: 'Find...',
+  }),
+};
+
 /**
  * The main wrapper component for the session view.
  */
@@ -53,20 +59,9 @@ export const SessionViewSearchBar = ({
 
   const showPagination = !!searchResults?.length;
 
-  const translatePlaceholder = i18n.translate(
-    'xpack.sessionView.searchBar.searchBarKeyPlaceholder',
-    {
-      defaultMessage: 'Find...',
-    }
-  );
-
   return (
     <div data-test-subj="sessionView:searchInput" css={{ position: 'relative' }}>
-      <EuiSearchBar
-        query={searchQuery}
-        onChange={onSearch}
-        box={{ placeholder: translatePlaceholder }}
-      />
+      <EuiSearchBar query={searchQuery} onChange={onSearch} box={translatePlaceholder} />
       {showPagination && (
         <EuiPagination
           data-test-subj="sessionView:searchPagination"
