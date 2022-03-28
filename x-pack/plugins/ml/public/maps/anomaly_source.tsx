@@ -149,9 +149,7 @@ export class AnomalySource implements IVectorSource {
 
   getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
-    const meta = sourceDataRequest
-      ? (sourceDataRequest.getMeta())
-      : null;
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     if (!featureCollection || !meta) {
       return {
         tooltipContent: null,
@@ -232,9 +230,7 @@ export class AnomalySource implements IVectorSource {
   }
 
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceStatus {
-    const meta = sourceDataRequest
-      ? (sourceDataRequest.getMeta())
-      : null;
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     return {
       tooltipContent: i18n.translate('xpack.ml.maps.sourceTooltip', {
         defaultMessage: 'Shows anomalies',

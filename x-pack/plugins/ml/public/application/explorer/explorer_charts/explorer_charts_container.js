@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiToolTip,
-  htmlIdGenerator
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import {
@@ -41,6 +41,7 @@ import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { useActiveCursor } from '../../../../../../../src/plugins/charts/public';
+import { ML_ANOMALY_LAYERS } from '../../../maps/util';
 import { Chart, Settings } from '@elastic/charts';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -61,7 +62,6 @@ const mapsPluginMessage = i18n.translate('xpack.ml.explorer.charts.mapsPluginMis
 const openInMapsPluginMessage = i18n.translate('xpack.ml.explorer.charts.openInMapsPluginMessage', {
   defaultMessage: 'Open in Maps',
 });
-
 
 // create a somewhat unique ID
 // from charts metadata for React's key attribute
@@ -91,18 +91,21 @@ function ExplorerChartContainer({
   const [mapsLink, setMapsLink] = useState('');
 
   const {
-    services: { data, share,
-    application: { navigateToApp }, },
+    services: {
+      data,
+      share,
+      application: { navigateToApp },
+    },
   } = useMlKibana();
 
-  // TODO: pull in layer name constant and wrap in useCallback if poss
-  const getMapsLink = async () => {
-    const initialLayers = [{
+  const getMapsLink = useCallback(async () => {
+    const initialLayers = [
+      {
         id: htmlIdGenerator()(),
         type: LAYER_TYPE.GEOJSON_VECTOR,
         sourceDescriptor: AnomalySource.createDescriptor({
           jobId: series.jobId,
-          typicalActual: 'actual',
+          typicalActual: ML_ANOMALY_LAYERS.ACTUAL,
         }),
         style: {
           type: 'VECTOR',
@@ -118,7 +121,7 @@ function ExplorerChartContainer({
         type: LAYER_TYPE.GEOJSON_VECTOR,
         sourceDescriptor: AnomalySource.createDescriptor({
           jobId: series.jobId,
-          typicalActual: 'typical',
+          typicalActual: ML_ANOMALY_LAYERS.TYPICAL,
         }),
         style: {
           type: 'VECTOR',
@@ -134,7 +137,7 @@ function ExplorerChartContainer({
         type: LAYER_TYPE.GEOJSON_VECTOR,
         sourceDescriptor: AnomalySource.createDescriptor({
           jobId: series.jobId,
-          typicalActual: 'typical to actual',
+          typicalActual: ML_ANOMALY_LAYERS.TYPICAL_TO_ACTUAL,
         }),
         style: {
           type: 'VECTOR',
@@ -144,7 +147,8 @@ function ExplorerChartContainer({
           },
           isTimeAware: false,
         },
-      }];
+      },
+    ];
 
     const locator = share.url.locators.get('MAPS_APP_LOCATOR');
     const location = await locator.getLocation({
@@ -153,7 +157,7 @@ function ExplorerChartContainer({
     });
 
     return location;
-  };
+  }, [series?.jobId]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -173,25 +177,28 @@ function ExplorerChartContainer({
     };
   }, [mlLocator, series]);
 
-  useEffect(function getMapsPluginLink() {
-    if (!series) return;
-    let isCancelled = false;   
-    const generateLink = async () => {
-      if (!isCancelled) {
-        try {
-          const mapsLink = await getMapsLink();
-          setMapsLink(mapsLink?.path); 
-        } catch (error) {
-          console.error(error);
-          setMapsLink('');
+  useEffect(
+    function getMapsPluginLink() {
+      if (!series) return;
+      let isCancelled = false;
+      const generateLink = async () => {
+        if (!isCancelled) {
+          try {
+            const mapsLink = await getMapsLink();
+            setMapsLink(mapsLink?.path);
+          } catch (error) {
+            console.error(error);
+            setMapsLink('');
+          }
         }
-      }
-    };
-    generateLink().catch(console.error);;
-    return () => {
-      isCancelled = true;
-    };
-  }, [series]);
+      };
+      generateLink().catch(console.error);
+      return () => {
+        isCancelled = true;
+      };
+    },
+    [series]
+  );
 
   const chartRef = useRef(null);
 
@@ -296,7 +303,10 @@ function ExplorerChartContainer({
                     await navigateToApp('maps', { path: mapsLink });
                   }}
                 >
-                  <FormattedMessage id="xpack.ml.explorer.charts.viewInMapsLabel" defaultMessage="View" />
+                  <FormattedMessage
+                    id="xpack.ml.explorer.charts.viewInMapsLabel"
+                    defaultMessage="View"
+                  />
                 </EuiButtonEmpty>
               </EuiToolTip>
             ) : null}
