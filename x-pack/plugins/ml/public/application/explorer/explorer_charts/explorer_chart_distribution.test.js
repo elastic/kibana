@@ -17,9 +17,9 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { ExplorerChartDistribution } from './explorer_chart_distribution';
-import { chartLimits } from '../../util/chart_utils';
 import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
+
 const utilityProps = {
   timeBuckets: timeBucketsMock,
   chartTheme: kibanaContextMock.services.charts.theme.useChartsTheme(),
@@ -96,7 +96,6 @@ describe('ExplorerChart', () => {
     const config = {
       ...seriesConfig,
       chartData,
-      chartLimits: chartLimits(chartData),
     };
 
     const mockTooltipService = {
