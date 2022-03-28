@@ -19,7 +19,7 @@ const imageBase64 = Buffer.from(
   'base64'
 );
 
-describe.only('PdfMaker', () => {
+describe('PdfMaker', () => {
   let layout: ReturnType<typeof createMockLayout>;
   let pdf: PdfMaker;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
