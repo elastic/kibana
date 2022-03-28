@@ -62,10 +62,10 @@ function SettingsMenu({
       isOpen
     >
       <EuiPopoverTitle>
-        <FormattedMessage id="x-pack.lens.settings.title" defaultMessage="Lens settings" />
+        <FormattedMessage id="xpack.lens.settings.title" defaultMessage="Lens settings" />
       </EuiPopoverTitle>
       <EuiSwitch
-        label={i18n.translate('x-pack.lens.settings.autoApply', {
+        label={i18n.translate('xpack.lens.settings.autoApply', {
           defaultMessage: 'Auto-apply visualization changes',
         })}
         checked={autoApplyEnabled}
