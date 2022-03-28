@@ -7,12 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  ExpressionFunctionDefinition,
-  TablesAdapter,
-  Datatable,
-} from '../../../../expressions';
+import type { ExpressionFunctionDefinition } from '../../../../expressions';
 import { LensMultiTable, XYArgs, XYRender } from '../types';
+import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
 import {
   XY_VIS,
   DATA_LAYER,
@@ -28,13 +25,28 @@ import {
   REFERENCE_LINE_LAYER,
   LABELS_ORIENTATION_CONFIG,
   AXIS_TITLES_VISIBILITY_CONFIG,
+  EndValues,
+  ANNOTATION_LAYER,
+  LayerTypes,
 } from '../constants';
 
-export const logDataTable = (
-  tableAdapter: TablesAdapter,
-  datatables: Record<string, Datatable> = {}
-) => {
-  Object.entries(datatables).forEach(([key, table]) => tableAdapter.logDatatable(key, table));
+const strings = {
+  getMetricHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.metric', {
+      defaultMessage: 'Vertical axis',
+    }),
+  getXAxisHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.x', {
+      defaultMessage: 'Horizontal axis',
+    }),
+  getBreakdownHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
+      defaultMessage: 'Break down by',
+    }),
+  getReferenceLineHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
+      defaultMessage: 'Break down by',
+    }),
 };
 
 export const xyVisFunction: ExpressionFunctionDefinition<
@@ -101,6 +113,18 @@ export const xyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Define how missing values are treated',
       }),
     },
+    endValue: {
+      types: ['string'],
+      options: [...Object.values(EndValues)],
+      help: i18n.translate('expressionXY.xyVis.endValue.help', {
+        defaultMessage: 'End value',
+      }),
+    },
+    emphasizeFitting: {
+      types: ['boolean'],
+      default: false,
+      help: '',
+    },
     valueLabels: {
       types: ['string'],
       options: [...Object.values(ValueLabelModes)],
@@ -133,7 +157,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       }),
     },
     layers: {
-      types: [DATA_LAYER, REFERENCE_LINE_LAYER],
+      types: [DATA_LAYER, REFERENCE_LINE_LAYER, ANNOTATION_LAYER],
       help: i18n.translate('expressionXY.xyVis.layers.help', {
         defaultMessage: 'Layers of visual series',
       }),
@@ -176,7 +200,34 @@ export const xyVisFunction: ExpressionFunctionDefinition<
   },
   fn(data, args, handlers) {
     if (handlers?.inspectorAdapters?.tables) {
-      logDataTable(handlers.inspectorAdapters.tables, data.tables);
+      args.layers.forEach((layer) => {
+        if (layer.layerType === LayerTypes.ANNOTATIONS) {
+          return;
+        }
+
+        let xAccessor;
+        let splitAccessor;
+        if (layer.layerType === LayerTypes.DATA) {
+          xAccessor = layer.xAccessor;
+          splitAccessor = layer.splitAccessor;
+        }
+
+        const { layerId, accessors, layerType } = layer;
+        const logTable = prepareLogTable(
+          data.tables[layerId],
+          [
+            [
+              accessors ? accessors : undefined,
+              layerType === 'data' ? strings.getMetricHelp() : strings.getReferenceLineHelp(),
+            ],
+            [xAccessor ? [xAccessor] : undefined, strings.getXAxisHelp()],
+            [splitAccessor ? [splitAccessor] : undefined, strings.getBreakdownHelp()],
+          ],
+          true
+        );
+
+        handlers.inspectorAdapters.tables.logDatatable(layerId, logTable);
+      });
     }
 
     return {

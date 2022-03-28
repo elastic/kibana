@@ -12,12 +12,7 @@ import { XyToolbar } from '.';
 import { DimensionEditor } from './dimension_editor';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { FramePublicAPI } from '../../types';
-import {
-  State,
-  XYDataLayerConfig,
-  XYState,
-  LensDataLayerConfigResult as DataLayerConfigResult,
-} from '../types';
+import { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
@@ -40,10 +35,6 @@ describe('XY Config panels', () => {
           splitAccessor: 'baz',
           xAccessor: 'foo',
           accessors: ['bar'],
-          xScaleType: 'linear',
-          yScaleType: 'linear',
-          isHistogram: false,
-          palette: { type: 'palette', name: 'default' },
         },
       ],
     };
@@ -231,7 +222,7 @@ describe('XY Config panels', () => {
           groupId="left"
           state={{
             ...state,
-            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as DataLayerConfigResult],
+            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
           }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}

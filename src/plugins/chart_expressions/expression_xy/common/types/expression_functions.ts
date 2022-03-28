@@ -10,7 +10,7 @@ import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/chart
 import { $Values } from '@kbn/utility-types';
 import { Datatable } from '../../../../expressions';
 import { PaletteOutput } from '../../../../charts/common';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { EventAnnotationOutput } from '../../../../event_annotation/common';
 import {
   AxisExtentModes,
   FillStyles,
@@ -34,8 +34,11 @@ import {
   LEGEND_CONFIG,
   DATA_LAYER,
   AXIS_EXTENT_CONFIG,
+  ANNOTATION_LAYER,
+  EndValues,
 } from '../constants';
 
+export type EndValue = $Values<typeof EndValues>;
 export type LayerType = $Values<typeof LayerTypes>;
 export type YAxisMode = $Values<typeof YAxisModes>;
 export type LineStyle = $Values<typeof LineStyles>;
@@ -78,28 +81,25 @@ export interface YConfig {
   textVisibility?: boolean;
 }
 
-export interface XYDataLayerConfig {
+export interface ValidLayer extends DataLayerConfigResult {
+  xAccessor: NonNullable<DataLayerConfigResult['xAccessor']>;
+}
+
+export interface DataLayerArgs {
   layerId: string;
   accessors: Array<string | ExpressionValueVisDimension>;
   seriesType: SeriesType;
   xAccessor?: string | ExpressionValueVisDimension;
   hide?: boolean;
-  yConfig?: YConfigResult[];
-  splitAccessor?: string | ExpressionValueVisDimension;
-  palette?: PaletteOutput;
-}
-export interface ValidLayer extends DataLayerConfigResult {
-  xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
-}
-
-export type DataLayerArgs = XYDataLayerConfig & {
+  splitAccessor?: string;
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
   // palette will always be set on the expression
   palette: PaletteOutput;
-};
+  yConfig?: YConfigResult[];
+}
 
 export interface LegendConfig {
   /**
@@ -165,6 +165,8 @@ export interface XYArgs {
   legend: LegendConfigResult;
   valueLabels: ValueLabelMode;
   layers: XYLayerConfigResult[];
+  endValue?: EndValue;
+  emphasizeFitting?: boolean;
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -177,17 +179,34 @@ export interface XYArgs {
   ariaLabel?: string;
 }
 
-export interface XYReferenceLineLayerConfig {
+export interface AnnotationLayerArgs {
+  annotations: EventAnnotationOutput[];
   layerId: string;
+  hide?: boolean;
+}
+
+export type AnnotationLayerConfigResult = AnnotationLayerArgs & {
+  type: typeof ANNOTATION_LAYER;
+  layerType: typeof LayerTypes.ANNOTATIONS;
+};
+
+export interface ReferenceLineLayerArgs {
+  layerId: string;
+<<<<<<< HEAD
   accessors: Array<string | ExpressionValueVisDimension>;
+=======
+  accessors: string[];
+  columnToLabel?: string;
+>>>>>>> Kunzetsov/chart_expressions-xy
   yConfig?: YConfigResult[];
 }
 
-export type ReferenceLineLayerArgs = XYReferenceLineLayerConfig & {
-  columnToLabel?: string;
-};
+export type XYLayerArgs = DataLayerArgs | ReferenceLineLayerArgs | AnnotationLayerArgs;
 
-export type XYLayerConfigResult = DataLayerConfigResult | ReferenceLineLayerConfigResult;
+export type XYLayerConfigResult =
+  | DataLayerConfigResult
+  | ReferenceLineLayerConfigResult
+  | AnnotationLayerConfigResult;
 
 export interface LensMultiTable {
   type: typeof MULTITABLE;

@@ -137,8 +137,7 @@ describe('KibanaPageTemplate', () => {
     expect(component.find('div.kbnPageTemplate__pageSideBar').length).toBe(1);
   });
 
-  // https://github.com/elastic/kibana/issues/127951
-  test.skip('render noDataContent', () => {
+  test('render noDataContent', () => {
     const component = shallow(
       <KibanaPageTemplate
         pageHeader={{

@@ -8,30 +8,28 @@
 
 import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
 import { DataLayerConfigResult, LensMultiTable, XYLayerConfigResult } from '../../common';
-import { isDataLayer } from './visualization';
+import { getDataLayers } from './visualization';
 
 export function getFilteredLayers(layers: XYLayerConfigResult[], data: LensMultiTable) {
-  return layers.filter<DataLayerConfigResult>((layer): layer is DataLayerConfigResult => {
-    if (!isDataLayer(layer)) {
-      return false;
+  return getDataLayers(layers).filter<DataLayerConfigResult>(
+    (layer): layer is DataLayerConfigResult => {
+      const { layerId, accessors, xAccessor, splitAccessor } = layer;
+      const table = data.tables[layerId];
+
+      const xColumnId = xAccessor && table && getAccessorByDimension(xAccessor, table.columns);
+      const splitColumnId =
+        splitAccessor && table && getAccessorByDimension(splitAccessor, table.columns);
+
+      return !(
+        !accessors.length ||
+        !table ||
+        table.rows.length === 0 ||
+        (xColumnId && table.rows.every((row) => typeof row[xColumnId] === 'undefined')) ||
+        // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
+        (!xColumnId &&
+          splitColumnId &&
+          table.rows.every((row) => typeof row[splitColumnId] === 'undefined'))
+      );
     }
-
-    const { layerId, accessors, xAccessor, splitAccessor } = layer;
-    const table = data.tables[layerId];
-
-    const xColumnId = xAccessor && table && getAccessorByDimension(xAccessor, table.columns);
-    const splitColumnId =
-      splitAccessor && table && getAccessorByDimension(splitAccessor, table.columns);
-
-    return !(
-      !accessors.length ||
-      !table ||
-      table.rows.length === 0 ||
-      (xColumnId && table.rows.every((row) => typeof row[xColumnId] === 'undefined')) ||
-      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
-      (!xColumnId &&
-        splitColumnId &&
-        table.rows.every((row) => typeof row[splitColumnId] === 'undefined'))
-    );
-  });
+  );
 }

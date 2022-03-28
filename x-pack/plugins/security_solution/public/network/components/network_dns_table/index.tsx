@@ -32,6 +32,7 @@ interface NetworkDnsTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: networkModel.NetworkType;
@@ -56,6 +57,7 @@ const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
   loading,
   loadPage,
   showMorePagesIndicator,
+  setQuerySkip,
   totalCount,
   type,
 }) => {
@@ -153,6 +155,7 @@ const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
       loadPage={loadPage}
       onChange={onChange}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={showMorePagesIndicator}
       sorting={sorting}
       totalCount={fakeTotalCount}

@@ -13,6 +13,7 @@ import type {
   PluginStart,
   DataRequestHandlerContext,
 } from '../../../../../src/plugins/data/server';
+import type { PluginStart as DataViewPluginStart } from '../../../../../src/plugins/data_views/server';
 import { CoreSetup, PluginInitializerContext, Plugin } from '../../../../../src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
@@ -23,6 +24,7 @@ import { getUiSettings } from './ui_settings';
 
 export interface TimelionPluginStartDeps {
   data: PluginStart;
+  dataViews: DataViewPluginStart;
 }
 
 /**

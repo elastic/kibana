@@ -18,6 +18,7 @@ import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizo
 import { LensIconChartLine } from '../assets/chart_line';
 
 import type { VisualizationType, Suggestion } from '../types';
+import { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import type {
   SeriesType,
   LegendConfig,
@@ -26,59 +27,42 @@ import type {
   AxesSettingsConfig,
   FittingFunction,
   LabelsOrientationConfig,
-  DataLayerConfigResult,
-  DataLayerArgs,
-  LayerType,
-  ReferenceLineLayerArgs,
-  ReferenceLineLayerConfigResult,
+  EndValue,
   YConfig,
-  XScaleType,
-  YScaleType,
-  YConfigResult,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { PaletteOutput } from '../../../../../src/plugins/charts/common';
+import { EventAnnotationConfig } from '../../../../../src/plugins/event_annotation/common';
 import type { ValueLabelConfig } from '../../common/types';
 
-export interface YLensConfig extends Omit<YConfig, 'forAccessor'> {
-  forAccessor: string;
-}
-
-export type YLensConfigResult = YConfigResult & { forAccessor: string };
-export interface XYDataLayerConfig
-  extends Omit<
-    DataLayerArgs,
-    | 'yConfig'
-    | 'palette'
-    | 'isHistogram'
-    | 'xScaleType'
-    | 'yScaleType'
-    | 'xAccessor'
-    | 'accessors'
-    | 'splitAccessor'
-  > {
-  layerType: LayerType;
-  yConfig?: YLensConfig[];
-  palette?: PaletteOutput;
-  yScaleType?: YScaleType;
-  xScaleType?: XScaleType;
-  isHistogram?: boolean;
-  splitAccessor?: string;
+export interface XYDataLayerConfig {
+  layerId: string;
   accessors: string[];
+  layerType: 'data';
+  seriesType: SeriesType;
   xAccessor?: string;
-}
-export interface XYReferenceLineLayerConfig
-  extends Omit<ReferenceLineLayerArgs, 'yConfig' | 'palette' | 'accessors'> {
-  accessors: string[];
-  layerType: LayerType;
-  yConfig?: YLensConfig[];
+  hide?: boolean;
+  yConfig?: YConfig[];
+  splitAccessor?: string;
   palette?: PaletteOutput;
 }
 
-export type LensDataLayerConfigResult = DataLayerConfigResult & XYDataLayerConfig;
-export type LensReferenceLineLayerConfigResult = Omit<ReferenceLineLayerConfigResult, 'yConfig'> &
-  XYReferenceLineLayerConfig;
+export interface XYReferenceLineLayerConfig {
+  layerId: string;
+  accessors: string[];
+  yConfig?: YConfig[];
+  layerType: 'referenceLine';
+}
 
-export type XYLayerConfig = XYDataLayerConfig | XYReferenceLineLayerConfig;
+export interface XYAnnotationLayerConfig {
+  layerId: string;
+  layerType: 'annotations';
+  annotations: EventAnnotationConfig[];
+  hide?: boolean;
+}
+
+export type XYLayerConfig =
+  | XYDataLayerConfig
+  | XYReferenceLineLayerConfig
+  | XYAnnotationLayerConfig;
 
 export interface ValidLayer extends DataLayerConfigResult {
   xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
@@ -93,6 +77,8 @@ export interface XYState {
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
+  emphasizeFitting?: boolean;
+  endValue?: EndValue;
   yLeftExtent?: AxisExtentConfig;
   yRightExtent?: AxisExtentConfig;
   layers: XYLayerConfig[];
@@ -110,6 +96,7 @@ export interface XYState {
 }
 
 export type State = XYState;
+
 const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
   defaultMessage: 'Bar',
 });

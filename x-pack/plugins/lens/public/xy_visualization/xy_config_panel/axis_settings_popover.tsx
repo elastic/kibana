@@ -21,6 +21,7 @@ import {
   AxesSettingsConfig,
   AxisExtentConfig,
 } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { XYLayerConfig } from '../types';
 import {
   ToolbarPopover,
   useDebouncedValue,
@@ -34,7 +35,6 @@ import { EuiIconAxisRight } from '../../assets/axis_right';
 import { EuiIconAxisTop } from '../../assets/axis_top';
 import { ToolbarButtonProps } from '../../../../../../src/plugins/kibana_react/public';
 import { validateExtent } from '../axes_configuration';
-import { XYLayerConfig } from '../types';
 
 import './axis_settings_popover.scss';
 

@@ -68,6 +68,7 @@ import {
   BackToExternalAppButton,
   BackToExternalAppButtonProps,
 } from '../../../components/back_to_external_app_button/back_to_external_app_button';
+import { DevConsole } from './dev_console';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -664,6 +665,9 @@ export const EndpointList = () => {
       }
       headerBackComponent={routeState.backLink && backToPolicyList}
     >
+      {/* FIXME: Remove once Console is implemented via ConsoleManagementProvider */}
+      <DevConsole />
+
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
         {areEndpointsEnrolling && !hasErrorFindingTotals && (

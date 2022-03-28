@@ -114,8 +114,16 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         <MissingValuesOptions
           isFittingEnabled={isFittingEnabled}
           fittingFunction={state?.fittingFunction}
+          emphasizeFitting={state?.emphasizeFitting}
+          endValue={state?.endValue}
           onFittingFnChange={(newVal) => {
             setState({ ...state, fittingFunction: newVal });
+          }}
+          onEmphasizeFittingChange={(newVal) => {
+            setState({ ...state, emphasizeFitting: newVal });
+          }}
+          onEndValueChange={(newVal) => {
+            setState({ ...state, endValue: newVal });
           }}
         />
 

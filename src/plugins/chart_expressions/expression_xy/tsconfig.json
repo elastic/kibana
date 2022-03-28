@@ -20,6 +20,7 @@
     { "path": "../../ui_actions/tsconfig.json" },
     { "path": "../../field_formats/tsconfig.json"},
     { "path": "../../kibana_utils/tsconfig.json" },
+    { "path": "../../event_annotation/tsconfig.json" },
     { "path": "../../visualizations/tsconfig.json" },
   ]
 }

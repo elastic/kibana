@@ -8,14 +8,14 @@
 
 import { partition } from 'lodash';
 import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
+import { Datatable } from '../../../../expressions';
 import type { DataLayerConfigResult } from '../../common';
-import type { FramePublicAPI } from '../types';
 import { isStackedChart } from './state';
 
 export function computeOverallDataDomain(
   dataLayers: DataLayerConfigResult[],
   accessorIds: string[],
-  activeData: NonNullable<FramePublicAPI['activeData']>,
+  activeData: Record<string, Datatable>,
   allowStacking: boolean = true
 ) {
   const accessorMap = new Set(accessorIds);

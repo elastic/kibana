@@ -9,7 +9,7 @@
 import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
 import type { Datatable } from '../../../../expressions/public';
 import type { SeriesType, XYLayerConfigResult, YConfig } from '../../common';
-import { getDataLayers, isDataLayer } from './visualization';
+import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -28,9 +28,10 @@ export function isHorizontalChart(layers: XYLayerConfigResult[]) {
 }
 
 export const getSeriesColor = (layer: XYLayerConfigResult, accessor: string, table: Datatable) => {
-  if (isDataLayer(layer) && layer.splitAccessor) {
+  if ((isDataLayer(layer) && layer.splitAccessor) || isAnnotationsLayer(layer)) {
     return null;
   }
+
   return (
     layer?.yConfig?.find(
       (yConfig: YConfig) => getAccessorByDimension(yConfig.forAccessor, table.columns) === accessor

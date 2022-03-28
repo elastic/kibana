@@ -12,8 +12,10 @@ import { euiLightVars } from '@kbn/ui-theme';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory } from '../../common';
-import { isDataLayer, isReferenceLayer } from './visualization_helpers';
-import { XYDataLayerConfig, XYLayerConfig, XYReferenceLineLayerConfig } from './types';
+import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
+import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
+import { getReferenceLineAccessorColorConfig } from './reference_line_helpers';
+import { XYDataLayerConfig, XYLayerConfig } from './types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -94,17 +96,6 @@ export function getColorAssignments(
   });
 }
 
-const getReferenceLineAccessorColorConfig = (layer: XYReferenceLineLayerConfig) => {
-  return layer.accessors.map((accessor) => {
-    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
-    return {
-      columnId: accessor,
-      triggerIcon: 'color' as const,
-      color: currentYConfig?.color || defaultReferenceLineColor,
-    };
-  });
-};
-
 export function getAccessorColorConfig(
   colorAssignments: ColorAssignments,
   frame: Pick<FramePublicAPI, 'datasourceLayers'>,
@@ -114,13 +105,14 @@ export function getAccessorColorConfig(
   if (isReferenceLayer(layer)) {
     return getReferenceLineAccessorColorConfig(layer);
   }
-  const dataLayer: XYDataLayerConfig = layer;
-
-  const layerContainsSplits = Boolean(dataLayer.splitAccessor);
-  const currentPalette: PaletteOutput = dataLayer.palette || { type: 'palette', name: 'default' };
+  if (isAnnotationsLayer(layer)) {
+    return getAnnotationsAccessorColorConfig(layer);
+  }
+  const layerContainsSplits = Boolean(layer.splitAccessor);
+  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
   const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
-  return dataLayer.accessors.map((accessor) => {
-    const currentYConfig = dataLayer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+  return layer.accessors.map((accessor) => {
+    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     if (layerContainsSplits) {
       return {
         columnId: accessor as string,
@@ -128,7 +120,7 @@ export function getAccessorColorConfig(
       };
     }
 
-    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[dataLayer.layerId]);
+    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
     const rank = colorAssignments[currentPalette.name].getRank(
       layer,
       columnToLabel[accessor] || accessor,
