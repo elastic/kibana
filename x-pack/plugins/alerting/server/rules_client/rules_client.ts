@@ -92,6 +92,10 @@ import {
 } from '../lib/get_execution_log_aggregation';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
+import {
+  formatExecutionErrorsResult,
+  IExecutionErrorsResult,
+} from '../lib/format_execution_log_errors';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -257,6 +261,15 @@ export interface GetExecutionLogByIdParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+}
+
+export type IExecutionLogWithErrorsResult = IExecutionLogResult & IExecutionErrorsResult;
+interface ScheduleRuleOptions {
+  id: string;
+  consumer: string;
+  ruleTypeId: string;
+  schedule: IntervalSchedule;
+  throwOnConflict: boolean; // whether to throw conflict errors or swallow them
 }
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
@@ -450,12 +463,13 @@ export class RulesClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleRule(
-          createdAlert.id,
-          rawRule.alertTypeId,
-          data.schedule,
-          true
-        );
+        scheduledTask = await this.scheduleRule({
+          id: createdAlert.id,
+          consumer: data.consumer,
+          ruleTypeId: rawRule.alertTypeId,
+          schedule: data.schedule,
+          throwOnConflict: true,
+        });
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
         try {
@@ -613,7 +627,6 @@ export class RulesClient {
       entity: AlertingAuthorizationEntity.Rule,
     });
 
-    // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
     const durationMillis = parseDuration(rule.schedule.interval) * (numberOfExecutions ?? 60);
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
@@ -679,7 +692,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
-  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogWithErrorsResult> {
     this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
@@ -716,23 +729,47 @@ export class RulesClient {
 
     const eventLogClient = await this.getEventLogClient();
 
-    const results = await eventLogClient.aggregateEventsBySavedObjectIds(
-      'alert',
-      [id],
-      {
-        start: parsedDateStart.toISOString(),
-        end: parsedDateEnd.toISOString(),
-        filter,
-        aggs: getExecutionLogAggregation({
-          page,
-          perPage,
-          sort,
-        }),
-      },
-      rule.legacyId !== null ? [rule.legacyId] : undefined
-    );
+    try {
+      const [aggResult, errorResult] = await Promise.all([
+        eventLogClient.aggregateEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            start: parsedDateStart.toISOString(),
+            end: parsedDateEnd.toISOString(),
+            filter,
+            aggs: getExecutionLogAggregation({
+              page,
+              perPage,
+              sort,
+            }),
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+        eventLogClient.findEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            start: parsedDateStart.toISOString(),
+            end: parsedDateEnd.toISOString(),
+            per_page: 500,
+            filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+            sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+      ]);
 
-    return formatExecutionLogResult(results);
+      return {
+        ...formatExecutionLogResult(aggResult),
+        ...formatExecutionErrorsResult(errorResult),
+      };
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
   }
 
   public async find<Params extends RuleTypeParams = never>({
@@ -1445,12 +1482,13 @@ export class RulesClient {
         );
         throw e;
       }
-      const scheduledTask = await this.scheduleRule(
+      const scheduledTask = await this.scheduleRule({
         id,
-        attributes.alertTypeId,
-        attributes.schedule as IntervalSchedule,
-        false
-      );
+        consumer: attributes.consumer,
+        ruleTypeId: attributes.alertTypeId,
+        schedule: attributes.schedule as IntervalSchedule,
+        throwOnConflict: false,
+      });
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
       });
@@ -1519,6 +1557,7 @@ export class RulesClient {
             ruleId: id,
             ruleName: attributes.name,
             ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
+            consumer: attributes.consumer,
             instanceId,
             action: EVENT_LOG_ACTIONS.recoveredInstance,
             message,
@@ -1526,6 +1565,7 @@ export class RulesClient {
             group: actionGroup,
             subgroup: actionSubgroup,
             namespace: this.namespace,
+            spaceId: this.spaceId,
             savedObjects: [
               {
                 id,
@@ -1669,6 +1709,68 @@ export class RulesClient {
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    );
+  }
+
+  public async unsnooze({ id }: { id: string }): Promise<void> {
+    return await retryIfConflicts(
+      this.logger,
+      `rulesClient.unsnooze('${id}')`,
+      async () => await this.unsnoozeWithOCC({ id })
+    );
+  }
+
+  private async unsnoozeWithOCC({ id }: { id: string }) {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: attributes.alertTypeId,
+        consumer: attributes.consumer,
+        operation: WriteOperations.Unsnooze,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.UNSNOOZE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.UNSNOOZE,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    const updateAttributes = this.updateMeta({
+      snoozeEndTime: null,
+      muteAll: false,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1948,12 +2050,8 @@ export class RulesClient {
     return this.spaceId;
   }
 
-  private async scheduleRule(
-    id: string,
-    ruleTypeId: string,
-    schedule: IntervalSchedule,
-    throwOnConflict: boolean // whether to throw conflict errors or swallow them
-  ) {
+  private async scheduleRule(opts: ScheduleRuleOptions) {
+    const { id, consumer, ruleTypeId, schedule, throwOnConflict } = opts;
     const taskInstance = {
       id, // use the same ID for task document as the rule
       taskType: `alerting:${ruleTypeId}`,
@@ -1961,6 +2059,7 @@ export class RulesClient {
       params: {
         alertId: id,
         spaceId: this.spaceId,
+        consumer,
       },
       state: {
         previousStartedAt: null,
@@ -2045,12 +2144,15 @@ export class RulesClient {
       executionStatus,
       schedule,
       actions,
+      snoozeEndTime,
       ...partialRawRule
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
     excludeFromPublicApi: boolean = false
   ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
+    const snoozeEndTimeDate = snoozeEndTime != null ? new Date(snoozeEndTime) : snoozeEndTime;
+    const includeSnoozeEndTime = snoozeEndTimeDate !== undefined && !excludeFromPublicApi;
     const rule = {
       id,
       notifyWhen,
@@ -2060,6 +2162,7 @@ export class RulesClient {
       schedule: schedule as IntervalSchedule,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
+      ...(includeSnoozeEndTime ? { snoozeEndTime: snoozeEndTimeDate } : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),

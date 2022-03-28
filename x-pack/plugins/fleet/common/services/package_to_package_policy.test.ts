@@ -35,6 +35,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         ml_module: [],
         security_rule: [],
         tag: [],
+        osquery_pack_asset: [],
       },
       elasticsearch: {
         ingest_pipeline: [],
