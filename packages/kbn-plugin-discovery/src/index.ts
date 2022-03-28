@@ -7,4 +7,5 @@
  */
 
 export * from './parse_kibana_platform_plugin';
+export * from './plugin_search_paths';
 export * from './simple_kibana_platform_plugin_discovery';
