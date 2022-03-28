@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.switchToFormula();
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
       // 4th item is the other bucket
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'formula',
       });
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('mtrVis');
       expect(await PageObjects.lens.getErrorCount()).to.eql(0);
     });
 
