@@ -141,6 +141,12 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await this.searchAlerts(name);
       await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${name}"]`);
     },
+    async maybeClickOnAlertTab() {
+      if (await testSubjects.exists('ruleDetailsTabbedContent')) {
+        const alertTab = await testSubjects.find('ruleAlertListTab');
+        await alertTab.click();
+      }
+    },
     async changeTabs(tab: 'rulesTab' | 'connectorsTab') {
       await testSubjects.click(tab);
     },

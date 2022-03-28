@@ -10,12 +10,20 @@ import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { RuleComponent, AlertListItem, alertToListItem } from './rule';
+import { RuleComponent, alertToListItem } from './rule';
+import { AlertListItem } from './types';
+import { RuleAlertList } from './rule_alert_list';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
-import { EuiBasicTable } from '@elastic/eui';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
+import { RuleEventLogList } from './rule_event_log_list';
 
 jest.mock('../../../../common/lib/kibana');
+
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn(),
+}));
+
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
@@ -31,6 +39,10 @@ const mockAPIs = {
 beforeAll(() => {
   jest.resetAllMocks();
   global.Date.now = jest.fn(() => fakeNow.getTime());
+});
+
+beforeEach(() => {
+  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
 });
 
 describe('rules', () => {
@@ -59,19 +71,17 @@ describe('rules', () => {
       alertToListItem(fakeNow.getTime(), ruleType, 'first_rule', ruleSummary.alerts.first_rule),
     ];
 
-    expect(
-      shallow(
-        <RuleComponent
-          {...mockAPIs}
-          rule={rule}
-          ruleType={ruleType}
-          ruleSummary={ruleSummary}
-          readOnly={false}
-        />
-      )
-        .find(EuiBasicTable)
-        .prop('items')
-    ).toEqual(rules);
+    const wrapper = shallow(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+
+    expect(wrapper.find(RuleAlertList).prop('items')).toEqual(rules);
   });
 
   it('render a hidden field with duration epoch', () => {
@@ -120,7 +130,7 @@ describe('rules', () => {
           })}
         />
       )
-        .find(EuiBasicTable)
+        .find(RuleAlertList)
         .prop('items')
     ).toEqual([
       alertToListItem(fakeNow.getTime(), ruleType, 'us-central', alerts['us-central']),
@@ -157,7 +167,7 @@ describe('rules', () => {
           })}
         />
       )
-        .find(EuiBasicTable)
+        .find(RuleAlertList)
         .prop('items')
     ).toEqual([
       alertToListItem(fakeNow.getTime(), ruleType, 'us-west', ruleUsWest),
@@ -376,6 +386,58 @@ describe('execution duration overview', () => {
         .find(ExecutionDurationChart)
         .exists()
     ).toBeTruthy();
+  });
+});
+
+describe('tabbed content', () => {
+  it('tabbed content renders when the event log experiment is on', async () => {
+    // Enable the event log experiment
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const ruleSummary = mockRuleSummary({
+      alerts: {
+        first_rule: {
+          status: 'OK',
+          muted: false,
+          actionGroupId: 'default',
+        },
+        second_rule: {
+          status: 'Active',
+          muted: false,
+          actionGroupId: 'action group id unknown',
+        },
+      },
+    });
+
+    const wrapper = shallow(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+
+    const tabbedContent = wrapper.find('[data-test-subj="ruleDetailsTabbedContent"]').dive();
+
+    // Need to mock this function
+    (tabbedContent.instance() as any).focusTab = jest.fn();
+    tabbedContent.update();
+
+    expect(tabbedContent.find(RuleEventLogList).exists()).toBeTruthy();
+    expect(tabbedContent.find(RuleAlertList).exists()).toBeFalsy();
+
+    tabbedContent.find('[data-test-subj="ruleAlertListTab"]').simulate('click');
+
+    expect(tabbedContent.find(RuleEventLogList).exists()).toBeFalsy();
+    expect(tabbedContent.find(RuleAlertList).exists()).toBeTruthy();
+
+    tabbedContent.find('[data-test-subj="eventLogListTab"]').simulate('click');
+    expect(tabbedContent.find(RuleEventLogList).exists()).toBeTruthy();
+    expect(tabbedContent.find(RuleAlertList).exists()).toBeFalsy();
   });
 });
 
