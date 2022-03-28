@@ -66,7 +66,7 @@ import { getIsReadOnly } from './ui_selectors';
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
-  customIcons?: CustomIcon[],
+  customIcons: CustomIcon[],
   inspectorAdapters?: Adapters,
   chartsPaletteServiceGetColor?: (value: string) => string | null
 ): ILayer {

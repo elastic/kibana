@@ -14,7 +14,7 @@ interface Props {
   fill?: string;
   stroke?: string;
   style?: CSSProperties;
-  svg?: string;
+  svg: string;
 }
 
 interface State {
@@ -44,7 +44,6 @@ export class SymbolIcon extends Component<Props, State> {
       imgDataUrl = buildSrcUrl(styledSvg);
     } catch (error) {
       // ignore failures - component will just not display an icon
-      // TODO maybe need to handle this if custom icon is missing?
       return;
     }
 

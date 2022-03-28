@@ -26,15 +26,15 @@ import {
 } from '../../symbol_utils';
 
 export interface Props {
-  svg?: string;
-  cutoff?: number;
-  radius?: number;
-  isSvgInvalid?: boolean;
+  svg: string;
+  cutoff: number;
+  radius: number;
+  isSvgInvalid: boolean;
 }
 
 interface State {
   map: MapboxMap | null;
-  iconColor: string | null;
+  iconColor: string;
 }
 
 export class IconPreview extends Component<Props, State> {
@@ -127,7 +127,7 @@ export class IconPreview extends Component<Props, State> {
     });
   }
 
-  async _createMapInstance(): Promise<MapboxMap> {
+  _createMapInstance(): Promise<MapboxMap> {
     return new Promise((resolve) => {
       const map = new mapboxgl.Map({
         container: this._containerRef!,
@@ -174,8 +174,6 @@ export class IconPreview extends Component<Props, State> {
   }
 
   async _initializeMap() {
-    if (!this._isMounted) return;
-
     const map: MapboxMap = await this._createMapInstance();
 
     if (!this._isMounted) return;

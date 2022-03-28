@@ -172,7 +172,7 @@ export interface BlendedVectorLayerArguments {
   chartsPaletteServiceGetColor?: (value: string) => string | null;
   source: IVectorSource;
   layerDescriptor: VectorLayerDescriptor;
-  customIcons?: CustomIcon[];
+  customIcons: CustomIcon[];
 }
 
 export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLayer {

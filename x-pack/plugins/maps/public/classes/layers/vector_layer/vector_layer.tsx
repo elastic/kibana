@@ -71,7 +71,7 @@ export interface VectorLayerArguments {
   source: IVectorSource;
   joins?: InnerJoin[];
   layerDescriptor: VectorLayerDescriptor;
-  customIcons?: CustomIcon[];
+  customIcons: CustomIcon[];
   chartsPaletteServiceGetColor?: (value: string) => string | null;
 }
 

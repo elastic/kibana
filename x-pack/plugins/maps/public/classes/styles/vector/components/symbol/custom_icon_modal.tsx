@@ -6,7 +6,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiAccordion,
   EuiButton,
@@ -33,8 +32,6 @@ import { IconPreview } from './icon_preview';
 import { ValidatedRange } from '../../../../../components/validated_range';
 import { CustomIcon } from '../../../../../../common/descriptor_types';
 
-const MAX_LABEL_LENGTH = 40;
-
 const strings = {
   getAdvancedOptionsLabel: () =>
     i18n.translate('xpack.maps.customIconModal.advancedOptionsLabel', {
@@ -43,13 +40,6 @@ const strings = {
   getCancelButtonLabel: () =>
     i18n.translate('xpack.maps.customIconModal.cancelButtonLabel', {
       defaultMessage: 'Cancel',
-    }),
-  getCharactersRemainingDescription: (numberOfRemainingCharacter: number) =>
-    i18n.translate('xpack.maps.customIconModal.remainingCharactersDescription', {
-      defaultMessage: '{numberOfRemainingCharacter} characters remaining',
-      values: {
-        numberOfRemainingCharacter,
-      },
     }),
   getCutoffRangeLabel: () => (
     <EuiToolTip
@@ -162,33 +152,23 @@ interface State {
   /**
    * id of image added to map
    */
-  symbolId?: string;
+  symbolId: string;
   /**
    * label of the custom element to be saved
    */
-  label?: string;
+  label: string;
   /**
    * image of the custom element to be saved
    */
-  svg?: string;
+  svg: string;
 
-  cutoff?: number;
-  radius?: number;
-  isFileInvalid?: boolean;
+  cutoff: number;
+  radius: number;
+  isFileInvalid: boolean;
 }
 
 export class CustomIconModal extends Component<Props, State> {
-  public static propTypes = {
-    symbolId: PropTypes.string,
-    label: PropTypes.string,
-    svg: PropTypes.string,
-    cutoff: PropTypes.number.isRequired,
-    radius: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    onSave: PropTypes.func.isRequired,
-    onCancel: PropTypes.func.isRequired,
-    onDelete: PropTypes.func,
-  };
+  private _isMounted: boolean = false;
 
   public state = {
     symbolId: this.props.symbolId || '',
@@ -199,8 +179,16 @@ export class CustomIconModal extends Component<Props, State> {
     isFileInvalid: this.props.svg ? false : true,
   };
 
-  private _handleChange = (type: 'label' | 'svg', value: string) => {
-    this.setState({ [type]: value });
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  private _handleLabelChange = (value: string) => {
+    this.setState({ label: value });
   };
 
   private _handleCutoffChange = (value: number) => {
@@ -215,7 +203,7 @@ export class CustomIconModal extends Component<Props, State> {
     this.setState({ radius: this.props.radius, cutoff: this.props.cutoff });
   };
 
-  private _onFileSelect = (files: FileList | null) => {
+  private _onFileSelect = async (files: FileList | null) => {
     this.setState({
       label: '',
       svg: '',
@@ -227,14 +215,17 @@ export class CustomIconModal extends Component<Props, State> {
       const { type } = file;
       if (type === 'image/svg+xml') {
         const label = this.props.label ?? getFileNameWithoutExt(file.name);
-        file
-          .text()
-          .then((svg: string) => {
-            this.setState({ isFileInvalid: false, label, svg });
-          })
-          .catch((err) => {
-            this.setState({ isFileInvalid: true });
-          });
+        try {
+          const svg = await file.text();
+
+          if (!this._isMounted) {
+            return;
+          }
+
+          this.setState({ isFileInvalid: false, label, svg });
+        } catch (err) {
+          this.setState({ isFileInvalid: true });
+        }
       } else {
         this.setState({ isFileInvalid: true });
       }
@@ -300,15 +291,11 @@ export class CustomIconModal extends Component<Props, State> {
     const { label, svg } = this.state;
     return svg !== '' ? (
       <>
-        <EuiFormRow
-          label={strings.getNameInputLabel()}
-          helpText={strings.getCharactersRemainingDescription(MAX_LABEL_LENGTH - label.length)}
-          display="rowCompressed"
-        >
+        <EuiFormRow label={strings.getNameInputLabel()} display="rowCompressed">
           <EuiFieldText
             value={label}
             className="mapsCustomIconForm__label"
-            onChange={(e) => this._handleChange('label', e.target.value)}
+            onChange={(e) => this._handleLabelChange(e.target.value)}
             required
             data-test-subj="mapsCustomIconForm-label"
           />
@@ -329,14 +316,13 @@ export class CustomIconModal extends Component<Props, State> {
   }
 
   public render() {
-    const { onSave, onCancel, onDelete, title, ...rest } = this.props;
+    const { onSave, onCancel, onDelete, title } = this.props;
     const { symbolId, label, svg, cutoff, radius, isFileInvalid } = this.state;
     const isComplete = label.length !== 0 && svg.length !== 0 && !isFileInvalid;
     const fileError = svg && isFileInvalid ? strings.getInvalidFileLabel() : '';
     return (
       <EuiModal
-        {...rest}
-        className={`mapsCustomIconModal`}
+        className="mapsCustomIconModal"
         maxWidth={700}
         onClose={onCancel}
         initialFocus=".mapsCustomIconForm__image"

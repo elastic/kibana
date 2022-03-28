@@ -14,7 +14,7 @@ import turfBooleanContains from '@turf/boolean-contains';
 import { Filter } from '@kbn/es-query';
 import { Query, TimeRange } from 'src/plugins/data/public';
 import { Geometry, Position } from 'geojson';
-import { asyncForEach } from '@kbn/std';
+import { asyncForEach, asyncMap } from '@kbn/std';
 import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
 import { MapStoreState } from '../reducers/store';
@@ -116,15 +116,12 @@ export function updateMapSetting(
 }
 
 export function updateCustomIcons(customIcons: CustomIcon[]) {
-  const encodedIcons = customIcons.map((icon) => {
-    return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
-  });
-  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
-    dispatch({
-      type: UPDATE_MAP_SETTING,
-      settingKey: 'customIcons',
-      settingValue: encodedIcons,
-    });
+  return {
+    type: UPDATE_MAP_SETTING,
+    settingKey: 'customIcons',
+    settingValue: customIcons.map((icon) => {
+      return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
+    }),
   };
 }
 
@@ -133,25 +130,24 @@ export function deleteCustomIcon(value: string) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const layerList = getLayerList(getState());
-    const findCustomIcons = layerList
-      .filter((layer) => {
-        const style = layer.getCurrentStyle();
-        if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
-          return;
-        }
-        return (style as IVectorStyle).getCustomIconIdsInUse().includes(value);
-      })
-      .map(async (layer) => await layer.getDisplayName());
+    const layersContainingCustomIcon = getLayerList(getState()).filter((layer) => {
+      const style = layer.getCurrentStyle();
+      if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
+        return;
+      }
+      return (style as IVectorStyle).getCustomIconIdsInUse().includes(value);
+    });
+    const layerList = await asyncMap(layersContainingCustomIcon, async (layer) => {
+      return await layer.getDisplayName();
+    });
 
-    const layersContainingCustomIcon = await Promise.all(findCustomIcons);
-
-    if (layersContainingCustomIcon.length > 0) {
+    if (layerList.length > 0) {
       getToasts().addWarning(
         i18n.translate('xpack.maps.mapActions.deleteCustomIconWarning', {
-          defaultMessage: `Unable to delete custom icon. This icon is in use by the following layer(s): {layers}`,
+          defaultMessage: `Unable to delete icon. The icon is in use by the {count, plural, one {layer} other {layers}}: {layerNames}`,
           values: {
-            layers: layersContainingCustomIcon.join(', '),
+            count: layerList.length,
+            layerNames: layerList.join(', '),
           },
         })
       );
