@@ -66,7 +66,7 @@ export function WaterfallWithSummary({
 
   const { entryWaterfallTransaction } = waterfall;
 
-  if (!entryWaterfallTransaction || traceSamples.length === 0) {
+  if ((!entryWaterfallTransaction || traceSamples.length === 0) && !isLoading) {
     return (
       <EuiEmptyPrompt
         title={
