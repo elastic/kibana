@@ -67,6 +67,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('action-delete');
         await testSubjects.click('confirmModalConfirmButton');
         await testSubjects.existOrFail('euiToastHeader');
+        await cases.casesTable.waitForTableToFinishLoading();
+
         await retry.tryForTime(2000, async () => {
           const firstRow = await testSubjects.find('case-details-link');
           expect(await firstRow.getVisibleText()).not.to.be('delete me');
@@ -75,6 +77,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('bulk delete cases from the list', async () => {
         await cases.casesTable.selectAndDeleteAllCases();
+        await cases.casesTable.waitForTableToFinishLoading();
         await cases.casesTable.validateCasesTableHasNthRows(0);
       });
     });
@@ -112,10 +115,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await input.type(caseTitle);
         await input.pressKeys(browser.keys.ENTER);
 
-        await retry.tryForTime(20000, async () => {
-          await cases.casesTable.validateCasesTableHasNthRows(1);
-        });
-
+        await cases.casesTable.validateCasesTableHasNthRows(1);
         await testSubjects.click('clearSearchButton');
         await cases.casesTable.validateCasesTableHasNthRows(4);
       });

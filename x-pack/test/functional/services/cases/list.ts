@@ -55,11 +55,10 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
     },
 
     async validateCasesTableHasNthRows(nrRows: number) {
-      await header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
-      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
-      const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
-      expect(rows.length).equal(nrRows);
+      await retry.tryForTime(2000, async () => {
+        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
+        expect(rows.length).equal(nrRows);
+      });
     },
 
     async waitForCasesToBeListed() {
@@ -75,6 +74,10 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         return rows.length === 0;
       });
+    },
+
+    async waitForTableToFinishLoading() {
+      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
     },
 
     async getCaseFromTable(index: number) {
