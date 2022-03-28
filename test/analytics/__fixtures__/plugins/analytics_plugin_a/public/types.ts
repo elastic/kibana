@@ -6,11 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../services';
+import type { TelemetryCounter } from 'src/core/public';
+import type { Action } from './custom_shipper';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('analytics', () => {
-    loadTestFile(require.resolve('./analytics_from_the_browser'));
-    loadTestFile(require.resolve('./analytics_from_the_server'));
-  });
+declare global {
+  interface Window {
+    __analyticsPluginA__: {
+      getLastActions: (takeNumberOfActions: number) => Promise<Action[]>;
+      stats: TelemetryCounter[];
+      setOptIn: (optIn: boolean) => void;
+    };
+  }
 }

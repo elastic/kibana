@@ -8,13 +8,16 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 import { services as commonServices } from '../../common/services';
+import { services as functionalServices } from '../../functional/services';
+import { pageObjects } from '../../functional/page_objects';
 
-import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
+// import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
 
 export const services = {
   ...commonServices,
-  supertest: KibanaSupertestProvider,
-  esSupertest: ElasticsearchSupertestProvider,
+  ...functionalServices,
+  // supertest: KibanaSupertestProvider,
+  // esSupertest: ElasticsearchSupertestProvider,
 };
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

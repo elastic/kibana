@@ -24,6 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [require.resolve('./tests')],
     services,
+    pageObjects: functionalConfig.get('pageObjects'),
     servers: commonConfig.get('servers'),
     junit: {
       reportName: 'Analytics Integration Tests',

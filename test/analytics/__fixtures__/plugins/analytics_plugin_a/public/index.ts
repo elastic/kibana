@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../services';
+import { AnalyticsPluginA } from './plugin';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('analytics', () => {
-    loadTestFile(require.resolve('./analytics_from_the_browser'));
-    loadTestFile(require.resolve('./analytics_from_the_server'));
-  });
+export function plugin() {
+  return new AnalyticsPluginA();
 }

@@ -4,5 +4,5 @@
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "server": true,
-  "ui": false
+  "ui": true
 }
