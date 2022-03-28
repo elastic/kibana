@@ -6,6 +6,7 @@
  */
 import { act } from 'react-dom/test-utils';
 
+import { HttpSetup } from 'src/core/public';
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { RestoreSnapshot } from '../../../public/application/sections/restore_snapshot';
 import { WithAppDependencies } from './setup_environment';
@@ -17,11 +18,6 @@ const testBedConfig: AsyncTestBedConfig = {
   },
   doMountAsync: true,
 };
-
-const initTestBed = registerTestBed<RestoreSnapshotFormTestSubject>(
-  WithAppDependencies(RestoreSnapshot),
-  testBedConfig
-);
 
 const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
   const { find, component, form, exists } = testBed;
@@ -84,7 +80,12 @@ export type RestoreSnapshotTestBed = TestBed<RestoreSnapshotFormTestSubject> & {
   actions: Actions;
 };
 
-export const setup = async (): Promise<RestoreSnapshotTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<RestoreSnapshotTestBed> => {
+  const initTestBed = registerTestBed<RestoreSnapshotFormTestSubject>(
+    WithAppDependencies(RestoreSnapshot, httpSetup),
+    testBedConfig
+  );
+
   const testBed = await initTestBed();
 
   return {

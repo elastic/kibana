@@ -8,6 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { TestBedConfig, registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
+import { HttpSetup } from 'src/core/public';
 import { BASE_PATH } from '../../../public/application/constants';
 import { SnapshotList } from '../../../public/application/sections/home/snapshot_list';
 import { WithAppDependencies } from './setup_environment';
@@ -18,9 +19,6 @@ const getTestBedConfig = (query?: string): TestBedConfig => ({
     componentRoutePath: `${BASE_PATH}/snapshots/:repositoryName?/:snapshotId*`,
   },
 });
-
-const initTestBed = (query?: string) =>
-  registerTestBed(WithAppDependencies(SnapshotList), getTestBedConfig(query))();
 
 export interface SnapshotListTestBed extends TestBed {
   actions: {
@@ -33,8 +31,12 @@ export interface SnapshotListTestBed extends TestBed {
 const searchBarSelector = 'snapshotListSearch';
 const searchErrorSelector = 'snapshotListSearchError';
 
-export const setup = async (query?: string): Promise<SnapshotListTestBed> => {
-  const testBed = await initTestBed(query);
+export const setup = async (httpSetup: HttpSetup, query?: string): Promise<SnapshotListTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(SnapshotList, httpSetup),
+    getTestBedConfig(query)
+  );
+  const testBed = await initTestBed();
   const { form, component, find, exists } = testBed;
 
   const setSearchText = async (value: string, advanceTime = true) => {
