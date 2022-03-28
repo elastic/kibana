@@ -230,8 +230,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
+
+      log.debug('create source index');
       await createSourceIndex();
+
+      log.debug('generate documents');
       await generateNewDocs(5);
+
+      log.debug('create output index');
       await createOutputDataIndex();
 
       log.debug('create data views');
