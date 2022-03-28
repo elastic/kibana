@@ -138,7 +138,7 @@ export const ElasticsearchCloudId: React.FC = () => {
             {i18n.translate(
               'xpack.enterpriseSearch.overview.elasticsearchCloudId.manageApiKeysLink',
               {
-                defaultMessage: 'Manage API Keys',
+                defaultMessage: 'Manage API keys',
               }
             )}
           </EuiButton>

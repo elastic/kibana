@@ -40,7 +40,7 @@ export const ElasticsearchCard: React.FC = () => {
           <div>
             <EuiButtonTo to={ELASTICSEARCH_GUIDE_PATH}>
               {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchCard.button', {
-                defaultMessage: 'Get Started',
+                defaultMessage: 'Get started',
               })}
             </EuiButtonTo>
           </div>
