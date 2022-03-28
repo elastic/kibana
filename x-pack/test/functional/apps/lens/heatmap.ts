@@ -33,12 +33,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
     });
 
     it('should render heatmap chart with the temperature palette', async () => {
       await PageObjects.lens.switchToVisualization('heatmap', 'heat');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('heatmapChart');
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
       if (!debugState) {
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           typeCharByChar: true,
         });
       });
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('heatmapChart');
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not change when passing from percentage to number', async () => {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('heatmapChart');
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '0', {
         clearWithKeyboard: true,
       });
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('heatmapChart');
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should reset stop numbers when changing palette', async () => {
       await PageObjects.lens.changePaletteTo('status');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('heatmapChart');
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not change when passing from number to percent', async () => {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_percent');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('heatmapChart');
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
