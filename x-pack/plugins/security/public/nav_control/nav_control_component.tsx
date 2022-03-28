@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './nav_control_component.scss';
-
 import type { EuiContextMenuPanelItemDescriptor, IconType } from '@elastic/eui';
 import {
   EuiContextMenu,
@@ -46,7 +44,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   logoutUrl,
   userMenuLinks$,
 }) => {
-  const userMenuLinks = useObservable(userMenuLinks$) ?? [];
+  const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isOpen, setIsOpen] = useState(false);
 
   const userProfile = useUserProfile();
@@ -77,9 +75,8 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     </EuiHeaderSectionItemButton>
   );
 
-  const isAnonymous = userProfile.value ? isUserAnonymous(userProfile.value) : false;
+  const isAnonymous = userProfile.value ? isUserAnonymous(userProfile.value.user) : false;
   const items: EuiContextMenuPanelItemDescriptor[] = [];
-
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
       .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
@@ -132,14 +129,6 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     'data-test-subj': 'logoutLink',
   });
 
-  const panels = [
-    {
-      id: 0,
-      title: displayName,
-      items,
-    },
-  ];
-
   return (
     <EuiPopover
       id="headerUserMenu"
@@ -153,7 +142,17 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       buffer={0}
     >
       <div data-test-subj="userMenu">
-        <EuiContextMenu className="chrNavControl__userMenu" initialPanelId={0} panels={panels} />
+        <EuiContextMenu
+          className="chrNavControl__userMenu"
+          initialPanelId={0}
+          panels={[
+            {
+              id: 0,
+              title: displayName,
+              items,
+            },
+          ]}
+        />
       </div>
     </EuiPopover>
   );

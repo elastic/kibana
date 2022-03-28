@@ -6,6 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
+import type { FunctionComponent } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Observable, Subscription } from 'rxjs';
@@ -13,7 +14,7 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart, CoreTheme } from 'src/core/public';
 
 import {
   KibanaContextProvider,
@@ -112,25 +113,19 @@ export class SecurityNavControlService {
     this.stop$.next();
   }
 
-  private registerSecurityNavControl(
-    core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'injectedMetadata' | 'application' | 'theme'>
-  ) {
+  private registerSecurityNavControl(core: CoreStart) {
     const { theme$ } = core.theme;
     core.chrome.navControls.registerRight({
       order: 2000,
       mount: (element: HTMLElement) => {
         ReactDOM.render(
-          <KibanaContextProvider services={core}>
-            <I18nProvider>
-              <KibanaThemeProvider theme$={theme$}>
-                <SecurityNavControl
-                  editProfileUrl={core.http.basePath.prepend('/security/account')}
-                  logoutUrl={this.logoutUrl}
-                  userMenuLinks$={this.userMenuLinks$}
-                />
-              </KibanaThemeProvider>
-            </I18nProvider>
-          </KibanaContextProvider>,
+          <Providers services={core} theme$={theme$}>
+            <SecurityNavControl
+              editProfileUrl={core.http.basePath.prepend('/security/account')}
+              logoutUrl={this.logoutUrl}
+              userMenuLinks$={this.userMenuLinks$}
+            />
+          </Providers>,
           element
         );
 
@@ -145,3 +140,16 @@ export class SecurityNavControlService {
     return sortBy(userMenuLinks, 'order');
   }
 }
+
+export interface ProvidersProps {
+  services: CoreStart;
+  theme$: Observable<CoreTheme>;
+}
+
+export const Providers: FunctionComponent<ProvidersProps> = ({ services, theme$, children }) => (
+  <KibanaContextProvider services={services}>
+    <I18nProvider>
+      <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+    </I18nProvider>
+  </KibanaContextProvider>
+);

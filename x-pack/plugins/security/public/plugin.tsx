@@ -201,6 +201,7 @@ export interface SecurityPluginStart {
   authc: AuthenticationServiceStart;
   /**
    * Exposes UI components that will be loaded asynchronously.
+   * @deprecated
    */
   uiApi: UiApi;
 }

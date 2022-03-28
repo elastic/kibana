@@ -22,6 +22,7 @@ const coreStart = coreMock.createStart();
 const theme$ = themeServiceMock.createTheme$();
 let history = scopedHistoryMock.create();
 const authc = securityMock.createSetup().authc;
+
 const wrapper: FunctionComponent = ({ children }) => (
   <Providers services={coreStart} theme$={theme$} history={history} authc={authc}>
     {children}

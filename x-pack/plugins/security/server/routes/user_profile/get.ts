@@ -38,7 +38,7 @@ export function defineGetUserProfileRoute({
         const profile = await userProfileService.get(session.userProfileId, request.query.data);
         const body: AuthenticatedUserProfile = {
           ...profile,
-          authentication_provider: session.provider,
+          user: { ...profile.user, authentication_provider: session.provider },
         };
         return response.ok({ body });
       } catch (error) {
