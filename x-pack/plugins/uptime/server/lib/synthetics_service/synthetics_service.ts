@@ -38,7 +38,7 @@ import { SyntheticsMonitorSavedObject } from '../../../common/types';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
-const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '1m';
+const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
 
 export class SyntheticsService {
   private logger: Logger;
