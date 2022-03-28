@@ -8,18 +8,36 @@
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import moment from 'moment';
 import { UptimeSettingsContext } from '../../../contexts';
 import { DeleteMonitor } from './delete_monitor';
+import { InlineError } from './inline_error';
+import { MonitorManagementListResult, Ping } from '../../../../common/runtime_types';
 
 interface Props {
   id: string;
   name: string;
   isDisabled?: boolean;
   onUpdate: () => void;
+  errorSummaries?: Ping[];
+  monitors: MonitorManagementListResult['monitors'];
 }
 
-export const Actions = ({ id, name, onUpdate, isDisabled }: Props) => {
+export const Actions = ({ id, name, onUpdate, isDisabled, errorSummaries, monitors }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
+
+  let errorSummary = errorSummaries?.find((summary) => summary.config_id === id);
+
+  const monitor = monitors.find((monitorT) => monitorT.id === id);
+
+  if (errorSummary && monitor) {
+    const summaryIsBeforeUpdate = moment(monitor.updated_at).isBefore(
+      moment(errorSummary.timestamp)
+    );
+    if (!summaryIsBeforeUpdate) {
+      errorSummary = undefined;
+    }
+  }
 
   return (
     <EuiFlexGroup>
@@ -35,6 +53,11 @@ export const Actions = ({ id, name, onUpdate, isDisabled }: Props) => {
       <EuiFlexItem grow={false}>
         <DeleteMonitor onUpdate={onUpdate} name={name} id={id} isDisabled={isDisabled} />
       </EuiFlexItem>
+      {errorSummary && (
+        <EuiFlexItem>
+          <InlineError errorSummary={errorSummary} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
