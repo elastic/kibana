@@ -34,5 +34,7 @@ include::cases/cases-api-delete-comments.asciidoc[leveloffset=+1]
 //FIND
 include::cases/cases-api-find-cases.asciidoc[leveloffset=+1]
 include::cases/cases-api-find-connectors.asciidoc[leveloffset=+1]
+//GET
+include::cases/cases-api-get-case.asciidoc[leveloffset=+1]
 //UPDATE
 include::cases/cases-api-update.asciidoc[leveloffset=+1]
