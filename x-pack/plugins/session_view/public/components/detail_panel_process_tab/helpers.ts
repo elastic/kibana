@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { Teletype } from '../../../common/types/process_tree';
+
 /**
  * Serialize an array of executable tuples to a copyable text.
  *
  * @param  {String[][]} executable
  * @return {String} serialized string with data of each executable
  */
-export const getProcessExecutableCopyText = (executable: string[][]) => {
+export const getProcessExecutableCopyText = (executable: string[][]): string => {
   try {
     return executable
       .map((execTuple) => {
@@ -26,3 +28,21 @@ export const getProcessExecutableCopyText = (executable: string[][]) => {
     return '';
   }
 };
+
+/**
+ * Format an array of args for display.
+ *
+ * @param  {String[]} args
+ * @return {String} formatted string of process args
+ */
+export const formatProcessArgs = (args: string[]): string =>
+  args.length ? `[${args.map((arg) => `'${arg}'`).join(', ')}]` : '-';
+
+/**
+ * Get isInteractive boolean string from tty.
+ *
+ * @param  {Teletype | undefined} tty
+ * @return {String} returns 'True' if tty exists, 'False' otherwise.
+ */
+export const getIsInterativeString = (tty: Teletype | undefined): string =>
+  !!tty ? 'True' : 'False';
