@@ -16,7 +16,7 @@ import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINE_PATH } from '../../routes';
 import { formatApiName } from '../../utils/format_api_name';
-import { EngineDetails } from '../engine/types';
+import { EngineDetails, EngineTypes } from '../engine/types';
 
 import { META_ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 
@@ -100,7 +100,9 @@ export const MetaEngineCreationLogic = kea<
       }
 
       if (response) {
-        const engineNames = response.results.map((result) => result.name);
+        const engineNames = response.results
+          .filter(({ type }) => type !== EngineTypes.elasticsearch)
+          .map((result) => result.name);
         actions.setIndexedEngineNames([...values.indexedEngineNames, ...engineNames]);
 
         if (page < response.meta.page.total_pages) {
