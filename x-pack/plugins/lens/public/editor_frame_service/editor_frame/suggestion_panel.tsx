@@ -21,7 +21,6 @@ import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';

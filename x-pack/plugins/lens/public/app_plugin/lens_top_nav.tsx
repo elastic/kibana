@@ -9,7 +9,6 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useStore } from 'react-redux';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import {
   LensAppServices,
