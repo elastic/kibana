@@ -69,6 +69,14 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
       });
     },
 
+    async waitForCasesToBeDeleted() {
+      await retry.waitFor('the cases table to be empty', async () => {
+        this.refreshTable();
+        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
+        return rows.length === 0;
+      });
+    },
+
     async getCaseFromTable(index: number) {
       const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
 

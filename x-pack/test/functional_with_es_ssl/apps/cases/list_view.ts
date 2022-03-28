@@ -17,14 +17,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/128468
-  describe.skip('cases list', () => {
+  describe('cases list', () => {
     before(async () => {
       await cases.navigation.navigateToApp();
     });
 
     after(async () => {
       await cases.api.deleteAllCases();
+      await cases.casesTable.waitForCasesToBeDeleted();
     });
 
     describe('empty state', () => {
@@ -34,20 +34,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('listing', () => {
-      const NUMBER_CASES = 2;
-
       before(async () => {
-        await cases.api.createNthRandomCases(NUMBER_CASES);
+        await cases.api.createNthRandomCases(2);
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
 
       after(async () => {
         await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
       });
 
       it('lists cases correctly', async () => {
-        await cases.casesTable.validateCasesTableHasNthRows(NUMBER_CASES);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
       });
     });
 
@@ -61,6 +60,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
       });
 
       it('deletes a case correctly from the list', async () => {
@@ -101,6 +101,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
       });
 
       it('filters cases from the list with partial match', async () => {
@@ -154,6 +155,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
       });
 
       it('paginates cases correctly', async () => {
@@ -174,6 +176,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
       });
 
       it('to in progress', async () => {
