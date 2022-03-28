@@ -38,8 +38,10 @@ export const login = ({
  * Cypress setup/helpers
  */
 
+// eslint complains this should be in `dependencies` and not `devDependencies`, but these tests should only run on dev
 // eslint-disable-next-line import/no-extraneous-dependencies
-import 'cypress-axe'; // eslint complains this should be in `dependencies` and not `devDependencies`, but these tests should only run on dev
+import 'cypress-axe';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/test';
 
 const axeConfig = {
