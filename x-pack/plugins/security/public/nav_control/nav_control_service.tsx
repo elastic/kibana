@@ -21,13 +21,11 @@ import {
   KibanaThemeProvider,
 } from '../../../../../src/plugins/kibana_react/public';
 import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticationServiceSetup } from '../authentication';
 import type { UserMenuLink } from './nav_control_component';
 import { SecurityNavControl } from './nav_control_component';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;
-  authc: AuthenticationServiceSetup;
   logoutUrl: string;
 }
 

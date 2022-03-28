@@ -13,8 +13,15 @@ import { coreMock } from 'src/core/public/mocks';
 import type { ILicense } from '../../../licensing/public';
 import { SecurityLicenseService } from '../../common/licensing';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import * as UseCurrentUserImports from '../components/use_current_user';
 import { securityMock } from '../mocks';
 import { SecurityNavControlService } from './nav_control_service';
+const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
+
+useUserProfileMock.mockReset();
+useUserProfileMock.mockReturnValue({
+  loading: true,
+});
 
 const validLicense = {
   isAvailable: true,
@@ -34,13 +41,8 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
 
     const navControlService = new SecurityNavControlService();
-    const mockSecuritySetup = securityMock.createSetup();
-    mockSecuritySetup.authc.getCurrentUser.mockResolvedValue(
-      mockAuthenticatedUser({ username: 'some-user', full_name: undefined })
-    );
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      authc: mockSecuritySetup.authc,
       logoutUrl: '/some/logout/url',
     });
 
@@ -83,20 +85,9 @@ describe('SecurityNavControlService', () => {
                   <span
                     class="euiHeaderSectionItemButton__content"
                   >
-                    <div
-                      aria-label="some-user"
-                      class="euiAvatar euiAvatar--s euiAvatar--user"
-                      data-test-subj="userMenuAvatar"
-                      role="img"
-                      style="background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
-                      title="some-user"
-                    >
-                      <span
-                        aria-hidden="true"
-                      >
-                        s
-                      </span>
-                    </div>
+                    <span
+                      class="euiLoadingSpinner euiLoadingSpinner--medium"
+                    />
                   </span>
                 </span>
               </span>
@@ -117,7 +108,6 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      authc: securityMock.createSetup().authc,
       logoutUrl: '/some/logout/url',
     });
 
@@ -137,7 +127,6 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      authc: securityMock.createSetup().authc,
       logoutUrl: '/some/logout/url',
     });
 
@@ -154,7 +143,6 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      authc: securityMock.createSetup().authc,
       logoutUrl: '/some/logout/url',
     });
 
@@ -176,7 +164,6 @@ describe('SecurityNavControlService', () => {
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      authc: securityMock.createSetup().authc,
       logoutUrl: '/some/logout/url',
     });
 
@@ -199,7 +186,6 @@ describe('SecurityNavControlService', () => {
       navControlService = new SecurityNavControlService();
       navControlService.setup({
         securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-        authc: securityMock.createSetup().authc,
         logoutUrl: '/some/logout/url',
       });
     });
