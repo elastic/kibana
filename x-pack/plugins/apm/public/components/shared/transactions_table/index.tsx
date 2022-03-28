@@ -90,7 +90,7 @@ export function TransactionsTable({
   const {
     query: {
       comparisonEnabled,
-      comparisonType,
+      offset,
       latencyAggregationType,
       page: urlPage = 0,
       pageSize: urlPageSize = numberOfTransactionsPerPage,

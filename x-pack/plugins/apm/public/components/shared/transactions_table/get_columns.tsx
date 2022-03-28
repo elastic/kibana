@@ -57,7 +57,7 @@ export function getColumns({
   transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
-  comparisonType?: TimeRangeComparisonType;
+  offset?: string;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {

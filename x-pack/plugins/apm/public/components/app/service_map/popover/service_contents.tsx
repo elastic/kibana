@@ -95,7 +95,14 @@ export function ServiceContents({
 
   const focusUrl = apmRouter.link('/services/{serviceName}/service-map', {
     path: { serviceName },
-    query: { rangeFrom, rangeTo, environment, kuery, serviceGroup },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      serviceGroup,
+      comparisonEnabled,
+    },
   });
 
   const { serviceAnomalyStats } = nodeData;

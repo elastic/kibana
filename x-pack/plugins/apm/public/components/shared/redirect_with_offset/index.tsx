@@ -12,7 +12,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { isRouteWithTimeRange } from '../is_route_with_time_range';
 import {
   TimeRangeComparisonEnum,
-  dayAndWeekBeforeToOffsetMap,
+  dayAndWeekBeforeToOffset,
 } from '../../../components/shared/time_comparison/get_comparison_options';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getComparisonEnabled } from '../../../components/shared/time_comparison/get_comparison_enabled';
@@ -29,6 +29,8 @@ export function RedirectWithOffset({
   const matchesRoute = isRouteWithTimeRange({ apmRouter, location });
   const query = qs.parse(location.search);
 
+  // Redirect when 'comparisonType' is set as we now use offset instead
+  // or when 'comparisonEnabled' is not set as it's now required
   if (
     matchesRoute &&
     ('comparisonType' in query || !('comparisonEnabled' in query))
@@ -56,7 +58,7 @@ export function RedirectWithOffset({
           url: location.pathname,
           query: {
             comparisonEnabled,
-            offset: dayAndWeekBeforeToOffsetMap[comparisonTypeEnumValue] ?? '',
+            offset: dayAndWeekBeforeToOffset[comparisonTypeEnumValue] ?? '',
             ...queryRest,
           },
         })}
