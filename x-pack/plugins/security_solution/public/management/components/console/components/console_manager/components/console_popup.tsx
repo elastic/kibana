@@ -8,6 +8,7 @@
 import React, { memo, PropsWithChildren, ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiIcon,
   EuiModalBody,
   EuiModalFooter,
@@ -92,12 +93,12 @@ export const ConsolePopup = memo<ConsolePopupProps>(
             <div className="console-holder">{children}</div>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton onClick={handleTerminateOnClick}>
+            <EuiButtonEmpty color="danger" onClick={handleTerminateOnClick}>
               <FormattedMessage
                 id="xpack.securitySolution.console.manager.popup.terminateLabel"
                 defaultMessage="Terminate"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
             <EuiButton onClick={onHide} fill>
               <FormattedMessage
                 id="xpack.securitySolution.console.manager.popup.hideLabel"

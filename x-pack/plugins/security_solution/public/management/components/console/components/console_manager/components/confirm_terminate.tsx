@@ -61,7 +61,7 @@ export const ConfirmTerminate = memo<ConfirmTerminateProps>(({ onConfirm, onCanc
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={onConfirm} color="primary" fill>
+              <EuiButton onClick={onConfirm} color="danger" fill>
                 <FormattedMessage
                   id="xpack.securitySolution.console.popup.terminateConfirmSubmitLabel"
                   defaultMessage="Terminate"
