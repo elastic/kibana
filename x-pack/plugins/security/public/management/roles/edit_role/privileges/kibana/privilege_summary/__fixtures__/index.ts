@@ -60,7 +60,7 @@ export function getDisplayedFeaturePrivileges(
 
         acc[feature.id][key] = {
           ...acc[feature.id][key],
-          primaryFeaturePrivilege: primary.text().replaceAll('Info', '').trim(), //Removing the word "info" to account for the rendered text coming from EuiIcon
+          primaryFeaturePrivilege: primary.text().replaceAll('Info', '').trim(), // Removing the word "info" to account for the rendered text coming from EuiIcon
           hasCustomizedSubFeaturePrivileges:
             findTestSubject(primary, 'additionalPrivilegesGranted').length > 0,
         };
