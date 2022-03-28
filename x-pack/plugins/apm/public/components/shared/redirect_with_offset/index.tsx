@@ -52,13 +52,15 @@ export function RedirectWithOffset({
       | TimeRangeComparisonEnum.DayBefore
       | TimeRangeComparisonEnum.WeekBefore;
 
+    const dayOrWeekOffset = dayAndWeekBeforeToOffset[comparisonTypeEnumValue];
+
     return (
       <Redirect
         to={qs.stringifyUrl({
           url: location.pathname,
           query: {
             comparisonEnabled,
-            offset: dayAndWeekBeforeToOffset[comparisonTypeEnumValue] ?? '',
+            ...(dayOrWeekOffset ? { offset: dayOrWeekOffset } : {}),
             ...queryRest,
           },
         })}
