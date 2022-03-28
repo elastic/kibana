@@ -71,31 +71,19 @@ export const DocumentExplorerCallout = () => {
         <span css={style}>
           <FormattedMessage
             id="discover.docExplorerCallout.bodyMessageTwo"
-            defaultMessage="Document Explorer"
+            defaultMessage="Document Explorer."
           />
         </span>
         <span>
           <FormattedMessage
             id="discover.docExplorerCallout.bodyMessageThree"
-            defaultMessage=". Understand the shape of your data with "
+            defaultMessage=" Understand the shape of your data with "
           />
         </span>
         <span css={style}>
           <FormattedMessage
             id="discover.docExplorerCallout.bodyMessageFour"
-            defaultMessage="Field Statistics"
-          />
-        </span>
-        <span>
-          <FormattedMessage
-            id="discover.docExplorerCallout.bodyMessageFive"
-            defaultMessage=". Take action on your search results with "
-          />
-        </span>
-        <span css={style}>
-          <FormattedMessage
-            id="discover.docExplorerCallout.bodyMessageSix"
-            defaultMessage="Alerts"
+            defaultMessage="Field Statistics."
           />
         </span>
       </p>
