@@ -51,8 +51,10 @@ export interface ErrorResponse {
   data: null;
 }
 
+console.log('WORKER================> isMainThread', isMainThread);
 if (!isMainThread) {
   const { port } = workerData as WorkerData;
+  console.log('WORKER================> listening for execute request');
   port.on('message', execute);
 }
 
