@@ -437,6 +437,7 @@ const createThresholdTimeline = async (
         lists: exceptions,
         excludeExceptions: true,
         chunkSize: 10000,
+        alias: 'Exceptions',
       }) ?? [];
     const allFilters = (templateValues.filters ?? filters).concat(exceptionsFilter);
 
