@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import type { XYCurveType } from '../../../../common/expressions';
+import type { XYCurveType } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 export interface LineCurveOptionProps {
   /**

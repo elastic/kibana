@@ -418,7 +418,7 @@
     "usng.js": "^0.4.5",
     "utility-types": "^3.10.0",
     "uuid": "3.3.2",
-    "vega": "^5.22.0",
+    "vega": "^5.22.1",
     "vega-interpreter": "^1.0.4",
     "vega-lite": "^5.2.0",
     "vega-schema-url-parser": "^2.2.0",
