@@ -32,21 +32,26 @@ default space is used.
 
 === Request body
 
+////
 `alertId`::
 (Required*, string) The alert identifier. It is required only when `type` is
 `alert`.
+////
 
 `comment`::
-(Required*, string) The new comment. It is required only when `type` is `user`.
+(Required, string) The new comment.
+//It is required only when `type` is `user`.
 
+////
 `index`::
 (Required*, string) The alert index. It is required only when `type` is `alert`.
+////
 
 `owner`::
-(Required*, string) The application that owns the case. It is required only when
-`type` is `alert`. Valid values are: `cases`, `observability`, or
-`securitySolution`.
+(Required, string) The application that owns the case. Valid values are:
+`cases`, `observability`, or `securitySolution`.
 
+////
 `rule`::
 (Required*, object) The rule that is associated with the alert. It is required
 only when `type` is `alert`.
@@ -62,9 +67,10 @@ only when `type` is `alert`.
 (Required, string) The rule name.
 //TBD: Ditto
 ====
-
+////
 `type`::
-(Required, string) The comment type, which can be `user` or `alert`.
+(Required, string) The comment type, which must be `user`.
+//or `alert`
 
 === Response code
 
@@ -80,7 +86,8 @@ Add a comment to case ID `293f1bc0-74f6-11ea-b83a-553aecdb28b6`:
 POST api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/comments
 {
   "type": "user",
-  "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives."
+  "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives.",
+  "owner": "cases"
 }
 --------------------------------------------------
 // KIBANA
@@ -145,6 +152,7 @@ The API returns details about the case and its comments. For example:
 } 
 --------------------------------------------------
 
+////
 Add an alert to the case:
 
 [source,sh]
@@ -162,3 +170,4 @@ POST api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/comments
 }
 --------------------------------------------------
 // KIBANA
+////
