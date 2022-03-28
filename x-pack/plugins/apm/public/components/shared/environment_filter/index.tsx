@@ -41,7 +41,7 @@ export function ApmEnvironmentFilter() {
       environmentOptions={environmentOptions}
       start={start}
       end={end}
-      onChange={(changeValue) =>
+      onChange={(changeValue: string) =>
         updateEnvironmentUrl(history, location, changeValue)
       }
     />

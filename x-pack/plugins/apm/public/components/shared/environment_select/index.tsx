@@ -29,7 +29,7 @@ export function EnvironmentSelect({
   serviceName?: string;
   start?: string;
   end?: string;
-  onChange: (value?: string) => void;
+  onChange: (value: string) => void;
 }) {
   const [searchValue, setSearchValue] = useState('');
   const defaultOption: EuiComboBoxOptionOption<string> = {
@@ -45,13 +45,8 @@ export function EnvironmentSelect({
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedOptions(changedOptions);
 
-      if (changedOptions.length === 0) {
-        onChange('');
-      }
-
-      if (changedOptions.length === 1) {
-        const [changedOption] = changedOptions;
-        onChange(changedOption.value);
+      if (changedOptions.length === 1 && changedOptions[0].value) {
+        onChange(changedOptions[0].value);
       }
     },
     [onChange]
