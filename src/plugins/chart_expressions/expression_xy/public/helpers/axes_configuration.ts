@@ -7,7 +7,11 @@
  */
 
 import { FormatFactory } from '../types';
-import { AxisExtentConfig, CommonXYLayerConfigResult } from '../../common';
+import {
+  AxisExtentConfig,
+  CommonXYDataLayerConfigResult,
+  CommonXYReferenceLineLayerConfigResult,
+} from '../../common';
 import type {
   IFieldFormat,
   SerializedFieldFormat,
@@ -37,7 +41,9 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function groupAxesByType(layers: CommonXYLayerConfigResult[]) {
+export function groupAxesByType(
+  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>
+) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -107,7 +113,7 @@ export function groupAxesByType(layers: CommonXYLayerConfigResult[]) {
 }
 
 export function getAxesConfiguration(
-  layers: CommonXYLayerConfigResult[],
+  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>,
   shouldRotate: boolean,
   formatFactory?: FormatFactory
 ): GroupsConfiguration {

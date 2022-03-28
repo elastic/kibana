@@ -142,13 +142,15 @@ export const updateAgentPolicyHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const { force, ...data } = request.body;
   try {
     const agentPolicy = await agentPolicyService.update(
       soClient,
       esClient,
       request.params.agentPolicyId,
-      request.body,
+      data,
       {
+        force,
         user: user || undefined,
       }
     );

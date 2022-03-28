@@ -17,7 +17,7 @@ import {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
 } from './types';
-import { getDataLayers, isDataLayer } from './visualization_helpers';
+import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -54,6 +54,9 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
 }
 
 export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
+  if (isAnnotationsLayer(layer)) {
+    return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
+  }
   if (isDataLayer(layer) && layer.splitAccessor) {
     return null;
   }

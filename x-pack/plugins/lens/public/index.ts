@@ -11,7 +11,14 @@ export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
-export type { XYState, XYLayerConfig, ValidLayer } from './xy_visualization/types';
+export type {
+  XYState,
+  XYReferenceLineLayerConfig,
+  XYLayerConfig,
+  ValidLayer,
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
+} from './xy_visualization/types';
 export type {
   DatasourcePublicAPI,
   DataType,
@@ -92,7 +99,6 @@ export type {
   AxisExtentConfigResult,
   ReferenceLineLayerArgs,
   LabelsOrientationConfig,
-  XYReferenceLineLayerConfig,
   LabelsOrientationConfigResult,
   ReferenceLineLayerConfigResult,
   AxisTitlesVisibilityConfigResult,

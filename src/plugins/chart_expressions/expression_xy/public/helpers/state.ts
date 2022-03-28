@@ -7,7 +7,7 @@
  */
 
 import type { CommonXYLayerConfigResult, SeriesType, YConfig } from '../../common';
-import { getDataLayers, isDataLayer } from './visualization';
+import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -26,9 +26,10 @@ export function isHorizontalChart(layers: CommonXYLayerConfigResult[]) {
 }
 
 export const getSeriesColor = (layer: CommonXYLayerConfigResult, accessor: string) => {
-  if (isDataLayer(layer) && layer.splitAccessor) {
+  if ((isDataLayer(layer) && layer.splitAccessor) || isAnnotationsLayer(layer)) {
     return null;
   }
+
   return (
     layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
   );

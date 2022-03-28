@@ -43,6 +43,7 @@ interface AuthenticationTableProps {
   loadPage: (newActivePage: number) => void;
   id: string;
   isInspect: boolean;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
@@ -78,6 +79,7 @@ const AuthenticationTableComponent: React.FC<AuthenticationTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   showMorePagesIndicator,
   totalCount,
   type,
@@ -133,6 +135,7 @@ const AuthenticationTableComponent: React.FC<AuthenticationTableProps> = ({
       loading={loading}
       loadPage={loadPage}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={showMorePagesIndicator}
       totalCount={fakeTotalCount}
       updateLimitPagination={updateLimitPagination}
