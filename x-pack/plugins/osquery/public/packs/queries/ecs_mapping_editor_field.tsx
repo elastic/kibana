@@ -16,7 +16,7 @@ import {
   isArray,
   map,
   reduce,
-  get,
+  trim,
 } from 'lodash';
 import React, {
   forwardRef,
@@ -43,7 +43,7 @@ import {
   EuiIcon,
   EuiSuperSelect,
 } from '@elastic/eui';
-import sqlParser from 'js-sql-parser';
+import sqliteParser from '@appland/sql-parser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -127,6 +127,10 @@ const StyledFieldSpan = styled.span`
   padding-bottom: 0 !important;
 `;
 
+const DescriptionWrapper = styled(EuiFlexItem)`
+  overflow: hidden;
+`;
+
 // align the icon to the inputs
 const StyledSemicolonWrapper = styled.div`
   margin-top: 8px;
@@ -181,9 +185,9 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   const renderOption = useCallback(
     (option, searchValue, contentClassName) => (
       <EuiFlexGroup
-        className={`${contentClassName} euiSuggestItem`}
+        className={`${contentClassName} euiSuggestItem euiSuggestItem--truncate`}
         alignItems="center"
-        gutterSize="xs"
+        gutterSize="none"
       >
         <EuiFlexItem grow={false}>
           {
@@ -197,11 +201,11 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
           </StyledFieldSpan>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <span className="euiSuggestItem__description euiSuggestItem__description--truncate">
+        <DescriptionWrapper grow={false}>
+          <StyledFieldSpan className="euiSuggestItem__description euiSuggestItem__description">
             {option.value.description}
-          </span>
-        </EuiFlexItem>
+          </StyledFieldSpan>
+        </DescriptionWrapper>
       </EuiFlexGroup>
     ),
     []
@@ -344,9 +348,9 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const renderOsqueryOption = useCallback(
     (option, searchValue, contentClassName) => (
       <EuiFlexGroup
-        className={`${contentClassName} euiSuggestItem`}
+        className={`${contentClassName} euiSuggestItem euiSuggestItem--truncate`}
         alignItems="center"
-        gutterSize="xs"
+        gutterSize="none"
       >
         <EuiFlexItem grow={false}>
           <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__labelDisplay--expand">
@@ -354,11 +358,11 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
           </StyledFieldSpan>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <span className="euiSuggestItem__description euiSuggestItem__description--truncate">
+        <DescriptionWrapper grow={false}>
+          <StyledFieldSpan className="euiSuggestItem__description euiSuggestItem__description">
             {option.value.description}
-          </span>
-        </EuiFlexItem>
+          </StyledFieldSpan>
+        </DescriptionWrapper>
       </EuiFlexGroup>
     ),
     []
@@ -367,7 +371,11 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const handleChange = useCallback(
     (newSelectedOptions) => {
       setSelected(newSelectedOptions);
-      setValue(newSelectedOptions[0]?.label ?? '');
+      setValue(
+        isArray(newSelectedOptions)
+          ? map(newSelectedOptions, 'label')
+          : newSelectedOptions[0]?.label ?? ''
+      );
     },
     [setValue, setSelected]
   );
@@ -384,16 +392,20 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
   const handleCreateOption = useCallback(
     (newOption: string) => {
+      const trimmedNewOption = trim(newOption);
+
+      if (!trimmedNewOption.length) return;
+
       if (euiFieldProps.singleSelection === false) {
-        setValue([newOption]);
+        setValue([trimmedNewOption]);
         if (resultValue.value.length) {
-          setValue([...castArray(resultValue.value), newOption]);
+          setValue([...castArray(resultValue.value), trimmedNewOption]);
         } else {
-          setValue([newOption]);
+          setValue([trimmedNewOption]);
         }
         inputRef.current?.blur();
       } else {
-        setValue(newOption);
+        setValue(trimmedNewOption);
       }
     },
     [euiFieldProps.singleSelection, resultValue.value, setValue]
@@ -415,6 +427,17 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     ),
     [onTypeChange, resultType.value]
   );
+
+  useEffect(() => {
+    if (euiFieldProps?.singleSelection && isArray(resultValue.value)) {
+      setValue(resultValue.value.join(' '));
+    }
+
+    if (!euiFieldProps?.singleSelection && !isArray(resultValue.value)) {
+      setValue(resultValue.value.length ? [resultValue.value] : []);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [euiFieldProps?.singleSelection, setValue]);
 
   useEffect(() => {
     setSelected(() => {
@@ -705,7 +728,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
             return { data: {}, isValid: true };
           }
 
-          validateFields(['result.value']);
+          validateFields(['result.value', 'key']);
           const isValid = await validate();
 
           return {
@@ -840,7 +863,7 @@ export const ECSMappingEditorField = React.memo(
         let ast: Record<string, any> | undefined;
 
         try {
-          ast = sqlParser.parse(query)?.value;
+          ast = sqliteParser(query)?.statement?.[0];
         } catch (e) {
           return currentValue;
         }
@@ -852,40 +875,78 @@ export const ECSMappingEditorField = React.memo(
             order: number;
           }
         > =
-          ast?.from?.value?.reduce(
-            (
-              acc: {
-                [x: string]: {
-                  columns: OsqueryColumn[];
-                  order: number;
-                };
-              },
-              table: {
-                value: {
-                  left?: { value: { value: string }; alias?: { value: string } };
-                  right?: { value: { value: string }; alias?: { value: string } };
-                  value?: { value: string };
-                  alias?: { value: string };
-                };
+          reduce(
+            ast,
+            (acc, data) => {
+              // select * from uptime
+              if (data?.type === 'identifier' && data?.variant === 'table') {
+                const osqueryTable = find(osquerySchema, ['name', data.name]);
+
+                if (osqueryTable) {
+                  acc[data.alias || data.name] = {
+                    columns: osqueryTable.columns,
+                    order: Object.keys(acc).length,
+                  };
+                }
               }
-            ) => {
-              each(['value.left', 'value.right', 'value'], (valueKey) => {
-                if (valueKey) {
-                  const osqueryTable = find(osquerySchema, [
-                    'name',
-                    get(table, `${valueKey}.value.value`),
-                  ]);
+
+              // select * from uptime, routes
+              if (data?.type === 'map' && data?.variant === 'join') {
+                if (data?.source?.type === 'identifier' && data?.source?.variant === 'table') {
+                  const osqueryTable = find(osquerySchema, ['name', data?.source?.name]);
 
                   if (osqueryTable) {
-                    acc[
-                      get(table, `${valueKey}.alias.value`) ?? get(table, `${valueKey}.value.value`)
-                    ] = {
+                    acc[data?.source?.alias || data?.source?.name] = {
                       columns: osqueryTable.columns,
                       order: Object.keys(acc).length,
                     };
                   }
                 }
-              });
+
+                if (data?.source?.type === 'statement' && data?.source?.variant === 'compound') {
+                  if (
+                    data?.source?.statement.from.type === 'identifier' &&
+                    data?.source?.statement.from.variant === 'table'
+                  ) {
+                    const osqueryTable = find(osquerySchema, [
+                      'name',
+                      data?.source?.statement.from.name,
+                    ]);
+
+                    if (osqueryTable) {
+                      acc[data?.source?.statement.from.alias || data?.source?.statement.from.name] =
+                        {
+                          columns: osqueryTable.columns,
+                          order: Object.keys(acc).length,
+                        };
+                    }
+                  }
+                }
+
+                each(
+                  data?.map,
+                  (mapValue: {
+                    type: string;
+                    source: { type: string; variant: string; name: any | string; alias: any };
+                  }) => {
+                    if (mapValue?.type === 'join') {
+                      if (
+                        mapValue?.source?.type === 'identifier' &&
+                        mapValue?.source?.variant === 'table'
+                      ) {
+                        const osqueryTable = find(osquerySchema, ['name', mapValue?.source?.name]);
+
+                        if (osqueryTable) {
+                          acc[mapValue?.source?.alias || mapValue?.source?.name] = {
+                            columns: osqueryTable.columns,
+                            order: Object.keys(acc).length,
+                          };
+                        }
+                      }
+                    }
+                  }
+                );
+              }
 
               return acc;
             },
@@ -897,81 +958,80 @@ export const ECSMappingEditorField = React.memo(
           return currentValue;
         }
 
-        const suggestions =
-          isArray(ast?.selectItems?.value) &&
-          ast?.selectItems?.value
-            ?.map((selectItem: { type: string; value: string; hasAs: boolean; alias?: string }) => {
-              if (selectItem.type === 'Identifier') {
-                /*
+        const suggestions = isArray(ast?.result)
+          ? ast?.result
+              ?.map((selectItem: { type: string; name: string; alias?: string }) => {
+                if (selectItem.type === 'identifier') {
+                  /*
                 select * from routes, uptime;
               */
-                if (ast?.selectItems?.value.length === 1 && selectItem.value === '*') {
-                  return reduce(
-                    astOsqueryTables,
-                    (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
-                      acc.push(
-                        ...osqueryColumns.map((osqueryColumn) => ({
-                          label: osqueryColumn.name,
+                  if (ast?.result.length === 1 && selectItem.name === '*') {
+                    return reduce(
+                      astOsqueryTables,
+                      (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
+                        acc.push(
+                          ...osqueryColumns.map((osqueryColumn) => ({
+                            label: osqueryColumn.name,
+                            value: {
+                              name: osqueryColumn.name,
+                              description: osqueryColumn.description,
+                              table,
+                              tableOrder,
+                              suggestion_label: osqueryColumn.name,
+                            },
+                          }))
+                        );
+                        return acc;
+                      },
+                      [] as OsquerySchemaOption[]
+                    );
+                  }
+
+                  /*
+                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+              */
+
+                  const [table, column] = selectItem.name.includes('.')
+                    ? selectItem.name?.split('.')
+                    : [Object.keys(astOsqueryTables)[0], selectItem.name];
+
+                  if (column === '*' && astOsqueryTables[table]) {
+                    const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
+                    return osqueryColumns.map((osqueryColumn) => ({
+                      label: osqueryColumn.name,
+                      value: {
+                        name: osqueryColumn.name,
+                        description: osqueryColumn.description,
+                        table,
+                        tableOrder,
+                        suggestion_label: `${osqueryColumn.name}`,
+                      },
+                    }));
+                  }
+
+                  if (astOsqueryTables[table]) {
+                    const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
+
+                    if (osqueryColumn) {
+                      const label = selectItem.alias ?? column;
+
+                      return [
+                        {
+                          label,
                           value: {
                             name: osqueryColumn.name,
                             description: osqueryColumn.description,
                             table,
-                            tableOrder,
-                            suggestion_label: osqueryColumn.name,
+                            tableOrder: astOsqueryTables[table].order,
+                            suggestion_label: `${label}`,
                           },
-                        }))
-                      );
-                      return acc;
-                    },
-                    [] as OsquerySchemaOption[]
-                  );
+                        },
+                      ];
+                    }
+                  }
                 }
 
                 /*
-                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
-              */
-
-                const [table, column] = selectItem.value.includes('.')
-                  ? selectItem.value?.split('.')
-                  : [Object.keys(astOsqueryTables)[0], selectItem.value];
-
-                if (column === '*' && astOsqueryTables[table]) {
-                  const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
-                  return osqueryColumns.map((osqueryColumn) => ({
-                    label: osqueryColumn.name,
-                    value: {
-                      name: osqueryColumn.name,
-                      description: osqueryColumn.description,
-                      table,
-                      tableOrder,
-                      suggestion_label: `${osqueryColumn.name}`,
-                    },
-                  }));
-                }
-
-                if (astOsqueryTables[table]) {
-                  const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
-
-                  if (osqueryColumn) {
-                    const label = selectItem.hasAs ? selectItem.alias : column;
-
-                    return [
-                      {
-                        label,
-                        value: {
-                          name: osqueryColumn.name,
-                          description: osqueryColumn.description,
-                          table,
-                          tableOrder: astOsqueryTables[table].order,
-                          suggestion_label: `${label}`,
-                        },
-                      },
-                    ];
-                  }
-                }
-              }
-
-              /*
               SELECT pid, uid, name, ROUND((
                 (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
               ) * 100, 2) AS percentage
@@ -985,24 +1045,25 @@ export const ECSMappingEditorField = React.memo(
               LIMIT 5;
             */
 
-              if (selectItem.hasAs && selectItem.alias) {
-                return [
-                  {
-                    label: selectItem.alias,
-                    value: {
-                      name: selectItem.alias,
-                      description: '',
-                      table: '',
-                      tableOrder: -1,
-                      suggestion_label: selectItem.alias,
+                if (selectItem.type === 'function' && selectItem.alias) {
+                  return [
+                    {
+                      label: selectItem.alias,
+                      value: {
+                        name: selectItem.alias,
+                        description: '',
+                        table: '',
+                        tableOrder: -1,
+                        suggestion_label: selectItem.alias,
+                      },
                     },
-                  },
-                ];
-              }
+                  ];
+                }
 
-              return [];
-            })
-            .flat();
+                return [];
+              })
+              .flat()
+          : [];
 
         // Remove column duplicates by keeping the column from the table that appears last in the query
         return sortedUniqBy(

@@ -98,6 +98,7 @@
     "puppeteer/node-fetch": "^2.6.7"
   },
   "dependencies": {
+    "@appland/sql-parser": "^1.5.1",
     "@babel/runtime": "^7.17.2",
     "@dnd-kit/core": "^3.1.1",
     "@dnd-kit/sortable": "^4.0.0",
@@ -285,7 +286,6 @@
     "js-levenshtein": "^1.1.6",
     "js-search": "^1.4.3",
     "js-sha256": "^0.9.0",
-    "js-sql-parser": "^1.4.1",
     "js-yaml": "^3.14.1",
     "json-stable-stringify": "^1.0.1",
     "json-stringify-pretty-compact": "1.2.0",

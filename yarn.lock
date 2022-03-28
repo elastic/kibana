@@ -41,6 +41,11 @@
     call-me-maybe "^1.0.1"
     z-schema "^5.0.1"
 
+"@appland/sql-parser@^1.5.1":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@appland/sql-parser/-/sql-parser-1.5.1.tgz#331d644364899858ba7aa6e884e2492596990626"
+  integrity sha512-R2FBHUOdzdBPUCCiL6WvXT9Fu+Xaj89exa1g+wMlatIe5z6vqitzLkY5a9zGDL3IByTiwbR0jiYuvFMfhp1Q+Q==
+
 "@babel/cli@^7.17.6":
   version "7.17.6"
   resolved "https://registry.yarnpkg.com/@babel/cli/-/cli-7.17.6.tgz#169e5935f1795f0b62ded5a2accafeedfe5c5363"
@@ -18260,11 +18265,6 @@ js-sha3@0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.8.0.tgz#b9b7a5da73afad7dedd0f8c463954cbde6818840"
   integrity sha512-gF1cRrHhIzNfToc802P800N8PpXS+evLLXfsVpowqmAFR9uwbi89WvXg2QspOmXL8QL86J4T1EpFu+yUkwJY3Q==
-
-js-sql-parser@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/js-sql-parser/-/js-sql-parser-1.4.1.tgz#775516b3187dd5872ecec04bef8ed4a430242fda"
-  integrity sha512-J8zi3+/yK4FWSnVvLOjS2HIGfJhR6v7ApwIF8gZ/SpaO/tFIDlsgugD6ZMn6flXiuMsCjJxvhE0+xBgbdzvDDw==
 
 js-string-escape@^1.0.1:
   version "1.0.1"
