@@ -35,11 +35,7 @@ export const NerModel: FC<Props> = ({ model }) => {
 
   const ner = useMemo(() => new NerInference(trainedModels, model), [trainedModels, model]);
 
-  // const [inputText, setInputText] = useState('');
-  const [inputText, setInputText] =
-    useState(`Hello, my name is Bob and i live in London with my wife Sally, and my children Bob and Barbra.
-
-  I used to live in Cornwall, but it was pretty boring.`);
+  const [inputText, setInputText] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState<FormattedNerResp | null>(null);
   const [rawOutput, setRawOutput] = useState<string | null>(null);

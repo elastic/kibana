@@ -35,10 +35,8 @@ export const LangIdentModel: FC<Props> = ({ model }) => {
 
   const ner = useMemo(() => new LangIdentInference(trainedModels, model), [trainedModels, model]);
 
-  // const [inputText, setInputText] = useState('');
-  const [inputText, setInputText] = useState(
-    `Hola, mi nombre es Bob y vivo en Hersham, Surrey con mi esposa Kate y mis hijos Jim y Barbra.`
-  );
+  const [inputText, setInputText] = useState('');
+
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState<FormattedLangIdentResp | null>(null);
   const [rawOutput, setRawOutput] = useState<string | null>(null);
