@@ -473,7 +473,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(setTagsRule.tags).to.eql(['reset-tag']);
 
-        expect(setTagsRule.enabled).to.eql(false);
         expect(setTagsRule.actions).to.eql([
           {
             action_type_id: '.slack',
