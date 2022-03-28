@@ -27,7 +27,7 @@ import {
 
 const SESSION_ENTITY_ID = '3d0192c6-7c54-5ee6-a110-3539a7cf42bc';
 const SEARCH_QUERY = 'vi';
-const SEARCH_RESULT_PROCESS_ID = '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3727';
+const SEARCH_RESULT_PROCESS_ID = '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726';
 
 describe('process tree hook helpers tests', () => {
   let processMap: ProcessMap;
