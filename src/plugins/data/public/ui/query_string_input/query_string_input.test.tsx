@@ -102,7 +102,6 @@ describe('QueryStringInput', () => {
     );
 
     await waitFor(() => getByText(kqlQuery.query));
-    await waitFor(() => getByText('KQL'));
   });
 
   it('Should pass the query language to the language switcher', () => {
