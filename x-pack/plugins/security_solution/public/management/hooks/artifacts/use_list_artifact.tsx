@@ -28,8 +28,7 @@ export function useListArtifact(
     page: number;
     perPage: number;
     policies: string[];
-    sortOrder: string;
-    sortField: string;
+
     excludedPolicies: string[];
   }> = DEFAULT_OPTIONS,
   searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
@@ -43,8 +42,6 @@ export function useListArtifact(
     page = MANAGEMENT_DEFAULT_PAGE + 1,
     perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
     policies = [],
-    sortField = MANAGEMENT_DEFAULT_SORT_FIELD,
-    sortOrder = MANAGEMENT_DEFAULT_SORT_ORDER,
     excludedPolicies = [],
   } = options;
   const filterKuery = useMemo<string | undefined>(() => {
@@ -62,8 +59,8 @@ export function useListArtifact(
         filter: filterKuery,
         perPage,
         page,
-        sortOrder,
-        sortField,
+        sortField: MANAGEMENT_DEFAULT_SORT_FIELD,
+        sortOrder: MANAGEMENT_DEFAULT_SORT_ORDER,
       });
 
       return result;

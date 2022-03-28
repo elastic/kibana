@@ -82,46 +82,6 @@ describe('List artifact hook', () => {
     expect(onSuccessMock).toHaveBeenCalledTimes(1);
   });
 
-  it('parse and use sortField and sortOrder', async () => {
-    const apiResponse = getFoundExceptionListItemSchemaMock(10);
-    fakeHttpServices.get.mockResolvedValueOnce(apiResponse);
-    options = {
-      filter: 'test',
-      page: 1,
-      perPage: 10,
-      policies: ['all'],
-      sortField: 'name',
-      sortOrder: 'asc',
-    };
-    searchableFields = ['field-1', 'field-1.field-2', 'field-2'];
-    const onSuccessMock: jest.Mock = jest.fn();
-
-    result = await renderQuery(
-      () =>
-        useListArtifact(instance, options, searchableFields, {
-          onSuccess: onSuccessMock,
-          retry: false,
-        }),
-      'isSuccess'
-    );
-
-    expect(result.data).toBe(apiResponse);
-    expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
-    expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
-      query: {
-        filter:
-          '((exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.field-1:(*test*) OR exception-list-agnostic.attributes.field-1.field-2:(*test*) OR exception-list-agnostic.attributes.field-2:(*test*)))',
-        list_id: ['FAKE_LIST_ID'],
-        namespace_type: ['agnostic'],
-        page: 1,
-        per_page: 10,
-        sort_field: 'name',
-        sort_order: 'asc',
-      },
-    });
-    expect(onSuccessMock).toHaveBeenCalledTimes(1);
-  });
-
   it('throw when getting a list of exceptions', async () => {
     const error = {
       response: {

@@ -13,8 +13,6 @@ import { useIsMounted } from '../../hooks/use_is_mounted';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
-  MANAGEMENT_DEFAULT_SORT_FIELD,
-  MANAGEMENT_DEFAULT_SORT_ORDER,
 } from '../../../common/constants';
 import { useUrlParams } from '../../hooks/use_url_params';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
@@ -48,14 +46,7 @@ export const useWithArtifactListData = (
   const isMounted = useIsMounted();
 
   const {
-    urlParams: {
-      page = 1,
-      pageSize = MANAGEMENT_DEFAULT_PAGE_SIZE,
-      filter,
-      includedPolicies,
-      sortField = MANAGEMENT_DEFAULT_SORT_FIELD,
-      sortOrder = MANAGEMENT_DEFAULT_SORT_ORDER,
-    },
+    urlParams: { page = 1, pageSize = MANAGEMENT_DEFAULT_PAGE_SIZE, filter, includedPolicies },
   } = useUrlParams<ArtifactListPageUrlParams>();
 
   // Used to determine if the `does data exist` check should be done.
@@ -91,8 +82,6 @@ export const useWithArtifactListData = (
       perPage: pageSize,
       filter,
       policies: includedPolicies ? includedPolicies.split(',') : [],
-      sortField,
-      sortOrder,
     },
     searchableFields
   );
