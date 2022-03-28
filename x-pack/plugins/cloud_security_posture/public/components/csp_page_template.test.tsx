@@ -11,7 +11,7 @@ import { coreMock } from '../../../../../src/core/public/mocks';
 import { createNavigationItemFixture } from '../test/fixtures/navigation_item';
 import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';
-import { CspPageTemplate, getSideNavItems } from './csp_page_template';
+import { CspPageTemplate, getSideNavItems, isCommonError } from './csp_page_template';
 import { LOADING, PACKAGE_NOT_INSTALLED_TEXT, DEFAULT_NO_DATA_TEXT } from './translations';
 import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
 import { UseQueryResult } from 'react-query';
@@ -99,7 +99,7 @@ describe('<CspPageTemplate />', () => {
     renderCspPageTemplate({ children });
 
     Object.values(PACKAGE_NOT_INSTALLED_TEXT).forEach((text) =>
-      expect(screen.queryByText(text)).toBeInTheDocument()
+      expect(screen.getByText(text)).toBeInTheDocument()
     );
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
@@ -114,7 +114,7 @@ describe('<CspPageTemplate />', () => {
     const children = chance.sentence();
     renderCspPageTemplate({ children, query });
 
-    expect(screen.queryByText(LOADING)).toBeInTheDocument();
+    expect(screen.getByText(LOADING)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
     packageNotInstalledUniqueTexts.forEach((text) =>
@@ -142,7 +142,7 @@ describe('<CspPageTemplate />', () => {
     renderCspPageTemplate({ children, query });
 
     [ERROR_LOADING_DATA_DEFAULT_MESSAGE, error, message, statusCode].forEach((text) =>
-      expect(screen.queryByText(text, { exact: false })).toBeInTheDocument()
+      expect(screen.getByText(text, { exact: false })).toBeInTheDocument()
     );
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
@@ -171,10 +171,10 @@ describe('<CspPageTemplate />', () => {
     renderCspPageTemplate({
       children,
       query,
-      errorRender: (err) => <div>{err.body?.message}</div>,
+      errorRender: (err) => <div>{isCommonError(err) && err.body.message}</div>,
     });
 
-    expect(screen.queryByText(message)).toBeInTheDocument();
+    expect(screen.getByText(message)).toBeInTheDocument();
     [ERROR_LOADING_DATA_DEFAULT_MESSAGE, error, statusCode].forEach((text) =>
       expect(screen.queryByText(text)).not.toBeInTheDocument()
     );
@@ -199,7 +199,7 @@ describe('<CspPageTemplate />', () => {
       loadingRender: () => <div>{loading}</div>,
     });
 
-    expect(screen.queryByText(loading)).toBeInTheDocument();
+    expect(screen.getByText(loading)).toBeInTheDocument();
     expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
@@ -217,7 +217,7 @@ describe('<CspPageTemplate />', () => {
     const children = chance.sentence();
     renderCspPageTemplate({ children, query });
 
-    expect(screen.queryByText(DEFAULT_NO_DATA_TEXT.PAGE_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(DEFAULT_NO_DATA_TEXT.PAGE_TITLE)).toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();
@@ -243,7 +243,7 @@ describe('<CspPageTemplate />', () => {
       noDataConfig: { pageTitle, solution, docsLink, actions: {} },
     });
 
-    expect(screen.queryByText(pageTitle)).toBeInTheDocument();
+    expect(screen.getByText(pageTitle)).toBeInTheDocument();
     expect(screen.getByText(solution, { exact: false })).toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();

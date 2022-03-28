@@ -18,21 +18,26 @@ import type { CspNavigationItem } from '../common/navigation/types';
 import { CLOUD_SECURITY_POSTURE } from '../common/translations';
 import { CspLoadingState } from './csp_loading_state';
 import { LOADING, PACKAGE_NOT_INSTALLED_TEXT, DEFAULT_NO_DATA_TEXT } from './translations';
-import {
-  CIS_KUBERNETES_INTEGRATION_VERSION,
-  useCisKubernetesIntegration,
-} from '../common/api/use_cis_kubernetes_integration';
+import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
 import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../../common/constants';
-import type { GetInfoResponse, DefaultPackagesInstallationError } from '../../../fleet/common';
 
-type CommonError = Partial<{
+export interface CommonError {
   body: {
     error: string;
     message: string;
     statusCode: number;
   };
-}>;
+}
+
+export const isCommonError = (x: any): x is CommonError => {
+  if (!('body' in x)) return false;
+
+  const {
+    body: { error, message, statusCode },
+  } = x;
+
+  return !!(error && message && statusCode);
+};
 
 const activeItemStyle = { fontWeight: 700 };
 
@@ -91,7 +96,7 @@ const getPackageNotInstalledNoDataConfig = (
 
 const DefaultLoading = () => <CspLoadingState>{LOADING}</CspLoadingState>;
 
-const DefaultError = (error: CommonError) => (
+const DefaultError = (error: unknown) => (
   <EuiEmptyPrompt
     color="danger"
     iconType="alert"
@@ -105,22 +110,22 @@ const DefaultError = (error: CommonError) => (
             />
           </h2>
         </EuiTitle>
-        {error.body?.error && error.body?.statusCode && (
-          <EuiTitle size="xs">
-            <h5>{`${error.body.error} (${error.body.statusCode})`}</h5>
-          </EuiTitle>
-        )}
-        {error.body?.message && (
-          <EuiTitle size="xs">
-            <h5>{error.body.message}</h5>
-          </EuiTitle>
+        {isCommonError(error) && (
+          <>
+            <EuiTitle size="xs">
+              <h5>{`${error.body.error} (${error.body.statusCode})`}</h5>
+            </EuiTitle>
+            <EuiTitle size="xs">
+              <h5>{error.body.message}</h5>
+            </EuiTitle>
+          </>
         )}
       </>
     }
   />
 );
 
-export const CspPageTemplate = <TData, TError = any>({
+export const CspPageTemplate = <TData, TError>({
   query,
   children,
   loadingRender = DefaultLoading,
@@ -159,7 +164,7 @@ export const CspPageTemplate = <TData, TError = any>({
   };
 
   const render = () => {
-    if (query?.isLoading || integrationQueryResult.isLoading) return loadingRender();
+    if (query?.isLoading) return loadingRender();
     if (query?.isError) return errorRender(query.error);
     if (query?.isSuccess) return children;
 

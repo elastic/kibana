@@ -42,15 +42,15 @@ export const CSP_EVALUATION_BADGE_PASSED = i18n.translate(
 
 export const PACKAGE_NOT_INSTALLED_TEXT = {
   PAGE_TITLE: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.pageTitle', {
-    defaultMessage: 'Integration package not installed',
+    defaultMessage: 'Install Integration to get started',
   }),
   SOLUTION: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.solutionNameLabel', {
     defaultMessage: 'Cloud Security Posture',
   }),
-  BUTTON_TITLE: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.ButtonLabel', {
+  BUTTON_TITLE: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.buttonLabel', {
     defaultMessage: 'Add a CIS integration',
   }),
-  DESCRIPTION: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.Description', {
+  DESCRIPTION: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.description', {
     defaultMessage:
       'Use our CIS Kubernetes Benchmark integration to measure your Kubernetes cluster setup against the CIS recommendations.',
   }),

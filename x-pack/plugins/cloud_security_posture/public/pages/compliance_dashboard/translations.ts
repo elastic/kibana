@@ -84,16 +84,16 @@ export const FINDINGS = i18n.translate('xpack.csp.findings', {
 });
 
 export const NO_DATA_CONFIG_TEXT = {
-  PAGE_TITLE: i18n.translate('xpack.csp.complianceDashboard.NoDataConfig.pageTitle', {
+  PAGE_TITLE: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.pageTitle', {
     defaultMessage: 'Cloud Security Compliance Dashboard',
   }),
-  SOLUTION: i18n.translate('xpack.csp.complianceDashboard.NoDataConfig.solutionNameLabel', {
+  SOLUTION: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.solutionNameLabel', {
     defaultMessage: 'Cloud Security Posture',
   }),
-  BUTTON_TITLE: i18n.translate('xpack.csp.complianceDashboard.NoDataConfig.ActionTitle', {
+  BUTTON_TITLE: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.actionTitle', {
     defaultMessage: 'Try Again',
   }),
-  DESCRIPTION: i18n.translate('xpack.csp.complianceDashboard.NoDataConfig.ActionDescription', {
+  DESCRIPTION: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.actionDescription', {
     defaultMessage: 'You can try to refetch your data',
   }),
 };
