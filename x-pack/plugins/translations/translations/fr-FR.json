@@ -23321,7 +23321,6 @@
     "xpack.spaces.spaceSelector.contactSysAdminDescription": "Contactez votre administrateur système.",
     "xpack.spaces.spaceSelector.errorLoadingSpacesDescription": "Erreur lors du chargement des espaces ({message})",
     "xpack.spaces.spaceSelector.findSpacePlaceholder": "Rechercher un espace",
-    "xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription": "Aucun espace ne correspond aux critères de recherche",
     "xpack.spaces.spaceSelector.selectSpacesTitle": "Sélectionner votre espace",
     "xpack.spaces.spacesTitle": "Espaces",
     "xpack.spaces.uiApi.errorBoundaryToastMessage": "Rechargez la page pour continuer.",

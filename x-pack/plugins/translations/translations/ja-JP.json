@@ -26650,7 +26650,6 @@
     "xpack.spaces.spaceSelector.contactSysAdminDescription": "システム管理者にお問い合わせください。",
     "xpack.spaces.spaceSelector.errorLoadingSpacesDescription": "スペースの読み込みエラー（{message}）",
     "xpack.spaces.spaceSelector.findSpacePlaceholder": "スペースを検索",
-    "xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription": "検索条件に一致するスペースがありません",
     "xpack.spaces.spaceSelector.selectSpacesTitle": "スペースの選択",
     "xpack.spaces.spacesTitle": "スペース",
     "xpack.spaces.uiApi.errorBoundaryToastMessage": "続行するにはページを再読み込みしてください。",

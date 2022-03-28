@@ -26679,7 +26679,6 @@
     "xpack.spaces.spaceSelector.contactSysAdminDescription": "请联系您的系统管理员。",
     "xpack.spaces.spaceSelector.errorLoadingSpacesDescription": "加载工作区时出错 ({message})",
     "xpack.spaces.spaceSelector.findSpacePlaceholder": "查找工作区",
-    "xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription": "没有匹配搜索条件的空间",
     "xpack.spaces.spaceSelector.selectSpacesTitle": "选择您的空间",
     "xpack.spaces.spacesTitle": "工作区",
     "xpack.spaces.uiApi.errorBoundaryToastMessage": "重新加载页面以继续。",
