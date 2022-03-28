@@ -289,6 +289,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   // ml signal fields
+  influencers: true,
   signal: {
     ancestors: true,
     depth: true,
