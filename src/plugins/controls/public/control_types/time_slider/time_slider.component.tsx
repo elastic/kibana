@@ -73,7 +73,7 @@ export function getInterval(min: number, max: number, steps = 6): number {
 export interface TimeSliderProps {
   range?: [number | undefined, number | undefined];
   value: [number | null, number | null];
-  onChange: EuiDualRangeProps['onChange'];
+  onChange: (range: [number | null, number | null]) => void;
   dateFormat?: string;
   timezone?: string;
   fieldName: string;
@@ -239,10 +239,27 @@ export const TimeSliderComponentPopover: FC<
   }, [fullRange, getTicks]);
 
   const onChangeHandler = useCallback(
-    ([min, max]: [number, number]) => {
+    ([_min, _max]: [number | string, number | string]) => {
       // If a value is undefined and the number that is given here matches the range bounds
       // then we will ignore it, becuase they probably didn't actually select that value
       const report: [number | null, number | null] = [null, null];
+
+      let min: number;
+      let max: number;
+      if (typeof _min === 'string') {
+        min = parseFloat(_min);
+        min = isNaN(min) ? range[0] : min;
+      } else {
+        min = _min;
+      }
+
+      if (typeof _max === 'string') {
+        max = parseFloat(_max);
+        max = isNaN(max) ? range[0] : max;
+      } else {
+        max = _max;
+      }
+
       if (value[0] !== null || min !== range[0]) {
         report[0] = min;
       }
@@ -278,7 +295,6 @@ export const TimeSliderComponentPopover: FC<
             levels={levels}
             showTicks
             disabled={false}
-            errorMessage={''}
             allowEmptyRange
           />
         </EuiFlexItem>

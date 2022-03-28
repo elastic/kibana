@@ -23,7 +23,6 @@ interface SetupDeps {
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
   public setup(core: CoreSetup, { embeddable, data }: SetupDeps) {
     embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
-    console.log(timeSliderPersistableStateServiceFactory);
     embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
 
     embeddable.registerEmbeddableFactory(

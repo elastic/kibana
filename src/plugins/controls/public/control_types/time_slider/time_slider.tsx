@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { debounce } from 'lodash';
 import { useStateObservable } from '../../hooks/use_state_observable';
@@ -49,7 +49,7 @@ export const TimeSlider: FC<TimeSliderProps> = ({
   } = useReduxEmbeddableContext<TimeSliderControlEmbeddableInput, typeof timeSliderReducers>();
   const dispatch = useEmbeddableDispatch();
 
-  const { range: availableRange, loading } = useStateObservable<TimeSliderSubjectState>(
+  const { range: availableRange } = useStateObservable<TimeSliderSubjectState>(
     componentStateSubject,
     componentStateSubject.getValue()
   );
@@ -74,7 +74,7 @@ export const TimeSlider: FC<TimeSliderProps> = ({
     [dispatch, selectRange]
   );
 
-  const debouncedDispatchChange = useCallback(debounce(dispatchChange, 500), [dispatchChange]);
+  const debouncedDispatchChange = useMemo(() => debounce(dispatchChange, 500), [dispatchChange]);
 
   const onChangeComplete = useCallback(
     (range: [number | null, number | null]) => {
@@ -89,7 +89,6 @@ export const TimeSlider: FC<TimeSliderProps> = ({
       onChange={onChangeComplete}
       value={selectedValue}
       range={[min, max]}
-      isLoading={loading}
       dateFormat={dateFormat}
       timezone={timezone}
       fieldName={fieldName}

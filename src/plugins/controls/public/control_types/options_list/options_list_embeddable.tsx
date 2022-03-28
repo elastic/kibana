@@ -209,7 +209,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   }
 
   private runOptionsListQuery = async () => {
-    console.log('run options list query');
     const { dataView, field } = await this.getCurrentDataViewAndField();
     this.updateComponentState({ loading: true });
     this.updateOutput({ loading: true, dataViews: [dataView] });

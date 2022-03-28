@@ -18,7 +18,7 @@ export const TimeSliderStrings = {
   noDocumentsPopover: {
     getLabel: () =>
       i18n.translate('controls.timeSlider.noDocuments.label', {
-        defaultMessage: 'Reset selections',
+        defaultMessage: 'There were no documents found.  Range selection unavailable.',
       }),
   },
 };

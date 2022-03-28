@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import { isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { merge, Subscription, BehaviorSubject, Observable } from 'rxjs';
-import { map, distinctUntilChanged, skip, take, mergeMap } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, take, mergeMap, tap } from 'rxjs/operators';
 
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 
@@ -141,7 +141,6 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         this.buildFilter();
 
         this.componentStateSubject$.next(this.componentState);
-        this.updateOutput(this.internalOutput);
       })
     );
   }
@@ -203,10 +202,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         const rangeFilter = buildRangeFilter(field!, range, dataView);
         rangeFilter.meta.key = field?.name;
 
-        this.updateInternalOutput({ filters: [rangeFilter] });
+        this.updateInternalOutput({ filters: [rangeFilter] }, true);
         this.updateComponentState({ loading: false });
       } else {
-        this.updateInternalOutput({ filters: undefined, dataViews: [dataView] });
+        this.updateInternalOutput({ filters: undefined, dataViews: [dataView] }, true);
         this.updateComponentState({ loading: false });
       }
     });
@@ -241,6 +240,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     if (this.dataView && this.dataView.id === dataViewId)
       return new Observable<DataView>((subscriber) => {
         subscriber.next(this.dataView);
+        subscriber.complete();
       });
 
     return this.getDataView$(dataViewId);
@@ -267,6 +267,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
           take(1)
         )
         .subscribe(({ min, max }) => {
+          this.updateInternalOutput({ loading: false });
           this.updateComponentState({
             range: {
               min: min === null ? undefined : min,
@@ -274,7 +275,6 @@ export class TimeSliderControlEmbeddable extends Embeddable<
             },
             loading: false,
           });
-          this.updateInternalOutput({ loading: false });
         });
     } catch (e) {
       this.updateComponentState({ loading: false }, true);
