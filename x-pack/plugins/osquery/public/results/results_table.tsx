@@ -327,7 +327,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </>
       ),
     }),
-    [actionId, actionId, endDate, startDate]
+    [actionId, addToTimeline, endDate, startDate]
   );
 
   useEffect(

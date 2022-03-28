@@ -18,8 +18,7 @@
     "navigation",
     "taskManager",
     "triggersActionsUi",
-    "security",
-    "timelines"
+    "security"
   ],
   "server": true,
   "ui": true,
