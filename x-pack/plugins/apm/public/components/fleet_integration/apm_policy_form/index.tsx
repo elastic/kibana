@@ -24,25 +24,23 @@ import { PackagePolicyVars } from './typings';
 interface Props {
   updateAPMPolicy: (newVars: PackagePolicyVars, isValid: boolean) => void;
   vars?: PackagePolicyVars;
-  isCloudPolicy: boolean;
 }
 
-export function APMPolicyForm({
-  vars = {},
-  isCloudPolicy,
-  updateAPMPolicy,
-}: Props) {
-  const { apmSettings, rumSettings, tlsSettings, agentAuthorizationSettings } =
-    useMemo(() => {
-      return {
-        apmSettings: getApmSettings({ isCloudPolicy }),
-        rumSettings: getRUMSettings(),
-        tlsSettings: getTLSSettings(),
-        agentAuthorizationSettings: getAgentAuthorizationSettings({
-          isCloudPolicy,
-        }),
-      };
-    }, [isCloudPolicy]);
+export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
+  const {
+    apmSettings,
+    rumSettings,
+    tlsSettings,
+    agentAuthorizationSettings,
+    tailSamplingSettings,
+  } = useMemo(() => {
+    return {
+      apmSettings: getApmSettings(),
+      rumSettings: getRUMSettings(),
+      tlsSettings: getTLSSettings(),
+      agentAuthorizationSettings: getAgentAuthorizationSettings(),
+    };
+  }, []);
 
   function handleFormChange(key: string, value: any) {
     // Merge new key/value with the rest of fields
