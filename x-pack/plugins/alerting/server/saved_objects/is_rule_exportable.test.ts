@@ -13,12 +13,14 @@ import { ILicenseState } from '../lib/license_state';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { isRuleExportable } from './is_rule_exportable';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
 
 let ruleTypeRegistryParams: ConstructorOptions;
 let logger: MockedLogger;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 const taskManager = taskManagerMock.createSetup();
+const inMemoryMetrics = inMemoryMetricsMock.create();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -31,6 +33,7 @@ beforeEach(() => {
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: { value: '1m', enforce: false },
+    inMemoryMetrics,
   };
 });
 

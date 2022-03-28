@@ -7,4 +7,5 @@
  */
 
 export { SolutionToolbar } from './solution_toolbar';
+/** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-components */
 export * from './items';

@@ -34,7 +34,10 @@ interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDivElement
  * It is recommended to use the component at the highest possible level of the component tree that would
  * require to handle the links. A good practice is to consider it as a context provider and to use it
  * at the root level of an application or of the page that require the feature.
+ *
+ * @deprecated use RedirectAppLinks from @kbn-shared-ux-components
  */
+
 export const RedirectAppLinks: FunctionComponent<RedirectCrossAppLinksProps> = ({
   application,
   children,
