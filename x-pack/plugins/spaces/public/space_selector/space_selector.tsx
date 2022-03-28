@@ -152,11 +152,13 @@ export class SpaceSelector extends Component<Props, State> {
             <EuiPanel className="spcSpaceSelector__errorPanel" color="subdued">
               <EuiTitle size="xs">
                 <h2>
-                  <FormattedMessage
-                    id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
-                    defaultMessage="No spaces match"
-                  />{' '}
-                  {`"${this.state.searchTerm}"`}
+                  {i18n.translate(
+                    'xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription',
+                    {
+                      defaultMessage: 'No spaces match "{searchTerm}"',
+                      values: { searchTerm: this.state.searchTerm },
+                    }
+                  )}
                 </h2>
               </EuiTitle>
             </EuiPanel>
