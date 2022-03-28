@@ -2001,7 +2001,6 @@
     "data.kueryAutocomplete.equalOperatorDescription.equalsText": "等于",
     "data.kueryAutocomplete.existOperatorDescription": "以任意形式{exists}",
     "data.kueryAutocomplete.existOperatorDescription.existsText": "存在",
-    "data.kueryAutocomplete.filterResultsDescription": "筛选包含 {fieldName} 的结果",
     "data.kueryAutocomplete.greaterThanOperatorDescription": "{greaterThan}某一值",
     "data.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText": "大于",
     "data.kueryAutocomplete.greaterThanOrEqualOperatorDescription": "{greaterThanOrEqualTo}某一值",

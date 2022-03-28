@@ -63,6 +63,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await queryBar.setQuery('extension.raw : ');
           await queryBar.expectSuggestions({ count: 5, contains: '"jpg"' });
         });
+
+        it('also displays descriptions for operators', async () => {
+          await PageObjects.timePicker.setDefaultAbsoluteRange();
+          await queryBar.setQuery('extension.raw');
+          await queryBar.expectSuggestionsDescription({ count: 2 });
+        });
       });
 
       describe('context', () => {
