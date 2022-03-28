@@ -91,6 +91,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
+  async function createRuleWithSmallInterval(
+    testRunUuid: string,
+    params: Record<string, any> = {}
+  ) {
+    const connectors = await createConnectors(testRunUuid);
+    return await createAlwaysFiringRule({
+      name: `test-rule-${testRunUuid}`,
+      schedule: {
+        interval: '1s',
+      },
+      actions: connectors.map((connector) => ({
+        id: connector.id,
+        group: 'default',
+        params: {
+          message: 'from alert 1s',
+          level: 'warn',
+        },
+      })),
+      params,
+    });
+  }
+
   async function getAlertSummary(ruleId: string) {
     const { body: summary } = await supertest
       .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_alert_summary`)
@@ -116,7 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const testRunUuid = uuid.v4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
-        const rule = await createRuleWithActionsAndParams(testRunUuid);
+        const rule = await createRuleWithSmallInterval(testRunUuid);
 
         // refresh to see rule
         await browser.refresh();
@@ -143,6 +165,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const { connectorType } = await pageObjects.ruleDetailsUI.getActionsLabels();
         expect(connectorType).to.be(`Slack`);
+      });
+
+      it('renders toast when schedule is less than configured minimum', async () => {
+        await testSubjects.existOrFail('intervalConfigToast');
+
+        const editButton = await testSubjects.find('ruleIntervalToastEditButton');
+        await editButton.click();
+
+        await testSubjects.click('cancelSaveEditedRuleButton');
       });
 
       it('should disable the rule', async () => {

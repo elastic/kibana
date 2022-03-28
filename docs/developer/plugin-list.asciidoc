@@ -432,7 +432,7 @@ security and spaces filtering.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
-actitivies.
+activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
