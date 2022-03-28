@@ -88,10 +88,6 @@ function options(y: Argv) {
       describe: 'Amount of Node.js worker threads',
       number: true,
     })
-    .option('clientWorkers', {
-      describe: 'Number of concurrently connected ES clients',
-      default: 5,
-    })
     .option('logLevel', {
       describe: 'Log level',
       default: 'info',

@@ -112,6 +112,5 @@ The following options are supported:
 | `--workers`       | Amount of Node.js worker threads                   | `5`          |
 | `--bucketSize`    | Size of bucket for which to generate data.         | `15m`        |
 | `--interval`      | The interval at which to index data.               | `10s`        |
-| `--clientWorkers` | Number of simultaneously connected ES clients      | `5`          |
 | `--batchSize`     | Number of documents per bulk index request         | `1000`       |
 | `--logLevel`      | Log level.                                         | `info`       |
