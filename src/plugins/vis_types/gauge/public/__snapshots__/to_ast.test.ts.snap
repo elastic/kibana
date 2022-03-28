@@ -48,7 +48,7 @@ Object {
         ],
         "metric": Array [],
         "respectRanges": Array [
-          false,
+          true,
         ],
         "shape": Array [
           "circle",
