@@ -29,7 +29,7 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
 
 export interface AddToDashboardControlProps {
   jobIds: string[];
-  selectedCells?: AppStateSelectedCells;
+  selectedCells?: AppStateSelectedCells | null;
   bounds?: TimeRangeBounds;
   interval?: number;
   onClose: (callback?: () => Promise<void>) => void;
@@ -50,8 +50,8 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
 
   const getEmbeddableInput = useCallback(() => {
     let timeRange: TimeRange | undefined;
-    if (selectedCells !== undefined && interval !== undefined && bounds !== undefined) {
-      const { earliestMs, latestMs } = getSelectionTimeRange(selectedCells, interval, bounds);
+    if (!!selectedCells && interval !== undefined && bounds !== undefined) {
+      const { earliestMs, latestMs } = getSelectionTimeRange(selectedCells, bounds);
       timeRange = {
         from: formatDate(earliestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
         to: formatDate(latestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),

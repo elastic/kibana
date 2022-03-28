@@ -156,6 +156,10 @@ export function createAlertingUsageCollector(
           count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: {},
           avg_execution_time_per_day: 0,
           avg_execution_time_by_type_per_day: {},
+          avg_es_search_duration_per_day: 0,
+          avg_es_search_duration_by_type_per_day: {},
+          avg_total_search_duration_per_day: 0,
+          avg_total_search_duration_by_type_per_day: {},
         };
       }
     },
@@ -203,6 +207,10 @@ export function createAlertingUsageCollector(
       count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: byTaskStatusSchemaByType,
       avg_execution_time_per_day: { type: 'long' },
       avg_execution_time_by_type_per_day: byTypeSchema,
+      avg_es_search_duration_per_day: { type: 'long' },
+      avg_es_search_duration_by_type_per_day: byTypeSchema,
+      avg_total_search_duration_per_day: { type: 'long' },
+      avg_total_search_duration_by_type_per_day: byTypeSchema,
     },
   });
 }
