@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/inventory_models/types';
 import { isRate } from './is_rate';
 
-export const calcualteFromBasedOnMetric = (
+export const calculateFromBasedOnMetric = (
   to: Moment,
   condition: InventoryMetricConditions,
   nodeType: InventoryItemType,

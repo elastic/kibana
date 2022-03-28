@@ -14,7 +14,7 @@ import { InfraTimerangeInput } from '../../../../common/http_api';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { LogQueryFields } from '../../../services/log_queries/get_log_query_fields';
 import { InfraSource } from '../../sources';
-import { calcualteFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
+import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
 
 type ConditionResult = InventoryMetricConditions & {
@@ -52,7 +52,7 @@ export const evaluateCondition = async ({
 
   const timerange = {
     to: startedAt.valueOf(),
-    from: calcualteFromBasedOnMetric(moment(startedAt), condition, nodeType, metric, customMetric),
+    from: calculateFromBasedOnMetric(moment(startedAt), condition, nodeType, metric, customMetric),
     interval: `${condition.timeSize}${condition.timeUnit}`,
     forceInterval: true,
   } as InfraTimerangeInput;
