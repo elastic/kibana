@@ -43,7 +43,29 @@ exports[`InspectorPanel should render as expected 1`] = `
         "navigateToUrl": [MockFunction],
       },
       "http": Object {},
-      "share": Object {},
+      "share": Object {
+        "navigate": [MockFunction],
+        "toggleShareContextMenu": [MockFunction],
+        "url": UrlService {
+          "deps": Object {
+            "getUrl": [Function],
+            "navigate": [Function],
+            "shortUrls": [Function],
+          },
+          "locators": LocatorClient {
+            "deps": Object {
+              "getUrl": [Function],
+              "navigate": [Function],
+              "shortUrls": [Function],
+            },
+            "getAllMigrations": [Function],
+            "locators": Map {},
+          },
+          "shortUrls": Object {
+            "get": [Function],
+          },
+        },
+      },
       "uiSettings": Object {},
     }
   }
@@ -206,7 +228,29 @@ exports[`InspectorPanel should render as expected 1`] = `
           "navigateToUrl": [MockFunction],
         },
         "http": Object {},
-        "share": Object {},
+        "share": Object {
+          "navigate": [MockFunction],
+          "toggleShareContextMenu": [MockFunction],
+          "url": UrlService {
+            "deps": Object {
+              "getUrl": [Function],
+              "navigate": [Function],
+              "shortUrls": [Function],
+            },
+            "locators": LocatorClient {
+              "deps": Object {
+                "getUrl": [Function],
+                "navigate": [Function],
+                "shortUrls": [Function],
+              },
+              "getAllMigrations": [Function],
+              "locators": Map {},
+            },
+            "shortUrls": Object {
+              "get": [Function],
+            },
+          },
+        },
         "uiSettings": Object {},
       }
     }

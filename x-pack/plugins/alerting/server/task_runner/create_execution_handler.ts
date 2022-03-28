@@ -37,6 +37,7 @@ export function createExecutionHandler<
   logger,
   ruleId,
   ruleName,
+  ruleConsumer,
   executionId,
   tags,
   actionsPlugin,
@@ -131,6 +132,8 @@ export function createExecutionHandler<
         continue;
       }
 
+      alertExecutionStore.numberOfTriggeredActions++;
+
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
       const enqueueOptions = {
@@ -138,6 +141,7 @@ export function createExecutionHandler<
         params: action.params,
         spaceId,
         apiKey: apiKey ?? null,
+        consumer: ruleConsumer,
         source: asSavedObjectExecutionSource({
           id: ruleId,
           type: 'alert',
@@ -163,19 +167,18 @@ export function createExecutionHandler<
           if (isEphemeralTaskRejectedDueToCapacityError(err)) {
             await actionsClient.enqueueExecution(enqueueOptions);
           }
-        } finally {
-          alertExecutionStore.numberOfTriggeredActions++;
         }
       } else {
         await actionsClient.enqueueExecution(enqueueOptions);
-        alertExecutionStore.numberOfTriggeredActions++;
       }
 
       const event = createAlertEventLogRecordObject({
         ruleId,
         ruleType: ruleType as UntypedNormalizedRuleType,
+        consumer: ruleConsumer,
         action: EVENT_LOG_ACTIONS.executeAction,
         executionId,
+        spaceId,
         instanceId: alertId,
         group: actionGroup,
         subgroup: actionSubgroup,

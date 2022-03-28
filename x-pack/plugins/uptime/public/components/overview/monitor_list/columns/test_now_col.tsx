@@ -24,7 +24,11 @@ export const TestNowColumn = ({
   const testNowRun = useSelector(testNowRunSelector(configId));
 
   if (!configId) {
-    return <>--</>;
+    return (
+      <EuiToolTip content={TEST_NOW_AVAILABLE_LABEL}>
+        <>--</>
+      </EuiToolTip>
+    );
   }
 
   const testNowClick = () => {
@@ -50,6 +54,13 @@ export const TestNowColumn = ({
 export const TEST_NOW_ARIA_LABEL = i18n.translate('xpack.uptime.monitorList.testNow.AriaLabel', {
   defaultMessage: 'CLick to run test now',
 });
+
+export const TEST_NOW_AVAILABLE_LABEL = i18n.translate(
+  'xpack.uptime.monitorList.testNow.available',
+  {
+    defaultMessage: 'Test now is only available for monitors added via Monitor management.',
+  }
+);
 
 export const TEST_NOW_LABEL = i18n.translate('xpack.uptime.monitorList.testNow.label', {
   defaultMessage: 'Test now',
