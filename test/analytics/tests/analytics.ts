@@ -8,10 +8,9 @@
 
 import expect from '@kbn/expect';
 import type { TelemetryCounter } from 'src/core/server';
-import { FtrProviderContext } from '../services/types';
+import { FtrProviderContext } from '../services';
 import { Action } from '../__fixtures__/plugins/analytics_plugin_a/server/custom_shipper';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 

@@ -1,7 +1,7 @@
 {
   "name": "analytics_plugin_a",
   "version": "1.0.0",
-  "main": "target/test/server_integration/__fixtures__/plugins/analytics_plugin_a",
+  "main": "target/test/analytics/__fixtures__/plugins/analytics_plugin_a",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
