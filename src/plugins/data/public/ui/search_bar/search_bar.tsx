@@ -77,7 +77,6 @@ export interface SearchBarOwnProps {
   isClearable?: boolean;
   iconType?: EuiIconProps['type'];
   nonKqlMode?: 'lucene' | 'text';
-  nonKqlModeHelpText?: string;
   // defines padding; use 'inPage' to avoid extra padding;
   // use 'detached' if the searchBar appears at the very top of the view, without any wrapper
   displayStyle?: 'inPage' | 'detached';
@@ -367,7 +366,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     const queryBarMenu = (
       <QueryBarMenu
         nonKqlMode={this.props.nonKqlMode}
-        nonKqlModeHelpText={this.props.nonKqlModeHelpText}
         language={this.state?.query?.language ?? 'kuery'}
         services={this.services}
         onQueryChange={this.onQueryBarChange}
@@ -432,7 +430,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           isClearable={this.props.isClearable}
           iconType={this.props.iconType}
           nonKqlMode={this.props.nonKqlMode}
-          nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}

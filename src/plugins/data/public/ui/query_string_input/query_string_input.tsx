@@ -70,7 +70,6 @@ export interface QueryStringInputProps {
    * this params add another option text, which is just a  simple keyword search mode, the way a simple search box works
    */
   nonKqlMode?: 'lucene' | 'text';
-  nonKqlModeHelpText?: string;
   /**
    * @param autoSubmit if user selects a value, in that case kuery will be auto submitted
    */
@@ -700,7 +699,6 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
             anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
             onSelectLanguage={this.onSelectLanguage}
             nonKqlMode={this.props.nonKqlMode}
-            nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           />
         )}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>

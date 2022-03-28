@@ -60,7 +60,6 @@ export interface QueryBarTopRowProps {
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   nonKqlMode?: 'lucene' | 'text';
-  nonKqlModeHelpText?: string;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
@@ -382,7 +381,6 @@ export const QueryBarTopRow = React.memo(
                 isClearable={props.isClearable}
                 iconType={props.iconType}
                 nonKqlMode={props.nonKqlMode}
-                nonKqlModeHelpText={props.nonKqlModeHelpText}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
                 disableLanguageSwitcher={true}
               />

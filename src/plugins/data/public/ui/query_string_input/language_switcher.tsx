@@ -25,7 +25,6 @@ export interface QueryLanguageSwitcherProps {
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
   nonKqlMode?: 'lucene' | 'text';
-  nonKqlModeHelpText?: string;
   isOnMenu?: boolean;
 }
 
@@ -34,7 +33,6 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   anchorPosition,
   onSelectLanguage,
   nonKqlMode = 'lucene',
-  nonKqlModeHelpText,
   isOnMenu,
 }: QueryLanguageSwitcherProps) {
   const kibana = useKibana();

@@ -46,7 +46,6 @@ interface Props {
   toggleFilterBarMenuPopover: (value: boolean) => void;
   openQueryBarMenu: boolean;
   nonKqlMode?: 'lucene' | 'text';
-  nonKqlModeHelpText?: string;
   services: KibanaReactContextValue<IDataPluginServices>['services'];
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -67,7 +66,6 @@ interface Props {
 export function QueryBarMenu({
   language,
   nonKqlMode,
-  nonKqlModeHelpText,
   services,
   dateRangeFrom,
   dateRangeTo,
@@ -476,7 +474,6 @@ export function QueryBarMenu({
           language={language}
           onSelectLanguage={onSelectLanguage}
           nonKqlMode={nonKqlMode}
-          nonKqlModeHelpText={nonKqlModeHelpText}
           isOnMenu={true}
         />
       ),
