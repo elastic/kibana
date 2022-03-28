@@ -40,12 +40,12 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
 
   const pivotQuery = useMemo(() => getPivotQuery(searchQuery), [searchQuery]);
 
-  const indexPatternTitle = Array.isArray(transformConfig.source.index)
+  const dataViewTitle = Array.isArray(transformConfig.source.index)
     ? transformConfig.source.index.join(',')
     : transformConfig.source.index;
 
   const pivotPreviewProps = usePivotData(
-    indexPatternTitle,
+    dataViewTitle,
     pivotQuery,
     validationStatus,
     previewRequest,
