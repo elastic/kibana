@@ -31,7 +31,7 @@ import {
   StepDetailsSummary,
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import type { RuntimeMappings } from '../step_define/common/types';
 
 enum WIZARD_STEPS {
@@ -86,26 +86,22 @@ interface WizardProps {
 }
 
 export const CreateTransformWizardContext = createContext<{
-  indexPattern: IndexPattern | null;
+  dataView: DataView | null;
   runtimeMappings: RuntimeMappings | undefined;
 }>({
-  indexPattern: null,
+  dataView: null,
   runtimeMappings: undefined,
 });
 
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
-  const { indexPattern } = searchItems;
+  const { dataView } = searchItems;
 
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
   // The DEFINE state
   const [stepDefineState, setStepDefineState] = useState(
-    applyTransformConfigToDefineState(
-      getDefaultStepDefineState(searchItems),
-      cloneConfig,
-      indexPattern
-    )
+    applyTransformConfigToDefineState(getDefaultStepDefineState(searchItems), cloneConfig, dataView)
   );
 
   // The DETAILS state
@@ -117,7 +113,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
 
   const transformConfig = getCreateTransformRequestBody(
-    indexPattern.title,
+    dataView.title,
     stepDefineState,
     stepDetailsState
   );
@@ -180,12 +176,12 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         <Fragment>
           {currentStep === WIZARD_STEPS.CREATE ? (
             <StepCreateForm
-              createIndexPattern={stepDetailsState.createIndexPattern}
+              createDataView={stepDetailsState.createDataView}
               transformId={stepDetailsState.transformId}
               transformConfig={transformConfig}
               onChange={setStepCreateState}
               overrides={stepCreateState}
-              timeFieldName={stepDetailsState.indexPatternTimeField}
+              timeFieldName={stepDetailsState.dataViewTimeField}
             />
           ) : (
             <StepCreateSummary />
@@ -200,19 +196,19 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   }, [
     currentStep,
     setCurrentStep,
-    stepDetailsState.createIndexPattern,
+    stepDetailsState.createDataView,
     stepDetailsState.transformId,
     transformConfig,
     setStepCreateState,
     stepCreateState,
-    stepDetailsState.indexPatternTimeField,
+    stepDetailsState.dataViewTimeField,
   ]);
 
   const stepsConfig = [stepDefine, stepDetails, stepCreate];
 
   return (
     <CreateTransformWizardContext.Provider
-      value={{ indexPattern, runtimeMappings: stepDefineState.runtimeMappings }}
+      value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
     >
       <EuiSteps className="transform__steps" steps={stepsConfig} />
     </CreateTransformWizardContext.Provider>

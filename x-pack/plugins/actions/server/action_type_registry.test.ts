@@ -13,8 +13,10 @@ import { actionsConfigMock } from './actions_config.mock';
 import { licenseStateMock } from './lib/license_state.mock';
 import { ActionsConfigurationUtilities } from './actions_config';
 import { licensingMock } from '../../licensing/server/mocks';
+import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 
 const mockTaskManager = taskManagerMock.createSetup();
+const inMemoryMetrics = inMemoryMetricsMock.create();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
@@ -26,7 +28,10 @@ beforeEach(() => {
   actionTypeRegistryParams = {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
-    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
+    taskRunnerFactory: new TaskRunnerFactory(
+      new ActionExecutor({ isESOCanEncrypt: true }),
+      inMemoryMetrics
+    ),
     actionsConfigUtils: mockedActionsConfig,
     licenseState: mockedLicenseState,
     preconfiguredActions: [

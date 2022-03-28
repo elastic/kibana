@@ -154,6 +154,7 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       handleEsError,
       logsRules: this.logsRules.setup(core, plugins),
       metricsRules: this.metricsRules.setup(core, plugins),
+      basePath: core.http.basePath,
       logger: this.logger,
     };
 
