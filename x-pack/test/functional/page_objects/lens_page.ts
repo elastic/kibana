@@ -280,6 +280,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async waitForWorkspaceWithApplyChangesPrompt() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`workspace-apply-changes-prompt`);
+      });
+    },
+
     async waitForWorkspaceWithVisualization() {
       await retry.try(async () => {
         await testSubjects.existOrFail(`lnsVisualizationContainer`);
@@ -1336,32 +1342,48 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
     },
 
-    getAutoApplyToggleExists() {
-      return testSubjects.exists('lensToggleAutoApply');
+    settingsMenuOpen() {
+      return testSubjects.exists('lnsApp__settingsMenu');
     },
 
-    enableAutoApply() {
-      return testSubjects.setEuiSwitch('lensToggleAutoApply', 'check');
+    async openSettingsMenu() {
+      if (await this.settingsMenuOpen()) return;
+
+      await testSubjects.click('lnsApp_settingsButton');
     },
 
-    disableAutoApply() {
-      return testSubjects.setEuiSwitch('lensToggleAutoApply', 'uncheck');
+    async closeSettingsMenu() {
+      if (!(await this.settingsMenuOpen())) return;
+
+      await testSubjects.click('lnsApp_settingsButton');
     },
 
-    getAutoApplyEnabled() {
-      return testSubjects.isEuiSwitchChecked('lensToggleAutoApply');
+    async enableAutoApply() {
+      await this.openSettingsMenu();
+
+      return testSubjects.setEuiSwitch('lnsToggleAutoApply', 'check');
     },
 
-    async applyChanges(throughSuggestions = false) {
-      const applyButtonSelector = throughSuggestions
-        ? 'lnsSuggestionApplyChanges'
-        : 'lensApplyChanges';
+    async disableAutoApply() {
+      await this.openSettingsMenu();
+
+      return testSubjects.setEuiSwitch('lnsToggleAutoApply', 'uncheck');
+    },
+
+    async getAutoApplyEnabled() {
+      await this.openSettingsMenu();
+
+      return testSubjects.isEuiSwitchChecked('lnsToggleAutoApply');
+    },
+
+    applyChangesExists(whichButton: 'toolbar' | 'suggestions' | 'workspace') {
+      return testSubjects.exists(`lnsApplyChanges__${whichButton}`);
+    },
+
+    async applyChanges(whichButton: 'toolbar' | 'suggestions' | 'workspace') {
+      const applyButtonSelector = `lnsApplyChanges__${whichButton}`;
       await testSubjects.waitForEnabled(applyButtonSelector);
       await testSubjects.click(applyButtonSelector);
-    },
-
-    async getAreSuggestionsPromptingToApply() {
-      return testSubjects.exists('lnsSuggestionApplyChanges');
     },
   });
 }

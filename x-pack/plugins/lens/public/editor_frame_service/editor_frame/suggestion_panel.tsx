@@ -361,7 +361,7 @@ export function SuggestionPanel({
             size="s"
             className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
             onClick={() => dispatchLens(applyChanges())}
-            data-test-subj="lnsSuggestionApplyChanges"
+            data-test-subj="lnsApplyChanges__suggestions"
           >
             <FormattedMessage
               id="xpack.lens.suggestions.applyChangesLabel"

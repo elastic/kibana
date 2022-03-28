@@ -419,7 +419,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
             iconType="checkInCircleFilled"
             onClick={() => dispatchLens(applyChanges())}
-            data-test-subj="lnsWorkspaceApplyChanges"
+            data-test-subj="lnsApplyChanges__workspace"
           >
             {i18n.translate('xpack.lens.editorFrame.applyChanges', {
               defaultMessage: 'Apply changes',

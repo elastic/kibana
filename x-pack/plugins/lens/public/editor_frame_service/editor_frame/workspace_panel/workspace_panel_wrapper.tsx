@@ -163,7 +163,7 @@ export function WorkspacePanelWrapper({
                         iconType="checkInCircleFilled"
                         onClick={() => dispatchLens(applyChanges())}
                         size="m"
-                        data-test-subj="lensApplyChanges"
+                        data-test-subj="lnsApplyChanges__toolbar"
                       >
                         <FormattedMessage
                           id="xpack.lens.editorFrame.applyChangesLabel"

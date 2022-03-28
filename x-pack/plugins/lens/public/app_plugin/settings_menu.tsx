@@ -54,7 +54,13 @@ function SettingsMenu({
   }, [dispatch, autoApplyEnabled]);
 
   return (
-    <EuiWrappingPopover ownFocus button={anchorElement} closePopover={onClose} isOpen>
+    <EuiWrappingPopover
+      data-test-subj="lnsApp__settingsMenu"
+      ownFocus
+      button={anchorElement}
+      closePopover={onClose}
+      isOpen
+    >
       <EuiPopoverTitle>
         <FormattedMessage id="x-pack.lens.settings.title" defaultMessage="Lens settings" />
       </EuiPopoverTitle>
@@ -64,6 +70,7 @@ function SettingsMenu({
         })}
         checked={autoApplyEnabled}
         onChange={() => toggleAutoApply()}
+        data-test-subj="lnsToggleAutoApply"
       />
     </EuiWrappingPopover>
   );

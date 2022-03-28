@@ -83,7 +83,7 @@ describe('workspace_panel_wrapper', () => {
       }
 
       private get applyChangesButton() {
-        return this._instance.find('button[data-test-subj="lensApplyChanges"]');
+        return this._instance.find('button[data-test-subj="lnsApplyChanges__toolbar"]');
       }
 
       applyChanges() {

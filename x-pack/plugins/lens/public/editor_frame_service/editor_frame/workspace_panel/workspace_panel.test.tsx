@@ -74,7 +74,7 @@ const defaultProps = {
 };
 
 const SELECTORS = {
-  applyChangesButton: 'button[data-test-subj="lnsWorkspaceApplyChanges"]',
+  applyChangesButton: 'button[data-test-subj="lnsApplyChanges__toolbar"]',
   dragDropPrompt: '[data-test-subj="workspace-drag-drop-prompt"]',
   applyChangesPrompt: '[data-test-subj="workspace-apply-changes-prompt"]',
 };
