@@ -41,7 +41,9 @@ jest.mock('../../../../common/lib/health_api', () => ({
   triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
 }));
 jest.mock('../../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest.fn().mockResolvedValue({ minimumScheduleInterval: '1m' }),
+  triggersActionsUiConfig: jest
+    .fn()
+    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
@@ -167,7 +169,7 @@ describe('rules_list component with items', () => {
       tags: ['tag1'],
       enabled: true,
       ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
+      schedule: { interval: '1s' },
       actions: [],
       params: { name: 'test rule type name' },
       scheduledTaskId: null,
@@ -425,11 +427,6 @@ describe('rules_list component with items', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(mockedRulesData.length);
 
-    // Enabled switch column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-enabled"]').length).toEqual(
-      mockedRulesData.length
-    );
-
     // Name and rule type column
     const ruleNameColumns = wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-name"]');
     expect(ruleNameColumns.length).toEqual(mockedRulesData.length);
@@ -474,6 +471,19 @@ describe('rules_list component with items', () => {
       wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-interval"]').length
     ).toEqual(mockedRulesData.length);
 
+    // Schedule interval tooltip
+    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOver');
+
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+
+    wrapper.update();
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+      'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
+    );
+
+    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOut');
+
     // Duration column
     expect(
       wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-duration"]').length
@@ -497,10 +507,10 @@ describe('rules_list component with items', () => {
       'The length of time it took for the rule to run (mm:ss).'
     );
 
-    // Status column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
-      mockedRulesData.length
-    );
+    // Last response column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastResponse"]').length
+    ).toEqual(mockedRulesData.length);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-active"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
@@ -519,6 +529,11 @@ describe('rules_list component with items', () => {
     );
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').last().text()).toEqual(
       'License Error'
+    );
+
+    // Status control column
+    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
+      mockedRulesData.length
     );
 
     // Monitoring column
@@ -712,7 +727,7 @@ describe('rules_list component with items', () => {
   it('sorts rules when clicking the name column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -731,10 +746,10 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('sorts rules when clicking the enabled column', async () => {
+  it('sorts rules when clicking the status control column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_enabled_0"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_enabled_8"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 

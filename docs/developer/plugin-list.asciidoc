@@ -94,6 +94,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |This plugin contains reusable code in the form of self-contained modules (or libraries). Each of these modules exports a set of functionality relevant to the domain of the module.
 
 
+|{kib-repo}blob/{branch}/src/plugins/event_annotation/README.md[eventAnnotation]
+|The Event Annotation service contains expressions for event annotations
+
+
 |{kib-repo}blob/{branch}/src/plugins/expression_error/README.md[expressionError]
 |Expression Error plugin adds an error renderer to the expression plugin. The renderer will display the error image.
 
@@ -428,7 +432,7 @@ security and spaces filtering.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
-actitivies.
+activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
