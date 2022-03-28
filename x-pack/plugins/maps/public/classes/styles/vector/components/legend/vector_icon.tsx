@@ -55,14 +55,18 @@ export function VectorIcon({
     return <CircleIcon style={style} />;
   }
 
-  return (
-    <SymbolIcon
-      key={`${symbolId}${fillColor}${strokeColor}`}
-      symbolId={symbolId}
-      fill={fillColor}
-      stroke={strokeColor}
-      style={borderStyle}
-      svg={svg ?? ''}
-    />
-  );
+  if (svg) {
+    return (
+      <SymbolIcon
+        key={`${symbolId}${fillColor}${strokeColor}`}
+        symbolId={symbolId}
+        fill={fillColor}
+        stroke={strokeColor}
+        style={borderStyle}
+        svg={svg}
+      />
+    );
+  }
+
+  return null;
 }

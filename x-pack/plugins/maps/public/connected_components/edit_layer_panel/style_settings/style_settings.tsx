@@ -20,7 +20,8 @@ export interface Props {
 }
 
 export function StyleSettings({ layer, updateStyleDescriptor, updateCustomIcons }: Props) {
-  const onCustomIconsChange = (customIcons: Record<string, CustomIcon>) => updateCustomIcons(Object.values(customIcons))
+  const onCustomIconsChange = (customIcons: Record<string, CustomIcon>) =>
+    updateCustomIcons(Object.values(customIcons));
   const settingsEditor = layer.renderStyleEditor(updateStyleDescriptor, onCustomIconsChange);
 
   if (!settingsEditor) {
