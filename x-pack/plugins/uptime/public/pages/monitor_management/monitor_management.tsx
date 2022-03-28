@@ -8,7 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiCallOut, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiSpacer, EuiLink } from '@elastic/eui';
 import { useTrackPageview } from '../../../../observability/public';
 import { ConfigKey } from '../../../common/runtime_types';
 import { getMonitors } from '../../state/actions';
@@ -68,24 +68,32 @@ export const MonitorManagementPage: React.FC = () => {
         errorTitle={ERROR_HEADING_LABEL}
         errorBody={ERROR_HEADING_BODY}
       >
-        {!isEnabled && monitorList.total && monitorList.total > 0 && (
-          <EuiCallOut title={CALLOUT_MANAGEMENT_DISABLED} color="warning" iconType="help">
-            <p>{CALLOUT_MANAGEMENT_DESCRIPTION}</p>
-            {enablement.canEnable ? (
-              <EuiButton
-                fill
-                color="primary"
-                onClick={() => {
-                  enableSynthetics();
-                }}
-              >
-                {SYNTHETICS_ENABLE_LABEL}
-              </EuiButton>
-            ) : (
-              <p>{CALLOUT_MANAGEMENT_CONTACT_ADMIN}</p>
-            )}
-          </EuiCallOut>
-        )}
+        {!isEnabled && monitorList.total && monitorList.total > 0 ? (
+          <>
+            <EuiCallOut title={CALLOUT_MANAGEMENT_DISABLED} color="warning" iconType="help">
+              <p>{CALLOUT_MANAGEMENT_DESCRIPTION}</p>
+              {enablement.canEnable ? (
+                <EuiButton
+                  fill
+                  color="primary"
+                  onClick={() => {
+                    enableSynthetics();
+                  }}
+                >
+                  {SYNTHETICS_ENABLE_LABEL}
+                </EuiButton>
+              ) : (
+                <p>
+                  {CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
+                  <EuiLink href="#" target="_blank">
+                    {LEARN_MORE_LABEL}
+                  </EuiLink>
+                </p>
+              )}
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        ) : null}
         {isEnabled || (!isEnabled && monitorList.total) ? <MonitorListContainer /> : null}
       </Loader>
       {isEnabled !== undefined && monitorList.total === 0 && (
@@ -99,6 +107,13 @@ const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.manageMonit
   defaultMessage: 'Loading Monitor Management',
 });
 
+const LEARN_MORE_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.manageMonitorLoadingLabel.callout.learnMore',
+  {
+    defaultMessage: 'Learn more.',
+  }
+);
+
 const CALLOUT_MANAGEMENT_DISABLED = i18n.translate(
   'xpack.uptime.monitorManagement.callout.disabled',
   {
@@ -109,7 +124,7 @@ const CALLOUT_MANAGEMENT_DISABLED = i18n.translate(
 const CALLOUT_MANAGEMENT_CONTACT_ADMIN = i18n.translate(
   'xpack.uptime.monitorManagement.callout.disabled.adminContact',
   {
-    defaultMessage: 'PLease contact your administrator to enable Monitor Management',
+    defaultMessage: 'Please contact your administrator to enable Monitor Management.',
   }
 );
 
