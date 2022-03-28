@@ -265,7 +265,7 @@ describe('Service Overview', () => {
       );
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNamesWithComparison,
-        value: 'comparisonStart',
+        value: 'offset',
       });
     });
   });

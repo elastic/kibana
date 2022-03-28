@@ -16,7 +16,7 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts'],
+  coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts', 'jest\\.config\\.js'],
 
   // A list of reporter names that Jest uses when writing coverage reports
   coverageReporters: !!process.env.CODE_COVERAGE

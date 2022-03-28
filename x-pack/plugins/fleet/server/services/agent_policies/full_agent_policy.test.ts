@@ -144,7 +144,6 @@ describe('getFullAgentPolicy', () => {
         default: {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
-          ca_sha256: undefined,
         },
       },
       inputs: [],
@@ -176,7 +175,6 @@ describe('getFullAgentPolicy', () => {
         default: {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
-          ca_sha256: undefined,
         },
       },
       inputs: [],
@@ -210,7 +208,6 @@ describe('getFullAgentPolicy', () => {
         default: {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
-          ca_sha256: undefined,
         },
       },
       inputs: [],
@@ -316,7 +313,6 @@ describe('transformOutputToFullPolicyOutput', () => {
 
     expect(policyOutput).toMatchInlineSnapshot(`
       Object {
-        "ca_sha256": undefined,
         "hosts": Array [
           "http://host.fr",
         ],
@@ -341,7 +337,6 @@ ssl.test: 123
 
     expect(policyOutput).toMatchInlineSnapshot(`
       Object {
-        "ca_sha256": undefined,
         "hosts": Array [
           "http://host.fr",
         ],
@@ -368,7 +363,6 @@ ssl.test: 123
 
     expect(policyOutput).toMatchInlineSnapshot(`
       Object {
-        "ca_sha256": undefined,
         "hosts": Array [
           "http://host.fr",
         ],
@@ -394,7 +388,6 @@ ssl.test: 123
 
     expect(policyOutput).toMatchInlineSnapshot(`
       Object {
-        "ca_sha256": undefined,
         "hosts": Array [
           "host.fr:3332",
         ],

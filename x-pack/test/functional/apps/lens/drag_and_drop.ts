@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const xyChartContainer = 'xyVisChart';
 
   describe('lens drag and drop tests', () => {
     describe('basic drag and drop', () => {
@@ -18,7 +19,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickVisType('lens');
         await PageObjects.lens.goToTimeRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.lens.dragFieldToWorkspace('@timestamp');
+        await PageObjects.lens.dragFieldToWorkspace('@timestamp', xyChartContainer);
 
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
           '@timestamp'
@@ -136,7 +137,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       it('Should duplicate and swap elements when dragging over secondary drop targets', async () => {
         await PageObjects.lens.removeLayer();
         await PageObjects.lens.switchToVisualization('bar');
-        await PageObjects.lens.dragFieldToWorkspace('@timestamp');
+        await PageObjects.lens.dragFieldToWorkspace('@timestamp', xyChartContainer);
 
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lnsXY_xDimensionPanel > lns-dimensionTrigger',
@@ -165,8 +166,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       it('should combine breakdown dimension with the horizontal one', async () => {
         await PageObjects.lens.removeLayer();
-        await PageObjects.lens.dragFieldToWorkspace('clientip');
-        await PageObjects.lens.dragFieldToWorkspace('@message.raw');
+        await PageObjects.lens.dragFieldToWorkspace('clientip', xyChartContainer);
+        await PageObjects.lens.dragFieldToWorkspace('@message.raw', xyChartContainer);
 
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
@@ -180,7 +181,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       it('should combine field to existing horizontal dimension', async () => {
         await PageObjects.lens.removeLayer();
-        await PageObjects.lens.dragFieldToWorkspace('clientip');
+        await PageObjects.lens.dragFieldToWorkspace('clientip', xyChartContainer);
 
         await PageObjects.lens.dragFieldToExtraDropType(
           '@message.raw',
@@ -194,7 +195,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       it('should combine two multi terms dimensions', async () => {
         await PageObjects.lens.removeLayer();
-        await PageObjects.lens.dragFieldToWorkspace('clientip');
+        await PageObjects.lens.dragFieldToWorkspace('clientip', xyChartContainer);
 
         await PageObjects.lens.dragFieldToExtraDropType(
           '@message.raw',
@@ -313,10 +314,10 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickVisType('lens');
         await PageObjects.lens.goToTimeRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.lens.dragFieldToWorkspace('@timestamp');
-        await PageObjects.lens.waitForVisualization();
-        await PageObjects.lens.dragFieldToWorkspace('clientip');
-        await PageObjects.lens.waitForVisualization();
+        await PageObjects.lens.dragFieldToWorkspace('@timestamp', xyChartContainer);
+        await PageObjects.lens.waitForVisualization(xyChartContainer);
+        await PageObjects.lens.dragFieldToWorkspace('clientip', xyChartContainer);
+        await PageObjects.lens.waitForVisualization(xyChartContainer);
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
         ).to.eql(['Top 3 values of clientip']);
@@ -329,11 +330,11 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       it('overwrite existing time dimension if one exists already', async () => {
         await PageObjects.lens.searchField('utc');
-        await PageObjects.lens.dragFieldToWorkspace('utc_time');
-        await PageObjects.lens.waitForVisualization();
+        await PageObjects.lens.dragFieldToWorkspace('utc_time', xyChartContainer);
+        await PageObjects.lens.waitForVisualization(xyChartContainer);
         await PageObjects.lens.searchField('client');
-        await PageObjects.lens.dragFieldToWorkspace('clientip');
-        await PageObjects.lens.waitForVisualization();
+        await PageObjects.lens.dragFieldToWorkspace('clientip', xyChartContainer);
+        await PageObjects.lens.waitForVisualization(xyChartContainer);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
           'utc_time',
         ]);
