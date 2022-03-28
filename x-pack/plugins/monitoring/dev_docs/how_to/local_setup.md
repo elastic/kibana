@@ -73,12 +73,13 @@ docker run --name filebeat \
 
 The "[Standalone Cluster](../reference/terminology.md#standalone-cluster)" entry appears in Stack Monitoring when there are monitoring documents that lack a `cluster_uuid`. Beats will send these in some timing/failure cases, but the easiest way to generate them intentionally to start a logstash node with monitoring enabled and no elasticsearch output.
 
-For example using docker:
+For example using docker and [metricbeat collection](#yarn-and-metricbeat-collection):
 
 ```shell
 docker run --name logstash \
   --pull always --rm \
   --hostname=logstash \
+  --publish=9600:9600 \
   --volume="$(pwd)/x-pack/plugins/monitoring/dev_docs/reference/logstash.yml:/usr/share/logstash/config/logstash.yml:ro" \
   docker.elastic.co/logstash/logstash:master-SNAPSHOT \
   -e 'input { java_generator { eps => 1 } } output { file { path => "/dev/null" } }'
