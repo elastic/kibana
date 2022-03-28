@@ -30,7 +30,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiTlsHandshakesQuery';
+export const ID = 'networkKpiTlsHandshakesQuery';
 
 export interface NetworkKpiTlsHandshakesArgs {
   tlsHandshakes: number;
@@ -162,6 +162,14 @@ export const useNetworkKpiTlsHandshakes = ({
       abortCtrl.current.abort();
     };
   }, [networkKpiTlsHandshakesRequest, networkKpiTlsHandshakesSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkKpiTlsHandshakesResponse];
 };

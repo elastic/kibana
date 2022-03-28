@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { kpiUserAuthenticationsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_area';
 import { kpiUserAuthenticationsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_bar';
 import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_metric_success';
 import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentication_metric_failure';
-import { useHostsKpiAuthentications } from '../../../containers/kpi_hosts/authentications';
+import { useHostsKpiAuthentications, ID } from '../../../containers/kpi_hosts/authentications';
 import { KpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
@@ -57,12 +58,17 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
   setQuery,
   skip,
 }) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [loading, { refetch, id, inspect, ...data }] = useHostsKpiAuthentications({
     filterQuery,
     endDate: to,
     indexNames,
     startDate: from,
-    skip,
+    skip: querySkip,
   });
 
   return (
@@ -77,6 +83,7 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
     />
   );
 };
