@@ -24,7 +24,10 @@ import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_c
 import { CspPageTemplate } from '../../components/page_template';
 import { BenchmarksTable } from './benchmarks_table';
 import { ADD_A_CIS_INTEGRATION, BENCHMARK_INTEGRATIONS } from './translations';
-import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
+import {
+  useCspBenchmarkIntegrations,
+  UseCspBenchmarkIntegrationsProps,
+} from './use_csp_benchmark_integrations';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { SEARCH_PLACEHOLDER } from './translations';
 
@@ -118,7 +121,13 @@ const PAGE_HEADER: EuiPageHeaderProps = {
 };
 
 export const Benchmarks = () => {
-  const [query, setQuery] = useState({ name: '', page: 1, perPage: 5 });
+  const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
+    name: '',
+    page: 1,
+    perPage: 5,
+    sortField: 'package_policy.name',
+    sortOrder: 'asc',
+  });
 
   const queryResult = useCspBenchmarkIntegrations(query);
 
@@ -129,7 +138,7 @@ export const Benchmarks = () => {
   return (
     <CspPageTemplate pageHeader={PAGE_HEADER}>
       <BenchmarkSearchField
-        isLoading={queryResult.isLoading}
+        isLoading={queryResult.isFetching}
         onSearch={(name) => setQuery((current) => ({ ...current, name }))}
       />
       <EuiSpacer />
@@ -142,13 +151,25 @@ export const Benchmarks = () => {
         benchmarks={queryResult.data?.items || []}
         data-test-subj={BENCHMARKS_TABLE_DATA_TEST_SUBJ}
         error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
-        loading={queryResult.isLoading}
+        loading={queryResult.isFetching}
         pageIndex={query.page}
         pageSize={query.perPage}
+        sorting={{
+          // @ts-expect-error - EUI types currently do not support sorting by nested fields
+          sort: { field: query.sortField, direction: query.sortOrder },
+          allowNeutralSort: false,
+        }}
         totalItemCount={totalItemCount}
-        setQuery={({ page }) =>
-          setQuery((current) => ({ ...current, page: page.index, perPage: page.size }))
-        }
+        setQuery={({ page, sort }) => {
+          setQuery((current) => ({
+            ...current,
+            page: page.index,
+            perPage: page.size,
+            sortField:
+              (sort?.field as UseCspBenchmarkIntegrationsProps['sortField']) || current.sortField,
+            sortOrder: sort?.direction || current.sortOrder,
+          }));
+        }}
         noItemsMessage={
           queryResult.isSuccess && !queryResult.data.total ? (
             <BenchmarkEmptyState name={query.name} />

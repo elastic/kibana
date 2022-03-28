@@ -19,6 +19,11 @@ import { spacesPluginMock } from '../../../../../../spaces/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock('../../../../common/lib/config_api', () => ({
+  triggersActionsUiConfig: jest
+    .fn()
+    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+}));
 describe('rule_details_route', () => {
   beforeEach(() => {
     jest.clearAllMocks();

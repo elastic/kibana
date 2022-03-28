@@ -73,7 +73,7 @@ export const addPrepackedRulesRoute = (router: SecuritySolutionPluginRouter) => 
   );
 };
 
-class PrepackagedRulesError extends Error {
+export class PrepackagedRulesError extends Error {
   public readonly statusCode: number;
   constructor(message: string, statusCode: number) {
     super(message);
@@ -147,10 +147,10 @@ export const createPrepackagedRules = async (
   await updatePrepackagedRules(
     rulesClient,
     savedObjectsClient,
-    context.getSpaceId(),
     rulesToUpdate,
     signalsIndex,
-    ruleRegistryEnabled
+    ruleRegistryEnabled,
+    context.getRuleExecutionLog()
   );
 
   const prepackagedRulesOutput: PrePackagedRulesAndTimelinesSchema = {
