@@ -85,44 +85,48 @@ export const hydrateSavedObjects = async ({
 };
 
 const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: string[]) => {
-  const data = await esClient.search({
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: 'now-15m',
-                  lt: 'now',
+  const data = await esClient.search(
+    {
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-15m',
+                    lt: 'now',
+                  },
                 },
               },
-            },
-            {
-              terms: {
-                config_id: configIds,
+              {
+                terms: {
+                  config_id: configIds,
+                },
               },
-            },
-            {
-              exists: {
-                field: 'summary',
+              {
+                exists: {
+                  field: 'summary',
+                },
               },
-            },
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [{ exists: { field: 'url.full' } }, { exists: { field: 'url.port' } }],
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [{ exists: { field: 'url.full' } }, { exists: { field: 'url.port' } }],
+                },
               },
-            },
-          ],
+            ],
+          },
+        },
+        _source: ['url', 'config_id', '@timestamp'],
+        collapse: {
+          field: 'config_id',
         },
       },
-      _source: ['url', 'config_id', '@timestamp'],
-      collapse: {
-        field: 'config_id',
-      },
     },
-  });
+    'getHydrateQuery',
+    'synthetics-*'
+  );
 
   return data.body.hits.hits.map(
     ({ _source: doc }) => ({ ...(doc as any), timestamp: (doc as any)['@timestamp'] } as Ping)
