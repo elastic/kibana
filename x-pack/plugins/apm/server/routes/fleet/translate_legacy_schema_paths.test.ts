@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { preprocessLegacyFields } from './get_apm_package_policy_definition';
+import { translateLegacySchemaPaths } from './translate_legacy_schema_paths';
 
 const apmServerSchema = {
   'apm-server.host': '0.0.0.0:8200',
@@ -24,7 +24,7 @@ const apmServerSchema = {
 describe('get_apm_package_policy_definition', () => {
   describe('preprocessLegacyFields', () => {
     it('should replace legacy fields with supported fields', () => {
-      const result = preprocessLegacyFields({ apmServerSchema });
+      const result = translateLegacySchemaPaths(apmServerSchema);
       expect(result).toMatchInlineSnapshot(`
         Object {
           "apm-server.auth.anonymous.allow_service": "opbeans-test",
