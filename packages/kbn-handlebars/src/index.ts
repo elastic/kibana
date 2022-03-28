@@ -340,10 +340,13 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   // `{{#this.foo}}...{{/this.foo}}`, resolve the value of `foo`, and
   // replace it on the stack with the result of properly
   // invoking blockHelperMissing.
-  private blockValue(node: hbs.AST.BlockStatement, context: any) {
+  private blockValue(node: hbs.AST.BlockStatement, value: any) {
     const name = node.path.original;
     const options = this.setupParams(node, name);
-    const result = this.container.hooks.blockHelperMissing!.call(node, context, options);
+
+    const context = this.scopes[0];
+    const result = this.container.hooks.blockHelperMissing!.call(context, value, options);
+
     this.output.push(result);
   }
 
@@ -449,16 +452,17 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       : helper.fn;
   }
 
-  private ambiguousBlockValue(block: hbs.AST.BlockStatement, result: any) {
+  private ambiguousBlockValue(block: hbs.AST.BlockStatement, value: any) {
     const name = block.path.parts[0];
     const helper = this.setupHelper(block, name);
 
     if (!helper.fn) {
+      const context = this.scopes[0];
       const options = helper.params[helper.params.length - 1];
-      result = this.container.hooks.blockHelperMissing!.call(block, result, options);
+      value = this.container.hooks.blockHelperMissing!.call(context, value, options);
     }
 
-    return result;
+    return value;
   }
 
   private setupHelper(
