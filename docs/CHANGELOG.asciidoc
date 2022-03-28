@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 7.12.x releases.
 
+* <<release-notes-7.12.2>>
 * <<release-notes-7.12.1>>
 * <<release-notes-7.12.0>>
 // * <<release-notes-7.11.2>>
@@ -51,6 +52,48 @@ Review important information about the {kib} 7.12.x releases.
 // * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.12.2]]
+== {kib} 7.12.2
+
+coming::[7.12.2]
+
+The 7.12.2 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.12.2]]
+=== Bug Fixes
+Canvas::
+Fixes bug with plot sorting {kibana-pull}98084[#98084]
+
+Dashboard::
+Only apply explicit input on copy to {kibana-pull}98083[#98083]
+
+Discover::
+* Do not set fieldsFromSource when not using fields API {kibana-pull}98575[#98575]
+* Fixes wrong sort order with empty sort URL parameter {kibana-pull}97434[#97434]
+
+Elastic Security::
+For the Elastic Security 7.12.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Machine Learning::
+* Fixes pagination and sorting on trained models list page {kibana-pull}99061[#99061]
+* Data Frame Analytics results: ensure model evaluation stats are shown {kibana-pull}97486[#97486]
+
+Management::
+* Fixes the search sessions documentation link {kibana-pull}98918[#98918]
+* Fixes displaying expired search sessions on the management screen {kibana-pull}98915[#98915]
+* Transforms/Data Frame Analytics: Fix freezing wizard for indices with massive amounts of fields {kibana-pull}98259[#98259]
+* Console's handling of responses from the cluster have been made more robust as well as a fix for editor mode switching that ensures we do not continuing to show XJSON syntax highlighting for text and csv based responses {kibana-pull}97983[#97983]
+* Fixes the "Copy as cURL" functionality in Console which was not copying to the system clipboard on newer browser versions {kibana-pull}97968[#97968]
+* Fixes field filtering {kibana-pull}97189[#97189]
+
+Operations::
+Fixes issues preventing the SysV service from starting Kibana {kibana-pull}95018[#95018]
+
+Security::
+Forbid setting the Location and Refresh custom response headers {kibana-pull}98129[#98129]
+
 [[release-notes-7.12.1]]
 == {kib} 7.12.1
 
