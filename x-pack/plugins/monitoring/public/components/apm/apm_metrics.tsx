@@ -63,12 +63,12 @@ const getHeading = (isFleetTypeMetric: boolean) => {
   const titles: TitleType = {};
   if (isFleetTypeMetric) {
     titles.title = i18n.translate('xpack.monitoring.apm.metrics.topCharts.agentTitle', {
-      defaultMessage: 'APM & Fleet Server - Resource Usage',
+      defaultMessage: 'Integrations Server - Resource Usage',
     });
     titles.heading = (
       <FormattedMessage
         id="xpack.monitoring.apm.metrics.agentHeading"
-        defaultMessage="APM & Fleet Server"
+        defaultMessage="Integrations Server"
       />
     );
     return titles;
