@@ -19,6 +19,7 @@ import { AlertingConfig } from './config';
 import { RuleType } from './types';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
+import { monitoringCollectionMock } from '../../monitoring_collection/server/mocks';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -29,7 +30,6 @@ const generateAlertingConfig = (): AlertingConfig => ({
     removalDelay: '1h',
   },
   maxEphemeralActionsPerAlert: 10,
-  defaultRuleTaskTimeout: '5m',
   cancelAlertsOnRuleTimeout: true,
   rules: {
     minimumScheduleInterval: { value: '1m', enforce: false },
@@ -70,6 +70,7 @@ describe('Alerting Plugin', () => {
       eventLog: eventLogServiceMock.create(),
       actions: actionsMock.createSetup(),
       statusService: statusServiceMock.createSetupContract(),
+      monitoringCollection: monitoringCollectionMock.createSetup(),
     };
 
     let plugin: AlertingPlugin;
@@ -178,6 +179,10 @@ describe('Alerting Plugin', () => {
     describe('registerType()', () => {
       let setup: PluginSetupContract;
       beforeEach(async () => {
+        const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+          generateAlertingConfig()
+        );
+        plugin = new AlertingPlugin(context);
         setup = await plugin.setup(setupMocks, mockPlugins);
       });
 
@@ -261,6 +266,7 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogServiceMock.create(),
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
+          monitoringCollection: monitoringCollectionMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -297,6 +303,7 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogServiceMock.create(),
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
+          monitoringCollection: monitoringCollectionMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -344,6 +351,7 @@ describe('Alerting Plugin', () => {
         eventLog: eventLogServiceMock.create(),
         actions: actionsMock.createSetup(),
         statusService: statusServiceMock.createSetupContract(),
+        monitoringCollection: monitoringCollectionMock.createSetup(),
       });
 
       const startContract = plugin.start(coreMock.createStart(), {
