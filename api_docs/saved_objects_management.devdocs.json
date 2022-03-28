@@ -826,7 +826,7 @@
             "label": "euiColumn",
             "description": [],
             "signature": [
-              "{ children?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; color?: string | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; title?: string | undefined; id?: string | undefined; description?: string | undefined; security?: string | undefined; name: React.ReactNode; className?: string | undefined; field: (string & {}) | keyof ",
+              "{ children?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; color?: string | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; className?: string | undefined; title?: string | undefined; id?: string | undefined; description?: string | undefined; security?: string | undefined; name: React.ReactNode; field: (string & {}) | keyof ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",

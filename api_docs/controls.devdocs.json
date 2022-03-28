@@ -63,6 +63,81 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.setLastUsedDataViewId",
+            "type": "Function",
+            "tags": [],
+            "label": "setLastUsedDataViewId",
+            "description": [],
+            "signature": [
+              "(lastUsedDataViewId: string) => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.setLastUsedDataViewId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "lastUsedDataViewId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.setRelevantDataViewId",
+            "type": "Function",
+            "tags": [],
+            "label": "setRelevantDataViewId",
+            "description": [],
+            "signature": [
+              "(newRelevantDataViewId: string) => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.setRelevantDataViewId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "newRelevantDataViewId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.getMostRelevantDataViewId",
+            "type": "Function",
+            "tags": [],
+            "label": "getMostRelevantDataViewId",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.ControlGroupContainer.getCreateControlButton",
             "type": "Function",
             "tags": [
@@ -1444,7 +1519,7 @@
             "label": "controlEditorComponent",
             "description": [],
             "signature": [
-              "({ onChange, initialInput, setValidState, setDefaultTitle, }: ",
+              "({ onChange, initialInput, setValidState, setDefaultTitle, getRelevantDataViewId, setLastUsedDataViewId, }: ",
               {
                 "pluginId": "controls",
                 "scope": "public",
@@ -1826,6 +1901,51 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.ControlEditorProps.getRelevantDataViewId",
+            "type": "Function",
+            "tags": [],
+            "label": "getRelevantDataViewId",
+            "description": [],
+            "signature": [
+              "(() => string | undefined) | undefined"
+            ],
+            "path": "src/plugins/controls/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlEditorProps.setLastUsedDataViewId",
+            "type": "Function",
+            "tags": [],
+            "label": "setLastUsedDataViewId",
+            "description": [],
+            "signature": [
+              "((newId: string) => void) | undefined"
+            ],
+            "path": "src/plugins/controls/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlEditorProps.setLastUsedDataViewId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "newId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/controls/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.ControlEditorProps.onChange",
             "type": "Function",
             "tags": [],
@@ -1946,6 +2066,19 @@
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupInput.chainingSystem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chainingSystem",
+            "description": [],
+            "signature": [
+              "\"HIERARCHICAL\" | \"NONE\""
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "controls",
             "id": "def-public.ControlGroupInput.defaultControlWidth",
@@ -2531,7 +2664,32 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.getDefaultControlGroupInput",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultControlGroupInput",
+        "description": [],
+        "signature": [
+          "() => Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", \"id\">"
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_constants.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "controls",
@@ -2562,6 +2720,19 @@
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.ControlGroupInput.chainingSystem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chainingSystem",
+            "description": [],
+            "signature": [
+              "\"HIERARCHICAL\" | \"NONE\""
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "controls",
             "id": "def-common.ControlGroupInput.defaultControlWidth",
