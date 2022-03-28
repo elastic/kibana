@@ -16,7 +16,7 @@ import {
   IIndexPattern,
   QuerySuggestion,
   QuerySuggestionTypes,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../data/public';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
   values

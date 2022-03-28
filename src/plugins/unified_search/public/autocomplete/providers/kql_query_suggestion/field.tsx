@@ -16,7 +16,7 @@ import {
   indexPatterns as indexPatternsUtils,
   QuerySuggestionField,
   QuerySuggestionTypes,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../data/public';
 import { KqlQuerySuggestionProvider } from './types';
 
 const getDescription = (field: IFieldType) => {

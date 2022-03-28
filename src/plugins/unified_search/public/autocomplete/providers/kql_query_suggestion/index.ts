@@ -19,7 +19,7 @@ import {
   QuerySuggestionGetFnArgs,
   QuerySuggestionGetFn,
   DataPublicPluginStart,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../data/public';
 
 const cursorSymbol = '@kuery-cursor@';
 

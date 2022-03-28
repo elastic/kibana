@@ -284,6 +284,7 @@ export type {
   PersistedLog,
   QueryStringContract,
   QuerySetup,
+  TimefilterSetup,
 } from './query';
 
 export type { AggsStart } from './search/aggs';

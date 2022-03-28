@@ -12,7 +12,7 @@ import {
   DataPublicPluginStart,
   QuerySuggestionBasic,
   QuerySuggestionGetFnArgs,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../data/public';
 
 export type KqlQuerySuggestionProvider<T = QuerySuggestionBasic> = (
   core: CoreSetup<object, DataPublicPluginStart>

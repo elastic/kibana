@@ -13,8 +13,8 @@ import {
   indexPatterns as indexPatternsUtils,
   QuerySuggestionGetFnArgs,
   KueryNode,
-} from '../../../../../../../src/plugins/data/public';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+} from '../../../../../data/public';
+import { coreMock } from '../../../../../../core/public/mocks';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 
