@@ -240,6 +240,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('create output index');
       await createOutputDataIndex();
 
+      // wait for indices creation finished
+      await PageObjects.common.sleep(8000);
       log.debug('create data views');
       const [sourceDataViewResponse, outputDataViewResponse] = await createDataViews();
 
