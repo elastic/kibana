@@ -92,6 +92,7 @@ export const CreateControlButton = ({
           </PresentationUtilProvider>
         ),
         {
+          outsideClickCloses: false,
           onClose: (flyout) => onCancel(flyout),
         }
       );

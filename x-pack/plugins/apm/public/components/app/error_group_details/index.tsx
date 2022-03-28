@@ -112,7 +112,14 @@ export function ErrorGroupDetails() {
 
   const {
     path: { groupId },
-    query: { rangeFrom, rangeTo, environment, kuery, serviceGroup },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      serviceGroup,
+      comparisonEnabled,
+    },
   } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -130,6 +137,7 @@ export function ErrorGroupDetails() {
         environment,
         kuery,
         serviceGroup,
+        comparisonEnabled,
       },
     }),
   });

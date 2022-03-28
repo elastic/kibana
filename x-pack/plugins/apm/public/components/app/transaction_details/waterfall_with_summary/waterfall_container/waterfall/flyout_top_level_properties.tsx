@@ -25,7 +25,7 @@ interface Props {
 export function FlyoutTopLevelProperties({ transaction }: Props) {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
-  const { latencyAggregationType, comparisonEnabled, comparisonType } = query;
+  const { latencyAggregationType, comparisonEnabled, offset } = query;
 
   if (!transaction) {
     return null;
@@ -66,7 +66,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           environment={nextEnvironment}
           latencyAggregationType={latencyAggregationType}
           comparisonEnabled={comparisonEnabled}
-          comparisonType={comparisonType}
+          offset={offset}
         >
           {transaction.transaction.name}
         </TransactionDetailLink>
