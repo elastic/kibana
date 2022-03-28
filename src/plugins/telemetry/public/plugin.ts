@@ -33,7 +33,7 @@ import {
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
 import { HomePublicPluginSetup } from '../../home/public';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
-import type { CloudSetup } from './services/cloud';
+import type { CloudSetup } from '../../../../x-pack/plugins/cloud/public';
 
 /**
  * Publicly exposed APIs from the Telemetry Service

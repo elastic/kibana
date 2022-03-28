@@ -8,9 +8,14 @@
 
 import { TelemetryPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
-import { screenshotModeMock, homeMock, cloudMock } from './plugin.test.mocks';
+import { homePluginMock } from '../../../../src/plugins/home/public/mocks';
+import { screenshotModePluginMock } from '../../../../src/plugins/screenshot_mode/public/mocks';
+import { cloudMock } from '../../../../x-pack/plugins/cloud/public/mocks';
 
 const mockInitializerContext = coreMock.createPluginInitializerContext();
+const home = homePluginMock.createSetupContract();
+const screenshotMode = screenshotModePluginMock.createSetupContract();
+const cloud = cloudMock.createSetup();
 
 describe('TelemetryPublicPlugin', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -18,21 +23,21 @@ describe('TelemetryPublicPlugin', () => {
   describe('setup', () => {
     it('registers the telemetry notice renderer for a fresh on-prem instance', async () => {
       await new TelemetryPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
-        screenshotMode: screenshotModeMock,
-        home: homeMock,
+        screenshotMode,
+        home,
       });
 
-      expect(homeMock.welcomeScreen.registerTelemetryNoticeRenderer).toHaveBeenCalledTimes(1);
+      expect(home.welcomeScreen.registerTelemetryNoticeRenderer).toHaveBeenCalledTimes(1);
     });
 
     it('does not register the telemetry notice renderer for a cloud instance', async () => {
       await new TelemetryPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
-        screenshotMode: screenshotModeMock,
-        home: homeMock,
-        cloud: cloudMock,
+        screenshotMode,
+        home,
+        cloud,
       });
 
-      expect(homeMock.welcomeScreen.registerTelemetryNoticeRenderer).not.toBeCalled();
+      expect(home.welcomeScreen.registerTelemetryNoticeRenderer).not.toBeCalled();
     });
   });
 });
