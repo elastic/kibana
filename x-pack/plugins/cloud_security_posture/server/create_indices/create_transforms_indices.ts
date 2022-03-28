@@ -11,42 +11,54 @@ import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import { latestFindingsMapping } from './latest_findings_mapping';
 import {
   LATEST_FINDINGS_INDEX_PATTERN,
+  LATEST_FINDINGS_INDEX_NAME,
   BENCHMARK_SCORE_INDEX_PATTERN,
+  BENCHMARK_SCORE_INDEX_NAME,
 } from '../../common/constants';
-import { indexNameBeginsWithPeriod } from 'src/plugins/es_ui_shared/public/indices/validate';
 
 // TODO: Add integration tests
 export const initializeCspTransformsIndices = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ) => {
-  createIndexIfNotExists(esClient, LATEST_FINDINGS_INDEX_PATTERN, latestFindingsMapping, logger);
-  createIndexIfNotExists(esClient, BENCHMARK_SCORE_INDEX_PATTERN, benchmarkScoreMapping, logger);
+  createIndexIfNotExists(
+    esClient,
+    LATEST_FINDINGS_INDEX_NAME,
+    LATEST_FINDINGS_INDEX_PATTERN,
+    latestFindingsMapping,
+    logger
+  );
+  createIndexIfNotExists(
+    esClient,
+    BENCHMARK_SCORE_INDEX_NAME,
+    BENCHMARK_SCORE_INDEX_PATTERN,
+    benchmarkScoreMapping,
+    logger
+  );
 };
 
 export const createIndexIfNotExists = async (
   esClient: ElasticsearchClient,
-  index: string,
+  indexName: string,
+  indexPattern: string,
   mappings: MappingTypeMapping,
   logger: Logger
 ) => {
   try {
     const isLatestIndexExists = await esClient.indices.exists({
-      index,
+      index: indexPattern,
     });
 
     if (!isLatestIndexExists) {
-      await esClient.indices.putTemplate({
-        name: index,
-        create: true,
-        index_patterns: index,
-        mappings,
-        settings: { priority: 500 },
+      await esClient.indices.putIndexTemplate({
+        name: indexName,
+        index_patterns: indexPattern,
+        template: { mappings },
+        priority: 500,
       });
       await esClient.indices.create({
-        index,
+        index: indexPattern,
         mappings,
-        // settings: { priority: 500 },
       });
     }
   } catch (err) {
