@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const fetchRule = (ruleId: string) =>
     supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`).set('kbn-xsrf', 'true');
 
-  describe('perform_bulk_action', () => {
+  describe.only('perform_bulk_action', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
     });
@@ -470,6 +470,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Check that the updates have been persisted
         const { body: setTagsRule } = await fetchRule(ruleId).expect(200);
+
+        // Sidecar should be removed
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
 
         expect(setTagsRule.tags).to.eql(['reset-tag']);
 

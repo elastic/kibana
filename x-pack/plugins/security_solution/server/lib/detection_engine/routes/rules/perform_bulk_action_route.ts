@@ -430,7 +430,7 @@ export const performBulkActionRoute = (
 
                 await patchRules({
                   rulesClient,
-                  rule,
+                  rule: editedRule,
                   tags,
                   index,
                   timelineTitle,
