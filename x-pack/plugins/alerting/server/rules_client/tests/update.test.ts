@@ -1947,7 +1947,7 @@ describe('update()', () => {
       },
     });
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
-      `Rule schedule interval (1s) is less than the minimum value (1m). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+      `Rule schedule interval (1s) for "myType" rule type with ID "1" is less than the minimum value (1m). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
     );
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
   });

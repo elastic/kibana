@@ -19,3 +19,7 @@ export type SyntheticsMonitorSavedObject = SimpleSavedObject<EncryptedSynthetics
 export type DecryptedSyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor> & {
   updated_at: string;
 };
+
+export interface SyntheticsServiceAllowed {
+  serviceAllowed: boolean;
+}

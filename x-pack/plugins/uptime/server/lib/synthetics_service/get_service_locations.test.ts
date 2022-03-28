@@ -6,6 +6,7 @@
  */
 import axios from 'axios';
 import { getServiceLocations } from './get_service_locations';
+import { BandwidthLimitKey } from '../../../common/runtime_types';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -14,6 +15,11 @@ describe('getServiceLocations', function () {
   mockedAxios.get.mockRejectedValue('Network error: Something went wrong');
   mockedAxios.get.mockResolvedValue({
     data: {
+      throttling: {
+        [BandwidthLimitKey.DOWNLOAD]: 100,
+        [BandwidthLimitKey.UPLOAD]: 50,
+        [BandwidthLimitKey.LATENCY]: 20,
+      },
       locations: {
         us_central: {
           url: 'https://local.dev',
@@ -26,7 +32,8 @@ describe('getServiceLocations', function () {
       },
     },
   });
-  it('should return parsed locations', async () => {
+
+  it('should return parsed locations and throttling', async () => {
     const locations = await getServiceLocations({
       config: {
         service: {
@@ -40,6 +47,11 @@ describe('getServiceLocations', function () {
     });
 
     expect(locations).toEqual({
+      throttling: {
+        [BandwidthLimitKey.DOWNLOAD]: 100,
+        [BandwidthLimitKey.UPLOAD]: 50,
+        [BandwidthLimitKey.LATENCY]: 20,
+      },
       locations: [
         {
           geo: {
