@@ -2,7 +2,6 @@
 
 exports[`NoDataPage render 1`] = `
 <div
-  className="kbnNoDataPageContents"
   intl={
     Object {
       "defaultFormats": Object {},
@@ -107,43 +106,10 @@ exports[`NoDataPage render 1`] = `
   }
 >
   <NoDataPageBody
-    actionCards={
-      Array [
-        <ElasticAgentCard />,
-        <ElasticAgentCard />,
-        <NoDataCard />,
-      ]
-    }
+    actionCard={<ElasticAgentCard />}
     docsLink="test"
     pageTitle="Welcome to Elastic Elastic!"
     solution="Elastic"
   />
-  <EuiSpacer
-    size="xxl"
-  />
-  <EuiText
-    color="subdued"
-    textAlign="center"
-  >
-    <p>
-      <FormattedMessage
-        defaultMessage="Confused on which to use? {link}"
-        id="sharedUXComponents.noDataPage.cantDecide"
-        values={
-          Object {
-            "link": <EuiLink
-              href="https://www.elastic.co/guide/en/fleet/current/beats-agent-comparison.html"
-            >
-              <FormattedMessage
-                defaultMessage="Check our docs for more information."
-                id="sharedUXComponents.noDataPage.cantDecide.link"
-                values={Object {}}
-              />
-            </EuiLink>,
-          }
-        }
-      />
-    </p>
-  </EuiText>
 </div>
 `;
