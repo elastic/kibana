@@ -14,10 +14,7 @@ jest.mock('../../../../elasticsearch', () => {
   return { getErrorMessage: mockGetEsErrorMessage };
 });
 
-// Mock these functions to return empty results, as this simplifies test cases and we don't need to exercise alternate code paths for these
-jest.mock('@kbn/es-query', () => {
-  return { nodeTypes: { function: { buildNode: jest.fn() } } };
-});
+// Mock this function to return empty results, as this simplifies test cases and we don't need to exercise alternate code paths for these
 jest.mock('../search_dsl', () => {
   return { getSearchDsl: jest.fn() };
 });

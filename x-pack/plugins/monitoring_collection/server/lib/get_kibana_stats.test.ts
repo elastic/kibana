@@ -57,4 +57,22 @@ describe('getKibanaStats', () => {
       status: 'red',
     });
   });
+
+  it('should handle no status', async () => {
+    const getStatus = () => {
+      return undefined;
+    };
+    const stats = await getKibanaStats({ config, getStatus });
+    expect(stats).toStrictEqual({
+      uuid: config.uuid,
+      name: config.server.name,
+      index: config.kibanaIndex,
+      host: config.server.hostname,
+      locale: 'en',
+      transport_address: `${config.server.hostname}:${config.server.port}`,
+      version: '8.0.0',
+      snapshot: false,
+      status: 'unknown',
+    });
+  });
 });
