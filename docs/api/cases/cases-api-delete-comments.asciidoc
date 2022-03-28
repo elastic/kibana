@@ -30,9 +30,8 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 <<cases-api-find-cases>>.
 
 `<comment_id>`::
-(Optional, string) The identifier for the comment.
-//To retrieve comment IDs, use <<cases-api-get-all-case-comments>>. 
-If it is not specified, all comments are deleted.
+(Optional, string) The identifier for the comment. To retrieve comment IDs, use
+<<cases-api-find-cases>>. If it is not specified, all comments are deleted.
 
 <space_id>::
 (Optional, string) An identifier for the space. If it is not specified, the
