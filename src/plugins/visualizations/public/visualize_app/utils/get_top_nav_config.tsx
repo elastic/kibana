@@ -627,7 +627,7 @@ export const getTopNavConfig = (
               }
             ),
             testId: 'visualizesaveAndReturnButton',
-            disableButton: hasUnappliedChanges || !dashboardCapabilities.showWriteControls,
+            disableButton: hasUnappliedChanges,
             tooltip() {
               if (hasUnappliedChanges) {
                 return i18n.translate(

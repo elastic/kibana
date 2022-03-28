@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IndexPattern } from 'src/plugins/data/public';
+import type { DataView } from 'src/plugins/data_views/public';
 
 import { AnnotationRow } from './annotation_row';
 import { collectionActions, CollectionActionsProps } from './lib/collection_actions';
@@ -22,10 +22,10 @@ interface AnnotationsEditorProps {
   fields: VisFields;
   model: Panel;
   onChange: (partialModel: Partial<Panel>) => void;
-  defaultIndexPattern?: IndexPattern;
+  defaultIndexPattern?: DataView;
 }
 
-export const newAnnotation = (defaultIndexPattern?: IndexPattern) => () => ({
+export const newAnnotation = (defaultIndexPattern?: DataView) => () => ({
   id: uuid.v1(),
   color: '#F00',
   index_pattern:

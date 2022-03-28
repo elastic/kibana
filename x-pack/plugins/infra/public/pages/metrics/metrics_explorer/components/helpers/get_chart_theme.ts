@@ -13,6 +13,7 @@ import {
   mergeWithDefaultTheme,
 } from '@elastic/charts';
 
+// TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
 export function getChartTheme(isDarkMode: boolean): Theme {
   return isDarkMode ? DARK_THEME : LIGHT_THEME;
 }

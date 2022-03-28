@@ -19,7 +19,7 @@ if ! yarn kbn bootstrap; then
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
-  verify_no_git_changes 'yarn kbn bootstrap'
+  check_for_changed_files 'yarn kbn bootstrap'
 fi
 
 ###

@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('saveIndexPatternButton');
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/126658
-  describe.skip('discover integration with data view editor', function describeIndexTests() {
+  describe('discover integration with data view editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -39,14 +38,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      // The test creates the 'ftr-remote:logstash*" data view but we have to load the discover_ccs
+      // which contains ftr-remote:logstash-* otherwise, discover will redirect us to another page.
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover_ccs');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover_ccs');
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
     });
 

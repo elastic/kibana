@@ -272,5 +272,24 @@ describe('Exceptions List Api Client', () => {
 
       await expect(exceptionsListApiClientInstance.hasData()).resolves.toBe(false);
     });
+
+    it('return new instance when HttpCore changes', async () => {
+      const initialInstance = ExceptionsListApiClient.getInstance(
+        fakeHttpServices,
+        getFakeListId(),
+        getFakeListDefinition()
+      );
+
+      fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
+      fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+
+      const newInstance = ExceptionsListApiClient.getInstance(
+        fakeHttpServices,
+        getFakeListId(),
+        getFakeListDefinition()
+      );
+
+      expect(initialInstance).not.toStrictEqual(newInstance);
+    });
   });
 });

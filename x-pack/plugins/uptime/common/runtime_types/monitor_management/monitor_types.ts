@@ -166,6 +166,8 @@ export const BrowserSimpleFieldsCodec = t.intersection([
     [ConfigKey.SOURCE_ZIP_PASSWORD]: t.string,
     [ConfigKey.SOURCE_ZIP_PROXY_URL]: t.string,
     [ConfigKey.PARAMS]: t.string,
+    [ConfigKey.URLS]: t.union([t.string, t.undefined]),
+    [ConfigKey.PORT]: t.union([t.number, t.undefined]),
   }),
   ZipUrlTLSFieldsCodec,
   CommonFieldsCodec,
@@ -220,7 +222,9 @@ export const SyntheticsMonitorWithIdCodec = t.intersection([
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
 
 export const MonitorManagementListResultCodec = t.type({
-  monitors: t.array(t.interface({ id: t.string, attributes: SyntheticsMonitorCodec })),
+  monitors: t.array(
+    t.interface({ id: t.string, attributes: SyntheticsMonitorCodec, updated_at: t.string })
+  ),
   page: t.number,
   perPage: t.number,
   total: t.union([t.number, t.null]),

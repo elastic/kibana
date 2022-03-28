@@ -21,7 +21,10 @@ import {
 } from '../../data/public';
 import { DataViewsContract } from '../../data_views/public';
 
-/** @deprecated */
+/**
+ * @deprecated
+ * @removeBy 8.8.0
+ */
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;

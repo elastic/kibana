@@ -24,6 +24,9 @@ import { State, createStore } from '../../common/store';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { mockCasesContract } from '../../../../cases/public/mocks';
+import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
+import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_overview';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -35,6 +38,29 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
+jest.mock('../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
+const mockNavigateToApp = jest.fn();
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          ...original.useKibana().services.application,
+          navigateToApp: mockNavigateToApp,
+        },
+        cases: {
+          ...mockCasesContract(),
+        },
+      },
+    }),
+  };
+});
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -59,19 +85,25 @@ const mockHistory = {
 };
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Hosts - rendering', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   test('it renders the Setup Instructions text when no index is available', async () => {
     mockUseSourcererDataView.mockReturnValue({
       indicesExist: false,
     });
 
-    const wrapper = mount(
+    mount(
       <TestProviders>
         <Router history={mockHistory}>
           <Hosts />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
+    expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
+      deepLinkId: SecurityPageName.landing,
+      path: getAppLandingUrl(),
+    });
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
@@ -79,14 +111,14 @@ describe('Hosts - rendering', () => {
       indicesExist: true,
       indexPattern: {},
     });
-    const wrapper = mount(
+    mount(
       <TestProviders>
         <Router history={mockHistory}>
           <Hosts />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 
   test('it should render tab navigation', async () => {

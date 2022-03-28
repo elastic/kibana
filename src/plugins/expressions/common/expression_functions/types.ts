@@ -44,6 +44,8 @@ export interface ExpressionFunctionDefinition<
    */
   disabled?: boolean;
 
+  namespace?: string;
+
   /**
    * Name of type of value this function outputs.
    */

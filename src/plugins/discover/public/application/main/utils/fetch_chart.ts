@@ -12,9 +12,9 @@ import {
   isCompleteResponse,
   search,
   ISearchSource,
+  tabifyAggResponse,
 } from '../../../../../data/public';
 import { getChartAggConfigs, getDimensions } from './index';
-import { tabifyAggResponse } from '../../../../../data/common';
 import { buildPointSeriesData, Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from './use_saved_search';
 import { FetchDeps } from './fetch_all';

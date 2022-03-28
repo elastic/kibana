@@ -88,6 +88,23 @@ describe('AddSourceList', () => {
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ChoiceStep);
   });
 
+  it('renders default state correctly when there are multiple connector options but external connector is configured', () => {
+    setMockValues({ ...mockValues, externalConfigured: true });
+    const wrapper = shallow(
+      <AddSource
+        sourceData={{
+          ...staticSourceData[0],
+          externalConnectorAvailable: true,
+          customConnectorAvailable: true,
+          internalConnectorAvailable: true,
+        }}
+      />
+    );
+    wrapper.find(ConfigurationIntro).prop('advanceStep')();
+
+    expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
+  });
+
   describe('layout', () => {
     it('renders the default workplace search layout when on an organization view', () => {
       setMockValues({ ...mockValues, isOrganization: true });
@@ -117,7 +134,23 @@ describe('AddSourceList', () => {
       addSourceCurrentStep: AddSourceSteps.ConfigCompletedStep,
     });
     const wrapper = shallow(<AddSource sourceData={staticSourceData[1]} />);
+    expect(wrapper.find(ConfigCompleted).prop('showFeedbackLink')).toEqual(false);
     wrapper.find(ConfigCompleted).prop('advanceStep')();
+
+    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
+    expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
+  });
+
+  it('renders Config Completed step with feedback for external connectors', () => {
+    setMockValues({
+      ...mockValues,
+      sourceConfigData: { ...sourceConfigData, serviceType: 'external' },
+      addSourceCurrentStep: AddSourceSteps.ConfigCompletedStep,
+    });
+    const wrapper = shallow(
+      <AddSource sourceData={{ ...staticSourceData[1], serviceType: 'external' }} />
+    );
+    expect(wrapper.find(ConfigCompleted).prop('showFeedbackLink')).toEqual(true);
 
     expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);

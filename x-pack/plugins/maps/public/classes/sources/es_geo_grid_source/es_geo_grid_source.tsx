@@ -45,13 +45,14 @@ import { DataView } from '../../../../../../../src/plugins/data/common';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { makePublicExecutionContext } from '../../../util';
+import { isMvt } from './is_mvt';
 
 type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
 
 const MAX_GEOTILE_LEVEL = 29;
 
 export const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
-  defaultMessage: 'Clusters and grids',
+  defaultMessage: 'Clusters',
 });
 
 export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle', {
@@ -87,6 +88,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     return (
       <UpdateSourceEditor
         currentLayerType={sourceEditorArgs.currentLayerType}
+        geoFieldName={this.getGeoFieldName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={sourceEditorArgs.onChange}
         metrics={this._descriptor.metrics}
@@ -123,19 +125,15 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {
-          defaultMessage: 'Geospatial field',
+          defaultMessage: 'Cluster field',
         }),
         value: this._descriptor.geoField,
       },
     ];
   }
 
-  isMvt() {
-    // heatmap uses MVT regardless of resolution because heatmap only supports counting metrics
-    if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
-      return true;
-    }
-    return this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE;
+  isMvt(): boolean {
+    return isMvt(this._descriptor.requestType, this._descriptor.resolution);
   }
 
   getFieldNames() {
@@ -172,6 +170,27 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   _getGeoGridPrecisionResolutionDelta() {
+    // Hexagon resolutions do not scale evenly to zoom levels.
+    // zoomX and zoomX + 1 may result in the same hexagon resolution.
+    // To avoid FINE and MOST_FINE providing potenitally the same resolution,
+    // use 3 level resolution system that increases zoom + 3 per resolution step.
+    if (this._descriptor.requestType === RENDER_AS.HEX) {
+      if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
+        return 2;
+      }
+
+      if (
+        this._descriptor.resolution === GRID_RESOLUTION.FINE ||
+        this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE
+      ) {
+        return 5;
+      }
+
+      if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+        return 8;
+      }
+    }
+
     if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
       return 2;
     }
@@ -452,15 +471,12 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    const requestType =
-      this._descriptor.requestType === RENDER_AS.GRID ? RENDER_AS.GRID : RENDER_AS.POINT;
-
     return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
 &requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
-&requestType=${requestType}\
+&renderAs=${this._descriptor.requestType}\
 &token=${refreshToken}`;
   }
 
@@ -479,7 +495,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
-    if (this._descriptor.requestType === RENDER_AS.GRID) {
+    if (
+      this._descriptor.requestType === RENDER_AS.GRID ||
+      this._descriptor.requestType === RENDER_AS.HEX
+    ) {
       return [VECTOR_SHAPE_TYPE.POLYGON];
     }
 

@@ -27,11 +27,18 @@ import {
   EuiPageTemplate,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { AlertExecutionStatusErrorReasons, parseDuration } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import { Rule, RuleType, ActionType, ActionConnector } from '../../../../types';
+import {
+  Rule,
+  RuleType,
+  ActionType,
+  ActionConnector,
+  TriggersActionsUiConfig,
+} from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkRuleOperations,
@@ -40,10 +47,14 @@ import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
 import { RuleEdit } from '../../rule_form';
 import { routeToRuleDetails } from '../../../constants';
-import { rulesErrorReasonTranslationsMapping } from '../../rules_list/translations';
+import {
+  rulesErrorReasonTranslationsMapping,
+  rulesWarningReasonTranslationsMapping,
+} from '../../rules_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
+import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -72,6 +83,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     setBreadcrumbs,
     chrome,
     http,
+    notifications: { toasts },
   } = useKibana().services;
   const [{}, dispatch] = useReducer(ruleReducer, { rule });
   const setInitialRule = (value: Rule) => {
@@ -80,6 +92,14 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
+
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+
+  useEffect(() => {
+    (async () => {
+      setConfig(await triggersActionsUiConfig({ http }));
+    })();
+  }, [http]);
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -135,7 +155,55 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const [isMutedUpdating, setIsMutedUpdating] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(rule.muteAll);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const [dissmissRuleErrors, setDissmissRuleErrors] = useState<boolean>(false);
+  const [dismissRuleErrors, setDismissRuleErrors] = useState<boolean>(false);
+  const [dismissRuleWarning, setDismissRuleWarning] = useState<boolean>(false);
+
+  // Check whether interval is below configured minium
+  useEffect(() => {
+    if (rule.schedule.interval && config.minimumScheduleInterval) {
+      if (
+        parseDuration(rule.schedule.interval) < parseDuration(config.minimumScheduleInterval.value)
+      ) {
+        const configurationToast = toasts.addInfo({
+          'data-test-subj': 'intervalConfigToast',
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastTitle',
+            {
+              defaultMessage: 'Configuration settings',
+            }
+          ),
+          text: toMountPoint(
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessage"
+                  defaultMessage="This rule has an interval set below the minimum configured interval. This may impact performance."
+                />
+              </p>
+              {hasEditButton && (
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="ruleIntervalToastEditButton"
+                      onClick={() => {
+                        toasts.remove(configurationToast);
+                        setEditFlyoutVisibility(true);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessageButton"
+                        defaultMessage="Edit rule"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </>
+          ),
+        });
+      }
+    }
+  }, [rule.schedule.interval, config.minimumScheduleInterval, toasts, hasEditButton]);
 
   const setRule = async () => {
     history.push(routeToRuleDetails.replace(`:ruleId`, rule.id));
@@ -146,6 +214,14 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       return rulesErrorReasonTranslationsMapping[rule.executionStatus.error.reason];
     } else {
       return rulesErrorReasonTranslationsMapping.unknown;
+    }
+  };
+
+  const getRuleStatusWarningReasonText = () => {
+    if (rule.executionStatus.warning && rule.executionStatus.warning.reason) {
+      return rulesWarningReasonTranslationsMapping[rule.executionStatus.warning.reason];
+    } else {
+      return rulesWarningReasonTranslationsMapping.unknown;
     }
   };
 
@@ -294,7 +370,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                         setIsEnabled(false);
                         await disableRule(rule);
                         // Reset dismiss if previously clicked
-                        setDissmissRuleErrors(false);
+                        setDismissRuleErrors(false);
                       } else {
                         setIsEnabled(true);
                         await enableRule(rule);
@@ -357,7 +433,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {rule.enabled && !dissmissRuleErrors && rule.executionStatus.status === 'error' ? (
+        {rule.enabled && !dismissRuleErrors && rule.executionStatus.status === 'error' ? (
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut
@@ -376,7 +452,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                     <EuiButton
                       data-test-subj="dismiss-execution-error"
                       color="danger"
-                      onClick={() => setDissmissRuleErrors(true)}
+                      onClick={() => setDismissRuleErrors(true)}
                     >
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.dismissButtonTitle"
@@ -399,6 +475,39 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   )}
+                </EuiFlexGroup>
+              </EuiCallOut>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
+
+        {rule.enabled && !dismissRuleWarning && rule.executionStatus.status === 'warning' ? (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCallOut
+                color="warning"
+                data-test-subj="ruleWarningBanner"
+                size="s"
+                title={getRuleStatusWarningReasonText()}
+                iconType="alert"
+              >
+                <EuiText size="s" color="warning" data-test-subj="ruleWarningMessageText">
+                  {rule.executionStatus.warning?.message}
+                </EuiText>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="s" wrap={true}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="dismiss-execution-warning"
+                      color="warning"
+                      onClick={() => setDismissRuleWarning(true)}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.dismissButtonTitle"
+                        defaultMessage="Dismiss"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiCallOut>
             </EuiFlexItem>

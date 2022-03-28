@@ -7,9 +7,10 @@
  */
 
 import { ValueNode } from '../ts_nodes';
+import { ExportInfo } from '../export_info';
 
 export class ResultValue {
   type = 'value' as const;
 
-  constructor(public exported: boolean, public readonly node: ValueNode) {}
+  constructor(public exportInfo: ExportInfo | undefined, public readonly node: ValueNode) {}
 }

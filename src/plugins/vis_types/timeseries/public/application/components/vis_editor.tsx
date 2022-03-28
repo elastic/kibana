@@ -12,7 +12,7 @@ import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
 import type { IUiSettingsClient } from 'kibana/public';
-import type { IndexPattern } from 'src/plugins/data/public';
+import type { DataView } from 'src/plugins/data_views/public';
 import type {
   Vis,
   VisualizeEmbeddableContract,
@@ -47,7 +47,7 @@ export interface TimeseriesEditorProps {
   query: EditorRenderProps['query'];
   uiState: EditorRenderProps['uiState'];
   vis: Vis<TimeseriesVisParams>;
-  defaultIndexPattern?: IndexPattern;
+  defaultIndexPattern?: DataView;
 }
 
 interface TimeseriesEditorState {

@@ -1,0 +1,108 @@
+{
+  "id": "cloudSecurityPosture",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cloudSecurityPosture",
+      "id": "def-public.CspClientPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CspClientPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cloudSecurityPosture",
+      "id": "def-public.CspClientPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CspClientPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cloudSecurityPosture",
+      "id": "def-server.CspServerPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CspServerPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/cloud_security_posture/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cloudSecurityPosture",
+      "id": "def-server.CspServerPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CspServerPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/cloud_security_posture/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "cloudSecurityPosture",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"csp\""
+        ],
+        "path": "x-pack/plugins/cloud_security_posture/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudSecurityPosture",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"Cloud Security\""
+        ],
+        "path": "x-pack/plugins/cloud_security_posture/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

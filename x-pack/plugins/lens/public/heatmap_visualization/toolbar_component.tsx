@@ -21,6 +21,7 @@ import { EuiIconAxisLeft } from '../assets/axis_left';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
 import type { HeatmapVisualizationState } from './types';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
+import './toolbar_component.scss';
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
   {
@@ -110,6 +111,16 @@ export const HeatmapToolbar = memo(
                   legend: { ...state.legend, shouldTruncate: !current },
                 });
               }}
+              legendSize={state?.legend.legendSize}
+              onLegendSizeChange={(legendSize) => {
+                setState({
+                  ...state,
+                  legend: {
+                    ...state.legend,
+                    legendSize,
+                  },
+                });
+              }}
             />
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -129,6 +140,7 @@ export const HeatmapToolbar = memo(
                 groupPosition="left"
                 isDisabled={!Boolean(state?.yAccessor)}
                 buttonDataTestSubj="lnsHeatmapVerticalAxisButton"
+                panelClassName="lnsVisToolbarAxis__popover"
               >
                 <AxisTitleSettings
                   axis="yLeft"

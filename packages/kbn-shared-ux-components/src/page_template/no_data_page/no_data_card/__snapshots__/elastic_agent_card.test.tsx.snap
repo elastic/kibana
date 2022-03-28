@@ -1,0 +1,320 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticAgentCard renders 1`] = `
+.emotion-0 {
+  max-width: 400px;
+}
+
+<SharedUxServicesProvider
+  application={
+    Object {
+      "currentAppId$": Observable {
+        "_isScalar": false,
+      },
+      "navigateToUrl": [Function],
+    }
+  }
+  docLinks={
+    Object {
+      "dataViewsDocLink": "dummy link",
+    }
+  }
+  editors={
+    Object {
+      "openDataViewEditor": [MockFunction],
+    }
+  }
+  http={
+    Object {
+      "addBasePath": [MockFunction],
+    }
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  permissions={
+    Object {
+      "canAccessFleet": true,
+      "canCreateNewDataView": true,
+    }
+  }
+  platform={
+    Object {
+      "setIsFullscreen": [MockFunction],
+    }
+  }
+>
+  <ElasticAgentCard>
+    <ElasticAgentCardComponent
+      canAccessFleet={true}
+      currentAppId$={
+        Observable {
+          "_isScalar": false,
+        }
+      }
+      href="/app/integrations/browse"
+      navigateToUrl={[Function]}
+    >
+      <RedirectAppLinks
+        currentAppId$={
+          Observable {
+            "_isScalar": false,
+          }
+        }
+        navigateToUrl={[Function]}
+      >
+        <div>
+          <NoDataCard
+            description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+            href="/app/integrations/browse"
+            image="test-file-stub"
+            title="Add Elastic Agent"
+          >
+            <EuiCard
+              betaBadgeProps={
+                Object {
+                  "label": undefined,
+                }
+              }
+              css={
+                Object {
+                  "maxWidth": 400,
+                }
+              }
+              description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+              footer={
+                <EuiButton
+                  fill={true}
+                >
+                  Add Elastic Agent
+                </EuiButton>
+              }
+              href="/app/integrations/browse"
+              image="test-file-stub"
+              paddingSize="l"
+              title="Add Elastic Agent"
+            >
+              <EuiPanel
+                css="unknown styles"
+                element="div"
+                hasShadow={true}
+                onClick={[Function]}
+                paddingSize="l"
+              >
+                <EuiPanel
+                  className="euiCard euiCard--centerAligned euiCard--isClickable emotion-0"
+                  element="div"
+                  hasShadow={true}
+                  onClick={[Function]}
+                  paddingSize="l"
+                >
+                  <div
+                    className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable emotion-0"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="euiCard__top"
+                    >
+                      <div
+                        className="euiCard__image"
+                      >
+                        <img
+                          alt=""
+                          src="test-file-stub"
+                        />
+                      </div>
+                    </div>
+                    <div
+                      className="euiCard__content"
+                    >
+                      <EuiTitle
+                        className="euiCard__title"
+                        id="generated-idTitle"
+                        size="s"
+                      >
+                        <span
+                          className="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          <a
+                            aria-describedby="generated-idDescription"
+                            className="euiCard__titleAnchor"
+                            href="/app/integrations/browse"
+                            rel="noreferrer"
+                          >
+                            Add Elastic Agent
+                          </a>
+                        </span>
+                      </EuiTitle>
+                      <EuiText
+                        className="euiCard__description"
+                        id="generated-idDescription"
+                        size="s"
+                      >
+                        <div
+                          className="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            Use Elastic Agent for a simple, unified way to collect data from your machines.
+                          </p>
+                        </div>
+                      </EuiText>
+                    </div>
+                    <div
+                      className="euiCard__footer"
+                    >
+                      <EuiButton
+                        fill={true}
+                      >
+                        <EuiButtonDisplay
+                          baseClassName="euiButton"
+                          disabled={false}
+                          element="button"
+                          fill={true}
+                          isDisabled={false}
+                          type="button"
+                        >
+                          <button
+                            className="euiButton euiButton--primary euiButton--fill"
+                            disabled={false}
+                            style={
+                              Object {
+                                "minWidth": undefined,
+                              }
+                            }
+                            type="button"
+                          >
+                            <EuiButtonContent
+                              className="euiButton__content"
+                              iconSide="left"
+                              textProps={
+                                Object {
+                                  "className": "euiButton__text",
+                                }
+                              }
+                            >
+                              <span
+                                className="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  className="euiButton__text"
+                                >
+                                  Add Elastic Agent
+                                </span>
+                              </span>
+                            </EuiButtonContent>
+                          </button>
+                        </EuiButtonDisplay>
+                      </EuiButton>
+                    </div>
+                  </div>
+                </EuiPanel>
+              </EuiPanel>
+            </EuiCard>
+          </NoDataCard>
+        </div>
+      </RedirectAppLinks>
+    </ElasticAgentCardComponent>
+  </ElasticAgentCard>
+</SharedUxServicesProvider>
+`;

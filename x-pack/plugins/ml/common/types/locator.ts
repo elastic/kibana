@@ -72,6 +72,11 @@ export type AnomalyDetectionUrlState = MLPageState<
   typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
   AnomalyDetectionQueryState | undefined
 >;
+
+export type AnomalyExplorerSwimLaneUrlState = ExplorerAppState['mlExplorerSwimlane'];
+
+export type AnomalyExplorerFilterUrlState = ExplorerAppState['mlExplorerFilter'];
+
 export interface ExplorerAppState {
   mlExplorerSwimlane: {
     selectedType?: 'overall' | 'viewBy';
