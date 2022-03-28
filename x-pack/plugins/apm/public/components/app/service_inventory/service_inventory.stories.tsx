@@ -11,7 +11,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
-import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { AnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
@@ -61,7 +60,7 @@ const stories: Meta<{}> = {
             <MockUrlParamsContextProvider
               params={{
                 comparisonEnabled: true,
-                comparisonType: TimeRangeComparisonEnum.DayBefore,
+                offset: '1d',
               }}
             >
               <MockApmPluginContextWrapper
