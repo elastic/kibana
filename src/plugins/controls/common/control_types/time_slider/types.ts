@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { TimesliderEmbeddableFactory } from './time_slider_embeddable_factory';
-export { TimeSliderControlEmbeddableInput } from './time_slider_embeddable';
-export {} from '../../../common';
+import { ControlInput } from '../../types';
+
+export const TIME_SLIDER_CONTROL = 'timeSlider';
+
+export interface TimeSliderControlEmbeddableInput extends ControlInput {
+  fieldName: string;
+  dataViewId: string;
+  value?: [number | null, number | null];
+}

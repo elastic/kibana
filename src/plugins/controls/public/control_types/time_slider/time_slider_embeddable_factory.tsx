@@ -8,25 +8,21 @@
 
 import deepEqual from 'fast-deep-equal';
 
-//import { OptionsListEditor } from './options_list_editor';
+import { TIME_SLIDER_CONTROL } from '../../';
 import { ControlEmbeddable, IEditableControlFactory } from '../../types';
-//import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
-import { Embeddable, EmbeddableFactoryDefinition, IContainer } from '../../../../embeddable/public';
+import { EmbeddableFactoryDefinition, IContainer } from '../../../../embeddable/public';
 import {
   createOptionsListExtract,
   createOptionsListInject,
 } from '../../../common/control_types/options_list/options_list_persistable_state';
 import { TimeSliderEditor } from './time_slider_editor';
 import { TimeSliderControlEmbeddableInput } from './time_slider_embeddable';
-import { pluginServices } from '../../services';
 
 export class TimesliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<TimeSliderControlEmbeddableInput>
 {
-  public type = 'TIME_SLIDER';
+  public type = TIME_SLIDER_CONTROL;
   public canCreateNew = () => false;
-
-  private EmbeddableClass?: Embeddable;
 
   constructor() {}
 

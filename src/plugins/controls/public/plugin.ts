@@ -29,8 +29,10 @@ import {
   CONTROL_GROUP_TYPE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
 } from '.';
-import {   TimesliderEmbeddableFactory,
+import {
+  TimesliderEmbeddableFactory,
   TimeSliderControlEmbeddableInput,
 } from './control_types/time_slider';
 import { controlsService } from './services/kibana/controls';
@@ -89,7 +91,6 @@ export class ControlsPlugin
       );
       registerControlType(optionsListFactory);
 
-<<<<<<< HEAD
       // Register range slider
       const rangeSliderFactoryDef = new RangeSliderEmbeddableFactory();
       const rangeSliderFactory = embeddable.registerEmbeddableFactory(
@@ -101,11 +102,11 @@ export class ControlsPlugin
         rangeSliderFactory
       );
       registerControlType(rangeSliderFactory);
-=======
+
       // Time Slider Control Factory Setup
       const timeSliderFactoryDef = new TimesliderEmbeddableFactory();
       const timeSliderFactory = embeddable.registerEmbeddableFactory(
-        'TIME_SLIDER',
+        TIME_SLIDER_CONTROL,
         timeSliderFactoryDef
       )();
       this.transferEditorFunctions<TimeSliderControlEmbeddableInput>(
@@ -114,16 +115,7 @@ export class ControlsPlugin
       );
 
       registerControlType(timeSliderFactory);
->>>>>>> wip
     });
-
-    // create time slider embeddable
-
-    //    this.inlineEditors['TIME_SLIDER'] = {
-    //     controlEditorComponent: timeSliderFactory.controlEditorComponent,
-    //   presaveTransformFunction: timeSliderFactory.presaveTransformFunction,
-    //};
-    //embeddable.registerEmbeddableFactory('TIME_SLIDER', timeSliderFactory);
 
     return {
       registerControlType,
@@ -134,21 +126,7 @@ export class ControlsPlugin
     this.startControlsKibanaServices(coreStart, startPlugins);
 
     const { getControlFactory, getControlTypes } = controlsService;
-<<<<<<< HEAD
 
-=======
-    /*
-    const timeSliderFactory = embeddable.getEmbeddableFactory('TIME_SLIDER');
-    const {
-      controlEditorComponent: timeSliderControlEditor,
-      presaveTransformFunction: timeSliderPresaveTransform,
-    } = this.inlineEditors['TIME_SLIDER'];
-    (timeSliderFactory as IEditableControlFactory).controlEditorComponent = timeSliderControlEditor;
-    (timeSliderFactory as IEditableControlFactory).presaveTransformFunction =
-      timeSliderPresaveTransform;
-    if (timeSliderFactory) controlsService.registerControlType(timeSliderFactory);
-*/
->>>>>>> wip
     return {
       getControlFactory,
       getControlTypes,

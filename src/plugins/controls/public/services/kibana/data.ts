@@ -12,6 +12,7 @@ import { get } from 'lodash';
 import { ControlsDataService } from '../data';
 import { ControlsPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
+import { from } from 'rxjs';
 
 export type DataServiceFactory = KibanaPluginServiceFactory<
   ControlsDataService,
@@ -47,48 +48,51 @@ export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
   } = startPlugins;
   const { data } = startPlugins;
 
+  const fetchFieldRange = async (dataView, fieldName, input) => {
+    const { ignoreParentSettings, query, timeRange } = input;
+    let { filters = [] } = input;
+
+    const field = dataView.getFieldByName(fieldName);
+
+    if (!field) {
+      throw new Error('Field Missing Error');
+    }
+
+    if (timeRange) {
+      const timeFilter = data.query.timefilter.timefilter.createFilter(dataView, timeRange);
+      if (timeFilter) {
+        filters = filters.concat(timeFilter);
+      }
+    }
+
+    const searchSource = await data.search.searchSource.create();
+    searchSource.setField('size', 0);
+    searchSource.setField('index', dataView);
+
+    const aggs = minMaxAgg(field);
+    searchSource.setField('aggs', aggs);
+
+    searchSource.setField('filter', ignoreParentSettings?.ignoreFilters ? [] : filters);
+    searchSource.setField('query', ignoreParentSettings?.ignoreQuery ? undefined : query);
+
+    const resp = await searchSource.fetch$().toPromise();
+
+    const min = get(resp, 'rawResponse.aggregations.minAgg.value', undefined);
+    const max = get(resp, 'rawResponse.aggregations.maxAgg.value', undefined);
+
+    return {
+      min: min === null ? undefined : min,
+      max: max === null ? undefined : max,
+    };
+  };
+
   return {
-    fetchFieldRange: async (dataView, fieldName, input) => {
-      const { ignoreParentSettings, query, timeRange } = input;
-      let { filters = [] } = input;
-
-      const field = dataView.getFieldByName(fieldName);
-
-      if (!field) {
-        throw new Error('Field Missing Error');
-      }
-
-      if (timeRange) {
-        const timeFilter = data.query.timefilter.timefilter.createFilter(dataView, timeRange);
-        if (timeFilter) {
-          filters = filters.concat(timeFilter);
-        }
-      }
-
-      const searchSource = await data.search.searchSource.create();
-      searchSource.setField('size', 0);
-      searchSource.setField('index', dataView);
-
-      const aggs = minMaxAgg(field);
-      searchSource.setField('aggs', aggs);
-
-      searchSource.setField('filter', ignoreParentSettings?.ignoreFilters ? [] : filters);
-      searchSource.setField('query', ignoreParentSettings?.ignoreQuery ? undefined : query);
-
-      const resp = await searchSource.fetch$().toPromise();
-
-      const min = get(resp, 'rawResponse.aggregations.minAgg.value', undefined);
-      const max = get(resp, 'rawResponse.aggregations.maxAgg.value', undefined);
-
-      return {
-        min: min === null ? undefined : min,
-        max: max === null ? undefined : max,
-      };
-    },
+    fetchFieldRange,
+    fetchFieldRange$: (dataView, fieldName, input) =>
+      from(fetchFieldRange(dataView, fieldName, input)),
     getDataView: data.dataViews.get,
+    getDataView$: (id: string) => from(data.dataViews.get(id)),
     autocomplete,
     query: queryPlugin,
-    searchSource: search.searchSource,
-    timefilter: queryPlugin.timefilter.timefilter,
   };
 };

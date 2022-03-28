@@ -22,8 +22,10 @@ import {
 // It expects a behavior subject
 
 export interface TimeSliderSubjectState {
-  min?: number;
-  max?: number;
+  range?: {
+    min?: number;
+    max?: number;
+  };
   loading: boolean;
 }
 
@@ -31,12 +33,14 @@ interface TimeSliderProps {
   componentStateSubject: BehaviorSubject<TimeSliderSubjectState>;
   dateFormat: string;
   timezone: string;
+  fieldName: string;
 }
 
 export const TimeSlider: FC<TimeSliderProps> = ({
   componentStateSubject,
   dateFormat,
   timezone,
+  fieldName,
 }) => {
   const {
     useEmbeddableDispatch,
@@ -45,19 +49,26 @@ export const TimeSlider: FC<TimeSliderProps> = ({
   } = useReduxEmbeddableContext<TimeSliderControlEmbeddableInput, typeof timeSliderReducers>();
   const dispatch = useEmbeddableDispatch();
 
-  const { min, max, loading } = useStateObservable<TimeSliderSubjectState>(
+  const { range: availableRange, loading } = useStateObservable<TimeSliderSubjectState>(
     componentStateSubject,
     componentStateSubject.getValue()
   );
 
+  const { min, max } = availableRange
+    ? availableRange
+    : ({} as {
+        min?: number;
+        max?: number;
+      });
+
   const { value } = useEmbeddableSelector((state) => state);
 
-  const [selectedValue, setSelectedValue] = useState<[number | undefined, number | undefined]>(
-    value || [undefined, undefined]
+  const [selectedValue, setSelectedValue] = useState<[number | null, number | null]>(
+    value || [null, null]
   );
 
   const dispatchChange = useCallback(
-    (range: [number | undefined, number | undefined]) => {
+    (range: [number | null, number | null]) => {
       dispatch(selectRange(range));
     },
     [dispatch, selectRange]
@@ -66,7 +77,7 @@ export const TimeSlider: FC<TimeSliderProps> = ({
   const debouncedDispatchChange = useCallback(debounce(dispatchChange, 500), [dispatchChange]);
 
   const onChangeComplete = useCallback(
-    (range: [number | undefined, number | undefined]) => {
+    (range: [number | null, number | null]) => {
       debouncedDispatchChange(range);
       setSelectedValue(range);
     },
@@ -81,6 +92,7 @@ export const TimeSlider: FC<TimeSliderProps> = ({
       isLoading={loading}
       dateFormat={dateFormat}
       timezone={timezone}
+      fieldName={fieldName}
     />
   );
 };

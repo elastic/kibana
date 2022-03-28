@@ -7,6 +7,7 @@
  */
 
 import React, { FC, useState, useMemo, useCallback } from 'react';
+import { isNil } from 'lodash';
 import {
   EuiDualRangeProps,
   EuiText,
@@ -21,8 +22,9 @@ import {
 } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import moment from 'moment-timezone';
-import { TimeRange, calcAutoIntervalNear } from '../../../../data/common';
+import { calcAutoIntervalNear } from '../../../../data/common';
 import { ValidatedDualRange } from '../../../../kibana_react/public';
+import { TimeSliderStrings } from './time_slider_strings';
 import './time_slider.component.scss';
 
 function getScaledDateFormat(interval: number): string {
@@ -70,19 +72,20 @@ export function getInterval(min: number, max: number, steps = 6): number {
 
 export interface TimeSliderProps {
   range?: [number | undefined, number | undefined];
-  value: [number | undefined, number | undefined];
+  value: [number | null, number | null];
   onChange: EuiDualRangeProps['onChange'];
   dateFormat?: string;
   timezone?: string;
+  fieldName: string;
 }
 
 const isValidRange = (maybeRange: TimeSliderProps['range']): maybeRange is [number, number] => {
-  return maybeRange !== undefined && maybeRange[0] !== undefined && maybeRange[1] !== undefined;
+  return maybeRange !== undefined && !isNil(maybeRange[0]) && !isNil(maybeRange[1]);
 };
 
 export const TimeSlider: FC<TimeSliderProps> = (props) => {
   const defaultProps = { dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS', timezone: 'Browser', ...props };
-  const { range, value, timezone, dateFormat } = defaultProps;
+  const { range, value, timezone, dateFormat, fieldName } = defaultProps;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -107,22 +110,20 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
 
   // We have values if we have a range or value entry for both position
   const hasValues =
-    (value[0] !== undefined || (hasRange && range[0] !== undefined)) &&
-    (value[1] !== undefined || (hasRange && range[1] !== undefined));
+    (value[0] !== null || (hasRange && range[0] !== undefined)) &&
+    (value[1] !== null || (hasRange && range[1] !== undefined));
 
   let valueText: JSX.Element | null = null;
   if (hasValues) {
-    const lower = value[0] !== undefined ? value[0] : range![0]!;
-    const upper = value[1] !== undefined ? value[1] : range![1]!;
+    const lower = value[0] !== null ? value[0] : range![0]!;
+    const upper = value[1] !== null ? value[1] : range![1]!;
 
     // has value and doesn't have a
     const hasLowerValueInRange =
-      value[0] !== undefined &&
-      (!isValidRange(range) || (value[0] >= range[0] && value[0] <= range[1]));
+      value[0] !== null && (!isValidRange(range) || (value[0] >= range[0] && value[0] <= range[1]));
     // It's out of range if the upper value is above the upper range or below the lower range
     const hasUpperValueInRange =
-      value[1] !== undefined &&
-      (!isValidRange(range) || (value[1] <= range[1] && value[1] >= range[0]));
+      value[1] !== null && (!isValidRange(range) || (value[1] <= range[1] && value[1] >= range[0]));
 
     valueText = (
       <EuiText className="eui-textTruncate" size="s">
@@ -176,6 +177,7 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
           onChange={props.onChange}
           getTimezone={getTimezone}
           epochToKbnDateFormat={epochToKbnDateFormat}
+          fieldName={fieldName}
         />
       ) : (
         <TimeSliderComponentPopoverNoDocuments />
@@ -185,7 +187,7 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
 };
 
 const TimeSliderComponentPopoverNoDocuments: FC = () => {
-  return <EuiText size="s">There were no documents found, so no range is available</EuiText>;
+  return <EuiText size="s">{TimeSliderStrings.noDocumentsPopover.getLabel()}</EuiText>;
 };
 
 export const TimeSliderComponentPopover: FC<
@@ -194,15 +196,15 @@ export const TimeSliderComponentPopover: FC<
     getTimezone: () => string;
     epochToKbnDateFormat: (epoch: number) => string;
   }
-> = ({ range, value, onChange, getTimezone, epochToKbnDateFormat }) => {
+> = ({ range, value, onChange, getTimezone, epochToKbnDateFormat, fieldName }) => {
   const [lowerBound, upperBound] = range;
   let [lowerValue, upperValue] = value;
 
-  if (lowerValue === undefined) {
+  if (lowerValue === null) {
     lowerValue = lowerBound;
   }
 
-  if (upperValue === undefined) {
+  if (upperValue === null) {
     upperValue = upperBound;
   }
 
@@ -240,11 +242,11 @@ export const TimeSliderComponentPopover: FC<
     ([min, max]: [number, number]) => {
       // If a value is undefined and the number that is given here matches the range bounds
       // then we will ignore it, becuase they probably didn't actually select that value
-      const report: [number | undefined, number | undefined] = [undefined, undefined];
-      if (value[0] !== undefined || min !== range[0]) {
+      const report: [number | null, number | null] = [null, null];
+      if (value[0] !== null || min !== range[0]) {
         report[0] = min;
       }
-      if (value[1] !== undefined || max !== range[1]) {
+      if (value[1] !== null || max !== range[1]) {
         report[1] = max;
       }
 
@@ -257,7 +259,7 @@ export const TimeSliderComponentPopover: FC<
 
   return (
     <>
-      <EuiPopoverTitle paddingSize="s">title</EuiPopoverTitle>
+      <EuiPopoverTitle paddingSize="s">{fieldName}</EuiPopoverTitle>
       <EuiText textAlign="center" size="s">
         {epochToKbnDateFormat(lowerValue)} - {epochToKbnDateFormat(upperValue)}
       </EuiText>
@@ -268,7 +270,7 @@ export const TimeSliderComponentPopover: FC<
             id={'my-id'}
             max={fullRange[1]}
             min={fullRange[0]}
-            onChange={onChange}
+            onChange={onChangeHandler}
             step={undefined}
             value={[lowerValue, upperValue]}
             fullWidth
@@ -281,12 +283,12 @@ export const TimeSliderComponentPopover: FC<
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content="placeholder content">
+          <EuiToolTip content={TimeSliderStrings.resetButton.getLabel()}>
             <EuiButtonIcon
               iconType="eraser"
               color="danger"
-              onClick={() => onChange([null, null])}
-              aria-label="placeholder aria label"
+              onClick={() => onChangeHandler([null, null])}
+              aria-label={TimeSliderStrings.resetButton.getLabel()}
               data-test-subj="timeSlider__clearRangeButton"
             />
           </EuiToolTip>

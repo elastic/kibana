@@ -6,185 +6,275 @@
  * Side Public License, v 1.
  */
 
-import { take, skipWhile, first } from 'rxjs/operators';
-import { TimeSliderControlEmbeddableInput } from '.';
+import { interval, from, of } from 'rxjs';
+import { take, skipWhile, first, tap, mergeMap, delay, map } from 'rxjs/operators';
+import { TimeSliderControlEmbeddableInput, TimesliderEmbeddableFactory } from '.';
 import { TimeSliderControlEmbeddable } from './time_slider_embeddable';
 import { stubLogstashDataView } from '../../../../data_views/common/data_view.stub';
 import { pluginServices } from '../../services';
+import { TestScheduler } from 'rxjs/testing';
+import {
+  Filter,
+  buildEsQuery,
+  compareFilters,
+  buildRangeFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  RangeFilterParams,
+} from '@kbn/es-query';
+
+const buildFilter = (range: [number | undefined, number | undefined]) => {
+  const filterPieces: Record<string, number> = {};
+  if (range[0]) {
+    filterPieces.gte = range[0];
+  }
+  if (range[1]) {
+    filterPieces.lte = range[1];
+  }
+
+  const filter = buildRangeFilter(
+    stubLogstashDataView.getFieldByName('bytes')!,
+    filterPieces,
+    stubLogstashDataView
+  );
+  filter.meta.key = 'bytes';
+
+  return filter;
+};
+
+const rangeMin = 20;
+const rangeMax = 30;
+const range = { min: rangeMin, max: rangeMax };
+
+const lowerValue: [number, number] = [15, 25];
+const upperValue: [number, number] = [25, 35];
+const withinRangeValue: [number, number] = [21, 29];
+const outOfRangeValue: [number, number] = [31, 40];
+
+const rangeFilter = buildFilter([rangeMin, rangeMax]);
+const lowerValueFilter = buildFilter(lowerValue);
+const lowerValuePartialFilter = buildFilter([20, 25]);
+const upperValueFilter = buildFilter(upperValue);
+const upperValuePartialFilter = buildFilter([25, 30]);
+const withinRangeValueFilter = buildFilter(withinRangeValue);
+const outOfRangeValueFilter = buildFilter(outOfRangeValue);
+
+const baseInput: TimeSliderControlEmbeddableInput = {
+  id: 'id',
+  fieldName: 'bytes',
+  dataViewId: stubLogstashDataView.id!,
+};
+
+const inputWithValue: TimeSliderControlEmbeddableInput = {
+  id: 'id',
+  fieldName: 'bytes',
+  dataViewId: stubLogstashDataView.id!,
+  value: [10, 20],
+};
 
 describe('Time Slider Control Embeddable', () => {
   const services = pluginServices.getServices();
   const fetchRange = jest.spyOn(services.data, 'fetchFieldRange');
   const getDataView = jest.spyOn(services.data, 'getDataView');
+  const fetchRange$ = jest.spyOn(services.data, 'fetchFieldRange$');
+  const getDataView$ = jest.spyOn(services.data, 'getDataView$');
 
   beforeEach(() => {
     jest.resetAllMocks();
 
-    fetchRange.mockResolvedValue({ min: 0, max: 1 });
+    fetchRange.mockResolvedValue(range);
+    fetchRange$.mockReturnValue(of(range).pipe(delay(100)));
     getDataView.mockResolvedValue(stubLogstashDataView);
+    getDataView$.mockReturnValue(of(stubLogstashDataView));
+  });
+
+  describe('outputting filters', () => {
+    let testScheduler: TestScheduler;
+    beforeEach(() => {
+      testScheduler = new TestScheduler((actual, expected) => {
+        expect(actual).toEqual(expected);
+      });
+    });
+
+    const testFilterOutput = (
+      input: any,
+      expectedFilterAfterRangeFetch: any,
+      mockRange: { min?: number; max?: number } = range
+    ) => {
+      testScheduler.run(({ expectObservable, cold }) => {
+        fetchRange$.mockReturnValue(cold('--b', { b: mockRange }));
+        const expectedMarbles = 'a-b';
+        const expectedValues = {
+          a: undefined,
+          b: expectedFilterAfterRangeFetch ? [expectedFilterAfterRangeFetch] : undefined,
+        };
+
+        const embeddable = new TimeSliderControlEmbeddable(input, {});
+        const source$ = embeddable.getOutput$().pipe(map((o) => o.filters));
+
+        expectObservable(source$).toBe(expectedMarbles, expectedValues);
+      });
+    };
+
+    it('outputs filter of the range when no value is given', () => {
+      testFilterOutput(baseInput, rangeFilter);
+    });
+
+    it('outputs the value filter after the range is fetched', () => {
+      testFilterOutput({ ...baseInput, value: withinRangeValue }, withinRangeValueFilter);
+    });
+
+    describe('with validation', () => {
+      it('outputs a partial value filter if value is below range', () => {
+        testFilterOutput({ ...baseInput, value: lowerValue }, lowerValuePartialFilter);
+      });
+
+      it('outputs a partial value filter if value is above range', () => {
+        testFilterOutput({ ...baseInput, value: upperValue }, upperValuePartialFilter);
+      });
+
+      it('outputs range filter value if value is completely out of range', () => {
+        testFilterOutput({ ...baseInput, value: outOfRangeValue }, rangeFilter);
+      });
+
+      it('outputs no filter when no range available', () => {
+        testFilterOutput({ ...baseInput, value: withinRangeValue }, undefined, {});
+      });
+    });
+
+    describe('with validation off', () => {
+      it('outputs the lower value filter', () => {
+        testFilterOutput(
+          { ...baseInput, ignoreParentSettings: true, value: lowerValue },
+          lowerValueFilter
+        );
+      });
+
+      it('outputs the uppwer value filter', () => {
+        testFilterOutput(
+          { ...baseInput, ignoreParentSettings: true, value: upperValue },
+          upperValueFilter
+        );
+      });
+
+      it('outputs the out of range filter', () => {
+        testFilterOutput(
+          { ...baseInput, ignoreParentSettings: true, value: outOfRangeValue },
+          outOfRangeValueFilter
+        );
+      });
+
+      it('outputs the value filter when no range found', () => {
+        testFilterOutput(
+          { ...baseInput, ignoreParentSettings: true, value: withinRangeValue },
+          withinRangeValueFilter,
+          { min: undefined, max: undefined }
+        );
+      });
+    });
   });
 
   describe('fetching range', () => {
-    it('fetches range on init', async () => {
-      const input: TimeSliderControlEmbeddableInput = {
-        id: 'id',
-        fieldName: 'bytes',
-        dataViewId: stubLogstashDataView.id!,
-        value: [0, 1],
-      };
-
-      const expectedMin = 560;
-      const expectedMax = 1020;
-      fetchRange.mockResolvedValueOnce({ min: expectedMin, max: expectedMax });
-
-      const embeddable = new TimeSliderControlEmbeddable(input, {});
-
-      const state = await embeddable
-        .getComponentState$()
-        .pipe(
-          skipWhile((value) => value.loading),
-          first()
-        )
-        .toPromise();
-
-      expect(state.min).toBe(expectedMin);
-      expect(state.max).toBe(expectedMax);
-    });
-
-    it('fetches range on input change', async () => {
-      const input: TimeSliderControlEmbeddableInput = {
-        id: 'id',
-        fieldName: 'bytes',
-        dataViewId: stubLogstashDataView.id!,
-      };
-
-      const updatedInput: TimeSliderControlEmbeddableInput = {
-        id: 'id',
-        fieldName: '@timestamp',
-        dataViewId: stubLogstashDataView.id!,
-      };
-
-      const embeddable = new TimeSliderControlEmbeddable(input, {});
-      embeddable.updateInput(updatedInput);
-
-      await embeddable
-        .getComponentState$()
-        .pipe(
-          skipWhile((value) => value.loading),
-          first()
-        )
-        .toPromise();
-
-      expect(fetchRange).toBeCalledWith(stubLogstashDataView, '@timestamp', expect.anything());
-    });
-  });
-
-  describe('output', () => {
-    describe('filter', () => {
-      it('outputs the filter from the given value', async () => {
-        const input: TimeSliderControlEmbeddableInput = {
-          id: 'id',
-          fieldName: 'bytes',
-          dataViewId: stubLogstashDataView.id!,
-          value: [0, 1],
-        };
-
-        const embeddable = new TimeSliderControlEmbeddable(input, {});
-        const output = await embeddable
-          .getOutput$()
-          .pipe(
-            skipWhile((v) => v.filters === undefined),
-            first()
-          )
-          .toPromise();
-
-        expect(output.filters).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "meta": Object {
-                "field": "bytes",
-                "index": "logstash-*",
-                "key": "bytes",
-                "params": Object {},
-              },
-              "query": Object {
-                "range": Object {
-                  "bytes": Object {
-                    "gte": 0,
-                    "lte": 1,
-                  },
-                },
-              },
-            },
-          ]
-        `);
+    it('fetches range on init', () => {
+      const testScheduler = new TestScheduler((actual, expected) => {
+        expect(actual).toEqual(expected);
       });
 
-      it('outputs the filter from a partial value with available range', async () => {
-        const input: TimeSliderControlEmbeddableInput = {
-          id: 'id',
-          fieldName: 'bytes',
-          dataViewId: stubLogstashDataView.id!,
-          value: [1, undefined],
+      testScheduler.run(({ cold, expectObservable }) => {
+        const mockRange = { min: 1, max: 2 };
+        fetchRange$.mockReturnValue(cold('--b', { b: mockRange }));
+
+        const expectedMarbles = 'a-b';
+        const expectedValues = {
+          a: undefined,
+          b: mockRange,
         };
-        const range = { min: 0, max: 10 };
-        fetchRange.mockResolvedValue(range);
 
-        const embeddable = new TimeSliderControlEmbeddable(input, {});
-        let output = await embeddable
-          .getOutput$()
-          .pipe(
-            skipWhile((v) => v.filters === undefined),
-            take(2) // initial value, and then the value after the range is fetched which is what we're interested in
-          )
-          .toPromise();
+        const embeddable = new TimeSliderControlEmbeddable(baseInput, {});
+        const source$ = embeddable.getComponentState$().pipe(map((state) => state.range));
 
-        // Missing upper value uses upper range on the query
-        expect(output.filters![0].query!.range.bytes.gte).toBe(1);
-        expect(output.filters![0].query!.range.bytes.lte).toBe(range.max);
+        const { fieldName, ...inputForFetch } = baseInput;
 
-        embeddable.updateInput({
-          ...input,
-          value: [undefined, 9],
+        expectObservable(source$).toBe(expectedMarbles, expectedValues);
+        expect(fetchRange$).toBeCalledWith(stubLogstashDataView, fieldName, {
+          ...inputForFetch,
+          filters: undefined,
+          query: undefined,
+          timeRange: undefined,
+          viewMode: 'edit',
         });
+      });
+    });
 
-        output = await embeddable.getOutput$().pipe(take(2)).toPromise();
-
-        expect(output.filters![0].query!.range.bytes.gte).toBe(range.min);
-        expect(output.filters![0].query!.range.bytes.lte).toBe(9);
+    it('fetches range on input change', () => {
+      const testScheduler = new TestScheduler((actual, expected) => {
+        expect(actual).toEqual(expected);
       });
 
-      it('excludes filters if no value or range', async () => {
-        const input: TimeSliderControlEmbeddableInput = {
-          id: 'id',
-          fieldName: 'bytes',
-          dataViewId: stubLogstashDataView.id!,
-          value: [1, undefined],
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const mockRange = { min: 1, max: 2 };
+        fetchRange$.mockReturnValue(cold('a', { a: mockRange }));
+
+        const embeddable = new TimeSliderControlEmbeddable(baseInput, {});
+        const updatedInput = { ...baseInput, fieldName: '@timestamp' };
+
+        embeddable.updateInput(updatedInput);
+
+        expect(fetchRange$).toBeCalledTimes(2);
+        expect(fetchRange$.mock.calls[1][1]).toBe(updatedInput.fieldName);
+      });
+    });
+
+    it('passes input to fetch range to build the query', () => {
+      const testScheduler = new TestScheduler((actual, expected) => {
+        expect(actual).toEqual(expected);
+      });
+
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const mockRange = { min: 1, max: 2 };
+        fetchRange$.mockReturnValue(cold('a', { a: mockRange }));
+
+        const input = {
+          ...baseInput,
+          query: {} as any,
+          filters: {} as any,
+          timeRange: {} as any,
         };
-        const range = { min: undefined, max: undefined };
-        fetchRange.mockResolvedValue(range);
 
-        const embeddable = new TimeSliderControlEmbeddable(input, {});
-        let output = await embeddable
-          .getOutput$()
-          .pipe(
-            skipWhile((v) => v.filters === undefined),
-            take(1) // initial value, and then the value after the range is fetched which is what we're interested in
-          )
-          .toPromise();
+        new TimeSliderControlEmbeddable(input, {});
 
-        expect(output.filters![0].query!.range.bytes.gte).toBe(1);
-        expect(output.filters![0].query!.range.bytes.lte).toBe(undefined);
+        expect(fetchRange$).toBeCalledTimes(1);
+        const args = fetchRange$.mock.calls[0][2];
+        expect(args.query).toBe(input.query);
+        expect(args.filters).toBe(input.filters);
+        expect(args.timeRange).toBe(input.timeRange);
+      });
+    });
 
-        embeddable.updateInput({
-          ...input,
-          value: [undefined, 9],
-        });
+    it('does not pass ignored parent settings', () => {
+      const testScheduler = new TestScheduler((actual, expected) => {
+        expect(actual).toEqual(expected);
+      });
 
-        output = await embeddable.getOutput$().pipe(take(2)).toPromise();
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const mockRange = { min: 1, max: 2 };
+        fetchRange$.mockReturnValue(cold('a', { a: mockRange }));
 
-        expect(output.filters![0].query!.range.bytes.gte).toBe(undefined);
-        expect(output.filters![0].query!.range.bytes.lte).toBe(9);
+        const input = {
+          ...baseInput,
+          query: '' as any,
+          filters: {} as any,
+          timeRange: {} as any,
+          ignoreParentSettings: { ignoreFilters: true, ignoreQuery: true, ignoreTimerange: true },
+        };
+
+        new TimeSliderControlEmbeddable(input, {});
+
+        expect(fetchRange$).toBeCalledTimes(1);
+        const args = fetchRange$.mock.calls[0][2];
+        expect(args.query).not.toBe(input.query);
+        expect(args.filters).not.toBe(input.filters);
+        expect(args.timeRange).not.toBe(input.timeRange);
       });
     });
   });
