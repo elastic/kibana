@@ -9,12 +9,12 @@ import type { TransformConfigUnion, TransformId } from '../../../../../../common
 
 export type EsIndexName = string;
 export type EsIngestPipelineName = string;
-export type IndexPatternTitle = string;
+export type DataViewTitle = string;
 
 export interface StepDetailsExposedState {
   continuousModeDateField: string;
   continuousModeDelay: string;
-  createIndexPattern: boolean;
+  createDataView: boolean;
   destinationIndex: EsIndexName;
   destinationIngestPipeline: EsIngestPipelineName;
   isContinuousModeEnabled: boolean;
@@ -28,7 +28,7 @@ export interface StepDetailsExposedState {
   transformSettingsMaxPageSearchSize: number;
   transformSettingsDocsPerSecond?: number;
   valid: boolean;
-  indexPatternTimeField?: string | undefined;
+  dataViewTimeField?: string | undefined;
   _meta?: Record<string, unknown>;
 }
 
@@ -40,7 +40,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
   return {
     continuousModeDateField: '',
     continuousModeDelay: defaultContinuousModeDelay,
-    createIndexPattern: true,
+    createDataView: true,
     isContinuousModeEnabled: false,
     isRetentionPolicyEnabled: false,
     retentionPolicyDateField: '',
@@ -53,7 +53,7 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
     destinationIngestPipeline: '',
     touched: false,
     valid: false,
-    indexPatternTimeField: undefined,
+    dataViewTimeField: undefined,
   };
 }
 

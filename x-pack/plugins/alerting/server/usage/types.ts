@@ -27,6 +27,10 @@ export interface AlertingUsage {
   >;
   avg_execution_time_per_day: number;
   avg_execution_time_by_type_per_day: Record<string, number>;
+  avg_es_search_duration_per_day: number;
+  avg_es_search_duration_by_type_per_day: Record<string, number>;
+  avg_total_search_duration_per_day: number;
+  avg_total_search_duration_by_type_per_day: Record<string, number>;
   throttle_time: {
     min: string;
     avg: string;

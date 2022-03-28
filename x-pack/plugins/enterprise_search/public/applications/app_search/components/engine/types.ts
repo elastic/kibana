@@ -45,6 +45,7 @@ export interface EngineDetails extends Engine {
   unsearchedUnconfirmedFields: boolean;
   apiTokens: ApiToken[];
   apiKey: string;
+  elasticsearchIndexName?: string;
   schema: Schema;
   schemaConflicts?: SchemaConflicts;
   unconfirmedFields?: string[];
