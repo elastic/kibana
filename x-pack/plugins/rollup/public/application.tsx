@@ -29,7 +29,7 @@ const AppWithExecutionContext = ({
 }) => {
   useExecutionContext(executionContext, {
     type: 'application',
-    page: 'remoteClusters',
+    page: 'rollup',
   });
 
   return <App history={history} />;
