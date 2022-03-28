@@ -242,7 +242,7 @@ export type BulkEditActionRule =
 //     value: Rule['notifyWhen'];
 //   };
 
-type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Params;
+type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
 
 export interface BulkEditOptions<Params extends RuleTypeParams> {
   filter: string | KueryNode;
@@ -1425,15 +1425,15 @@ export class RulesClient {
             }
 
             const ruleParams = paramsModifier
-              ? paramsModifier(rule.attributes.params as Params)
-              : rule.attributes.params;
+              ? await paramsModifier(attributes.params as Params)
+              : attributes.params;
 
             // validate rule params
             const validatedAlertTypeParams = validateRuleTypeParams(
               ruleParams,
               ruleType.validate?.params
             );
-            validateMutatedRuleTypeParams(
+            const validatedMutatedAlertTypeParams = validateMutatedRuleTypeParams(
               validatedAlertTypeParams,
               rule.attributes.params,
               ruleType.validate?.params
@@ -1456,7 +1456,7 @@ export class RulesClient {
             } = await this.extractReferences(
               ruleType,
               ruleActions.actions,
-              validatedAlertTypeParams
+              validatedMutatedAlertTypeParams
             );
 
             // create API key

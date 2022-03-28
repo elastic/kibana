@@ -650,7 +650,7 @@ describe('bulkEdit()', () => {
       const result = await rulesClient.bulkEdit({
         filter: '',
         editActions: [],
-        paramsModifier: (params) => {
+        paramsModifier: async (params) => {
           params.index = ['test-index-*'];
 
           return params;
