@@ -11,7 +11,7 @@ import { render } from '../../../../../lib/helper/rtl_helpers';
 
 describe('NetworkRequestsTotal', () => {
   it('message in case total is greater than fetched', () => {
-    const { getByText, getByLabelText } = render(
+    const { getByText } = render(
       <NetworkRequestsTotal
         fetchedNetworkRequests={1000}
         totalNetworkRequests={1100}
