@@ -53,7 +53,6 @@ export interface ErrorResponse {
 
 if (!isMainThread) {
   const { port } = workerData as WorkerData;
-  console.log('WORKER=============> listening for work...');
   port.on('message', execute);
 }
 
@@ -68,7 +67,6 @@ const getPageCount = (pdfDoc: PDFKit.PDFDocument): number => {
 };
 
 async function execute({ data: { layout, logo, title, content } }: GeneratePdfRequest) {
-  console.log('WORKER=============> got work!');
   const { port } = workerData as WorkerData;
   try {
     const tableBorderWidth = 1;
@@ -97,7 +95,6 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
       content,
     });
 
-    console.log('WORKER=============> creating pdf doc!');
     const pdfDoc = printer.createPdfKitDocument(docDefinition, {
       tableLayouts: {
         noBorder: {
@@ -116,7 +113,6 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
       throw new Error('Document stream has not been generated');
     }
 
-    console.log('WORKER=============> creating buffer!');
     const buffer = await new Promise<Buffer>((resolve, reject) => {
       const buffers: Buffer[] = [];
       pdfDoc.on('error', reject);
@@ -137,7 +133,6 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
         },
       },
     };
-    console.log('WORKER=============> posting result back!');
     port.postMessage(successResponse, [buffer.buffer /* Transfer buffer instead of copying */]);
   } catch (error) {
     const errorResponse: ErrorResponse = { error: error.message, data: null };
