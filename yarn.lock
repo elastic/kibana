@@ -1482,10 +1482,10 @@
     "@elastic/transport" "^8.0.2"
     tslib "^2.3.0"
 
-"@elastic/ems-client@8.1.0":
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.1.0.tgz#e33ec651314a9ceb9a8a7f3e4c6e205c39f20efb"
-  integrity sha512-u7Y8EakPk07nqRYqRxYTTLOIMb8Y+u7UM+2BGaw10jYVxdQ85sA4oi37GJJPJVn7jk/x9R7yTQ6Mpc3FbPGoRg==
+"@elastic/ems-client@8.2.0":
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.2.0.tgz#35ca17f07a576c464b15a17ef9b228a51043e329"
+  integrity sha512-NtU/KjTMGntnrCY6+2jdkugn6pqMJj2EV4/Mff/MGlBLrWSlxYkYa6Q6KFhmT3V68RJUxOsId47mUdoQbRi/yg==
   dependencies:
     "@types/geojson" "^7946.0.7"
     "@types/lru-cache" "^5.1.0"
@@ -12810,10 +12810,10 @@ ejs@^3.1.6:
   dependencies:
     jake "^10.6.1"
 
-elastic-apm-http-client@11.0.0:
-  version "11.0.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.0.0.tgz#a38a85eae078e3f7f09edda86db6d6419a8ecfea"
-  integrity sha512-HB6+O0C4GGj9k5bd6yL3QK5prGKh+Rf8Tc5iW0T7FCdh2HliICfGmB6wmdQ2XkClblLtISh7tKYgVr9YgdXl3Q==
+elastic-apm-http-client@11.0.1:
+  version "11.0.1"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.0.1.tgz#15dbe99d56d62b3f732d1bd2b51bef6094b78801"
+  integrity sha512-5AOWlhs2WlZpI+DfgGqY/8Rk7KF8WeevaO8R961eBylavU6GWhLRNiJncohn5jsvrqhmeT19azBvy/oYRN7bJw==
   dependencies:
     agentkeepalive "^4.2.1"
     breadth-filter "^2.0.0"
@@ -12826,10 +12826,10 @@ elastic-apm-http-client@11.0.0:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.30.0:
-  version "3.30.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.30.0.tgz#4df7110324535089f66f7a3a96bf37d2fe47f38b"
-  integrity sha512-KumRBDGIE+MGgJfteAi9BDqeGxpAYpbovWjNdB5x8T3/zpnQRJkDMSblliEsMwD6uKf2+Nkxzmyq9UZdh5MbGQ==
+elastic-apm-node@^3.31.0:
+  version "3.31.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.31.0.tgz#6e0bf622d922c95ff0127a263babcdeaeea71457"
+  integrity sha512-0OulazfhkXYbOaGkHncqjwOfxtcvzsDyzUKr6Y1k95HwKrjf1Vi+xPutZv4p/WfDdO+JadphI0U2Uu5ncGB2iA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
@@ -12838,7 +12838,7 @@ elastic-apm-node@^3.30.0:
     basic-auth "^2.0.1"
     cookie "^0.4.0"
     core-util-is "^1.0.2"
-    elastic-apm-http-client "11.0.0"
+    elastic-apm-http-client "11.0.1"
     end-of-stream "^1.4.4"
     error-callsites "^2.0.4"
     error-stack-parser "^2.0.6"
@@ -20390,15 +20390,15 @@ mrmime@^1.0.0:
   resolved "https://registry.yarnpkg.com/mrmime/-/mrmime-1.0.0.tgz#14d387f0585a5233d291baba339b063752a2398b"
   integrity sha512-a70zx7zFfVO7XpnQ2IX1Myh9yY4UYvfld/dikWRnsXxbyvMcfz+u6UfgNAtH+k2QqtJuzVpv6eLTx1G2+WKZbQ==
 
-ms-chromium-edge-driver@^0.4.3:
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/ms-chromium-edge-driver/-/ms-chromium-edge-driver-0.4.3.tgz#808723efaf24da086ebc2a2feb0975162164d2ff"
-  integrity sha512-+UcyDNaNjvk17+Yx12WaiOCFB0TUgQ9dh5lHFVRaHn6sCGoMO1MWsO4+Ut6hdZHoJSKqk+dIOgHoAyWkpfsTaw==
+ms-chromium-edge-driver@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/ms-chromium-edge-driver/-/ms-chromium-edge-driver-0.5.1.tgz#18faec511f82637db942ef0007337d7196c94622"
+  integrity sha512-m8eP9LZ2SEOT20OG2z8PSrSvqyizGFWZpvT9rdX0b0R1rh2VsTUs8mE/DSop2TM0dUSWRe85mSd1ThFznMokhg==
   dependencies:
     extract-zip "^2.0.1"
     got "^11.8.2"
     lodash "^4.17.21"
-    regedit "^3.0.3"
+    regedit "^5.0.0"
 
 ms@2.0.0:
   version "2.0.0"
@@ -24521,10 +24521,10 @@ refractor@^3.2.0, refractor@^3.5.0:
     parse-entities "^2.0.0"
     prismjs "~1.25.0"
 
-regedit@^3.0.3:
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/regedit/-/regedit-3.0.3.tgz#0c2188e15f670de7d5740c5cea9bbebe99497749"
-  integrity sha512-SpHmMKOtiEYx0MiRRC48apBsmThoZ4svZNsYoK8leHd5bdUHV1nYb8pk8gh6Moou7/S9EDi1QsjBTpyXVQrPuQ==
+regedit@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/regedit/-/regedit-5.0.0.tgz#7ec444ef027cc704e104fae00586f84752291116"
+  integrity sha512-4uSqj6Injwy5TPtXlE+1F/v2lOW/bMfCqNIAXyib4aG1ZwacG69oyK/yb6EF8KQRMhz7YINxkD+/HHc6i7YJtA==
   dependencies:
     debug "^4.1.0"
     if-async "^3.7.4"
@@ -29278,10 +29278,22 @@ vega-scale@^7.0.3, vega-scale@^7.1.1, vega-scale@^7.2.0, vega-scale@~7.2.0:
     vega-time "^2.1.0"
     vega-util "^1.17.0"
 
-vega-scenegraph@^4.10.0, vega-scenegraph@^4.9.2, vega-scenegraph@^4.9.3, vega-scenegraph@~4.10.0:
+vega-scenegraph@^4.10.0, vega-scenegraph@^4.9.2, vega-scenegraph@^4.9.3:
   version "4.10.0"
   resolved "https://registry.yarnpkg.com/vega-scenegraph/-/vega-scenegraph-4.10.0.tgz#232643372760ea081f2a899f640530777c2e2ba8"
   integrity sha512-znUQAulNJnuXSza8+Qg1objNpXcHxP9KZwwp0XW4H/AHbzVhHEigZagb8xKDpQI1/8OSk2WZf9Bkr7CrsFC0hg==
+  dependencies:
+    d3-path "^3.0.1"
+    d3-shape "^3.1.0"
+    vega-canvas "^1.2.5"
+    vega-loader "^4.4.0"
+    vega-scale "^7.2.0"
+    vega-util "^1.15.2"
+
+vega-scenegraph@~4.10.1:
+  version "4.10.1"
+  resolved "https://registry.yarnpkg.com/vega-scenegraph/-/vega-scenegraph-4.10.1.tgz#944da67b8a28758fab2e1306259fb7ff6be89f6b"
+  integrity sha512-takIpkmNxYHhJYALOYzhTin3EDzbys6U4g+l1yJZVlXG9YTdiCMuEVAdtaQOCqF9/7qytD6pCrMxJY2HaoN0qQ==
   dependencies:
     d3-path "^3.0.1"
     d3-shape "^3.1.0"
@@ -29399,10 +29411,10 @@ vega-wordcloud@~4.1.3:
     vega-statistics "^1.7.9"
     vega-util "^1.15.2"
 
-vega@^5.22.0:
-  version "5.22.0"
-  resolved "https://registry.yarnpkg.com/vega/-/vega-5.22.0.tgz#9286832a0bc523ee39b1f3baff9a2ca1957a61f0"
-  integrity sha512-ZIehKTrMY93sWaWIn/2N2LwsCN8XymQthxQA5fQwTmefVl7OOvcYmsGFJ9nttXUF4n0z5WRXkSsPZcJHHBlOKw==
+vega@^5.22.1:
+  version "5.22.1"
+  resolved "https://registry.yarnpkg.com/vega/-/vega-5.22.1.tgz#e028f3645de18e0070317bc04410282975549e1e"
+  integrity sha512-KJBI7OWSzpfCPbmWl3GQCqBqbf2TIdpWS0mzO6MmWbvdMhWHf74P9IVnx1B1mhg0ZTqWFualx9ZYhWzMMwudaQ==
   dependencies:
     vega-crossfilter "~4.1.0"
     vega-dataflow "~5.7.4"
@@ -29421,7 +29433,7 @@ vega@^5.22.0:
     vega-regression "~1.1.0"
     vega-runtime "~6.1.3"
     vega-scale "~7.2.0"
-    vega-scenegraph "~4.10.0"
+    vega-scenegraph "~4.10.1"
     vega-statistics "~1.8.0"
     vega-time "~2.1.0"
     vega-transforms "~4.10.0"

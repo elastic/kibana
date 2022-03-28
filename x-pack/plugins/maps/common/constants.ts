@@ -164,6 +164,7 @@ export enum RENDER_AS {
   HEATMAP = 'heatmap',
   POINT = 'point',
   GRID = 'grid',
+  HEX = 'hex',
 }
 
 export enum GRID_RESOLUTION {

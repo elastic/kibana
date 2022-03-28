@@ -6,42 +6,38 @@
  */
 
 import uuid from 'uuid';
+import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';
 import '../../../../../common/mock/match_media';
-import { deleteRulesAction, duplicateRulesAction, editRuleAction } from './actions';
+import { goToRuleEditPage, executeRulesBulkAction } from './actions';
 import { getRulesTableActions } from './rules_table_actions';
 import { mockRule } from './__mocks__/mock';
 
-jest.mock('./actions', () => ({
-  duplicateRulesAction: jest.fn(),
-  deleteRulesAction: jest.fn(),
-  editRuleAction: jest.fn(),
-}));
+jest.mock('./actions');
 
-const duplicateRulesActionMock = duplicateRulesAction as jest.Mock;
-const deleteRulesActionMock = deleteRulesAction as jest.Mock;
-const editRuleActionMock = editRuleAction as jest.Mock;
+const executeRulesBulkActionMock = executeRulesBulkAction as jest.Mock;
+const goToRuleEditPageMock = goToRuleEditPage as jest.Mock;
 
 describe('getRulesTableActions', () => {
   const rule = mockRule(uuid.v4());
-  const dispatchToaster = jest.fn();
-  const reFetchRules = jest.fn();
+  const toasts = useAppToastsMock.create();
+  const invalidateRules = jest.fn();
   const setLoadingRules = jest.fn();
 
   beforeEach(() => {
-    duplicateRulesActionMock.mockClear();
-    deleteRulesActionMock.mockClear();
-    reFetchRules.mockClear();
+    jest.clearAllMocks();
   });
 
   test('duplicate rule onClick should call rule edit after the rule is duplicated', async () => {
     const ruleDuplicate = mockRule('newRule');
     const navigateToApp = jest.fn();
-    duplicateRulesActionMock.mockImplementation(() => Promise.resolve([ruleDuplicate]));
+    executeRulesBulkActionMock.mockImplementation(() =>
+      Promise.resolve({ attributes: { results: { created: [ruleDuplicate] } } })
+    );
 
     const duplicateRulesActionObject = getRulesTableActions(
-      dispatchToaster,
+      toasts,
       navigateToApp,
-      reFetchRules,
+      invalidateRules,
       true,
       setLoadingRules
     )[1];
@@ -49,17 +45,19 @@ describe('getRulesTableActions', () => {
     expect(duplicateRulesActionHandler).toBeDefined();
 
     await duplicateRulesActionHandler!(rule);
-    expect(duplicateRulesActionMock).toHaveBeenCalled();
-    expect(editRuleActionMock).toHaveBeenCalledWith(ruleDuplicate.id, navigateToApp);
+    expect(executeRulesBulkAction).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'duplicate' })
+    );
+    expect(goToRuleEditPageMock).toHaveBeenCalledWith(ruleDuplicate.id, navigateToApp);
   });
 
   test('delete rule onClick should call refetch after the rule is deleted', async () => {
     const navigateToApp = jest.fn();
 
     const deleteRulesActionObject = getRulesTableActions(
-      dispatchToaster,
+      toasts,
       navigateToApp,
-      reFetchRules,
+      invalidateRules,
       true,
       setLoadingRules
     )[3];
@@ -67,10 +65,13 @@ describe('getRulesTableActions', () => {
     expect(deleteRuleActionHandler).toBeDefined();
 
     await deleteRuleActionHandler!(rule);
-    expect(deleteRulesActionMock).toHaveBeenCalledTimes(1);
-    expect(reFetchRules).toHaveBeenCalledTimes(1);
-    expect(deleteRulesActionMock.mock.invocationCallOrder[0]).toBeLessThan(
-      reFetchRules.mock.invocationCallOrder[0]
+    expect(executeRulesBulkAction).toHaveBeenCalledTimes(1);
+    expect(executeRulesBulkAction).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'delete' })
+    );
+    expect(invalidateRules).toHaveBeenCalledTimes(1);
+    expect(executeRulesBulkActionMock.mock.invocationCallOrder[0]).toBeLessThan(
+      invalidateRules.mock.invocationCallOrder[0]
     );
   });
 });
