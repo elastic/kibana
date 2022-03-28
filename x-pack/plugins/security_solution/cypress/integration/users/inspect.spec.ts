@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { AUTHENTICATIONS_TABLE } from '../../screens/hosts/authentications';
 import { INSPECT_MODAL } from '../../screens/inspect';
 import { ALL_USERS_TABLE } from '../../screens/users/all_users';
+import { AUTHENTICATIONS_TAB } from '../../screens/users/user_authentications';
 import { cleanKibana } from '../../tasks/common';
 
 import { clickInspectButton, closesModal } from '../../tasks/inspect';
@@ -28,6 +30,12 @@ describe('Inspect', () => {
 
     it(`inspects all users table`, () => {
       clickInspectButton(ALL_USERS_TABLE);
+      cy.get(INSPECT_MODAL).should('be.visible');
+    });
+
+    it(`inspects authentications table`, () => {
+      cy.get(AUTHENTICATIONS_TAB).click();
+      clickInspectButton(AUTHENTICATIONS_TABLE);
       cy.get(INSPECT_MODAL).should('be.visible');
     });
   });

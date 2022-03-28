@@ -11,6 +11,8 @@ exports[`Paginated Table Component rendering it renders the default load more ta
     <HeaderSectionComponent
       subtitle="Showing: 1 Test Unit"
       title="Hosts"
+      toggleQuery={[Function]}
+      toggleStatus={true}
       tooltip="My test tooltip"
     >
       <p>
@@ -58,6 +60,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
           },
         ]
       }
+      data-test-subj="paginated-basic-table"
       items={
         Array [
           Object {

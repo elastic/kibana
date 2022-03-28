@@ -160,6 +160,12 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Enables relative precentage mode',
       }),
     },
+    commonLabel: {
+      types: ['string'],
+      help: i18n.translate('expressionGauge.functions.gauge.args.commonLabel.help', {
+        defaultMessage: 'Specifies the common label outside the chart',
+      }),
+    },
     ariaLabel: {
       types: ['string'],
       help: i18n.translate('expressionGauge.functions.gaugeChart.config.ariaLabel.help', {
@@ -182,12 +188,16 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     }
 
     if (handlers?.inspectorAdapters?.tables) {
-      const logTable = prepareLogTable(data, [
-        [metric ? [metric] : undefined, strings.getMetricHelp()],
-        [min ? [min] : undefined, strings.getMinHelp()],
-        [max ? [max] : undefined, strings.getMaxHelp()],
-        [goal ? [goal] : undefined, strings.getGoalHelp()],
-      ]);
+      const logTable = prepareLogTable(
+        data,
+        [
+          [metric ? [metric] : undefined, strings.getMetricHelp()],
+          [min ? [min] : undefined, strings.getMinHelp()],
+          [max ? [max] : undefined, strings.getMaxHelp()],
+          [goal ? [goal] : undefined, strings.getGoalHelp()],
+        ],
+        true
+      );
 
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
