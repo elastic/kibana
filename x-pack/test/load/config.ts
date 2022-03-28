@@ -13,6 +13,8 @@ import { GatlingTestRunner } from './runner';
 // These "secret" values are intentionally written in the source.
 const APM_SERVER_URL = 'https://142fea2d3047486e925eb8b223559cae.apm.europe-west1.gcp.cloud.es.io';
 const APM_PUBLIC_TOKEN = 'pWFFEym07AKBBhUE2i';
+const AGGS_SHARD_DELAY = process.env.LOAD_TESTING_SHARD_DELAY;
+const DISABLE_PLUGINS = process.env.LOAD_TESTING_DISABLE_PLUGINS;
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -43,6 +45,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalTestsConfig.get('kbnTestServer.sourceArgs'),
         '--no-base-path',
         '--env.name=development',
+        ...(!!AGGS_SHARD_DELAY ? ['--data.search.aggs.shardDelay.enabled=true'] : []),
+        ...(!!DISABLE_PLUGINS ? ['--plugins.initialize=false'] : []),
       ],
       env: {
         ELASTIC_APM_ACTIVE: process.env.ELASTIC_APM_ACTIVE,
