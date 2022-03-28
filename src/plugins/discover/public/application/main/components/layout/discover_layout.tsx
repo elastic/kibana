@@ -239,7 +239,7 @@ export function DiscoverLayout({
         <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
           {savedSearch.title}
         </h1>
-        <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
+        <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
           <EuiFlexItem grow={false}>
             <SidebarMemoized
               columns={columns}
