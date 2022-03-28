@@ -9659,7 +9659,6 @@
     "xpack.enterpriseSearch.workplaceSearch.sources.learnCustom.features.button": "Découvrir les fonctionnalités de Platinum",
     "xpack.enterpriseSearch.workplaceSearch.sources.learnMore.link": "En savoir plus",
     "xpack.enterpriseSearch.workplaceSearch.sources.learnMore.text": "{learnMoreLink} sur les autorisations",
-    "xpack.enterpriseSearch.workplaceSearch.sources.learnMoreCustom.text": "{learnMoreLink} sur les sources personnalisées.",
     "xpack.enterpriseSearch.workplaceSearch.sources.licenseCallout.description": "Pour en savoir plus, contactez votre administrateur d'expérience de recherche.",
     "xpack.enterpriseSearch.workplaceSearch.sources.licenseCallout.title": "Les sources privées ne sont plus disponibles",
     "xpack.enterpriseSearch.workplaceSearch.sources.noContent.title": "Aucun contenu pour l'instant",

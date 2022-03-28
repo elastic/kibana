@@ -200,18 +200,18 @@ describe('useSearchStrategy', () => {
 
     expect(start).toBeCalledWith(expect.objectContaining({ signal }));
   });
-  it('skip = true will cancel any running request', () => {
+  it('abort = true will cancel any running request', () => {
     const abortSpy = jest.fn();
     const signal = new AbortController().signal;
     jest.spyOn(window, 'AbortController').mockReturnValue({ abort: abortSpy, signal });
     const factoryQueryType = 'fakeQueryType' as FactoryQueryTypes;
     const localProps = {
       ...userSearchStrategyProps,
-      skip: false,
+      abort: false,
       factoryQueryType,
     };
     const { rerender } = renderHook(() => useSearchStrategy<FactoryQueryTypes>(localProps));
-    localProps.skip = true;
+    localProps.abort = true;
     act(() => rerender());
     expect(abortSpy).toHaveBeenCalledTimes(1);
   });
