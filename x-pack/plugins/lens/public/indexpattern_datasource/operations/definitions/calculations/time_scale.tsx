@@ -28,7 +28,7 @@ export type OverallAverageIndexPatternColumn = OverallMetricIndexPatternColumn<'
 
 export type TimeScaleIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
-    operationType: 'time_scale';
+    operationType: 'normalize_by_unit';
     params: {
       unit?: string;
     };
@@ -36,10 +36,10 @@ export type TimeScaleIndexPatternColumn = FormattedIndexPatternColumn &
 
 export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn, 'fullReference'> =
   {
-    type: 'time_scale',
+    type: 'normalize_by_unit',
     priority: 1,
     displayName: i18n.translate('xpack.lens.indexPattern.timeScale', {
-      defaultMessage: 'Time scale',
+      defaultMessage: 'Normalize by unit',
     }),
     input: 'fullReference',
     selectionStyle: 'hidden',
@@ -58,7 +58,7 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
       };
     },
     getDefaultLabel: (column, indexPattern, columns) => {
-      return 'time_scale';
+      return 'normalize_by_unit';
     },
     toExpression: (layer, columnId) => {
       const currentColumn = layer.columns[columnId] as unknown as TimeScaleIndexPatternColumn;
@@ -82,9 +82,9 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
     },
     buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
       return {
-        label: 'Time scale',
+        label: 'Normalize by unit',
         dataType: 'number',
-        operationType: 'time_scale',
+        operationType: 'normalize_by_unit',
         isBucketed: false,
         scale: 'ratio',
         references: referenceIds,
@@ -103,14 +103,23 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
           layer,
           columnId,
           i18n.translate('xpack.lens.indexPattern.timeScale', {
-            defaultMessage: 'Time scale',
+            defaultMessage: 'Normalize by unit',
           })
         ),
         getDisallowedPreviousShiftMessage(layer, columnId),
         !(layer.columns[columnId] as TimeScaleIndexPatternColumn).params.unit
           ? [
               i18n.translate('xpack.lens.indexPattern.timeScale.missingUnit', {
-                defaultMessage: 'No unit specified for time scale',
+                defaultMessage: 'No unit specified for normalize by unit.',
+              }),
+            ]
+          : [],
+        ['s', 'm', 'h', 'd'].indexOf(
+          (layer.columns[columnId] as TimeScaleIndexPatternColumn).params.unit || 's'
+        ) === -1
+          ? [
+              i18n.translate('xpack.lens.indexPattern.timeScale.wrongUnit', {
+                defaultMessage: 'Unknown unit specified, use s,m,h or d.',
               }),
             ]
           : [],
@@ -126,15 +135,12 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
       description: i18n.translate('xpack.lens.indexPattern.time_scale.documentation.markdown', {
         defaultMessage: `
 
-Normalizes a metric to always be shown by a certain time unit independently of the actual interval of the underlying date histogram.
+This advanced function is useful for normalizing counts and sums to a specific time interval. It allows for integration with metrics that are stored already normalized to a specific time interval.
 
 This function can only be used if there's a date histogram function used in the current chart.
 
-Example: Sum of bytes per second, independent of date histogram interval
-\`time_scale(sum(bytes), unit='s')\`
-
-Example: Adding a counter metric and a gauge metric:
-\`time_scale(counter_rate(max(in_bytes)), unit=s) + last_value(internal_traffic_speed)\`
+Example: A ratio comparing an already normalized metric to another metric that needs to be normalized.
+\`normalize_by_unit(counter_rate(max(system.diskio.write.bytes)), unit='s') / last_value(apache.status.bytes_per_second)\`
       `,
       }),
     },
