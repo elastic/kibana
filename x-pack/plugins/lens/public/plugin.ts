@@ -449,7 +449,10 @@ export class LensPlugin {
 
     startDependencies.uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      createOpenInDiscoverAction(startDependencies.discover!)
+      createOpenInDiscoverAction(
+        startDependencies.discover!,
+        core.application.capabilities.discover.show as boolean
+      )
     );
 
     return {

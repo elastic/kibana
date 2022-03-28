@@ -14,7 +14,7 @@ import { DOC_TYPE } from '../../common';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
 
-export const createOpenInDiscoverAction = (discover: DiscoverStart) =>
+export const createOpenInDiscoverAction = (discover: DiscoverStart, hasDiscoverAccess: boolean) =>
   createAction<{ embeddable: IEmbeddable }>({
     type: ACTION_OPEN_IN_DISCOVER,
     id: ACTION_OPEN_IN_DISCOVER,
@@ -25,6 +25,7 @@ export const createOpenInDiscoverAction = (discover: DiscoverStart) =>
         defaultMessage: 'Open in Discover',
       }),
     isCompatible: async (context: { embeddable: IEmbeddable }) => {
+      if (!hasDiscoverAccess) return false;
       return (
         context.embeddable.type === DOC_TYPE &&
         (await (context.embeddable as Embeddable).canViewUnderlyingData())
