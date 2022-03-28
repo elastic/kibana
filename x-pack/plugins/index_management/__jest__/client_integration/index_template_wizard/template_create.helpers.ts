@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { registerTestBed, AsyncTestBedConfig } from '@kbn/test/jest';
 import { HttpSetup } from 'src/core/public';
 import { TemplateCreate } from '../../../public/application/sections/template_create';
