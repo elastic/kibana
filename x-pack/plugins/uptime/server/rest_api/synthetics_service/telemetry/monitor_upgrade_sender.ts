@@ -53,7 +53,7 @@ export function formatTelemetryEvent({
   lastUpdatedAt?: string;
   durationSinceLastUpdated?: number;
   deletedAt?: string;
-  errors?: ServiceLocationErrors;
+  errors?: ServiceLocationErrors | null;
 }) {
   const { attributes } = monitor;
 
@@ -91,7 +91,7 @@ export function formatTelemetryUpdateEvent(
   currentMonitor: SavedObjectsUpdateResponse<SyntheticsMonitor>,
   previousMonitor: SavedObject<SyntheticsMonitor>,
   kibanaVersion: string,
-  errors?: ServiceLocationErrors
+  errors?: ServiceLocationErrors | null
 ) {
   let durationSinceLastUpdated: number = 0;
   if (currentMonitor.updated_at && previousMonitor.updated_at) {
@@ -113,7 +113,7 @@ export function formatTelemetryDeleteEvent(
   previousMonitor: SavedObject<SyntheticsMonitor>,
   kibanaVersion: string,
   deletedAt: string,
-  errors?: ServiceLocationErrors
+  errors?: ServiceLocationErrors | null
 ) {
   let durationSinceLastUpdated: number = 0;
   if (deletedAt && previousMonitor.updated_at) {
