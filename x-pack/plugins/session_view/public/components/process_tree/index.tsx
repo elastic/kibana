@@ -153,6 +153,7 @@ export const ProcessTree = ({
         const elBottom = elTop + elHeight;
         const isVisible = elBottom >= viewPortElTop && elTop <= viewPortElBottom;
 
+        // jest will die when calling scrollIntoView (perhaps not part of the DOM it executes under)
         if (!isVisible && processEl.scrollIntoView) {
           processEl.scrollIntoView({ block: 'center' });
         }
