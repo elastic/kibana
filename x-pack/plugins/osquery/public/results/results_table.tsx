@@ -46,6 +46,7 @@ interface ResultsTableComponentProps {
   agentIds?: string[];
   endDate?: string;
   startDate?: string;
+  addToTimeline?: (actionId: string) => void;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -53,6 +54,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   agentIds,
   startDate,
   endDate,
+  addToTimeline,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -321,10 +323,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             endDate={endDate}
             startDate={startDate}
           />
+          {addToTimeline && addToTimeline(actionId)}
         </>
       ),
     }),
-    [actionId, endDate, startDate]
+    [actionId, actionId, endDate, startDate]
   );
 
   useEffect(

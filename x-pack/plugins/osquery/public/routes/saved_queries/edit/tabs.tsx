@@ -17,6 +17,7 @@ interface ResultTabsProps {
   agentIds?: string[];
   startDate?: string;
   endDate?: string;
+  addToTimeline?: (actionId: string) => void;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -24,6 +25,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   agentIds,
   endDate,
   startDate,
+  addToTimeline,
 }) => {
   const tabs = useMemo(
     () => [
@@ -38,6 +40,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
               agentIds={agentIds}
               startDate={startDate}
               endDate={endDate}
+              addToTimeline={addToTimeline}
             />
           </>
         ),
@@ -57,7 +60,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         ),
       },
     ],
-    [actionId, agentIds, endDate, startDate]
+    [actionId, agentIds, endDate, startDate, addToTimeline]
   );
 
   return (

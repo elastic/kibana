@@ -62,6 +62,7 @@ interface LiveQueryFormProps {
   ecsMappingField?: boolean;
   formType?: FormType;
   enabled?: boolean;
+  addToTimeline?: (actionId: string) => void;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -72,6 +73,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   ecsMappingField = true,
   formType = 'steps',
   enabled = true,
+  addToTimeline,
 }) => {
   const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -378,9 +380,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const resultsStepContent = useMemo(
     () =>
       actionId ? (
-        <ResultTabs actionId={actionId} endDate={data?.actions[0].expiration} agentIds={agentIds} />
+        <ResultTabs
+          actionId={actionId}
+          endDate={data?.actions[0].expiration}
+          agentIds={agentIds}
+          addToTimeline={addToTimeline}
+        />
       ) : null,
-    [actionId, agentIds, data?.actions]
+    [actionId, agentIds, data?.actions, addToTimeline]
   );
 
   const formSteps: EuiContainedStepProps[] = useMemo(

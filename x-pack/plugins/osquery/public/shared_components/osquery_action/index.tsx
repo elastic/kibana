@@ -6,7 +6,7 @@
  */
 
 import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, ReactElement } from 'react';
 import { QueryClientProvider } from 'react-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
@@ -20,9 +20,14 @@ import { useIsOsqueryAvailable } from './use_is_osquery_available';
 interface OsqueryActionProps {
   agentId?: string;
   formType: 'steps' | 'simple';
+  addToTimeline: (actionId: string) => void;
 }
 
-const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formType = 'simple' }) => {
+const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
+  agentId,
+  formType = 'simple',
+  addToTimeline,
+}) => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
   const emptyPrompt = useMemo(
@@ -134,18 +139,18 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
     );
   }
 
-  return <LiveQuery formType={formType} agentId={agentId} />;
+  return <LiveQuery formType={formType} agentId={agentId} addToTimeline={addToTimeline} />;
 };
 
 const OsqueryAction = React.memo(OsqueryActionComponent);
 
 // @ts-expect-error update types
-const OsqueryActionWrapperComponent = ({ services, agentId, formType }) => (
+const OsqueryActionWrapperComponent = ({ services, agentId, formType, addToTimeline }) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <OsqueryAction agentId={agentId} formType={formType} />
+          <OsqueryAction agentId={agentId} formType={formType} addToTimeline={addToTimeline} />
         </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>

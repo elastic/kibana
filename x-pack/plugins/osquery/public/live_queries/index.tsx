@@ -7,7 +7,7 @@
 
 import { castArray } from 'lodash';
 import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, ReactElement } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LiveQueryForm } from './form';
@@ -28,6 +28,7 @@ interface LiveQueryProps {
   ecsMappingField?: boolean;
   enabled?: boolean;
   formType?: 'steps' | 'simple';
+  addToTimeline?: (actionId: string) => void;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -44,6 +45,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   ecsMappingField,
   formType,
   enabled,
+  addToTimeline,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
@@ -113,6 +115,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       onSuccess={onSuccess}
       formType={formType}
       enabled={enabled}
+      addToTimeline={addToTimeline}
     />
   );
 };

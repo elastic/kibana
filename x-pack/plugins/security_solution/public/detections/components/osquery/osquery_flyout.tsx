@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutFooter, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
@@ -24,9 +24,37 @@ export interface OsqueryFlyoutProps {
 
 export const OsqueryFlyout: React.FC<OsqueryFlyoutProps> = ({ agentId, onClose }) => {
   const {
-    services: { osquery },
+    services: { osquery, timelines },
   } = useKibana();
 
+  const { getAddToTimelineButton } = timelines.getHoverActions();
+
+  const handleAddToTimeline = useCallback(
+    (actionId: string) => {
+      console.log({ actionId });
+      const providerA: DataProvider = {
+        and: [],
+        enabled: true,
+        excluded: false,
+        id: actionId,
+        kqlQuery: '',
+        name: actionId,
+        queryMatch: {
+          field: 'field.test',
+          value: 'testValue',
+          operator: ':',
+        },
+      };
+
+      return getAddToTimelineButton({
+        dataProvider: providerA,
+        field: actionId,
+        ownFocus: false,
+        showTooltip: true,
+      });
+    },
+    [getAddToTimelineButton]
+  );
   // @ts-expect-error
   const { OsqueryAction } = osquery;
   return (
@@ -45,7 +73,7 @@ export const OsqueryFlyout: React.FC<OsqueryFlyoutProps> = ({ agentId, onClose }
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <OsqueryActionWrapper data-test-subj="flyout-body-osquery">
-          <OsqueryAction agentId={agentId} formType="steps" />
+          <OsqueryAction agentId={agentId} formType="steps" addToTimeline={handleAddToTimeline} />
         </OsqueryActionWrapper>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
