@@ -57,7 +57,7 @@
                 "section": "def-common.AlertAction",
                 "text": "AlertAction"
               },
-              "[]; throttle: string | null; alertTypeId: string; consumer: string; schedule: ",
+              "[]; throttle: string | null; consumer: string; alertTypeId: string; schedule: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -81,7 +81,7 @@
                 "section": "def-common.AlertExecutionStatus",
                 "text": "AlertExecutionStatus"
               },
-              "; }"
+              "; snoozeEndTime?: Date | null | undefined; }"
             ],
             "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
             "deprecated": false
@@ -1904,8 +1904,8 @@
                 "pluginId": "alerting",
                 "scope": "server",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.PublicAlertingConfig",
-                "text": "PublicAlertingConfig"
+                "section": "def-server.AlertingRulesConfig",
+                "text": "AlertingRulesConfig"
               }
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
@@ -2433,6 +2433,20 @@
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleType.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "RuleTypeConfig",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2526,6 +2540,20 @@
           "SavedObjectAttributes"
         ],
         "path": "x-pack/plugins/alerting/common/alert.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.AlertingRulesConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "AlertingRulesConfig",
+        "description": [],
+        "signature": [
+          "{ readonly minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; }"
+        ],
+        "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2653,20 +2681,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-server.PublicAlertingConfig",
-        "type": "Type",
-        "tags": [],
-        "label": "PublicAlertingConfig",
-        "description": [],
-        "signature": [
-          "{ readonly minimumScheduleInterval: string; }"
-        ],
-        "path": "x-pack/plugins/alerting/server/config.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-server.RulesClient",
         "type": "Type",
         "tags": [],
@@ -2775,7 +2789,11 @@
             "section": "def-common.AlertSummary",
             "text": "AlertSummary"
           },
-          ">; updateApiKey: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
+          ">; getExecutionLogForRule: ({ id, dateStart, dateEnd, filter, page, perPage, sort, }: ",
+          "GetExecutionLogByIdParams",
+          ") => Promise<",
+          "IExecutionLogResult",
+          ">; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeEndTime, }: { id: string; snoozeEndTime: string | -1; }) => Promise<void>; unsnooze: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
           ") => Promise<void>; unmuteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
@@ -3540,6 +3558,19 @@
             ],
             "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Alert.snoozeEndTime",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "snoozeEndTime",
+            "description": [],
+            "signature": [
+              "Date | null | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3648,6 +3679,19 @@
             ],
             "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertAggregations.ruleSnoozedStatus",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleSnoozedStatus",
+            "description": [],
+            "signature": [
+              "{ snoozed: number; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3670,7 +3714,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
+              "\"error\" | \"unknown\" | \"warning\" | \"pending\" | \"ok\" | \"active\""
             ],
             "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
@@ -3742,6 +3786,27 @@
                 "docId": "kibAlertingPluginApi",
                 "section": "def-common.AlertExecutionStatusErrorReasons",
                 "text": "AlertExecutionStatusErrorReasons"
+              },
+              "; message: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertExecutionStatus.warning",
+            "type": "Object",
+            "tags": [],
+            "label": "warning",
+            "description": [],
+            "signature": [
+              "{ reason: ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.AlertExecutionStatusWarningReasons",
+                "text": "AlertExecutionStatusWarningReasons"
               },
               "; message: string; } | undefined"
             ],
@@ -4328,7 +4393,7 @@
             "label": "state",
             "description": [],
             "signature": [
-              "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; triggeredActions: { group?: string | undefined; id?: string | undefined; actionTypeId?: string | undefined; params?: { [x: string]: unknown; } | undefined; }[]; }"
+              "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; alertExecutionStore: { numberOfTriggeredActions?: number | undefined; triggeredActionsStatus?: string | undefined; }; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
             "deprecated": false
@@ -4777,8 +4842,19 @@
         "label": "AlertExecutionStatuses",
         "description": [],
         "signature": [
-          "\"error\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
+          "\"error\" | \"unknown\" | \"warning\" | \"pending\" | \"ok\" | \"active\""
         ],
+        "path": "x-pack/plugins/alerting/common/alert.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.AlertExecutionStatusWarningReasons",
+        "type": "string",
+        "tags": [],
+        "label": "AlertExecutionStatusWarningReasons",
+        "description": [],
         "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -5108,7 +5184,7 @@
         "label": "RuleExecutionState",
         "description": [],
         "signature": [
-          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; triggeredActions: { group?: string | undefined; id?: string | undefined; actionTypeId?: string | undefined; params?: { [x: string]: unknown; } | undefined; }[]; }"
+          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; alertExecutionStore: { numberOfTriggeredActions?: number | undefined; triggeredActionsStatus?: string | undefined; }; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
         "deprecated": false,
@@ -5180,7 +5256,7 @@
             "section": "def-common.AlertAction",
             "text": "AlertAction"
           },
-          "[]; throttle: string | null; alertTypeId: string; consumer: string; schedule: ",
+          "[]; throttle: string | null; consumer: string; alertTypeId: string; schedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -5204,7 +5280,7 @@
             "section": "def-common.AlertExecutionStatus",
             "text": "AlertExecutionStatus"
           },
-          "; }"
+          "; snoozeEndTime?: Date | null | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
@@ -5264,7 +5340,7 @@
         "label": "AlertExecutionStatusValues",
         "description": [],
         "signature": [
-          "readonly [\"ok\", \"active\", \"error\", \"pending\", \"unknown\"]"
+          "readonly [\"ok\", \"active\", \"error\", \"pending\", \"unknown\", \"warning\"]"
         ],
         "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
