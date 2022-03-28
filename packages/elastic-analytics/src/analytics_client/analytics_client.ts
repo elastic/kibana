@@ -200,7 +200,6 @@ export class AnalyticsClient implements IAnalyticsClient {
   };
 
   public registerContextProvider = <Context>(contextProviderOpts: ContextProviderOpts<Context>) => {
-    // const contextProviderID = `context_provider_${Date.now()}`;
     contextProviderOpts.context$
       .pipe(
         tap((ctx) => {
