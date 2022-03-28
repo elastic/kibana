@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from 'src/plugins/data/common';
+import { DataView } from 'src/plugins/data_views/common';
 import { legacyExistingFields, existingFields, Field, buildFieldList } from './existing_fields';
 
 describe('existingFields', () => {
@@ -143,7 +143,7 @@ describe('buildFieldList', () => {
   };
 
   it('supports scripted fields', () => {
-    const fields = buildFieldList(indexPattern as unknown as IndexPattern, []);
+    const fields = buildFieldList(indexPattern as unknown as DataView, []);
     expect(fields.find((f) => f.isScript)).toMatchObject({
       isScript: true,
       name: 'foo',
@@ -153,7 +153,7 @@ describe('buildFieldList', () => {
   });
 
   it('supports runtime fields', () => {
-    const fields = buildFieldList(indexPattern as unknown as IndexPattern, []);
+    const fields = buildFieldList(indexPattern as unknown as DataView, []);
     expect(fields.find((f) => f.runtimeField)).toMatchObject({
       name: 'runtime_foo',
       runtimeField: { type: 'long', script: { source: '2+2' } },
@@ -161,7 +161,7 @@ describe('buildFieldList', () => {
   });
 
   it('supports meta fields', () => {
-    const fields = buildFieldList(indexPattern as unknown as IndexPattern, ['_mymeta']);
+    const fields = buildFieldList(indexPattern as unknown as DataView, ['_mymeta']);
     expect(fields.find((f) => f.isMeta)).toMatchObject({
       isScript: false,
       isMeta: true,

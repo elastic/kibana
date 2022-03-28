@@ -21,9 +21,11 @@
     "presentationUtil",
     "dataViewFieldEditor",
     "expressionGauge",
-    "expressionHeatmap"
+    "expressionHeatmap",
+    "eventAnnotation"
   ],
   "optionalPlugins": [
+    "expressionXY",
     "usageCollection",
     "taskManager",
     "globalSearch",

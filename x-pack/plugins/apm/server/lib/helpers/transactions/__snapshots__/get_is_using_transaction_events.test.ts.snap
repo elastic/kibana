@@ -31,6 +31,7 @@ Object {
         ],
       },
     },
+    "size": 1,
   },
   "terminate_after": 1,
 }
@@ -55,6 +56,7 @@ Object {
         ],
       },
     },
+    "size": 1,
   },
   "terminate_after": 1,
 }
@@ -82,6 +84,7 @@ Array [
             ],
           },
         },
+        "size": 1,
       },
       "terminate_after": 1,
     },
@@ -100,6 +103,7 @@ Array [
             "filter": Array [],
           },
         },
+        "size": 0,
       },
       "terminate_after": 1,
     },

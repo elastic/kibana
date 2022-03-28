@@ -9,6 +9,7 @@ import {
   ElasticsearchClient,
   SavedObjectsClientContract,
   Logger,
+  KibanaRequest,
 } from 'kibana/server';
 import { PackagePolicy } from '../../../../fleet/common';
 import {
@@ -30,7 +31,7 @@ export async function createCloudApmPackgePolicy({
   esClient,
   logger,
   setup,
-  kibanaVersion,
+  request,
 }: {
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
@@ -38,7 +39,7 @@ export async function createCloudApmPackgePolicy({
   esClient: ElasticsearchClient;
   logger: Logger;
   setup: Setup;
-  kibanaVersion: string;
+  request: KibanaRequest;
 }): Promise<PackagePolicy> {
   const { attributes } = await savedObjectsClient.get(
     APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
@@ -52,7 +53,7 @@ export async function createCloudApmPackgePolicy({
     apmServerSchema,
     cloudPluginSetup,
     fleetPluginStart,
-    kibanaVersion,
+    request,
   });
   const mergedAPMPackagePolicy = await mergePackagePolicyWithApm({
     setup,
