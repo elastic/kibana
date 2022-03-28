@@ -13,6 +13,7 @@
     { "path": "../../../src/plugins/discover/tsconfig.json" },
     { "path": "../../../src/plugins/share/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../lens/tsconfig.json" },
     { "path": "../../../src/plugins/url_forwarding/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
