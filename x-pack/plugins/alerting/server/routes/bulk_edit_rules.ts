@@ -38,8 +38,8 @@ const editActionsSchema = schema.arrayOf(
 );
 
 const bodySchema = schema.object({
-  filter: schema.string(),
-  ids: schema.arrayOf(schema.string()),
+  filter: schema.maybe(schema.string()),
+  ids: schema.maybe(schema.arrayOf(schema.string())),
   editActions: editActionsSchema,
 });
 
@@ -64,7 +64,7 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
 
         const bulkEditResults = await rulesClient.bulkEdit({
           filter,
-          ids,
+          ids: ids as string[],
           editActions,
         });
         return res.ok({
