@@ -338,7 +338,7 @@ export const visit = (url: string, onBeforeLoadCallback?: (win: Cypress.AUTWindo
         if (onBeforeLoadCallback) {
           onBeforeLoadCallback(win);
         }
-        disableRulesFeatureTour(win);
+        disableFeatureTourForRuleManagementPage(win);
       },
     }
   );
@@ -347,14 +347,14 @@ export const visit = (url: string, onBeforeLoadCallback?: (win: Cypress.AUTWindo
 
 export const visitWithoutDateRange = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url, {
-    onBeforeLoad: disableRulesFeatureTour,
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
 export const visitWithUser = (url: string, user: User) => {
   cy.visit(constructUrlWithUser(user, url), {
-    onBeforeLoad: disableRulesFeatureTour,
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
@@ -389,7 +389,7 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
 export const visitTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
   cy.visit(role ? getUrlWithRoute(role, route) : route, {
-    onBeforeLoad: disableRulesFeatureTour,
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
