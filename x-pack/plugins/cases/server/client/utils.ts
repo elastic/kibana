@@ -6,7 +6,7 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { get, isPlainObject } from 'lodash';
+import { get, isPlainObject, isString } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -182,6 +182,31 @@ export function stringToKueryNode(expression?: string): KueryNode | undefined {
 
   return fromKueryExpression(expression);
 }
+
+export const buildRangeFilter = ({
+  from,
+  to,
+  field = 'created_at',
+  savedObjectType = CASE_SAVED_OBJECT,
+}: {
+  from?: string;
+  to?: string;
+  field?: string;
+  savedObjectType?: string;
+}): KueryNode | undefined => {
+  if (from == null && to == null) {
+    return;
+  }
+
+  const fromKQL = from != null ? `${savedObjectType}.attributes.${field} >= ${from}` : undefined;
+  const toKQL = to != null ? `${savedObjectType}.attributes.${field} <= ${to}` : undefined;
+
+  const rangeKQLQuery = `${fromKQL != null ? fromKQL : ''} ${
+    fromKQL != null && toKQL != null ? 'and' : ''
+  } ${toKQL != null ? toKQL : ''}`;
+
+  return stringToKueryNode(rangeKQLQuery);
+};
 
 export const constructQueryOptions = ({
   tags,
