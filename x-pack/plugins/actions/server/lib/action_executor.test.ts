@@ -135,6 +135,9 @@ test('successfully executes', async () => {
                 "type_id": "test",
               },
             ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
           },
           "message": "action started: test:1: 1",
         },
@@ -162,6 +165,9 @@ test('successfully executes', async () => {
                 "type": "action",
                 "type_id": "test",
               },
+            ],
+            "space_ids": Array [
+              "some-namespace",
             ],
           },
           "message": "action executed: test:1: 1",
@@ -534,6 +540,7 @@ test('writes to event log for execute timeout', async () => {
   await actionExecutor.logCancellation({
     actionId: 'action1',
     executionId: '123abc',
+    consumer: 'test-consumer',
     relatedSavedObjects: [],
     request: {} as KibanaRequest,
   });
@@ -546,6 +553,7 @@ test('writes to event log for execute timeout', async () => {
     kibana: {
       alert: {
         rule: {
+          consumer: 'test-consumer',
           execution: {
             uuid: '123abc',
           },
@@ -560,6 +568,7 @@ test('writes to event log for execute timeout', async () => {
           namespace: 'some-namespace',
         },
       ],
+      space_ids: ['some-namespace'],
     },
     message: `action: test:action1: 'action-1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
   });
@@ -595,6 +604,7 @@ test('writes to event log for execute and execute start', async () => {
           namespace: 'some-namespace',
         },
       ],
+      space_ids: ['some-namespace'],
     },
     message: 'action started: test:1: action-1',
   });
@@ -621,6 +631,96 @@ test('writes to event log for execute and execute start', async () => {
           namespace: 'some-namespace',
         },
       ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action executed: test:1: action-1',
+  });
+});
+
+test('writes to event log for execute and execute start when consumer and related saved object are defined', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+  });
+  await actionExecutor.execute({
+    ...executeParams,
+    consumer: 'test-consumer',
+    relatedSavedObjects: [
+      {
+        typeId: '.rule-type',
+        type: 'alert',
+        id: '12',
+      },
+    ],
+  });
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+    event: {
+      action: 'execute-start',
+      kind: 'action',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          consumer: 'test-consumer',
+          execution: {
+            uuid: '123abc',
+          },
+          rule_type_id: '.rule-type',
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+        {
+          rel: 'primary',
+          type: 'alert',
+          id: '12',
+          type_id: '.rule-type',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action started: test:1: action-1',
+  });
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+    event: {
+      action: 'execute',
+      kind: 'action',
+      outcome: 'success',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          consumer: 'test-consumer',
+          execution: {
+            uuid: '123abc',
+          },
+          rule_type_id: '.rule-type',
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+        {
+          rel: 'primary',
+          type: 'alert',
+          id: '12',
+          type_id: '.rule-type',
+        },
+      ],
+      space_ids: ['some-namespace'],
     },
     message: 'action executed: test:1: action-1',
   });
