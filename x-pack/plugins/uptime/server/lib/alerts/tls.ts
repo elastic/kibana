@@ -109,7 +109,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
     },
   ],
   actionVariables: {
-    context: [],
+    context: [...tlsTranslations.actionVariables, ...commonStateTranslations],
     state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
   },
   isExportable: true,
@@ -174,7 +174,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
           ...updateState(state, foundCerts),
           ...summary,
         });
-        alertInstance.scheduleActions(TLS.id);
+        alertInstance.scheduleActions(TLS.id, { ...summary });
       });
     }
 

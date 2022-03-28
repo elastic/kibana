@@ -242,6 +242,13 @@ describe('status check alert', () => {
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
+            "latestErrorMessage": "error message 1",
+            "monitorId": "first",
+            "monitorName": "First",
+            "monitorType": "myType",
+            "monitorUrl": "localhost:8080",
+            "observerHostname": undefined,
+            "observerLocation": "harrisburg",
             "reason": "First from harrisburg failed 234 times in the last 15 mins. Alert when > 5.",
             "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
           },
@@ -313,6 +320,13 @@ describe('status check alert', () => {
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
+            "latestErrorMessage": "error message 1",
+            "monitorId": "first",
+            "monitorName": "First",
+            "monitorType": "myType",
+            "monitorUrl": "localhost:8080",
+            "observerHostname": undefined,
+            "observerLocation": "harrisburg",
             "reason": "First from harrisburg failed 234 times in the last 15m. Alert when > 5.",
             "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
           },
@@ -785,6 +799,13 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "latestErrorMessage": undefined,
+              "monitorId": "foo",
+              "monitorName": "Foo",
+              "monitorType": "myType",
+              "monitorUrl": "https://foo.com",
+              "observerHostname": undefined,
+              "observerLocation": "harrisburg",
               "reason": "Foo from harrisburg 35 days availability is 99.28%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zm9v?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
             },
@@ -792,6 +813,13 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "latestErrorMessage": undefined,
+              "monitorId": "foo",
+              "monitorName": "Foo",
+              "monitorType": "myType",
+              "monitorUrl": "https://foo.com",
+              "observerHostname": undefined,
+              "observerLocation": "fairbanks",
               "reason": "Foo from fairbanks 35 days availability is 98.03%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zm9v?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
             },
@@ -799,6 +827,13 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "latestErrorMessage": undefined,
+              "monitorId": "unreliable",
+              "monitorName": "Unreliable",
+              "monitorType": "myType",
+              "monitorUrl": "https://unreliable.co",
+              "observerHostname": undefined,
+              "observerLocation": "fairbanks",
               "reason": "Unreliable from fairbanks 35 days availability is 90.92%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/dW5yZWxpYWJsZQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
             },
@@ -806,6 +841,13 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "latestErrorMessage": undefined,
+              "monitorId": "no-name",
+              "monitorName": "no-name",
+              "monitorType": "myType",
+              "monitorUrl": "https://no-name.co",
+              "observerHostname": undefined,
+              "observerLocation": "fairbanks",
               "reason": "no-name from fairbanks 35 days availability is 90.92%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/bm8tbmFtZQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
             },

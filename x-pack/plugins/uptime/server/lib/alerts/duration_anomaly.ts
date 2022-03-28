@@ -94,7 +94,12 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
     },
   ],
   actionVariables: {
-    context: [ACTION_VARIABLES[ALERT_REASON_MSG], ACTION_VARIABLES[VIEW_IN_APP_URL]],
+    context: [
+      ACTION_VARIABLES[ALERT_REASON_MSG],
+      ACTION_VARIABLES[VIEW_IN_APP_URL],
+      ...durationAnomalyTranslations.actionVariables,
+      ...commonStateTranslations,
+    ],
     state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
   },
   isExportable: true,
@@ -160,6 +165,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
         alertInstance.scheduleActions(DURATION_ANOMALY.id, {
           [ALERT_REASON_MSG]: alertReasonMessage,
           [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+          ...summary,
         });
       });
     }

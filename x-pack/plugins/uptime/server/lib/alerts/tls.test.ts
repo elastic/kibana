@@ -131,16 +131,18 @@ describe('tls alert', () => {
       const [{ value: alertInstanceMock }] = alertWithLifecycle.mock.results;
       expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(4);
       mockCertResult.certs.forEach((cert) => {
-        expect(alertInstanceMock.replaceState).toBeCalledWith(
-          expect.objectContaining({
-            commonName: cert.common_name,
-            issuer: cert.issuer,
-            status: 'expired',
-          })
+        const context = {
+          commonName: cert.common_name,
+          issuer: cert.issuer,
+          status: 'expired',
+        };
+        expect(alertInstanceMock.replaceState).toBeCalledWith(expect.objectContaining(context));
+        expect(alertInstanceMock.scheduleActions).toBeCalledWith(
+          TLS.id,
+          expect.objectContaining(context)
         );
       });
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(4);
-      expect(alertInstanceMock.scheduleActions).toBeCalledWith(TLS.id);
     });
 
     it('handles dynamic settings for aging or expiration threshold', async () => {

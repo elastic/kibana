@@ -218,7 +218,17 @@ Response times as high as ${slowestResponse} ms have been detected from location
         Array [
           "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
-            "${ALERT_REASON_MSG}": "${reasonMessages[0]}",
+            "anomalyStartTimestamp": "date",
+            "bucketSpan": 900,
+            "expectedResponseTime": "10 ms",
+            "monitor": "uptime-monitor",
+            "monitorUrl": "https://elastic.co",
+            "observerLocation": "harrisburg",
+            "${ALERT_REASON_MSG}": "Abnormal (minor level) response time detected on uptime-monitor with url https://elastic.co at date. Anomaly severity score is 25.
+        Response times as high as 200 ms have been detected from location harrisburg. Expected response time is 10 ms.",
+            "severity": "minor",
+            "severityScore": 25,
+            "slowestAnomalyResponse": "200 ms",
             "${VIEW_IN_APP_URL}": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MA==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
           },
         ]
@@ -227,7 +237,17 @@ Response times as high as ${slowestResponse} ms have been detected from location
         Array [
           "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
-            "${ALERT_REASON_MSG}": "${reasonMessages[1]}",
+            "anomalyStartTimestamp": "date",
+            "bucketSpan": 900,
+            "expectedResponseTime": "20 ms",
+            "monitor": "uptime-monitor",
+            "monitorUrl": "https://elastic.co",
+            "observerLocation": "fairbanks",
+            "${ALERT_REASON_MSG}": "Abnormal (warning level) response time detected on uptime-monitor with url https://elastic.co at date. Anomaly severity score is 10.
+        Response times as high as 300 ms have been detected from location fairbanks. Expected response time is 20 ms.",
+            "severity": "warning",
+            "severityScore": 10,
+            "slowestAnomalyResponse": "300 ms",
             "${VIEW_IN_APP_URL}": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
           },
         ]

@@ -161,7 +161,7 @@ export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
 
   return {
     ...summary,
-    reason: `${monitorName} from ${observerLocation} ${statusMessage}`,
+    [ALERT_REASON_MSG]: `${monitorName} from ${observerLocation} ${statusMessage}`,
   };
 };
 
@@ -281,6 +281,8 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       ACTION_VARIABLES[MONITOR_WITH_GEO],
       ACTION_VARIABLES[ALERT_REASON_MSG],
       ACTION_VARIABLES[VIEW_IN_APP_URL],
+      ...commonMonitorStateI18,
+      ...commonStateTranslations,
     ],
     state: [...commonMonitorStateI18, ...commonStateTranslations],
   },
@@ -289,7 +291,13 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   async executor({
     params: rawParams,
     state,
-    services: { savedObjectsClient, scopedClusterClient, alertWithLifecycle, getAlertStartedDate },
+    services: {
+      savedObjectsClient,
+      scopedClusterClient,
+      alertWithLifecycle,
+      getAlertStartedDate,
+      alertFactory,
+    },
     rule: {
       schedule: { interval },
     },
@@ -381,8 +389,8 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         });
 
         alert.scheduleActions(MONITOR_STATUS.id, {
-          [ALERT_REASON_MSG]: monitorSummary.reason,
           [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+          ...monitorSummary,
         });
       }
       return updateState(state, downMonitorsByLocation.length > 0);
@@ -451,8 +459,8 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       });
 
       alert.scheduleActions(MONITOR_STATUS.id, {
-        [ALERT_REASON_MSG]: monitorSummary.reason,
         [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+        ...monitorSummary,
       });
     });
     return updateState(state, downMonitorsByLocation.length > 0);
