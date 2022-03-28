@@ -53,67 +53,79 @@ export type ConsoleManagerProps = PropsWithChildren<{
 export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, children }) => {
   const [consoleStorage, setConsoleStorage] = useState<RunningConsoleStorage>(storage);
 
-  const show = useCallback<ConsoleManagerClient['show']>((id) => {
-    setConsoleStorage((prevState) => {
-      if (!prevState[id]) {
-        throw new Error(`Unable to show Console with id ${id}. Not found.`);
+  const validateIdOrThrow = useCallback(
+    (id: string) => {
+      if (!consoleStorage[id]) {
+        throw new Error(`Console with id ${id} not found`);
       }
+    },
+    [consoleStorage]
+  );
 
-      const newState = { ...prevState };
+  const show = useCallback<ConsoleManagerClient['show']>(
+    (id) => {
+      validateIdOrThrow(id);
 
-      // if any is visible, hide it
-      Object.entries(newState).forEach(([consoleId, managedConsole]) => {
-        if (managedConsole.isOpen) {
-          newState[consoleId] = {
-            ...managedConsole,
-            isOpen: false,
-          };
-        }
+      setConsoleStorage((prevState) => {
+        const newState = { ...prevState };
+
+        // if any is visible, hide it
+        Object.entries(newState).forEach(([consoleId, managedConsole]) => {
+          if (managedConsole.isOpen) {
+            newState[consoleId] = {
+              ...managedConsole,
+              isOpen: false,
+            };
+          }
+        });
+
+        newState[id] = {
+          ...newState[id],
+          isOpen: true,
+        };
+
+        return newState;
       });
+    },
+    [validateIdOrThrow]
+  );
 
-      newState[id] = {
-        ...newState[id],
-        isOpen: true,
-      };
+  const hide = useCallback<ConsoleManagerClient['hide']>(
+    (id) => {
+      validateIdOrThrow(id);
 
-      return newState;
-    });
-  }, []);
+      setConsoleStorage((prevState) => {
+        return {
+          ...prevState,
+          [id]: {
+            ...prevState[id],
+            isOpen: false,
+          },
+        };
+      });
+    },
+    [validateIdOrThrow]
+  );
 
-  const hide = useCallback<ConsoleManagerClient['hide']>((id) => {
-    setConsoleStorage((prevState) => {
-      if (!prevState[id]) {
-        throw new Error(`Unable to hide Console with id ${id}. Not found.`);
-      }
+  const terminate = useCallback<ConsoleManagerClient['terminate']>(
+    (id) => {
+      validateIdOrThrow(id);
 
-      return {
-        ...prevState,
-        [id]: {
-          ...prevState[id],
-          isOpen: false,
-        },
-      };
-    });
-  }, []);
+      setConsoleStorage((prevState) => {
+        const { onBeforeTerminate } = prevState[id];
 
-  const terminate = useCallback<ConsoleManagerClient['terminate']>((id) => {
-    setConsoleStorage((prevState) => {
-      if (!prevState[id]) {
-        throw new Error(`Unable to terminate console id ${id}. Not found`);
-      }
+        if (onBeforeTerminate) {
+          onBeforeTerminate();
+        }
 
-      const { onBeforeTerminate } = prevState[id];
+        const newState = { ...prevState };
+        delete newState[id];
 
-      if (onBeforeTerminate) {
-        onBeforeTerminate();
-      }
-
-      const newState = { ...prevState };
-      delete newState[id];
-
-      return newState;
-    });
-  }, []);
+        return newState;
+      });
+    },
+    [validateIdOrThrow]
+  );
 
   const getOne = useCallback<ConsoleManagerClient['getOne']>(
     <Meta extends object = Record<string, unknown>>(id: string) => {
@@ -132,8 +144,24 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     ) as ReadonlyArray<Readonly<RegisteredConsoleClient<Meta>>>;
   }, [consoleStorage]);
 
+  const isVisible = useCallback(
+    (id: string): boolean => {
+      if (consoleStorage[id]) {
+        return consoleStorage[id].isOpen;
+      }
+
+      return false;
+    },
+    [consoleStorage]
+  );
+
   const register = useCallback<ConsoleManagerClient['register']>(
-    ({ id, title, meta, ...otherRegisterProps }) => {
+    ({ id, title, meta, consoleProps, ...otherRegisterProps }) => {
+      if (consoleStorage[id]) {
+        throw new Error(`Console with id ${id} already registered`);
+      }
+
+      const managedKey = Symbol(id);
       const managedConsole: ManagedConsole = {
         ...otherRegisterProps,
         client: {
@@ -143,34 +171,24 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
           show: () => show(id),
           hide: () => hide(id),
           terminate: () => terminate(id),
+          isVisible: () => isVisible(id),
         },
-        console: <></>, // temporary
+        consoleProps,
+        console: <Console {...consoleProps} managedKey={managedKey} key={id} />,
         isOpen: false,
-        key: Symbol(id),
+        key: managedKey,
       };
 
       setConsoleStorage((prevState) => {
-        if (prevState[id]) {
-          throw new Error(`Console with id ${id} already registered.`);
-        }
-
         return {
           ...prevState,
           [id]: managedConsole,
         };
       });
 
-      managedConsole.console = (
-        <Console
-          {...managedConsole.consoleProps}
-          managedKey={managedConsole.key}
-          key={managedConsole.client.id}
-        />
-      );
-
       return managedConsole.client;
     },
-    [hide, show, terminate]
+    [consoleStorage, hide, isVisible, show, terminate]
   );
 
   const consoleManagerClient = useMemo<ConsoleManagerClient>(() => {

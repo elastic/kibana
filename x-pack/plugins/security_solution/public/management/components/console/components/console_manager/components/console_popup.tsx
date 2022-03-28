@@ -80,10 +80,10 @@ export const ConsolePopup = memo<ConsolePopupProps>(
     }, []);
 
     return (
-      <ConsolePopupWrapper className={cssClassNames}>
+      <ConsolePopupWrapper className={cssClassNames} data-test-subj="consolePopupWrapper">
         <div className="euiModal__flex modal-content">
           {!isHidden && (
-            <EuiModalHeader>
+            <EuiModalHeader data-test-subj="consolePopupHeader">
               <EuiModalHeaderTitle>
                 <h1>
                   <EuiIcon type="console" size="xl" /> {title}
@@ -97,7 +97,7 @@ export const ConsolePopup = memo<ConsolePopupProps>(
                         of each command is persisted - by allowing the consoles to still be
                         rendered (Console takes care of hiding it own UI in this case)
           */}
-          <EuiModalBody>
+          <EuiModalBody data-test-subj="consolePopupBody">
             <div className="console-holder">{children}</div>
           </EuiModalBody>
 

@@ -28,6 +28,8 @@ export interface RegisteredConsoleClient<Meta extends object = Record<string, un
   hide(): void;
 
   terminate(): void;
+
+  isVisible(): boolean;
 }
 
 export interface ConsoleManagerClient {
