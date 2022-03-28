@@ -32,7 +32,7 @@ describe('RuleExecutionStatus', () => {
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
       const status = executionStatusFromState({
-        alertExecutionStore: {
+        alertExecutionMetrics: {
           numberOfTriggeredActions: 0,
           numberOfScheduledActions: 0,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
@@ -49,7 +49,7 @@ describe('RuleExecutionStatus', () => {
     test('task state with no instances', () => {
       const status = executionStatusFromState({
         alertInstances: {},
-        alertExecutionStore: {
+        alertExecutionMetrics: {
           numberOfTriggeredActions: 0,
           numberOfScheduledActions: 0,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
@@ -68,7 +68,7 @@ describe('RuleExecutionStatus', () => {
     test('task state with one instance', () => {
       const status = executionStatusFromState({
         alertInstances: { a: {} },
-        alertExecutionStore: {
+        alertExecutionMetrics: {
           numberOfTriggeredActions: 0,
           numberOfScheduledActions: 0,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
@@ -86,7 +86,7 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with numberOfTriggeredActions', () => {
       const status = executionStatusFromState({
-        alertExecutionStore: {
+        alertExecutionMetrics: {
           numberOfTriggeredActions: 1,
           numberOfScheduledActions: 2,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
@@ -106,7 +106,7 @@ describe('RuleExecutionStatus', () => {
     test('task state with warning', () => {
       const status = executionStatusFromState({
         alertInstances: { a: {} },
-        alertExecutionStore: {
+        alertExecutionMetrics: {
           numberOfTriggeredActions: 3,
           triggeredActionsStatus: ActionsCompletion.PARTIAL,
         },

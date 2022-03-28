@@ -23,7 +23,7 @@ export function executionStatusFromState(state: RuleExecutionState): AlertExecut
   const alertIds = Object.keys(state.alertInstances ?? {});
 
   const hasIncompleteAlertExecution =
-    state.alertExecutionStore.triggeredActionsStatus === ActionsCompletion.PARTIAL;
+    state.alertExecutionMetrics.triggeredActionsStatus === ActionsCompletion.PARTIAL;
 
   let status: AlertExecutionStatuses =
     alertIds.length === 0 ? AlertExecutionStatusValues[0] : AlertExecutionStatusValues[1];
@@ -34,8 +34,8 @@ export function executionStatusFromState(state: RuleExecutionState): AlertExecut
 
   return {
     metrics: state.metrics,
-    numberOfTriggeredActions: state.alertExecutionStore.numberOfTriggeredActions,
-    numberOfScheduledActions: state.alertExecutionStore.numberOfScheduledActions,
+    numberOfTriggeredActions: state.alertExecutionMetrics.numberOfTriggeredActions,
+    numberOfScheduledActions: state.alertExecutionMetrics.numberOfScheduledActions,
     lastExecutionDate: new Date(),
     status,
     ...(hasIncompleteAlertExecution && {

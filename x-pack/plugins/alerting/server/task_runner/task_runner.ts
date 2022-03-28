@@ -65,8 +65,6 @@ import {
 } from '../lib/create_alert_event_log_record_object';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 import {
-  ActionsCompletion,
-  AlertExecutionStore,
   GenerateNewAndRecoveredAlertEventsParams,
   LogActiveAndRecoveredAlertsParams,
   RuleTaskInstance,
@@ -74,6 +72,7 @@ import {
   ScheduleActionsForRecoveredAlertsParams,
   TrackAlertDurationsParams,
 } from './types';
+import { AlertExecutionStore } from '../lib/alert_execution_store';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -491,12 +490,7 @@ export class TaskRunner<
       });
     }
 
-    const alertExecutionStore: AlertExecutionStore = {
-      numberOfTriggeredActions: 0,
-      numberOfTriggeredActionsByConnectorType: {},
-      numberOfScheduledActions: 0,
-      triggeredActionsStatus: ActionsCompletion.COMPLETE,
-    };
+    const alertExecutionStore = new AlertExecutionStore();
 
     const ruleIsSnoozed = this.isRuleSnoozed(rule);
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
@@ -568,7 +562,11 @@ export class TaskRunner<
 
     return {
       metrics: searchMetrics,
-      alertExecutionStore,
+      alertExecutionMetrics: {
+        numberOfTriggeredActions: alertExecutionStore.getNumberOfTriggeredActions(),
+        numberOfScheduledActions: alertExecutionStore.getNumberOfScheduledActions(),
+        triggeredActionsStatus: alertExecutionStore.getTriggeredActionsStatus(),
+      },
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
         Record<string, CreatedAlert<InstanceState, InstanceContext>>,
@@ -875,7 +873,7 @@ export class TaskRunner<
       executionState: RuleExecutionState
     ): RuleTaskState => {
       return {
-        ...omit(executionState, ['alertExecutionStore', 'metrics']),
+        ...omit(executionState, ['alertExecutionMetrics', 'metrics']),
         previousStartedAt: startedAt,
       };
     };

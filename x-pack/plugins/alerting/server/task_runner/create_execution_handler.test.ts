@@ -6,7 +6,7 @@
  */
 
 import { createExecutionHandler } from './create_execution_handler';
-import { ActionsCompletion, AlertExecutionStore, CreateExecutionHandlerOptions } from './types';
+import { ActionsCompletion, CreateExecutionHandlerOptions } from './types';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import {
   actionsClientMock,
@@ -24,6 +24,7 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../types';
+import { AlertExecutionStore } from '../lib/alert_execution_store';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -125,12 +126,7 @@ describe('Create Execution Handler', () => {
     mockActionsPlugin.renderActionParameterTemplates.mockImplementation(
       renderActionParameterTemplatesDefault
     );
-    alertExecutionStore = {
-      numberOfTriggeredActions: 0,
-      numberOfScheduledActions: 0,
-      numberOfTriggeredActionsByConnectorType: {},
-      triggeredActionsStatus: ActionsCompletion.COMPLETE,
-    };
+    alertExecutionStore = new AlertExecutionStore();
   });
 
   test('enqueues execution per selected action', async () => {
@@ -142,7 +138,7 @@ describe('Create Execution Handler', () => {
       alertId: '2',
       alertExecutionStore,
     });
-    expect(alertExecutionStore.numberOfTriggeredActions).toBe(1);
+    expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(1);
     expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(
       createExecutionHandlerParams.request
     );
@@ -250,7 +246,7 @@ describe('Create Execution Handler', () => {
       },
     });
 
-    expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.COMPLETE);
+    expect(alertExecutionStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
   });
 
   test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
@@ -281,7 +277,7 @@ describe('Create Execution Handler', () => {
       alertId: '2',
       alertExecutionStore,
     });
-    expect(alertExecutionStore.numberOfTriggeredActions).toBe(1);
+    expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
       consumer: 'rule-consumer',
@@ -337,7 +333,7 @@ describe('Create Execution Handler', () => {
       alertId: '2',
       alertExecutionStore,
     });
-    expect(alertExecutionStore.numberOfTriggeredActions).toBe(0);
+    expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(0);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
 
     mockActionsPlugin.isActionExecutable.mockImplementation(() => true);
@@ -364,7 +360,7 @@ describe('Create Execution Handler', () => {
       alertId: '2',
       alertExecutionStore,
     });
-    expect(alertExecutionStore.numberOfTriggeredActions).toBe(0);
+    expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(0);
     expect(actionsClient.enqueueExecution).not.toHaveBeenCalled();
   });
 
@@ -377,7 +373,7 @@ describe('Create Execution Handler', () => {
       alertId: '2',
       alertExecutionStore,
     });
-    expect(alertExecutionStore.numberOfTriggeredActions).toBe(1);
+    expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
@@ -472,8 +468,8 @@ describe('Create Execution Handler', () => {
       'Invalid action group "invalid-group" for rule "test".'
     );
 
-    expect(alertExecutionStore.numberOfTriggeredActions).toBe(0);
-    expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.COMPLETE);
+    expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(0);
+    expect(alertExecutionStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
   });
 
   test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions', async () => {
@@ -509,12 +505,7 @@ describe('Create Execution Handler', () => {
       ],
     });
 
-    alertExecutionStore = {
-      numberOfTriggeredActions: 0,
-      numberOfScheduledActions: 0,
-      numberOfTriggeredActionsByConnectorType: {},
-      triggeredActionsStatus: ActionsCompletion.COMPLETE,
-    };
+    alertExecutionStore = new AlertExecutionStore();
 
     await executionHandler({
       actionGroup: 'default',
@@ -524,9 +515,9 @@ describe('Create Execution Handler', () => {
       alertExecutionStore,
     });
 
-    expect(alertExecutionStore.numberOfTriggeredActions).toBe(2);
-    expect(alertExecutionStore.numberOfScheduledActions).toBe(3);
-    expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.PARTIAL);
+    expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(2);
+    expect(alertExecutionStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
+    expect(createExecutionHandlerParams.logger.debug).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
   });
 
@@ -586,11 +577,7 @@ describe('Create Execution Handler', () => {
       ],
     });
 
-    alertExecutionStore = {
-      numberOfTriggeredActions: 0,
-      numberOfTriggeredActionsByConnectorType: {},
-      triggeredActionsStatus: ActionsCompletion.COMPLETE,
-    };
+    alertExecutionStore = new AlertExecutionStore();
 
     await executionHandler({
       actionGroup: 'default',
@@ -600,15 +587,16 @@ describe('Create Execution Handler', () => {
       alertExecutionStore,
     });
 
-    expect(alertExecutionStore.numberOfTriggeredActions).toBe(4);
-    expect(alertExecutionStore.numberOfTriggeredActionsByConnectorType.test).toBe(1);
-    expect(alertExecutionStore.numberOfTriggeredActionsByConnectorType['test-action-type-id']).toBe(
-      1
-    );
+    expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(4);
+    expect(alertExecutionStore.getNumberOfTriggeredActionsByConnectorType('test')).toBe(1);
     expect(
-      alertExecutionStore.numberOfTriggeredActionsByConnectorType['another-action-type-id']
+      alertExecutionStore.getNumberOfTriggeredActionsByConnectorType('test-action-type-id')
+    ).toBe(1);
+    expect(
+      alertExecutionStore.getNumberOfTriggeredActionsByConnectorType('another-action-type-id')
     ).toBe(2);
-    expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.PARTIAL);
+    expect(alertExecutionStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
+    expect(createExecutionHandlerParams.logger.debug).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(4);
   });
 });

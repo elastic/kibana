@@ -28,6 +28,7 @@ import { ExecutionHandler } from './create_execution_handler';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import { RawRule } from '../types';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
+import { AlertExecutionStore } from '../lib/alert_execution_store';
 
 export interface RuleTaskRunResultWithActions {
   state: RuleExecutionState;
@@ -161,13 +162,4 @@ export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
 export enum ActionsCompletion {
   COMPLETE = 'complete',
   PARTIAL = 'partial',
-}
-
-export interface AlertExecutionStore {
-  numberOfTriggeredActions: number;
-  numberOfScheduledActions: number;
-  triggeredActionsStatus: ActionsCompletion;
-  numberOfTriggeredActionsByConnectorType: {
-    [key: string]: number;
-  };
 }

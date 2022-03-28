@@ -73,25 +73,6 @@ export function createExecutionHandler<
     alertExecutionStore,
     alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
-    const hasReachedTheExecutableActionsLimit = (): boolean =>
-      alertExecutionStore.numberOfTriggeredActions >= actionsConfigMap.default.max;
-
-    const hasReachedTheExecutableActionsLimitByConnectorType = (actionTypeId: string): boolean => {
-      const numberOfTriggeredActionsByConnectorType =
-        alertExecutionStore.numberOfTriggeredActionsByConnectorType[actionTypeId] || 0;
-      const executableActionsLimitByConnectorType =
-        actionsConfigMap[actionTypeId]?.max || actionsConfigMap.default.max;
-
-      return numberOfTriggeredActionsByConnectorType >= executableActionsLimitByConnectorType;
-    };
-
-    const setNumberOfTriggeredActions = (actionTypeId: string) => {
-      alertExecutionStore.numberOfTriggeredActions++;
-
-      alertExecutionStore.numberOfTriggeredActionsByConnectorType[actionTypeId] =
-        (alertExecutionStore.numberOfTriggeredActionsByConnectorType[actionTypeId] || 0) + 1;
-    };
-
     if (!ruleTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
       return;
@@ -133,7 +114,7 @@ export function createExecutionHandler<
         }),
       }));
 
-    alertExecutionStore.numberOfScheduledActions += actions.length;
+    alertExecutionStore.incrementNumberOfScheduledActions(actions.length);
 
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
@@ -141,13 +122,24 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (hasReachedTheExecutableActionsLimit()) {
-        alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
+      if (alertExecutionStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
+        alertExecutionStore.setTriggeredActionsStatus(ActionsCompletion.PARTIAL);
+        logger.debug(
+          `The maximum number of actions (${actionsConfigMap.default.max}) for this rule type has been reached`
+        );
         break;
       }
 
-      if (hasReachedTheExecutableActionsLimitByConnectorType(action.actionTypeId)) {
-        alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
+      if (
+        alertExecutionStore.hasReachedTheExecutableActionsLimitByConnectorType({
+          actionTypeId: action.actionTypeId,
+          actionsConfigMap,
+        })
+      ) {
+        alertExecutionStore.setTriggeredActionsStatus(ActionsCompletion.PARTIAL);
+        logger.debug(
+          `The maximum number of actions for this connector type (${action.actionTypeId}) type has been reached`
+        );
         continue;
       }
 
@@ -160,7 +152,8 @@ export function createExecutionHandler<
         continue;
       }
 
-      setNumberOfTriggeredActions(action.actionTypeId);
+      alertExecutionStore.incrementNumberOfTriggeredActions();
+      alertExecutionStore.incrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
