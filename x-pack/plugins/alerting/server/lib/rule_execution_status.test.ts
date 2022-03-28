@@ -34,11 +34,13 @@ describe('RuleExecutionStatus', () => {
       const status = executionStatusFromState({
         alertExecutionStore: {
           numberOfTriggeredActions: 0,
+          numberOfScheduledActions: 0,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
         },
       } as RuleExecutionState);
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.numberOfTriggeredActions).toBe(0);
+      expect(status.numberOfScheduledActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
@@ -49,12 +51,14 @@ describe('RuleExecutionStatus', () => {
         alertInstances: {},
         alertExecutionStore: {
           numberOfTriggeredActions: 0,
+          numberOfScheduledActions: 0,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
         },
         metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.numberOfTriggeredActions).toBe(0);
+      expect(status.numberOfScheduledActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
@@ -66,12 +70,14 @@ describe('RuleExecutionStatus', () => {
         alertInstances: { a: {} },
         alertExecutionStore: {
           numberOfTriggeredActions: 0,
+          numberOfScheduledActions: 0,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
         },
         metrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.numberOfTriggeredActions).toBe(0);
+      expect(status.numberOfScheduledActions).toBe(0);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
@@ -82,6 +88,7 @@ describe('RuleExecutionStatus', () => {
       const status = executionStatusFromState({
         alertExecutionStore: {
           numberOfTriggeredActions: 1,
+          numberOfScheduledActions: 2,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
         },
         alertInstances: { a: {} },
@@ -89,6 +96,7 @@ describe('RuleExecutionStatus', () => {
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.numberOfTriggeredActions).toBe(1);
+      expect(status.numberOfScheduledActions).toBe(2);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
@@ -309,28 +317,6 @@ describe('RuleExecutionStatus', () => {
           },
           "lastDuration": 1234,
           "lastExecutionDate": 2020-09-03T16:26:58.000Z,
-          "status": "active",
-        }
-      `);
-    });
-
-    test('valid status, date, error, duration and triggeredActions', () => {
-      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
-        status,
-        lastExecutionDate: date,
-        numberOfTriggeredActions: 5,
-        error,
-        lastDuration: 1234,
-      });
-      expect(result).toMatchInlineSnapshot(`
-        Object {
-          "error": Object {
-            "message": "wops",
-            "reason": "execute",
-          },
-          "lastDuration": 1234,
-          "lastExecutionDate": 2020-09-03T16:26:58.000Z,
-          "numberOfTriggeredActions": 5,
           "status": "active",
         }
       `);
