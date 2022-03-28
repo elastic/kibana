@@ -38,8 +38,8 @@ const editActionsSchema = schema.arrayOf(
 );
 
 const bodySchema = schema.object({
-  filter: schema.maybe(schema.string()),
-  ids: schema.maybe(schema.arrayOf(schema.string())),
+  filter: schema.string(),
+  ids: schema.arrayOf(schema.string()),
   editActions: editActionsSchema,
 });
 
@@ -60,12 +60,12 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = context.alerting.getRulesClient();
-        const { filter, editActions, ids = [] } = req.body;
+        const { filter, editActions, ids } = req.body;
 
         const bulkEditResults = await rulesClient.bulkEdit({
           filter,
-          editActions,
           ids,
+          editActions,
         });
         return res.ok({
           body: bulkEditResults,

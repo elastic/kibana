@@ -1332,18 +1332,16 @@ export class RulesClient {
     rules: Array<SanitizedRule<Params>>;
     errors: BulkEditError[];
   }> {
-    let filter = (options as BulkEditOptionsFilter<Params>).filter;
+    const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
     const ids = (options as BulkEditOptionsIds<Params>).ids;
 
-    if (ids) {
-      if (filter) {
-        throw Error(
-          "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
-        );
-      }
-      filter = this.convertIdsToFilterQuery(ids);
+    if (ids && queryFilter) {
+      throw Error(
+        "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
+      );
     }
 
+    const filter = ids ? this.convertIdsToFilterQuery(ids) : queryFilter;
     const { editActions, paramsModifier } = options;
 
     let authorizationTuple;
