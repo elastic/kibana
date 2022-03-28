@@ -49,8 +49,7 @@ describe('Rules', () => {
           // Create a rule in APM
           cy.visit('/app/apm/services');
           cy.contains('Alerts and rules').click();
-          cy.contains('Error count').click();
-          cy.contains('Create threshold rule').click();
+          cy.contains('Create error count rule').click();
 
           // Check for the existence of this element to make sure the form
           // has loaded.
