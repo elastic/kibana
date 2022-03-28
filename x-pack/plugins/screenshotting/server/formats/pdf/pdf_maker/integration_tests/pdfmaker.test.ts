@@ -65,9 +65,9 @@ describe('PdfMaker', () => {
         protected workerModulePath = path.resolve(__dirname, './buggy_worker.js');
       })(layout, undefined, logger);
 
-      await expect(buggyMaker.generate()).rejects.toEqual(new Error('This is a bug'));
-      await expect(buggyMaker.generate()).rejects.toEqual(new Error('This is a bug'));
-      await expect(buggyMaker.generate()).rejects.toEqual(new Error('This is a bug'));
+      await expect(buggyMaker.generate()).rejects.toThrowError(new Error('This is a bug'));
+      await expect(buggyMaker.generate()).rejects.toThrowError(new Error('This is a bug'));
+      await expect(buggyMaker.generate()).rejects.toThrowError(new Error('This is a bug'));
     });
   });
 

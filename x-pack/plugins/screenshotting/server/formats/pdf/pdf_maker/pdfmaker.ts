@@ -202,7 +202,7 @@ export class PdfMaker {
             reject(workerError);
           }
         });
-        this.worker.on('exit', () => {}); // do nothing on errors
+        this.worker.on('exit', () => {});
 
         // Send the initial request
         const generatePdfRequest: GeneratePdfRequest = {
