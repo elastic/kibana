@@ -133,6 +133,7 @@ Note:
 
 Note:
 - The default `--to` is `15m` unless `--maxDocs` is specified in which case `--to` is calculated based on the scenario's TPM.
+- You can combine `--from` `--maxDocs` and `--to` with `--live` to back-fill some data.
 
 
 ### Setup options

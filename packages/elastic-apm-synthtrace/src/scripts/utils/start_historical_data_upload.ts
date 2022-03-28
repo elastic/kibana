@@ -159,7 +159,6 @@ export async function startHistoricalDataUpload(
       });
       worker.on('message', (message: WorkerMessages) => {
         if ('workerIndex' in message) {
-          if (!runOptions.maxDocs) return;
           if ('processedDocuments' in message) {
             totalProcessed += message.processedDocuments;
             workerProcessed[workerIndex].total += message.processedDocuments;
