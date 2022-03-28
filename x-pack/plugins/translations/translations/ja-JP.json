@@ -19015,7 +19015,6 @@
     "xpack.ml.trainedModels.nodesList.modelsList.modelRoutingStateHeader": "ルーティング状態",
     "xpack.ml.trainedModels.nodesList.modelsList.modelSizeHeader": "サイズ",
     "xpack.ml.trainedModels.nodesList.modelsList.modelStartTimeHeader": "開始時刻",
-    "xpack.ml.trainedModels.nodesList.modelsList.modelStateHeader": "ステータス",
     "xpack.ml.trainedModels.nodesList.modelsList.nodeNameHeader": "ノード名",
     "xpack.ml.trainedModels.nodesList.modelsMemoryUsage": "学習済みモデル",
     "xpack.ml.trainedModels.nodesList.nodeMemoryUsageHeader": "メモリー使用状況",

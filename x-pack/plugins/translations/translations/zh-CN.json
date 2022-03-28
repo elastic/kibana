@@ -19040,7 +19040,6 @@
     "xpack.ml.trainedModels.nodesList.modelsList.modelRoutingStateHeader": "路由状态",
     "xpack.ml.trainedModels.nodesList.modelsList.modelSizeHeader": "大小",
     "xpack.ml.trainedModels.nodesList.modelsList.modelStartTimeHeader": "开始时间",
-    "xpack.ml.trainedModels.nodesList.modelsList.modelStateHeader": "状态",
     "xpack.ml.trainedModels.nodesList.modelsList.nodeNameHeader": "节点名称",
     "xpack.ml.trainedModels.nodesList.modelsMemoryUsage": "已训练模型",
     "xpack.ml.trainedModels.nodesList.nodeMemoryUsageHeader": "内存使用",
