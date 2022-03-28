@@ -584,6 +584,13 @@ export const COLUMN_GAP = i18n.translate(
   }
 );
 
+export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltipSeeDocsDescription',
+  {
+    defaultMessage: 'see documentation',
+  }
+);
+
 export const RULES_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.tabs.rules',
   {
