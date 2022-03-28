@@ -8,7 +8,7 @@
 
 import { get, isPlainObject, keys, findKey } from 'lodash';
 import moment from 'moment';
-import { IAggConfig } from '../aggs';
+import { IAggConfig, parseInterval } from '../aggs';
 import { AggResponseBucket, TabbedRangeFilterParams, TimeRangeInformation } from './types';
 
 type AggParams = IAggConfig['params'] & {
@@ -25,7 +25,7 @@ export class TabifyBuckets {
   buckets: any;
   _keys: any[] = [];
 
-  constructor(aggResp: any, aggParams?: AggParams, timeRange?: TimeRangeInformation) {
+  constructor(aggResp: any, agg?: IAggConfig, timeRange?: TimeRangeInformation) {
     if (aggResp && aggResp.buckets) {
       this.buckets = aggResp.buckets;
     } else if (aggResp) {
@@ -45,10 +45,10 @@ export class TabifyBuckets {
       this.length = this.buckets.length;
     }
 
-    if (this.length && aggParams) {
-      this.orderBucketsAccordingToParams(aggParams);
-      if (aggParams.drop_partials) {
-        this.dropPartials(aggParams, timeRange);
+    if (this.length && agg) {
+      this.orderBucketsAccordingToParams(agg.params);
+      if (agg.params.drop_partials) {
+        this.dropPartials(agg, timeRange);
       }
     }
   }
@@ -96,23 +96,26 @@ export class TabifyBuckets {
 
   // dropPartials should only be called if the aggParam setting is enabled,
   // and the agg field is the same as the Time Range.
-  private dropPartials(params: AggParams, timeRange?: TimeRangeInformation) {
+  private dropPartials(agg: IAggConfig, timeRange?: TimeRangeInformation) {
     if (
       !timeRange ||
       this.buckets.length <= 1 ||
       this.objectMode ||
-      !timeRange.timeFields.includes(params.field.name)
+      !timeRange.timeFields.includes(agg.params.field.name)
     ) {
       return;
     }
 
-    const interval = this.buckets[1].key - this.buckets[0].key;
+    // serialize to turn into resolved interval
+    const interval = agg.params.used_interval
+      ? parseInterval((agg.serialize().params! as { used_interval: string }).used_interval)
+      : moment.duration(this.buckets[1].key - this.buckets[0].key);
 
     this.buckets = this.buckets.filter((bucket: AggResponseBucket) => {
       if (moment(bucket.key).isBefore(timeRange.from)) {
         return false;
       }
-      if (moment(bucket.key + interval).isAfter(timeRange.to)) {
+      if (moment(bucket.key).add(interval).isAfter(timeRange.to)) {
         return false;
       }
       return true;

@@ -10,7 +10,8 @@ import {
   DataLayerConfigResult,
   ReferenceLineLayerConfigResult,
   XYLayerConfigResult,
-} from '../../common';
+  AnnotationLayerConfigResult,
+} from '../../common/types';
 import { LayerTypes } from '../../common/constants';
 
 export const isDataLayer = (layer: XYLayerConfigResult): layer is DataLayerConfigResult =>
@@ -27,3 +28,16 @@ export const getReferenceLayers = (layers: XYLayerConfigResult[]) =>
   (layers || []).filter((layer): layer is ReferenceLineLayerConfigResult =>
     isReferenceLayer(layer)
   );
+
+const isAnnotationLayerCommon = (
+  layer: XYLayerConfigResult
+): layer is AnnotationLayerConfigResult => layer.layerType === LayerTypes.ANNOTATIONS;
+
+export const isAnnotationsLayer = (
+  layer: XYLayerConfigResult
+): layer is AnnotationLayerConfigResult => isAnnotationLayerCommon(layer);
+
+export const getAnnotationsLayers = (
+  layers: XYLayerConfigResult[]
+): AnnotationLayerConfigResult[] =>
+  (layers || []).filter((layer): layer is AnnotationLayerConfigResult => isAnnotationsLayer(layer));

@@ -8,6 +8,7 @@
 
 export * from './xy_vis';
 export * from './legend_config';
+export * from './annotation_layer_config';
 export * from './y_axis_config';
 export * from './data_layer_config';
 export * from './grid_lines_config';

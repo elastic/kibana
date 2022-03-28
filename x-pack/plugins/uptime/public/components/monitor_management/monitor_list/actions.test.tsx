@@ -15,7 +15,7 @@ describe('<Actions />', () => {
   const onUpdate = jest.fn();
 
   it('navigates to edit monitor flow on edit pencil', () => {
-    render(<Actions id="test-id" name="sample name" onUpdate={onUpdate} />);
+    render(<Actions id="test-id" name="sample name" onUpdate={onUpdate} monitors={[]} />);
 
     expect(screen.getByLabelText('Edit monitor')).toHaveAttribute(
       'href',

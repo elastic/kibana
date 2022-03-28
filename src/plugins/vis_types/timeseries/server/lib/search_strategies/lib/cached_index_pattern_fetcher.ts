@@ -8,11 +8,11 @@
 
 import { getIndexPatternKey, fetchIndexPattern } from '../../../../common/index_patterns_utils';
 
-import type { IndexPatternsService } from '../../../../../../data/server';
+import type { DataViewsService } from '../../../../../../data_views/common';
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../common/types';
 
 export const getCachedIndexPatternFetcher = (
-  indexPatternsService: IndexPatternsService,
+  indexPatternsService: DataViewsService,
   globalOptions: {
     fetchKibanaIndexForStringIndexes: boolean;
   } = {

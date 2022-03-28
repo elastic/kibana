@@ -524,7 +524,10 @@ function buildSuggestion({
   const keptLayers: XYLayerConfig[] = currentState
     ? currentState.layers
         // Remove layers that aren't being suggested
-        .filter((layer) => keptLayerIds.includes(layer.layerId))
+        .filter(
+          (layer) =>
+            keptLayerIds.includes(layer.layerId) || layer.layerType === layerTypes.ANNOTATIONS
+        )
         // Update in place
         .map((layer) => (layer.layerId === layerId ? newLayer : layer))
         // Replace the seriesType on all previous layers

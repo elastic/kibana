@@ -21,16 +21,19 @@ import {
   dataLayerConfigFunction,
   axisExtentConfigFunction,
   tickLabelsConfigFunction,
+  annotationLayerConfigFunction,
   labelsOrientationConfigFunction,
   referenceLineLayerConfigFunction,
   axisTitlesVisibilityConfigFunction,
 } from '../common';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
+import { EventAnnotationPluginSetup } from '../../../event_annotation/public';
 
 export interface XYPluginStartDependencies {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginStart;
+  eventAnnotation: EventAnnotationPluginSetup;
 }
 
 export function getTimeZone(uiSettings: IUiSettingsClient) {
@@ -53,6 +56,7 @@ export class ExpressionXyPlugin {
     expressions.registerFunction(dataLayerConfigFunction);
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(tickLabelsConfigFunction);
+    expressions.registerFunction(annotationLayerConfigFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
     expressions.registerFunction(referenceLineLayerConfigFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
@@ -63,12 +67,14 @@ export class ExpressionXyPlugin {
       const {
         data,
         fieldFormats,
+        eventAnnotation,
         charts: { activeCursor, theme, palettes },
       } = deps;
 
       const paletteService = await palettes.getPalettes();
 
       const { theme: kibanaTheme } = coreStart;
+      const eventAnnotationService = await eventAnnotation.getService();
       const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
 
       return {
@@ -79,6 +85,7 @@ export class ExpressionXyPlugin {
         activeCursor,
         paletteService,
         useLegacyTimeAxis,
+        eventAnnotationService,
         timeZone: getTimeZone(core.uiSettings),
       };
     };

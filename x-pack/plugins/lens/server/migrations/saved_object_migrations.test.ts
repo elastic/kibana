@@ -1993,4 +1993,75 @@ describe('Lens migrations', () => {
       });
     });
   });
+
+  describe('8.2.0 include empty rows for date histogram columns', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: null,
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto', timeZone: 'Europe/Berlin' },
+                    },
+                    '4': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto' },
+                    },
+                    '6': {
+                      label: 'Sum of bytes',
+                      dataType: 'number',
+                      operationType: 'sum',
+                      sourceField: 'bytes',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+              },
+            },
+          },
+          visualization: {},
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('should set include empty rows for all date histogram columns', () => {
+      const result = migrations['8.2.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+
+      const layer2Columns =
+        result.attributes.state.datasourceStates.indexpattern.layers['2'].columns;
+      expect(layer2Columns['3'].params).toHaveProperty('includeEmptyRows', true);
+      expect(layer2Columns['4'].params).toHaveProperty('includeEmptyRows', true);
+    });
+  });
 });

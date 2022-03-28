@@ -33,6 +33,12 @@ Object {
         "description": Array [
           "",
         ],
+        "emphasizeFitting": Array [
+          true,
+        ],
+        "endValue": Array [
+          "Nearest",
+        ],
         "fillOpacity": Array [
           0.3,
         ],

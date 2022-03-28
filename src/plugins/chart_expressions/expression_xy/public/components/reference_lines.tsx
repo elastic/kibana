@@ -14,7 +14,7 @@ import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FieldFormat } from '../../../../field_formats/common';
-import type { ReferenceLineLayerConfigResult, IconPosition, YAxisMode } from '../../common';
+import type { IconPosition, ReferenceLineLayerArgs, YAxisMode } from '../../common/types';
 import type { LensMultiTable } from '../../common/types';
 import { hasIcon } from '../helpers';
 
@@ -56,7 +56,7 @@ export const computeChartMargins = (
 
 // Note: it does not take into consideration whether the reference line is in view or not
 export const getReferenceLineRequiredPaddings = (
-  referenceLineLayers: ReferenceLineLayerConfigResult[],
+  referenceLineLayers: ReferenceLineLayerArgs[],
   axesMap: Record<'left' | 'right', unknown>
 ) => {
   // collect all paddings for the 4 axis: if any text is detected double it.
@@ -188,7 +188,7 @@ function getMarkerToShow(
 }
 
 export interface ReferenceLineAnnotationsProps {
-  layers: ReferenceLineLayerConfigResult[];
+  layers: ReferenceLineLayerArgs[];
   data: LensMultiTable;
   formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   axesMap: Record<'left' | 'right', boolean>;

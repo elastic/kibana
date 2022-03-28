@@ -12,6 +12,7 @@ import { ThemeServiceStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ChartsPluginStart, PaletteRegistry } from '../../../../charts/public';
+import { EventAnnotationServiceType } from '../../../../event_annotation/public';
 import { ExpressionRenderDefinition } from '../../../../expressions';
 import { FormatFactory } from '../../../../field_formats/common';
 import { KibanaThemeProvider } from '../../../../kibana_react/public';
@@ -27,6 +28,7 @@ export type GetStartDepsFn = () => Promise<{
   timeZone: string;
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
+  eventAnnotationService: EventAnnotationServiceType;
 }>;
 
 interface XyChartRendererDeps {
@@ -66,6 +68,7 @@ export const getXyChartRenderer = ({
               chartsThemeService={deps.theme}
               paletteService={deps.paletteService}
               timeZone={deps.timeZone}
+              eventAnnotationService={deps.eventAnnotationService}
               useLegacyTimeAxis={deps.useLegacyTimeAxis}
               minInterval={calculateMinInterval(config)}
               interactive={handlers.isInteractive()}

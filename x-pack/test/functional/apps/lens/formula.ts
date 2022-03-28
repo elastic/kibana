@@ -188,6 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsDatatable_rows > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
+        disableEmptyRows: true,
       });
 
       await PageObjects.lens.configureDimension({
