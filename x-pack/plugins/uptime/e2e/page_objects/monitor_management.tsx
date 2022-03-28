@@ -23,7 +23,7 @@ export function monitorManagementPageProvider({
   const remotePassword = process.env.SYNTHETICS_REMOTE_KIBANA_PASSWORD;
   const isRemote = Boolean(process.env.SYNTHETICS_REMOTE_ENABLED);
   const basePath = isRemote ? remoteKibanaUrl : kibanaUrl;
-  const monitorManagement = `${basePath}/app/uptime/manage-monitors`;
+  const monitorManagement = `${basePath}/app/uptime/manage-monitors/all`;
   const addMonitor = `${basePath}/app/uptime/add-monitor`;
   const overview = `${basePath}/app/uptime`;
   return {

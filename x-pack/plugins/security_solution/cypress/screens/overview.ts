@@ -144,7 +144,7 @@ export const OVERVIEW_HOST_STATS = '[data-test-subj="overview-hosts-stats"]';
 
 export const OVERVIEW_NETWORK_STATS = '[data-test-subj="overview-network-stats"]';
 
-export const OVERVIEW_EMPTY_PAGE = '[data-test-subj="empty-page"]';
+export const OVERVIEW_EMPTY_PAGE = '[data-test-subj="siem-landing-page"]';
 
 export const OVERVIEW_REVENT_TIMELINES = '[data-test-subj="overview-recent-timelines"]';
 

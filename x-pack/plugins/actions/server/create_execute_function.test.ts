@@ -93,6 +93,78 @@ describe('execute()', () => {
     });
   });
 
+  test('schedules the action with all given parameters and consumer', async () => {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry,
+      isESOCanEncrypt: true,
+      preconfiguredActions: [],
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'action_task_params',
+      attributes: {},
+      references: [],
+    });
+    await executeFn(savedObjectsClient, {
+      id: '123',
+      params: { baz: false },
+      spaceId: 'default',
+      executionId: '123abc',
+      consumer: 'test-consumer',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+      source: asHttpRequestExecutionSource(request),
+    });
+    expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "params": Object {
+                  "actionTaskParamsId": "234",
+                  "spaceId": "default",
+                },
+                "scope": Array [
+                  "actions",
+                ],
+                "state": Object {},
+                "taskType": "actions:mock-action",
+              },
+            ]
+        `);
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('action', '123');
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'action_task_params',
+      {
+        actionId: '123',
+        params: { baz: false },
+        executionId: '123abc',
+        consumer: 'test-consumer',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      {
+        references: [
+          {
+            id: '123',
+            name: 'actionRef',
+            type: 'action',
+          },
+        ],
+      }
+    );
+    expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
+      notifyUsage: true,
+    });
+  });
+
   test('schedules the action with all given parameters and relatedSavedObjects', async () => {
     const actionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
