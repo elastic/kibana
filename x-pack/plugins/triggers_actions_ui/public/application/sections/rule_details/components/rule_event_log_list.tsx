@@ -68,6 +68,7 @@ const columns = [
       }
     ),
     isSortable: getIsColumnSortable('timestamp'),
+    initialWidth: 250,
   },
   {
     id: 'execution_duration',
@@ -78,6 +79,7 @@ const columns = [
       }
     ),
     isSortable: getIsColumnSortable('execution_duration'),
+    initialWidth: 100,
   },
   {
     id: 'status',
@@ -99,7 +101,6 @@ const columns = [
       }
     ),
     isSortable: getIsColumnSortable('message'),
-    initialWidth: 400,
   },
   {
     id: 'num_active_alerts',
