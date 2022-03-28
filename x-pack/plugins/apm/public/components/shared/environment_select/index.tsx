@@ -32,19 +32,16 @@ export function EnvironmentSelect({
   onChange: (value: string) => void;
 }) {
   const [searchValue, setSearchValue] = useState('');
-  const defaultOption: EuiComboBoxOptionOption<string> = {
-    value: environment,
-    label: getEnvironmentLabel(environment),
-  };
 
-  const [selectedOptions, setSelectedOptions] = useState(
-    defaultOption ? [defaultOption] : []
-  );
+  const selectedOptions: Array<EuiComboBoxOptionOption<string>> = [
+    {
+      value: environment,
+      label: getEnvironmentLabel(environment),
+    },
+  ];
 
   const handleChange = useCallback(
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedOptions(changedOptions);
-
       if (changedOptions.length === 1 && changedOptions[0].value) {
         onChange(changedOptions[0].value);
       }
