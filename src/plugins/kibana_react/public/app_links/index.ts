@@ -5,5 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 export { RedirectAppLinks } from './redirect_app_link';
