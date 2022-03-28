@@ -41,11 +41,11 @@ describe('ChangePasswordFlyout', () => {
       it('should show errors when the new password is not at least 6 characters', () => {
         expect(validateChangePasswordForm({ password: '12345', confirm_password: '12345' }, true))
           .toMatchInlineSnapshot(`
-                  Object {
-                    "current_password": "Enter your current password.",
-                    "password": "Password must be at least 6 characters.",
-                  }
-              `);
+          Object {
+            "current_password": "Enter your current password.",
+            "password": "Enter at least 6 characters.",
+          }
+        `);
       });
 
       it('should show errors when new password does not match confirmation password', () => {
@@ -100,7 +100,7 @@ describe('ChangePasswordFlyout', () => {
         expect(validateChangePasswordForm({ password: '1234', confirm_password: '1234' }, false))
           .toMatchInlineSnapshot(`
           Object {
-            "password": "Password must be at least 6 characters.",
+            "password": "Enter at least 6 characters.",
           }
         `);
       });
