@@ -123,6 +123,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         reduxContainerContext
       ),
       {
+        outsideClickCloses: false,
         onClose: (flyout) => onCancel(flyout),
       }
     );

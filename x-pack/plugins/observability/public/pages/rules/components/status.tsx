@@ -5,19 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiBadge } from '@elastic/eui';
+import { noop } from 'lodash/fp';
 import { StatusProps } from '../types';
 import { statusMap } from '../config';
+import { RULES_CHANGE_STATUS } from '../translations';
 
-export function Status({ type, onClick }: StatusProps) {
+export function Status({ type, disabled, onClick }: StatusProps) {
+  const props = useMemo(
+    () => ({
+      color: statusMap[type].color,
+      ...(!disabled ? { onClick } : { onClick: noop }),
+      ...(!disabled ? { iconType: 'arrowDown', iconSide: 'right' as const } : {}),
+      ...(!disabled ? { iconOnClick: onClick } : { iconOnClick: noop }),
+    }),
+    [disabled, onClick, type]
+  );
   return (
     <EuiBadge
-      color={statusMap[type].color}
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={onClick}
-      onClickAriaLabel="Change status"
+      {...props}
+      onClickAriaLabel={RULES_CHANGE_STATUS}
+      iconOnClickAriaLabel={RULES_CHANGE_STATUS}
     >
       {statusMap[type].label}
     </EuiBadge>

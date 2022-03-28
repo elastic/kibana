@@ -162,7 +162,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           }),
         ]);
       }
-      const logTable = prepareLogTable(input, argsTable);
+      const logTable = prepareLogTable(input, argsTable, true);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 

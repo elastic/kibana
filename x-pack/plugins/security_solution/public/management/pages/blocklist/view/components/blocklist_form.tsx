@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import {
   OperatingSystem,
-  ConditionEntryField,
+  BlocklistConditionEntryField,
   isPathValid,
   hasSimpleExecutableName,
 } from '@kbn/securitysolution-utils';
@@ -65,9 +65,10 @@ import { useLicense } from '../../../../../common/hooks/use_license';
 import { isValidHash } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
+import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 
 interface BlocklistEntry {
-  field: ConditionEntryField;
+  field: BlocklistConditionEntryField;
   operator: 'included';
   type: 'match_any';
   value: string[];
@@ -82,7 +83,7 @@ function createValidationMessage(message: string): React.ReactNode {
   return <div>{message}</div>;
 }
 
-function getDropdownDisplay(field: ConditionEntryField): React.ReactNode {
+function getDropdownDisplay(field: BlocklistConditionEntryField): React.ReactNode {
   return (
     <>
       {CONDITION_FIELD_TITLE[field]}
@@ -106,19 +107,39 @@ export const BlockListForm = memo(
     const warningsRef = useRef<ItemValidation>({});
     const errorsRef = useRef<ItemValidation>({});
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const isGlobal = useMemo(() => isArtifactGlobal(item as ExceptionListItemSchema), [item]);
+    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(item.tags));
+    const [hasFormChanged, setHasFormChanged] = useState(false);
+
+    const showAssignmentSection = useMemo(() => {
+      return (
+        isPlatinumPlus ||
+        (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
+      );
+    }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
+
+    // set initial state of `wasByPolicy` that checks if the initial state of the exception was by policy or not
+    useEffect(() => {
+      if (!hasFormChanged && item.tags) {
+        setWasByPolicy(!isGlobalPolicyEffected(item.tags));
+      }
+    }, [item.tags, hasFormChanged]);
 
     // select policies if editing
     useEffect(() => {
+      if (hasFormChanged) return;
       const policyIds = item.tags?.map((tag) => tag.split(':')[1]) ?? [];
       if (!policyIds.length) return;
       const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
+
       setSelectedPolicies(policiesData);
-    }, [item.tags, policies]);
+    }, [hasFormChanged, item.tags, policies]);
 
     const blocklistEntry = useMemo((): BlocklistEntry => {
       if (!item.entries.length) {
         return {
-          field: ConditionEntryField.HASH,
+          field: 'file.hash.*',
           operator: 'included',
           type: 'match_any',
           value: [],
@@ -148,20 +169,19 @@ export const BlockListForm = memo(
       []
     );
 
-    const fieldOptions: Array<EuiSuperSelectOption<ConditionEntryField>> = useMemo(() => {
-      const selectableFields: Array<EuiSuperSelectOption<ConditionEntryField>> = [
-        ConditionEntryField.HASH,
-        ConditionEntryField.PATH,
-      ].map((field) => ({
+    const fieldOptions: Array<EuiSuperSelectOption<BlocklistConditionEntryField>> = useMemo(() => {
+      const selectableFields: Array<EuiSuperSelectOption<BlocklistConditionEntryField>> = (
+        ['file.hash.*', 'file.path'] as BlocklistConditionEntryField[]
+      ).map((field) => ({
         value: field,
         inputDisplay: CONDITION_FIELD_TITLE[field],
         dropdownDisplay: getDropdownDisplay(field),
       }));
       if (selectedOs === OperatingSystem.WINDOWS) {
         selectableFields.push({
-          value: ConditionEntryField.SIGNER,
-          inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER],
-          dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER),
+          value: 'file.Ext.code_signature',
+          inputDisplay: CONDITION_FIELD_TITLE['file.Ext.code_signature'],
+          dropdownDisplay: getDropdownDisplay('file.Ext.code_signature'),
         });
       }
 
@@ -183,7 +203,7 @@ export const BlockListForm = memo(
     const validateValues = useCallback((nextItem: ArtifactFormComponentProps['item']) => {
       const os = ((nextItem.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
       const {
-        field = ConditionEntryField.HASH,
+        field = 'file.hash.*',
         type = 'match_any',
         value: values = [],
       } = (nextItem.entries[0] ?? {}) as BlocklistEntry;
@@ -203,20 +223,20 @@ export const BlockListForm = memo(
       }
 
       // error if invalid hash
-      if (field === ConditionEntryField.HASH && values.some((value) => !isValidHash(value))) {
+      if (field === 'file.hash.*' && values.some((value) => !isValidHash(value))) {
         newValueErrors.push(createValidationMessage(ERRORS.INVALID_HASH));
       }
 
       const isInvalidPath = values.some((value) => !isPathValid({ os, field, type, value }));
 
       // warn if invalid path
-      if (field !== ConditionEntryField.HASH && isInvalidPath) {
+      if (field !== 'file.hash.*' && isInvalidPath) {
         newValueWarnings.push(createValidationMessage(ERRORS.INVALID_PATH));
       }
 
       // warn if wildcard
       if (
-        field !== ConditionEntryField.HASH &&
+        field !== 'file.hash.*' &&
         !isInvalidPath &&
         values.some((value) => !hasSimpleExecutableName({ os, type, value }))
       ) {
@@ -249,6 +269,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item]
     );
@@ -262,6 +283,7 @@ export const BlockListForm = memo(
             description: event.target.value,
           },
         });
+        setHasFormChanged(true);
       },
       [onChange, item]
     );
@@ -275,9 +297,8 @@ export const BlockListForm = memo(
             {
               ...blocklistEntry,
               field:
-                os !== OperatingSystem.WINDOWS &&
-                blocklistEntry.field === ConditionEntryField.SIGNER
-                  ? ConditionEntryField.HASH
+                os !== OperatingSystem.WINDOWS && blocklistEntry.field === 'file.Ext.code_signature'
+                  ? 'file.hash.*'
                   : blocklistEntry.field,
             },
           ],
@@ -288,12 +309,13 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, blocklistEntry, onChange, item]
     );
 
     const handleOnFieldChange = useCallback(
-      (field: ConditionEntryField) => {
+      (field: BlocklistConditionEntryField) => {
         const nextItem = {
           ...item,
           entries: [{ ...blocklistEntry, field }],
@@ -304,6 +326,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item, blocklistEntry]
     );
@@ -322,6 +345,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item, blocklistEntry]
     );
@@ -343,6 +367,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item, blocklistEntry]
     );
@@ -353,16 +378,20 @@ export const BlockListForm = memo(
           ? [GLOBAL_ARTIFACT_TAG]
           : change.selected.map((policy) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`);
 
-        setSelectedPolicies(change.selected);
+        const nextItem = { ...item, tags };
+
+        // Preserve old selected policies when switching to global
+        if (!change.isGlobal) {
+          setSelectedPolicies(change.selected);
+        }
+        validateValues(nextItem);
         onChange({
           isValid: isValid(errorsRef.current),
-          item: {
-            ...item,
-            tags,
-          },
+          item: nextItem,
         });
+        setHasFormChanged(true);
       },
-      [onChange, item]
+      [validateValues, onChange, item]
     );
 
     return (
@@ -463,20 +492,22 @@ export const BlockListForm = memo(
           />
         </EuiFormRow>
 
-        <>
-          <EuiHorizontalRule />
-          <EuiFormRow fullWidth>
-            <EffectedPolicySelect
-              isGlobal={isArtifactGlobal(item as ExceptionListItemSchema)}
-              isPlatinumPlus={useLicense().isPlatinumPlus()}
-              selected={selectedPolicies}
-              options={policies}
-              onChange={handleOnPolicyChange}
-              isLoading={policiesIsLoading}
-              description={POLICY_SELECT_DESCRIPTION}
-            />
-          </EuiFormRow>
-        </>
+        {showAssignmentSection && (
+          <>
+            <EuiHorizontalRule />
+            <EuiFormRow fullWidth>
+              <EffectedPolicySelect
+                isGlobal={isGlobal}
+                isPlatinumPlus={isPlatinumPlus}
+                selected={selectedPolicies}
+                options={policies}
+                onChange={handleOnPolicyChange}
+                isLoading={policiesIsLoading}
+                description={POLICY_SELECT_DESCRIPTION}
+              />
+            </EuiFormRow>
+          </>
+        )}
       </EuiForm>
     );
   }
