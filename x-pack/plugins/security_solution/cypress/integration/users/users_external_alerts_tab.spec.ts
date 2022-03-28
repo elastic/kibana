@@ -9,16 +9,15 @@ import {
   EXTERNAL_ALERTS_TAB,
   EXTERNAL_ALERTS_TAB_CONTENT,
 } from '../../screens/users/user_external_alerts';
-import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 
 import { USERS_URL } from '../../urls/navigation';
 
 describe('Users external alerts tab', () => {
   before(() => {
-    cleanKibana();
-    loginAndWaitForPage(USERS_URL);
+    login();
+    visit(USERS_URL);
   });
 
   it(`renders external alerts tab`, () => {

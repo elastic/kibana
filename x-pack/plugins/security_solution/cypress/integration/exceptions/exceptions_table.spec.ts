@@ -10,12 +10,7 @@ import { getExceptionList, expectedExportedExceptionList } from '../../objects/e
 import { getNewRule } from '../../objects/rule';
 
 import { createCustomRule } from '../../tasks/api_calls/rules';
-import {
-  login,
-  loginAndWaitForPageWithoutDateRange,
-  visitWithoutDateRange,
-  waitForPageWithoutDateRange,
-} from '../../tasks/login';
+import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
 
 import { EXCEPTIONS_URL } from '../../urls/navigation';
 import {
@@ -182,7 +177,8 @@ describe('Exceptions Table - read only', () => {
     createExceptionList(getExceptionList(), getExceptionList().list_id);
 
     // Then we login as read-only user to test.
-    loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
+    login(ROLES.reader);
+    visitWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
     waitForExceptionsTableToBeLoaded();
 
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);

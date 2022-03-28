@@ -304,25 +304,7 @@ const disableFeatureTourForRuleManagementPage = (window: Window) => {
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
-export const loginAndWaitForPage = (
-  url: string,
-  role?: ROLES,
-  onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void
-) => {
-  login(role);
-  cy.visit(
-    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
-    {
-      onBeforeLoad(win) {
-        if (onBeforeLoadCallback) {
-          onBeforeLoadCallback(win);
-        }
-        disableFeatureTourForRuleManagementPage(win);
-      },
-    }
-  );
-  cy.get('[data-test-subj="headerGlobalNav"]');
-};
+
 export const waitForPage = (url: string) => {
   cy.visit(
     `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
@@ -359,33 +341,6 @@ export const visitWithUser = (url: string, user: User) => {
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
-export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
-  login(role);
-  cy.visit(role ? getUrlWithRoute(role, url) : url, {
-    onBeforeLoad: disableFeatureTourForRuleManagementPage,
-  });
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
-};
-
-export const loginWithUserAndWaitForPageWithoutDateRange = (url: string, user: User) => {
-  loginWithUser(user);
-  cy.visit(constructUrlWithUser(user, url), {
-    onBeforeLoad: disableFeatureTourForRuleManagementPage,
-  });
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
-};
-
-export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
-  const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
-
-  login(role);
-  cy.visit(role ? getUrlWithRoute(role, route) : route, {
-    onBeforeLoad: disableFeatureTourForRuleManagementPage,
-  });
-  cy.get('[data-test-subj="headerGlobalNav"]');
-  cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
-};
-
 export const visitTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
   cy.visit(role ? getUrlWithRoute(role, route) : route, {
@@ -397,19 +352,10 @@ export const visitTimeline = (timelineId: string, role?: ROLES) => {
 
 export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
   visit(hostDetailsUrl(hostName));
-  cy.get('[data-test-subj="host-overview"] [data-test-subj="loading-spinner"]').should('exist');
-  cy.get('[data-test-subj="host-overview"] [data-test-subj="loading-spinner"]').should('not.exist');
-};
-export const loginAndWaitForHostDetailsPage = (hostName = 'suricata-iowa') => {
-  loginAndWaitForPage(hostDetailsUrl(hostName));
-
-  cy.get('[data-test-subj="hostDetailsPage"]', { timeout: 12000 }).should('exist');
-  cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
 };
 
-export const loginAndWaitForUsersDetailsPage = (userName = 'bob') => {
-  loginAndWaitForPage(userDetailsUrl(userName));
-  cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
+export const visitUserDetailsPage = (userName = 'bob') => {
+  visit(userDetailsUrl(userName));
 };
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {

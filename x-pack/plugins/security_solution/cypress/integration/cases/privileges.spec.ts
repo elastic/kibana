@@ -18,9 +18,10 @@ import {
   filterStatusOpen,
 } from '../../tasks/create_new_case';
 import {
-  loginAndWaitForHostDetailsPage,
+  login,
   loginWithUser,
   logout,
+  visitHostDetailsPage,
   visitWithUser,
 } from '../../tasks/login';
 import {
@@ -38,7 +39,7 @@ const usersToCreate = [secAllUser, secReadCasesAllUser];
 const rolesToCreate = [secAll, secReadCasesAll];
 // needed to generate index pattern
 const visitSecuritySolution = () => {
-  loginAndWaitForHostDetailsPage();
+  visitHostDetailsPage();
   openSourcerer();
   logout();
 };
@@ -53,6 +54,7 @@ const testCase: TestCaseWithoutTimeline = {
 describe('Cases privileges', () => {
   before(() => {
     cleanKibana();
+    login();
     createUsersAndRoles(usersToCreate, rolesToCreate);
     visitSecuritySolution();
   });

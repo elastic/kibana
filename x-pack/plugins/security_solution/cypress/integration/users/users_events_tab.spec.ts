@@ -6,16 +6,14 @@
  */
 
 import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../screens/users/user_events';
-import { cleanKibana } from '../../tasks/common';
-
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 
 import { USERS_URL } from '../../urls/navigation';
 
 describe('Users Events tab', () => {
   before(() => {
-    cleanKibana();
-    loginAndWaitForPage(USERS_URL);
+    login();
+    visit(USERS_URL);
   });
 
   it(`renders events tab`, () => {
