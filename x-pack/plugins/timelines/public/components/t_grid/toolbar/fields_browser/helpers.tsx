@@ -37,43 +37,49 @@ export const getFieldCount = (category: Partial<BrowserField> | undefined): numb
  * Filters the specified `BrowserFields` to return a new collection where every
  * category contains at least one field name that matches the specified substring.
  */
-export const filterBrowserFieldsByFieldName = ({
+export function filterBrowserFieldsByFieldName({
   browserFields,
   substring,
 }: {
   browserFields: BrowserFields;
   substring: string;
-}): BrowserFields => {
+}): BrowserFields {
   const trimmedSubstring = substring.trim();
+  // an empty search param will match everything
   if (trimmedSubstring === '') {
     return browserFields;
   }
-
-  // filter each category such that it only contains fields with field names
-  // that contain the specified substring:
-  const filteredBrowserFields: BrowserFields = Object.keys(browserFields).reduce(
-    (filteredCategories, categoryId) => ({
-      ...filteredCategories,
-      [categoryId]: {
-        ...browserFields[categoryId],
-        fields: pickBy(
-          ({ name }) => name != null && name.includes(trimmedSubstring),
-          browserFields[categoryId].fields
-        ),
-      },
-    }),
-    {}
-  );
-
-  // only pick non-empty categories from the filtered browser fields
-  const nonEmptyCategories: BrowserFields = pickBy(
-    (category) => categoryHasFields(category),
-    filteredBrowserFields
-  );
-
-  return nonEmptyCategories;
-};
-
+  const result: Record<string, Partial<BrowserField>> = {};
+  for (const [categoryName, categoryDescriptor] of Object.entries(browserFields)) {
+    if (!categoryDescriptor.fields) {
+      // ignore any category that is missing fields. This shouldn't happen.
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+    let hadAMatch = false;
+    const filteredFields: Record<string, Partial<BrowserField>> = {};
+    for (const [fieldName, fieldDescriptor] of Object.entries(categoryDescriptor.fields)) {
+      const fieldNameFromDescriptor = fieldDescriptor.name;
+      if (!fieldNameFromDescriptor) {
+        // Ignore any field that is missing a name in its descriptor. This shouldn't happen.
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+      if (fieldNameFromDescriptor !== null && fieldNameFromDescriptor.includes(trimmedSubstring)) {
+        // this field is a match
+        hadAMatch = true;
+        filteredFields[fieldName] = fieldDescriptor;
+      }
+    }
+    if (hadAMatch) {
+      result[categoryName] = {
+        ...browserFields[categoryName],
+        fields: filteredFields
+      }
+    }
+  }
+  return result;
+}
 /**
  * Filters the selected `BrowserFields` to return a new collection where every
  * category contains at least one field that is present in the `columnHeaders`.
