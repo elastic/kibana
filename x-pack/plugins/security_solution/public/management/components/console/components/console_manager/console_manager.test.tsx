@@ -5,44 +5,161 @@
  * 2.0.
  */
 
+import { renderHook as _renderHook, RenderHookResult, act } from '@testing-library/react-hooks';
+import { waitFor, getByTestId } from '@testing-library/react';
+import { ConsoleManager, useConsoleManager } from './console_manager';
+import React, { memo } from 'react';
+import type { ConsoleManagerClient, ConsoleRegistrationInterface } from './types';
+import { getCommandServiceMock } from '../../mocks';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+
 describe('When using ConsoleManager', () => {
-  it.todo('should return the expected interface');
+  describe('and using the ConsoleManagerInterface via the hook', () => {
+    type RenderResultInterface = RenderHookResult<never, ConsoleManagerClient>;
 
-  it.todo('should register a console');
+    let renderHook: () => RenderResultInterface;
+    let renderResult: RenderResultInterface;
 
-  it.todo('should show a console by `id`');
+    const getConsoleRegistration = (
+      overrides: Partial<ConsoleRegistrationInterface> = {}
+    ): ConsoleRegistrationInterface => {
+      return {
+        id: Math.random().toString(36),
+        title: 'Test console',
+        meta: { about: 'for unit testing ' },
+        consoleProps: {
+          'data-test-subj': 'testRunningConsole',
+          commandService: getCommandServiceMock(),
+        },
+        onBeforeTerminate: jest.fn(),
+        ...overrides,
+      };
+    };
 
-  it.todo('should throw if attempting to show a console with invalid `id`');
+    const registerNewConsole = (): string => {
+      const newConsole = getConsoleRegistration();
 
-  it.todo("should persist a console's command output history");
+      act(() => {
+        renderResult.result.current.register(newConsole);
+      });
 
-  it.todo('should hide a console by `id`');
+      return newConsole.id;
+    };
 
-  it.todo('should throw if attempting to hide a console with invalid `id`');
+    beforeEach(() => {
+      const { AppWrapper } = createAppRootMockRenderer();
 
-  it.todo('should terminate a console by `id`');
+      const RenderWrapper = memo(({ children }) => {
+        return (
+          <AppWrapper>
+            <ConsoleManager>{children}</ConsoleManager>{' '}
+          </AppWrapper>
+        );
+      });
+      RenderWrapper.displayName = 'RenderWrapper';
 
-  it.todo('should call `onBeforeTerminate()`');
+      renderHook = () => {
+        renderResult = _renderHook(useConsoleManager, {
+          wrapper: RenderWrapper,
+        });
 
-  it.todo('should throw if attempting to terminate a console with invalid `id`');
+        return renderResult;
+      };
+    });
 
-  it.todo('should return a registered console when calling `getOne()`');
+    it('should return the expected interface', async () => {
+      renderHook();
 
-  it.todo('should return `undefined` when calling getOne() with invalid `id`');
+      expect(renderResult.result.current).toEqual({
+        getList: expect.any(Function),
+        getOne: expect.any(Function),
+        hide: expect.any(Function),
+        register: expect.any(Function),
+        show: expect.any(Function),
+        terminate: expect.any(Function),
+      });
+    });
 
-  it.todo('should return list of registered consoles when calling `getList()`');
+    it('should register a console', () => {
+      const newConsole = getConsoleRegistration();
 
-  describe('and using the Registered Console client interface', () => {
-    it.todo('should have the expected interface');
+      renderHook();
+      act(() => {
+        renderResult.result.current.register(newConsole);
+      });
 
-    it.todo('should display the console when `.show()` is called');
+      expect(renderResult.result.current.getOne(newConsole.id)).toEqual({
+        id: newConsole.id,
+        title: newConsole.title,
+        meta: newConsole.meta,
+        show: expect.any(Function),
+        hide: expect.any(Function),
+        terminate: expect.any(Function),
+        isVisible: expect.any(Function),
+      });
+    });
 
-    it.todo('should hide the console when `.hide()` is called');
+    it('should show a console by `id`', async () => {
+      const { waitForNextUpdate } = renderHook();
+      const consoleId = registerNewConsole();
+      act(() => {
+        renderResult.result.current.show(consoleId);
+      });
+      await waitForNextUpdate();
 
-    it.todo('should un-register the console when `.terminate() is called');
+      expect(renderResult.result.current.getOne(consoleId)!.isVisible()).toBe(true);
+    });
+
+    it('should throw if attempting to show a console with invalid `id`', () => {
+      renderHook();
+
+      expect(() => renderResult.result.current.show('some id')).toThrow(
+        'Unable to show Console with id some id. Not found.'
+      );
+    });
+
+    it('should hide a console by `id`', () => {
+      renderHook();
+      const consoleId = registerNewConsole();
+      act(() => {
+        renderResult.result.current.show(consoleId);
+      });
+
+      expect(renderResult.result.current.getOne(consoleId)!.isVisible()).toBe(true);
+
+      act(() => {
+        renderResult.result.current.hide(consoleId);
+      });
+
+      expect(renderResult.result.current.getOne(consoleId)!.isVisible()).toBe(false);
+    });
+
+    it.todo('should throw if attempting to hide a console with invalid `id`');
+
+    it.todo('should terminate a console by `id`');
+
+    it.todo('should call `onBeforeTerminate()`');
+
+    it.todo('should throw if attempting to terminate a console with invalid `id`');
+
+    it.todo('should return a registered console when calling `getOne()`');
+
+    it.todo('should return `undefined` when calling getOne() with invalid `id`');
+
+    it.todo('should return list of registered consoles when calling `getList()`');
+
+    describe('and using the Registered Console client interface', () => {
+      it.todo('should have the expected interface');
+
+      it.todo('should display the console when `.show()` is called');
+
+      it.todo('should hide the console when `.hide()` is called');
+
+      it.todo('should un-register the console when `.terminate() is called');
+    });
   });
 
-  describe('and when the console popup is opened', () => {
+  describe('and when the console popup is rendered into the page', () => {
     it.todo('should show the title');
 
     it.todo('should show the console');
@@ -53,9 +170,11 @@ describe('When using ConsoleManager', () => {
 
     it.todo('should hide the popup');
 
-    it.todo('should show confirmation when terminate button is clicked');
+    it.todo("should persist a console's command output history");
 
     describe('and the terminate confirmation is shown', () => {
+      it.todo('should show confirmation when terminate button is clicked');
+
       it.todo('should show message confirmation');
 
       it.todo('should show cancel and terminate buttons');
