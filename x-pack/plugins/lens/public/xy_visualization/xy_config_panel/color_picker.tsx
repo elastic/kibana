@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State } from '../types';
 import { FormatFactory } from '../../../common';
@@ -20,7 +21,7 @@ import {
 } from '../color_assignment';
 import { getSortedAccessors } from '../to_expression';
 import { TooltipWrapper } from '../../shared_components';
-import { isReferenceLayer } from '../visualization_helpers';
+import { isReferenceLayer, isAnnotationsLayer, getDataLayers } from '../visualization_helpers';
 
 const tooltipContent = {
   auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
@@ -62,15 +63,17 @@ export const ColorPicker = ({
     if (overwriteColor || !frame.activeData) return overwriteColor;
     if (isReferenceLayer(layer)) {
       return defaultReferenceLineColor;
+    } else if (isAnnotationsLayer(layer)) {
+      return defaultAnnotationColor;
     }
 
     const sortedAccessors: string[] = getSortedAccessors(
-      frame.datasourceLayers[layer.layerId],
+      frame.datasourceLayers[layer.layerId] ?? layer.accessors,
       layer
     );
 
     const colorAssignments = getColorAssignments(
-      state.layers,
+      getDataLayers(state.layers),
       { tables: frame.activeData },
       formatFactory
     );

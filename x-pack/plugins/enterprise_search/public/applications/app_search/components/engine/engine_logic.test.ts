@@ -53,6 +53,7 @@ describe('EngineLogic', () => {
     hasNoDocuments: true,
     hasEmptySchema: true,
     isMetaEngine: false,
+    isElasticsearchEngine: false,
     isSampleEngine: false,
     hasSchemaErrors: false,
     hasSchemaConflicts: false,
@@ -379,6 +380,19 @@ describe('EngineLogic', () => {
           ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
           isMetaEngine: true,
+        });
+      });
+    });
+
+    describe('isElasticsearchEngine', () => {
+      it('should be set based on engine.type', () => {
+        const engine = { ...mockEngineData, type: EngineTypes.elasticsearch };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
+          isElasticsearchEngine: true,
         });
       });
     });

@@ -101,6 +101,17 @@ describe('aggregate()', () => {
             { key: 1, key_as_string: '1', doc_count: 3 },
           ],
         },
+        snoozed: {
+          buckets: [
+            {
+              key: '2022-03-21T20:22:01.501Z-*',
+              format: 'strict_date_time',
+              from: 1.647894121501e12,
+              from_as_string: '2022-03-21T20:22:01.501Z',
+              doc_count: 2,
+            },
+          ],
+        },
       },
     });
 
@@ -146,6 +157,9 @@ describe('aggregate()', () => {
           "muted": 3,
           "unmuted": 27,
         },
+        "ruleSnoozedStatus": Object {
+          "snoozed": 2,
+        },
       }
     `);
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -165,6 +179,13 @@ describe('aggregate()', () => {
           },
           muted: {
             terms: { field: 'alert.attributes.muteAll' },
+          },
+          snoozed: {
+            date_range: {
+              field: 'alert.attributes.snoozeEndTime',
+              format: 'strict_date_time',
+              ranges: [{ from: 'now' }],
+            },
           },
         },
       },
@@ -192,6 +213,13 @@ describe('aggregate()', () => {
           },
           muted: {
             terms: { field: 'alert.attributes.muteAll' },
+          },
+          snoozed: {
+            date_range: {
+              field: 'alert.attributes.snoozeEndTime',
+              format: 'strict_date_time',
+              ranges: [{ from: 'now' }],
+            },
           },
         },
       },

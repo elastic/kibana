@@ -41,44 +41,28 @@ interface FiltersInUse {
   [id: string]: FilterUsage;
 }
 
-// interface PartialDetector {
-//   detector_description: string;
-//   custom_rules: DetectorRule[];
-// }
-
-// interface PartialJob {
-//   job_id: string;
-//   analysis_config: {
-//     detectors: PartialDetector[];
-//   };
-// }
-
 export class FilterManager {
   constructor(private _mlClient: MlClient) {}
 
   async getFilter(filterId: string) {
     try {
-      const [JOBS, FILTERS] = [0, 1];
-      const results = await Promise.all([
-        this._mlClient.getJobs(),
-        this._mlClient.getFilters({ filter_id: filterId }),
-      ]);
-
-      if (results[FILTERS] && (results[FILTERS] as estypes.MlGetFiltersResponse).filters.length) {
-        let filtersInUse: FiltersInUse = {};
-        if (results[JOBS] && (results[JOBS] as estypes.MlGetJobsResponse).jobs) {
-          filtersInUse = this.buildFiltersInUse((results[JOBS] as estypes.MlGetJobsResponse).jobs);
-        }
-
-        const filter = (results[FILTERS] as estypes.MlGetFiltersResponse).filters[0];
-        return {
-          ...filter,
-          used_by: filtersInUse[filter.filter_id],
-          item_count: 0,
-        } as FilterStats;
-      } else {
+      const {
+        filters: [filter],
+      } = await this._mlClient.getFilters({ filter_id: filterId });
+      if (filter === undefined) {
+        // could be an empty list rather than a 404 if a wildcard was used,
+        // so throw our own 404
         throw Boom.notFound(`Filter with the id "${filterId}" not found`);
       }
+
+      const { jobs } = await this._mlClient.getJobs();
+      const filtersInUse = this.buildFiltersInUse(jobs);
+
+      return {
+        ...filter,
+        used_by: filtersInUse[filter.filter_id],
+        item_count: 0,
+      } as FilterStats;
     } catch (error) {
       throw Boom.badRequest(error);
     }
