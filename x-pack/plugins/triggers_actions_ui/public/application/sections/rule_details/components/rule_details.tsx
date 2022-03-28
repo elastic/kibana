@@ -441,7 +441,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 data-test-subj="ruleErrorBanner"
                 size="s"
                 title={getRuleStatusErrorReasonText()}
-                iconType="rule"
+                iconType="alert"
               >
                 <EuiText size="s" color="danger" data-test-subj="ruleErrorMessageText">
                   {rule.executionStatus.error?.message}
