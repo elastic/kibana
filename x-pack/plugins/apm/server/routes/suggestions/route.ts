@@ -44,6 +44,7 @@ const suggestionsRoute = createApmServerRoute({
       ? await getSuggestionsWithTermsAggregation({
           fieldName,
           fieldValue,
+          searchAggregatedTransactions,
           serviceName,
           setup,
           size,

@@ -6,6 +6,7 @@
  */
 import moment from 'moment';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery, termQuery } from '../../../../observability/server';
 import { Setup } from '../../lib/helpers/setup_request';
@@ -13,6 +14,7 @@ import { Setup } from '../../lib/helpers/setup_request';
 export async function getSuggestionsWithTermsAggregation({
   fieldName,
   fieldValue,
+  searchAggregatedTransactions,
   serviceName,
   setup,
   size,
@@ -21,6 +23,7 @@ export async function getSuggestionsWithTermsAggregation({
 }: {
   fieldName: string;
   fieldValue: string;
+  searchAggregatedTransactions: boolean;
   serviceName: string;
   setup: Setup;
   size: number;
@@ -34,7 +37,7 @@ export async function getSuggestionsWithTermsAggregation({
     {
       apm: {
         events: [
-          ProcessorEvent.transaction,
+          getProcessorEventForTransactions(searchAggregatedTransactions),
           ProcessorEvent.error,
           ProcessorEvent.metric,
         ],
