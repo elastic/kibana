@@ -15,6 +15,7 @@ import {
 } from './helpers';
 import { BrowserFields } from '../../../../../common/search_strategy';
 import { ColumnHeaderOptions } from '../../../../../common';
+import largeBrowserFields from './large_browser_fields_for_testing_filter_browser_fields_by_field_name.json';
 
 describe('helpers', () => {
   describe('categoryHasFields', () => {
@@ -168,6 +169,18 @@ describe('helpers', () => {
           substring: '',
         })
       ).toEqual(mockBrowserFields);
+    });
+
+    test("it returns the expected fields/categories when the substring is '.' and the browser fields are large", () => {
+      const start = Date.now();
+      const result = filterBrowserFieldsByFieldName({
+        browserFields: largeBrowserFields,
+        substring: '.',
+      });
+      console.log(`This took: ${Date.now() - start}ms.`);
+      expect(
+        result
+      ).toMatchSnapshot();
     });
 
     test('it returns (only) non-empty categories, where each category contains only the fields matching the substring', () => {
