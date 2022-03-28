@@ -1222,6 +1222,7 @@
           ],
           "path": "src/plugins/home/public/plugin.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "cloud",
