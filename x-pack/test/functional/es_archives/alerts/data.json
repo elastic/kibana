@@ -900,29 +900,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "action:5195d200-ad1e-11ec-ab9e-5f5932f4fad8",
-    "index": ".kibana_1",
-    "source": {
-      "action": {
-        "name": "test-server-connector",
-        "alertTypeId": ".server-log",
-        "isMissingSecrets": false,
-        "config": {},
-      },
-      "type": "action",
-      "updated_at": "2022-03-26T16:03:47.121Z",
-      "migrationVersion": {
-        "alert": "8.0.0"
-      },
-      "references": [
-      ]
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "alert:776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8",
     "index": ".kibana_1",
     "source": {
@@ -949,15 +926,6 @@
         },
         "enabled": true,
         "actions": [
-          {
-            "group": "query matched",
-            "params": {
-              "level": "info",
-              "message": "Elasticsearch query alert '{{alertName}}' is active:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
-            },
-            "actionRef": "action_0",
-            "actionTypeId": ".server-log"
-          }
         ],
         "throttle": null,
         "apiKeyOwner": null,
@@ -975,11 +943,6 @@
         "alert": "8.0.1"
       },
       "references": [
-        {
-          "id": "5195d200-ad1e-11ec-ab9e-5f5932f4fad8",
-          "name": "action_0",
-          "type": "action"
-        }
       ]
     }
   }
