@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { asyncMap, asyncForEach } from '@kbn/std';
+import { asyncForEach } from '@kbn/std';
 import { last } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -104,16 +104,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return alerts;
   };
 
-  const createDataViews = () =>
-    asyncMap(
-      [SOURCE_DATA_INDEX, OUTPUT_DATA_INDEX],
-      async (dataView: string) =>
-        await supertest
-          .post(`/api/data_views/data_view`)
-          .set('kbn-xsrf', 'foo')
-          .send({ data_view: { title: dataView, timeFieldName: '@timestamp' } })
-          .expect(200)
-    );
+  const createDataView = async (dataView: string) => {
+    log.debug(`create data view ${dataView}`);
+    return await supertest
+      .post(`/api/data_views/data_view`)
+      .set('kbn-xsrf', 'foo')
+      .send({ data_view: { title: dataView, timeFieldName: '@timestamp' } })
+      .expect(200);
+  };
 
   const createConnector = async (): Promise<string> => {
     const { body: createdAction } = await supertest
@@ -240,10 +238,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('create output index');
       await createOutputDataIndex();
 
-      // wait for indices creation finished
-      await PageObjects.common.sleep(8000);
       log.debug('create data views');
-      const [sourceDataViewResponse, outputDataViewResponse] = await createDataViews();
+      const sourceDataViewResponse = await createDataView(SOURCE_DATA_INDEX);
+      const outputDataViewResponse = await createDataView(OUTPUT_DATA_INDEX);
 
       log.debug('create connector');
       connectorId = await createConnector();
