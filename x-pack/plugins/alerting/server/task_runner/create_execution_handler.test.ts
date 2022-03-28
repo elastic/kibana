@@ -127,6 +127,7 @@ describe('Create Execution Handler', () => {
     );
     alertExecutionStore = {
       numberOfTriggeredActions: 0,
+      numberOfScheduledActions: 0,
       numberOfTriggeredActionsByConnectorType: {},
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
@@ -510,6 +511,7 @@ describe('Create Execution Handler', () => {
 
     alertExecutionStore = {
       numberOfTriggeredActions: 0,
+      numberOfScheduledActions: 0,
       numberOfTriggeredActionsByConnectorType: {},
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
@@ -523,6 +525,7 @@ describe('Create Execution Handler', () => {
     });
 
     expect(alertExecutionStore.numberOfTriggeredActions).toBe(2);
+    expect(alertExecutionStore.numberOfScheduledActions).toBe(3);
     expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.PARTIAL);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
   });

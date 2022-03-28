@@ -15,7 +15,7 @@ interface Deps {
     'mode' | 'actions' | 'checkPrivilegesDynamicallyWithRequest'
   >;
   checkHasManagePipeline: boolean;
-  checkCreateIndexPattern: boolean;
+  checkCreateDataView: boolean;
   indexName?: string;
 }
 
@@ -23,7 +23,7 @@ export const checkFileUploadPrivileges = async ({
   request,
   authorization,
   checkHasManagePipeline,
-  checkCreateIndexPattern,
+  checkCreateDataView,
   indexName,
 }: Deps) => {
   const requiresAuthz = authorization?.mode.useRbacForRequest(request) ?? false;
@@ -42,7 +42,7 @@ export const checkFileUploadPrivileges = async ({
       index: indexName ? { [indexName]: ['create', 'create_index'] } : {},
     },
   };
-  if (checkCreateIndexPattern) {
+  if (checkCreateDataView) {
     checkPrivilegesPayload.kibana = [
       authorization.actions.savedObject.get('index-pattern', 'create'),
     ];

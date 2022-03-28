@@ -145,11 +145,14 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         inspector: inspectorPluginMock.createStartContract(),
         getTrigger,
         theme: themeServiceMock.createStartContract(),
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         documentToExpression: () =>
           Promise.resolve({
@@ -189,9 +192,15 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: {} as DataViewsContract,
         inspector: inspectorPluginMock.createStartContract(),
-        capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
+        },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -236,9 +245,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -294,9 +306,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -341,9 +356,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -387,9 +405,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -429,9 +450,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -474,9 +498,15 @@ describe('embeddable', () => {
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as DataViewsContract,
-        capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
+        },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -526,9 +556,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -576,9 +609,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -633,9 +669,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -659,7 +698,7 @@ describe('embeddable', () => {
       expect.objectContaining({
         timeRange,
         query: [query, savedVis.state.query],
-        filters: mockInjectFilterReferences(filters, []),
+        filters,
       })
     );
 
@@ -691,9 +730,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -723,8 +765,10 @@ describe('embeddable', () => {
 
   it('should merge external context with query and filters of the saved object', async () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
-    const query: Query = { language: 'kquery', query: 'external filter' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
+    const query: Query = { language: 'kquery', query: 'external query' };
+    const filters: Filter[] = [
+      { meta: { alias: 'external filter', negate: false, disabled: false } },
+    ];
 
     const newSavedVis = {
       ...savedVis,
@@ -750,9 +794,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -772,18 +819,16 @@ describe('embeddable', () => {
     await embeddable.initializeSavedVis(input);
     embeddable.render(mountpoint);
 
-    expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
-      timeRange,
-      query: [query, { language: 'kquery', query: 'saved filter' }],
-      // actual index pattern id gets injected
-      filters: mockInjectFilterReferences(
-        [
-          filters[0],
-          { meta: { alias: 'test', negate: false, disabled: false, index: 'injected!' } },
-        ],
-        []
-      ),
-    });
+    const expectedFilters = [
+      ...input.filters!,
+      ...mockInjectFilterReferences(newSavedVis.state.filters, []),
+    ];
+    expect(expressionRenderer.mock.calls[0][0].searchContext?.timeRange).toEqual(timeRange);
+    expect(expressionRenderer.mock.calls[0][0].searchContext?.filters).toEqual(expectedFilters);
+    expect(expressionRenderer.mock.calls[0][0].searchContext?.query).toEqual([
+      query,
+      { language: 'kquery', query: 'saved filter' },
+    ]);
   });
 
   it('should execute trigger on event from expression renderer', async () => {
@@ -798,9 +843,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -846,9 +894,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -891,9 +942,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -951,9 +1005,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -1030,9 +1087,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -1084,9 +1144,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -1135,9 +1198,12 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         visualizationMap: {},
+        datasourceMap: {},
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -1207,6 +1273,8 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
         },
         getTrigger,
         theme: themeServiceMock.createStartContract(),
@@ -1216,6 +1284,7 @@ describe('embeddable', () => {
             onEditAction: onEditActionMock,
           } as unknown as Visualization,
         },
+        datasourceMap: {},
         documentToExpression: documentToExpressionMock,
       },
       { id: '123' } as unknown as LensEmbeddableInput
