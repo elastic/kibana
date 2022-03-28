@@ -10,8 +10,7 @@
 import Url from 'url';
 import { inspect } from 'util';
 import apm, { Span, Transaction } from 'elastic-apm-node';
-import { setTimeout } from 'timers/promises';
-import playwright, { ChromiumBrowser, Page, BrowserContext } from 'playwright';
+import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession } from 'playwright';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
 
 type StorageState = Awaited<ReturnType<BrowserContext['storageState']>>;
@@ -22,40 +21,32 @@ apm.start({
   secretToken: 'CTs9y3cvcfq13bQqsB',
 });
 
-interface StepCtx {
+export interface StepCtx {
   page: Page;
 }
+
 type StepFn = (ctx: StepCtx) => Promise<void>;
-type Steps = Array<{ name: string; fn: StepFn }>;
+export type Steps = Array<{ name: string; handler: StepFn }>;
 
 export class PerformanceTestingService extends FtrService {
-  private readonly config = this.ctx.getService('config');
-  private readonly lifecycle = this.ctx.getService('lifecycle');
-  private readonly inputDelays = this.ctx.getService('inputDelays');
+  private readonly config;
+  private readonly inputDelays;
+
   private browser: ChromiumBrowser | undefined;
   private storageState: StorageState | undefined;
   private currentSpanStack: Array<Span | null> = [];
-  private currentTransaction: Transaction | undefined | null;
+  private currentTransaction: Transaction | undefined | null = undefined;
 
   constructor(ctx: FtrProviderContext) {
     super(ctx);
 
-    this.lifecycle.beforeTests.add(async () => {
-      await this.withTransaction('Journey setup', async () => {
-        await this.getStorageState();
-      });
-    });
-
-    this.lifecycle.cleanup.add(async () => {
-      apm.flush();
-      await setTimeout(5000);
-      await this.browser?.close();
-    });
+    this.config = ctx.getService('config');
+    this.inputDelays = ctx.getService('inputDelays');
   }
 
   private async withTransaction<T>(name: string, block: () => Promise<T>) {
     try {
-      if (this.currentTransaction !== undefined) {
+      if (this.currentTransaction) {
         throw new Error(
           `Transaction already started, make sure you end transaction ${this.currentTransaction?.name}`
         );
@@ -179,70 +170,67 @@ export class PerformanceTestingService extends FtrService {
     });
   }
 
-  public makePage(journeyName: string) {
-    const steps: Steps = [];
+  public runUserJourney(journeyName: string, steps: Steps) {
+    return this.withTransaction(`Journey ${journeyName}`, async () => {
+      const browser = await this.getBrowserInstance();
+      const storageState = await this.getStorageState();
+      const viewport = { width: 1600, height: 1200 };
+      const context = await browser.newContext({ viewport, storageState });
 
-    it(journeyName, async () => {
-      await this.withTransaction(`Journey ${journeyName}`, async () => {
-        const browser = await this.getBrowserInstance();
-        const context = await browser.newContext({
-          viewport: { width: 1600, height: 1200 },
-          storageState: await this.getStorageState(),
-        });
+      const page = await context.newPage();
+      if (!process.env.NO_BROWSER_LOG) {
+        page.on('console', this.onConsoleEvent());
+      }
+      const client = await this.sendCDPCommands(context, page);
 
-        const page = await context.newPage();
-        page.on('console', (message) => {
-          (async () => {
-            try {
-              const args = await Promise.all(
-                message.args().map(async (handle) => handle.jsonValue())
-              );
+      await this.interceptBrowserRequests(page);
+      await this.handleSteps(steps, page);
+      await this.tearDown(page, client, context);
+    });
+  }
 
-              const { url, lineNumber, columnNumber } = message.location();
+  private async tearDown(page: Page, client: CDPSession, context: BrowserContext) {
+    if (page) {
+      apm.flush();
+      await client.detach();
+      await page.close();
+      await context.close();
+    }
+  }
 
-              const location = `${url},${lineNumber},${columnNumber}`;
-
-              const text = args.length
-                ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg))).join(' ')
-                : message.text();
-
-              console.log(`[console.${message.type()}]`, text);
-              console.log('    ', location);
-            } catch (e) {
-              console.error('Failed to evaluate console.log line', e);
-            }
-          })();
-        });
-        const client = await this.sendCDPCommands(context, page);
-
-        await this.interceptBrowserRequests(page);
-
+  private async handleSteps(steps: Array<{ name: string; handler: StepFn }>, page: Page) {
+    for (const step of steps) {
+      await this.withSpan(`step: ${step.name}`, 'step', async () => {
         try {
-          for (const step of steps) {
-            await this.withSpan(`step: ${step.name}`, 'step', async () => {
-              try {
-                await step.fn({ page });
-              } catch (e) {
-                const error = new Error(`Step [${step.name}] failed: ${e.message}`);
-                error.stack = e.stack;
-                throw error;
-              }
-            });
-          }
-        } finally {
-          if (page) {
-            await client.detach();
-            await page.close();
-            await context.close();
-          }
+          await step.handler({ page });
+        } catch (e) {
+          const error = new Error(`Step [${step.name}] failed: ${e.message}`);
+          error.stack = e.stack;
         }
       });
-    });
+    }
+  }
 
-    return {
-      step: (name: string, fn: StepFn) => {
-        steps.push({ name, fn });
-      },
+  private onConsoleEvent() {
+    return (message: playwright.ConsoleMessage) => {
+      (async () => {
+        try {
+          const args = await Promise.all(message.args().map(async (handle) => handle.jsonValue()));
+
+          const { url, lineNumber, columnNumber } = message.location();
+
+          const location = `${url},${lineNumber},${columnNumber}`;
+
+          const text = args.length
+            ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg))).join(' ')
+            : message.text();
+
+          console.log(`[console.${message.type()}]`, text);
+          console.log('    ', location);
+        } catch (e) {
+          console.error('Failed to evaluate console.log line', e);
+        }
+      })();
     };
   }
 }
