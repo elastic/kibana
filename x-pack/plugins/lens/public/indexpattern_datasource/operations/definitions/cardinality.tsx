@@ -12,7 +12,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition, ParamEditorProps } from './index';
-import { FieldBasedIndexPatternColumn, FormatParams } from './column_types';
+import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 
 import {
   getFormatFromPreviousColumn,
@@ -60,7 +60,7 @@ export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternCol
   operationType: typeof OPERATION_TYPE;
   params?: {
     emptyAsNull?: boolean;
-    format?: FormatParams;
+    format?: ValueFormatConfig;
   };
 }
 
