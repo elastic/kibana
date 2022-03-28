@@ -49,7 +49,7 @@ export interface ConsoleManagerClient {
   ): Readonly<RegisteredConsoleClient<Meta>> | undefined;
 
   /** Get a list of running consoles */
-  getList<Meta extends object = Record<string, unknown>>(): Readonly<
-    Array<RegisteredConsoleClient<Meta>>
+  getList<Meta extends object = Record<string, unknown>>(): ReadonlyArray<
+    Readonly<RegisteredConsoleClient<Meta>>
   >;
 }
