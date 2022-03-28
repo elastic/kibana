@@ -116,8 +116,9 @@ export function monitorManagementPageProvider({
       while (true) {
         if ((await page.$(this.byTestId('monitorManagementDeleteMonitor'))) === null) break;
         await this.clickByTestSubj('monitorManagementDeleteMonitor');
+        await page.waitForSelector('[data-test-subj="confirmModalTitleText"]');
         await this.clickByTestSubj('confirmModalConfirmButton');
-        isSuccessful = Boolean(this.findByTestSubj('uptimeDeleteMonitorSuccess'));
+        isSuccessful = Boolean(await this.findByTestSubj('uptimeDeleteMonitorSuccess'));
         await page.waitForTimeout(5 * 1000);
       }
       return isSuccessful;
