@@ -2,7 +2,7 @@
 
 ## Yarn and internal collection
 
-For the simplest Elasticsearch & Kibana stack monitoring setup from a kibana clone, using [internal collection](../reference/terminology.md#internal-collection), first start elasticsearch with monitoring and a local [exporter](../reference/terminology.md#exporter) enabled.
+For the simplest Elasticsearch & Kibana stack monitoring setup from a kibana clone, using [internal collection](../reference/terminology.md#internal-collection), first start elasticsearch with monitoring and a local [exporter](https://www.elastic.co/guide/en/elasticsearch/reference/current/es-monitoring-exporters.html) enabled.
 
 ```shell
 yarn es snapshot --license trial \
