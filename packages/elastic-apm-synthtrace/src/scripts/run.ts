@@ -108,7 +108,6 @@ function options(y: Argv) {
       string: true,
     })
 
-    .conflicts('to', 'live')
     .conflicts('target', 'cloudId')
     .conflicts('kibana', 'cloudId')
     .conflicts('local', 'target')
@@ -126,6 +125,13 @@ yargs(process.argv.slice(2))
     async (argv: RunCliFlags) => {
       if (argv.local) {
         argv.target = 'http://localhost:9200';
+      }
+      if (argv.kibana && !argv.target) {
+        const url = new URL(argv.kibana);
+        // super naive inference of ES target based on public kibana Cloud endpoint
+        if (url.hostname.match(/\.kb\./)) {
+          argv.target = argv.kibana.replace(/\.kb\./, '.es.');
+        }
       }
 
       const runOptions = parseRunCliFlags(argv);
