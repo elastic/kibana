@@ -6,9 +6,11 @@
  */
 
 import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { i18n } from '@kbn/i18n';
 import type { LensMultiTable } from '../../../../lens/common';
 import type { ChoroplethChartConfig, ChoroplethChartProps } from './types';
 import { RENDERER_ID } from './expression_renderer';
+import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
 
 interface ChoroplethChartRender {
   type: 'render';
@@ -56,7 +58,29 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
     },
   },
   inputTypes: ['lens_multitable'],
-  fn(data, args) {
+  fn(data, args, handlers) {
+    if (handlers?.inspectorAdapters?.tables) {
+      const logTable = prepareLogTable(
+        Object.values(data.tables)[0],
+        [
+          [
+            args.valueAccessor ? [args.valueAccessor] : undefined,
+            i18n.translate('xpack.maps.logDatatable.value', {
+              defaultMessage: 'Value',
+            }),
+          ],
+          [
+            args.regionAccessor ? [args.regionAccessor] : undefined,
+            i18n.translate('xpack.maps.logDatatable.region', {
+              defaultMessage: 'Region key',
+            }),
+          ],
+        ],
+        true
+      );
+
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+    }
     return {
       type: 'render',
       as: RENDERER_ID,
