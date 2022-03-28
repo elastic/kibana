@@ -29,5 +29,6 @@ export const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
     navigateToApp: jest.fn(),
     navigateToUrl: jest.fn(),
     getUrlForApp: jest.fn(),
+    navigateToUrlSkipUnload: jest.fn(),
   };
 };
