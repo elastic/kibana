@@ -7,11 +7,12 @@
 
 import { CoreSetup } from '../../../../src/core/server';
 
-import { savedQueryType, packType } from './lib/saved_query/saved_object_mappings';
+import { savedQueryType, packType, packAssetType } from './lib/saved_query/saved_object_mappings';
 import { usageMetricType } from './routes/usage/saved_object_mappings';
 
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
   savedObjects.registerType(usageMetricType);
   savedObjects.registerType(savedQueryType);
   savedObjects.registerType(packType);
+  savedObjects.registerType(packAssetType);
 };

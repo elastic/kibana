@@ -26,6 +26,8 @@ export interface Influencer {
 
 export type MLAnomalyDoc = AnomalyRecordDoc;
 
+export type RecordForInfluencer = AnomalyRecordDoc;
+
 /**
  * Anomaly record document. Records contain the detailed analytical results.
  * They describe the anomalous activity that has been identified in the input data based on the detector configuration.

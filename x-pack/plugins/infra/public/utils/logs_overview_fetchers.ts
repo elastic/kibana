@@ -38,7 +38,10 @@ export function getLogsHasDataFetcher(getStartServices: InfraClientCoreSetup['ge
   return async () => {
     const [core] = await getStartServices();
     const sourceStatus = await callFetchLogSourceStatusAPI(DEFAULT_SOURCE_ID, core.http.fetch);
-    return sourceStatus.data.logIndexStatus === 'available';
+    return {
+      hasData: sourceStatus.data.logIndexStatus === 'available',
+      indices: sourceStatus.data.indices,
+    };
   };
 }
 
