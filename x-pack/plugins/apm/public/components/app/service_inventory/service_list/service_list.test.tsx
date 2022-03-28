@@ -22,6 +22,7 @@ const query = {
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
   serviceGroup: '',
+  comparisonEnabled: false,
 };
 
 const service: any = {

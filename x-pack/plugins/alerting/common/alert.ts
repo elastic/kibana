@@ -77,6 +77,7 @@ export interface AlertAggregations {
   alertExecutionStatus: { [status: string]: number };
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
+  ruleSnoozedStatus: { snoozed: number };
 }
 
 export interface MappedParamsProperties {

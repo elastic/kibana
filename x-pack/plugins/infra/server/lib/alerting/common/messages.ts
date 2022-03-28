@@ -206,3 +206,11 @@ export const thresholdActionVariableDescription = i18n.translate(
       'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
   }
 );
+
+export const viewInAppUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.viewInAppUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+  }
+);

@@ -22,6 +22,7 @@ export const RULE_TYPE_ID = 'test';
 export const DATE_1969 = '1969-12-31T00:00:00.000Z';
 export const DATE_1970 = '1970-01-01T00:00:00.000Z';
 export const DATE_1970_5_MIN = '1969-12-31T23:55:00.000Z';
+export const DATE_9999 = '9999-12-31T12:34:56.789Z';
 export const MOCK_DURATION = 86400000000000;
 
 export const SAVED_OBJECT = {
@@ -29,6 +30,7 @@ export const SAVED_OBJECT = {
   type: 'alert',
   attributes: {
     apiKey: Buffer.from('123:abc').toString('base64'),
+    consumer: 'bar',
     enabled: true,
   },
   references: [],
@@ -174,6 +176,8 @@ export const mockTaskInstance = () => ({
   taskType: 'alerting:test',
   params: {
     alertId: RULE_ID,
+    spaceId: 'default',
+    consumer: 'bar',
   },
   ownerId: null,
 });
@@ -196,6 +200,7 @@ export const generateEventLog = ({
   action,
   task,
   duration,
+  consumer,
   start,
   end,
   outcome,
@@ -227,6 +232,7 @@ export const generateEventLog = ({
   kibana: {
     alert: {
       rule: {
+        ...(consumer && { consumer }),
         execution: {
           uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
           ...((!isNil(numberOfTriggeredActions) || !isNil(numberOfScheduledActions)) && {
@@ -239,6 +245,7 @@ export const generateEventLog = ({
             },
           }),
         },
+        rule_type_id: 'test',
       },
     },
     ...((actionSubgroup || actionGroupId || instanceId || status) && {
@@ -250,6 +257,7 @@ export const generateEventLog = ({
       },
     }),
     saved_objects: savedObjects,
+    space_ids: ['default'],
     ...(task && {
       task: {
         schedule_delay: 0,
@@ -366,6 +374,7 @@ export const generateEnqueueFunctionInput = () => ({
   params: {
     foo: true,
   },
+  consumer: 'bar',
   relatedSavedObjects: [
     {
       id: '1',
@@ -381,7 +390,7 @@ export const generateEnqueueFunctionInput = () => ({
     },
     type: 'SAVED_OBJECT',
   },
-  spaceId: undefined,
+  spaceId: 'default',
 });
 
 export const generateAlertInstance = ({ id, duration, start }: GeneratorParams = { id: 1 }) => ({

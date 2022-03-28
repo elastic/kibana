@@ -79,6 +79,7 @@ const createExecutionHandlerParams: jest.Mocked<
   spaceId: 'test1',
   ruleId: '1',
   ruleName: 'name-of-alert',
+  ruleConsumer: 'rule-consumer',
   executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
   tags: ['tag-A', 'tag-B'],
   apiKey: 'MTIzOmFiYw==',
@@ -149,6 +150,7 @@ describe('Create Execution Handler', () => {
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
+        "consumer": "rule-consumer",
         "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
         "id": "1",
         "params": Object {
@@ -192,9 +194,11 @@ describe('Create Execution Handler', () => {
           "kibana": Object {
             "alert": Object {
               "rule": Object {
+                "consumer": "rule-consumer",
                 "execution": Object {
                   "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 },
+                "rule_type_id": "test",
               },
             },
             "alerting": Object {
@@ -215,6 +219,9 @@ describe('Create Execution Handler', () => {
                 "type": "action",
                 "type_id": "test",
               },
+            ],
+            "space_ids": Array [
+              "test1",
             ],
           },
           "message": "alert: test:1: 'name-of-alert' instanceId: '2' scheduled actionGroup: 'default' action: test:1",
@@ -276,6 +283,7 @@ describe('Create Execution Handler', () => {
     expect(alertExecutionStore.numberOfTriggeredActions).toBe(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
+      consumer: 'rule-consumer',
       id: '2',
       params: {
         foo: true,
@@ -374,6 +382,7 @@ describe('Create Execution Handler', () => {
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
+        "consumer": "rule-consumer",
         "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
         "id": "1",
         "params": Object {
@@ -417,6 +426,7 @@ describe('Create Execution Handler', () => {
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
+        "consumer": "rule-consumer",
         "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
         "id": "1",
         "params": Object {

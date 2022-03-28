@@ -79,6 +79,7 @@ export interface GenerateNewAndRecoveredAlertEventsParams<
     string
   >;
   rule: SanitizedAlert<AlertTypeParams>;
+  spaceId: string;
 }
 
 export interface ScheduleActionsForRecoveredAlertsParams<
@@ -121,6 +122,7 @@ export interface CreateExecutionHandlerOptions<
 > {
   ruleId: string;
   ruleName: string;
+  ruleConsumer: string;
   executionId: string;
   tags?: string[];
   actionsPlugin: ActionsPluginStartContract;

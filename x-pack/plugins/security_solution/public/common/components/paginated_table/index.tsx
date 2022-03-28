@@ -50,6 +50,7 @@ import * as i18n from './translations';
 import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
 import { useQueryToggle } from '../../containers/query_toggle';
+import { UsersTableColumns } from '../../../users/components/all_users';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -89,7 +90,8 @@ declare type BasicTableColumns =
   | HostRiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
-  | UsersColumns;
+  | UsersColumns
+  | UsersTableColumns;
 
 declare type SiemTables = BasicTableProps<BasicTableColumns>;
 

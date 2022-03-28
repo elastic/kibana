@@ -11,11 +11,14 @@ import React from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { enableInspectEsQueries, useInspectorContext } from '../../../../../observability/public';
 import { ClientPluginsStart } from '../../../apps/plugin';
+import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export function InspectorHeaderLink() {
   const {
     services: { inspector, uiSettings },
   } = useKibana<ClientPluginsStart>();
+
+  const { isDev } = useUptimeSettingsContext();
 
   const { inspectorAdapters } = useInspectorContext();
 
@@ -25,7 +28,7 @@ export function InspectorHeaderLink() {
     inspector.open(inspectorAdapters);
   };
 
-  if (!isInspectorEnabled) {
+  if (!isInspectorEnabled && !isDev) {
     return null;
   }
 
