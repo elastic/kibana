@@ -336,9 +336,12 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click(`control-editor-save`);
   }
 
-  public async controlEditorCancel() {
+  public async controlEditorCancel(confirm?: boolean) {
     this.log.debug(`Canceling changes in control editor`);
     await this.testSubjects.click(`control-editor-cancel`);
+    if (confirm) {
+      await this.common.clickConfirmOnModal();
+    }
   }
 
   // Options List editor functions
@@ -362,6 +365,17 @@ export class DashboardPageControls extends FtrService {
     if (width) await this.controlEditorSetWidth(width);
 
     await this.controlEditorSave();
+  }
+
+  public async optionsListEditorGetCurrentDataView(openAndCloseFlyout?: boolean) {
+    if (openAndCloseFlyout) {
+      await this.openCreateControlFlyout(OPTIONS_LIST_CONTROL);
+    }
+    const dataViewName = (await this.testSubjects.find('open-data-view-picker')).getVisibleText();
+    if (openAndCloseFlyout) {
+      await this.controlEditorCancel(true);
+    }
+    return dataViewName;
   }
 
   public async optionsListEditorSetDataView(dataViewTitle: string) {

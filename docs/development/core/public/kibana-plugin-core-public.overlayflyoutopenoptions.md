@@ -23,6 +23,7 @@ export interface OverlayFlyoutOpenOptions
 |  [maskProps?](./kibana-plugin-core-public.overlayflyoutopenoptions.maskprops.md) | EuiOverlayMaskProps | <i>(Optional)</i> |
 |  [maxWidth?](./kibana-plugin-core-public.overlayflyoutopenoptions.maxwidth.md) | boolean \| number \| string | <i>(Optional)</i> |
 |  [onClose?](./kibana-plugin-core-public.overlayflyoutopenoptions.onclose.md) | (flyout: OverlayRef) =&gt; void | <i>(Optional)</i> EuiFlyout onClose handler. If provided the consumer is responsible for calling flyout.close() to close the flyout; |
+|  [outsideClickCloses?](./kibana-plugin-core-public.overlayflyoutopenoptions.outsideclickcloses.md) | boolean | <i>(Optional)</i> |
 |  [ownFocus?](./kibana-plugin-core-public.overlayflyoutopenoptions.ownfocus.md) | boolean | <i>(Optional)</i> |
 |  [size?](./kibana-plugin-core-public.overlayflyoutopenoptions.size.md) | EuiFlyoutSize | <i>(Optional)</i> |
 
