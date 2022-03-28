@@ -464,9 +464,7 @@ export default async function ({ readConfigFile }) {
           },
           kibana: [
             {
-              feature: {
-                discover: ['read'],
-              },
+              base: ['all'],
               spaces: ['*'],
             },
           ],
