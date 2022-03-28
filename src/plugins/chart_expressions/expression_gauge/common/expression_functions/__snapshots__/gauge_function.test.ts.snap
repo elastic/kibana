@@ -39,6 +39,7 @@ Object {
       "centralMajor": "Some label",
       "centralMajorMode": "custom",
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -89,6 +90,7 @@ Object {
       "centralMajor": undefined,
       "centralMajorMode": "auto",
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -137,6 +139,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "auto",
@@ -185,6 +188,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -233,6 +237,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -283,6 +288,7 @@ Object {
       "centralMajor": "Some label",
       "centralMajorMode": "custom",
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -333,6 +339,7 @@ Object {
       "centralMajor": undefined,
       "centralMajorMode": "auto",
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -381,6 +388,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -429,6 +437,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -477,6 +486,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -525,6 +535,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -573,6 +584,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "none",
@@ -621,6 +633,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "palette",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -669,6 +682,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",

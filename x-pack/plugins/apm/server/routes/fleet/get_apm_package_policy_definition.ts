@@ -9,6 +9,7 @@ import {
   isPrereleaseVersion,
   POLICY_ELASTIC_AGENT_ON_CLOUD,
   SUPPORTED_APM_PACKAGE_VERSION,
+  ELASTIC_CLOUD_APM_AGENT_POLICY_ID,
 } from '../../../common/fleet';
 import {
   APMPluginSetupDependencies,
@@ -29,6 +30,7 @@ export async function getApmPackagePolicyDefinition(
     options;
 
   return {
+    id: ELASTIC_CLOUD_APM_AGENT_POLICY_ID,
     name: 'Elastic APM',
     namespace: 'default',
     enabled: true,

@@ -92,6 +92,13 @@ describe('useEngineNav', () => {
 
         expect(wrapper.find(EuiBadge).prop('children')).toEqual('META ENGINE');
       });
+
+      it('renders an elasticsearch index badge for elasticsearch indexed engines', () => {
+        setMockValues({ ...values, isElasticsearchEngine: true });
+        const wrapper = renderEngineLabel(useEngineNav());
+
+        expect(wrapper.find(EuiBadge).prop('children')).toEqual('ELASTICSEARCH INDEX');
+      });
     });
 
     it('returns an analytics nav item', () => {
@@ -181,6 +188,11 @@ describe('useEngineNav', () => {
 
       it('does not return a crawler nav item for meta engines', () => {
         setMockValues({ ...values, myRole, isMetaEngine: true });
+        expect(useEngineNav()).toEqual(BASE_NAV);
+      });
+
+      it('does not return a crawler nav item for elasticsearch engines', () => {
+        setMockValues({ ...values, myRole, isElasticsearchEngine: true });
         expect(useEngineNav()).toEqual(BASE_NAV);
       });
     });

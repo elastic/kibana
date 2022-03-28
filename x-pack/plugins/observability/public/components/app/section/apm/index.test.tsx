@@ -54,6 +54,7 @@ describe('APMSection', () => {
       },
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       ObservabilityPageTemplate: KibanaPageTemplate,
+      kibanaFeatures: [],
     }));
   });
 
