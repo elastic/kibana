@@ -12,16 +12,16 @@ import { resultIsAllowed } from 'handlebars/dist/cjs/handlebars/internal/proto-a
 // @ts-expect-error: Could not find a declaration file for module
 import AST from 'handlebars/dist/cjs/handlebars/compiler/ast';
 // @ts-expect-error: Could not find a declaration file for module
-import { indexOf } from 'handlebars/dist/cjs/handlebars/utils';
+import { indexOf, createFrame } from 'handlebars/dist/cjs/handlebars/utils';
 // @ts-expect-error: Could not find a declaration file for module
 import { moveHelperToHooks } from 'handlebars/dist/cjs/handlebars/helpers';
 import get from 'lodash/get';
 
 export type ExtendedCompileOptions = Pick<
   CompileOptions,
-  'knownHelpers' | 'knownHelpersOnly' | 'strict' | 'noEscape'
+  'knownHelpers' | 'knownHelpersOnly' | 'strict' | 'noEscape' | 'data'
 >;
-export type ExtendedRuntimeOptions = Pick<RuntimeOptions, 'helpers' | 'blockParams'>;
+export type ExtendedRuntimeOptions = Pick<RuntimeOptions, 'helpers' | 'blockParams' | 'data'>;
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace ExtendedHandlebars {
@@ -70,6 +70,7 @@ interface Container {
   strict: (obj: { [name: string]: any }, name: string, loc: hbs.AST.SourceLocation) => any;
   lookupProperty: (parent: { [name: string]: any }, propertyName: string) => any;
   lambda: (current: any, context: any) => any;
+  data: (value: any, depth: number) => any;
   hooks: {
     helperMissing?: Handlebars.HelperDelegate;
     blockHelperMissing?: Handlebars.HelperDelegate;
@@ -81,6 +82,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private output: any[] = [];
   private template: string;
   private compileOptions: ExtendedCompileOptions;
+  private runtimeOptions?: ExtendedRuntimeOptions;
   private initialHelpers: { [name: string]: Handlebars.HelperDelegate };
   private blockParamNames: any[][] = [];
   private blockParamValues: any[][] = [];
@@ -96,7 +98,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   ) {
     super();
     this.template = template;
-    this.compileOptions = options;
+    this.compileOptions = Object.assign(
+      {
+        data: true,
+      },
+      options
+    );
 
     this.compileOptions.knownHelpers = Object.assign(
       Object.create(null),
@@ -144,6 +151,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       lambda(current, context) {
         return typeof current === 'function' ? current.call(context) : current;
       },
+      data(value: any, depth: number) {
+        while (value && depth--) {
+          value = value._parent;
+        }
+        return value;
+      },
       hooks: {},
     });
 
@@ -154,8 +167,13 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   render(context: any, options: ExtendedRuntimeOptions = {}): string {
     this.scopes = [context];
     this.output = [];
+    this.runtimeOptions = options;
     this.container.helpers = Object.assign(this.initialHelpers, options.helpers);
     this.container.hooks = {};
+
+    if (this.compileOptions.data) {
+      this.runtimeOptions.data = initData(context, this.runtimeOptions.data);
+    }
 
     const keepHelperInHelpers = false;
     moveHelperToHooks(this.container, 'helperMissing', keepHelperInHelpers);
@@ -201,10 +219,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
     if (blockParamId) {
       this.output.push(this.lookupBlockParam(blockParamId, path.parts));
-    } else if (this.compileOptions.noEscape === true || typeof value !== 'string') {
-      this.output.push(value);
+    } else if (path.data) {
+      const data = this.runtimeOptions!.data;
+      const result = this.resolvePath(path.depth, data, path.parts);
+      this.output.push(result);
     } else {
-      this.output.push(Handlebars.escapeExpression(value));
+      this.output.push(value);
     }
   }
 
@@ -410,6 +430,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const name = node.path.parts[0];
     const helper = this.setupHelper(node, name);
 
+    helper.fn = helper.fn ?? this.resolveNodes(node.path)[0];
+
     if (!helper.fn) {
       if (this.compileOptions.strict) {
         helper.fn = this.container.strict(helper.context, name, node.loc);
@@ -470,16 +492,36 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       // @ts-expect-error: Name should be on there, but the offical types doesn't know this
       name: helperName,
       hash: this.getHash(node),
+      data: this.runtimeOptions!.data,
     };
 
     if (isBlock(node)) {
       const generateProgramFunction = (program: hbs.AST.Program) => {
         const prog = (nextContext: any, runtimeOptions: ExtendedRuntimeOptions = {}) => {
+          // inherit data an blockParams from parent program
+          runtimeOptions = Object.assign({}, runtimeOptions);
+          runtimeOptions.data = runtimeOptions.data || this.runtimeOptions!.data;
+          if (runtimeOptions.blockParams) {
+            runtimeOptions.blockParams = runtimeOptions.blockParams.concat(
+              this.runtimeOptions!.blockParams
+            );
+          }
+
+          // stash parent program data
+          const tmpRuntimeOptions = this.runtimeOptions;
+          this.runtimeOptions = runtimeOptions;
           this.scopes.unshift(nextContext);
           this.blockParamValues.unshift(runtimeOptions.blockParams || []);
+
+          // execute child program
           const result = this.resolveNodes(program).join('');
+
+          // unstash parent program data
           this.blockParamValues.shift();
           this.scopes.shift();
+          this.runtimeOptions = tmpRuntimeOptions;
+
+          // return result of child program
           return result;
         };
         prog.blockParams = node.program?.blockParams?.length ?? 0;
@@ -500,6 +542,16 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       result[key] = this.resolveNodes(value)[0];
     }
     return result;
+  }
+
+  private resolvePath(depth: number, data: any, parts: string[]) {
+    if (depth) {
+      data = this.container.data(data, depth);
+    }
+    for (let i = 0; i < parts.length; i++) {
+      data = data ? this.container.lookupProperty(data, parts[i]) : data;
+    }
+    return data;
   }
 
   private resolveNodes(nodes: hbs.AST.Node | hbs.AST.Node[]): any[] {
@@ -530,6 +582,15 @@ function isBlock(node: hbs.AST.Node): node is hbs.AST.BlockStatement {
 
 function noop() {
   return '';
+}
+
+// liftet from handlebars lib/handlebars/runtime.js
+function initData(context: any, data: any) {
+  if (!data || !('root' in data)) {
+    data = data ? createFrame(data) : {};
+    data.root = context;
+  }
+  return data;
 }
 
 // liftet from handlebars lib/handlebars/compiler/compiler.js

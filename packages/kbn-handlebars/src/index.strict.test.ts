@@ -27,6 +27,16 @@ describe('strict', () => {
       expectTemplate('{{hello}}').withCompileOptions({ strict: true }).toThrow(Error);
     });
 
+    it('should error on missing data lookup', () => {
+      const xt = expectTemplate('{{@hello}}').withCompileOptions({
+        strict: true,
+      });
+
+      xt.toThrow(Error);
+
+      xt.withRuntimeOptions({ data: { hello: 'foo' } }).toCompileTo('foo');
+    });
+
     it('should not run helperMissing for helper calls', () => {
       expectTemplate('{{hello foo}}')
         .withCompileOptions({ strict: true })

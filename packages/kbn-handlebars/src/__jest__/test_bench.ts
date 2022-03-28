@@ -26,6 +26,7 @@ class HandlebarsTestBench {
   private template: string;
   private options: TestOptions;
   private compileOptions?: ExtendedCompileOptions;
+  private runtimeOptions?: ExtendedRuntimeOptions;
   private helpers: { [key: string]: HelperDelegate } = {};
   private input: any;
 
@@ -36,6 +37,11 @@ class HandlebarsTestBench {
 
   withCompileOptions(compileOptions?: ExtendedCompileOptions) {
     this.compileOptions = compileOptions;
+    return this;
+  }
+
+  withRuntimeOptions(runtimeOptions?: ExtendedRuntimeOptions) {
+    this.runtimeOptions = runtimeOptions;
     return this;
   }
 
@@ -87,9 +93,12 @@ class HandlebarsTestBench {
   private compileAndExecuteEval() {
     const renderEval = this.compileEval();
 
-    const runtimeOptions: ExtendedRuntimeOptions = {
-      helpers: this.helpers,
-    };
+    const runtimeOptions: ExtendedRuntimeOptions = Object.assign(
+      {
+        helpers: this.helpers,
+      },
+      this.runtimeOptions
+    );
 
     return renderEval(this.input, runtimeOptions);
   }
@@ -97,9 +106,12 @@ class HandlebarsTestBench {
   private compileAndExecuteAST() {
     const renderAST = this.compileAST();
 
-    const runtimeOptions: ExtendedRuntimeOptions = {
-      helpers: this.helpers,
-    };
+    const runtimeOptions: ExtendedRuntimeOptions = Object.assign(
+      {
+        helpers: this.helpers,
+      },
+      this.runtimeOptions
+    );
 
     return renderAST(this.input, runtimeOptions);
   }
