@@ -31,10 +31,10 @@ const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
     item.environments?.join(', ').toLowerCase() ?? '',
   [ServiceInventoryFieldName.TransactionType]: (item) =>
     item.transactionType ?? '',
-  [ServiceInventoryFieldName.Latency]: (item) => item.latency ?? 0,
-  [ServiceInventoryFieldName.Throughput]: (item) => item.throughput ?? 0,
+  [ServiceInventoryFieldName.Latency]: (item) => item.latency ?? -1,
+  [ServiceInventoryFieldName.Throughput]: (item) => item.throughput ?? -1,
   [ServiceInventoryFieldName.TransactionErrorRate]: (item) =>
-    item.transactionErrorRate ?? 0,
+    item.transactionErrorRate ?? -1,
 };
 
 function reverseSortDirection(sortDirection: 'asc' | 'desc') {
