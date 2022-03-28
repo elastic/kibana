@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useFetcher, FETCH_STATUS } from './use_fetcher';
+import { useFetcher } from './use_fetcher';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -40,7 +40,7 @@ export function useEnvironmentsFetcher({
   start?: string;
   end?: string;
 }) {
-  const { data = INITIAL_DATA, status = FETCH_STATUS.LOADING } = useFetcher(
+  const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi('GET /internal/apm/environments', {

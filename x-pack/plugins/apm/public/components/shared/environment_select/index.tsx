@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getEnvironmentLabel } from '../../../../common/environment_filter_values';
@@ -71,12 +71,14 @@ export function EnvironmentSelect({
   const terms = data?.terms ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
-    ...(searchValue === '' ? environmentOptions : []),
-    ...terms.map((name) => {
-      return { label: name, value: name };
-    }),
+    ...(searchValue === ''
+      ? environmentOptions
+      : terms.map((name) => {
+          return { label: name, value: name };
+        })),
   ];
 
+  const handleSearchChange = useMemo(() => debounce(setSearchValue, 300), []);
   return (
     <EuiComboBox
       async
@@ -92,7 +94,7 @@ export function EnvironmentSelect({
       options={options}
       selectedOptions={selectedOptions}
       onChange={(changedOptions) => handleChange(changedOptions)}
-      onSearchChange={debounce(setSearchValue, 500)}
+      onSearchChange={handleSearchChange}
       isLoading={
         status === FETCH_STATUS.LOADING || searchStatus === FETCH_STATUS.LOADING
       }
