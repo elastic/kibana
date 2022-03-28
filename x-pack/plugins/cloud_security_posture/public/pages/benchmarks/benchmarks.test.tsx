@@ -32,7 +32,9 @@ describe('<Benchmarks />', () => {
     jest.resetAllMocks();
 
     // if package installation status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
+      data: { item: { status: 'installed' } },
+    }));
     // Required for the page template to render the benchmarks page
     (useKubebeatDataView as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({

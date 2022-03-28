@@ -38,8 +38,9 @@ describe('<Findings />', () => {
     const data = dataPluginMock.createStartContract();
     const source = await data.search.searchSource.create();
 
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
-
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
+      data: { item: { status: 'installed' } },
+    }));
     (source.fetch$ as jest.Mock).mockReturnValue({
       toPromise: () => Promise.resolve({ rawResponse: { hits: { hits: [] } } }),
     });

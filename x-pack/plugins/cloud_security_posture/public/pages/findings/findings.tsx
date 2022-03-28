@@ -22,7 +22,6 @@ export const Findings = () => {
   useCspBreadcrumbs([allNavigationItems.findings]);
 
   return (
-    // `CspPageTemplate` takes care of loading and error states based on query status, no need to handle them here
     <CspPageTemplate pageHeader={pageHeader} query={dataViewQuery}>
       {dataViewQuery.data && <FindingsContainer dataView={dataViewQuery.data} />}
     </CspPageTemplate>

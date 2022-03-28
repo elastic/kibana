@@ -6,12 +6,12 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import {
+import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ComplianceDashboardData } from '../../../common/types';
+import type { ComplianceDashboardData } from '../../../common/types';
 import { KeyDocCount } from './compliance_dashboard';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 

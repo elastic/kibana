@@ -45,7 +45,9 @@ describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
+      data: { item: { status: 'installed' } },
+    }));
   });
 
   it('calls API with URL params', async () => {
@@ -89,7 +91,7 @@ describe('<Rules />', () => {
 
     render(<Component />);
 
-    expect(screen.queryByTestId(cspLoadingStateTestId)).toBeInTheDocument();
+    expect(screen.getByTestId(cspLoadingStateTestId)).toBeInTheDocument();
   });
 
   it('displays success state when result request is resolved', async () => {

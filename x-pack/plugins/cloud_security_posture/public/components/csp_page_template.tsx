@@ -17,7 +17,7 @@ import { allNavigationItems } from '../common/navigation/constants';
 import type { CspNavigationItem } from '../common/navigation/types';
 import { CLOUD_SECURITY_POSTURE } from '../common/translations';
 import { CspLoadingState } from './csp_loading_state';
-import { LOADING, PACKAGE_NOT_INSTALLED_TEXT, DEFAULT_NO_DATA_TEXT } from './translations';
+import { DEFAULT_NO_DATA_TEXT, LOADING, PACKAGE_NOT_INSTALLED_TEXT } from './translations';
 import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
 import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
 
@@ -113,10 +113,27 @@ const DefaultError = (error: unknown) => (
         {isCommonError(error) && (
           <>
             <EuiTitle size="xs">
-              <h5>{`${error.body.error} (${error.body.statusCode})`}</h5>
+              <h5>
+                <FormattedMessage
+                  id="xpack.csp.pageTemplate.errorDetails.errorCodeTitle"
+                  defaultMessage="{error} {statusCode}"
+                  values={{
+                    error: error.body.error,
+                    statusCode: error.body.statusCode,
+                  }}
+                />
+              </h5>
             </EuiTitle>
             <EuiTitle size="xs">
-              <h5>{error.body.message}</h5>
+              <h5>
+                <FormattedMessage
+                  id="xpack.csp.pageTemplate.errorDetails.errorBodyTitle"
+                  defaultMessage="{body}"
+                  values={{
+                    body: error.body.message,
+                  }}
+                />
+              </h5>
             </EuiTitle>
           </>
         )}
@@ -136,8 +153,7 @@ export const CspPageTemplate = <TData, TError>({
   errorRender?: (error: TError) => React.ReactNode;
   query?: UseQueryResult<TData, TError>;
 }) => {
-  const integrationQueryResult = useCisKubernetesIntegration();
-  const cisKubernetesPackageInfo = integrationQueryResult;
+  const cisKubernetesPackageInfo = useCisKubernetesIntegration();
   const cisIntegrationLink = useCISIntegrationLink();
 
   const getNoDataConfig = (): KibanaPageTemplateProps['noDataConfig'] => {

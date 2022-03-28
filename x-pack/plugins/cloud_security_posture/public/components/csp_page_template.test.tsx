@@ -53,7 +53,9 @@ describe('<CspPageTemplate />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     // if package installation status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({ status: 'installed' }));
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
+      data: { item: { status: 'installed' } },
+    }));
   });
 
   const renderCspPageTemplate = (props: ComponentProps<typeof CspPageTemplate> = {}) => {
@@ -78,7 +80,7 @@ describe('<CspPageTemplate />', () => {
     );
   };
 
-  it('renders children if integraion is installed', () => {
+  it('renders children if integration is installed', () => {
     const children = chance.sentence();
     renderCspPageTemplate({ children });
 
@@ -90,9 +92,10 @@ describe('<CspPageTemplate />', () => {
     );
   });
 
-  it('renders integrations installation promprt if integraion is not installed', () => {
+  it('renders integrations installation prompt if integration is not installed', () => {
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
-      status: 'not_installed',
+      isSuccess: true,
+      data: { item: { status: 'not_installed' } },
     }));
 
     const children = chance.sentence();

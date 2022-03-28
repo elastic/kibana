@@ -6,9 +6,9 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
-import { ComplianceDashboardData, Score } from '../../../common/types';
+import type { ComplianceDashboardData, Score } from '../../../common/types';
 
 /**
  * @param value value is [0, 1] range
