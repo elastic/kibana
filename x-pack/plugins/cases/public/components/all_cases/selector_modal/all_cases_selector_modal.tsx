@@ -26,7 +26,7 @@ export interface AllCasesSelectorModalProps {
    */
   alertData?: Omit<CommentRequestAlertType, 'type'>;
   hiddenStatuses?: CaseStatusWithAllStatus[];
-  onRowClick: (theCase?: Case) => void;
+  onRowClick?: (theCase?: Case) => void;
   updateCase?: (newCase: Case) => void;
   onClose?: () => void;
   attachments?: CaseAttachments;
@@ -52,7 +52,9 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
     const onClick = useCallback(
       (theCase?: Case) => {
         closeModal();
-        onRowClick(theCase);
+        if (onRowClick) {
+          onRowClick(theCase);
+        }
       },
       [closeModal, onRowClick]
     );

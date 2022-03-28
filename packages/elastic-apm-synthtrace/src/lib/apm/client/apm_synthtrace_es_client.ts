@@ -7,56 +7,115 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { uploadEvents } from '../../../scripts/utils/upload_events';
-import { Fields } from '../../entity';
 import { cleanWriteTargets } from '../../utils/clean_write_targets';
-import { getBreakdownMetrics } from '../utils/get_breakdown_metrics';
-import { getSpanDestinationMetrics } from '../utils/get_span_destination_metrics';
-import { getTransactionMetrics } from '../utils/get_transaction_metrics';
 import { getApmWriteTargets } from '../utils/get_apm_write_targets';
 import { Logger } from '../../utils/create_logger';
-import { apmEventsToElasticsearchOutput } from '../utils/apm_events_to_elasticsearch_output';
+import { ApmFields } from '../apm_fields';
+import { SpanIterable } from '../../span_iterable';
+import { StreamProcessor } from '../../stream_processor';
+import { SpanGeneratorsUnion } from '../../span_generators_union';
+
+export interface StreamToBulkOptions {
+  concurrency?: number;
+  maxDocs?: number;
+  mapToIndex?: (document: Record<string, any>) => string;
+}
 
 export class ApmSynthtraceEsClient {
-  constructor(private readonly client: Client, private readonly logger: Logger) {}
+  constructor(
+    private readonly client: Client,
+    private readonly logger: Logger,
+    private readonly forceDataStreams: boolean
+  ) {}
 
   private getWriteTargets() {
-    return getApmWriteTargets({ client: this.client });
+    return getApmWriteTargets({ client: this.client, forceDataStreams: this.forceDataStreams });
   }
 
   clean() {
-    return this.getWriteTargets().then((writeTargets) =>
-      cleanWriteTargets({
+    return this.getWriteTargets().then(async (writeTargets) => {
+      const indices = Object.values(writeTargets);
+      this.logger.info(`Attempting to clean: ${indices}`);
+      if (this.forceDataStreams) {
+        for (const name of indices) {
+          const dataStream = await this.client.indices.getDataStream({ name }, { ignore: [404] });
+          if (dataStream.data_streams && dataStream.data_streams.length > 0) {
+            this.logger.debug(`Deleting datastream: ${name}`);
+            await this.client.indices.deleteDataStream({ name });
+          }
+        }
+        return;
+      }
+
+      return cleanWriteTargets({
         client: this.client,
-        targets: Object.values(writeTargets),
+        targets: indices,
         logger: this.logger,
-      })
-    );
+      });
+    });
   }
 
-  async index(events: Fields[]) {
+  async updateComponentTemplates(numberOfPrimaryShards: number) {
+    const response = await this.client.cluster.getComponentTemplate({ name: '*apm*@custom' });
+    for (const componentTemplate of response.component_templates) {
+      if (componentTemplate.component_template._meta?.package?.name !== 'apm') continue;
+
+      componentTemplate.component_template.template.settings = {
+        index: {
+          number_of_shards: numberOfPrimaryShards,
+        },
+      };
+
+      const putTemplate = await this.client.cluster.putComponentTemplate({
+        name: componentTemplate.name,
+        ...componentTemplate.component_template,
+      });
+      this.logger.info(
+        `- updated component template ${componentTemplate.name}, acknowledged: ${putTemplate.acknowledged}`
+      );
+    }
+  }
+
+  async index(events: SpanIterable | SpanIterable[], options?: StreamToBulkOptions) {
+    const dataStream = Array.isArray(events) ? new SpanGeneratorsUnion(events) : events;
+
     const writeTargets = await this.getWriteTargets();
-
-    const eventsToIndex = apmEventsToElasticsearchOutput({
-      events: [
-        ...events,
-        ...getTransactionMetrics(events),
-        ...getSpanDestinationMetrics(events),
-        ...getBreakdownMetrics(events),
-      ],
-      writeTargets,
+    // TODO logger.perf
+    await this.client.helpers.bulk<ApmFields>({
+      concurrency: options?.concurrency ?? 10,
+      refresh: false,
+      refreshOnCompletion: false,
+      datasource: new StreamProcessor({
+        processors: StreamProcessor.apmProcessors,
+        maxSourceEvents: options?.maxDocs,
+        logger: this.logger,
+      })
+        // TODO https://github.com/elastic/elasticsearch-js/issues/1610
+        // having to map here is awkward, it'd be better to map just before serialization.
+        .streamToDocumentAsync(StreamProcessor.toDocument, dataStream),
+      onDrop: (doc) => {
+        this.logger.info(doc);
+      },
+      // TODO bug in client not passing generic to BulkHelperOptions<>
+      // https://github.com/elastic/elasticsearch-js/issues/1611
+      onDocument: (doc: unknown) => {
+        const d = doc as Record<string, any>;
+        const index = options?.mapToIndex
+          ? options?.mapToIndex(d)
+          : this.forceDataStreams
+          ? StreamProcessor.getDataStreamForEvent(d, writeTargets)
+          : StreamProcessor.getIndexForEvent(d, writeTargets);
+        return { create: { _index: index } };
+      },
     });
 
-    await uploadEvents({
-      batchSize: 1000,
-      client: this.client,
-      clientWorkers: 5,
-      events: eventsToIndex,
-      logger: this.logger,
-    });
+    const indices = Object.values(writeTargets);
+    this.logger.info(`Indexed all data attempting to refresh: ${indices}`);
 
     return this.client.indices.refresh({
-      index: Object.values(writeTargets),
+      index: indices,
+      allow_no_indices: true,
+      ignore_unavailable: true,
     });
   }
 }

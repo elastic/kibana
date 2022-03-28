@@ -8,11 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCheckbox, EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
-import {
-  OperatingSystem,
-  PolicyOperatingSystem,
-  UIPolicyConfig,
-} from '../../../../../../../common/endpoint/types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { PolicyOperatingSystem, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ConfigForm, ConfigFormHeading } from '../../components/config_form';
 
 const OPERATING_SYSTEM_TO_TEST_SUBJ: { [K in OperatingSystem]: string } = {

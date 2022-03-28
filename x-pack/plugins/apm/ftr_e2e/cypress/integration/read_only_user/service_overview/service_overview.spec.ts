@@ -8,6 +8,7 @@
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 import { opbeans } from '../../../fixtures/synthtrace/opbeans';
+import { checkA11y } from '../../../support/commands';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
@@ -102,6 +103,13 @@ describe('Service Overview', () => {
       cy.loginAsReadOnlyUser();
       cy.visit(baseUrl);
     });
+
+    it('has no detectable a11y violations on load', () => {
+      cy.contains('opbeans-node');
+      // set skipFailures to true to not fail the test when there are accessibility failures
+      checkA11y({ skipFailures: true });
+    });
+
     it('transaction latency chart', () => {
       cy.get('[data-test-subj="latencyChart"]');
     });
@@ -257,7 +265,7 @@ describe('Service Overview', () => {
       );
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNamesWithComparison,
-        value: 'comparisonStart',
+        value: 'offset',
       });
     });
   });

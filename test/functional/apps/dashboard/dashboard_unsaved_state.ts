@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -27,7 +26,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY https://github.com/elastic/kibana/issues/112812
   describe.skip('dashboard unsaved state', () => {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -37,6 +39,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       originalPanelCount = await PageObjects.dashboard.getPanelCount();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('view mode state', () => {

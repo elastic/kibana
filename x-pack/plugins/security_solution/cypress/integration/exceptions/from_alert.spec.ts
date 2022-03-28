@@ -9,7 +9,6 @@ import { getException } from '../../objects/exception';
 import { getNewRule } from '../../objects/rule';
 
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../screens/alerts';
-import { RULE_STATUS } from '../../screens/create_new_rule';
 
 import { addExceptionFromFirstAlert, goToClosedAlerts, goToOpenedAlerts } from '../../tasks/alerts';
 import { createCustomRule } from '../../tasks/api_calls/rules';
@@ -18,7 +17,7 @@ import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
-  activatesRule,
+  enablesRule,
   addsException,
   goToAlertsTab,
   goToExceptionsTab,
@@ -34,15 +33,12 @@ describe.skip('From alert', () => {
 
   beforeEach(() => {
     cleanKibana();
+    esArchiverLoad('auditbeat_for_exceptions');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRule({ ...getNewRule(), index: ['exceptions-*'] }, 'rule_testing', '10s');
+    createCustomRule({ ...getNewRule(), index: ['exceptions-*'] }, 'rule_testing');
     reload();
     goToRuleDetails();
-
-    cy.get(RULE_STATUS).should('have.text', '—');
-
-    esArchiverLoad('auditbeat_for_exceptions');
-    activatesRule();
+    enablesRule();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
@@ -74,6 +70,7 @@ describe.skip('From alert', () => {
 
     goToExceptionsTab();
     removeException();
+    esArchiverLoad('auditbeat_for_exceptions2');
     goToAlertsTab();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();

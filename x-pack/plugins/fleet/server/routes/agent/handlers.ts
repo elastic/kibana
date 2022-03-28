@@ -21,6 +21,7 @@ import type {
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   GetAgentStatusRequestSchema,
+  GetAgentDataRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
 } from '../../types';
@@ -218,3 +219,29 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
     return defaultIngestErrorHandler({ error, response });
   }
 };
+
+export const getAgentDataHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetAgentDataRequestSchema.query>
+> = async (context, request, response) => {
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  try {
+    let items;
+
+    if (isStringArray(request.query.agentsIds)) {
+      items = await AgentService.getIncomingDataByAgentsId(esClient, request.query.agentsIds);
+    } else {
+      items = await AgentService.getIncomingDataByAgentsId(esClient, [request.query.agentsIds]);
+    }
+
+    const body = { items };
+
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+function isStringArray(arr: unknown | string[]): arr is string[] {
+  return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
+}

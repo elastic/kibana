@@ -8,10 +8,11 @@
 import { EuiCard, EuiLink, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityAppServices } from '../../../application/types';
 
 export function FleetPanel() {
-  const { core } = usePluginContext();
+  const { http } = useKibana<ObservabilityAppServices>().services;
 
   return (
     <EuiCard
@@ -25,7 +26,7 @@ export function FleetPanel() {
         </EuiTextColor>
       }
       footer={
-        <EuiLink href={core.http.basePath.prepend('/app/fleet#/')}>
+        <EuiLink href={http.basePath.prepend('/app/fleet#/')}>
           {i18n.translate('xpack.observability.fleet.button', {
             defaultMessage: 'Try Fleet',
           })}

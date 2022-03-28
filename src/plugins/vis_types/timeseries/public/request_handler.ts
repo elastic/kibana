@@ -22,6 +22,7 @@ interface MetricsRequestHandlerParams {
   searchSessionId?: string;
   executionContext?: KibanaExecutionContext;
   inspectorAdapters?: Adapters;
+  expressionAbortSignal: AbortSignal;
 }
 
 export const metricsRequestHandler = async ({
@@ -31,63 +32,72 @@ export const metricsRequestHandler = async ({
   searchSessionId,
   executionContext,
   inspectorAdapters,
+  expressionAbortSignal,
 }: MetricsRequestHandlerParams): Promise<TimeseriesVisData | {}> => {
-  const config = getUISettings();
-  const data = getDataStart();
-  const theme = getCoreStart().theme;
+  if (!expressionAbortSignal.aborted) {
+    const config = getUISettings();
+    const data = getDataStart();
+    const theme = getCoreStart().theme;
+    const abortController = new AbortController();
+    const expressionAbortHandler = function () {
+      abortController.abort();
+    };
 
-  const timezone = getTimezone(config);
-  const uiStateObj = uiState[visParams.type] ?? {};
-  const dataSearch = data.search;
-  const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
+    expressionAbortSignal.addEventListener('abort', expressionAbortHandler);
 
-  if (visParams && visParams.id && !visParams.isModelInvalid) {
-    const untrackSearch =
-      dataSearch.session.isCurrentSession(searchSessionId) &&
-      dataSearch.session.trackSearch({
-        abort: () => {
-          // TODO: support search cancellations
-        },
-      });
+    const timezone = getTimezone(config);
+    const uiStateObj = uiState[visParams.type] ?? {};
+    const dataSearch = data.search;
+    const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
 
-    try {
-      const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
+    if (visParams && visParams.id && !visParams.isModelInvalid && !expressionAbortSignal.aborted) {
+      const untrackSearch =
+        dataSearch.session.isCurrentSession(searchSessionId) &&
+        dataSearch.session.trackSearch({
+          abort: () => abortController.abort(),
+        });
 
-      const visData: TimeseriesVisData = await getCoreStart().http.post(ROUTES.VIS_DATA, {
-        body: JSON.stringify({
-          timerange: {
-            timezone,
-            ...parsedTimeRange,
-          },
-          query: input?.query,
-          filters: input?.filters,
-          panels: [visParams],
-          state: uiStateObj,
-          ...(searchSessionOptions && {
-            searchSession: searchSessionOptions,
+      try {
+        const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
+
+        const visData: TimeseriesVisData = await getCoreStart().http.post(ROUTES.VIS_DATA, {
+          body: JSON.stringify({
+            timerange: {
+              timezone,
+              ...parsedTimeRange,
+            },
+            query: input?.query,
+            filters: input?.filters,
+            panels: [visParams],
+            state: uiStateObj,
+            ...(searchSessionOptions && {
+              searchSession: searchSessionOptions,
+            }),
           }),
-        }),
-        context: executionContext,
-      });
+          context: executionContext,
+          signal: abortController.signal,
+        });
 
-      inspectorAdapters?.requests?.reset();
+        inspectorAdapters?.requests?.reset();
 
-      Object.entries(visData.trackedEsSearches || {}).forEach(([key, query]) => {
-        inspectorAdapters?.requests
-          ?.start(query.label ?? key, { searchSessionId })
-          .json(query.body)
-          .ok({ time: query.time });
+        Object.entries(visData.trackedEsSearches || {}).forEach(([key, query]) => {
+          inspectorAdapters?.requests
+            ?.start(query.label ?? key, { searchSessionId })
+            .json(query.body)
+            .ok({ time: query.time });
 
-        if (query.response && config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
-          handleResponse({ body: query.body }, { rawResponse: query.response }, theme);
+          if (query.response && config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
+            handleResponse({ body: query.body }, { rawResponse: query.response }, theme);
+          }
+        });
+
+        return visData;
+      } finally {
+        if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
+          // untrack if this search still belongs to current session
+          untrackSearch();
         }
-      });
-
-      return visData;
-    } finally {
-      if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
-        // untrack if this search still belongs to current session
-        untrackSearch();
+        expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
       }
     }
   }

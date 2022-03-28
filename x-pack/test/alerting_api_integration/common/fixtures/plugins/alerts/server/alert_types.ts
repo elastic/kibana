@@ -594,7 +594,7 @@ function getCancellableRuleType() {
         },
       };
 
-      await services.search.asCurrentUser.search(query as any);
+      await services.scopedClusterClient.asCurrentUser.search(query as any);
 
       if (doLongPostProcessing) {
         await new Promise((resolve) => setTimeout(resolve, 10000));

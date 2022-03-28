@@ -23,7 +23,11 @@ import {
   updateCase,
   createComment,
 } from '../../../../common/lib/utils';
-import { CaseResponse, CaseStatuses } from '../../../../../../plugins/cases/common/api';
+import {
+  CaseResponse,
+  CaseStatuses,
+  CommentType,
+} from '../../../../../../plugins/cases/common/api';
 import {
   obsOnly,
   secOnly,
@@ -47,6 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const esArchiver = getService('esArchiver');
 
   describe('find_cases', () => {
     describe('basic tests', () => {
@@ -190,8 +195,106 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases.count_in_progress_cases).to.eql(1);
       });
 
+      it('returns the correct fields', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
+          'title',
+          ['title', 'description'],
+        ];
+
+        for (const fields of queryFields) {
+          const cases = await findCases({ supertest, query: { fields } });
+          const fieldsAsArray = Array.isArray(fields) ? fields : [fields];
+
+          const expectedValues = fieldsAsArray.reduce(
+            (theCase, field) => ({
+              ...theCase,
+              [field]: postedCase[field],
+            }),
+            {}
+          );
+
+          expect(cases).to.eql({
+            ...findCasesResp,
+            total: 1,
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                external_service: postedCase.external_service,
+                owner: postedCase.owner,
+                connector: postedCase.connector,
+                comments: [],
+                totalAlerts: 0,
+                totalComment: 0,
+                ...expectedValues,
+              },
+            ],
+            count_open_cases: 1,
+          });
+        }
+      });
+
       it('unhappy path - 400s when bad query supplied', async () => {
         await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
+      });
+    });
+
+    describe('alerts', () => {
+      const defaultSignalsIndex = '.siem-signals-default-000001';
+      const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
+      const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
+
+      beforeEach(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
+        await deleteAllCaseItems(es);
+      });
+
+      it('correctly counts alerts ignoring duplicates', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        /**
+         * Adds three comments of type alerts.
+         * The first two have the same alertId.
+         * The third has different alertId.
+         */
+        for (const alertId of [signalID, signalID, signalID2]) {
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: {
+              alertId,
+              index: defaultSignalsIndex,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+              owner: 'securitySolutionFixture',
+            },
+          });
+        }
+
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+
+        const cases = await findCases({ supertest });
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [
+            {
+              ...patchedCase,
+              comments: [],
+              totalAlerts: 2,
+              totalComment: 1,
+            },
+          ],
+          count_open_cases: 1,
+        });
       });
     });
 

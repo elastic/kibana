@@ -29,6 +29,7 @@ import {
 import type { Logger } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { ConfigType } from '../../../config';
+import { errors } from '../../../../common';
 import { getChromiumDisconnectedError } from '../';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
@@ -101,7 +102,7 @@ const DEFAULT_ARGS = [
 const DIAGNOSTIC_TIME = 5 * 1000;
 
 export class HeadlessChromiumDriverFactory {
-  private userDataDir = fs.mkdtempSync(path.join(getDataPath(), 'chromium-'));
+  private userDataDir: string;
   type = 'chromium';
 
   constructor(
@@ -111,6 +112,10 @@ export class HeadlessChromiumDriverFactory {
     private binaryPath: string,
     private basePath: string
   ) {
+    const dataDir = getDataPath();
+    fs.mkdirSync(dataDir, { recursive: true });
+    this.userDataDir = fs.mkdtempSync(path.join(dataDir, 'chromium-'));
+
     if (this.config.browser.chromium.disableSandbox) {
       logger.warn(`Enabling the Chromium sandbox provides an additional layer of protection.`);
     }
@@ -141,7 +146,6 @@ export class HeadlessChromiumDriverFactory {
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
       let browser: Browser | undefined;
-
       try {
         browser = await puppeteer.launch({
           pipe: !this.config.browser.chromium.inspect,
@@ -162,7 +166,9 @@ export class HeadlessChromiumDriverFactory {
           },
         });
       } catch (err) {
-        observer.error(new Error(`Error spawning Chromium browser! ${err}`));
+        observer.error(
+          new errors.FailedToSpawnBrowserError(`Error spawning Chromium browser! ${err}`)
+        );
         return;
       }
 

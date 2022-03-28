@@ -10,7 +10,16 @@ import { uniq } from 'lodash';
 import { DatasourcePublicAPI, OperationMetadata, VisualizationType } from '../types';
 import { State, visualizationTypes, XYState } from './types';
 import { isHorizontalChart } from './state_helpers';
-import { SeriesType, XYLayerConfig } from '../../common/expressions';
+import {
+  AnnotationLayerArgs,
+  DataLayerArgs,
+  SeriesType,
+  XYAnnotationLayerConfig,
+  XYDataLayerConfig,
+  XYLayerArgs,
+  XYLayerConfig,
+  XYReferenceLineLayerConfig,
+} from '../../common/expressions';
 import { layerTypes } from '..';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
@@ -59,14 +68,15 @@ export function checkXAccessorCompatibility(
   state: XYState,
   datasourceLayers: Record<string, DatasourcePublicAPI>
 ) {
+  const dataLayers = getDataLayers(state.layers);
   const errors = [];
-  const hasDateHistogramSet = state.layers.some(
+  const hasDateHistogramSet = dataLayers.some(
     checkScaleOperation('interval', 'date', datasourceLayers)
   );
-  const hasNumberHistogram = state.layers.some(
+  const hasNumberHistogram = dataLayers.some(
     checkScaleOperation('interval', 'number', datasourceLayers)
   );
-  const hasOrdinalAxis = state.layers.some(
+  const hasOrdinalAxis = dataLayers.some(
     checkScaleOperation('ordinal', undefined, datasourceLayers)
   );
   if (state.layers.length > 1 && hasDateHistogramSet && hasNumberHistogram) {
@@ -109,7 +119,7 @@ export function checkScaleOperation(
   dataType: 'date' | 'number' | 'string' | undefined,
   datasourceLayers: Record<string, DatasourcePublicAPI>
 ) {
-  return (layer: XYLayerConfig) => {
+  return (layer: XYDataLayerConfig) => {
     const datasourceAPI = datasourceLayers[layer.layerId];
     if (!layer.xAccessor) {
       return false;
@@ -121,11 +131,49 @@ export function checkScaleOperation(
   };
 }
 
-export const isDataLayer = (layer: Pick<XYLayerConfig, 'layerType'>) =>
-  layer.layerType === layerTypes.DATA;
+export const isDataLayer = (layer: Pick<XYLayerConfig, 'layerType'>): layer is XYDataLayerConfig =>
+  layer.layerType === layerTypes.DATA || !layer.layerType;
 
-export const isReferenceLayer = (layer: Pick<XYLayerConfig, 'layerType'>) =>
-  layer?.layerType === layerTypes.REFERENCELINE;
+export const getDataLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
+  (layers || []).filter((layer): layer is XYDataLayerConfig => isDataLayer(layer));
+
+export const getDataLayersArgs = (layers: XYLayerArgs[]) =>
+  (layers || []).filter((layer): layer is DataLayerArgs => isDataLayer(layer));
+
+export const getFirstDataLayer = (layers: XYLayerConfig[]) =>
+  (layers || []).find((layer): layer is XYDataLayerConfig => isDataLayer(layer));
+
+export const isReferenceLayer = (
+  layer: Pick<XYLayerConfig, 'layerType'>
+): layer is XYReferenceLineLayerConfig => layer.layerType === layerTypes.REFERENCELINE;
+
+export const getReferenceLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
+  (layers || []).filter((layer): layer is XYReferenceLineLayerConfig => isReferenceLayer(layer));
+
+export const isAnnotationsLayer = (
+  layer: Pick<XYLayerConfig, 'layerType'>
+): layer is XYAnnotationLayerConfig => layer.layerType === layerTypes.ANNOTATIONS;
+
+export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
+  (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
+
+export const getAnnotationsLayersArgs = (layers: XYLayerArgs[]) =>
+  (layers || []).filter((layer): layer is AnnotationLayerArgs => isAnnotationsLayer(layer));
+
+export interface LayerTypeToLayer {
+  [layerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;
+  [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => XYReferenceLineLayerConfig;
+  [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => XYAnnotationLayerConfig;
+}
+
+export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLayer) => {
+  if (isDataLayer(layer)) {
+    return options[layerTypes.DATA](layer);
+  } else if (isReferenceLayer(layer)) {
+    return options[layerTypes.REFERENCELINE](layer);
+  }
+  return options[layerTypes.ANNOTATIONS](layer);
+};
 
 export function getVisualizationType(state: State): VisualizationType | 'mixed' {
   if (!state.layers.length) {
@@ -133,8 +181,9 @@ export function getVisualizationType(state: State): VisualizationType | 'mixed' 
       visualizationTypes.find((t) => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
     );
   }
-  const visualizationType = visualizationTypes.find((t) => t.id === state.layers[0].seriesType);
-  const seriesTypes = uniq(state.layers.map((l) => l.seriesType));
+  const dataLayers = getDataLayers(state?.layers);
+  const visualizationType = visualizationTypes.find((t) => t.id === dataLayers?.[0].seriesType);
+  const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
@@ -220,17 +269,41 @@ export function getMessageIdsForDimension(
   return { shortMessage: '', longMessage: '' };
 }
 
-export function newLayerState(
-  seriesType: SeriesType,
-  layerId: string,
-  layerType: LayerType = layerTypes.DATA
-): XYLayerConfig {
-  return {
+const newLayerFn = {
+  [layerTypes.DATA]: ({
     layerId,
     seriesType,
+  }: {
+    layerId: string;
+    seriesType: SeriesType;
+  }): XYDataLayerConfig => ({
+    layerId,
+    layerType: layerTypes.DATA,
     accessors: [],
-    layerType,
-  };
+    seriesType,
+  }),
+  [layerTypes.REFERENCELINE]: ({ layerId }: { layerId: string }): XYReferenceLineLayerConfig => ({
+    layerId,
+    layerType: layerTypes.REFERENCELINE,
+    accessors: [],
+  }),
+  [layerTypes.ANNOTATIONS]: ({ layerId }: { layerId: string }): XYAnnotationLayerConfig => ({
+    layerId,
+    layerType: layerTypes.ANNOTATIONS,
+    annotations: [],
+  }),
+};
+
+export function newLayerState({
+  layerId,
+  layerType = layerTypes.DATA,
+  seriesType,
+}: {
+  layerId: string;
+  layerType?: LayerType;
+  seriesType: SeriesType;
+}) {
+  return newLayerFn[layerType]({ layerId, seriesType });
 }
 
 export function getLayersByType(state: State, byType?: string) {
@@ -241,8 +314,8 @@ export function getLayersByType(state: State, byType?: string) {
 
 export function validateLayersForDimension(
   dimension: string,
-  layers: XYLayerConfig[],
-  missingCriteria: (layer: XYLayerConfig) => boolean
+  layers: XYDataLayerConfig[],
+  missingCriteria: (layer: XYDataLayerConfig) => boolean
 ):
   | { valid: true }
   | {

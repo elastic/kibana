@@ -9,6 +9,8 @@
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
+
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 interface SaveDashboardOptions {
@@ -49,6 +51,13 @@ export class DashboardPageObject extends FtrService {
     await this.esArchiver.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
     await this.common.navigateToApp('dashboard');
+  }
+
+  public async expectAppStateRemovedFromURL() {
+    this.retry.try(async () => {
+      const url = await this.browser.getCurrentUrl();
+      expect(url.indexOf('_a')).to.be(-1);
+    });
   }
 
   public async preserveCrossAppState() {

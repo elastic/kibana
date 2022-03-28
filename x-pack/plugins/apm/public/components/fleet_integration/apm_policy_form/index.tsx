@@ -25,6 +25,7 @@ import {
 import { SettingsForm, SettingsSection } from './settings_form';
 import { isSettingsFormValid, mergeNewVars } from './settings_form/utils';
 import { PackagePolicyVars } from './typings';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   updateAPMPolicy: (newVars: PackagePolicyVars, isValid: boolean) => void;
@@ -32,6 +33,8 @@ interface Props {
 }
 
 export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
+  const tailSamplingPoliciesDocsLink =
+    useKibana().services.docLinks?.links.apm.tailSamplingPolicies;
   const {
     apmSettings,
     rumSettings,
@@ -44,9 +47,11 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
       rumSettings: getRUMSettings(),
       tlsSettings: getTLSSettings(),
       agentAuthorizationSettings: getAgentAuthorizationSettings(),
-      tailSamplingSettings: getTailSamplingSettings(),
+      tailSamplingSettings: getTailSamplingSettings(
+        tailSamplingPoliciesDocsLink
+      ),
     };
-  }, []);
+  }, [tailSamplingPoliciesDocsLink]);
 
   function handleFormChange(key: string, value: any) {
     // Merge new key/value with the rest of fields

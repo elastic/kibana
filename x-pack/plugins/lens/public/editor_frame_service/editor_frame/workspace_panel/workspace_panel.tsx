@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useContext, useCallback, useRef } from 'react';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
@@ -52,7 +52,7 @@ import {
   getUnknownVisualizationTypeError,
 } from '../../error_helper';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
-import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
+import type { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 import {
   onActiveDataChange,
   useLensDispatch,
@@ -66,9 +66,14 @@ import {
   selectDatasourceStates,
   selectActiveDatasourceId,
   selectSearchSessionId,
+  selectAutoApplyEnabled,
+  selectTriggerApplyChanges,
+  selectDatasourceLayers,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField } from '../../../utils';
+import { setChangesApplied } from '../../../state_management/lens_slice';
+import type { Datatable } from '../../../../../../../src/plugins/expressions/public';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -88,6 +93,7 @@ interface WorkspaceState {
     fixAction?: DatasourceFixAction<unknown>;
   }>;
   expandError: boolean;
+  expressionToRender: string | null | undefined;
 }
 
 const dropProps = {
@@ -136,12 +142,21 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const visualization = useLensSelector(selectVisualization);
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
+  const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+  const triggerApply = useLensSelector(selectTriggerApplyChanges);
 
-  const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
+    expressionToRender: undefined,
   });
+
+  // const expressionToRender = useRef<null | undefined | string>();
+  const initialRenderComplete = useRef<boolean>();
+
+  const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
+
+  const { datasourceLayers } = framePublicAPI;
 
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
@@ -186,7 +201,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
   );
 
-  const expression = useMemo(() => {
+  const _expression = useMemo(() => {
     if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
       try {
         const ast = buildExpression({
@@ -238,10 +253,32 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     visualization.activeId,
   ]);
 
-  const expressionExists = Boolean(expression);
   useEffect(() => {
-    dispatchLens(setSaveable(expressionExists));
-  }, [expressionExists, dispatchLens]);
+    dispatchLens(setSaveable(Boolean(_expression)));
+  }, [_expression, dispatchLens]);
+
+  useEffect(() => {
+    if (!autoApplyEnabled) {
+      dispatchLens(setChangesApplied(_expression === localState.expressionToRender));
+    }
+  });
+
+  useEffect(() => {
+    if (shouldApplyExpression) {
+      setLocalState((s) => ({ ...s, expressionToRender: _expression }));
+    }
+  }, [_expression, shouldApplyExpression]);
+
+  const expressionExists = Boolean(localState.expressionToRender);
+  useEffect(() => {
+    // null signals an empty workspace which should count as an initial render
+    if (
+      (expressionExists || localState.expressionToRender === null) &&
+      !initialRenderComplete.current
+    ) {
+      initialRenderComplete.current = true;
+    }
+  }, [expressionExists, localState.expressionToRender]);
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
@@ -291,7 +328,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
       trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
-      switchToSuggestion(dispatchLens, suggestionForDraggedField, true);
+      switchToSuggestion(dispatchLens, suggestionForDraggedField, { clearStagedPreview: true });
     }
   }, [suggestionForDraggedField, expressionExists, dispatchLens]);
 
@@ -343,12 +380,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderVisualization = () => {
-    if (expression === null) {
+    if (localState.expressionToRender === null) {
       return renderEmptyWorkspace();
     }
+
     return (
       <VisualizationWrapper
-        expression={expression}
+        expression={localState.expressionToRender}
         framePublicAPI={framePublicAPI}
         lensInspector={lensInspector}
         onEvent={onEvent}
@@ -356,12 +394,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
         application={core.application}
+        datasourceMap={datasourceMap}
         activeDatasourceId={activeDatasourceId}
       />
     );
   };
-
-  const element = expression !== null ? renderVisualization() : renderEmptyWorkspace();
 
   const dragDropContext = useContext(DragContext);
 
@@ -381,7 +418,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ) : (
       <DragDrop
         className={classNames('lnsWorkspacePanel__dragDrop', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'lnsWorkspacePanel__dragDrop--fullscreen': isFullscreen,
         })}
         dataTestSubj="lnsWorkspace"
@@ -392,7 +428,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         order={dropProps.order}
       >
         <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {element}
+          {renderVisualization()}
         </EuiPageContentBody>
       </DragDrop>
     );
@@ -423,6 +459,7 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent,
   application,
   activeDatasourceId,
+  datasourceMap,
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -441,6 +478,7 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent: ReactExpressionRendererType;
   application: ApplicationStart;
   activeDatasourceId: string | null;
+  datasourceMap: DatasourceMap;
 }) => {
   const context = useLensSelector(selectExecutionContext);
   const searchContext: ExecutionContextSearch = useMemo(
@@ -455,16 +493,27 @@ export const VisualizationWrapper = ({
     [context]
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
-
+  const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
   const dispatchLens = useLensDispatch();
+  const [defaultLayerId] = Object.keys(datasourceLayers);
 
   const onData$ = useCallback(
     (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (adapters && adapters.tables) {
-        dispatchLens(onActiveDataChange({ ...adapters.tables.tables }));
+        dispatchLens(
+          onActiveDataChange(
+            Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+              (acc, [key, value], index, tables) => ({
+                ...acc,
+                [tables.length === 1 ? defaultLayerId : key]: value,
+              }),
+              {}
+            )
+          )
+        );
       }
     },
-    [dispatchLens]
+    [defaultLayerId, dispatchLens]
   );
 
   function renderFixAction(

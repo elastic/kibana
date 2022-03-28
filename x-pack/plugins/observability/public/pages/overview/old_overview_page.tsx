@@ -5,9 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiHorizontalRule,
+  EuiButton,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useRef, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo, useRef, useCallback, useState } from 'react';
+import { observabilityFeatureId } from '../../../common';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../..';
 import { EmptySections } from '../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../components/app/header';
@@ -18,7 +32,6 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useTimeRange } from '../../hooks/use_time_range';
 import { useAlertIndexNames } from '../../hooks/use_alert_index_names';
 import { RouteParams } from '../../routes';
 import { getNewsFeed } from '../../services/get_news_feed';
@@ -28,6 +41,12 @@ import { DataSections } from './data_sections';
 import { LoadingObservability } from './loading_observability';
 import { AlertsTableTGrid } from '../alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
 import { SectionContainer } from '../../components/app/section';
+import { ObservabilityAppServices } from '../../application/types';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
+import { paths } from '../../config';
+import { useDatePickerContext } from '../../hooks/use_date_picker_context';
+import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
+import { ObservabilityStatus } from '../../components/app/observability_status';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -48,34 +67,28 @@ export function OverviewPage({ routeParams }: Props) {
       }),
     },
   ]);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const indexNames = useAlertIndexNames();
+  const { cases, docLinks, http } = useKibana<ObservabilityAppServices>().services;
+  const { ObservabilityPageTemplate, config } = usePluginContext();
 
-  const { core, ObservabilityPageTemplate } = usePluginContext();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, refreshInterval, refreshPaused } =
+    useDatePickerContext();
 
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
-
-  const relativeTime = { start: relativeStart, end: relativeEnd };
-  const absoluteTime = { start: absoluteStart, end: absoluteEnd };
-
-  const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
+  const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
 
-  const bucketSize = calculateBucketSize({
-    start: absoluteTime.start,
-    end: absoluteTime.end,
-  });
-
-  const bucketSizeValue = useMemo(() => {
-    if (bucketSize?.bucketSize) {
-      return {
-        bucketSize: bucketSize.bucketSize,
-        intervalString: bucketSize.intervalString,
-      };
-    }
-  }, [bucketSize?.bucketSize, bucketSize?.intervalString]);
+  const bucketSize = useMemo(
+    () =>
+      calculateBucketSize({
+        start: absoluteStart,
+        end: absoluteEnd,
+      }),
+    [absoluteStart, absoluteEnd]
+  );
 
   const setRefetch = useCallback((ref) => {
     refetch.current = ref;
@@ -85,6 +98,9 @@ export function OverviewPage({ routeParams }: Props) {
     return refetch.current && refetch.current();
   }, []);
 
+  const CasesContext = cases.ui.getCasesContext();
+  const userPermissions = useGetUserCasesPermissions();
+
   if (hasAnyData === undefined) {
     return <LoadingObservability />;
   }
@@ -93,11 +109,13 @@ export function OverviewPage({ routeParams }: Props) {
 
   const noDataConfig = getNoDataConfig({
     hasData,
-    basePath: core.http.basePath,
-    docsLink: core.docLinks.links.observability.guide,
+    basePath: http.basePath,
+    docsLink: docLinks.links.observability.guide,
   });
 
-  const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
+  const alertsLink = config.unsafe.alertingExperience.enabled
+    ? paths.observability.alerts
+    : paths.management.rules;
 
   return (
     <ObservabilityPageTemplate
@@ -107,9 +125,15 @@ export function OverviewPage({ routeParams }: Props) {
           ? {
               pageTitle: overviewPageTitle,
               rightSideItems: [
+                <EuiButton color="text" iconType="wrench" onClick={() => setIsFlyoutVisible(true)}>
+                  <FormattedMessage
+                    id="xpack.observability.overview.guidedSetupButton"
+                    defaultMessage="Guided setup"
+                  />
+                </EuiButton>,
                 <DatePicker
-                  rangeFrom={relativeTime.start}
-                  rangeTo={relativeTime.end}
+                  rangeFrom={relativeStart}
+                  rangeTo={relativeEnd}
                   refreshInterval={refreshInterval}
                   refreshPaused={refreshPaused}
                   onTimeRangeRefresh={onTimeRangeRefresh}
@@ -122,6 +146,7 @@ export function OverviewPage({ routeParams }: Props) {
       {hasData && (
         <>
           <ObservabilityHeaderMenu />
+          <ObservabilityStatusProgress onViewDetailsClick={() => setIsFlyoutVisible(true)} />
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <SectionContainer
@@ -129,18 +154,31 @@ export function OverviewPage({ routeParams }: Props) {
                   defaultMessage: 'Alerts',
                 })}
                 hasError={false}
+                appLink={{
+                  href: alertsLink,
+                  label: i18n.translate('xpack.observability.overview.alerts.appLink', {
+                    defaultMessage: 'Show alerts',
+                  }),
+                }}
+                showExperimentalBadge={true}
               >
-                <AlertsTableTGrid
-                  setRefetch={setRefetch}
-                  rangeFrom={relativeTime.start}
-                  rangeTo={relativeTime.end}
-                  indexNames={indexNames}
-                />
+                <CasesContext
+                  owner={[observabilityFeatureId]}
+                  userCanCrud={userPermissions?.crud ?? false}
+                  features={{ alerts: { sync: false } }}
+                >
+                  <AlertsTableTGrid
+                    setRefetch={setRefetch}
+                    rangeFrom={relativeStart}
+                    rangeTo={relativeEnd}
+                    indexNames={indexNames}
+                  />
+                </CasesContext>
               </SectionContainer>
             </EuiFlexItem>
             <EuiFlexItem>
               {/* Data sections */}
-              {hasAnyData && <DataSections bucketSize={bucketSizeValue} />}
+              {hasAnyData && <DataSections bucketSize={bucketSize} />}
               <EmptySections />
             </EuiFlexItem>
             <EuiSpacer size="s" />
@@ -160,6 +198,37 @@ export function OverviewPage({ routeParams }: Props) {
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
+      )}
+      {isFlyoutVisible && (
+        <EuiFlyout
+          size="s"
+          ownFocus
+          onClose={() => setIsFlyoutVisible(false)}
+          aria-labelledby="statusVisualizationFlyoutTitle"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id="statusVisualizationFlyoutTitle">
+                <FormattedMessage
+                  id="xpack.observability.overview.statusVisualizationFlyoutTitle"
+                  defaultMessage="Guided setup"
+                />
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.observability.overview.statusVisualizationFlyoutDescription"
+                  defaultMessage="Track your progress towards adding observability integrations and features."
+                />
+              </p>
+            </EuiText>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <ObservabilityStatus />
+          </EuiFlyoutBody>
+        </EuiFlyout>
       )}
     </ObservabilityPageTemplate>
   );

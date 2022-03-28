@@ -10,11 +10,32 @@ import type { ExpressionValueSearchContext } from '../../../../../../src/plugins
 import type { LensMultiTable } from '../../types';
 import type { XYArgs } from './xy_args';
 import { fittingFunctionDefinitions } from './fitting_function';
+import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
+import { endValueDefinitions } from './end_value';
 
 export interface XYChartProps {
   data: LensMultiTable;
   args: XYArgs;
 }
+
+const strings = {
+  getMetricHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.metric', {
+      defaultMessage: 'Vertical axis',
+    }),
+  getXAxisHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.x', {
+      defaultMessage: 'Horizontal axis',
+    }),
+  getBreakdownHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.breakDown', {
+      defaultMessage: 'Break down by',
+    }),
+  getReferenceLineHelp: () =>
+    i18n.translate('xpack.lens.xy.logDatatable.breakDown', {
+      defaultMessage: 'Break down by',
+    }),
+};
 
 export interface XYRender {
   type: 'render';
@@ -86,6 +107,16 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how missing values are treated',
       }),
     },
+    endValue: {
+      types: ['string'],
+      options: [...endValueDefinitions.map(({ id }) => id)],
+      help: '',
+    },
+    emphasizeFitting: {
+      types: ['boolean'],
+      default: false,
+      help: '',
+    },
     valueLabels: {
       types: ['string'],
       options: ['hide', 'inside'],
@@ -116,8 +147,12 @@ export const xyChart: ExpressionFunctionDefinition<
       }),
     },
     layers: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      types: ['lens_xy_layer'] as any,
+      types: [
+        'lens_xy_data_layer',
+        'lens_xy_referenceLine_layer',
+        'lens_xy_annotation_layer',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any,
       help: 'Layers of visual series',
       multi: true,
     },
@@ -157,6 +192,28 @@ export const xyChart: ExpressionFunctionDefinition<
     },
   },
   fn(data: LensMultiTable, args: XYArgs, handlers) {
+    if (handlers?.inspectorAdapters?.tables) {
+      args.layers.forEach((layer) => {
+        if (layer.layerType === 'annotations') {
+          return;
+        }
+        const { layerId, accessors, xAccessor, splitAccessor, layerType } = layer;
+        const logTable = prepareLogTable(
+          data.tables[layerId],
+          [
+            [
+              accessors ? accessors : undefined,
+              layerType === 'data' ? strings.getMetricHelp() : strings.getReferenceLineHelp(),
+            ],
+            [xAccessor ? [xAccessor] : undefined, strings.getXAxisHelp()],
+            [splitAccessor ? [splitAccessor] : undefined, strings.getBreakdownHelp()],
+          ],
+          true
+        );
+
+        handlers.inspectorAdapters.tables.logDatatable(layerId, logTable);
+      });
+    }
     return {
       type: 'render',
       as: 'lens_xy_chart_renderer',

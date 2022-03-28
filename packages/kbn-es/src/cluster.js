@@ -12,7 +12,7 @@ const chalk = require('chalk');
 const path = require('path');
 const { Client } = require('@elastic/elasticsearch');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
-const { ES_BIN } = require('./paths');
+const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
 const {
   log: defaultLog,
   parseEsLog,
@@ -59,13 +59,10 @@ exports.Cluster = class Cluster {
    */
   async installSource(options = {}) {
     this._log.info(chalk.bold('Installing from source'));
-    this._log.indent(4);
-
-    const { installPath } = await installSource({ log: this._log, ...options });
-
-    this._log.indent(-4);
-
-    return { installPath };
+    return await this._log.indent(4, async () => {
+      const { installPath } = await installSource({ log: this._log, ...options });
+      return { installPath };
+    });
   }
 
   /**
@@ -78,16 +75,14 @@ exports.Cluster = class Cluster {
    */
   async downloadSnapshot(options = {}) {
     this._log.info(chalk.bold('Downloading snapshot'));
-    this._log.indent(4);
+    return await this._log.indent(4, async () => {
+      const { installPath } = await downloadSnapshot({
+        log: this._log,
+        ...options,
+      });
 
-    const { installPath } = await downloadSnapshot({
-      log: this._log,
-      ...options,
+      return { installPath };
     });
-
-    this._log.indent(-4);
-
-    return { installPath };
   }
 
   /**
@@ -100,16 +95,14 @@ exports.Cluster = class Cluster {
    */
   async installSnapshot(options = {}) {
     this._log.info(chalk.bold('Installing from snapshot'));
-    this._log.indent(4);
+    return await this._log.indent(4, async () => {
+      const { installPath } = await installSnapshot({
+        log: this._log,
+        ...options,
+      });
 
-    const { installPath } = await installSnapshot({
-      log: this._log,
-      ...options,
+      return { installPath };
     });
-
-    this._log.indent(-4);
-
-    return { installPath };
   }
 
   /**
@@ -122,16 +115,14 @@ exports.Cluster = class Cluster {
    */
   async installArchive(path, options = {}) {
     this._log.info(chalk.bold('Installing from an archive'));
-    this._log.indent(4);
+    return await this._log.indent(4, async () => {
+      const { installPath } = await installArchive(path, {
+        log: this._log,
+        ...options,
+      });
 
-    const { installPath } = await installArchive(path, {
-      log: this._log,
-      ...options,
+      return { installPath };
     });
-
-    this._log.indent(-4);
-
-    return { installPath };
   }
 
   /**
@@ -144,21 +135,55 @@ exports.Cluster = class Cluster {
    */
   async extractDataDirectory(installPath, archivePath, extractDirName = 'data') {
     this._log.info(chalk.bold(`Extracting data directory`));
-    this._log.indent(4);
+    await this._log.indent(4, async () => {
+      // stripComponents=1 excludes the root directory as that is how our archives are
+      // structured. This works in our favor as we can explicitly extract into the data dir
+      const extractPath = path.resolve(installPath, extractDirName);
+      this._log.info(`Data archive: ${archivePath}`);
+      this._log.info(`Extract path: ${extractPath}`);
 
-    // stripComponents=1 excludes the root directory as that is how our archives are
-    // structured. This works in our favor as we can explicitly extract into the data dir
-    const extractPath = path.resolve(installPath, extractDirName);
-    this._log.info(`Data archive: ${archivePath}`);
-    this._log.info(`Extract path: ${extractPath}`);
-
-    await extract({
-      archivePath,
-      targetDir: extractPath,
-      stripComponents: 1,
+      await extract({
+        archivePath,
+        targetDir: extractPath,
+        stripComponents: 1,
+      });
     });
+  }
 
-    this._log.indent(-4);
+  /**
+   * Starts ES and returns resolved promise once started
+   *
+   * @param {String} installPath
+   * @param {String} plugins - comma separated list of plugins to install
+   * @param {Object} options
+   * @returns {Promise}
+   */
+  async installPlugins(installPath, plugins, options) {
+    const esJavaOpts = this.javaOptions(options);
+    for (const plugin of plugins.split(',')) {
+      await execa(ES_PLUGIN_BIN, ['install', plugin.trim()], {
+        cwd: installPath,
+        env: {
+          JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
+          ES_JAVA_OPTS: esJavaOpts.trim(),
+        },
+      });
+    }
+  }
+
+  async configureKeystoreWithSecureSettingsFiles(installPath, secureSettingsFiles) {
+    const env = { JAVA_HOME: '' };
+    for (const [secureSettingName, secureSettingFile] of secureSettingsFiles) {
+      this._log.info(
+        `setting secure setting %s to %s`,
+        chalk.bold(secureSettingName),
+        chalk.bold(secureSettingFile)
+      );
+      await execa(ES_KEYSTORE_BIN, ['add-file', secureSettingName, secureSettingFile], {
+        cwd: installPath,
+        env,
+      });
+    }
   }
 
   /**
@@ -169,24 +194,27 @@ exports.Cluster = class Cluster {
    * @returns {Promise<void>}
    */
   async start(installPath, options = {}) {
-    this._exec(installPath, options);
+    // _exec indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
+    await this._log.indent(0, async () => {
+      this._exec(installPath, options);
 
-    await Promise.race([
-      // wait for native realm to be setup and es to be started
-      Promise.all([
-        first(this._process.stdout, (data) => {
-          if (/started/.test(data)) {
-            return true;
-          }
+      await Promise.race([
+        // wait for native realm to be setup and es to be started
+        Promise.all([
+          first(this._process.stdout, (data) => {
+            if (/started/.test(data)) {
+              return true;
+            }
+          }),
+          this._setupPromise,
+        ]),
+
+        // await the outcome of the process in case it exits before starting
+        this._outcome.then(() => {
+          throw createCliError('ES exited without starting');
         }),
-        this._setupPromise,
-      ]),
-
-      // await the outcome of the process in case it exits before starting
-      this._outcome.then(() => {
-        throw createCliError('ES exited without starting');
-      }),
-    ]);
+      ]);
+    });
   }
 
   /**
@@ -197,16 +225,19 @@ exports.Cluster = class Cluster {
    * @returns {Promise<void>}
    */
   async run(installPath, options = {}) {
-    this._exec(installPath, options);
+    // _exec indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
+    await this._log.indent(0, async () => {
+      this._exec(installPath, options);
 
-    // log native realm setup errors so they aren't uncaught
-    this._setupPromise.catch((error) => {
-      this._log.error(error);
-      this.stop();
+      // log native realm setup errors so they aren't uncaught
+      this._setupPromise.catch((error) => {
+        this._log.error(error);
+        this.stop();
+      });
+
+      // await the final outcome of the process
+      await this._outcome;
     });
-
-    // await the final outcome of the process
-    await this._outcome;
   }
 
   /**
@@ -261,6 +292,7 @@ exports.Cluster = class Cluster {
       'action.destructive_requires_name=true',
       'ingest.geoip.downloader.enabled=false',
       'search.check_ccs_compatibility=true',
+      'cluster.routing.allocation.disk.threshold_enabled=false',
     ].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled
@@ -284,19 +316,9 @@ exports.Cluster = class Cluster {
     );
 
     this._log.info('%s %s', ES_BIN, args.join(' '));
+    const esJavaOpts = this.javaOptions(options);
 
-    let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
-
-    // ES now automatically sets heap size to 50% of the machine's available memory
-    // so we need to set it to a smaller size for local dev and CI
-    // especially because we currently run many instances of ES on the same machine during CI
-    // inital and max must be the same, so we only need to check the max
-    if (!esJavaOpts.includes('Xmx')) {
-      // 1536m === 1.5g
-      esJavaOpts += ' -Xms1536m -Xmx1536m';
-    }
-
-    this._log.info('ES_JAVA_OPTS: %s', esJavaOpts.trim());
+    this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
@@ -304,7 +326,7 @@ exports.Cluster = class Cluster {
         ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-        ES_JAVA_OPTS: esJavaOpts.trim(),
+        ES_JAVA_OPTS: esJavaOpts,
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -432,5 +454,19 @@ exports.Cluster = class Cluster {
         await new Promise((resolve) => setTimeout(resolve, waitSec * 1000));
       }
     }
+  }
+
+  javaOptions(options) {
+    let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
+
+    // ES now automatically sets heap size to 50% of the machine's available memory
+    // so we need to set it to a smaller size for local dev and CI
+    // especially because we currently run many instances of ES on the same machine during CI
+    // inital and max must be the same, so we only need to check the max
+    if (!esJavaOpts.includes('Xmx')) {
+      // 1536m === 1.5g
+      esJavaOpts += ' -Xms1536m -Xmx1536m';
+    }
+    return esJavaOpts.trim();
   }
 };

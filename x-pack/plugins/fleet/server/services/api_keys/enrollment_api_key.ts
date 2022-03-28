@@ -43,6 +43,7 @@ export async function listEnrollmentApiKeys(
     from: (page - 1) * perPage,
     size: perPage,
     track_total_hits: true,
+    rest_total_hits_as_int: true,
     ignore_unavailable: true,
     body: {
       sort: [{ created_at: { order: 'desc' } }],
@@ -55,8 +56,7 @@ export async function listEnrollmentApiKeys(
 
   return {
     items,
-    // @ts-expect-error value is number | TotalHits
-    total: res.hits.total.value,
+    total: res.hits.total as number,
     page,
     perPage,
   };

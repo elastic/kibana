@@ -33,6 +33,12 @@ Object {
         "description": Array [
           "",
         ],
+        "emphasizeFitting": Array [
+          true,
+        ],
+        "endValue": Array [
+          "Nearest",
+        ],
         "fillOpacity": Array [
           0.3,
         ],
@@ -127,7 +133,7 @@ Object {
                     "linear",
                   ],
                 },
-                "function": "lens_xy_layer",
+                "function": "lens_xy_data_layer",
                 "type": "function",
               },
             ],
@@ -145,6 +151,7 @@ Object {
                   "isVisible": Array [
                     true,
                   ],
+                  "legendSize": Array [],
                   "maxLines": Array [],
                   "position": Array [
                     "bottom",

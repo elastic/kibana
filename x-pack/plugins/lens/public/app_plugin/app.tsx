@@ -13,7 +13,7 @@ import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useExecutionContext, useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
 import { syncQueryStateWithUrl } from '../../../../../src/plugins/data/public';
 import { LensAppProps, LensAppServices } from './types';
@@ -24,6 +24,7 @@ import { Document } from '../persistence/saved_object_store';
 
 import {
   setState,
+  applyChanges,
   useLensSelector,
   useLensDispatch,
   LensAppState,
@@ -71,6 +72,7 @@ export function App({
     getOriginatingAppName,
     spaces,
     http,
+    executionContext,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
   } = lensAppServices;
@@ -111,6 +113,7 @@ export function App({
     undefined
   );
   const [isGoBackToVizEditorModalVisible, setIsGoBackToVizEditorModalVisible] = useState(false);
+  const savedObjectId = (initialInput as LensByReferenceInput)?.savedObjectId;
 
   useEffect(() => {
     if (currentDoc) {
@@ -122,6 +125,12 @@ export function App({
     setIndicateNoData(true);
   }, [setIndicateNoData]);
 
+  useExecutionContext(executionContext, {
+    type: 'application',
+    id: savedObjectId || 'new',
+    page: 'editor',
+  });
+
   useEffect(() => {
     if (indicateNoData) {
       setIndicateNoData(false);
@@ -132,11 +141,9 @@ export function App({
     () =>
       Boolean(
         // Temporarily required until the 'by value' paradigm is default.
-        dashboardFeatureFlag.allowByValueEmbeddables &&
-          isLinkedToOriginatingApp &&
-          !(initialInput as LensByReferenceInput)?.savedObjectId
+        dashboardFeatureFlag.allowByValueEmbeddables && isLinkedToOriginatingApp && !savedObjectId
       ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, initialInput]
+    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, savedObjectId]
   );
 
   useEffect(() => {
@@ -270,6 +277,7 @@ export function App({
 
   const runSave = useCallback(
     (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
+      dispatch(applyChanges());
       return runSaveLensVisualization(
         {
           lastKnownDoc,
@@ -310,6 +318,7 @@ export function App({
       redirectTo,
       lensAppServices,
       dispatchSetState,
+      dispatch,
       setIsSaveModalVisible,
     ]
   );

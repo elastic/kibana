@@ -7,46 +7,27 @@
 
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
+
 import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
-import { HostIsolationExceptionsApiClient } from '../../host_isolation_exceptions/host_isolation_exceptions_api_client';
-
-// FIXME:PT delete this when real component is implemented
-const TempDevFormComponent: ArtifactListPageProps['ArtifactFormComponent'] = (props) => {
-  // For Dev. Delete once we implement this component
-  // @ts-ignore
-  if (!window._dev_artifact_form_props) {
-    // @ts-ignore
-    window._dev_artifact_form_props = [];
-    // @ts-ignore
-    window.console.log(window._dev_artifact_form_props);
-  }
-  // @ts-ignore
-  window._dev_artifact_form_props.push(props);
-
-  return (
-    <div>
-      <div style={{ margin: '3em 0' }}>
-        {props.error ? props.error?.body?.message || props.error : ''}
-      </div>
-      {`TODO: ${props.mode} Form here`}
-    </div>
-  );
-};
+import { BlocklistsApiClient } from '../services';
+import { BlockListForm } from './components/blocklist_form';
 
 const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.blocklist.pageTitle', {
     defaultMessage: 'Blocklist',
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.blocklist.pageAboutInfo', {
-    defaultMessage: '(DEV: temporarily using isolation exception api)', // FIXME: need wording from PM
+    defaultMessage:
+      'The blocklist prevents selected applications from running on your hosts by extending the list of processes the Endpoint considers malicious.',
   }),
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageAddButtonTitle', {
     defaultMessage: 'Add blocklist entry',
   }),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.blocklist.showingTotal', {
-      defaultMessage: 'Showing {total} {total, plural, one {blocklist} other {blocklists}}',
+      defaultMessage:
+        'Showing {total} {total, plural, one {blocklist entry} other {blocklist entries}}',
       values: { total },
     }),
   cardActionEditLabel: i18n.translate('xpack.securitySolution.blocklist.cardActionEditLabel', {
@@ -118,16 +99,15 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
 
 export const Blocklist = memo(() => {
   const http = useHttp();
-  // FIXME: Implement Blocklist API client and define list
-  // for now, just using Event Filters
-  const eventFiltersApiClient = HostIsolationExceptionsApiClient.getInstance(http);
+  const blocklistsApiClient = BlocklistsApiClient.getInstance(http);
 
   return (
     <ArtifactListPage
-      apiClient={eventFiltersApiClient}
-      ArtifactFormComponent={TempDevFormComponent} // FIXME: Implement create/edit form
+      apiClient={blocklistsApiClient}
+      ArtifactFormComponent={BlockListForm}
       labels={BLOCKLIST_PAGE_LABELS}
       data-test-subj="blocklistPage"
+      flyoutSize="l"
     />
   );
 });

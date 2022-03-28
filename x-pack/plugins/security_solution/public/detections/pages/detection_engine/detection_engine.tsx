@@ -123,7 +123,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       signalIndexName,
       hasIndexWrite = false,
       hasIndexMaintenance = false,
-      canUserCRUD = false,
       canUserREAD,
       hasIndexRead,
     },
@@ -140,7 +139,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
-  const loading = userInfoLoading || listsConfigLoading || isLoadingIndexPattern;
+  const loading = userInfoLoading || listsConfigLoading;
   const {
     application: { navigateToUrl },
     timelines: timelinesUi,
@@ -341,24 +340,32 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="m" />
               <EuiFlexGroup wrap>
                 <EuiFlexItem grow={1}>
-                  <AlertsCountPanel
-                    filters={alertsHistogramDefaultFilters}
-                    query={query}
-                    signalIndexName={signalIndexName}
-                    runtimeMappings={runtimeMappings}
-                  />
+                  {isLoadingIndexPattern ? (
+                    <EuiLoadingSpinner size="xl" />
+                  ) : (
+                    <AlertsCountPanel
+                      filters={alertsHistogramDefaultFilters}
+                      query={query}
+                      signalIndexName={signalIndexName}
+                      runtimeMappings={runtimeMappings}
+                    />
+                  )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={2}>
-                  <AlertsHistogramPanel
-                    chartHeight={CHART_HEIGHT}
-                    filters={alertsHistogramDefaultFilters}
-                    query={query}
-                    showTotalAlertsCount={false}
-                    titleSize={'s'}
-                    signalIndexName={signalIndexName}
-                    updateDateRange={updateDateRangeCallback}
-                    runtimeMappings={runtimeMappings}
-                  />
+                  {isLoadingIndexPattern ? (
+                    <EuiLoadingSpinner size="xl" />
+                  ) : (
+                    <AlertsHistogramPanel
+                      chartHeight={CHART_HEIGHT}
+                      filters={alertsHistogramDefaultFilters}
+                      query={query}
+                      showTotalAlertsCount={false}
+                      titleSize={'s'}
+                      signalIndexName={signalIndexName}
+                      updateDateRange={updateDateRangeCallback}
+                      runtimeMappings={runtimeMappings}
+                    />
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
 
@@ -368,8 +375,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             <AlertsTable
               timelineId={TimelineId.detectionsPage}
               loading={loading}
-              hasIndexWrite={(hasIndexWrite ?? false) && (canUserCRUD ?? false)}
-              hasIndexMaintenance={(hasIndexMaintenance ?? false) && (canUserCRUD ?? false)}
+              hasIndexWrite={hasIndexWrite ?? false}
+              hasIndexMaintenance={hasIndexMaintenance ?? false}
               from={from}
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}

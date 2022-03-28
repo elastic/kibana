@@ -67,6 +67,11 @@ const metrics = {
     sortField: controls.TopSortFieldParamEditor,
     sortOrder: controls.OrderParamEditor,
   },
+  [METRIC_TYPES.TOP_METRICS]: {
+    field: controls.FieldParamEditor,
+    sortField: controls.TopSortFieldParamEditor,
+    sortOrder: controls.OrderParamEditor,
+  },
   [METRIC_TYPES.PERCENTILES]: {
     percents: controls.PercentilesEditor,
   },

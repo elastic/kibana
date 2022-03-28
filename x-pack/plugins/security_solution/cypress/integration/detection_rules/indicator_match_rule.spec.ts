@@ -75,7 +75,7 @@ import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
 import { cleanKibana, reload } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineIndicatorMatchRuleAndContinue,
   fillIndexAndIndicatorIndexPattern,
@@ -114,7 +114,7 @@ import { goBackToAllRulesTable, getDetails } from '../../tasks/rule_details';
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
-describe.skip('indicator match', () => {
+describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
     const expectedUrls = getNewThreatIndicatorRule().referenceUrls.join('');
     const expectedFalsePositives = getNewThreatIndicatorRule().falsePositivesExamples.join('');
@@ -408,7 +408,7 @@ describe.skip('indicator match', () => {
         loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       });
 
-      it('Creates and activates a new Indicator Match rule', () => {
+      it('Creates and enables a new Indicator Match rule', () => {
         goToManageAlertsDetectionRules();
         waitForRulesTableToBeLoaded();
         goToCreateNewRule();
@@ -416,7 +416,7 @@ describe.skip('indicator match', () => {
         fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
         fillAboutRuleAndContinue(getNewThreatIndicatorRule());
         fillScheduleRuleAndContinue(getNewThreatIndicatorRule());
-        createAndActivateRule();
+        createAndEnableRule();
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

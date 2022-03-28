@@ -11,6 +11,7 @@ import { Alert, AlertFactoryDoneUtils } from './alert';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
+  uiSettingsServiceMock,
 } from '../../../../src/core/server/mocks';
 import { AlertInstanceContext, AlertInstanceState } from './types';
 
@@ -105,6 +106,7 @@ const createAlertServicesMock = <
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     savedObjectsClient: savedObjectsClientMock.create(),
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,

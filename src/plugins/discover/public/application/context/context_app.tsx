@@ -14,7 +14,7 @@ import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
-import { DataView, DataViewField } from '../../../../data/common';
+import { DataView, DataViewField } from '../../../../data_views/public';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, isEqualFilters } from './services/context_state';
 import { useColumns } from '../../utils/use_data_grid_columns';
@@ -25,6 +25,7 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useExecutionContext } from '../../../../kibana_react/public';
 import { generateFilters } from '../../../../data/public';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
@@ -36,10 +37,16 @@ export interface ContextAppProps {
 
 export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const services = useDiscoverServices();
-  const { uiSettings, capabilities, indexPatterns, navigation, filterManager } = services;
+  const { uiSettings, capabilities, indexPatterns, navigation, filterManager, core } = services;
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'context',
+    id: indexPattern.id || '',
+  });
 
   /**
    * Context app state

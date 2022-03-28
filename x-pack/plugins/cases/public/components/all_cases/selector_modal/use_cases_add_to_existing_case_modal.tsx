@@ -6,15 +6,44 @@
  */
 
 import { useCallback } from 'react';
+import { CaseStatuses, StatusAll } from '../../../../common';
 import { AllCasesSelectorModalProps } from '.';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import { Case } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 
-export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps) => {
+type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
+  toastTitle?: string;
+  toastContent?: string;
+};
+
+export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) => {
+  const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
+    attachments: props.attachments,
+    onClose: props.onClose,
+    // TODO there's no need for onSuccess to be async. This will be fixed
+    // in a follow up clean up
+    onSuccess: async (theCase?: Case) => {
+      if (props.onRowClick) {
+        return props.onRowClick(theCase);
+      }
+    },
+    toastTitle: props.toastTitle,
+    toastContent: props.toastContent,
+  });
   const { dispatch } = useCasesContext();
+  const casesToasts = useCasesToast();
+
   const closeModal = useCallback(() => {
     dispatch({
       type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL,
+    });
+    // in case the flyout was also open when selecting
+    // create a new case
+    dispatch({
+      type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT,
     });
   }, [dispatch]);
 
@@ -23,6 +52,25 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
       type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
       payload: {
         ...props,
+        hiddenStatuses: [CaseStatuses.closed, StatusAll],
+        onRowClick: (theCase?: Case) => {
+          // when the case is undefined in the modal
+          // the user clicked "create new case"
+          if (theCase === undefined) {
+            closeModal();
+            createNewCaseFlyout.open();
+          } else {
+            casesToasts.showSuccessAttach({
+              theCase,
+              attachments: props.attachments,
+              title: props.toastTitle,
+              content: props.toastContent,
+            });
+            if (props.onRowClick) {
+              props.onRowClick(theCase);
+            }
+          }
+        },
         onClose: () => {
           closeModal();
           if (props.onClose) {
@@ -37,7 +85,7 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
         },
       },
     });
-  }, [closeModal, dispatch, props]);
+  }, [casesToasts, closeModal, createNewCaseFlyout, dispatch, props]);
   return {
     open: openModal,
     close: closeModal,

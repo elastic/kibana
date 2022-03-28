@@ -17,10 +17,11 @@ import {
   SavedObjectAttribute,
   SavedObjectReference,
 } from '../../../../../src/core/server';
-import { RawRule, RawAlertAction } from '../types';
+import { RawRule, RawAlertAction, RawRuleExecutionStatus } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
+import { getMappedParams } from '../../server/rules_client/lib/mapped_params_utils';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -145,6 +146,12 @@ export function getMigrations(
     pipeMigrations(addSecuritySolutionAADRuleTypeTags)
   );
 
+  const migrationRules820 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(addMappedParams)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
@@ -155,6 +162,7 @@ export function getMigrations(
     '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
     '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
     '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
+    '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
   };
 }
 
@@ -272,7 +280,7 @@ function initializeExecutionStatus(
         status: 'pending',
         lastExecutionDate: new Date().toISOString(),
         error: null,
-      },
+      } as RawRuleExecutionStatus,
     },
   };
 }
@@ -820,6 +828,28 @@ function fixInventoryThresholdGroupId(
   } else {
     return doc;
   }
+}
+
+function addMappedParams(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const {
+    attributes: { params },
+  } = doc;
+
+  const mappedParams = getMappedParams(params);
+
+  if (Object.keys(mappedParams).length) {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        mapped_params: mappedParams,
+      },
+    };
+  }
+
+  return doc;
 }
 
 function getCorrespondingAction(

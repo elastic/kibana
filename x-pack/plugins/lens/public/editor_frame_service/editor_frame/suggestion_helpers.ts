@@ -27,6 +27,7 @@ import {
   switchVisualization,
   DatasourceStates,
   VisualizationState,
+  applyChanges,
 } from '../../state_management';
 
 /**
@@ -147,7 +148,9 @@ export function getSuggestions({
             },
             currentVisualizationState,
             subVisualizationId,
-            palette
+            palette,
+            visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext,
+            activeData
           );
         });
     })
@@ -204,7 +207,9 @@ function getVisualizationSuggestions(
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
   currentVisualizationState: unknown,
   subVisualizationId?: string,
-  mainPalette?: PaletteOutput
+  mainPalette?: PaletteOutput,
+  isFromContext?: boolean,
+  activeData?: Record<string, Datatable>
 ) {
   return visualization
     .getSuggestions({
@@ -213,6 +218,8 @@ function getVisualizationSuggestions(
       keptLayerIds: datasourceSuggestion.keptLayerIds,
       subVisualizationId,
       mainPalette,
+      isFromContext,
+      activeData,
     })
     .map(({ state, ...visualizationSuggestion }) => ({
       ...visualizationSuggestion,
@@ -232,7 +239,10 @@ export function switchToSuggestion(
     Suggestion,
     'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId'
   >,
-  clearStagedPreview?: boolean
+  options?: {
+    clearStagedPreview?: boolean;
+    applyImmediately?: boolean;
+  }
 ) {
   dispatchLens(
     switchVisualization({
@@ -242,9 +252,12 @@ export function switchToSuggestion(
         datasourceState: suggestion.datasourceState,
         datasourceId: suggestion.datasourceId!,
       },
-      clearStagedPreview,
+      clearStagedPreview: options?.clearStagedPreview,
     })
   );
+  if (options?.applyImmediately) {
+    dispatchLens(applyChanges());
+  }
 }
 
 export function getTopSuggestionForField(

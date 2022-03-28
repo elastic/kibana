@@ -46,7 +46,7 @@ const getFakeFindings = (): CspFinding & { id: string } => ({
     uid: chance.string(),
     mode: chance.string(),
   },
-  run_id: chance.string(),
+  cycle_id: chance.string(),
   host: {} as any,
   ecs: {} as any,
   '@timestamp': new Date().toISOString(),
@@ -54,7 +54,8 @@ const getFakeFindings = (): CspFinding & { id: string } => ({
 
 type TableProps = PropsOf<typeof FindingsTable>;
 
-describe('<FindingsTable />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/126664
+describe.skip('<FindingsTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {
     const props: TableProps = {
       status: 'success',

@@ -31,6 +31,7 @@
     "expressions": "src/plugins/expressions",
     "expressionShape": "src/plugins/expression_shape",
     "expressionTagcloud": "src/plugins/chart_expressions/expression_tagcloud",
+    "eventAnnotation": "src/plugins/event_annotation",
     "fieldFormats": "src/plugins/field_formats",
     "flot": "packages/kbn-flot-charts/lib",
     "home": "src/plugins/home",
@@ -50,7 +51,10 @@
     "kibana-react": "src/plugins/kibana_react",
     "kibanaOverview": "src/plugins/kibana_overview",
     "lists": "packages/kbn-securitysolution-list-utils/src",
-    "management": ["src/legacy/core_plugins/management", "src/plugins/management"],
+    "management": [
+      "src/legacy/core_plugins/management",
+      "src/plugins/management"
+    ],
     "monaco": "packages/kbn-monaco/src",
     "navigation": "src/plugins/navigation",
     "newsfeed": "src/plugins/newsfeed",
@@ -60,13 +64,21 @@
     "server": "src/legacy/server",
     "share": "src/plugins/share",
     "sharedUX": "src/plugins/shared_ux",
+    "sharedUXComponents": "packages/kbn-shared-ux-components/src",
     "statusPage": "src/legacy/core_plugins/status_page",
-    "telemetry": ["src/plugins/telemetry", "src/plugins/telemetry_management_section"],
-    "timelion": ["src/plugins/vis_types/timelion"],
+    "telemetry": [
+      "src/plugins/telemetry",
+      "src/plugins/telemetry_management_section"
+    ],
+    "timelion": [
+      "src/plugins/vis_types/timelion"
+    ],
     "uiActions": "src/plugins/ui_actions",
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/plugins/usage_collection",
+    "utils": "packages/kbn-securitysolution-utils/src",
     "visDefaultEditor": "src/plugins/vis_default_editor",
+    "visTypeGauge": "src/plugins/vis_types/gauge",
     "visTypeHeatmap": "src/plugins/vis_types/heatmap",
     "visTypeMarkdown": "src/plugins/vis_type_markdown",
     "visTypeMetric": "src/plugins/vis_types/metric",

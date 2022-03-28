@@ -28,11 +28,13 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "//packages/kbn-i18n",
   "@npm//tslib",
-  "@npm//uuid",
+  "@npm//uuid"
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-i18n:npm_module_types",
   "@npm//tslib",
   "@npm//@types/jest",
   "@npm//@types/node",

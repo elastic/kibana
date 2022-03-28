@@ -51,7 +51,7 @@ import {
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineEqlRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -63,7 +63,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
-describe.skip('Detection rules, EQL', () => {
+describe('Detection rules, EQL', () => {
   const expectedUrls = getEqlRule().referenceUrls.join('');
   const expectedFalsePositives = getEqlRule().falsePositivesExamples.join('');
   const expectedTags = getEqlRule().tags.join('');
@@ -84,13 +84,13 @@ describe.skip('Detection rules, EQL', () => {
     });
   });
 
-  it('Creates and activates a new EQL rule', function () {
+  it('Creates and enables a new EQL rule', function () {
     loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -159,7 +159,7 @@ describe.skip('Detection rules, EQL', () => {
   });
 });
 
-describe.skip('Detection rules, sequence EQL', () => {
+describe('Detection rules, sequence EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfSequenceAlerts = '1 alert';
 
@@ -176,13 +176,13 @@ describe.skip('Detection rules, sequence EQL', () => {
     });
   });
 
-  it('Creates and activates a new EQL rule with a sequence', function () {
+  it('Creates and enables a new EQL rule with a sequence', function () {
     loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

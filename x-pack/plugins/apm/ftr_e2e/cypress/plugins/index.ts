@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, createLogger, LogLevel } from '@elastic/apm-synthtrace';
+import {
+  apm,
+  createLogger,
+  LogLevel,
+  SpanIterable,
+} from '@elastic/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 
 // ***********************************************************
@@ -33,13 +38,15 @@ const plugin: Cypress.PluginConfig = (on, config) => {
     isCloud: !!config.env.TEST_CLOUD,
   });
 
+  const forceDataStreams = false;
   const synthtraceEsClient = new apm.ApmSynthtraceEsClient(
     client,
-    createLogger(LogLevel.info)
+    createLogger(LogLevel.info),
+    forceDataStreams
   );
 
   on('task', {
-    'synthtrace:index': async (events) => {
+    'synthtrace:index': async (events: SpanIterable) => {
       await synthtraceEsClient.index(events);
       return null;
     },

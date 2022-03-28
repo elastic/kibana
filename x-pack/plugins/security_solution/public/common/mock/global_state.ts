@@ -13,7 +13,7 @@ import {
   NetworkTopTablesFields,
   NetworkTlsFields,
   NetworkUsersFields,
-  HostRiskScoreFields,
+  RiskScoreFields,
 } from '../../../common/search_strategy';
 import { State } from '../store';
 
@@ -41,6 +41,7 @@ import {
   mockRuntimeMappings,
 } from '../containers/source/mock';
 import { usersModel } from '../../users/store';
+import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 
 export const mockSourcererState = {
   ...initialSourcererState,
@@ -84,7 +85,7 @@ export const mockGlobalState: State = {
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
       },
@@ -105,7 +106,7 @@ export const mockGlobalState: State = {
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
       },
@@ -203,19 +204,31 @@ export const mockGlobalState: State = {
         [usersModel.UsersTableType.allUsers]: {
           activePage: 0,
           limit: 10,
-          // TODO sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: UsersFields.name, direction: Direction.asc },
+        },
+        [usersModel.UsersTableType.authentications]: {
+          activePage: 0,
+          limit: 10,
         },
         [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.risk]: {
+          activePage: 0,
+          limit: 10,
+          sort: {
+            field: RiskScoreFields.timestamp,
+            direction: Direction.asc,
+          },
+          severitySelection: [],
+        },
+        [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
+        [usersModel.UsersTableType.alerts]: { activePage: 0, limit: 10 },
       },
     },
     details: {
       queries: {
-        [usersModel.UsersTableType.allUsers]: {
-          activePage: 0,
-          limit: 10,
-          // TODO sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
-        },
         [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
+        [usersModel.UsersTableType.alerts]: { activePage: 0, limit: 10 },
       },
     },
   },

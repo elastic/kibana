@@ -13,7 +13,9 @@ import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory, LayerType } from '../../common';
 import type { XYLayerConfig } from '../../common/expressions';
-import { isDataLayer, isReferenceLayer } from './visualization_helpers';
+import { isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
+import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
+import { getReferenceLineAccessorColorConfig } from './reference_line_helpers';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -42,15 +44,13 @@ export function getColorAssignments(
 ): ColorAssignments {
   const layersPerPalette: Record<string, LayerColorConfig[]> = {};
 
-  layers
-    .filter((layer) => isDataLayer(layer))
-    .forEach((layer) => {
-      const palette = layer.palette?.name || 'default';
-      if (!layersPerPalette[palette]) {
-        layersPerPalette[palette] = [];
-      }
-      layersPerPalette[palette].push(layer);
-    });
+  layers.forEach((layer) => {
+    const palette = layer.palette?.name || 'default';
+    if (!layersPerPalette[palette]) {
+      layersPerPalette[palette] = [];
+    }
+    layersPerPalette[palette].push(layer);
+  });
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer, layerIndex) => {
@@ -59,6 +59,7 @@ export function getColorAssignments(
       }
       const splitAccessor = layer.splitAccessor;
       const column = data.tables[layer.layerId]?.columns.find(({ id }) => id === splitAccessor);
+      const columnFormatter = column && formatFactory(column.meta.params);
       const splits =
         !column || !data.tables[layer.layerId]
           ? []
@@ -66,7 +67,7 @@ export function getColorAssignments(
               data.tables[layer.layerId].rows.map((row) => {
                 let value = row[splitAccessor];
                 if (value && !isPrimitive(value)) {
-                  value = formatFactory(column.meta.params).convert(value);
+                  value = columnFormatter?.convert(value) ?? value;
                 } else {
                   value = String(value);
                 }
@@ -101,17 +102,6 @@ export function getColorAssignments(
   });
 }
 
-const getReferenceLineAccessorColorConfig = (layer: XYLayerConfig) => {
-  return layer.accessors.map((accessor) => {
-    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
-    return {
-      columnId: accessor,
-      triggerIcon: 'color' as const,
-      color: currentYConfig?.color || defaultReferenceLineColor,
-    };
-  });
-};
-
 export function getAccessorColorConfig(
   colorAssignments: ColorAssignments,
   frame: Pick<FramePublicAPI, 'datasourceLayers'>,
@@ -120,6 +110,9 @@ export function getAccessorColorConfig(
 ): AccessorConfig[] {
   if (isReferenceLayer(layer)) {
     return getReferenceLineAccessorColorConfig(layer);
+  }
+  if (isAnnotationsLayer(layer)) {
+    return getAnnotationsAccessorColorConfig(layer);
   }
   const layerContainsSplits = Boolean(layer.splitAccessor);
   const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };

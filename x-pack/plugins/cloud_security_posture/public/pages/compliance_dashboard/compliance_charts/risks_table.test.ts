@@ -5,45 +5,45 @@
  * 2.0.
  */
 
-import { getTop5Risks, RisksTableProps } from './risks_table';
+import { getTopRisks, RisksTableProps } from './risks_table';
 
 const podsAgg = {
-  resourceType: 'pods',
+  name: 'pods',
   totalFindings: 2,
   totalPassed: 1,
   totalFailed: 1,
 };
 
 const etcdAgg = {
-  resourceType: 'etcd',
+  name: 'etcd',
   totalFindings: 5,
   totalPassed: 0,
   totalFailed: 5,
 };
 
 const clusterAgg = {
-  resourceType: 'cluster',
+  name: 'cluster',
   totalFindings: 2,
   totalPassed: 2,
   totalFailed: 0,
 };
 
 const systemAgg = {
-  resourceType: 'system',
+  name: 'system',
   totalFindings: 10,
   totalPassed: 6,
   totalFailed: 4,
 };
 
 const apiAgg = {
-  resourceType: 'api',
+  name: 'api',
   totalFindings: 19100,
   totalPassed: 2100,
   totalFailed: 17000,
 };
 
 const serverAgg = {
-  resourceType: 'server',
+  name: 'server',
   totalFindings: 7,
   totalPassed: 4,
   totalFailed: 3,
@@ -58,16 +58,16 @@ const mockData: RisksTableProps['data'] = [
   serverAgg,
 ];
 
-describe('getTop5Risks', () => {
+describe('getTopRisks', () => {
   it('returns sorted by failed findings', () => {
-    expect(getTop5Risks([systemAgg, etcdAgg, apiAgg])).toEqual([apiAgg, etcdAgg, systemAgg]);
+    expect(getTopRisks([systemAgg, etcdAgg, apiAgg], 3)).toEqual([apiAgg, etcdAgg, systemAgg]);
   });
 
   it('return array filtered with failed findings only', () => {
-    expect(getTop5Risks([systemAgg, clusterAgg, apiAgg])).toEqual([apiAgg, systemAgg]);
+    expect(getTopRisks([systemAgg, clusterAgg, apiAgg], 3)).toEqual([apiAgg, systemAgg]);
   });
 
-  it('return sorted and filtered array with no more then 5 elements', () => {
-    expect(getTop5Risks(mockData)).toEqual([apiAgg, etcdAgg, systemAgg, serverAgg, podsAgg]);
+  it('return sorted and filtered array with the correct number of elements', () => {
+    expect(getTopRisks(mockData, 5)).toEqual([apiAgg, etcdAgg, systemAgg, serverAgg, podsAgg]);
   });
 });

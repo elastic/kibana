@@ -86,7 +86,7 @@ export function getTraceListColumns({
           content={
             <ServiceLink
               agentName={agentName}
-              query={{ ...query, transactionType }}
+              query={{ ...query, transactionType, serviceGroup: '' }}
               serviceName={serviceName}
             />
           }
@@ -121,7 +121,7 @@ export function getTraceListColumns({
             'xpack.apm.tracesTable.impactColumnDescription',
             {
               defaultMessage:
-                'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
+                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
             }
           )}
         >

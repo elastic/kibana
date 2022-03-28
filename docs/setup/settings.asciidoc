@@ -90,6 +90,10 @@ enforce even rudimentary CSP rules, though {kib} is still accessible. This
 configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enabled.
 *Default: `true`*
 
+|[[elasticsearch-maxSockets]] `elasticsearch.maxSockets`
+ | The maximum number of sockets that can be used for communications with elasticsearch.
+*Default: `Infinity`*
+
 | `elasticsearch.customHeaders:`
  | Header names and values to send to {es}. Any custom headers cannot be
 overwritten by client-side headers, regardless of the
@@ -278,12 +282,9 @@ on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
 |[[elasticsearch-service-account-token]] `elasticsearch.serviceAccountToken:`
- | beta[]. If your {es} is protected with basic authentication, this token provides the credentials
+ | If your {es} is protected with basic authentication, this token provides the credentials
 that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
-
-| `enterpriseSearch.host`
-  | The http(s) URL of your Enterprise Search instance. For example, in a local self-managed setup, set this to `http://localhost:3002`. Authentication between Kibana and the Enterprise Search host URL, such as via OAuth, is not supported. You can also {enterprise-search-ref}/configure-ssl-tls.html#configure-ssl-tls-in-kibana[configure Kibana to trust your Enterprise Search TLS certificate authority].
 
 | `interpreter.enableInVisualize`
   | Enables use of interpreter in Visualize. *Default: `true`*
@@ -719,6 +720,7 @@ Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
 include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
 include::{kib-repo-dir}/settings/banners-settings.asciidoc[]
+include::{kib-repo-dir}/settings/enterprise-search-settings.asciidoc[]
 include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]
 include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]
 include::{kib-repo-dir}/settings/logging-settings.asciidoc[]
@@ -726,8 +728,8 @@ include::{kib-repo-dir}/settings/logs-ui-settings.asciidoc[]
 include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
 include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
 include::{kib-repo-dir}/settings/reporting-settings.asciidoc[]
-include::secure-settings.asciidoc[]
 include::{kib-repo-dir}/settings/search-sessions-settings.asciidoc[]
+include::secure-settings.asciidoc[]
 include::{kib-repo-dir}/settings/security-settings.asciidoc[]
 include::{kib-repo-dir}/settings/spaces-settings.asciidoc[]
 include::{kib-repo-dir}/settings/task-manager-settings.asciidoc[]

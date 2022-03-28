@@ -28,10 +28,10 @@ export const EXPERIMENTAL = i18n.translate(
   }
 );
 
-export const ACTIVATE_RULE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.activateRuleLabel',
+export const ENABLE_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.enableRuleLabel',
   {
-    defaultMessage: 'Activate',
+    defaultMessage: 'Enable',
   }
 );
 

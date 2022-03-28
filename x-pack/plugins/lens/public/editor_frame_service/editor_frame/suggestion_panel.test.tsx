@@ -21,7 +21,21 @@ import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { mountWithProvider } from '../../mocks';
-import { LensAppState, PreviewState, setState, setToggleFullscreen } from '../../state_management';
+import {
+  applyChanges,
+  LensAppState,
+  PreviewState,
+  setState,
+  setToggleFullscreen,
+  VisualizationState,
+} from '../../state_management';
+import { setChangesApplied } from '../../state_management/lens_slice';
+
+const SELECTORS = {
+  APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsSuggestionApplyChanges"]',
+  SUGGESTIONS_PANEL: '[data-test-subj="lnsSuggestionsPanel"]',
+  SUGGESTION_TILE_BUTTON: 'button[data-test-subj="lnsSuggestion"]',
+};
 
 jest.mock('./suggestion_helpers');
 
@@ -108,6 +122,38 @@ describe('suggestion_panel', () => {
     expect(instance.find(SuggestionPanel).exists()).toBe(true);
   });
 
+  it('should display apply-changes prompt when changes not applied', async () => {
+    const { instance, lensStore } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
+      preloadedState: {
+        ...preloadedState,
+        visualization: {
+          ...preloadedState.visualization,
+          state: {
+            something: 'changed',
+          },
+        } as VisualizationState,
+        changesApplied: false,
+        autoApplyDisabled: true,
+      },
+    });
+
+    expect(instance.exists(SELECTORS.APPLY_CHANGES_BUTTON)).toBeTruthy();
+    expect(instance.exists(SELECTORS.SUGGESTION_TILE_BUTTON)).toBeFalsy();
+
+    instance.find(SELECTORS.APPLY_CHANGES_BUTTON).simulate('click');
+
+    // check changes applied
+    expect(lensStore.dispatch).toHaveBeenCalledWith(applyChanges());
+
+    // simulate workspace panel behavior
+    lensStore.dispatch(setChangesApplied(true));
+    instance.update();
+
+    // check UI updated
+    expect(instance.exists(SELECTORS.APPLY_CHANGES_BUTTON)).toBeFalsy();
+    expect(instance.exists(SELECTORS.SUGGESTION_TILE_BUTTON)).toBeTruthy();
+  });
+
   it('should list passed in suggestions', async () => {
     const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
       preloadedState,
@@ -173,12 +219,12 @@ describe('suggestion_panel', () => {
         preloadedState,
       });
       act(() => {
-        instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
+        instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(2).simulate('click');
       });
 
       instance.update();
 
-      expect(instance.find('[data-test-subj="lnsSuggestion"]').at(2).prop('className')).toContain(
+      expect(instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(2).prop('className')).toContain(
         'lnsSuggestionPanel__button-isSelected'
       );
     });
@@ -189,19 +235,23 @@ describe('suggestion_panel', () => {
       );
 
       act(() => {
-        instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
+        instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(2).simulate('click');
       });
 
       instance.update();
 
       act(() => {
-        instance.find('[data-test-subj="lnsSuggestion"]').at(0).simulate('click');
+        instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(0).simulate('click');
       });
 
       instance.update();
 
       expect(lensStore.dispatch).toHaveBeenCalledWith({
         type: 'lens/rollbackSuggestion',
+      });
+      // check that it immediately applied any state changes in case auto-apply disabled
+      expect(lensStore.dispatch).toHaveBeenLastCalledWith({
+        type: applyChanges.type,
       });
     });
   });
@@ -212,7 +262,7 @@ describe('suggestion_panel', () => {
     });
 
     act(() => {
-      instance.find('button[data-test-subj="lnsSuggestion"]').at(1).simulate('click');
+      instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(1).simulate('click');
     });
 
     expect(lensStore.dispatch).toHaveBeenCalledWith(
@@ -228,6 +278,7 @@ describe('suggestion_panel', () => {
         },
       })
     );
+    expect(lensStore.dispatch).toHaveBeenLastCalledWith({ type: applyChanges.type });
   });
 
   it('should render render icon if there is no preview expression', async () => {
@@ -264,10 +315,10 @@ describe('suggestion_panel', () => {
       preloadedState,
     });
 
-    expect(instance.find('[data-test-subj="lnsSuggestionsPanel"]').find(EuiIcon)).toHaveLength(1);
-    expect(
-      instance.find('[data-test-subj="lnsSuggestionsPanel"]').find(EuiIcon).prop('type')
-    ).toEqual(LensIconChartDatatable);
+    expect(instance.find(SELECTORS.SUGGESTIONS_PANEL).find(EuiIcon)).toHaveLength(1);
+    expect(instance.find(SELECTORS.SUGGESTIONS_PANEL).find(EuiIcon).prop('type')).toEqual(
+      LensIconChartDatatable
+    );
   });
 
   it('should return no suggestion if visualization has missing index-patterns', async () => {
@@ -301,7 +352,7 @@ describe('suggestion_panel', () => {
       instance.find(EuiAccordion).at(0).simulate('change');
     });
 
-    expect(instance.find('[data-test-subj="lnsSuggestionsPanel"]')).toEqual({});
+    expect(instance.find(SELECTORS.SUGGESTIONS_PANEL)).toEqual({});
   });
 
   it('should render preview expression if there is one', () => {

@@ -83,11 +83,11 @@ import {
   selectNumberOfRules,
   waitForRulesTableToBeRefreshed,
 } from '../../tasks/alerts_detection_rules';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, reload } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRule,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
@@ -101,11 +101,11 @@ import {
 } from '../../tasks/create_new_rule';
 import { saveEditedRule, waitForKibana } from '../../tasks/edit_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { activatesRule, getDetails } from '../../tasks/rule_details';
+import { enablesRule, getDetails } from '../../tasks/rule_details';
 
 import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-describe.skip('Custom detection rules creation', () => {
+describe('Custom detection rules creation', () => {
   const expectedUrls = getNewRule().referenceUrls.join('');
   const expectedFalsePositives = getNewRule().falsePositivesExamples.join('');
   const expectedTags = getNewRule().tags.join('');
@@ -125,7 +125,7 @@ describe.skip('Custom detection rules creation', () => {
     });
   });
 
-  it('Creates and activates a new rule', function () {
+  it('Creates and enables a new rule', function () {
     loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
@@ -143,7 +143,7 @@ describe.skip('Custom detection rules creation', () => {
     cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
     cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
 
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -209,10 +209,10 @@ describe('Custom detection rules deletion and edition', () => {
     beforeEach(() => {
       cleanKibana();
       loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      createCustomRuleActivated(getNewRule(), 'rule1');
+      createCustomRuleEnabled(getNewRule(), 'rule1');
 
-      createCustomRuleActivated(getNewOverrideRule(), 'rule2');
-      createCustomRuleActivated(getExistingRule(), 'rule3');
+      createCustomRuleEnabled(getNewOverrideRule(), 'rule2');
+      createCustomRuleEnabled(getExistingRule(), 'rule3');
       reload();
     });
 
@@ -309,12 +309,12 @@ describe('Custom detection rules deletion and edition', () => {
     beforeEach(() => {
       cleanKibana();
       loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      createCustomRuleActivated(getExistingRule(), 'rule1');
+      createCustomRuleEnabled(getExistingRule(), 'rule1');
       reload();
     });
 
     it('Only modifies rule active status on enable/disable', () => {
-      activatesRule();
+      enablesRule();
 
       cy.intercept('GET', `/api/detection_engine/rules?id=*`).as('fetchRuleDetails');
 

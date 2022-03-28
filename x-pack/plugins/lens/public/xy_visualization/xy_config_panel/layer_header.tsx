@@ -10,14 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPopover, EuiSelectable, EuiText, EuiPopoverTitle } from '@elastic/eui';
 import type { VisualizationLayerWidgetProps, VisualizationType } from '../../types';
 import { State, visualizationTypes } from '../types';
-import { SeriesType } from '../../../common/expressions';
+import { SeriesType, XYDataLayerConfig } from '../../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { StaticHeader } from '../../shared_components';
 import { ToolbarButton } from '../../../../../../src/plugins/kibana_react/public';
 import { LensIconChartBarReferenceLine } from '../../assets/chart_bar_reference_line';
+import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
 import { updateLayer } from '.';
-import { isReferenceLayer } from '../visualization_helpers';
+import { isAnnotationsLayer, isReferenceLayer } from '../visualization_helpers';
 
 export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
@@ -26,6 +27,8 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   }
   if (isReferenceLayer(layer)) {
     return <ReferenceLayerHeader />;
+  } else if (isAnnotationsLayer(layer)) {
+    return <AnnotationsLayerHeader />;
   }
   return <DataLayerHeader {...props} />;
 }
@@ -41,11 +44,22 @@ function ReferenceLayerHeader() {
   );
 }
 
+function AnnotationsLayerHeader() {
+  return (
+    <StaticHeader
+      icon={LensIconChartBarAnnotations}
+      label={i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
+        defaultMessage: 'Annotations',
+      })}
+    />
+  );
+}
+
 function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const { state, layerId } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
-  const layer = state.layers[index];
+  const layer = state.layers[index] as XYDataLayerConfig;
   const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
   const horizontalOnly = isHorizontalChart(state.layers);
 

@@ -38,13 +38,14 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md",
   ":certs",
   "ci_stats_reporter/package.json",
+  "sort_package_json/package.json",
   "stdio/package.json",
   "tooling_log/package.json"
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-utils",
   "//packages/kbn-std",
+  "//packages/kbn-utils",
   "@npm//@babel/core",
   "@npm//axios",
   "@npm//chalk",
@@ -54,11 +55,14 @@ RUNTIME_DEPS = [
   "@npm//exit-hook",
   "@npm//getopts",
   "@npm//globby",
+  "@npm//jest-diff",
   "@npm//load-json-file",
   "@npm//markdown-it",
   "@npm//normalize-path",
   "@npm//prettier",
   "@npm//rxjs",
+  "@npm//strip-ansi",
+  "@npm//sort-package-json",
   "@npm//tar",
   "@npm//tree-kill",
   "@npm//vinyl",
@@ -66,8 +70,8 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-utils:npm_module_types",
   "//packages/kbn-std:npm_module_types",
+  "//packages/kbn-utils:npm_module_types",
   "@npm//@babel/parser",
   "@npm//@babel/types",
   "@npm//@types/babel__core",
@@ -88,7 +92,10 @@ TYPES_DEPS = [
   "@npm//execa",
   "@npm//exit-hook",
   "@npm//getopts",
+  "@npm//jest-diff",
   "@npm//rxjs",
+  "@npm//sort-package-json",
+  "@npm//strip-ansi",
   "@npm//tree-kill",
 ]
 

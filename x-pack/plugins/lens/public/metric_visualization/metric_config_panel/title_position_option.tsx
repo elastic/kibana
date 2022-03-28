@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { MetricState } from '../../../common/expressions';
+import type { MetricState } from '../../../common/types';
 
 export interface TitlePositionProps {
   state: MetricState;

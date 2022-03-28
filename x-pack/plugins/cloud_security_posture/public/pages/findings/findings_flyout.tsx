@@ -6,9 +6,9 @@
  */
 import React, { useState } from 'react';
 import {
+  EuiCodeBlock,
   EuiFlexItem,
   EuiSpacer,
-  EuiCode,
   EuiDescriptionList,
   EuiTextColor,
   EuiFlyout,
@@ -20,14 +20,19 @@ import {
   EuiTab,
   EuiFlexGrid,
   EuiCard,
-  PropsOf,
+  EuiFlexGroup,
+  type PropsOf,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import type { CspFinding } from './types';
 import { CspEvaluationBadge } from '../../components/csp_evaluation_badge';
 import * as TEXT from './translations';
 
-const tabs = ['result', 'rule', 'resource'] as const;
+const tabs = ['remediation', 'resource', 'general'] as const;
+
+const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
+  <EuiCodeBlock {...props} isCopyable paddingSize="s" />
+);
 
 type FindingsTab = typeof tabs[number];
 
@@ -44,15 +49,22 @@ interface FindingFlyoutProps {
 }
 
 export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
-  const [tab, setTab] = useState<FindingsTab>('result');
+  const [tab, setTab] = useState<FindingsTab>('remediation');
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader>
-        <EuiTitle size="l">
-          <EuiTextColor color="primary">
-            <h2>{TEXT.FINDINGS}</h2>
-          </EuiTextColor>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <CspEvaluationBadge type={findings.result.evaluation} />
+          </EuiFlexItem>
+          <EuiFlexItem grow style={{ minWidth: 0 }}>
+            <EuiTitle size="m" className="eui-textTruncate">
+              <EuiTextColor color="primary" title={findings.rule.name}>
+                {findings.rule.name}
+              </EuiTextColor>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer />
         <EuiTabs>
           {tabs.map((v) => (
@@ -78,11 +90,15 @@ const Cards = ({ data }: { data: Card[] }) => (
   <EuiFlexGrid direction="column" gutterSize={'l'}>
     {data.map((card) => (
       <EuiFlexItem key={card.title} style={{ display: 'block' }}>
-        <EuiCard textAlign="left" title={card.title}>
+        <EuiCard textAlign="left" title={card.title} hasBorder>
           <EuiDescriptionList
             compressed={false}
             type="column"
             listItems={card.listItems.map((v) => ({ title: v[0], description: v[1] }))}
+            style={{ flexFlow: 'column' }}
+            descriptionProps={{
+              style: { width: '100%' },
+            }}
           />
         </EuiCard>
       </EuiFlexItem>
@@ -92,67 +108,26 @@ const Cards = ({ data }: { data: Card[] }) => (
 
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
   switch (tab) {
-    case 'result':
-      return <Cards data={getResultCards(findings)} />;
-    case 'rule':
-      return <Cards data={getRuleCards(findings)} />;
+    case 'remediation':
+      return <Cards data={getRemediationCards(findings)} />;
     case 'resource':
       return <Cards data={getResourceCards(findings)} />;
+    case 'general':
+      return <Cards data={getGeneralCards(findings)} />;
     default:
       assertNever(tab);
   }
 };
 
-const getResourceCards = ({ resource }: CspFinding): Card[] => [
+const getResourceCards = ({ resource, host }: CspFinding): Card[] => [
   {
     title: TEXT.RESOURCE,
     listItems: [
-      [TEXT.FILENAME, <EuiCode>{resource.filename}</EuiCode>],
+      [TEXT.FILENAME, <CodeBlock>{resource.filename}</CodeBlock>],
       [TEXT.MODE, resource.mode],
-      [TEXT.PATH, <EuiCode>{resource.path}</EuiCode>],
+      [TEXT.PATH, <CodeBlock>{resource.path}</CodeBlock>],
       [TEXT.TYPE, resource.type],
       [TEXT.UID, resource.uid],
-    ],
-  },
-];
-
-const getRuleCards = ({ rule }: CspFinding): Card[] => [
-  {
-    title: TEXT.RULE,
-    listItems: [
-      [TEXT.BENCHMARK, rule.benchmark],
-      [TEXT.NAME, rule.name],
-      [TEXT.DESCRIPTION, rule.description],
-      [TEXT.REMEDIATION, <EuiCode>{rule.remediation}</EuiCode>],
-      [
-        TEXT.TAGS,
-        rule.tags.map((t) => (
-          <EuiBadge key={t} color="default">
-            {t}
-          </EuiBadge>
-        )),
-      ],
-    ],
-  },
-];
-
-const getResultCards = ({ result, agent, host, ...rest }: CspFinding): Card[] => [
-  {
-    title: TEXT.RESULT,
-    listItems: [
-      [TEXT.EVALUATION, <CspEvaluationBadge type={result.evaluation} />],
-      [TEXT.EVIDENCE, <EuiCode>{JSON.stringify(result.evidence, null, 2)}</EuiCode>],
-      [TEXT.TIMESTAMP, rest['@timestamp']],
-      result.evaluation === 'failed' && [TEXT.REMEDIATION, rest.rule.remediation],
-    ].filter(Boolean) as Card['listItems'],
-  },
-  {
-    title: TEXT.AGENT,
-    listItems: [
-      [TEXT.NAME, agent.name],
-      [TEXT.ID, agent.id],
-      [TEXT.TYPE, agent.type],
-      [TEXT.VERSION, agent.version],
     ],
   },
   {
@@ -161,9 +136,9 @@ const getResultCards = ({ result, agent, host, ...rest }: CspFinding): Card[] =>
       [TEXT.ARCHITECTURE, host.architecture],
       [TEXT.CONTAINERIZED, host.containerized ? 'true' : 'false'],
       [TEXT.HOSTNAME, host.hostname],
-      [TEXT.ID, host.id],
-      [TEXT.IP, host.ip.join(',')],
-      [TEXT.MAC, host.mac.join(',')],
+      [TEXT.ID, <CodeBlock>{host.id}</CodeBlock>],
+      [TEXT.IP, <CodeBlock>{host.ip.join(', ')}</CodeBlock>],
+      [TEXT.MAC, <CodeBlock>{host.mac.join(', ')}</CodeBlock>],
       [TEXT.NAME, host.name],
     ],
   },
@@ -177,6 +152,52 @@ const getResultCards = ({ result, agent, host, ...rest }: CspFinding): Card[] =>
       [TEXT.PLATFORM, host.os.platform],
       [TEXT.TYPE, host.os.type],
       [TEXT.VERSION, host.os.version],
+    ],
+  },
+];
+
+const getGeneralCards = ({ rule }: CspFinding): Card[] => [
+  {
+    title: TEXT.RULE,
+    listItems: [
+      [TEXT.SEVERITY, ''],
+      [TEXT.INDEX, ''],
+      [TEXT.RULE_EVALUATED_AT, ''],
+      [TEXT.FRAMEWORK_SOURCES, ''],
+      [TEXT.SECTION, ''],
+      [TEXT.PROFILE_APPLICABILITY, ''],
+      [TEXT.AUDIT, ''],
+      [TEXT.BENCHMARK, rule.benchmark.name],
+      [TEXT.NAME, rule.name],
+      [TEXT.DESCRIPTION, rule.description],
+      [
+        TEXT.TAGS,
+        rule.tags.map((t) => (
+          <EuiBadge key={t} color="default">
+            {t}
+          </EuiBadge>
+        )),
+      ],
+    ],
+  },
+];
+
+const getRemediationCards = ({ result, ...rest }: CspFinding): Card[] => [
+  {
+    title: TEXT.RESULT,
+    listItems: [
+      [TEXT.EXPECTED, ''],
+      [TEXT.EVIDENCE, <CodeBlock>{JSON.stringify(result.evidence, null, 2)}</CodeBlock>],
+      [TEXT.TIMESTAMP, <CodeBlock>{rest['@timestamp']}</CodeBlock>],
+    ],
+  },
+  {
+    title: TEXT.REMEDIATION,
+    listItems: [
+      ['', <CodeBlock>{rest.rule.remediation}</CodeBlock>],
+      [TEXT.IMPACT, rest.rule.impact],
+      [TEXT.DEFAULT_VALUE, ''],
+      [TEXT.RATIONALE, ''],
     ],
   },
 ];

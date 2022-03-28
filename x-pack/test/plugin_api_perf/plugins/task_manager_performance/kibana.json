@@ -1,6 +1,6 @@
 {
   "id": "taskManagerPerformance",
-  "owner": { "name": "Alerting Services", "githubTeam": "kibana-alerting-services" },
+  "owner": { "name": "Response Ops", "githubTeam": "response-ops" },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": ["taskManager"],

@@ -7,23 +7,16 @@
 
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
 import { PartitionElementEvent } from '@elastic/charts';
-import { Query } from '@kbn/es-query';
-import { ScorePerAccountChart } from '../compliance_charts/score_per_account_chart';
 import { ChartPanel } from '../../../components/chart_panel';
 import { useCloudPostureStatsApi } from '../../../common/api';
 import * as TEXT from '../translations';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
-import { allNavigationItems } from '../../../common/navigation/constants';
-import { encodeQuery } from '../../../common/navigation/query_utils';
 import { Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
-
-const getEvaluationQuery = (evaluation: Evaluation): Query => ({
-  language: 'kuery',
-  query: `"result.evaluation : "${evaluation}"`,
-});
+import { CasesTable } from '../compliance_charts/cases_table';
+import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
+import { RULE_FAILED } from '../../../../common/constants';
 
 const defaultHeight = 360;
 
@@ -33,19 +26,24 @@ const summarySectionWrapperStyle = {
 };
 
 export const SummarySection = () => {
-  const history = useHistory();
+  const navToFindings = useNavigateFindings();
   const getStats = useCloudPostureStatsApi();
   if (!getStats.isSuccess) return null;
 
   const handleElementClick = (elements: PartitionElementEvent[]) => {
     const [element] = elements;
     const [layerValue] = element;
-    const rollupValue = layerValue[0].groupByRollup as Evaluation;
+    const evaluation = layerValue[0].groupByRollup as Evaluation;
 
-    history.push({
-      pathname: allNavigationItems.findings.path,
-      search: encodeQuery(getEvaluationQuery(rollupValue)),
-    });
+    navToFindings({ 'result.evaluation': evaluation });
+  };
+
+  const handleCellClick = (resourceTypeName: string) => {
+    navToFindings({ 'resource.type': resourceTypeName, 'result.evaluation': RULE_FAILED });
+  };
+
+  const handleViewAllClick = () => {
+    navToFindings({ 'result.evaluation': RULE_FAILED });
   };
 
   return (
@@ -58,24 +56,28 @@ export const SummarySection = () => {
         >
           <CloudPostureScoreChart
             id="cloud_posture_score_chart"
-            data={getStats.data}
+            data={getStats.data.stats}
             partitionOnElementClick={handleElementClick}
           />
         </ChartPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <ChartPanel title={TEXT.RISKS} isLoading={getStats.isLoading} isError={getStats.isError}>
-          <RisksTable data={getStats.data.resourceTypesAggs} />
+          <RisksTable
+            data={getStats.data.resourcesTypes}
+            maxItems={5}
+            onCellClick={handleCellClick}
+            onViewAllClick={handleViewAllClick}
+          />
         </ChartPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <ChartPanel
-          title={TEXT.SCORE_PER_CLUSTER_CHART_TITLE}
+          title={TEXT.OPEN_CASES}
           isLoading={getStats.isLoading}
           isError={getStats.isError}
         >
-          {/* TODO: no api for this chart yet, using empty state for now. needs BE */}
-          <ScorePerAccountChart />
+          <CasesTable />
         </ChartPanel>
       </EuiFlexItem>
     </EuiFlexGrid>

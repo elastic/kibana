@@ -90,13 +90,7 @@
         "description": [],
         "signature": [
           "({ reportType, allSeries }: { reportType: ",
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.ReportViewType",
-            "text": "ReportViewType"
-          },
+          "ReportViewType",
           "; allSeries: ",
           {
             "pluginId": "observability",
@@ -221,6 +215,40 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.createUseRulesLink",
+        "type": "Function",
+        "tags": [],
+        "label": "createUseRulesLink",
+        "description": [],
+        "signature": [
+          "(isNewRuleManagementEnabled: boolean) => (options?: ",
+          "Options",
+          ") => ",
+          "LinkProps"
+        ],
+        "path": "x-pack/plugins/observability/public/hooks/create_use_rules_link.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.createUseRulesLink.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "isNewRuleManagementEnabled",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/plugins/observability/public/hooks/create_use_rules_link.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.DatePicker",
         "type": "Function",
         "tags": [],
@@ -293,7 +321,7 @@
         "label": "ExploratoryViewContextProvider",
         "description": [],
         "signature": [
-          "({\n  children,\n  reportTypes,\n  dataTypes,\n  indexPatterns,\n  reportConfigMap,\n  setHeaderActionMenu,\n  theme$,\n}: { children: JSX.Element; } & ExploratoryViewContextValue) => JSX.Element"
+          "({\n  children,\n  reportTypes,\n  dataTypes,\n  dataViews,\n  reportConfigMap,\n  setHeaderActionMenu,\n  theme$,\n}: { children: JSX.Element; } & ExploratoryViewContextValue) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/contexts/exploratory_view_config.tsx",
         "deprecated": false,
@@ -303,7 +331,7 @@
             "id": "def-public.ExploratoryViewContextProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  reportTypes,\n  dataTypes,\n  indexPatterns,\n  reportConfigMap,\n  setHeaderActionMenu,\n  theme$,\n}",
+            "label": "{\n  children,\n  reportTypes,\n  dataTypes,\n  dataViews,\n  reportConfigMap,\n  setHeaderActionMenu,\n  theme$,\n}",
             "description": [],
             "signature": [
               "{ children: JSX.Element; } & ExploratoryViewContextValue"
@@ -1321,41 +1349,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.useRulesLink",
-        "type": "Function",
-        "tags": [],
-        "label": "useRulesLink",
-        "description": [],
-        "signature": [
-          "(options: ",
-          "Options",
-          " | undefined) => ",
-          "LinkProps"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_rules_link.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useRulesLink.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              "Options",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_rules_link.ts",
-            "deprecated": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.useTheme",
         "type": "Function",
         "tags": [],
@@ -1657,18 +1650,18 @@
         "children": [
           {
             "parentPluginId": "observability",
-            "id": "def-public.ConfigProps.indexPattern",
+            "id": "def-public.ConfigProps.dataView",
             "type": "Object",
             "tags": [],
-            "label": "indexPattern",
+            "label": "dataView",
             "description": [],
             "signature": [
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               }
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -1715,7 +1708,7 @@
             "label": "unsafe",
             "description": [],
             "signature": [
-              "{ alertingExperience: { enabled: boolean; }; cases: { enabled: boolean; }; overviewNext: { enabled: boolean; }; }"
+              "{ alertingExperience: { enabled: boolean; }; rules: { enabled: boolean; }; cases: { enabled: boolean; }; overviewNext: { enabled: boolean; }; }"
             ],
             "path": "x-pack/plugins/observability/public/index.ts",
             "deprecated": false
@@ -2165,13 +2158,7 @@
             "description": [],
             "signature": [
               "boolean | ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.ActionTypes",
-                "text": "ActionTypes"
-              },
+              "ActionTypes",
               "[] | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
@@ -4397,20 +4384,6 @@
     "misc": [
       {
         "parentPluginId": "observability",
-        "id": "def-public.ActionTypes",
-        "type": "Type",
-        "tags": [],
-        "label": "ActionTypes",
-        "description": [],
-        "signature": [
-          "\"save\" | \"explore\" | \"addToCase\" | \"openInLens\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/use_actions.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.AddInspectorRequest",
         "type": "Type",
         "tags": [],
@@ -4555,6 +4528,20 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.enableServiceGroups",
+        "type": "string",
+        "tags": [],
+        "label": "enableServiceGroups",
+        "description": [],
+        "signature": [
+          "\"observability:enableServiceGroups\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.FetchData",
         "type": "Type",
         "tags": [],
@@ -4666,7 +4653,7 @@
             "section": "def-public.KibanaPageTemplateProps",
             "text": "KibanaPageTemplateProps"
           },
-          ", \"children\" | \"paddingSize\" | \"data-test-subj\" | \"restrictWidth\" | \"template\" | \"pageHeader\" | \"isEmptyState\" | \"noDataConfig\" | \"pageBodyProps\" | \"pageContentProps\" | \"pageContentBodyProps\"> & { showSolutionNav?: boolean | undefined; }"
+          ", \"children\" | \"paddingSize\" | \"data-test-subj\" | \"restrictWidth\" | \"template\" | \"noDataConfig\" | \"pageHeader\" | \"pageBodyProps\" | \"pageContentProps\" | \"pageContentBodyProps\" | \"isEmptyState\"> & { showSolutionNav?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/observability/public/components/shared/page_template/lazy_page_template.tsx",
         "deprecated": false,
@@ -4807,20 +4794,6 @@
           "\"REPORT_METRIC_FIELD\""
         ],
         "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.ReportViewType",
-        "type": "Type",
-        "tags": [],
-        "label": "ReportViewType",
-        "description": [],
-        "signature": [
-          "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4987,7 +4960,11 @@
         "Observable",
         "<",
         "NavigationSection",
-        "[]>) => void; }; }"
+        "[]>) => void; }; useRulesLink: (options?: ",
+        "Options",
+        ") => ",
+        "LinkProps",
+        "; }"
       ],
       "path": "x-pack/plugins/observability/public/plugin.ts",
       "deprecated": false,
@@ -5005,13 +4982,7 @@
         "{ navigation: { PageTemplate: (pageTemplateProps: ",
         "WrappedPageTemplateProps",
         ") => JSX.Element; }; createExploratoryViewUrl: ({ reportType, allSeries }: { reportType: ",
-        {
-          "pluginId": "observability",
-          "scope": "public",
-          "docId": "kibObservabilityPluginApi",
-          "section": "def-public.ReportViewType",
-          "text": "ReportViewType"
-        },
+        "ReportViewType",
         "; allSeries: ",
         {
           "pluginId": "observability",
@@ -5028,7 +4999,11 @@
           "section": "def-public.ExploratoryEmbeddableProps",
           "text": "ExploratoryEmbeddableProps"
         },
-        ") => JSX.Element; }"
+        ") => JSX.Element; useRulesLink: (options?: ",
+        "Options",
+        ") => ",
+        "LinkProps",
+        "; }"
       ],
       "path": "x-pack/plugins/observability/public/plugin.ts",
       "deprecated": false,
@@ -5402,6 +5377,10 @@
                   "; helpers: ",
                   "default",
                   "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "default",
+                  "; child: (opts: ",
+                  "ClientOptions",
+                  ") => ",
                   "default",
                   "; Internal: ",
                   "default",
@@ -7333,6 +7312,20 @@
           "\"/cases\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.defaultApmServiceEnvironment",
+        "type": "string",
+        "tags": [],
+        "label": "defaultApmServiceEnvironment",
+        "description": [],
+        "signature": [
+          "\"observability:apmDefaultServiceEnvironment\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

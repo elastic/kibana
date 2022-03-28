@@ -69,7 +69,7 @@ export const ActionBar = ({
     });
   }, [monitor, monitorId, isValid, isSaving]);
 
-  const hasErrors = data && Object.keys(data).length;
+  const hasErrors = data && 'attributes' in data && data.attributes.errors?.length > 0;
   const loading = status === FETCH_STATUS.LOADING;
 
   const handleOnSave = useCallback(() => {
@@ -103,7 +103,7 @@ export const ActionBar = ({
       });
       setIsSuccessful(true);
     } else if (hasErrors && !loading) {
-      Object.values(data!).forEach((location) => {
+      Object.values(data.attributes.errors!).forEach((location) => {
         const { status: responseStatus, reason } = location.error || {};
         kibanaService.toasts.addWarning({
           title: i18n.translate('xpack.uptime.monitorManagement.service.error.title', {
@@ -145,7 +145,7 @@ export const ActionBar = ({
   }, [data, status, isSaving, isValid, monitorId, hasErrors, locations, loading]);
 
   return isSuccessful ? (
-    <Redirect to={MONITOR_MANAGEMENT_ROUTE} />
+    <Redirect to={MONITOR_MANAGEMENT_ROUTE + '/all'} />
   ) : (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>

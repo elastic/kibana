@@ -107,6 +107,8 @@ export const listArtifacts = async (
       from: (page - 1) * perPage,
       ignore_unavailable: true,
       size: perPage,
+      track_total_hits: true,
+      rest_total_hits_as_int: true,
       body: {
         sort: [{ [sortField]: { order: sortOrder } }],
       },
@@ -117,8 +119,7 @@ export const listArtifacts = async (
       items: searchResult.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
       page,
       perPage,
-      // @ts-expect-error doesn't handle total as number
-      total: searchResult.hits.total.value,
+      total: searchResult.hits.total as number,
     };
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);

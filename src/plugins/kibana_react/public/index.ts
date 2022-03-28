@@ -39,6 +39,8 @@ export { createReactOverlays } from './overlays';
 
 export { useUiSetting, useUiSetting$ } from './ui_settings';
 
+export { useExecutionContext } from './use_execution_context';
+
 export type { TableListViewProps, TableListViewState } from './table_list_view';
 export { TableListView } from './table_list_view';
 
@@ -78,6 +80,7 @@ export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { toMountPoint, MountPointPortal } from './util';
 export type { ToMountPointOptions } from './util';
 
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
 export { RedirectAppLinks } from './app_links';
 
 export { wrapWithTheme, KibanaThemeProvider } from './theme';

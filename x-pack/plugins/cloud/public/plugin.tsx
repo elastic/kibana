@@ -13,11 +13,12 @@ import {
   PluginInitializerContext,
   HttpStart,
   IBasePath,
-  ApplicationStart,
+  ExecutionContextStart,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, Subscription } from 'rxjs';
+import { compact, isUndefined, omitBy } from 'lodash';
 import type {
   AuthenticatedUser,
   SecurityPluginSetup,
@@ -83,8 +84,9 @@ export interface CloudSetup {
 }
 
 interface SetupFullstoryDeps extends CloudSetupDependencies {
-  application?: Promise<ApplicationStart>;
+  executionContextPromise?: Promise<ExecutionContextStart>;
   basePath: IBasePath;
+  esOrgId?: string;
 }
 
 interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
@@ -103,11 +105,16 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
-    const application = core.getStartServices().then(([coreStart]) => {
-      return coreStart.application;
+    const executionContextPromise = core.getStartServices().then(([coreStart]) => {
+      return coreStart.executionContext;
     });
 
-    this.setupFullstory({ basePath: core.http.basePath, security, application }).catch((e) =>
+    this.setupFullstory({
+      basePath: core.http.basePath,
+      security,
+      executionContextPromise,
+      esOrgId: this.config.id,
+    }).catch((e) =>
       // eslint-disable-next-line no-console
       console.debug(`Error setting up FullStory: ${e.toString()}`)
     );
@@ -223,9 +230,14 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     return user?.roles.includes('superuser') ?? true;
   }
 
-  private async setupFullstory({ basePath, security, application }: SetupFullstoryDeps) {
-    const { enabled, org_id: orgId } = this.config.full_story;
-    if (!enabled || !orgId) {
+  private async setupFullstory({
+    basePath,
+    security,
+    executionContextPromise,
+    esOrgId,
+  }: SetupFullstoryDeps) {
+    const { enabled, org_id: fsOrgId } = this.config.full_story;
+    if (!enabled || !fsOrgId) {
       return; // do not load any fullstory code in the browser if not enabled
     }
 
@@ -243,7 +255,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     const { fullStory, sha256 } = initializeFullStory({
       basePath,
-      orgId,
+      orgId: fsOrgId,
       packageInfo: this.initializerContext.env.packageInfo,
     });
 
@@ -252,16 +264,29 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
       // across domains work
       if (userId) {
-        // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
-        const hashedId = sha256(userId.toString());
-        application
-          ?.then(async () => {
-            const appStart = await application;
-            this.appSubscription = appStart.currentAppId$.subscribe((appId) => {
-              // Update the current application every time it changes
-              fullStory.setUserVars({
-                app_id_str: appId ?? 'unknown',
-              });
+        // Join the cloud org id and the user to create a truly unique user id.
+        // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
+        const hashedId = sha256(esOrgId ? `${esOrgId}:${userId}` : `${userId}`);
+
+        executionContextPromise
+          ?.then(async (executionContext) => {
+            this.appSubscription = executionContext.context$.subscribe((context) => {
+              const { name, page, id } = context;
+              // Update the current context every time it changes
+              fullStory.setVars(
+                'page',
+                omitBy(
+                  {
+                    // Read about the special pageName property
+                    // https://help.fullstory.com/hc/en-us/articles/1500004101581-FS-setVars-API-Sending-custom-page-data-to-FullStory
+                    pageName: `${compact([name, page]).join(':')}`,
+                    app_id_str: name ?? 'unknown',
+                    page_str: page,
+                    ent_id_str: id,
+                  },
+                  isUndefined
+                )
+              );
             });
           })
           .catch((e) => {
@@ -282,6 +307,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
           version_major_int: parsedVer[0] ?? -1,
           version_minor_int: parsedVer[1] ?? -1,
           version_patch_int: parsedVer[2] ?? -1,
+          org_id_str: esOrgId,
         });
       }
     } catch (e) {

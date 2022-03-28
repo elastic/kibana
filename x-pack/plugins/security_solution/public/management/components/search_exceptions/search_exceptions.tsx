@@ -102,8 +102,8 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
         ) : null}
 
         {!hideRefreshButton ? (
-          <EuiFlexItem grow={false} onClick={handleOnSearch} data-test-subj="searchButton">
-            <EuiButton iconType="refresh">
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="refresh" onClick={handleOnSearch} data-test-subj="searchButton">
               {i18n.translate('xpack.securitySolution.management.search.button', {
                 defaultMessage: 'Refresh',
               })}

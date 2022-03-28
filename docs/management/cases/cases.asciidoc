@@ -1,0 +1,22 @@
+[[cases]]
+== Cases
+
+preview::[]
+
+Cases are used to open and track issues directly in {kib}. All cases list
+the original reporter and all the users who contribute to a case (_participants_).
+You can also send cases to external incident management systems by configuring
+connectors.
+
+[role="screenshot"]
+image::images/cases.png[Cases page]
+
+NOTE: If you create cases in the {observability} or {security-app}, they are not
+visible in *{stack-manage-app}*. Likewise, the cases you create in
+*{stack-manage-app}* are not visible in the {observability} or {security-app}.
+You also cannot attach alerts from the {observability} or {security-app} to
+cases in *{stack-manage-app}*.
+
+* <<setup-cases>>
+* <<manage-cases>>
+* <<add-case-connectors>>

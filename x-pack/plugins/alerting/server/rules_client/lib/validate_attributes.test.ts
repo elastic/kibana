@@ -13,7 +13,7 @@ import {
 } from './validate_attributes';
 
 describe('Validate attributes', () => {
-  const excludedFieldNames = ['monitoring'];
+  const excludedFieldNames = ['monitoring', 'mapped_params'];
   describe('validateSortField', () => {
     test('should NOT throw an error, when sort field is not part of the field to exclude', () => {
       expect(() => validateSortField('name.keyword', excludedFieldNames)).not.toThrow();
@@ -86,6 +86,17 @@ describe('Validate attributes', () => {
       ).not.toThrow();
     });
 
+    test('should NOT throw an error, when filter contains params with validate properties', () => {
+      expect(() =>
+        validateFilterKueryNode({
+          astFilter: esKuery.fromKueryExpression(
+            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.params.risk_score > 50'
+          ),
+          excludedFieldNames,
+        })
+      ).not.toThrow();
+    });
+
     test('should throw an error, when filter contains the field to exclude', () => {
       expect(() =>
         validateFilterKueryNode({
@@ -109,6 +120,19 @@ describe('Validate attributes', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Filter is not supported on this field alert.attributes.actions"`
+      );
+    });
+
+    test('should throw an error, when filtering contains a property that is not valid', () => {
+      expect(() =>
+        validateFilterKueryNode({
+          astFilter: esKuery.fromKueryExpression(
+            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.mapped_params.risk_score > 50'
+          ),
+          excludedFieldNames,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Filter is not supported on this field alert.attributes.mapped_params.risk_score"`
       );
     });
   });

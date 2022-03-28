@@ -95,7 +95,7 @@ export const buildServices = memoize(function (
     fieldFormats: plugins.fieldFormats,
     filterManager: plugins.data.query.filterManager,
     history: getHistory,
-    indexPatterns: plugins.data.indexPatterns,
+    indexPatterns: plugins.data.dataViews,
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,

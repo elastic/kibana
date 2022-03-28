@@ -5,26 +5,29 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from 'kibana/server';
-import { JobSavedObjectService } from '../../saved_objects';
+import { MLSavedObjectService } from '../../saved_objects';
+import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
 import { JobType } from '../../../common/types/saved_objects';
 
 import { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { searchProvider } from './search';
 
 import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
-import { MLJobNotFound } from './errors';
+import { MLJobNotFound, MLModelNotFound } from './errors';
 import {
   MlClient,
   MlClientParams,
   MlGetADParams,
   MlGetDFAParams,
   MlGetDatafeedParams,
+  MlGetTrainedModelParams,
 } from './types';
 
 export function getMlClient(
   client: IScopedClusterClient,
-  jobSavedObjectService: JobSavedObjectService
+  mlSavedObjectService: MLSavedObjectService
 ): MlClient {
   const mlClient = client.asInternalUser.ml;
 
@@ -32,12 +35,12 @@ export function getMlClient(
     const jobIds =
       jobType === 'anomaly-detector' ? getADJobIdsFromRequest(p) : getDFAJobIdsFromRequest(p);
     if (jobIds.length) {
-      await checkIds(jobType, jobIds, allowWildcards);
+      await checkJobIds(jobType, jobIds, allowWildcards);
     }
   }
 
-  async function checkIds(jobType: JobType, jobIds: string[], allowWildcards: boolean = false) {
-    const filteredJobIds = await jobSavedObjectService.filterJobIdsForSpace(jobType, jobIds);
+  async function checkJobIds(jobType: JobType, jobIds: string[], allowWildcards: boolean = false) {
+    const filteredJobIds = await mlSavedObjectService.filterJobIdsForSpace(jobType, jobIds);
     let missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
     if (allowWildcards === true && missingIds.join().match('\\*') !== null) {
       // filter out wildcard ids from the error
@@ -90,7 +93,7 @@ export function getMlClient(
 
       // check the remaining jobs ids
       if (requestedJobIds.length) {
-        await checkIds('anomaly-detector', requestedJobIds, true);
+        await checkJobIds('anomaly-detector', requestedJobIds, true);
       }
     }
   }
@@ -100,7 +103,7 @@ export function getMlClient(
     ...p: Parameters<MlClient['getJobStats']>
   ) {
     // similar to groupIdsCheck above, however we need to load the jobs first to get the groups information
-    const ids = getADJobIdsFromRequest(p);
+    const ids = filterAll(getADJobIdsFromRequest(p));
     if (ids.length) {
       const body = await mlClient.getJobs(...p);
       await groupIdsCheck(p, body.jobs, filteredJobIds);
@@ -110,9 +113,7 @@ export function getMlClient(
   async function datafeedIdsCheck(p: MlClientParams, allowWildcards: boolean = false) {
     const datafeedIds = getDatafeedIdsFromRequest(p);
     if (datafeedIds.length) {
-      const filteredDatafeedIds = await jobSavedObjectService.filterDatafeedIdsForSpace(
-        datafeedIds
-      );
+      const filteredDatafeedIds = await mlSavedObjectService.filterDatafeedIdsForSpace(datafeedIds);
       let missingIds = datafeedIds.filter((j) => filteredDatafeedIds.indexOf(j) === -1);
       if (allowWildcards === true && missingIds.join().match('\\*') !== null) {
         // filter out wildcard ids from the error
@@ -121,6 +122,25 @@ export function getMlClient(
       if (missingIds.length) {
         throw new MLJobNotFound(`No known datafeed with id '${missingIds.join(',')}'`);
       }
+    }
+  }
+
+  async function modelIdsCheck(p: MlClientParams, allowWildcards: boolean = false) {
+    const modelIds = filterAll(getModelIdsFromRequest(p));
+    if (modelIds.length) {
+      await checkModelIds(modelIds, allowWildcards);
+    }
+  }
+
+  async function checkModelIds(modelIds: string[], allowWildcards: boolean = false) {
+    const filteredModelIds = await mlSavedObjectService.filterTrainedModelIdsForSpace(modelIds);
+    let missingIds = modelIds.filter((j) => filteredModelIds.indexOf(j) === -1);
+    if (allowWildcards === true && missingIds.join().match('\\*') !== null) {
+      // filter out wildcard ids from the error
+      missingIds = missingIds.filter((id) => id.match('\\*') === null);
+    }
+    if (missingIds.length) {
+      throw new MLModelNotFound(`No known model with id '${missingIds.join(',')}'`);
     }
   }
 
@@ -151,7 +171,7 @@ export function getMlClient(
       const resp = await mlClient.deleteDatafeed(...p);
       const [datafeedId] = getDatafeedIdsFromRequest(p);
       if (datafeedId !== undefined) {
-        await jobSavedObjectService.deleteDatafeed(datafeedId);
+        await mlSavedObjectService.deleteDatafeed(datafeedId);
       }
       return resp;
     },
@@ -178,6 +198,7 @@ export function getMlClient(
       return mlClient.deleteModelSnapshot(...p);
     },
     async deleteTrainedModel(...p: Parameters<MlClient['deleteTrainedModel']>) {
+      await modelIdsCheck(p);
       return mlClient.deleteTrainedModel(...p);
     },
     async estimateModelMemory(...p: Parameters<MlClient['estimateModelMemory']>) {
@@ -219,7 +240,7 @@ export function getMlClient(
       const groups = calJobIds.filter((j) => allJobIds.includes(j) === false);
 
       // get list of calendar jobs which are allowed in this space
-      const filteredJobIds = await jobSavedObjectService.filterJobIdsForSpace(
+      const filteredJobIds = await mlSavedObjectService.filterJobIdsForSpace(
         'anomaly-detector',
         calJobIds
       );
@@ -248,7 +269,7 @@ export function getMlClient(
         const meta = options.meta ?? false;
 
         const response = await mlClient.getDataFrameAnalytics(params, { ...options, meta: true });
-        const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
+        const jobs = await mlSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
           'data-frame-analytics',
           // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
           response.body.data_frame_analytics,
@@ -280,7 +301,7 @@ export function getMlClient(
         })) as unknown as {
           body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
         };
-        const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
+        const jobs = await mlSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
           'data-frame-analytics',
           response.body.data_frame_analytics,
           'id'
@@ -305,7 +326,7 @@ export function getMlClient(
         const [params, options = {}] = p;
         const meta = options.meta ?? false;
         const response = await mlClient.getDatafeedStats(params, { ...options, meta: true });
-        const datafeeds = await jobSavedObjectService.filterDatafeedsForSpace(
+        const datafeeds = await mlSavedObjectService.filterDatafeedsForSpace(
           'anomaly-detector',
           response.body.datafeeds,
           'datafeed_id'
@@ -330,7 +351,7 @@ export function getMlClient(
         const [params, options = {}] = p;
         const meta = options.meta ?? false;
         const response = await mlClient.getDatafeeds(params, { ...options, meta: true });
-        const datafeeds = await jobSavedObjectService.filterDatafeedsForSpace<Datafeed>(
+        const datafeeds = await mlSavedObjectService.filterDatafeedsForSpace<Datafeed>(
           'anomaly-detector',
           response.body.datafeeds,
           'datafeed_id'
@@ -361,7 +382,7 @@ export function getMlClient(
         const [params, options = {}] = p;
         const meta = options.meta ?? false;
         const response = await mlClient.getJobStats(params, { ...options, meta: true });
-        const jobs = await jobSavedObjectService.filterJobsForSpace(
+        const jobs = await mlSavedObjectService.filterJobsForSpace(
           'anomaly-detector',
           response.body.jobs,
           'job_id'
@@ -392,7 +413,7 @@ export function getMlClient(
         const [params, options = {}] = p;
         const meta = options.meta ?? false;
         const response = await mlClient.getJobs(params, { ...options, meta: true });
-        const jobs = await jobSavedObjectService.filterJobsForSpace<Job>(
+        const jobs = await mlSavedObjectService.filterJobsForSpace<Job>(
           'anomaly-detector',
           response.body.jobs,
           'job_id'
@@ -432,15 +453,45 @@ export function getMlClient(
       return mlClient.getRecords(...p);
     },
     async getTrainedModels(...p: Parameters<MlClient['getTrainedModels']>) {
-      return mlClient.getTrainedModels(...p);
+      await modelIdsCheck(p, true);
+      try {
+        const body = await mlClient.getTrainedModels(...p);
+        const models =
+          await mlSavedObjectService.filterTrainedModelsForSpace<estypes.MlTrainedModelConfig>(
+            body.trained_model_configs,
+            'model_id'
+          );
+        return { ...body, count: models.length, trained_model_configs: models };
+      } catch (error) {
+        if (error.statusCode === 404) {
+          throw new MLModelNotFound(error.body.error.reason);
+        }
+        throw error.body ?? error;
+      }
     },
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
-      return mlClient.getTrainedModelsStats(...p);
+      await modelIdsCheck(p, true);
+      try {
+        const body = await mlClient.getTrainedModelsStats(...p);
+        const models =
+          await mlSavedObjectService.filterTrainedModelsForSpace<estypes.MlTrainedModelStats>(
+            body.trained_model_stats,
+            'model_id'
+          );
+        return { ...body, count: models.length, trained_model_stats: models };
+      } catch (error) {
+        if (error.statusCode === 404) {
+          throw new MLModelNotFound(error.body.error.reason);
+        }
+        throw error.body ?? error;
+      }
     },
     async startTrainedModelDeployment(...p: Parameters<MlClient['startTrainedModelDeployment']>) {
+      await modelIdsCheck(p);
       return mlClient.startTrainedModelDeployment(...p);
     },
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
+      await modelIdsCheck(p);
       return mlClient.stopTrainedModelDeployment(...p);
     },
     async info(...p: Parameters<MlClient['info']>) {
@@ -471,7 +522,7 @@ export function getMlClient(
       const resp = await mlClient.putDataFrameAnalytics(...p);
       const [analyticsId] = getDFAJobIdsFromRequest(p);
       if (analyticsId !== undefined) {
-        await jobSavedObjectService.createDataFrameAnalyticsJob(analyticsId);
+        await mlSavedObjectService.createDataFrameAnalyticsJob(analyticsId);
       }
       return resp;
     },
@@ -480,7 +531,7 @@ export function getMlClient(
       const [datafeedId] = getDatafeedIdsFromRequest(p);
       const jobId = getJobIdFromBody(p);
       if (datafeedId !== undefined && jobId !== undefined) {
-        await jobSavedObjectService.addDatafeed(datafeedId, jobId);
+        await mlSavedObjectService.addDatafeed(datafeedId, jobId);
       }
 
       return resp;
@@ -492,12 +543,19 @@ export function getMlClient(
       const resp = await mlClient.putJob(...p);
       const [jobId] = getADJobIdsFromRequest(p);
       if (jobId !== undefined) {
-        await jobSavedObjectService.createAnomalyDetectionJob(jobId);
+        await mlSavedObjectService.createAnomalyDetectionJob(jobId);
       }
       return resp;
     },
     async putTrainedModel(...p: Parameters<MlClient['putTrainedModel']>) {
-      return mlClient.putTrainedModel(...p);
+      const resp = await mlClient.putTrainedModel(...p);
+      const [modelId] = getModelIdsFromRequest(p);
+      if (modelId !== undefined) {
+        const model = (p[0] as estypes.MlPutTrainedModelRequest).body;
+        const job = getJobDetailsFromTrainedModel(model);
+        await mlSavedObjectService.createTrainedModel(modelId, job);
+      }
+      return resp;
     },
     async revertModelSnapshot(...p: Parameters<MlClient['revertModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);
@@ -576,13 +634,22 @@ export function getMlClient(
     async validateDetector(...p: Parameters<MlClient['validateDetector']>) {
       return mlClient.validateDetector(...p);
     },
+    async getMemoryStats(...p: Parameters<MlClient['getMemoryStats']>) {
+      return mlClient.getMemoryStats(...p);
+    },
 
-    ...searchProvider(client, jobSavedObjectService),
+    ...searchProvider(client, mlSavedObjectService),
   } as MlClient;
 }
 
 function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
   const ids = params?.id?.split(',');
+  return ids || [];
+}
+
+function getModelIdsFromRequest([params]: MlGetTrainedModelParams): string[] {
+  const id = params?.model_id;
+  const ids = Array.isArray(id) ? id : id?.split(',');
   return ids || [];
 }
 
@@ -600,4 +667,12 @@ function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string[] {
 function getJobIdFromBody(p: any): string | undefined {
   const [params] = p;
   return params?.body?.job_id;
+}
+
+function filterAll(ids: string[]) {
+  // if _all has been passed as the only id, remove it and assume it was
+  // an empty list, so all items are returned.
+  // if _all is one of many ids, the endpoint should look for
+  // something called _all, which will subsequently fail.
+  return ids.length === 1 && ids[0] === '_all' ? [] : ids;
 }

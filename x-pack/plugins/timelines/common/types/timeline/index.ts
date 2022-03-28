@@ -310,6 +310,8 @@ export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeT
  */
 
 export enum TimelineId {
+  usersPageEvents = 'users-page-events',
+  usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
@@ -464,10 +466,6 @@ export enum TimelineTabs {
   pinned = 'pinned',
   eql = 'eql',
 }
-
-export type CreateFieldComponentType = React.FC<{
-  onClick: () => void;
-}>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Partial<Record<any, never>>;

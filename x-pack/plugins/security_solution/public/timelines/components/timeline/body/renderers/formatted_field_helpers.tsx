@@ -103,7 +103,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         {title ?? value}
       </Component>
     ) : (
-      <LinkAnchor onClick={goToRuleDetails} href={href}>
+      <LinkAnchor onClick={goToRuleDetails} href={href} data-test-subj="ruleName">
         {content}
       </LinkAnchor>
     );

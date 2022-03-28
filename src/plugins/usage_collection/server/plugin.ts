@@ -15,7 +15,6 @@ import type {
   Plugin,
   ElasticsearchClient,
   SavedObjectsClientContract,
-  KibanaRequest,
 } from 'src/core/server';
 import type { ConfigType } from './config';
 import { CollectorSet } from './collector';
@@ -39,12 +38,8 @@ export interface UsageCollectionSetup {
    * Creates a usage collector to collect plugin telemetry data.
    * registerCollector must be called to connect the created collector with the service.
    */
-  makeUsageCollector: <
-    TFetchReturn,
-    WithKibanaRequest extends boolean = false,
-    ExtraOptions extends object = {}
-  >(
-    options: UsageCollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
+  makeUsageCollector: <TFetchReturn, ExtraOptions extends object = {}>(
+    options: UsageCollectorOptions<TFetchReturn, ExtraOptions>
   ) => Collector<TFetchReturn, ExtraOptions>;
   /**
    * Register a usage collector or a stats collector.
@@ -66,7 +61,6 @@ export interface UsageCollectionSetup {
   bulkFetch: <TFetchReturn, ExtraOptions extends object>(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
     collectors?: Map<string, Collector<TFetchReturn, ExtraOptions>>
   ) => Promise<Array<{ type: string; result: unknown }>>;
   /**
@@ -88,12 +82,8 @@ export interface UsageCollectionSetup {
    * registerCollector must be called to connect the created collector with the service.
    * @internal: telemetry and monitoring use
    */
-  makeStatsCollector: <
-    TFetchReturn,
-    WithKibanaRequest extends boolean,
-    ExtraOptions extends object = {}
-  >(
-    options: CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
+  makeStatsCollector: <TFetchReturn, ExtraOptions extends object = {}>(
+    options: CollectorOptions<TFetchReturn, ExtraOptions>
   ) => Collector<TFetchReturn, ExtraOptions>;
 }
 

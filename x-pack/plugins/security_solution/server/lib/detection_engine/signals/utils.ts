@@ -27,6 +27,7 @@ import {
 } from '../../../../common/detection_engine/schemas/common';
 import type {
   ElasticsearchClient,
+  IUiSettingsClient,
   Logger,
   SavedObjectsClientContract,
 } from '../../../../../../../src/core/server';
@@ -65,6 +66,7 @@ import type { RACAlert, WrappedRACAlert } from '../rule_types/types';
 import type { SearchTypes } from '../../../../common/detection_engine/types';
 import type { IRuleExecutionLogForExecutors } from '../rule_execution_log';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -93,12 +95,19 @@ export const hasReadIndexPrivileges = async (args: {
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  uiSettingsClient: IUiSettingsClient;
 }): Promise<boolean> => {
-  const { privileges, logger, buildRuleMessage, ruleExecutionLogger } = args;
+  const { privileges, logger, buildRuleMessage, ruleExecutionLogger, uiSettingsClient } = args;
+
+  const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
 
   const indexNames = Object.keys(privileges.index);
+  const filteredIndexNames = isCcsPermissionWarningEnabled
+    ? indexNames
+    : indexNames.filter((indexName) => !indexName.includes(':')); // Cross cluster indices uniquely contain `:` in their name
+
   const [, indexesWithNoReadPrivileges] = partition(
-    indexNames,
+    filteredIndexNames,
     (indexName) => privileges.index[indexName].read
   );
 
@@ -143,7 +152,7 @@ export const hasTimestampFields = async (args: {
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
-    )} was found. This warning will continue to appear until a matching index is created or this rule is de-activated. ${
+    )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
       ruleName === 'Endpoint Security'
         ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
         : ''

@@ -52,7 +52,7 @@ import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
 import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
-import type { JobSavedObjectService } from '../../saved_objects';
+import type { MLSavedObjectService } from '../../saved_objects';
 import { isDefined } from '../../../common/types/guards';
 import { isPopulatedObject } from '../../../common/util/object_utils';
 
@@ -111,7 +111,7 @@ export class DataRecognizer {
   private _client: IScopedClusterClient;
   private _mlClient: MlClient;
   private _savedObjectsClient: SavedObjectsClientContract;
-  private _jobSavedObjectService: JobSavedObjectService;
+  private _mlSavedObjectService: MLSavedObjectService;
   private _dataViewsService: DataViewsService;
   private _request: KibanaRequest;
 
@@ -125,6 +125,17 @@ export class DataRecognizer {
   private _calculateModelMemoryLimit: ReturnType<typeof calculateModelMemoryLimitProvider>;
 
   /**
+   * A temporary cache of configs loaded from disk and from save object service.
+   * The configs from disk will not change while kibana is running.
+   * The configs from saved objects could potentially change while an instance of
+   * DataRecognizer exists, if a fleet package containing modules is installed.
+   * However the chance of this happening is very low and so the benefit of using
+   * this cache outweighs the risk of the cache being out of date during the short
+   * existence of a DataRecognizer instance.
+   */
+  private _configCache: Config[] | null = null;
+
+  /**
    * List of the module jobs that require model memory estimation
    */
   private _jobsForModelMemoryEstimation: Array<{ job: ModuleJob; query: any }> = [];
@@ -134,14 +145,14 @@ export class DataRecognizer {
     mlClient: MlClient,
     savedObjectsClient: SavedObjectsClientContract,
     dataViewsService: DataViewsService,
-    jobSavedObjectService: JobSavedObjectService,
+    mlSavedObjectService: MLSavedObjectService,
     request: KibanaRequest
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
     this._savedObjectsClient = savedObjectsClient;
     this._dataViewsService = dataViewsService;
-    this._jobSavedObjectService = jobSavedObjectService;
+    this._mlSavedObjectService = mlSavedObjectService;
     this._request = request;
     this._authorizationHeader = getAuthorizationHeader(request);
     this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
@@ -181,6 +192,10 @@ export class DataRecognizer {
   }
 
   private async _loadConfigs(): Promise<Config[]> {
+    if (this._configCache !== null) {
+      return this._configCache;
+    }
+
     const configs: Config[] = [];
     const dirs = await this._listDirs(this._modulesDir);
     await Promise.all(
@@ -211,7 +226,9 @@ export class DataRecognizer {
       isSavedObject: true,
     }));
 
-    return [...configs, ...savedObjectConfigs];
+    this._configCache = [...configs, ...savedObjectConfigs];
+
+    return this._configCache;
   }
 
   private async _loadSavedObjectModules() {
@@ -765,11 +782,12 @@ export class DataRecognizer {
       })
     );
     if (applyToAllSpaces === true) {
-      const canCreateGlobalJobs = await this._jobSavedObjectService.canCreateGlobalJobs(
+      const canCreateGlobalJobs = await this._mlSavedObjectService.canCreateGlobalMlSavedObjects(
+        'anomaly-detector',
         this._request
       );
       if (canCreateGlobalJobs === true) {
-        await this._jobSavedObjectService.updateJobsSpaces(
+        await this._mlSavedObjectService.updateJobsSpaces(
           'anomaly-detector',
           jobs.map((j) => j.id),
           ['*'], // spacesToAdd
@@ -1381,7 +1399,7 @@ export function dataRecognizerFactory(
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
   dataViewsService: DataViewsService,
-  jobSavedObjectService: JobSavedObjectService,
+  mlSavedObjectService: MLSavedObjectService,
   request: KibanaRequest
 ) {
   return new DataRecognizer(
@@ -1389,7 +1407,7 @@ export function dataRecognizerFactory(
     mlClient,
     savedObjectsClient,
     dataViewsService,
-    jobSavedObjectService,
+    mlSavedObjectService,
     request
   );
 }

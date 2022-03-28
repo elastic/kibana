@@ -5,56 +5,57 @@
  * 2.0.
  */
 import apm from 'elastic-apm-node';
-import { pickBy, mapValues, without, cloneDeep, concat, set, omit } from 'lodash';
+import { cloneDeep, mapValues, omit, pickBy, set, without } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import uuid from 'uuid';
 import { addSpaceIdToPath } from '../../../spaces/server';
-import { Logger, KibanaRequest } from '../../../../../src/core/server';
+import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { Alert as CreatedAlert, createAlertFactory } from '../alert';
 import {
-  validateRuleTypeParams,
-  executionStatusFromState,
-  executionStatusFromError,
-  ruleExecutionStatusToRaw,
-  ErrorWithReason,
+  createWrappedScopedClusterClientFactory,
   ElasticsearchError,
+  ErrorWithReason,
+  executionStatusFromError,
+  executionStatusFromState,
+  getRecoveredAlerts,
+  ruleExecutionStatusToRaw,
+  validateRuleTypeParams,
 } from '../lib';
 import {
-  RawRule,
-  IntervalSchedule,
-  RawAlertInstance,
-  RuleTaskState,
   Alert,
-  SanitizedAlert,
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
-  RuleTypeRegistry,
+  IntervalSchedule,
+  RawAlertInstance,
+  RawRule,
+  RawRuleExecutionStatus,
+  RuleExecutionRunResult,
+  RuleExecutionState,
   RuleMonitoring,
   RuleMonitoringHistory,
-  RawRuleExecutionStatus,
-  AlertAction,
-  RuleExecutionState,
-  RuleExecutionRunResult,
+  RuleTaskState,
+  RuleTypeRegistry,
+  SanitizedAlert,
 } from '../types';
-import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
-import { getExecutionSuccessRatio, getExecutionDurationPercentiles } from '../lib/monitoring';
+import { asErr, asOk, map, promiseResult, resolveErr, Resultable } from '../lib/result_type';
+import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
+  AlertInstanceContext,
+  AlertInstanceState,
   AlertTypeParams,
   AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  WithoutReservedActionGroups,
-  parseDuration,
   MONITORING_HISTORY_LIMIT,
+  parseDuration,
+  WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -62,10 +63,10 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
-import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
-import { createWrappedScopedClusterClientFactory } from '../lib';
-import { getRecoveredAlerts } from '../lib';
+import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 import {
+  ActionsCompletion,
+  AlertExecutionStore,
   GenerateNewAndRecoveredAlertEventsParams,
   LogActiveAndRecoveredAlertsParams,
   RuleTaskInstance,
@@ -102,6 +103,7 @@ export class TaskRunner<
   private logger: Logger;
   private taskInstance: RuleTaskInstance;
   private ruleName: string | null;
+  private ruleConsumer: string | null;
   private ruleType: NormalizedRuleType<
     Params,
     ExtractedParams,
@@ -113,6 +115,7 @@ export class TaskRunner<
   >;
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  private readonly inMemoryMetrics: InMemoryMetrics;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
@@ -128,36 +131,39 @@ export class TaskRunner<
       RecoveryActionGroupId
     >,
     taskInstance: ConcreteTaskInstance,
-    context: TaskRunnerContext
+    context: TaskRunnerContext,
+    inMemoryMetrics: InMemoryMetrics
   ) {
     this.context = context;
     this.logger = context.logger;
     this.usageCounter = context.usageCounter;
     this.ruleType = ruleType;
     this.ruleName = null;
+    this.ruleConsumer = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
     this.executionId = uuid.v4();
+    this.inMemoryMetrics = inMemoryMetrics;
   }
 
-  async getDecryptedAttributes(
+  private async getDecryptedAttributes(
     ruleId: string,
     spaceId: string
-  ): Promise<{ apiKey: string | null; enabled: boolean }> {
+  ): Promise<{ apiKey: string | null; enabled: boolean; consumer: string }> {
     const namespace = this.context.spaceIdToNamespace(spaceId);
     // Only fetch encrypted attributes here, we'll create a saved objects client
     // scoped with the API key to fetch the remaining data.
     const {
-      attributes: { apiKey, enabled },
+      attributes: { apiKey, enabled, consumer },
     } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
       'alert',
       ruleId,
       { namespace }
     );
 
-    return { apiKey, enabled };
+    return { apiKey, enabled, consumer };
   }
 
   private getFakeKibanaRequest(spaceId: string, apiKey: RawRule['apiKey']) {
@@ -210,6 +216,7 @@ export class TaskRunner<
     >({
       ruleId,
       ruleName,
+      ruleConsumer: this.ruleConsumer!,
       tags,
       executionId: this.executionId,
       logger: this.logger,
@@ -245,6 +252,18 @@ export class TaskRunner<
     }
   }
 
+  private isRuleSnoozed(rule: SanitizedAlert<Params>): boolean {
+    if (rule.muteAll) {
+      return true;
+    }
+
+    if (rule.snoozeEndTime == null) {
+      return false;
+    }
+
+    return Date.now() < rule.snoozeEndTime.getTime();
+  }
+
   private shouldLogAndScheduleActionsForAlerts() {
     // if execution hasn't been cancelled, return true
     if (!this.cancelled) {
@@ -267,10 +286,11 @@ export class TaskRunner<
     }
   }
 
-  async executeAlert(
+  private async executeAlert(
     alertId: string,
     alert: CreatedAlert<InstanceState, InstanceContext>,
-    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>
+    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
+    alertExecutionStore: AlertExecutionStore
   ) {
     const {
       actionGroup,
@@ -280,10 +300,17 @@ export class TaskRunner<
     } = alert.getScheduledActionOptions()!;
     alert.updateLastScheduledActions(actionGroup, actionSubgroup);
     alert.unscheduleActions();
-    return executionHandler({ actionGroup, actionSubgroup, context, state, alertId });
+    return executionHandler({
+      actionGroup,
+      actionSubgroup,
+      context,
+      state,
+      alertId,
+      alertExecutionStore,
+    });
   }
 
-  async executeAlerts(
+  private async executeAlerts(
     fakeRequest: KibanaRequest,
     rule: SanitizedAlert<Params>,
     params: Params,
@@ -297,7 +324,6 @@ export class TaskRunner<
       schedule,
       throttle,
       notifyWhen,
-      muteAll,
       mutedInstanceIds,
       name,
       tags,
@@ -339,6 +365,7 @@ export class TaskRunner<
         spaceId,
       },
       logger: this.logger,
+      abortController: this.searchAbortController,
     });
 
     let updatedRuleTypeState: void | Record<string, unknown>;
@@ -352,14 +379,17 @@ export class TaskRunner<
         }] namespace`,
       };
 
+      const savedObjectsClient = this.context.savedObjects.getScopedClient(fakeRequest, {
+        includedHiddenTypes: ['alert', 'action'],
+      });
+
       updatedRuleTypeState = await this.context.executionContext.withContext(ctx, () =>
         this.ruleType.executor({
           alertId: ruleId,
           executionId: this.executionId,
           services: {
-            savedObjectsClient: this.context.savedObjects.getScopedClient(fakeRequest, {
-              includedHiddenTypes: ['alert', 'action'],
-            }),
+            savedObjectsClient,
+            uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
             alertFactory: createAlertFactory<
               InstanceState,
@@ -372,10 +402,6 @@ export class TaskRunner<
             }),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
-            search: createAbortableEsClientFactory({
-              scopedClusterClient,
-              abortController: this.searchAbortController,
-            }),
           },
           params,
           state: alertTypeState as State,
@@ -460,29 +486,20 @@ export class TaskRunner<
         namespace,
         ruleType,
         rule,
+        spaceId,
       });
     }
 
-    let triggeredActions: AlertAction[] = [];
-    if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
+    const alertExecutionStore: AlertExecutionStore = {
+      numberOfTriggeredActions: 0,
+      triggeredActionsStatus: ActionsCompletion.COMPLETE,
+    };
+
+    const ruleIsSnoozed = this.isRuleSnoozed(rule);
+    if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
-      const scheduledActionsForRecoveredAlerts = await scheduleActionsForRecoveredAlerts<
-        InstanceState,
-        InstanceContext,
-        RecoveryActionGroupId
-      >({
-        recoveryActionGroup: this.ruleType.recoveryActionGroup,
-        recoveredAlerts,
-        executionHandler,
-        mutedAlertIdsSet,
-        logger: this.logger,
-        ruleLabel,
-      });
-
-      triggeredActions = concat(triggeredActions, scheduledActionsForRecoveredAlerts);
-
-      const alertsToExecute = Object.entries(alertsWithScheduledActions).filter(
+      const alertsWithExecutableActions = Object.entries(alertsWithScheduledActions).filter(
         ([alertName, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) => {
           const throttled = alert.isThrottled(throttle);
           const muted = mutedAlertIdsSet.has(alertName);
@@ -509,17 +526,29 @@ export class TaskRunner<
         }
       );
 
-      const allTriggeredActions = await Promise.all(
-        alertsToExecute.map(
+      await Promise.all(
+        alertsWithExecutableActions.map(
           ([alertId, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) =>
-            this.executeAlert(alertId, alert, executionHandler)
+            this.executeAlert(alertId, alert, executionHandler, alertExecutionStore)
         )
       );
 
-      triggeredActions = concat(triggeredActions, ...allTriggeredActions);
+      await scheduleActionsForRecoveredAlerts<
+        InstanceState,
+        InstanceContext,
+        RecoveryActionGroupId
+      >({
+        recoveryActionGroup: this.ruleType.recoveryActionGroup,
+        recoveredAlerts,
+        executionHandler,
+        mutedAlertIdsSet,
+        logger: this.logger,
+        ruleLabel,
+        alertExecutionStore,
+      });
     } else {
-      if (muteAll) {
-        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is muted.`);
+      if (ruleIsSnoozed) {
+        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
       }
       if (!this.shouldLogAndScheduleActionsForAlerts()) {
         this.logger.debug(
@@ -536,7 +565,7 @@ export class TaskRunner<
 
     return {
       metrics: searchMetrics,
-      triggeredActions,
+      alertExecutionStore,
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
         Record<string, CreatedAlert<InstanceState, InstanceContext>>,
@@ -545,7 +574,7 @@ export class TaskRunner<
     };
   }
 
-  async validateAndExecuteRule(
+  private async validateAndExecuteRule(
     fakeRequest: KibanaRequest,
     apiKey: RawRule['apiKey'],
     rule: SanitizedAlert<Params>,
@@ -571,19 +600,25 @@ export class TaskRunner<
     return this.executeAlerts(fakeRequest, rule, validatedParams, executionHandler, spaceId, event);
   }
 
-  async loadRuleAttributesAndRun(event: Event): Promise<Resultable<RuleExecutionRunResult, Error>> {
+  private async loadRuleAttributesAndRun(
+    event: Event
+  ): Promise<Resultable<RuleExecutionRunResult, Error>> {
     const {
       params: { alertId: ruleId, spaceId },
     } = this.taskInstance;
     let enabled: boolean;
     let apiKey: string | null;
+    let consumer: string;
     try {
       const decryptedAttributes = await this.getDecryptedAttributes(ruleId, spaceId);
       apiKey = decryptedAttributes.apiKey;
       enabled = decryptedAttributes.enabled;
+      consumer = decryptedAttributes.consumer;
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
+
+    this.ruleConsumer = consumer;
 
     if (!enabled) {
       throw new ErrorWithReason(
@@ -638,7 +673,7 @@ export class TaskRunner<
       ),
       schedule: asOk(
         // fetch the rule again to ensure we return the correct schedule as it may have
-        // cahnged during the task execution
+        // changed during the task execution
         (await rulesClient.get({ id: ruleId })).schedule
       ),
     };
@@ -646,11 +681,23 @@ export class TaskRunner<
 
   async run(): Promise<RuleTaskRunResult> {
     const {
-      params: { alertId: ruleId, spaceId },
+      params: { alertId: ruleId, spaceId, consumer },
       startedAt,
       state: originalState,
       schedule: taskSchedule,
     } = this.taskInstance;
+
+    // Initially use consumer as stored inside the task instance
+    // Replace this with consumer as read from the rule saved object after
+    // we successfully read the rule SO. This allows us to populate a consumer
+    // value for `execute-start` events (which are written before the rule SO is read)
+    // and in the event of decryption errors (where we cannot read the rule SO)
+    // Because "consumer" is set when a rule is created, this value should be static
+    // for the life of a rule but there may be edge cases where migrations cause
+    // the consumer values to become out of sync.
+    if (consumer) {
+      this.ruleConsumer = consumer;
+    }
 
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule`;
@@ -665,16 +712,18 @@ export class TaskRunner<
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
-    const scheduleDelay = runDate.getTime() - this.taskInstance.runAt.getTime();
+    const scheduleDelay = runDate.getTime() - this.taskInstance.scheduledAt.getTime();
 
     const event = createAlertEventLogRecordObject({
       ruleId,
       ruleType: this.ruleType as UntypedNormalizedRuleType,
+      consumer: this.ruleConsumer!,
       action: EVENT_LOG_ACTIONS.execute,
       namespace,
+      spaceId,
       executionId: this.executionId,
       task: {
-        scheduled: this.taskInstance.runAt.toISOString(),
+        scheduled: this.taskInstance.scheduledAt.toISOString(),
         scheduleDelay: Millis2Nanos * scheduleDelay,
       },
       savedObjects: [
@@ -697,6 +746,7 @@ export class TaskRunner<
       },
       message: `rule execution start: "${ruleId}"`,
     });
+
     eventLogger.logEvent(startEvent);
 
     const { state, schedule, monitoring } = await errorAsRuleTaskRunResult(
@@ -713,7 +763,6 @@ export class TaskRunner<
       (ruleExecutionState) => executionStatusFromState(ruleExecutionState),
       (err: ElasticsearchError) => executionStatusFromError(err)
     );
-
     // set the executionStatus date to same as event, if it's set
     if (event.event?.start) {
       executionStatus.lastExecutionDate = new Date(event.event.start);
@@ -733,6 +782,10 @@ export class TaskRunner<
 
     eventLogger.stopTiming(event);
     set(event, 'kibana.alerting.status', executionStatus.status);
+
+    if (this.ruleConsumer) {
+      set(event, 'kibana.alert.rule.consumer', this.ruleConsumer);
+    }
 
     const monitoringHistory: RuleMonitoringHistory = {
       success: true,
@@ -756,6 +809,10 @@ export class TaskRunner<
       }
       monitoringHistory.success = false;
     } else {
+      if (executionStatus.warning) {
+        set(event, 'event.reason', executionStatus.warning?.reason || 'unknown');
+        set(event, 'message', event?.message || executionStatus.warning.message);
+      }
       set(
         event,
         'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
@@ -791,6 +848,10 @@ export class TaskRunner<
     eventLogger.logEvent(event);
 
     if (!this.cancelled) {
+      this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+      if (executionStatus.error) {
+        this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
+      }
       this.logger.debug(
         `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
           executionStatus
@@ -806,7 +867,7 @@ export class TaskRunner<
       executionState: RuleExecutionState
     ): RuleTaskState => {
       return {
-        ...omit(executionState, ['triggeredActions', 'metrics']),
+        ...omit(executionState, ['alertExecutionStore', 'metrics']),
         previousStartedAt: startedAt,
       };
     };
@@ -861,9 +922,13 @@ export class TaskRunner<
 
     // Write event log entry
     const {
-      params: { alertId: ruleId, spaceId },
+      params: { alertId: ruleId, spaceId, consumer },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
+
+    if (consumer && !this.ruleConsumer) {
+      this.ruleConsumer = consumer;
+    }
 
     this.logger.debug(
       `Cancelling rule type ${this.ruleType.id} with id ${ruleId} - execution exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`
@@ -889,9 +954,11 @@ export class TaskRunner<
       kibana: {
         alert: {
           rule: {
+            ...(this.ruleConsumer ? { consumer: this.ruleConsumer } : {}),
             execution: {
               uuid: this.executionId,
             },
+            rule_type_id: this.ruleType.id,
           },
         },
         saved_objects: [
@@ -903,6 +970,7 @@ export class TaskRunner<
             namespace,
           },
         ],
+        space_ids: [spaceId],
       },
       rule: {
         id: ruleId,
@@ -913,6 +981,8 @@ export class TaskRunner<
       },
     };
     eventLogger.logEvent(event);
+
+    this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_TIMEOUTS);
 
     // Update the rule saved object with execution status
     const executionStatus: AlertExecutionStatus = {
@@ -992,6 +1062,7 @@ function generateNewAndRecoveredAlertEvents<
     recoveredAlerts,
     rule,
     ruleType,
+    spaceId,
   } = params;
   const originalAlertIds = Object.keys(originalAlerts);
   const currentAlertIds = Object.keys(currentAlerts);
@@ -1066,9 +1137,11 @@ function generateNewAndRecoveredAlertEvents<
       kibana: {
         alert: {
           rule: {
+            consumer: rule.consumer,
             execution: {
               uuid: executionId,
             },
+            rule_type_id: ruleType.id,
           },
         },
         alerting: {
@@ -1085,6 +1158,7 @@ function generateNewAndRecoveredAlertEvents<
             namespace,
           },
         ],
+        space_ids: [spaceId],
       },
       message,
       rule: {
@@ -1109,7 +1183,7 @@ async function scheduleActionsForRecoveredAlerts<
     InstanceContext,
     RecoveryActionGroupId
   >
-): Promise<AlertAction[]> {
+): Promise<void> {
   const {
     logger,
     recoveryActionGroup,
@@ -1117,9 +1191,10 @@ async function scheduleActionsForRecoveredAlerts<
     executionHandler,
     mutedAlertIdsSet,
     ruleLabel,
+    alertExecutionStore,
   } = params;
   const recoveredIds = Object.keys(recoveredAlerts);
-  let triggeredActions: AlertAction[] = [];
+
   for (const id of recoveredIds) {
     if (mutedAlertIdsSet.has(id)) {
       logger.debug(
@@ -1129,17 +1204,16 @@ async function scheduleActionsForRecoveredAlerts<
       const alert = recoveredAlerts[id];
       alert.updateLastScheduledActions(recoveryActionGroup.id);
       alert.unscheduleActions();
-      const triggeredActionsForRecoveredAlert = await executionHandler({
+      await executionHandler({
         actionGroup: recoveryActionGroup.id,
         context: alert.getContext(),
         state: {},
         alertId: id,
+        alertExecutionStore,
       });
       alert.scheduleActions(recoveryActionGroup.id);
-      triggeredActions = concat(triggeredActions, triggeredActionsForRecoveredAlert);
     }
   }
-  return triggeredActions;
 }
 
 function logActiveAndRecoveredAlerts<

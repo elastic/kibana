@@ -14,7 +14,7 @@ import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
 import { LensEmbeddableInput, LensPublicStart, XYState } from '../../../../../../lens/public';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
-import { IndexPatternState } from '../hooks/use_app_index_pattern';
+import { DataViewState } from '../hooks/use_app_data_view';
 import { ReportConfigMap } from '../contexts/exploratory_view_config';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ActionTypes, useActions } from './use_actions';
@@ -46,7 +46,7 @@ export interface ExploratoryEmbeddableProps {
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
   lens: LensPublicStart;
-  indexPatterns: IndexPatternState;
+  indexPatterns: DataViewState;
 }
 
 // eslint-disable-next-line import/no-default-export

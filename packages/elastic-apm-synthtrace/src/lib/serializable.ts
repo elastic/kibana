@@ -15,7 +15,7 @@ export class Serializable<TFields extends Fields> extends Entity<TFields> {
     });
   }
 
-  timestamp(time: number) {
+  timestamp(time: number): this {
     this.fields['@timestamp'] = time;
     return this;
   }

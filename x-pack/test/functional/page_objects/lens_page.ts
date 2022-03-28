@@ -116,6 +116,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         keepOpen?: boolean;
         palette?: string;
         formula?: string;
+        disableEmptyRows?: boolean;
       },
       layerIndex = 0
     ) {
@@ -158,6 +159,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       if (opts.palette) {
         await this.setPalette(opts.palette);
+      }
+
+      if (opts.disableEmptyRows) {
+        await testSubjects.setEuiSwitch('indexPattern-include-empty-rows', 'uncheck');
       }
 
       if (!opts.keepOpen) {
@@ -254,9 +259,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async waitForField(field: string) {
-      await retry.try(async () => {
-        await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
-      });
+      await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
     },
 
     async waitForMissingDataViewWarning() {
@@ -1054,8 +1057,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param count - expected count of metric
      */
     async assertMetric(title: string, count: string) {
-      await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
-      await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
+      await this.assertExactText('[data-test-subj="metric_label"]', title);
+      await this.assertExactText('[data-test-subj="metric_value"]', count);
     },
 
     async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
@@ -1063,7 +1066,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getMetricStyle() {
-      const el = await testSubjects.find('lnsVisualizationContainer');
+      const el = await testSubjects.find('metric_value');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
@@ -1152,9 +1155,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       expect(focusedElementText).to.eql(name);
     },
 
-    async waitForVisualization() {
+    async waitForVisualization(visDataTestSubj?: string) {
       async function getRenderingCount() {
-        const visualizationContainer = await testSubjects.find('lnsVisualizationContainer');
+        const visualizationContainer = await testSubjects.find(
+          visDataTestSubj || 'lnsVisualizationContainer'
+        );
         const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
         return Number(renderingCount);
       }
@@ -1329,6 +1334,34 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     hasEmptySizeRatioButtonGroup() {
       return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
+    },
+
+    getAutoApplyToggleExists() {
+      return testSubjects.exists('lensToggleAutoApply');
+    },
+
+    enableAutoApply() {
+      return testSubjects.setEuiSwitch('lensToggleAutoApply', 'check');
+    },
+
+    disableAutoApply() {
+      return testSubjects.setEuiSwitch('lensToggleAutoApply', 'uncheck');
+    },
+
+    getAutoApplyEnabled() {
+      return testSubjects.isEuiSwitchChecked('lensToggleAutoApply');
+    },
+
+    async applyChanges(throughSuggestions = false) {
+      const applyButtonSelector = throughSuggestions
+        ? 'lnsSuggestionApplyChanges'
+        : 'lensApplyChanges';
+      await testSubjects.waitForEnabled(applyButtonSelector);
+      await testSubjects.click(applyButtonSelector);
+    },
+
+    async getAreSuggestionsPromptingToApply() {
+      return testSubjects.exists('lnsSuggestionApplyChanges');
     },
   });
 }

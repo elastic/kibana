@@ -114,7 +114,7 @@ const getEuiPaginationFromEsSearchSource = ({
   pageIndex: Math.ceil(pageIndex / pageSize),
   totalItemCount: total,
   pageSizeOptions: [10, 25, 100],
-  hidePerPageOptions: false,
+  showPerPageOptions: true,
 });
 
 const getEuiSortFromEsSearchSource = (

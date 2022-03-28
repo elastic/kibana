@@ -8,7 +8,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { Fragment } from 'react';
-import type { DataView } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data_views/public';
 import { FieldFormatsStart } from '../../../../../field_formats/public';
 import { formatHit } from '../../../utils/format_hit';
 

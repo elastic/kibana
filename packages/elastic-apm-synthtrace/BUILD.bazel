@@ -32,6 +32,7 @@ RUNTIME_DEPS = [
   "@npm//object-hash",
   "@npm//p-limit",
   "@npm//yargs",
+  "@npm//node-fetch",
 ]
 
 TYPES_DEPS = [
@@ -43,6 +44,7 @@ TYPES_DEPS = [
   "@npm//@types/object-hash",
   "@npm//moment",
   "@npm//p-limit",
+  "@npm//@types/node-fetch",
 ]
 
 jsts_transpiler(

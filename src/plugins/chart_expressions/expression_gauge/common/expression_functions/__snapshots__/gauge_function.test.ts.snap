@@ -39,6 +39,7 @@ Object {
       "centralMajor": "Some label",
       "centralMajorMode": "custom",
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -47,6 +48,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "arc",
       "ticksPosition": "auto",
     },
@@ -88,6 +90,7 @@ Object {
       "centralMajor": undefined,
       "centralMajorMode": "auto",
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -96,6 +99,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "arc",
       "ticksPosition": "auto",
     },
@@ -135,6 +139,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "auto",
@@ -143,6 +148,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
@@ -182,6 +188,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -190,6 +197,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
@@ -229,6 +237,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -237,6 +246,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "horizontalBullet",
       "ticksPosition": "bands",
     },
@@ -278,6 +288,7 @@ Object {
       "centralMajor": "Some label",
       "centralMajorMode": "custom",
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -286,6 +297,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "circle",
       "ticksPosition": "auto",
     },
@@ -327,6 +339,7 @@ Object {
       "centralMajor": undefined,
       "centralMajorMode": "auto",
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -335,6 +348,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "circle",
       "ticksPosition": "auto",
     },
@@ -374,6 +388,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -382,6 +397,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
@@ -421,6 +437,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -429,6 +446,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "horizontalBullet",
       "ticksPosition": "hidden",
     },
@@ -468,6 +486,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -476,6 +495,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
@@ -515,6 +535,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -523,6 +544,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
@@ -562,6 +584,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "none",
@@ -570,6 +593,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
@@ -609,6 +633,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "palette",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -617,6 +642,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
@@ -656,6 +682,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
+      "commonLabel": undefined,
       "goal": undefined,
       "labelMajor": "title",
       "labelMajorMode": "custom",
@@ -664,6 +691,7 @@ Object {
       "metric": "col-0-1",
       "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
       "shape": "verticalBullet",
       "ticksPosition": "auto",
     },
@@ -698,11 +726,3 @@ Object {
 exports[`interpreter/functions#gauge throws error if centralMajor or centralMajorMode are provided for the horizontalBullet shape 1`] = `"Fields \\"centralMajor\\" and \\"centralMajorMode\\" are not supported by the shape \\"horizontalBullet\\""`;
 
 exports[`interpreter/functions#gauge throws error if centralMajor or centralMajorMode are provided for the vertical shape 1`] = `"Fields \\"centralMajor\\" and \\"centralMajorMode\\" are not supported by the shape \\"verticalBullet\\""`;
-
-exports[`interpreter/functions#gauge throws error on wrong colorMode type 1`] = `"Invalid color mode is specified. Supported color modes: palette, none"`;
-
-exports[`interpreter/functions#gauge throws error on wrong labelMajorMode type 1`] = `"Invalid label major mode is specified. Supported label major modes: auto, custom, none"`;
-
-exports[`interpreter/functions#gauge throws error on wrong shape type 1`] = `"Invalid shape is specified. Supported shapes: horizontalBullet, verticalBullet, arc, circle"`;
-
-exports[`interpreter/functions#gauge throws error on wrong ticksPosition type 1`] = `"Invalid ticks position is specified. Supported ticks positions: hidden, auto, bands"`;

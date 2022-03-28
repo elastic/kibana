@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
-import { isCompleteResponse, ISearchSource } from '../../../../../data/common';
+import { isCompleteResponse, ISearchSource } from '../../../../../data/public';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { FetchDeps } from './fetch_all';
 
@@ -32,11 +32,7 @@ export const fetchDocuments = (
   }
 
   const executionContext = {
-    type: 'application',
-    name: 'discover',
     description: 'fetch documents',
-    url: window.location.pathname,
-    id: savedSearch.id ?? '',
   };
 
   const fetch$ = searchSource

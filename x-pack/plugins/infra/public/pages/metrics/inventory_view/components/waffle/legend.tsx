@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
@@ -17,13 +17,7 @@ import {
   GradientLegendRT,
 } from '../../../../../lib/lib';
 import { GradientLegend } from './gradient_legend';
-import { LegendControls } from './legend_controls';
 import { StepLegend } from './steps_legend';
-import {
-  DEFAULT_LEGEND,
-  useWaffleOptionsContext,
-  WaffleLegendOptions,
-} from '../../hooks/use_waffle_options';
 import { SteppedGradientLegend } from './stepped_gradient_legend';
 interface Props {
   legend: InfraWaffleMapLegend;
@@ -32,39 +26,9 @@ interface Props {
   formatter: InfraFormatter;
 }
 
-interface LegendControlOptions {
-  auto: boolean;
-  bounds: InfraWaffleMapBounds;
-  legend: WaffleLegendOptions;
-}
-
-export const Legend: React.FC<Props> = ({ dataBounds, legend, bounds, formatter }) => {
-  const {
-    changeBoundsOverride,
-    changeAutoBounds,
-    autoBounds,
-    legend: legendOptions,
-    changeLegend,
-    boundsOverride,
-  } = useWaffleOptionsContext();
-  const handleChange = useCallback(
-    (options: LegendControlOptions) => {
-      changeBoundsOverride(options.bounds);
-      changeAutoBounds(options.auto);
-      changeLegend(options.legend);
-    },
-    [changeBoundsOverride, changeAutoBounds, changeLegend]
-  );
+export const Legend: React.FC<Props> = ({ legend, bounds, formatter }) => {
   return (
     <LegendContainer>
-      <LegendControls
-        options={legendOptions != null ? legendOptions : DEFAULT_LEGEND}
-        dataBounds={dataBounds}
-        bounds={bounds}
-        autoBounds={autoBounds}
-        boundsOverride={boundsOverride}
-        onChange={handleChange}
-      />
       {GradientLegendRT.is(legend) && (
         <GradientLegend formatter={formatter} legend={legend} bounds={bounds} />
       )}
@@ -77,8 +41,6 @@ export const Legend: React.FC<Props> = ({ dataBounds, legend, bounds, formatter 
 };
 
 const LegendContainer = euiStyled.div`
-  position: absolute;
-  bottom: 0px;
-  left: 10px;
-  right: 10px;
+  margin: 0 10px;
+  display: flex;
 `;

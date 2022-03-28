@@ -59,11 +59,11 @@ import {
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineThresholdRuleAndContinue,
   fillDefineThresholdRule,
@@ -77,7 +77,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
-describe.skip('Detection rules, threshold', () => {
+describe('Detection rules, threshold', () => {
   let rule = getNewThresholdRule();
   const expectedUrls = getNewThresholdRule().referenceUrls.join('');
   const expectedFalsePositives = getNewThresholdRule().falsePositivesExamples.join('');
@@ -93,12 +93,12 @@ describe.skip('Detection rules, threshold', () => {
     loginAndWaitForPageWithoutDateRange(RULE_CREATION);
   });
 
-  it('Creates and activates a new threshold rule', () => {
+  it('Creates and enables a new threshold rule', () => {
     selectThresholdRuleType();
     fillDefineThresholdRuleAndContinue(rule);
     fillAboutRuleAndContinue(rule);
     fillScheduleRuleAndContinue(rule);
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -168,7 +168,7 @@ describe.skip('Detection rules, threshold', () => {
   it.skip('Preview results of keyword using "host.name"', () => {
     rule.index = [...rule.index, '.siem-signals*'];
 
-    createCustomRuleActivated(getNewRule());
+    createCustomRuleEnabled(getNewRule());
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     goToCreateNewRule();
@@ -187,7 +187,7 @@ describe.skip('Detection rules, threshold', () => {
     };
     previewRule.index = [...previewRule.index, '.siem-signals*'];
 
-    createCustomRuleActivated(getNewRule());
+    createCustomRuleEnabled(getNewRule());
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     goToCreateNewRule();

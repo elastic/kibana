@@ -21,14 +21,16 @@
     "presentationUtil",
     "dataViewFieldEditor",
     "expressionGauge",
-    "expressionHeatmap"
+    "expressionHeatmap",
+    "eventAnnotation"
   ],
   "optionalPlugins": [
     "usageCollection",
     "taskManager",
     "globalSearch",
     "savedObjectsTagging",
-    "spaces"
+    "spaces",
+    "discover"
   ],
   "configPath": [
     "xpack",

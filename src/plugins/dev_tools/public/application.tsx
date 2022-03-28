@@ -9,14 +9,26 @@
 import React, { useEffect, useRef } from 'react';
 import { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
-import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
+import {
+  HashRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+  RouteComponentProps,
+} from 'react-router-dom';
 import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { ApplicationStart, ChromeStart, ScopedHistory, CoreTheme } from 'src/core/public';
-import { KibanaThemeProvider } from '../../kibana_react/public';
+import type {
+  ApplicationStart,
+  ChromeStart,
+  ScopedHistory,
+  CoreTheme,
+  ExecutionContextStart,
+} from 'src/core/public';
+import { KibanaThemeProvider, useExecutionContext } from '../../kibana_react/public';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
@@ -24,6 +36,7 @@ import { DevToolApp } from './dev_tool';
 export interface AppServices {
   docTitleService: DocTitleService;
   breadcrumbService: BreadcrumbService;
+  executionContext: ExecutionContextStart;
 }
 
 interface DevToolsWrapperProps {
@@ -32,6 +45,7 @@ interface DevToolsWrapperProps {
   updateRoute: (newRoute: string) => void;
   theme$: Observable<CoreTheme>;
   appServices: AppServices;
+  location: RouteComponentProps['location'];
 }
 
 interface MountedDevToolDescriptor {
@@ -46,6 +60,7 @@ function DevToolsWrapper({
   updateRoute,
   theme$,
   appServices,
+  location,
 }: DevToolsWrapperProps) {
   const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
@@ -63,6 +78,11 @@ function DevToolsWrapper({
     docTitleService.setTitle(activeDevTool.title);
     breadcrumbService.setBreadcrumbs(activeDevTool.title);
   }, [activeDevTool, docTitleService, breadcrumbService]);
+
+  useExecutionContext(appServices.executionContext, {
+    type: 'application',
+    page: activeDevTool.id,
+  });
 
   return (
     <main className="devApp">
@@ -115,11 +135,7 @@ function DevToolsWrapper({
 
             const params = {
               element,
-              appBasePath: '',
-              onAppLeave: () => undefined,
-              setHeaderActionMenu: () => undefined,
-              // TODO: adapt to use Core's ScopedHistory
-              history: {} as any,
+              location,
               theme$,
             };
 
@@ -192,6 +208,7 @@ export function renderApp(
                   render={(props) => (
                     <DevToolsWrapper
                       updateRoute={props.history.push}
+                      location={props.location}
                       activeDevTool={devTool}
                       devTools={devTools}
                       theme$={theme$}

@@ -757,12 +757,12 @@ describe('utils', () => {
 
       expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
       });
     });
 
@@ -797,12 +797,12 @@ describe('utils', () => {
 
       expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.',
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
       });
     });
   });

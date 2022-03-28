@@ -42,9 +42,27 @@ export function SpanDatabase({ spanDb }: Props) {
     return null;
   }
 
-  if (spanDb.type !== 'sql') {
-    return <DatabaseStatement>{spanDb.statement}</DatabaseStatement>;
-  }
+  const statementItem =
+    spanDb.type !== 'sql' ? (
+      spanDb.statement
+    ) : (
+      <TruncateHeightSection previewHeight={previewHeight}>
+        <SyntaxHighlighter
+          language={'sql'}
+          style={xcode}
+          customStyle={{
+            color: null,
+            background: null,
+            padding: null,
+            lineHeight: dbSyntaxLineHeight,
+            whiteSpace: 'pre-wrap',
+            overflowX: 'scroll',
+          }}
+        >
+          {spanDb.statement}
+        </SyntaxHighlighter>
+      </TruncateHeightSection>
+    );
 
   return (
     <Fragment>
@@ -59,24 +77,7 @@ export function SpanDatabase({ spanDb }: Props) {
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <DatabaseStatement>
-        <TruncateHeightSection previewHeight={previewHeight}>
-          <SyntaxHighlighter
-            language={'sql'}
-            style={xcode}
-            customStyle={{
-              color: null,
-              background: null,
-              padding: null,
-              lineHeight: dbSyntaxLineHeight,
-              whiteSpace: 'pre-wrap',
-              overflowX: 'scroll',
-            }}
-          >
-            {spanDb.statement}
-          </SyntaxHighlighter>
-        </TruncateHeightSection>
-      </DatabaseStatement>
+      <DatabaseStatement>{statementItem}</DatabaseStatement>
       <EuiSpacer size="l" />
     </Fragment>
   );

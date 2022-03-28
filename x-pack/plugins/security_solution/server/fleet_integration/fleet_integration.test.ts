@@ -41,8 +41,8 @@ import { Manifest } from '../endpoint/lib/artifacts';
 import { NewPackagePolicy } from '../../../fleet/common/types/models';
 import { ManifestSchema } from '../../common/endpoint/schema/manifest';
 import { DeletePackagePoliciesResponse } from '../../../fleet/common';
-import { ARTIFACT_LISTS_IDS_TO_REMOVE } from './handlers/remove_policy_from_artifacts';
 import { createMockPolicyData } from '../endpoint/services/feature_usage';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
@@ -334,11 +334,11 @@ describe('ingest_integration tests ', () => {
       await invokeDeleteCallback();
 
       expect(exceptionListClient.findExceptionListsItem).toHaveBeenCalledWith({
-        listId: ARTIFACT_LISTS_IDS_TO_REMOVE,
-        filter: ARTIFACT_LISTS_IDS_TO_REMOVE.map(
+        listId: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+        filter: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(
           () => `exception-list-agnostic.attributes.tags:"policy:${policyId}"`
         ),
-        namespaceType: ARTIFACT_LISTS_IDS_TO_REMOVE.map(() => 'agnostic'),
+        namespaceType: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(() => 'agnostic'),
         page: 1,
         perPage: 50,
         sortField: undefined,

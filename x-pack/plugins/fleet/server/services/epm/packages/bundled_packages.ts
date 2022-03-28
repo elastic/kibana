@@ -9,19 +9,26 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import type { BundledPackage } from '../../../types';
+import { IngestManagerError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { splitPkgKey } from '../registry';
 
-const BUNDLED_PACKAGE_DIRECTORY = path.join(__dirname, '../../../bundled_packages');
-
 export async function getBundledPackages(): Promise<BundledPackage[]> {
+  const config = appContextService.getConfig();
+
+  const bundledPackageLocation = config?.developer?.bundledPackageLocation;
+
+  if (!bundledPackageLocation) {
+    throw new IngestManagerError('xpack.fleet.developer.bundledPackageLocation is not configured');
+  }
+
   try {
-    const dirContents = await fs.readdir(BUNDLED_PACKAGE_DIRECTORY);
+    const dirContents = await fs.readdir(bundledPackageLocation);
     const zipFiles = dirContents.filter((file) => file.endsWith('.zip'));
 
     const result = await Promise.all(
       zipFiles.map(async (zipFile) => {
-        const file = await fs.readFile(path.join(BUNDLED_PACKAGE_DIRECTORY, zipFile));
+        const file = await fs.readFile(path.join(bundledPackageLocation, zipFile));
 
         const { pkgName, pkgVersion } = splitPkgKey(zipFile.replace(/\.zip$/, ''));
 
@@ -36,7 +43,7 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
     return result;
   } catch (err) {
     const logger = appContextService.getLogger();
-    logger.debug(`Unable to read bundled packages from ${BUNDLED_PACKAGE_DIRECTORY}`);
+    logger.debug(`Unable to read bundled packages from ${bundledPackageLocation}`);
 
     return [];
   }

@@ -7,7 +7,6 @@
  */
 
 import { Component as ReactComponent } from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { ComponentType, HTMLAttributes, ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '../find_test_subject';

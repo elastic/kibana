@@ -18,6 +18,7 @@ import { setDependencyCache, clearCache } from '../../util/dependency_cache';
 import './_index.scss';
 import type { SharePluginStart } from '../../../../../../../src/plugins/share/public';
 import type { SpacesPluginStart } from '../../../../../spaces/public';
+import type { FieldFormatsStart } from '../../../../../../../src/plugins/field_formats/public';
 
 const renderApp = (
   element: HTMLElement,
@@ -25,6 +26,7 @@ const renderApp = (
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
+  fieldFormats: FieldFormatsStart,
   spacesApi?: SpacesPluginStart,
   usageCollection?: UsageCollectionSetup
 ) => {
@@ -36,6 +38,7 @@ const renderApp = (
       data,
       spacesApi,
       usageCollection,
+      fieldFormats,
     }),
     element
   );
@@ -66,6 +69,7 @@ export async function mountApp(
     coreStart,
     pluginsStart.share,
     pluginsStart.data,
+    pluginsStart.fieldFormats,
     pluginsStart.spaces,
     deps.usageCollection
   );

@@ -72,8 +72,6 @@
 /src/plugins/field_formats/ @elastic/kibana-app-services
 /src/plugins/data_view_editor/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
-/src/plugins/kibana_react/ @elastic/kibana-app-services
-/src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
 /src/plugins/kibana_utils/ @elastic/kibana-app-services
 /src/plugins/navigation/ @elastic/kibana-app-services
 /src/plugins/share/ @elastic/kibana-app-services
@@ -120,7 +118,11 @@
 /x-pack/test/api_integration/apis/monitoring @elastic/infra-monitoring-ui
 
 # Fleet
+/fleet_packages.json @elastic/fleet
 /x-pack/plugins/fleet/ @elastic/fleet
+/x-pack/test/fleet_api_integration @elastic/fleet
+/x-pack/test/fleet_cypress @elastic/fleet
+/x-pack/test/fleet_functional @elastic/fleet
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
@@ -221,11 +223,14 @@
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
+/packages/kbn-type-summarizer/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
+/packages/kbn-bazel-packages/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations
+/packages/kbn-generate/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
@@ -416,14 +421,17 @@ x-pack/plugins/security_solution/cypress/upgrade_integration @elastic/security-e
 x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering-productivity
 x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
+## Security Solution sub teams - adaptive-workload-protection
+x-pack/plugins/session_view @elastic/awp-platform
+
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
 
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
 
-# Cloud Posture Security
-/x-pack/plugins/cloud_security_posture/ @elastic/cloud-posture-security
+# Cloud Security Posture
+/x-pack/plugins/cloud_security_posture/ @elastic/cloud-security-posture-control-plane
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
@@ -464,9 +472,11 @@ x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
 # EUI design
-/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-app-services
+/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/shared-ux
 
 # Application Experience
 
 ## Shared UX
-/src/plugins/shared_ux @elastic/shared-ux
+/src/plugins/shared_ux/ @elastic/shared-ux
+/src/plugins/kibana_react/ @elastic/shared-ux
+/src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation

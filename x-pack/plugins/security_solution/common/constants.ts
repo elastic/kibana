@@ -89,36 +89,42 @@ export enum SecurityPageName {
   caseConfigure = 'cases_configure',
   caseCreate = 'cases_create',
   detections = 'detections',
+  detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
-  hostIsolationExceptions = 'host_isolation_exceptions',
   events = 'events',
   exceptions = 'exceptions',
   explore = 'explore',
+  hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
   hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
-  users = 'users',
   investigate = 'investigate',
+  landing = 'get_started',
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
   networkExternalAlerts = 'network-external_alerts',
   networkHttp = 'network-http',
   networkTls = 'network-tls',
-  timelines = 'timelines',
-  timelinesTemplates = 'timelines-templates',
   overview = 'overview',
   policies = 'policies',
   rules = 'rules',
+  timelines = 'timelines',
+  timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
   uncommonProcesses = 'uncommon_processes',
+  users = 'users',
+  usersAnomalies = 'users-anomalies',
+  usersRisk = 'users-risk',
 }
 
 export const TIMELINES_PATH = '/timelines' as const;
 export const CASES_PATH = '/cases' as const;
 export const OVERVIEW_PATH = '/overview' as const;
+export const LANDING_PATH = '/get_started' as const;
+export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const RULES_PATH = '/rules' as const;
@@ -136,6 +142,8 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
+export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
+export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
 
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
@@ -169,6 +177,9 @@ export const DEFAULT_INDEX_PATTERN = [
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
+
+/** This Kibana Advanced Setting enables the warnings for CCS read permissions */
+export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
@@ -285,6 +296,7 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
+export const DETECTION_RESPONSE_METRICS_API_URL = '/api/detection_response_metrics' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -364,6 +376,8 @@ export const ELASTIC_NAME = 'estc' as const;
 
 export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
 
+export const RISKY_USERS_INDEX_PREFIX = 'ml_user_risk_score_' as const;
+
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',
   FAILED: 'failed',
@@ -418,5 +432,11 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrenc
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
 
+/**
+ * A local storage key we use to store the state of the feature tour UI for the Rule Management page.
+ *
+ * NOTE: As soon as we want to show a new tour for features in the current Kibana version,
+ * we will need to update this constant with the corresponding version.
+ */
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
   'securitySolution.rulesManagementPage.newFeaturesTour.v8.1';

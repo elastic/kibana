@@ -1,0 +1,70 @@
+[[manage-cases]]
+== Open and manage cases
+
+preview::[]
+
+[[open-case]]
+=== Open a new case
+
+Open a new case to keep track of issues and share their details with colleagues.
+
+. Go to *Management > {stack-manage-app} > Cases*, then click *Create case*.
+
+. Give the case a name, add any relevant tags and a description.
++
+TIP: In the `Description` area, you can use
+https://www.markdownguide.org/cheat-sheet[Markdown] syntax to create formatted
+text.
+
+. For *External incident management system*, select a connector. For more
+information, refer to <<add-case-connectors>>.
+
+. After you've completed all of the required fields, click *Create case*.
+
+[[add-case-visualization]]
+=== Add a visualization
+
+After you create a case, you can optionally add a visualization. For
+example, you can portray event and alert data through charts and graphs.
+
+[role="screenshot"]
+image::images/cases-visualization.png[Cases page]
+
+To add a visualization to a comment within your case:
+
+. Click the *Visualization* button. The *Add visualization* dialog appears.
+
+. Select an existing visualization from your Visualize Library or create a new
+visualization.
++
+IMPORTANT: Set an absolute time range for your visualization. This ensures your
+visualization doesn't change over time after you save it to your case and
+provides important context for viewers.
+
+. After you've finished creating your visualization, click *Save and return* to
+go back to your case.
+
+. Click *Preview* to see how the visualization will appear in the case comment.
+
+. Click *Add Comment* to add the visualization to your case.
+
+After a visualization has been added to a case, you can modify or interact with
+it by clicking the *Open Visualization* option in the comment menu.
+
+[[manage-case]]
+=== Manage cases
+
+In *Management > {stack-manage-app} > Cases*, you can search cases and filter
+them by tags, reporter.
+
+To view a case, click on its name. You can then:
+
+* Add a new comment.
+* Edit existing comments and the description.
+* Add a connector.
+* Send updates to external systems (if external connections are configured).
+* Edit tags.
+* Refresh the case to retrieve the latest updates.
+* Change the status.
+* Close or delete the case.
+* Reopen a closed case.

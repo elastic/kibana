@@ -16,6 +16,7 @@ import {
   httpServiceMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
+  uiSettingsServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../actions/server/mocks';
 import { rulesClientMock } from '../mocks';
@@ -23,11 +24,14 @@ import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 
+const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
+const uiSettingsService = uiSettingsServiceMock.createStartContract();
 const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
@@ -77,6 +81,7 @@ describe('Task Runner Factory', () => {
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
     savedObjects: savedObjectsService,
+    uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     actionsPlugin: actionsMock.createStart(),
@@ -102,7 +107,7 @@ describe('Task Runner Factory', () => {
   test(`throws an error if factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.create(ruleType, { taskInstance: mockedTaskInstance })
+      factory.create(ruleType, { taskInstance: mockedTaskInstance }, inMemoryMetrics)
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 

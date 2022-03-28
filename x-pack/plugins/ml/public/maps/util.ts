@@ -23,6 +23,34 @@ export const ML_ANOMALY_LAYERS = {
 } as const;
 
 export type MlAnomalyLayersType = typeof ML_ANOMALY_LAYERS[keyof typeof ML_ANOMALY_LAYERS];
+const INFLUENCER_LIMIT = 3;
+const INFLUENCER_MAX_VALUES = 3;
+
+export function getInfluencersHtmlString(
+  influencers: Array<{ influencer_field_name: string; influencer_field_values: string[] }>,
+  splitFields: string[]
+) {
+  let htmlString = '<ul>';
+  let influencerCount = 0;
+  for (let i = 0; i < influencers.length; i++) {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { influencer_field_name, influencer_field_values } = influencers[i];
+    // Skip if there are no values or it's a partition field
+    if (!influencer_field_values.length || splitFields.includes(influencer_field_name)) continue;
+
+    const fieldValuesString = influencer_field_values.slice(0, INFLUENCER_MAX_VALUES).join(', ');
+
+    htmlString += `<li>${influencer_field_name}: ${fieldValuesString}</li>`;
+    influencerCount += 1;
+
+    if (influencerCount === INFLUENCER_LIMIT) {
+      break;
+    }
+  }
+  htmlString += '</ul>';
+
+  return htmlString;
+}
 
 // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
 function getCoordinates(actualCoordinateStr: string, round: boolean = false): number[] {
@@ -136,6 +164,15 @@ export async function getResultsForJobId(
           coordinates: [typical, actual],
         };
       }
+
+      const splitFields = {
+        ...(_source.partition_field_name
+          ? { [_source.partition_field_name]: _source.partition_field_value }
+          : {}),
+        ...(_source.by_field_name ? { [_source.by_field_name]: _source.by_field_value } : {}),
+        ...(_source.over_field_name ? { [_source.over_field_name]: _source.over_field_value } : {}),
+      };
+
       return {
         type: 'Feature',
         geometry,
@@ -148,12 +185,14 @@ export async function getResultsForJobId(
           functionDescription: _source.function_description,
           timestamp: formatHumanReadableDateTimeSeconds(_source.timestamp),
           record_score: Math.floor(_source.record_score),
-          ...(_source.partition_field_name
-            ? { [_source.partition_field_name]: _source.partition_field_value }
-            : {}),
-          ...(_source.by_field_name ? { [_source.by_field_name]: _source.by_field_value } : {}),
-          ...(_source.over_field_name
-            ? { [_source.over_field_name]: _source.over_field_value }
+          ...(Object.keys(splitFields).length > 0 ? splitFields : {}),
+          ...(_source.influencers?.length
+            ? {
+                influencers: getInfluencersHtmlString(
+                  _source.influencers,
+                  Object.keys(splitFields)
+                ),
+              }
             : {}),
         },
       };

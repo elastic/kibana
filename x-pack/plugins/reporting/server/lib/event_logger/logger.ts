@@ -6,8 +6,7 @@
  */
 
 import deepMerge from 'deepmerge';
-import { LogMeta } from 'src/core/server';
-import { LevelLogger } from '../';
+import type { Logger, LogMeta } from 'kibana/server';
 import { PLUGIN_ID } from '../../../common/constants';
 import type { TaskRunMetrics } from '../../../common/types';
 import { IReport } from '../store';
@@ -46,7 +45,7 @@ export interface BaseEvent {
 }
 
 /** @internal */
-export function reportingEventLoggerFactory(logger: LevelLogger) {
+export function reportingEventLoggerFactory(logger: Logger) {
   const genericLogger = new EcsLogAdapter(logger, { event: { provider: PLUGIN_ID } });
 
   return class ReportingEventLogger {

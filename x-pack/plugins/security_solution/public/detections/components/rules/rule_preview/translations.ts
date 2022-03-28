@@ -30,6 +30,13 @@ export const QUERY_PREVIEW_BUTTON = i18n.translate(
   }
 );
 
+export const PREVIEW_TIMEOUT_WARNING = i18n.translate(
+  'xpack.securitySolution.stepDefineRule.previewTimeoutWarning',
+  {
+    defaultMessage: 'Preview timed out after 60 seconds',
+  }
+);
+
 export const QUERY_PREVIEW_SELECT_ARIA = i18n.translate(
   'xpack.securitySolution.stepDefineRule.previewQueryAriaLabel',
   {

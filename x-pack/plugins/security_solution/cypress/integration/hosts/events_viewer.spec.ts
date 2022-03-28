@@ -8,7 +8,8 @@
 import {
   FIELDS_BROWSER_CHECKBOX,
   FIELDS_BROWSER_CONTAINER,
-  FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
+  FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES,
+  FIELDS_BROWSER_VIEW_BUTTON,
 } from '../../screens/fields_browser';
 import {
   HOST_GEO_CITY_NAME_HEADER,
@@ -17,7 +18,12 @@ import {
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
 
-import { closeFieldsBrowser, filterFieldsBrowser } from '../../tasks/fields_browser';
+import {
+  activateViewAll,
+  activateViewSelected,
+  closeFieldsBrowser,
+  filterFieldsBrowser,
+} from '../../tasks/fields_browser';
 import { loginAndWaitForPage } from '../../tasks/login';
 import { openEvents } from '../../tasks/hosts/main';
 import {
@@ -60,14 +66,20 @@ describe('Events Viewer', () => {
       cy.get(FIELDS_BROWSER_CONTAINER).should('not.exist');
     });
 
-    it('displays the `default ECS` category (by default)', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).should('have.text', 'default ECS');
+    it('displays "view all" option by default', () => {
+      cy.get(FIELDS_BROWSER_VIEW_BUTTON).should('contain.text', 'View: all');
     });
 
-    it('displays a checked checkbox for all of the default events viewer columns that are also in the default ECS category', () => {
+    it('displays all categories (by default)', () => {
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES).should('be.empty');
+    });
+
+    it('displays only the default selected fields when "view selected" option is enabled', () => {
+      activateViewSelected();
       defaultHeadersInDefaultEcsCategory.forEach((header) =>
         cy.get(FIELDS_BROWSER_CHECKBOX(header.id)).should('be.checked')
       );
+      activateViewAll();
     });
   });
 
@@ -108,7 +120,6 @@ describe('Events Viewer', () => {
 
     it('resets all fields in the events viewer when `Reset Fields` is clicked', () => {
       const filterInput = 'host.geo.c';
-
       filterFieldsBrowser(filterInput);
       cy.get(HOST_GEO_COUNTRY_NAME_HEADER).should('not.exist');
       addsHostGeoCountryNameToHeader();

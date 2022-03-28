@@ -9,12 +9,13 @@ import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getXyVisualization } from './xy_visualization';
-import { Operation } from '../types';
+import { OperationDescriptor } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { eventAnnotationServiceMock } from 'src/plugins/event_annotation/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
@@ -22,6 +23,7 @@ describe('#toExpression', () => {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     kibanaTheme: themeServiceMock.createStartContract(),
     useLegacyTimeAxis: false,
+    eventAnnotationService: eventAnnotationServiceMock,
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -31,14 +33,14 @@ describe('#toExpression', () => {
     mockDatasource = createMockDatasource('testDatasource');
 
     mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-      { columnId: 'd' },
-      { columnId: 'a' },
-      { columnId: 'b' },
-      { columnId: 'c' },
+      { columnId: 'd', fields: [] },
+      { columnId: 'a', fields: [] },
+      { columnId: 'b', fields: [] },
+      { columnId: 'c', fields: [] },
     ]);
 
     mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation((col) => {
-      return { label: `col_${col}`, dataType: 'number' } as Operation;
+      return { label: `col_${col}`, dataType: 'number' } as OperationDescriptor;
     });
 
     frame.datasourceLayers = {
@@ -54,6 +56,8 @@ describe('#toExpression', () => {
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
+          endValue: 'Nearest',
+          emphasizeFitting: true,
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
           labelsOrientation: {
             x: 0,
@@ -343,9 +347,6 @@ describe('#toExpression', () => {
           {
             layerId: 'referenceLine',
             layerType: layerTypes.REFERENCELINE,
-            seriesType: 'area',
-            splitAccessor: 'd',
-            xAccessor: 'a',
             accessors: ['b', 'c'],
             yConfig: [{ forAccessor: 'a' }],
           },

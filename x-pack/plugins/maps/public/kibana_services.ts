@@ -23,6 +23,12 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
   emsSettings = mapsEms.createEMSSettings();
 }
 
+let isCloudEnabled = false;
+export function setIsCloudEnabled(enabled: boolean) {
+  isCloudEnabled = enabled;
+}
+export const getIsCloud = () => isCloudEnabled;
+
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
 export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
@@ -33,6 +39,7 @@ export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
 export const getIndexPatternSelectComponent = () => pluginsStart.data.ui.IndexPatternSelect;
 export const getHttp = () => coreStart.http;
+export const getExecutionContext = () => coreStart.executionContext;
 export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter;
 export const getToasts = () => coreStart.notifications.toasts;
 export const getSavedObjectsClient = () => coreStart.savedObjects.client;

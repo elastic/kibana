@@ -16,6 +16,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { SpacesPluginStart } from '../../spaces/public';
@@ -32,6 +33,7 @@ import type { NavigationPublicPluginStart } from '../../../../src/plugins/naviga
 import type { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import type { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import type { EventAnnotationPluginSetup } from '../../../../src/plugins/event_annotation/public';
 import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
@@ -93,6 +95,7 @@ import type { SaveModalContainerProps } from './app_plugin/save_modal_container'
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
+import type { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -102,12 +105,15 @@ export interface LensPluginSetupDependencies {
   embeddable?: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+  eventAnnotation: EventAnnotationPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  discover?: DiscoverSetup;
 }
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
@@ -116,12 +122,14 @@ export interface LensPluginStartDependencies {
   visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
+  eventAnnotation: EventAnnotationPluginSetup;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
+  discover?: DiscoverStart;
 }
 
 export interface LensPublicSetup {
@@ -230,6 +238,7 @@ export class LensPlugin {
       embeddable,
       visualizations,
       charts,
+      eventAnnotation,
       globalSearch,
       usageCollection,
     }: LensPluginSetupDependencies
@@ -246,9 +255,9 @@ export class LensPlugin {
         charts,
         expressions,
         fieldFormats,
-        plugins.fieldFormats.deserialize
+        plugins.fieldFormats.deserialize,
+        eventAnnotation
       );
-
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
 
       return {
@@ -260,7 +269,7 @@ export class LensPlugin {
         documentToExpression: this.editorFrameService!.documentToExpression,
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
-        indexPatternService: plugins.data.indexPatterns,
+        indexPatternService: plugins.dataViews,
         uiActions: plugins.uiActions,
         usageCollection,
         inspector: plugins.inspector,
@@ -287,10 +296,10 @@ export class LensPlugin {
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
-    const ensureDefaultDataView = async () => {
+    const ensureDefaultDataView = () => {
       // make sure a default index pattern exists
       // if not, the page will be redirected to management and visualize won't be rendered
-      await startServices().plugins.data.indexPatterns.ensureDefaultDataView();
+      startServices().plugins.dataViews.ensureDefaultDataView();
     };
 
     core.application.register({
@@ -300,22 +309,25 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
-        await this.initParts(
-          core,
-          data,
-          charts,
-          expressions,
-          fieldFormats,
-          deps.fieldFormats.deserialize
-        );
+        await Promise.all([
+          this.initParts(
+            core,
+            data,
+            charts,
+            expressions,
+            fieldFormats,
+            deps.fieldFormats.deserialize,
+            eventAnnotation
+          ),
+          ensureDefaultDataView(),
+        ]);
 
         const { mountApp, stopReportManager, getLensAttributeService } = await import(
           './async_services'
         );
-        const frameStart = this.editorFrameService!.start(coreStart, deps);
-
         this.stopReportManager = stopReportManager;
-        await ensureDefaultDataView();
+
+        const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
           attributeService: getLensAttributeService(coreStart, deps),
@@ -362,7 +374,8 @@ export class LensPlugin {
     charts: ChartsPluginSetup,
     expressions: ExpressionsServiceSetup,
     fieldFormats: FieldFormatsSetup,
-    formatFactory: FormatFactory
+    formatFactory: FormatFactory,
+    eventAnnotation: EventAnnotationPluginSetup
   ) {
     const {
       DatatableVisualization,
@@ -396,6 +409,7 @@ export class LensPlugin {
       charts,
       editorFrame: editorFrameSetupInterface,
       formatFactory,
+      eventAnnotation,
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);

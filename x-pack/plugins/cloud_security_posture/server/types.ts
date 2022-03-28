@@ -10,6 +10,15 @@ import type {
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
 
+import type {
+  RouteMethod,
+  KibanaResponseFactory,
+  RequestHandler,
+  IRouter,
+} from '../../../../src/core/server';
+
+import type { FleetStartContract, FleetRequestHandlerContext } from '../../fleet/server';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -25,6 +34,25 @@ export interface CspServerPluginSetupDeps {
 export interface CspServerPluginStartDeps {
   // required
   data: DataPluginStart;
-
-  // optional
+  fleet: FleetStartContract;
 }
+
+export type CspRequestHandlerContext = FleetRequestHandlerContext;
+
+/**
+ * Convenience type for request handlers in CSP that includes the CspRequestHandlerContext type
+ * @internal
+ */
+export type CspRequestHandler<
+  P = unknown,
+  Q = unknown,
+  B = unknown,
+  Method extends RouteMethod = any,
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+> = RequestHandler<P, Q, B, CspRequestHandlerContext, Method, ResponseFactory>;
+
+/**
+ * Convenience type for routers in Csp that includes the CspRequestHandlerContext type
+ * @internal
+ */
+export type CspRouter = IRouter<CspRequestHandlerContext>;

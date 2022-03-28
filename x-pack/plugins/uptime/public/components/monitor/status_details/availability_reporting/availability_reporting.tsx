@@ -62,7 +62,7 @@ export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
     pageIndex,
     pageSize,
     totalItemCount: allLocations.length,
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
   };
 
   const onTableChange = ({ page }: Criteria<StatusTag>) => {
