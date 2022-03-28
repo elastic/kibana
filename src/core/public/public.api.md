@@ -160,7 +160,9 @@ export interface ApplicationStart {
         deepLinkId?: string;
     }): string;
     navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
-    navigateToUrl(url: string): Promise<void>;
+    // Warning: (ae-forgotten-export) The symbol "NavigateToUrlOptions" needs to be exported by the entry point index.d.ts
+    navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
+    navigateToUrlSkipUnload(url: string): void;
 }
 
 // @public
@@ -778,6 +780,7 @@ export interface NavigateToAppOptions {
     openInNewTab?: boolean;
     path?: string;
     replace?: boolean;
+    skipAppLeave?: boolean;
     state?: unknown;
 }
 
