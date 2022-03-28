@@ -1486,10 +1486,10 @@
     "@elastic/transport" "^8.0.2"
     tslib "^2.3.0"
 
-"@elastic/ems-client@8.1.0":
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.1.0.tgz#e33ec651314a9ceb9a8a7f3e4c6e205c39f20efb"
-  integrity sha512-u7Y8EakPk07nqRYqRxYTTLOIMb8Y+u7UM+2BGaw10jYVxdQ85sA4oi37GJJPJVn7jk/x9R7yTQ6Mpc3FbPGoRg==
+"@elastic/ems-client@8.2.0":
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.2.0.tgz#35ca17f07a576c464b15a17ef9b228a51043e329"
+  integrity sha512-NtU/KjTMGntnrCY6+2jdkugn6pqMJj2EV4/Mff/MGlBLrWSlxYkYa6Q6KFhmT3V68RJUxOsId47mUdoQbRi/yg==
   dependencies:
     "@types/geojson" "^7946.0.7"
     "@types/lru-cache" "^5.1.0"
