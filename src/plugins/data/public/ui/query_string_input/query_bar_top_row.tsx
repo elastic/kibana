@@ -355,8 +355,12 @@ export const QueryBarTopRow = React.memo(
       if (!props.dataViewPickerComponentProps) return;
 
       return (
-        <EuiFlexItem grow={false}>
-          <DataViewPicker showNewMenuTour {...props.dataViewPickerComponentProps} />
+        <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
+          <DataViewPicker
+            showNewMenuTour
+            {...props.dataViewPickerComponentProps}
+            trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
+          />
         </EuiFlexItem>
       );
     }
@@ -410,12 +414,14 @@ export const QueryBarTopRow = React.memo(
     return (
       <EuiFlexGroup
         className={classes}
-        direction={isMobile ? 'columnReverse' : 'row'}
+        direction={isMobile ? 'column' : 'row'}
         responsive={false}
         gutterSize="s"
+        justifyContent="flexEnd"
+        wrap
       >
         {renderDataViewsPicker()}
-        <EuiFlexItem style={{ minWidth: '50%' }}>{renderQueryInput()}</EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 320 }}>{renderQueryInput()}</EuiFlexItem>
         <SharingMetaFields
           from={currentDateRange.from}
           to={currentDateRange.to}
