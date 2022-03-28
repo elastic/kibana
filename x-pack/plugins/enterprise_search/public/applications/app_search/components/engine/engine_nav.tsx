@@ -68,6 +68,7 @@ export const useEngineNav = () => {
     dataLoading,
     isSampleEngine,
     isMetaEngine,
+    isElasticsearchEngine,
     hasSchemaErrors,
     hasSchemaConflicts,
     hasUnconfirmedSchemaFields,
@@ -96,6 +97,13 @@ export const useEngineNav = () => {
             <EuiBadge>
               {i18n.translate('xpack.enterpriseSearch.appSearch.engine.metaEngineBadge', {
                 defaultMessage: 'META ENGINE',
+              })}
+            </EuiBadge>
+          )}
+          {isElasticsearchEngine && (
+            <EuiBadge>
+              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.elasticsearchEngineBadge', {
+                defaultMessage: 'ELASTICSEARCH INDEX',
               })}
             </EuiBadge>
           )}
@@ -185,7 +193,8 @@ export const useEngineNav = () => {
     });
   }
 
-  if (canViewEngineCrawler && !isMetaEngine) {
+  const showCrawlerNavItem = canViewEngineCrawler && !isMetaEngine && !isElasticsearchEngine;
+  if (showCrawlerNavItem) {
     navItems.push({
       id: 'crawler',
       name: CRAWLER_TITLE,

@@ -36,7 +36,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
-  minimumScheduleInterval: '1m',
+  minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
@@ -255,6 +255,7 @@ describe('enable()', () => {
       params: {
         alertId: '1',
         spaceId: 'default',
+        consumer: 'myApp',
       },
       schedule: {
         interval: '10s',
@@ -536,6 +537,7 @@ describe('enable()', () => {
       params: {
         alertId: '1',
         spaceId: 'default',
+        consumer: 'myApp',
       },
       schedule: {
         interval: '10s',

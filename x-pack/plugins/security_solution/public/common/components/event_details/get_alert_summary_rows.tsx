@@ -37,6 +37,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
   { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
+  { id: 'kibana.alert.original_event.id', label: i18n.SOURCE_EVENT_ID },
 ];
 
 /**

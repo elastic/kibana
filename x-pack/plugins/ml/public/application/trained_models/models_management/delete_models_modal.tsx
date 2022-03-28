@@ -103,7 +103,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ modelIds, onClos
   ) : (
     <DeleteSpaceAwareItemCheckModal
       ids={modelIds}
-      jobType="trained-model"
+      mlSavedObjectType="trained-model"
       canDeleteCallback={setCanDeleteModel.bind(null, true)}
       onCloseCallback={onClose.bind(null, true)}
       refreshJobsCallback={() => {}}
