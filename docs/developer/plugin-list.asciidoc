@@ -164,6 +164,10 @@ for use in their own application.
 |Expression Tagcloud plugin adds a tagcloud renderer and function to the expression plugin. The renderer will display the Wordcloud chart.
 
 
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_xy/README.md[expressionXY]
+|Expression XY plugin adds a xy renderer and function to the expression plugin. The renderer will display the xy chart.
+
+
 |{kib-repo}blob/{branch}/src/plugins/field_formats/README.md[fieldFormats]
 |Index pattern fields formatters
 
@@ -432,7 +436,7 @@ security and spaces filtering.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
-actitivies.
+activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]

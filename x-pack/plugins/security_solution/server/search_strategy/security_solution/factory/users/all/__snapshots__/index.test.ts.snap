@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`allHosts search strategy parse should parse data correctly 1`] = `
+Array [
+  Object {
+    "domain": "ENDPOINT-W-8-03",
+    "lastSeen": "2022-02-14T11:18:52.000Z",
+    "name": "vagrant",
+  },
+]
+`;
+
+exports[`allHosts search strategy parse should parse data correctly 2`] = `1`;
+
+exports[`allHosts search strategy parse should parse data correctly 3`] = `
+Object {
+  "activePage": 0,
+  "fakeTotalCount": 1,
+  "showMorePagesIndicator": false,
+}
+`;

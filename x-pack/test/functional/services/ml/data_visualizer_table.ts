@@ -565,12 +565,12 @@ export function MachineLearningDataVisualizerTableProvider(
       }
     }
 
-    public async assertLensActionShowChart(fieldName: string) {
+    public async assertLensActionShowChart(fieldName: string, visualizationContainer?: string) {
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.clickWhenNotDisabled(
           this.rowSelector(fieldName, 'dataVisualizerActionViewInLensButton')
         );
-        await testSubjects.existOrFail('lnsVisualizationContainer', {
+        await testSubjects.existOrFail(visualizationContainer ?? 'lnsVisualizationContainer', {
           timeout: 15 * 1000,
         });
       });

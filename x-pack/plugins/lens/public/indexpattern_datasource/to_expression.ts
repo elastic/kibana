@@ -194,6 +194,10 @@ function getExpressionForLayer(
           format: format ? [format.id] : [''],
           columnId: [id],
           decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
+          suffix:
+            format?.params && 'suffix' in format.params && format.params.suffix
+              ? [format.params.suffix]
+              : [],
           parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
         },
       };
