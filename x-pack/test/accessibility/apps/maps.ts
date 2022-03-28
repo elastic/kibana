@@ -112,16 +112,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('provides bulk delete', async function () {
       await testSubjects.click('deleteSelectedItems');
       await a11y.testAppSnapshot();
-    });
-
-    it('single delete modal', async function () {
-      await testSubjects.click('confirmModalConfirmButton');
-      await a11y.testAppSnapshot();
-    });
-
-    it('single cancel modal', async function () {
-      await testSubjects.click('confirmModalCancelButton');
-      await a11y.testAppSnapshot();
+      await retry.waitFor(
+        'maps cancel button exists',
+        async () => await testSubjects.exists('confirmModalCancelButton')
+      );
     });
   });
 }

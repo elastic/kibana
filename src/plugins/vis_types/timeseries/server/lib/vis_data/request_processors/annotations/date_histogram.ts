@@ -57,7 +57,7 @@ export const dateHistogram: AnnotationsRequestProcessorsFunction = ({
       time_zone: timezone,
       extended_bounds: {
         min: from.valueOf(),
-        max: to.valueOf() - bucketSize * 1000,
+        max: to.valueOf(),
       },
       ...dateHistogramInterval(autoBucketSize < bucketSize ? autoIntervalString : intervalString),
     });
