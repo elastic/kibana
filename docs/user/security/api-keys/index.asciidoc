@@ -20,14 +20,6 @@ To manage API keys, open the main menu, then click *Stack Management > API Keys*
 image:images/api-keys.png["API Keys UI"]
 
 [float]
-[[api-keys-service]]
-=== {es} API key service
-
-The {es} API key service is automatically enabled. For instructions on disabling it, see {ref}/security-settings.html#api-key-service-settings[API key service settings].
-
-If the {es} API key service is disabled, you cannot create or manage API keys, and you will get an error message when trying to use API keys in {kib}.
-
-[float]
 [[api-keys-security-privileges]]
 === Security privileges
 
