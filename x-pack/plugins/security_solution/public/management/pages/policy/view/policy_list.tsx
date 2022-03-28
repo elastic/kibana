@@ -55,7 +55,7 @@ export const PolicyList = memo(() => {
   });
 
   // endpoint count per policy
-  const policyIds = data?.items.map((policies) => policies.id) ?? [];
+  const policyIds = useMemo(() => data?.items.map((policies) => policies.id) ?? [], [data]);
   const { data: endpointCount = { items: [] } } = useGetAgentCountForPolicy({
     policyIds,
     customQueryOptions: {
@@ -63,7 +63,7 @@ export const PolicyList = memo(() => {
       onError: (err) => {
         toasts.addDanger(
           i18n.translate('xpack.securitySolution.policyList.endpointCountError', {
-            defaultMessage: `Error retrieving endpoint counts: ${err}`,
+            defaultMessage: 'Error retrieving endpoint counts',
           })
         );
       },
@@ -78,7 +78,7 @@ export const PolicyList = memo(() => {
         onError: (err) => {
           toasts.addDanger(
             i18n.translate('xpack.securitySolution.policyList.packageVersionError', {
-              defaultMessage: `Error retrieving the endpoint package version: ${err}`,
+              defaultMessage: 'Error retrieving the endpoint package version',
             })
           );
         },
@@ -90,8 +90,15 @@ export const PolicyList = memo(() => {
     for (const policy of endpointCount?.items) {
       map.set(policy.package_policies[0], policy.agents ?? 0);
     }
+
+    // error with the endpointCount api call, set default count to 0
+    if (policyIds.length > 0 && map.size === 0) {
+      for (const policy of policyIds) {
+        map.set(policy, 0);
+      }
+    }
     return map;
-  }, [endpointCount]);
+  }, [endpointCount, policyIds]);
 
   const totalItemCount = useMemo(() => data?.total ?? 0, [data]);
 
