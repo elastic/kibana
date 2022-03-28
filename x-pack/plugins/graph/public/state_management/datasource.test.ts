@@ -11,7 +11,7 @@ import { datasourceSelector, requestDatasource } from './datasource';
 import { datasourceSaga } from './datasource.sagas';
 import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
-import type { DataView } from '../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 

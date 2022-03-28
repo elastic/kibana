@@ -6,7 +6,7 @@
  */
 
 import { IndexPatternProvider } from '../types';
-import type { DataView } from '../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 export function createCachedIndexPatternProvider(
   indexPatternGetter: (id: string) => Promise<DataView>

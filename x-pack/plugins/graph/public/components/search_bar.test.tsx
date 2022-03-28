@@ -18,7 +18,7 @@ import {
 } from 'kibana/public';
 import { act } from 'react-dom/test-utils';
 import { QueryStringInput } from '../../../../../src/plugins/data/public';
-import type { DataView } from '../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';

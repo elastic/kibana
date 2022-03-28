@@ -29,7 +29,7 @@ import {
   Query,
 } from '../../../../../src/plugins/data/public';
 import { TooltipWrapper } from './tooltip_wrapper';
-import type { DataView } from '../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 export interface SearchBarProps {
   isLoading: boolean;

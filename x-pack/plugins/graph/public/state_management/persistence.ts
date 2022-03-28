@@ -25,7 +25,7 @@ import { updateMetaData, metaDataSelector } from './meta_data';
 import { openSaveModal, SaveWorkspaceHandler } from '../services/save_modal';
 import { getEditPath } from '../services/url';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
-import type { DataView } from '../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 export interface LoadSavedWorkspacePayload {
   indexPatterns: IndexPatternSavedObject[];

@@ -26,7 +26,7 @@ import {
   iconChoicesByClass,
 } from '../../helpers/style_choices';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
-import type { DataView } from '../../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,

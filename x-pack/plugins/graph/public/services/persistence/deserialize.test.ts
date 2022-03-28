@@ -9,7 +9,7 @@ import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '.
 import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
 import { createWorkspace } from '../../services/workspace/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import type { DataView } from '../../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;

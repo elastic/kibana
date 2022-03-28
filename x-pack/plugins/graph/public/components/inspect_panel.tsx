@@ -10,7 +10,7 @@ import { EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '../../../../../src/plugins/kibana_react/public';
-import type { DataView } from '../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 interface InspectPanelProps {
   showInspect: boolean;

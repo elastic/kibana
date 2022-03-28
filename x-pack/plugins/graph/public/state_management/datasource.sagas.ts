@@ -18,7 +18,7 @@ import {
   setDatasource,
   requestDatasource,
 } from './datasource';
-import type { DataView } from '../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 /**
  * Saga loading field information when the datasource is switched. This will overwrite current settings
