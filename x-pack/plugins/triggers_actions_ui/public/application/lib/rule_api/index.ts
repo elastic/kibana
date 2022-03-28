@@ -19,6 +19,8 @@ export { muteRule, muteRules } from './mute';
 export { loadRuleTypes } from './rule_types';
 export { loadRules } from './rules';
 export { loadRuleState } from './state';
+export type { LoadExecutionLogAggregationsProps } from './load_execution_log_aggregations';
+export { loadExecutionLogAggregations } from './load_execution_log_aggregations';
 export { unmuteAlertInstance } from './unmute_alert';
 export { unmuteRule, unmuteRules } from './unmute';
 export { updateRule } from './update';

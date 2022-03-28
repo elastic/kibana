@@ -14,18 +14,22 @@ import {
   MonitorManagementEnablementResult,
   ServiceLocations,
   SyntheticsMonitor,
+  EncryptedSyntheticsMonitor,
   ServiceLocationsApiResponseCodec,
   ServiceLocationErrors,
   ThrottlingOptions,
 } from '../../../common/runtime_types';
-import { SyntheticsMonitorSavedObject, SyntheticsServiceAllowed } from '../../../common/types';
+import {
+  DecryptedSyntheticsMonitorSavedObject,
+  SyntheticsServiceAllowed,
+} from '../../../common/types';
 import { apiService } from './utils';
 
 export const setMonitor = async ({
   monitor,
   id,
 }: {
-  monitor: SyntheticsMonitor;
+  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
   id?: string;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
   if (id) {
@@ -35,7 +39,11 @@ export const setMonitor = async ({
   }
 };
 
-export const getMonitor = async ({ id }: { id: string }): Promise<SyntheticsMonitorSavedObject> => {
+export const getMonitor = async ({
+  id,
+}: {
+  id: string;
+}): Promise<DecryptedSyntheticsMonitorSavedObject> => {
   return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
 };
 
