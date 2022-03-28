@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from 'kibana/public';
 
 export interface IQueryPayload {
   attributes?: {
@@ -16,7 +16,13 @@ export interface IQueryPayload {
 export type PackSavedObject = SavedObject<{
   name: string;
   description: string | undefined;
-  queries: Array<Record<string, any>>;
+  queries: Array<{
+    id: string;
+    name: string;
+    interval: number;
+    ecs_mapping: Record<string, unknown>;
+  }>;
+  version?: number;
   enabled: boolean | undefined;
   created_at: string;
   created_by: string | undefined;

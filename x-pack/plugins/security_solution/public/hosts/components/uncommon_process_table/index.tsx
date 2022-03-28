@@ -30,6 +30,7 @@ interface UncommonProcessTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
@@ -72,6 +73,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
     loading,
     loadPage,
     totalCount,
+    setQuerySkip,
     showMorePagesIndicator,
     type,
   }) => {
@@ -125,6 +127,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
         loading={loading}
         loadPage={loadPage}
         pageOfItems={data}
+        setQuerySkip={setQuerySkip}
         showMorePagesIndicator={showMorePagesIndicator}
         totalCount={fakeTotalCount}
         updateLimitPagination={updateLimitPagination}
