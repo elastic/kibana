@@ -1,0 +1,31 @@
+steps:
+  - command: .buildkite/scripts/lifecycle/pre_build.sh
+    label: Pre-Build
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
+
+  - wait
+
+  - command: .buildkite/scripts/steps/build_kibana.sh
+    label: Build Kibana Distribution and Plugins
+    agents:
+      queue: c2-16
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    timeout_in_minutes: 60
+
+  - command: .buildkite/scripts/steps/lint.sh
+    label: Install All Packages
+    agents:
+      queue: n2-2
+    key: linting
+    timeout_in_minutes: 90
+
+  - wait: ~
+    continue_on_failure: true
+
+  - label: Post-Build
+    command: .buildkite/scripts/lifecycle/post_build.sh
+    agents:
+      queue: kibana-default
