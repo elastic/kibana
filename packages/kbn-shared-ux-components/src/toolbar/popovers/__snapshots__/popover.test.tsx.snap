@@ -13,7 +13,6 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
       />
     }
     closePopover={[Function]}
-    color="primary"
     display="inlineBlock"
     hasArrow={true}
     isOpen={false}
@@ -22,7 +21,6 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
   >
     <div
       className="euiPopover euiPopover--anchorDownCenter"
-      color="primary"
     >
       <div
         className="euiPopover__anchor"

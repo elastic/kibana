@@ -32,7 +32,8 @@ export const ToolbarPopover = ({ label, iconType, children, ...popover }: Props)
   const button = <ToolbarButton onClick={onButtonClick} iconType={iconType} {...{ label }} />;
 
   return (
-    <EuiPopover color="primary" {...{ isOpen, button, closePopover }} {...popover}>
+    // @ts-ignore InterpolationWithTheme<any> css issue
+    <EuiPopover {...{ isOpen, button, closePopover }} {...popover}>
       {children({ closePopover })}
     </EuiPopover>
   );
