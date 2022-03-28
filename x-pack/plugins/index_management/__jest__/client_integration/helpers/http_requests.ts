@@ -12,9 +12,9 @@ type HttpResponse = Record<string, any> | any[];
 type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';
 
 export interface ResponseError {
-  status: number;
-  error: string;
-  message: string;
+  statusCode: number;
+  message: string | Error;
+  attributes?: Record<string, any>;
 }
 
 // Register helpers to mock HTTP Requests

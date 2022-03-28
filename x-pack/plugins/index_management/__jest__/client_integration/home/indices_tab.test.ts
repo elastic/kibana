@@ -403,7 +403,7 @@ describe('<IndexManagementHome />', () => {
       }`);
 
       const error = {
-        status: 400,
+        statusCode: 400,
         error: 'Bad Request',
         message: 'invalid tier names found in ...',
       };
