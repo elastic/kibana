@@ -1235,7 +1235,6 @@
     "controls.optionsList.editor.allowMultiselectTitle": "下拉列表中允许多选",
     "controls.optionsList.editor.dataViewTitle": "数据视图",
     "controls.optionsList.editor.fieldTitle": "字段",
-    "controls.optionsList.editor.indexPatternTitle": "索引模式",
     "controls.optionsList.editor.noDataViewTitle": "选择数据视图",
     "controls.optionsList.errors.dataViewNotFound": "找不到数据视图：{dataViewId}",
     "controls.optionsList.popover.allOptionsTitle": "显示所有选项",

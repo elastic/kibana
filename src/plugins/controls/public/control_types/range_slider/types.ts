@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './options_list';
-export * from './range_slider';
+export * from '../../../common/control_types/options_list/types';
+export * from '../../../common/control_types/range_slider/types';

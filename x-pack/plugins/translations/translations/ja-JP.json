@@ -1231,7 +1231,6 @@
     "controls.optionsList.editor.allowMultiselectTitle": "ドロップダウンでの複数選択を許可",
     "controls.optionsList.editor.dataViewTitle": "データビュー",
     "controls.optionsList.editor.fieldTitle": "フィールド",
-    "controls.optionsList.editor.indexPatternTitle": "インデックスパターン",
     "controls.optionsList.editor.noDataViewTitle": "データビューを選択",
     "controls.optionsList.errors.dataViewNotFound": "データビュー{dataViewId}が見つかりませんでした",
     "controls.optionsList.popover.allOptionsTitle": "すべてのオプションを表示",
