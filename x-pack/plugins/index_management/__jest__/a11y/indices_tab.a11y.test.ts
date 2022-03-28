@@ -22,27 +22,23 @@ import {
 
 describe('A11y Indices tab', () => {
   let testBed: IndicesTestBed;
-  let server: ReturnType<typeof setupEnvironment>['server'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
-  beforeEach(async () => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-    httpRequestsMockHelpers.setLoadIndicesResponse([]);
-    testBed = await setup();
-  });
-
-  afterAll(() => {
-    server.restore();
+  beforeEach(() => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   it('when there are no indices', async () => {
     httpRequestsMockHelpers.setLoadIndicesResponse([]);
     await act(async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup);
     });
     const { component } = testBed;
     component.update();
-    // this is expected to fail and needs to be updated when eui#5674 is available in Kibana
+    // this is expected to fail and needs to be updated when EUI 52.0.0 is available in Kibana
     // await expectToBeAccessible(component);
     // until then check that only 1 expected violation is found
     const violations = await getA11yViolations(component);
@@ -57,11 +53,11 @@ describe('A11y Indices tab', () => {
       createDataStreamBackingIndex('data-stream-test-index', 'test-data-stream'),
     ]);
     await act(async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup);
     });
     const { component } = testBed;
     component.update();
-    // this is expected to fail and needs to be updated when https://github.com/elastic/eui/pull/5709 is available in Kibana
+    // this is expected to fail and needs to be updated when EUI 52.0.0 is available in Kibana
     // await expectToBeAccessible(component);
     // until then check that only 1 expected violation is found
     const violations = await getA11yViolations(component);
@@ -79,7 +75,7 @@ describe('A11y Indices tab', () => {
       httpRequestsMockHelpers.setLoadIndexMappingResponse(indexMappings);
       httpRequestsMockHelpers.setLoadIndexStatsResponse(indexStats);
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       const { component, find } = testBed;
       component.update();
@@ -90,7 +86,7 @@ describe('A11y Indices tab', () => {
     it('summary tab', async () => {
       const { component, find } = testBed;
       expect(find('detailPanelTabSelected').text()).toEqual('Summary');
-      // this is expected to fail and needs to be updated when https://github.com/elastic/eui/pull/5709 is available in Kibana
+      // this is expected to fail and needs to be updated when EUI 52.0.0 is available in Kibana
       // await expectToBeAccessible(component);
       // until then check that only 1 expected violation is found
       const violations = await getA11yViolations(component);
@@ -103,7 +99,7 @@ describe('A11y Indices tab', () => {
         const { component, find, actions } = testBed;
         await actions.selectIndexDetailsTab(tab as 'settings');
         expect(find('detailPanelTabSelected').text().toLowerCase()).toEqual(tab);
-        // this is expected to fail and needs to be updated when https://github.com/elastic/eui/pull/5709 is available in Kibana
+        // this is expected to fail and needs to be updated when EUI 52.0.0 is available in Kibana
         // await expectToBeAccessible(component);
         // until then check that only 1 expected violation is found
         const violations = await getA11yViolations(component);
@@ -117,7 +113,7 @@ describe('A11y Indices tab', () => {
       const { component, find, actions } = testBed;
       await actions.selectIndexDetailsTab('edit_settings');
       expect(find('detailPanelTabSelected').text()).toEqual('Edit settings');
-      // this is expected to fail and needs to be updated when https://github.com/elastic/eui/pull/5709 is available in Kibana
+      // this is expected to fail and needs to be updated when EUI 52.0.0 is available in Kibana
       // await expectToBeAccessible(component);
       // until then check that only 1 expected violation is found
       const violations = await getA11yViolations(component);
