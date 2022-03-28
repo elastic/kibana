@@ -232,6 +232,7 @@
 /packages/kbn-utils/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations
 /packages/kbn-generate/ @elastic/kibana-operations
+/packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
