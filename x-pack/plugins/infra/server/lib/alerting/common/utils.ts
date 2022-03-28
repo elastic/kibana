@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { IBasePath } from 'kibana/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/rule_data_formatters';
+import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import { parseTechnicalFields } from '../../../../../rule_registry/common/parse_technical_fields';
 import {
   AlertExecutionDetails,

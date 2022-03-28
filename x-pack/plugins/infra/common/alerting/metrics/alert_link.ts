@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { ALERT_REASON, ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
-
-export type ObservabilityRuleTypeFieldsOnly = (options: {
-  fields: ParsedTechnicalFields & Record<string, any>;
-}) => { reason: string; link: string };
 
 export const getInventoryViewInAppUrl = (
   fields: ParsedTechnicalFields & Record<string, any>
 ): string => {
   const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
   const nodeType = fields[nodeTypeField];
-  let viwInAppUrl = '/app/metrics/link-to/inventory?';
+  let inventoryViewInAppUrl = '/app/metrics/link-to/inventory?';
   if (nodeType) {
     const linkToParams: Record<string, any> = {
       nodeType: fields[nodeTypeField][0],
@@ -46,16 +42,7 @@ export const getInventoryViewInAppUrl = (
     } else {
       linkToParams.metric = encode({ type: criteriaMetric });
     }
-    viwInAppUrl += stringify(linkToParams);
+    inventoryViewInAppUrl += stringify(linkToParams);
   }
-  return viwInAppUrl;
-};
-
-export const formatReason: ObservabilityRuleTypeFieldsOnly = ({ fields }) => {
-  const reason = fields[ALERT_REASON] ?? '-';
-
-  return {
-    reason,
-    link: getInventoryViewInAppUrl(fields),
-  };
+  return inventoryViewInAppUrl;
 };

@@ -14,7 +14,7 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
-import { formatReason } from '../../../common/alerting/metrics/rule_data_formatters';
+import { formatReason } from '../../alerting/inventory/rule_data_formatters';
 
 interface InventoryMetricRuleTypeParams extends RuleTypeParams {
   criteria: InventoryMetricConditions[];
