@@ -46,7 +46,8 @@ export const buildLastEventTimeQuery = ({
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               query: { bool: { filter: { bool: { should: getIpDetailsFilter(details.ip) } } } },
-              _source: ['@timestamp'],
+              _source: false,
+              fields: ['@timestamp'],
               size: 1,
               sort: [
                 {
@@ -69,7 +70,8 @@ export const buildLastEventTimeQuery = ({
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               query: { bool: { filter: getHostDetailsFilter(details.hostName) } },
-              _source: ['@timestamp'],
+              _source: false,
+              fields: ['@timestamp'],
               size: 1,
               sort: [
                 {
@@ -92,7 +94,8 @@ export const buildLastEventTimeQuery = ({
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               query: { bool: { filter: getUserDetailsFilter(details.userName) } },
-              _source: ['@timestamp'],
+              _source: false,
+              fields: ['@timestamp'],
               size: 1,
               sort: [
                 {
@@ -116,7 +119,8 @@ export const buildLastEventTimeQuery = ({
           body: {
             ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
             query: { match_all: {} },
-            _source: ['@timestamp'],
+            _source: false,
+            fields: ['@timestamp'],
             size: 1,
             sort: [
               {

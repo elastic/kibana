@@ -139,6 +139,7 @@ export const AuditdGenericDetails = React.memo<GenericDetailsProps>(
     const primary: string | null | undefined = get('auditd.summary.actor.primary[0]', data);
     const secondary: string | null | undefined = get('auditd.summary.actor.secondary[0]', data);
     const args: string[] | null | undefined = get('process.args', data);
+    console.log(session);
     if (data.process != null) {
       return (
         <Details>

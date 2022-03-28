@@ -7,11 +7,11 @@
 
 import { eventHit } from '@kbn/securitysolution-t-grid';
 import { EventHit } from '../../../../../common/search_strategy';
-import { buildObjectForFieldPath } from './build_object_for_field_path';
+import { buildObjectRecursive } from './build_object_recursive';
 
-describe('buildObjectForFieldPath', () => {
+describe('buildObjectRecursive', () => {
   it('builds an object from a single non-nested field', () => {
-    expect(buildObjectForFieldPath('@timestamp', eventHit)).toEqual({
+    expect(buildObjectRecursive('@timestamp', eventHit.fields)).toEqual({
       '@timestamp': ['2020-11-17T14:48:08.922Z'],
     });
   });
@@ -19,7 +19,7 @@ describe('buildObjectForFieldPath', () => {
   it('builds an object with no fields response', () => {
     const { fields, ...fieldLessHit } = eventHit;
     // @ts-expect-error fieldLessHit is intentionally missing fields
-    expect(buildObjectForFieldPath('@timestamp', fieldLessHit)).toEqual({
+    expect(buildObjectRecursive('@timestamp', fieldLessHit)).toEqual({
       '@timestamp': [],
     });
   });
@@ -33,7 +33,7 @@ describe('buildObjectForFieldPath', () => {
       },
     };
 
-    expect(buildObjectForFieldPath('foo.barBaz', hit)).toEqual({
+    expect(buildObjectRecursive('foo.barBaz', hit.fields)).toEqual({
       foo: { barBaz: ['foo'] },
     });
   });
@@ -45,7 +45,7 @@ describe('buildObjectForFieldPath', () => {
         foo: [{ bar: ['baz'] }],
       },
     };
-    expect(buildObjectForFieldPath('foo.bar', hit)).toEqual({
+    expect(buildObjectRecursive('foo.bar', hit.fields)).toEqual({
       foo: [{ bar: ['baz'] }],
     });
   });
@@ -61,7 +61,7 @@ describe('buildObjectForFieldPath', () => {
         ],
       },
     };
-    expect(buildObjectForFieldPath('foo.bar.baz', nestedHit)).toEqual({
+    expect(buildObjectRecursive('foo.bar.baz', nestedHit.fields)).toEqual({
       foo: {
         bar: [
           {
@@ -73,7 +73,7 @@ describe('buildObjectForFieldPath', () => {
   });
 
   it('builds intermediate objects at multiple levels', () => {
-    expect(buildObjectForFieldPath('threat.enrichments.matched.atomic', eventHit)).toEqual({
+    expect(buildObjectRecursive('threat.enrichments.matched.atomic', eventHit.fields)).toEqual({
       threat: {
         enrichments: [
           {
@@ -92,7 +92,7 @@ describe('buildObjectForFieldPath', () => {
   });
 
   it('preserves multiple values for a single leaf', () => {
-    expect(buildObjectForFieldPath('threat.enrichments.matched.field', eventHit)).toEqual({
+    expect(buildObjectRecursive('threat.enrichments.matched.field', eventHit.fields)).toEqual({
       threat: {
         enrichments: [
           {
@@ -136,7 +136,7 @@ describe('buildObjectForFieldPath', () => {
     });
 
     it('includes objects without the field', () => {
-      expect(buildObjectForFieldPath('nested_1.foo.nested_2.bar.leaf', nestedHit)).toEqual({
+      expect(buildObjectRecursive('nested_1.foo.nested_2.bar.leaf', nestedHit.fields)).toEqual({
         nested_1: {
           foo: [
             {
@@ -155,7 +155,7 @@ describe('buildObjectForFieldPath', () => {
     });
 
     it('groups multiple leaf values', () => {
-      expect(buildObjectForFieldPath('nested_1.foo.nested_2.bar.leaf_2', nestedHit)).toEqual({
+      expect(buildObjectRecursive('nested_1.foo.nested_2.bar.leaf_2', nestedHit.fields)).toEqual({
         nested_1: {
           foo: [
             {

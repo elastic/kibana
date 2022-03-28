@@ -11,7 +11,7 @@ import { toStringArray } from '../../../../../common/utils/to_array';
 import { getDataFromFieldsHits, getDataSafety } from '../../../../../common/utils/field_formatters';
 import { getTimestamp } from './get_timestamp';
 import { getNestedParentPath } from './get_nested_parent_path';
-import { buildObjectForFieldPath } from './build_object_for_field_path';
+import { buildObjectRecursive } from './build_object_recursive';
 import { ECS_METADATA_FIELDS } from './constants';
 
 export const formatTimelineData = async (
@@ -59,11 +59,7 @@ const getValuesFromFields = async (
   }
 
   let fieldToEval;
-  if (has(fieldName, hit._source)) {
-    fieldToEval = {
-      [fieldName]: get(fieldName, hit._source),
-    };
-  } else {
+  
     if (nestedParentFieldName == null) {
       fieldToEval = {
         [fieldName]: hit.fields[fieldName],
@@ -73,7 +69,6 @@ const getValuesFromFields = async (
         [nestedParentFieldName]: hit.fields[nestedParentFieldName],
       };
     }
-  }
   const formattedData = await getDataSafety(getDataFromFieldsHits, fieldToEval);
   return formattedData.reduce(
     (acc: TimelineNonEcsData[], { field, values }) =>
@@ -94,7 +89,6 @@ const mergeTimelineFieldsWithHit = async <T>(
     const nestedParentPath = getNestedParentPath(fieldName, hit.fields);
     if (
       nestedParentPath != null ||
-      has(fieldName, hit._source) ||
       has(fieldName, hit.fields) ||
       ECS_METADATA_FIELDS.includes(fieldName)
     ) {
@@ -110,7 +104,7 @@ const mergeTimelineFieldsWithHit = async <T>(
           ecs: ecsFields.includes(fieldName)
             ? {
                 ...get('node.ecs', flattenedFields),
-                ...buildObjectForFieldPath(fieldName, hit),
+                ...buildObjectRecursive(fieldName, hit.fields),
               }
             : get('node.ecs', flattenedFields),
         },

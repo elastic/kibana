@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { buildTimelineDetailsQuery } from './query.events_details.dsl';
+import {
+  Direction,
+} from '../../../../../../common/search_strategy';
+import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 
-describe('buildTimelineDetailsQuery', () => {
-  it('returns the expected query', () => {
-    const indexName = '.siem-signals-default';
-    const eventId = 'f0a936d50b5b3a5a193d415459c14587fe633f7e519df7b5dc151d56142680e3';
+describe('buildTimelineEventsAllQuery', () => {
+  it('should return ip details query if index key is ipDetails', () => {
+    const defaultIndex = ['.siem-signals-default'];
     const docValueFields = [
       { field: '@timestamp' },
       { field: 'agent.ephemeral_id' },
@@ -18,18 +20,25 @@ describe('buildTimelineDetailsQuery', () => {
       { field: 'agent.name' },
     ];
 
-    const query = buildTimelineDetailsQuery({
-      indexName,
-      id: eventId,
-      docValueFields,
-      runtimeMappings: {},
+    const query = buildTimelineEventsAllQuery({
+      fields: [], defaultIndex, docValueFields, filterQuery: '', language: 'eql', pagination: {
+        activePage: 0,
+        querySize: 100,
+      }, runtimeMappings: {}, sort: [{
+        direction: Direction.asc,
+        field: '@timestamp',
+        type: 'datetime'
+      }], timerange: {
+        from: '',
+        interval: '5m',
+        to: '',
+      }
     });
-
     expect(query).toMatchInlineSnapshot(`
       Object {
         "allow_no_indices": true,
         "body": Object {
-          "_source": false,
+          "_source": true,
           "docvalue_fields": Array [
             Object {
               "field": "@timestamp",
