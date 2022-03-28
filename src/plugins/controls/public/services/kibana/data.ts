@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { AggConfig } from 'src/plugins/data/public';
 import { DataViewField } from 'src/plugins/data_views/common';
 import { get } from 'lodash';
+import { from } from 'rxjs';
 import { ControlsDataService } from '../data';
 import { ControlsPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
-import { from } from 'rxjs';
 
 export type DataServiceFactory = KibanaPluginServiceFactory<
   ControlsDataService,
