@@ -94,10 +94,19 @@ describe('SessionView component', () => {
         render();
         await waitForApiCall();
 
-        userEvent.click(renderResult.getByTestId('sessionViewDetailPanelToggle'));
+        userEvent.click(renderResult.getByTestId('sessionView:sessionViewDetailPanelToggle'));
         expect(renderResult.getByText('Process')).toBeTruthy();
         expect(renderResult.getByText('Host')).toBeTruthy();
         expect(renderResult.getByText('Alerts')).toBeTruthy();
+      });
+
+      it('should render session view options button and its options when clicked', async () => {
+        render();
+        await waitForApiCall();
+        userEvent.click(renderResult.getByTestId('sessionView:sessionViewOptionButton'));
+        expect(renderResult.getByText('Display options')).toBeTruthy();
+        expect(renderResult.getByText('Timestamp')).toBeTruthy();
+        expect(renderResult.getByText('Verbose mode')).toBeTruthy();
       });
     });
   });

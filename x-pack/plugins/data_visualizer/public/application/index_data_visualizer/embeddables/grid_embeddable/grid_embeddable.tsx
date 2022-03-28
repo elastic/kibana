@@ -27,11 +27,8 @@ import {
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
-import {
-  IndexPattern,
-  IndexPatternField,
-  Query,
-} from '../../../../../../../../src/plugins/data/common';
+import { Query } from '../../../../../../../../src/plugins/data/common';
+import { DataView, DataViewField } from '../../../../../../../../src/plugins/data_views/public';
 import { SavedSearch } from '../../../../../../../../src/plugins/discover/public';
 import {
   DataVisualizerTable,
@@ -46,7 +43,7 @@ import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export interface DataVisualizerGridInput {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   savedSearch?: SavedSearch | SavedSearchSavedObject | null;
   query?: Query;
   visibleFieldNames?: string[];
@@ -57,7 +54,7 @@ export interface DataVisualizerGridInput {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   sessionId?: string;
   fieldsToFetch?: string[];
 }
@@ -87,6 +84,7 @@ export const EmbeddableWrapper = ({
     },
     [dataVisualizerListState, onOutputChange]
   );
+
   const { configs, searchQueryLanguage, searchString, extendedColumns, progress, setLastRefresh } =
     useDataVisualizerGridData(input, dataVisualizerListState);
 
@@ -102,7 +100,7 @@ export const EmbeddableWrapper = ({
           m[fieldName] = (
             <IndexBasedDataVisualizerExpandedRow
               item={item}
-              indexPattern={input.indexPattern}
+              dataView={input.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={input.onAddFilter}
             />
@@ -159,7 +157,7 @@ export const IndexDataVisualizerViewWrapper = (props: {
   const { embeddableInput, onOutputChange } = props;
 
   const input = useObservable(embeddableInput);
-  if (input && input.indexPattern) {
+  if (input && input.dataView) {
     return <EmbeddableWrapper input={input} onOutputChange={onOutputChange} />;
   } else {
     return (

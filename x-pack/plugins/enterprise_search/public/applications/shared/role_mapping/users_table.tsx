@@ -152,7 +152,7 @@ export const UsersTable: React.FC<Props> = ({
   };
 
   const pagination = {
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
     pageSize: 10,
   };
 

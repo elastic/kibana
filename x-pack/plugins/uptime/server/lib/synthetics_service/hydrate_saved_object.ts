@@ -8,49 +8,75 @@
 import moment from 'moment';
 import { UptimeESClient } from '../lib';
 import { UptimeServerSetup } from '../adapters';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
-import { MonitorFields, Ping } from '../../../common/runtime_types';
+import { DecryptedSyntheticsMonitorSavedObject } from '../../../common/types';
+import { SyntheticsMonitor, MonitorFields, Ping } from '../../../common/runtime_types';
 
 export const hydrateSavedObjects = async ({
   monitors,
   server,
 }: {
-  monitors: SyntheticsMonitorSavedObject[];
+  monitors: DecryptedSyntheticsMonitorSavedObject[];
   server: UptimeServerSetup;
 }) => {
   try {
-    const missingUrlInfoIds: string[] = [];
+    const missingInfoIds: string[] = monitors
+      .filter((monitor) => {
+        const isBrowserMonitor = monitor.attributes.type === 'browser';
+        const isHTTPMonitor = monitor.attributes.type === 'http';
+        const isTCPMonitor = monitor.attributes.type === 'tcp';
 
-    monitors
-      .filter((monitor) => monitor.attributes.type === 'browser')
-      .forEach(({ attributes, id }) => {
-        const monitor = attributes as MonitorFields;
-        if (!monitor || !monitor.urls) {
-          missingUrlInfoIds.push(id);
-        }
-      });
+        const monitorAttributes = monitor.attributes as MonitorFields;
+        const isMissingUrls = !monitorAttributes || !monitorAttributes.urls;
+        const isMissingPort = !monitorAttributes || !monitorAttributes['url.port'];
 
-    if (missingUrlInfoIds.length > 0 && server.uptimeEsClient) {
+        const isEnrichableBrowserMonitor = isBrowserMonitor && (isMissingUrls || isMissingPort);
+        const isEnrichableHttpMonitor = isHTTPMonitor && isMissingPort;
+        const isEnrichableTcpMonitor = isTCPMonitor && isMissingPort;
+
+        return isEnrichableBrowserMonitor || isEnrichableHttpMonitor || isEnrichableTcpMonitor;
+      })
+      .map(({ id }) => id);
+
+    if (missingInfoIds.length > 0 && server.uptimeEsClient) {
       const esDocs: Ping[] = await fetchSampleMonitorDocuments(
         server.uptimeEsClient,
-        missingUrlInfoIds
+        missingInfoIds
       );
-      const updatedObjects = monitors
-        .filter((monitor) => missingUrlInfoIds.includes(monitor.id))
-        .map((monitor) => {
-          let url = '';
+
+      const updatedObjects: DecryptedSyntheticsMonitorSavedObject[] = [];
+      monitors
+        .filter((monitor) => missingInfoIds.includes(monitor.id))
+        .forEach((monitor) => {
+          let resultAttributes: Partial<SyntheticsMonitor> = monitor.attributes;
+
+          let isUpdated = false;
+
           esDocs.forEach((doc) => {
             // to make sure the document is ingested after the latest update of the monitor
-            const diff = moment(monitor.updated_at).diff(moment(doc.timestamp), 'minutes');
-            if (doc.config_id === monitor.id && doc.url?.full && diff > 1) {
-              url = doc.url?.full;
+            const documentIsAfterLatestUpdate = moment(monitor.updated_at).isBefore(
+              moment(doc.timestamp)
+            );
+            if (!documentIsAfterLatestUpdate) return monitor;
+            if (doc.config_id !== monitor.id) return monitor;
+
+            if (doc.url?.full) {
+              isUpdated = true;
+              resultAttributes = { ...resultAttributes, urls: doc.url?.full };
+            }
+
+            if (doc.url?.port) {
+              isUpdated = true;
+              resultAttributes = { ...resultAttributes, ['url.port']: doc.url?.port };
             }
           });
-          if (url) {
-            return { ...monitor, attributes: { ...monitor.attributes, urls: url } };
+          if (isUpdated) {
+            updatedObjects.push({
+              ...monitor,
+              attributes: resultAttributes,
+            } as DecryptedSyntheticsMonitorSavedObject);
           }
-          return monitor;
         });
+
       await server.authSavedObjectsClient?.bulkUpdate(updatedObjects);
     }
   } catch (e) {
@@ -59,48 +85,48 @@ export const hydrateSavedObjects = async ({
 };
 
 const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: string[]) => {
-  const data = await esClient.search({
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: 'now-15m',
-                  lt: 'now',
+  const data = await esClient.search(
+    {
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-15m',
+                    lt: 'now',
+                  },
                 },
               },
-            },
-            {
-              terms: {
-                config_id: configIds,
+              {
+                terms: {
+                  config_id: configIds,
+                },
               },
-            },
-            {
-              term: {
-                'monitor.type': 'browser',
+              {
+                exists: {
+                  field: 'summary',
+                },
               },
-            },
-            {
-              exists: {
-                field: 'summary',
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [{ exists: { field: 'url.full' } }, { exists: { field: 'url.port' } }],
+                },
               },
-            },
-            {
-              exists: {
-                field: 'url.full',
-              },
-            },
-          ],
+            ],
+          },
+        },
+        _source: ['url', 'config_id', '@timestamp'],
+        collapse: {
+          field: 'config_id',
         },
       },
-      _source: ['url', 'config_id', '@timestamp'],
-      collapse: {
-        field: 'config_id',
-      },
     },
-  });
+    'getHydrateQuery',
+    'synthetics-*'
+  );
 
   return data.body.hits.hits.map(
     ({ _source: doc }) => ({ ...(doc as any), timestamp: (doc as any)['@timestamp'] } as Ping)

@@ -20,7 +20,12 @@ import type { LensPublicStart } from '../../lens/public';
 import type { SecurityPluginSetup } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '../../triggers_actions_ui/public';
-import { CasesByAlertId, CommentRequestAlertType, CommentRequestUserType } from '../common/api';
+import {
+  CasesByAlertId,
+  CasesByAlertIDRequest,
+  CommentRequestAlertType,
+  CommentRequestUserType,
+} from '../common/api';
 import { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { CasesOwners } from './client/helpers/can_use_cases';
@@ -68,7 +73,7 @@ export interface RenderAppProps {
 
 export interface CasesUiStart {
   api: {
-    getRelatedCases: (alertId: string) => Promise<CasesByAlertId>;
+    getRelatedCases: (alertId: string, query: CasesByAlertIDRequest) => Promise<CasesByAlertId>;
   };
   ui: {
     /**

@@ -115,6 +115,14 @@ Arguments
 | Property | Description  | Type   |
 | -------- | ------------ | ------ |
 | alertId  | The alert ID | string |
+| query    | The alert ID | object |
+
+`query`
+
+| Property | Description                                                                                                                       | Type                            |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| owner    | The type of cases to retrieve given an alert ID. If no owner is provided, all cases that the user has access to will be returned. | string \| string[] \| undefined |
+
 
 Response
 

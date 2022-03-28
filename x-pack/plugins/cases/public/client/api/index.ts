@@ -6,11 +6,15 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import { CasesByAlertId, getCasesFromAlertsUrl } from '../../../common/api';
+import { CasesByAlertId, CasesByAlertIDRequest, getCasesFromAlertsUrl } from '../../../common/api';
+import { CasesUiStart } from '../../types';
 
-export const createClientAPI = ({ http }: { http: HttpStart }) => {
+export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['api'] => {
   return {
-    getRelatedCases: async (alertId: string): Promise<CasesByAlertId> =>
-      http.get<CasesByAlertId>(getCasesFromAlertsUrl(alertId)),
+    getRelatedCases: async (
+      alertId: string,
+      query: CasesByAlertIDRequest
+    ): Promise<CasesByAlertId> =>
+      http.get<CasesByAlertId>(getCasesFromAlertsUrl(alertId), { query }),
   };
 };

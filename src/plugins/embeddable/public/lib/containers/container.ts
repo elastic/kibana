@@ -9,7 +9,8 @@
 import uuid from 'uuid';
 import { isEqual, xor } from 'lodash';
 import { merge, Subscription } from 'rxjs';
-import { startWith, pairwise } from 'rxjs/operators';
+import { pairwise, take, delay } from 'rxjs/operators';
+
 import {
   Embeddable,
   EmbeddableInput,
@@ -19,7 +20,13 @@ import {
   IEmbeddable,
   isErrorEmbeddable,
 } from '../embeddables';
-import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
+import {
+  IContainer,
+  ContainerInput,
+  ContainerOutput,
+  PanelState,
+  EmbeddableContainerSettings,
+} from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
@@ -39,19 +46,29 @@ export abstract class Container<
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
   } = {};
 
-  private subscription: Subscription;
+  private subscription: Subscription | undefined;
 
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
     protected readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
-    parent?: Container
+    parent?: IContainer,
+    settings?: EmbeddableContainerSettings
   ) {
     super(input, output, parent);
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
+
+    // initialize all children on the first input change. Delayed so it is run after the constructor is finished.
+    this.getInput$()
+      .pipe(delay(0), take(1))
+      .subscribe(() => {
+        this.initializeChildEmbeddables(input, settings);
+      });
+
+    // on all subsequent input changes, diff and update children on changes.
     this.subscription = this.getInput$()
-      // At each update event, get both the previous and current state
-      .pipe(startWith(input), pairwise())
+      // At each update event, get both the previous and current state.
+      .pipe(pairwise())
       .subscribe(([{ panels: prevPanels }, { panels: currentPanels }]) => {
         this.maybeUpdateChildren(currentPanels, prevPanels);
       });
@@ -166,7 +183,7 @@ export abstract class Container<
   public destroy() {
     super.destroy();
     Object.values(this.children).forEach((child) => child.destroy());
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public async untilEmbeddableLoaded<TEmbeddable extends IEmbeddable>(
@@ -263,6 +280,33 @@ export abstract class Container<
    * will override inherited input.
    */
   protected abstract getInheritedInput(id: string): TChildInput;
+
+  private async initializeChildEmbeddables(
+    initialInput: TContainerInput,
+    initializeSettings?: EmbeddableContainerSettings
+  ) {
+    let initializeOrder = Object.keys(initialInput.panels);
+    if (initializeSettings?.childIdInitializeOrder) {
+      const initializeOrderSet = new Set<string>();
+      for (const id of [...initializeSettings.childIdInitializeOrder, ...initializeOrder]) {
+        if (!initializeOrderSet.has(id) && Boolean(this.getInput().panels[id])) {
+          initializeOrderSet.add(id);
+        }
+      }
+      initializeOrder = Array.from(initializeOrderSet);
+    }
+
+    for (const id of initializeOrder) {
+      if (initializeSettings?.initializeSequentially) {
+        const embeddable = await this.onPanelAdded(initialInput.panels[id]);
+        if (embeddable && !isErrorEmbeddable(embeddable)) {
+          await this.untilEmbeddableLoaded(id);
+        }
+      } else {
+        this.onPanelAdded(initialInput.panels[id]);
+      }
+    }
+  }
 
   private async createAndSaveEmbeddable<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,

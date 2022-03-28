@@ -251,6 +251,7 @@ export interface RuleTableItem extends Rule {
   actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
+  showIntervalWarning?: boolean;
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -339,6 +340,7 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
+  filteredSolutions?: string[] | undefined;
 }
 
 export enum Percentiles {
@@ -348,5 +350,8 @@ export enum Percentiles {
 }
 
 export interface TriggersActionsUiConfig {
-  minimumScheduleInterval?: string;
+  minimumScheduleInterval?: {
+    value: string;
+    enforce: boolean;
+  };
 }

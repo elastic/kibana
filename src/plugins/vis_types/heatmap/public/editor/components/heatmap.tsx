@@ -8,6 +8,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -22,6 +23,7 @@ import {
   NumberInputOption,
   PercentageModeOption,
   LongLegendOptions,
+  LegendSizeSettings,
 } from '../../../../../vis_default_editor/public';
 import { colorSchemas } from '../../../../../charts/public';
 import { VisEditorOptionsProps } from '../../../../../visualizations/public';
@@ -64,6 +66,8 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
     }
   }, [stateParams]);
 
+  const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
+
   return (
     <>
       <EuiPanel paddingSize="s">
@@ -79,12 +83,22 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
 
         <BasicOptions {...props} legendPositions={legendPositions} />
         {showElasticChartsOptions && (
-          <LongLegendOptions
-            data-test-subj="heatmapLongLegendsOptions"
-            truncateLegend={stateParams.truncateLegend ?? true}
-            maxLegendLines={stateParams.maxLegendLines ?? 1}
-            setValue={setValue}
-          />
+          <>
+            <LongLegendOptions
+              data-test-subj="heatmapLongLegendsOptions"
+              truncateLegend={stateParams.truncateLegend ?? true}
+              maxLegendLines={stateParams.maxLegendLines ?? 1}
+              setValue={setValue}
+            />
+            <LegendSizeSettings
+              legendSize={stateParams.legendSize}
+              onLegendSizeChange={handleLegendSizeChange}
+              isVerticalLegend={
+                stateParams.legendPosition === Position.Left ||
+                stateParams.legendPosition === Position.Right
+              }
+            />
+          </>
         )}
 
         <SwitchOption

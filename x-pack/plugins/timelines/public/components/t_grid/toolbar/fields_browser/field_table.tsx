@@ -7,16 +7,16 @@
 
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiInMemoryTable, EuiText } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
-import * as i18n from './translations';
 import { getColumnHeader, getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 import { tGridActions } from '../../../../store/t_grid';
 import type { GetFieldTableColumns } from '../../../../../common/types/fields_browser';
+import { FieldTableHeader } from './field_table_header';
 
-interface FieldTableProps {
+export interface FieldTableProps {
   timelineId: string;
   columnHeaders: ColumnHeaderOptions[];
   /**
@@ -25,6 +25,9 @@ interface FieldTableProps {
    * the filter input (as a substring).
    */
   filteredBrowserFields: BrowserFields;
+  /** when true, show only the the selected field */
+  filterSelectedEnabled: boolean;
+  onFilterSelectedChange: (enabled: boolean) => void;
   /**
    * Optional function to customize field table columns
    */
@@ -36,6 +39,10 @@ interface FieldTableProps {
   /** The text displayed in the search input */
   /** Invoked when a user chooses to view a new set of columns in the timeline */
   searchInput: string;
+  /**
+   * Hides the field browser when invoked
+   */
+  onHide: () => void;
 }
 
 const TableContainer = styled.div<{ height: number }>`
@@ -54,10 +61,13 @@ Count.displayName = 'Count';
 const FieldTableComponent: React.FC<FieldTableProps> = ({
   columnHeaders,
   filteredBrowserFields,
+  filterSelectedEnabled,
   getFieldTableColumns,
   searchInput,
   selectedCategoryIds,
+  onFilterSelectedChange,
   timelineId,
+  onHide,
 }) => {
   const dispatch = useDispatch();
 
@@ -94,20 +104,20 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   );
 
   const columns = useMemo(
-    () => getFieldColumns({ highlight: searchInput, onToggleColumn, getFieldTableColumns }),
-    [onToggleColumn, searchInput, getFieldTableColumns]
+    () => getFieldColumns({ highlight: searchInput, onToggleColumn, getFieldTableColumns, onHide }),
+    [onToggleColumn, searchInput, getFieldTableColumns, onHide]
   );
   const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);
 
   return (
     <>
-      <EuiText data-test-subj="fields-showing" size="xs">
-        {i18n.FIELDS_SHOWING}
-        <Count data-test-subj="fields-count"> {fieldItems.length} </Count>
-        {i18n.FIELDS_COUNT(fieldItems.length)}
-      </EuiText>
+      <FieldTableHeader
+        fieldCount={fieldItems.length}
+        filterSelectedEnabled={filterSelectedEnabled}
+        onFilterSelectedChange={onFilterSelectedChange}
+      />
 
-      <TableContainer className="euiTable--compressed" height={TABLE_HEIGHT}>
+      <TableContainer height={TABLE_HEIGHT}>
         <EuiInMemoryTable
           data-test-subj="field-table"
           className={`${CATEGORY_TABLE_CLASS_NAME} eui-yScroll`}
@@ -117,6 +127,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
           pagination={true}
           sorting={true}
           hasActions={hasActions}
+          compressed
         />
       </TableContainer>
     </>

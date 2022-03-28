@@ -142,7 +142,7 @@ export function registerMonitoringTelemetryCollection(
       const callCluster = getClient().asInternalUser;
       const clusterDetails = await getClusterUuids(callCluster, timestamp, maxBucketSize);
       const [licenses, stats] = await Promise.all([
-        getLicenses(clusterDetails, callCluster, maxBucketSize),
+        getLicenses(clusterDetails, callCluster, timestamp, maxBucketSize),
         getAllStats(clusterDetails, callCluster, timestamp, maxBucketSize),
       ]);
 

@@ -306,6 +306,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Select sorting method for {display}',
         values: { display },
       }),
+    'euiComboBox.listboxAriaLabel': i18n.translate('core.euiComboBox.listboxAriaLabel', {
+      defaultMessage: 'Choose from the following options',
+    }),
     'euiComboBoxOptionsList.allOptionsSelected': i18n.translate(
       'core.euiComboBoxOptionsList.allOptionsSelected',
       {
@@ -484,18 +487,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Descending size label',
       }
     ),
-    'euiDataGridToolbar.fullScreenButton': i18n.translate(
-      'core.euiDataGridToolbar.fullScreenButton',
-      {
-        defaultMessage: 'Full screen',
-      }
-    ),
-    'euiDataGridToolbar.fullScreenButtonActive': i18n.translate(
-      'core.euiDataGridToolbar.fullScreenButtonActive',
-      {
-        defaultMessage: 'Exit full screen',
-      }
-    ),
     'euiDatePopoverButton.invalidTitle': ({ title }: EuiValues) =>
       i18n.translate('core.euiDatePopoverButton.invalidTitle', {
         defaultMessage: 'Invalid date: {title}',
@@ -586,6 +577,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'ARIA label on a button that removes any entry in a form field',
       }
     ),
+    'euiFullscreenSelector.fullscreenButton': i18n.translate(
+      'core.euiFullscreenSelector.fullscreenButton',
+      {
+        defaultMessage: 'Enter fullscreen',
+      }
+    ),
+    'euiFullscreenSelector.fullscreenButtonActive': i18n.translate(
+      'core.euiFullscreenSelector.fullscreenButtonActive',
+      {
+        defaultMessage: 'Exit fullscreen',
+      }
+    ),
     'euiHeaderLinks.appNavigation': i18n.translate('core.euiHeaderLinks.appNavigation', {
       defaultMessage: 'App menu',
       description: 'ARIA label on a `nav` element',
@@ -598,12 +601,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiImage.closeImage': ({ alt }: EuiValues) =>
       i18n.translate('core.euiImage.closeImage', {
-        defaultMessage: 'Close full screen {alt} image',
+        defaultMessage: 'Close fullscreen {alt} image',
         values: { alt },
       }),
     'euiImage.openImage': ({ alt }: EuiValues) =>
       i18n.translate('core.euiImage.openImage', {
-        defaultMessage: 'Open full screen {alt} image',
+        defaultMessage: 'Open fullscreen {alt} image',
         values: { alt },
       }),
     'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
@@ -1193,6 +1196,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { innerText, description },
         description: 'Displayed in a cell in the header of the table to describe the field',
       }),
+    'euiTablePagination.allRows': i18n.translate('core.euiTablePagination.allRows', {
+      defaultMessage: 'Showing all rows',
+      description: 'Displayed in a button that toggles a table pagination menu',
+    }),
     'euiTablePagination.rowsPerPage': i18n.translate('core.euiTablePagination.rowsPerPage', {
       defaultMessage: 'Rows per page',
       description: 'Displayed in a button that toggles a table pagination menu',
@@ -1203,6 +1210,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Displayed in a button that toggles the number of visible rows',
         values: { rowsPerPage },
       }),
+    'euiTablePagination.rowsPerPageOptionShowAllRows': i18n.translate(
+      'core.euiTablePagination.rowsPerPageOptionShowAllRows',
+      {
+        defaultMessage: 'Show all rows',
+        description: 'Displayed in a button that toggles the number of visible rows',
+      }
+    ),
     'euiTableSortMobile.sorting': i18n.translate('core.euiTableSortMobile.sorting', {
       defaultMessage: 'Sorting',
       description: 'Displayed in a button that toggles a table sorting menu',

@@ -9,18 +9,23 @@ import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../helpers';
 import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
-import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
+import {
+  esDeprecationsMockResponse,
+  MOCK_SNAPSHOT_ID,
+  MOCK_JOB_ID,
+  MOCK_REINDEX_DEPRECATION,
+} from './mocked_responses';
 
 describe('Index settings deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   const indexSettingDeprecation = esDeprecationsMockResponse.deprecations[1];
-
-  afterAll(() => {
-    server.restore();
-  });
-
   beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
     httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
@@ -28,7 +33,7 @@ describe('Index settings deprecation flyout', () => {
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
-    httpRequestsMockHelpers.setReindexStatusResponse({
+    httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
       reindexOp: null,
       warnings: [],
       hasRequiredPrivileges: true,
@@ -40,7 +45,7 @@ describe('Index settings deprecation flyout', () => {
     });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
     const { actions, component } = testBed;
@@ -48,7 +53,7 @@ describe('Index settings deprecation flyout', () => {
     await actions.table.clickDeprecationRowAt('indexSetting', 0);
   });
 
-  test('renders a flyout with deprecation details', async () => {
+  it('renders a flyout with deprecation details', async () => {
     const { find, exists } = testBed;
 
     expect(exists('indexSettingsDetails')).toBe(true);
@@ -64,7 +69,7 @@ describe('Index settings deprecation flyout', () => {
   it('removes deprecated index settings', async () => {
     const { find, actions, exists } = testBed;
 
-    httpRequestsMockHelpers.setUpdateIndexSettingsResponse({
+    httpRequestsMockHelpers.setUpdateIndexSettingsResponse(indexSettingDeprecation.index!, {
       acknowledged: true,
     });
 
@@ -72,13 +77,10 @@ describe('Index settings deprecation flyout', () => {
 
     await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
-    const request = server.requests[server.requests.length - 1];
-
-    expect(request.method).toBe('POST');
-    expect(request.url).toBe(
-      `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`,
+      expect.anything()
     );
-    expect(request.status).toEqual(200);
 
     // Verify the "Resolution" column of the table is updated
     expect(find('indexSettingsResolutionStatusCell').at(0).text()).toEqual(
@@ -104,17 +106,18 @@ describe('Index settings deprecation flyout', () => {
       message: 'Remove index settings error',
     };
 
-    httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
+    httpRequestsMockHelpers.setUpdateIndexSettingsResponse(
+      indexSettingDeprecation.index!,
+      undefined,
+      error
+    );
 
     await actions.indexSettingsDeprecationFlyout.clickDeleteSettingsButton();
 
-    const request = server.requests[server.requests.length - 1];
-
-    expect(request.method).toBe('POST');
-    expect(request.url).toBe(
-      `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      `/api/upgrade_assistant/${indexSettingDeprecation.index!}/index_settings`,
+      expect.anything()
     );
-    expect(request.status).toEqual(500);
 
     // Verify the "Resolution" column of the table is updated
     expect(find('indexSettingsResolutionStatusCell').at(0).text()).toEqual(

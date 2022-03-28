@@ -14,6 +14,9 @@ import { TestProviders } from '../../common/mock';
 import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 import { Users } from './users';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { mockCasesContext } from '../../../../cases/public/mocks/mock_cases_context';
+import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
+import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_overview';
 
 jest.mock('../../common/containers/sourcerer');
 jest.mock('../../common/components/search_bar', () => ({
@@ -22,7 +25,31 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
+jest.mock('../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
+const mockNavigateToApp = jest.fn();
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
 
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          ...original.useKibana().services.application,
+          navigateToApp: mockNavigateToApp,
+        },
+        cases: {
+          ui: {
+            getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+          },
+        },
+      },
+    }),
+  };
+});
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 const location = {
@@ -51,14 +78,17 @@ describe('Users - rendering', () => {
       indicesExist: false,
     });
 
-    const wrapper = mount(
+    mount(
       <TestProviders>
         <Router history={mockHistory}>
           <Users />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
+    expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
+      deepLinkId: SecurityPageName.landing,
+      path: getAppLandingUrl(),
+    });
   });
 
   test('it should render tab navigation', async () => {

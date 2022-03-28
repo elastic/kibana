@@ -895,6 +895,7 @@ describe('migration actions', () => {
         }
       `);
     });
+
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       await waitForIndexStatusYellow({
         client,
@@ -916,8 +917,8 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringMatching(
-            /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
+          message: expect.stringContaining(
+            '[timeout_exception] Timed out waiting for completion of [Task'
           ),
           type: 'wait_for_task_completion_timeout',
         },
@@ -1259,6 +1260,7 @@ describe('migration actions', () => {
 
       await expect(task()).rejects.toThrow('index_not_found_exception');
     });
+
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
@@ -1275,8 +1277,8 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringMatching(
-            /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
+          message: expect.stringContaining(
+            '[timeout_exception] Timed out waiting for completion of [Task'
           ),
           type: 'wait_for_task_completion_timeout',
         },

@@ -60,14 +60,39 @@ export class PdfWorkerOutOfMemoryError extends ReportingError {
       'Cannot generate PDF due to low memory. Consider making a smaller PDF before retrying this report.',
   });
 
+  /**
+   * No need to provide extra details, we know exactly what happened and can provide
+   * a nicely formatted message
+   */
   public override get message(): string {
     return this.details;
   }
 }
 
+export class BrowserCouldNotLaunchError extends ReportingError {
+  code = 'browser_could_not_launch_error';
+
+  details = i18n.translate('xpack.reporting.common.browserCouldNotLaunchErrorMessage', {
+    defaultMessage: 'Cannot generate screenshots because the browser did not launch.',
+  });
+
+  /**
+   * For this error message we expect that users will use the diagnostics
+   * functionality in reporting to debug further.
+   */
+  public override get message() {
+    return this.details;
+  }
+}
+
+export class BrowserUnexpectedlyClosedError extends ReportingError {
+  code = 'browser_unexpectedly_closed_error';
+}
+
+export class BrowserScreenshotError extends ReportingError {
+  code = 'browser_screenshot_error';
+}
+
 export class KibanaShuttingDownError extends ReportingError {
   code = 'kibana_shutting_down_error';
 }
-
-// TODO: Add ReportingError for missing Chromium dependencies
-// TODO: Add ReportingError for Chromium not starting for an unknown reason

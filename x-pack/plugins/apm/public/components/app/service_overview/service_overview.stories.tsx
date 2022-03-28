@@ -44,7 +44,6 @@ const stories: Meta<{}> = {
         uiSettings: { get: () => 'Browser' },
       } as unknown as CoreStart;
       const serviceContextValue = {
-        alerts: [],
         serviceName,
       } as unknown as APMServiceContextValue;
       const KibanaReactContext = createKibanaReactContext(mockCore);

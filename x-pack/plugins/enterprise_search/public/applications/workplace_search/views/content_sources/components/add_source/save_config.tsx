@@ -35,6 +35,8 @@ import {
 } from '../../../../constants';
 import { Configuration } from '../../../../types';
 
+import { ExternalConnectorFormFields } from './add_external_connector';
+import { ExternalConnectorDocumentation } from './add_external_connector';
 import { AddSourceLogic } from './add_source_logic';
 import { ConfigDocsLinks } from './config_docs_links';
 import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON, OAUTH_STEP_2 } from './constants';
@@ -73,6 +75,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
   const {
     accountContextOnly,
     configuredFields: { publicKey, consumerKey },
+    serviceType,
   } = sourceConfigData;
 
   const handleFormSubmission = (e: FormEvent) => {
@@ -139,6 +142,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const publicKeyStep2 = (
     <>
+      {serviceType === 'external' && <ExternalConnectorFormFields />}
       <EuiFormRow label={BASE_URI_LABEL}>
         <EuiFieldText
           value={baseUrlValue}
@@ -158,6 +162,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     <EuiFlexGroup direction="column" responsive={false}>
       <EuiFlexItem>
         <EuiForm>
+          {serviceType === 'external' && <ExternalConnectorFormFields />}
           <EuiFormRow label={CLIENT_ID_LABEL}>
             <EuiFieldText
               value={clientIdValue}
@@ -220,6 +225,12 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     <>
       {header}
       <EuiSpacer size="l" />
+      {serviceType === 'external' && (
+        <>
+          <ExternalConnectorDocumentation name={name} documentationUrl={documentationUrl} />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <form onSubmit={handleFormSubmission}>
         <EuiSteps steps={configSteps} className="adding-a-source__config-steps" />
       </form>

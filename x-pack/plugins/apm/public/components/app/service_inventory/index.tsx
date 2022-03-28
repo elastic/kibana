@@ -10,16 +10,18 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import uuid from 'uuid';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { SearchBar } from '../../shared/search_bar';
-import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { ServiceList } from './service_list';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { apmServiceInventoryOptimizedSorting } from '../../../../../observability/common';
+import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
+import { orderServiceItems } from './service_list/order_service_items';
 
 const initialData = {
   requestId: '',
@@ -30,21 +32,18 @@ const initialData = {
 
 function useServicesFetcher() {
   const {
-    urlParams: { comparisonEnabled, comparisonType },
-  } = useLegacyUrlParams();
-
-  const {
-    query: { rangeFrom, rangeTo, environment, kuery, serviceGroup },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      serviceGroup,
+      offset,
+      comparisonEnabled,
+    },
   } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
 
   const sortedAndFilteredServicesFetch = useFetcher(
     (callApmApi) => {
@@ -105,7 +104,7 @@ function useServicesFetcher() {
                   // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
                   .sort()
               ),
-              offset,
+              offset: comparisonEnabled ? offset : undefined,
             },
           },
         });
@@ -113,7 +112,7 @@ function useServicesFetcher() {
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatisticsData.requestId, offset],
+    [mainStatisticsData.requestId, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 
@@ -162,10 +161,36 @@ export function ServiceInventory() {
     />
   );
 
+  const mainStatisticsItems = mainStatisticsFetch.data?.items ?? [];
+  const preloadedServices = sortedAndFilteredServicesFetch.data?.services || [];
+
+  const displayHealthStatus = [
+    ...mainStatisticsItems,
+    ...preloadedServices,
+  ].some((item) => 'healthStatus' in item);
+
+  const tiebreakerField = useKibana().services.uiSettings?.get<boolean>(
+    apmServiceInventoryOptimizedSorting
+  )
+    ? ServiceInventoryFieldName.ServiceName
+    : ServiceInventoryFieldName.Throughput;
+
+  const initialSortField = displayHealthStatus
+    ? ServiceInventoryFieldName.HealthStatus
+    : tiebreakerField;
+
+  const initialSortDirection =
+    initialSortField === ServiceInventoryFieldName.ServiceName ? 'asc' : 'desc';
+
   const items = joinByKey(
     [
-      ...(sortedAndFilteredServicesFetch.data?.services ?? []),
-      ...(mainStatisticsFetch.data?.items ?? []),
+      // only use preloaded services if tiebreaker field is service.name,
+      // otherwise ignore them to prevent re-sorting of the table
+      // once the tiebreaking metric comes in
+      ...(tiebreakerField === ServiceInventoryFieldName.ServiceName
+        ? preloadedServices
+        : []),
+      ...mainStatisticsItems,
     ],
     'serviceName'
   );
@@ -188,6 +213,21 @@ export function ServiceInventory() {
             isLoading={isLoading}
             isFailure={isFailure}
             items={items}
+            comparisonDataLoading={
+              comparisonFetch.status === FETCH_STATUS.LOADING ||
+              comparisonFetch.status === FETCH_STATUS.NOT_INITIATED
+            }
+            displayHealthStatus={displayHealthStatus}
+            initialSortField={initialSortField}
+            initialSortDirection={initialSortDirection}
+            sortFn={(itemsToSort, sortField, sortDirection) => {
+              return orderServiceItems({
+                items: itemsToSort,
+                primarySortField: sortField,
+                sortDirection,
+                tiebreakerField,
+              });
+            }}
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
           />

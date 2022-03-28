@@ -105,6 +105,7 @@ export const AGENT_API_ROUTES = {
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
   STATUS_PATTERN: `${API_ROOT}/agent_status`,
+  DATA_PATTERN: `${API_ROOT}/agent_status/data`,
   // deprecated since 8.0
   STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,

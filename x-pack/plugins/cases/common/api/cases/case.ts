@@ -153,7 +153,7 @@ export const CasesFindRequestRt = rt.partial({
   /**
    * The fields in the entity to return in the response
    */
-  fields: rt.array(rt.string),
+  fields: rt.union([rt.array(rt.string), rt.string]),
   /**
    * The page of objects to return
    */
@@ -216,6 +216,7 @@ export const CaseResolveResponseRt = rt.intersection([
   }),
   rt.partial({
     alias_target_id: rt.string,
+    alias_purpose: rt.union([rt.literal('savedObjectConversion'), rt.literal('savedObjectImport')]),
   }),
 ]);
 

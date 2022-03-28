@@ -72,15 +72,15 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: ResetTransformsRequestSchema = {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/reset_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         // Check that transform was reset and assert stats.
         expect(body[transformId].transformReset.success).to.eql(true);
@@ -102,15 +102,15 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: ResetTransformsRequestSchema = {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };
-        await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/reset_transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(403);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(403, status, body);
 
         await transform.api.waitForTransformToExist(transformId);
         // Check that transform was not reset by asserting unchanged stats.
@@ -126,15 +126,15 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: ResetTransformsRequestSchema = {
           transformsInfo: [{ id: 'invalid_transform_id', state: TRANSFORM_STATE.STOPPED }],
         };
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/reset_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(body.invalid_transform_id.transformReset.success).to.eql(false);
         expect(body.invalid_transform_id.transformReset).to.have.property('error');
@@ -174,15 +174,15 @@ export default ({ getService }: FtrProviderContext) => {
           }
         );
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/reset_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         await asyncForEach(
           reqBody.transformsInfo,
@@ -213,7 +213,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
 
         const invalidTransformId = 'invalid_transform_id';
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/reset_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
@@ -226,8 +226,8 @@ export default ({ getService }: FtrProviderContext) => {
               ...reqBody.transformsInfo,
               { id: invalidTransformId, state: TRANSFORM_STATE.STOPPED },
             ],
-          })
-          .expect(200);
+          });
+        transform.api.assertResponseStatusCode(200, status, body);
 
         await asyncForEach(
           reqBody.transformsInfo,

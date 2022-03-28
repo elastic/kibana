@@ -26,12 +26,21 @@ describe('createClientAPI', () => {
     http.get.mockResolvedValue(res);
 
     it('should return the correct response', async () => {
-      expect(await api.getRelatedCases('alert-id')).toEqual(res);
+      expect(await api.getRelatedCases('alert-id', { owner: 'test' })).toEqual(res);
     });
 
     it('should have been called with the correct path', async () => {
-      await api.getRelatedCases('alert-id');
-      expect(http.get).toHaveBeenCalledWith('/api/cases/alerts/alert-id');
+      await api.getRelatedCases('alert-id', { owner: 'test' });
+      expect(http.get).toHaveBeenCalledWith('/api/cases/alerts/alert-id', {
+        query: { owner: 'test' },
+      });
+    });
+
+    it('should accept an empty object with no owner', async () => {
+      await api.getRelatedCases('alert-id', {});
+      expect(http.get).toHaveBeenCalledWith('/api/cases/alerts/alert-id', {
+        query: {},
+      });
     });
   });
 });

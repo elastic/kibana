@@ -72,14 +72,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dashboardControls.getAllControlTitles()).to.eql(['Speaker Name', 'Play Name']);
 
       const ids = await dashboardControls.getAllControlIds();
-      for (const id of ids) {
-        await dashboardControls.optionsListOpenPopover(id);
-        await retry.try(async () => {
-          // Value counts should be 10, because there are more than 10 speakers and plays in the data set
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(10);
-        });
-        await dashboardControls.optionsListEnsurePopoverIsClosed(id);
-      }
+
+      await dashboardControls.optionsListOpenPopover(ids[0]);
+      await retry.try(async () => {
+        expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(10);
+      });
+      await dashboardControls.optionsListEnsurePopoverIsClosed(ids[0]);
+
+      await dashboardControls.optionsListOpenPopover(ids[1]);
+      await retry.try(async () => {
+        // the second control should only have 5 available options because the previous control has HAMLET ROMEO JULIET and BRUTUS selected
+        expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(5);
+      });
+      await dashboardControls.optionsListEnsurePopoverIsClosed(ids[1]);
     });
 
     it('applies default selected options list options to control', async () => {

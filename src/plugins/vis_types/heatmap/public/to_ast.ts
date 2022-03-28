@@ -20,6 +20,7 @@ const prepareLegend = (params: HeatmapVisParams) => {
     position: params.legendPosition,
     shouldTruncate: params.truncateLegend ?? true,
     maxLines: params.maxLegendLines ?? 1,
+    legendSize: params.legendSize,
   });
 
   return buildExpression([legend]);

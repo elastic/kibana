@@ -69,6 +69,7 @@ export const ContextTab: FunctionComponent = () => {
           itemLayoutAlign="top"
           hasDividers
           fullWidth
+          data-test-subj="painlessContextDropDown"
         />
       </EuiFormRow>
 

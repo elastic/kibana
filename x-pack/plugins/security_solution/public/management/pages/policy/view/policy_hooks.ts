@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
+  ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
@@ -19,6 +20,7 @@ import {
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
 } from '../../../common/constants';
 import {
+  getPolicyBlocklistsPath,
   getPolicyDetailsArtifactsListPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
@@ -76,6 +78,11 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
         });
       } else if (listId === ENDPOINT_EVENT_FILTERS_LIST_ID) {
         return getPolicyEventFiltersPath(policyId, {
+          ...location,
+          ...args,
+        });
+      } else if (listId === ENDPOINT_BLOCKLISTS_LIST_ID) {
+        return getPolicyBlocklistsPath(policyId, {
           ...location,
           ...args,
         });

@@ -272,6 +272,10 @@
               "default",
               "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
+              "; child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
               "; Internal: ",
               "default",
               "; asyncSearch: ",
@@ -1594,26 +1598,6 @@
                 "text": "SavedObjectsErrorHelpers"
               },
               "; }"
-            ],
-            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "telemetryCollectionManager",
-            "id": "def-server.StatsCollectionConfig.kibanaRequest",
-            "type": "Object",
-            "tags": [],
-            "label": "kibanaRequest",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any> | undefined"
             ],
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false

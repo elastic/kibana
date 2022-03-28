@@ -143,6 +143,7 @@ export const Overview = React.memo<Props>(
           title={ALERTS_HEADERS_RISK_SCORE}
           enrichedFieldInfo={riskScoreData}
           contextId={contextId}
+          dataTestSubj="riskScore"
         >
           {riskScoreData.values[0]}
         </OverviewCardWithActions>

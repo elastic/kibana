@@ -1,0 +1,237 @@
+[[cases-api-create]]
+== Create case API
+++++
+<titleabbrev>Create case</titleabbrev>
+++++
+
+Creates a case.
+
+=== Request
+
+`POST <kibana host>:<port>/api/cases`
+
+`POST <kibana host>:<port>/s/<space_id>/api/cases`
+
+=== Prerequisite
+
+You must have `all` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the case you're creating.
+
+=== Path parameters
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== Request body
+
+`connector`::
+(Required, object) An object that contains the connector configuration.
++
+.Properties of `connector`
+[%collapsible%open]
+====
+`fields`::
+(Required, object) An object containing the connector fields.
++
+--
+To create a case without a connector, specify `null`. If you want to omit any
+individual field, specify `null` as its value.
+
+For {ibm-r} connectors, specify:
+
+`issueTypes`:::
+(Required, array of numbers) The type of the incident.
+
+`severityCode`:::
+(Required, number) The severity code of the incident.
+
+For {jira} connectors, specify:
+
+`issueType`:::
+(Required, string) The type of the issue.
+
+`parent`:::
+(Required, string) The key of the parent issue, when the issue type is `Sub-task`.
+
+`priority`:::
+(Required, string) The priority of the issue.
+
+For {sn-itsm} connectors, specify:
+
+`category`:::
+(Required, string) The category of the incident.
+
+`impact`:::
+(Required, string) The effect an incident had on business.
+
+`severity`:::
+(Required, string) The severity of the incident.
+
+`subcategory`:::
+(Required, string) The subcategory of the incident.
+
+`urgency`:::
+(Required, string) The extent to which the incident resolution can be delayed.
+
+For {sn-sir} connectors, specify:
+
+`category`:::
+(Required, string) The category of the incident.
+
+`destIp`:::
+(Required, string) A comma separated list of destination IPs.
+
+`malwareHash`:::
+(Required, string) A comma separated list of malware hashes.
+
+`malwareUrl`:::
+(Required, string) A comma separated list of malware URLs.
+
+`priority`:::
+(Required, string) The priority of the incident.
+
+`sourceIp`:::
+(Required, string) A comma separated list of source IPs.
+
+`subcategory`:::
+(Required, string) The subcategory of the incident.
+
+For {swimlane} connectors, specify:
+
+`caseId`:::
+(Required, string) The case ID.
+--
+
+`id`::
+(Required, string) The identifier for the connector. To create a case without a
+connector, use `none`.
+//To retrieve connector IDs, use <<cases-api-find-connectors>>).
+
+`name`::
+(Required, string) The name of the connector. To create a case without a
+connector, use `none`.
+
+`type`::
+(Required, string) The type of the connector. Valid values are: `.jira`, `.none`,
+`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`. To create a case
+without a connector, use `.none`.
+====
+
+`description`::
+(Required, string) The description for the case.
+
+`owner`::
+(Required, string) The application that owns the case. Valid values are:
+`cases`, `observability`, or `securitySolution`. This value affects
+whether the case is visible in the {stack-manage-app}, {observability}, or
+{security-app}.
+
+`settings`::
+(Required, object)
+An object that contains the case settings.
++
+.Properties of `settings`
+[%collapsible%open]
+====
+`syncAlerts`:: 
+(Required, boolean) Turns alert syncing on or off.
+====
+
+`tags`::
+(Required, string array) The words and phrases that help
+categorize cases. It can be an empty array.
+
+`title`::
+(Required, string) A title for the case.
+
+=== Response code
+
+`200`::
+   Indicates a successful call.
+
+=== Example
+
+[source,sh]
+--------------------------------------------------
+POST api/cases
+{
+  "description": "James Bond clicked on a highly suspicious email
+  banner advertising cheap holidays for underpaid civil servants.",
+  "title": "This case will self-destruct in 5 seconds",
+  "tags": [
+    "phishing",
+    "social engineering"
+  ],
+  "connector": {
+    "id": "131d4448-abe0-4789-939d-8ef60680b498",
+    "name": "My connector",
+    "type": ".jira",
+    "fields": {
+      "issueType": "10006",
+      "priority": "High",
+      "parent": null
+    }
+  },
+  "settings": {
+    "syncAlerts": true
+  },
+  "owner": "securitySolution"
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns a JSON object that includes the user who created the case and
+the case identifier, version, and creation time. For example:
+
+[source,json]
+--------------------------------------------------
+{
+  "id": "66b9aa00-94fa-11ea-9f74-e7e108796192", <1>
+  "version": "WzUzMiwxXQ==",
+  "comments": [],
+  "totalComment": 0,
+  "totalAlerts": 0,
+  "title": "This case will self-destruct in 5 seconds",
+  "tags": [
+    "phishing",
+    "social engineering",
+    "bubblegum"
+  ],
+  "settings": {
+    "syncAlerts": true
+  },
+  "owner": "securitySolution",
+  "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active",
+  "closed_at": null,
+  "closed_by": null,
+  "created_at": "2022-05-13T09:16:17.416Z",
+  "created_by": {
+    "email": "ahunley@imf.usa.gov",
+    "full_name": "Alan Hunley",
+    "username": "ahunley"
+  },
+  "status": "open",
+  "updated_at": null,
+  "updated_by": null,
+  "connector": {
+    "id": "131d4448-abe0-4789-939d-8ef60680b498", <2>
+    "name": "My connector",
+    "type": ".jira",
+    "fields": {
+      "issueType": "10006",
+      "parent": null,
+      "priority": "High"
+    }
+  },
+  "external_service": null <3>
+}
+--------------------------------------------------
+
+<1> The case identifier is also its saved object ID (`savedObjectId`), which is
+used when pushing cases to external systems.
+<2> The default connector used to push cases to external services.
+<3> The `external_service` object stores information about the incident after it
+is pushed to an external incident management system.
