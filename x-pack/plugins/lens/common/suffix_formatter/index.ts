@@ -49,7 +49,7 @@ export function getSuffixFormatter(getFormatFactory: () => FormatFactory): Field
 
     textConvert = (val: unknown) => {
       const unit = this.param('unit') as TimeScaleUnit | undefined;
-      const suffix = unit ? unitSuffixes[unit] : undefined;
+      const suffix = unit ? unitSuffixes[unit] : this.param('suffixString');
       const nestedFormatter = this.param('id');
       const nestedParams = this.param('params');
 
