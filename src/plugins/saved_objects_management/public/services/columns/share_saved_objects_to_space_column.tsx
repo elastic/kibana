@@ -10,6 +10,9 @@ import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import type { SavedObjectsNamespaceType } from 'src/core/public';
+import { EuiIconTip } from '@elastic/eui';
+
 import type {
   ShareToSpaceFlyoutProps,
   SpaceListProps,
@@ -19,12 +22,31 @@ import type { SavedObjectsManagementRecord } from '../types';
 import { SavedObjectsManagementColumn } from '../types';
 
 interface WrapperProps {
+  namespaceType: SavedObjectsNamespaceType;
   spacesApiUi: SpacesApiUi;
   spaceListProps: SpaceListProps;
   flyoutProps: ShareToSpaceFlyoutProps;
 }
 
-const Wrapper = ({ spacesApiUi, spaceListProps, flyoutProps }: WrapperProps) => {
+const columnName = i18n.translate('savedObjectsManagement.shareToSpace.columnTitle', {
+  defaultMessage: 'Spaces',
+});
+const columnDescription = i18n.translate('savedObjectsManagement.shareToSpace.columnDescription', {
+  defaultMessage: 'The spaces that this object is currently assigned to',
+});
+const isolatedObjectTypeTitle = i18n.translate(
+  'savedObjectsManagement.shareToSpace.isolatedObjectTypeTitle',
+  { defaultMessage: 'Isolated object type' }
+);
+const isolatedObjectTypeContent = i18n.translate(
+  'savedObjectsManagement.shareToSpace.isolatedObjectTypeContent',
+  {
+    defaultMessage:
+      'This saved object type only exists in one space, it cannot be assigned to multiple spaces.',
+  }
+);
+
+const Wrapper = ({ namespaceType, spacesApiUi, spaceListProps, flyoutProps }: WrapperProps) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   function listOnClick() {
@@ -42,6 +64,20 @@ const Wrapper = ({ spacesApiUi, spaceListProps, flyoutProps }: WrapperProps) => 
     [spacesApiUi]
   );
 
+  if (namespaceType === 'single' || namespaceType === 'multiple-isolated') {
+    return (
+      <EuiIconTip
+        type="minus"
+        position="left"
+        delay="long"
+        title={isolatedObjectTypeTitle}
+        content={isolatedObjectTypeContent}
+      />
+    );
+  } else if (namespaceType === 'agnostic') {
+    return null;
+  }
+
   return (
     <>
       <LazySpaceList {...spaceListProps} listOnClick={listOnClick} />
@@ -55,12 +91,8 @@ export class ShareToSpaceSavedObjectsManagementColumn extends SavedObjectsManage
 
   public euiColumn = {
     field: 'namespaces',
-    name: i18n.translate('savedObjectsManagement.shareToSpace.columnTitle', {
-      defaultMessage: 'Shared spaces',
-    }),
-    description: i18n.translate('savedObjectsManagement.shareToSpace.columnDescription', {
-      defaultMessage: 'The other spaces that this object is currently shared to',
-    }),
+    name: columnName,
+    description: columnDescription,
     render: (namespaces: string[] | undefined, record: SavedObjectsManagementRecord) => {
       if (!namespaces) {
         return null;
@@ -88,6 +120,7 @@ export class ShareToSpaceSavedObjectsManagementColumn extends SavedObjectsManage
 
       return (
         <Wrapper
+          namespaceType={record.meta.namespaceType}
           spacesApiUi={this.spacesApiUi}
           spaceListProps={spaceListProps}
           flyoutProps={flyoutProps}
