@@ -8,15 +8,21 @@
 import type { ReactNode } from 'react';
 import { ConsoleProps } from '../../types';
 
-export interface ConsoleRegistrationInterface {
+export interface ConsoleRegistrationInterface<Meta extends object = Record<string, unknown>> {
   id: string;
+  /** The title for the console popup */
   title: ReactNode;
+  /**
+   * Any additional metadata about the console. Helpful for when consuming Registered consoles
+   * (ex. could hold the details data for the Host that the console is opened against)
+   */
+  meta?: Meta;
   consoleProps: ConsoleProps;
   onBeforeClose?: () => void;
 }
 
-export interface RegisteredConsoleClient
-  extends Pick<ConsoleRegistrationInterface, 'id' | 'title'> {
+export interface RegisteredConsoleClient<Meta extends object = Record<string, unknown>>
+  extends Pick<ConsoleRegistrationInterface<Meta>, 'id' | 'title' | 'meta'> {
   show(): void;
 
   hide(): void;
@@ -38,8 +44,12 @@ export interface ConsoleManagerClient {
   terminate(id: string): void;
 
   /** Retrieve a running console */
-  getOne(id: string): Readonly<RegisteredConsoleClient> | undefined;
+  getOne<Meta extends object = Record<string, unknown>>(
+    id: string
+  ): Readonly<RegisteredConsoleClient<Meta>> | undefined;
 
   /** Get a list of running consoles */
-  getList(): Readonly<RegisteredConsoleClient[]>;
+  getList<Meta extends object = Record<string, unknown>>(): Readonly<
+    Array<RegisteredConsoleClient<Meta>>
+  >;
 }

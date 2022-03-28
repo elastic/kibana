@@ -46,6 +46,10 @@ export type ConsoleManagerProps = PropsWithChildren<{
   storage?: RunningConsoleStorage;
 }>;
 
+/**
+ * A console management context. Allow for the show/hide of consoles without them loosing their
+ * command history while running in "hidden" mode.
+ */
 export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, children }) => {
   const [consoleStorage, setConsoleStorage] = useState<RunningConsoleStorage>(storage);
 
@@ -219,6 +223,9 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
 });
 ConsoleManager.displayName = 'ConsoleManager';
 
+/**
+ * Returns the interface for managing consoles withing a `<ConsoleManager/>` constext.
+ */
 export const useConsoleManager = (): ConsoleManagerClient => {
   const consoleManagerClients = useContext(ConsoleManagerContext);
 

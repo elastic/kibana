@@ -7,5 +7,5 @@ A terminal like console component that focuses on the user's interactions with t
 
 ## Console Management
 
-The `<ConsoleManager />` context component and associated `useConsoleManager()` hook allow for the management of consoles in the app by ensuring that one can show/hide/terminate consoles as well as get a list of consoles that are "running". Each console's history is maintained when a console is hidden and re-displayed when it is opened again.
+The `<ConsoleManager />` context component and associated `useConsoleManager()` hook allows for the management of consoles in the app by ensuring that one can show/hide/terminate consoles as well as get a list of consoles that are "running". Each console's history is maintained when a console is hidden and re-displayed when it is opened again.
 

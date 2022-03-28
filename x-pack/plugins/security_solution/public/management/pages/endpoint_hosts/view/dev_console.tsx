@@ -131,11 +131,14 @@ export const DevConsole = memo(() => {
     return new DevCommandService();
   }, []);
 
-  const handleOnClick = useCallback(() => {
+  const handleRegisterOnClick = useCallback(() => {
     consoleManager
       .register({
         id: Math.random().toString(36), // getId(),
         title: 'Test console here',
+        meta: {
+          foo: 'bar',
+        },
         consoleProps: {
           prompt: '>>',
           commandService,
@@ -152,12 +155,14 @@ export const DevConsole = memo(() => {
     <EuiPanel>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={handleOnClick}>{'Open a managed console'}</EuiButton>
+          <EuiButton onClick={handleRegisterOnClick}>{'Open a managed console'}</EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          {consoleManager.getList().map((registeredConsole) => (
-            <RunningConsole key={registeredConsole.id} registeredConsole={registeredConsole} />
-          ))}
+          {consoleManager.getList<{ foo: string }>().map((registeredConsole) => {
+            return (
+              <RunningConsole key={registeredConsole.id} registeredConsole={registeredConsole} />
+            );
+          })}
         </EuiFlexItem>
       </EuiFlexGroup>
 

@@ -12,6 +12,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFocusTrap,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -26,48 +27,50 @@ export interface ConfirmTerminateProps {
 export const ConfirmTerminate = memo<ConfirmTerminateProps>(({ onConfirm, onCancel }) => {
   return (
     <div className="euiOverlayMask" style={{ position: 'absolute' }}>
-      <EuiPanel className="terminate-confirm-panel">
-        <EuiCallOut
-          color="primary"
-          iconType="iInCircle"
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.console.popup.confirmTitle"
-              defaultMessage="Terminate this session"
-            />
-          }
-        >
-          <EuiText>
-            <p>
+      <EuiFocusTrap>
+        <EuiPanel className="terminate-confirm-panel">
+          <EuiCallOut
+            color="primary"
+            iconType="iInCircle"
+            title={
               <FormattedMessage
-                id="xpack.securitySolution.console.popup.terminateMessage"
-                defaultMessage="This will end your console session. Do you wish to continue?"
+                id="xpack.securitySolution.console.popup.confirmTitle"
+                defaultMessage="Terminate this session"
               />
-            </p>
-          </EuiText>
-        </EuiCallOut>
+            }
+          >
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.console.popup.terminateMessage"
+                  defaultMessage="This will end your console session. Do you wish to continue?"
+                />
+              </p>
+            </EuiText>
+          </EuiCallOut>
 
-        <EuiSpacer />
+          <EuiSpacer />
 
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel}>
-              <FormattedMessage
-                id="xpack.securitySolution.console.popup.terminateConfirmCancelLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={onConfirm} color="primary" fill>
-              <FormattedMessage
-                id="xpack.securitySolution.console.popup.terminateConfirmSubmitLabel"
-                defaultMessage="Terminate"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onCancel}>
+                <FormattedMessage
+                  id="xpack.securitySolution.console.popup.terminateConfirmCancelLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={onConfirm} color="primary" fill>
+                <FormattedMessage
+                  id="xpack.securitySolution.console.popup.terminateConfirmSubmitLabel"
+                  defaultMessage="Terminate"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFocusTrap>
     </div>
   );
 });
