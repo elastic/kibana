@@ -19,7 +19,7 @@ describe('FormRow', () => {
       { error: 'Error', touched: false, isInvalid: false },
       { error: undefined, touched: true, isInvalid: false },
     ];
-    assertions.forEach(({error, touched, isInvalid}) => {
+    assertions.forEach(({ error, touched, isInvalid }) => {
       const wrapper = mount(
         <Formik
           onSubmit={jest.fn()}
@@ -32,13 +32,13 @@ describe('FormRow', () => {
           </FormRow>
         </Formik>
       );
-  
+
       expect(wrapper.find(EuiFormRow).props()).toEqual(
         expect.objectContaining({
           error,
           isInvalid,
         })
       );
-    })
+    });
   });
 });

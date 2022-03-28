@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Capabilities } from 'src/core/types';
+
 import type { AuthenticationProvider } from './authentication_provider';
 import type { User } from './user';
 
@@ -53,4 +55,11 @@ export function canUserChangePassword(
     REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(user.authentication_realm.type) &&
     !isUserAnonymous(user)
   );
+}
+
+export function canUserChangeDetails(
+  user: Pick<AuthenticatedUser, 'authentication_realm'>,
+  capabilities: Capabilities
+) {
+  return user.authentication_realm.type === 'native' && capabilities.management.security.users;
 }

@@ -37,6 +37,7 @@ import type { CoreStart } from 'src/core/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type { AuthenticatedUser, UserAvatar as IUserAvatar } from '../../../common';
 import {
+  canUserChangeDetails,
   canUserChangePassword,
   getUserAvatarColor,
   getUserAvatarInitials,
@@ -80,6 +81,7 @@ export interface UserProfileFormValues {
 }
 
 export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data }) => {
+  const { services } = useKibana<CoreStart>();
   const formik = useUserProfileForm({ user, data });
   const formChanges = useFormChanges();
   const titleId = useGeneratedHtmlId();
@@ -87,6 +89,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
   const isReservedUser = isUserReserved(user);
   const canChangePassword = canUserChangePassword(user);
+  const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
 
   return (
     <FormikProvider value={formik}>
@@ -208,7 +211,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                         </FormLabel>
                       }
                       labelAppend={<OptionalText />}
-                      isDisabled={isReservedUser}
+                      isDisabled={!canChangeDetails}
                       fullWidth
                     >
                       <FormField name="user.full_name" fullWidth />
@@ -224,7 +227,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                         </FormLabel>
                       }
                       labelAppend={<OptionalText />}
-                      isDisabled={isReservedUser}
+                      isDisabled={!canChangeDetails}
                       fullWidth
                     >
                       <FormField type="email" name="user.email" fullWidth />
@@ -471,6 +474,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
 export function useUserProfileForm({ user, data }: UserProfileProps) {
   const { services } = useKibana<CoreStart>();
+
   const [initialValues, resetInitialValues] = useState<UserProfileFormValues>({
     user: {
       full_name: user.full_name || '',
@@ -489,20 +493,26 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
   const formik = useFormik<UserProfileFormValues>({
     onSubmit: async (values) => {
       try {
-        await Promise.all([
-          new UserAPIClient(services.http).saveUser({
-            username: user.username,
-            roles: user.roles,
-            enabled: user.enabled,
-            full_name: values.user.full_name,
-            email: values.user.email,
-          }),
+        const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
+        const promises = [
           new UserProfileAPIClient(services.http).update(
             values.avatarType === 'image'
               ? values.data
               : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }
           ),
-        ]);
+        ];
+        if (canChangeDetails) {
+          promises.push(
+            new UserAPIClient(services.http).saveUser({
+              username: user.username,
+              roles: user.roles,
+              enabled: user.enabled,
+              full_name: values.user.full_name,
+              email: values.user.email,
+            })
+          );
+        }
+        await Promise.all(promises);
         resetInitialValues(values);
         services.notifications.toasts.addSuccess(
           i18n.translate('xpack.spaces.management.customizeSpaceAvatar.initialsHelpText', {

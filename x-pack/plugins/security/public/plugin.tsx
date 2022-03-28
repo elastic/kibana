@@ -98,7 +98,6 @@ export class SecurityPlugin
 
     this.navControlService.setup({
       securityLicense: license,
-      authc: this.authc,
       logoutUrl,
     });
 

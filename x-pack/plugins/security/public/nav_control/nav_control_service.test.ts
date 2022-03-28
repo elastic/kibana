@@ -12,9 +12,7 @@ import { coreMock } from 'src/core/public/mocks';
 
 import type { ILicense } from '../../../licensing/public';
 import { SecurityLicenseService } from '../../common/licensing';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import * as UseCurrentUserImports from '../components/use_current_user';
-import { securityMock } from '../mocks';
 import { SecurityNavControlService } from './nav_control_service';
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
 
