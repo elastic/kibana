@@ -869,6 +869,8 @@ export interface OverlayFlyoutOpenOptions {
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;
     // (undocumented)
+    outsideClickCloses?: boolean;
+    // (undocumented)
     ownFocus?: boolean;
     // (undocumented)
     size?: EuiFlyoutSize;
@@ -1578,6 +1580,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:190:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:192:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```
