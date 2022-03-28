@@ -14,6 +14,8 @@ export type { QueryStringInputProps } from './query_string_input';
 export { QueryStringInput } from './query_string_input';
 export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
 export type { UnifiedSearchPublicPluginStart } from './types';
+export { SearchBar } from './search_bar';
+export { FilterLabel, FilterItem } from './filter_bar';
 
 export type { ApplyGlobalFilterActionContext } from './actions';
 export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
