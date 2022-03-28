@@ -11,7 +11,7 @@ import { QueryLanguageSwitcher, QueryLanguageSwitcherProps } from './language_sw
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiButtonEmpty, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiPopover } from '@elastic/eui';
 const startMock = coreMock.createStart();
 
 describe('LanguageSwitcher', () => {
@@ -28,7 +28,7 @@ describe('LanguageSwitcher', () => {
     );
   }
 
-  it('should toggle off if language is lucene', () => {
+  it('should select the lucene context menu if language is lucene', () => {
     const component = mountWithIntl(
       wrapInContext({
         language: 'lucene',
@@ -37,12 +37,14 @@ describe('LanguageSwitcher', () => {
         },
       })
     );
-    component.find(EuiButtonEmpty).simulate('click');
+    component.find(EuiButtonIcon).simulate('click');
     expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
-    expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeFalsy();
+    expect(component.find('[data-test-subj="luceneLanguageMenuItem"]').get(0).props.icon).toBe(
+      'check'
+    );
   });
 
-  it('should toggle on if language is kuery', () => {
+  it('should select the kql context menu if language is kuery', () => {
     const component = mountWithIntl(
       wrapInContext({
         language: 'kuery',
@@ -51,12 +53,14 @@ describe('LanguageSwitcher', () => {
         },
       })
     );
-    component.find(EuiButtonEmpty).simulate('click');
+    component.find(EuiButtonIcon).simulate('click');
     expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
-    expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeTruthy();
+    expect(component.find('[data-test-subj="kqlLanguageMenuItem"]').get(0).props.icon).toBe(
+      'check'
+    );
   });
 
-  it('should toggle off if language is text', () => {
+  it('should select the lucene context menu if language is text', () => {
     const component = mountWithIntl(
       wrapInContext({
         language: 'text',
@@ -65,9 +69,11 @@ describe('LanguageSwitcher', () => {
         },
       })
     );
-    component.find(EuiButtonEmpty).simulate('click');
+    component.find(EuiButtonIcon).simulate('click');
     expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
-    expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeFalsy();
+    expect(component.find('[data-test-subj="luceneLanguageMenuItem"]').get(0).props.icon).toBe(
+      'check'
+    );
   });
   it('it set language on nonKql mode text', () => {
     const onSelectLanguage = jest.fn();
@@ -79,11 +85,13 @@ describe('LanguageSwitcher', () => {
         onSelectLanguage,
       })
     );
-    component.find(EuiButtonEmpty).simulate('click');
+    component.find(EuiButtonIcon).simulate('click');
     expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
-    expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeTruthy();
+    expect(component.find('[data-test-subj="kqlLanguageMenuItem"]').get(0).props.icon).toBe(
+      'check'
+    );
 
-    component.find('[data-test-subj="languageToggle"]').at(1).simulate('click');
+    component.find('[data-test-subj="luceneLanguageMenuItem"]').at(1).simulate('click');
 
     expect(onSelectLanguage).toHaveBeenCalledWith('text');
   });
@@ -97,8 +105,8 @@ describe('LanguageSwitcher', () => {
         onSelectLanguage,
       })
     );
-    component.find(EuiButtonEmpty).simulate('click');
-    component.find('[data-test-subj="languageToggle"]').at(1).simulate('click');
+    component.find(EuiButtonIcon).simulate('click');
+    component.find('[data-test-subj="luceneLanguageMenuItem"]').at(1).simulate('click');
 
     expect(onSelectLanguage).toHaveBeenCalledWith('lucene');
   });
@@ -114,10 +122,10 @@ describe('LanguageSwitcher', () => {
       })
     );
 
-    expect(component.find(EuiIcon).prop('type')).toBe('boxesVertical');
+    expect(component.find(EuiIcon).prop('type')).toBe('filter');
 
-    component.find(EuiButtonEmpty).simulate('click');
-    component.find('[data-test-subj="languageToggle"]').at(1).simulate('click');
+    component.find(EuiButtonIcon).simulate('click');
+    component.find('[data-test-subj="kqlLanguageMenuItem"]').at(1).simulate('click');
 
     expect(onSelectLanguage).toHaveBeenCalledWith('kuery');
   });
@@ -132,13 +140,12 @@ describe('LanguageSwitcher', () => {
         onSelectLanguage,
       })
     );
-
-    expect(component.find('[data-test-subj="switchQueryLanguageButton"]').at(0).text()).toBe(
-      'Lucene'
+    component.find(EuiButtonIcon).simulate('click');
+    expect(component.find('[data-test-subj="luceneLanguageMenuItem"]').get(0).props.icon).toBe(
+      'check'
     );
 
-    component.find(EuiButtonEmpty).simulate('click');
-    component.find('[data-test-subj="languageToggle"]').at(1).simulate('click');
+    component.find('[data-test-subj="kqlLanguageMenuItem"]').at(1).simulate('click');
 
     expect(onSelectLanguage).toHaveBeenCalledWith('kuery');
   });
