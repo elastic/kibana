@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import moment from 'moment';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
@@ -18,8 +17,8 @@ export async function getSuggestionsWithTermsAggregation({
   serviceName,
   setup,
   size,
-  start = moment().subtract(24, 'h').valueOf(),
-  end = moment().valueOf(),
+  start,
+  end,
 }: {
   fieldName: string;
   fieldValue: string;
@@ -27,8 +26,8 @@ export async function getSuggestionsWithTermsAggregation({
   serviceName: string;
   setup: Setup;
   size: number;
-  start?: number;
-  end?: number;
+  start: number;
+  end: number;
 }) {
   const { apmEventClient } = setup;
 

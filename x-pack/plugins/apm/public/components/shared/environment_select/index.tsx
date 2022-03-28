@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import { debounce } from 'lodash';
@@ -58,8 +59,8 @@ export function EnvironmentSelect({
               fieldName: SERVICE_ENVIRONMENT,
               fieldValue: searchValue ?? '',
               serviceName,
-              start,
-              end,
+              start: start ?? moment().subtract(24, 'h').toISOString(),
+              end: end ?? moment().toISOString(),
             },
           },
         });

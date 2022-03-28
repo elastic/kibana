@@ -9,12 +9,14 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../plugins/apm/common/elasticsearch_fieldnames';
+import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function suggestionsTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const archiveName = 'apm_8.0.0';
+  const { start, end } = archives_metadata[archiveName];
 
   registry.when(
     'suggestions when data is loaded',
@@ -25,7 +27,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns all environments', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: '' } },
+              params: { query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: '', start, end } },
             });
 
             expectSnapshot(body).toMatchInline(`
@@ -43,7 +45,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns items matching the string parameter', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: 'pr' } },
+              params: { query: { fieldName: SERVICE_ENVIRONMENT, fieldValue: 'pr', start, end } },
             });
 
             expectSnapshot(body).toMatchInline(`
@@ -62,7 +64,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns all services', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { fieldName: SERVICE_NAME, fieldValue: '' } },
+              params: { query: { fieldName: SERVICE_NAME, fieldValue: '', start, end } },
             });
 
             expectSnapshot(body).toMatchInline(`
@@ -86,7 +88,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns items matching the string parameter', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { fieldName: SERVICE_NAME, fieldValue: 'aud' } },
+              params: { query: { fieldName: SERVICE_NAME, fieldValue: 'aud', start, end } },
             });
 
             expectSnapshot(body).toMatchInline(`
@@ -105,7 +107,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns all transaction types', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { fieldName: TRANSACTION_TYPE, fieldValue: '' } },
+              params: { query: { fieldName: TRANSACTION_TYPE, fieldValue: '', start, end } },
             });
 
             expectSnapshot(body).toMatchInline(`
@@ -125,12 +127,12 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
           it('returns items matching the string parameter', async () => {
             const { body } = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/suggestions',
-              params: { query: { fieldName: TRANSACTION_TYPE, fieldValue: 'w' } },
+              params: { query: { fieldName: TRANSACTION_TYPE, fieldValue: 'w', start, end } },
             });
 
             expectSnapshot(body).toMatchInline(`
                 Object {
-                  "terms": Array [
+                  "terms": Array [,
                     "Worker",
                   ],
                 }

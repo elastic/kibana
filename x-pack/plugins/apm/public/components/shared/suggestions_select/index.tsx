@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { throttle } from 'lodash';
 import React, { useCallback, useState } from 'react';
@@ -54,7 +55,12 @@ export function SuggestionsSelect({
     (callApmApi) => {
       return callApmApi('GET /internal/apm/suggestions', {
         params: {
-          query: { fieldName, fieldValue: searchValue, start, end },
+          query: {
+            fieldName,
+            fieldValue: searchValue,
+            start: start ?? moment().subtract(24, 'h').toISOString(),
+            end: end ?? moment().toISOString(),
+          },
         },
       });
     },

@@ -22,7 +22,7 @@ const suggestionsRoute = createApmServerRoute({
         fieldName: t.string,
         fieldValue: t.string,
       }),
-      t.partial(rangeRt.props),
+      rangeRt,
       t.partial({ serviceName: t.string }),
     ]),
   }),
