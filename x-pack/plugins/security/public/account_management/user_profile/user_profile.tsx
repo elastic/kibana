@@ -536,11 +536,13 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
   }, [formik.values.user.full_name]);
 
   useUpdateEffect(() => {
-    const defaultInitials = getUserAvatarInitials({
-      username: user.username,
-      full_name: formik.values.user.full_name,
-    });
-    customAvatarInitials.current = formik.values.data.avatar.initials !== defaultInitials;
+    if (!customAvatarInitials.current) {
+      const defaultInitials = getUserAvatarInitials({
+        username: user.username,
+        full_name: formik.values.user.full_name,
+      });
+      customAvatarInitials.current = formik.values.data.avatar.initials !== defaultInitials;
+    }
   }, [formik.values.data.avatar.initials]);
 
   return formik;
