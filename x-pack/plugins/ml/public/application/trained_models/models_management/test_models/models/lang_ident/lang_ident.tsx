@@ -8,8 +8,8 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, useState, useMemo } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import { EuiSpacer, EuiTextArea, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
 
 import { useMlApiContext } from '../../../../../contexts/kibana';
@@ -36,10 +36,9 @@ export const LangIdentModel: FC<Props> = ({ model }) => {
   const ner = useMemo(() => new LangIdentInference(trainedModels, model), [trainedModels, model]);
 
   // const [inputText, setInputText] = useState('');
-  const [inputText, setInputText] =
-    useState(`Hola, mi nombre es James y vivo en Hersham, Surrey con mi esposa Kate y mis hijos Jonathan y Emily.
-
-  Solía ​​vivir en Londres, pero nos mudamos a los palos hace unos 3 años.`);
+  const [inputText, setInputText] = useState(
+    `Hola, mi nombre es Bob y vivo en Hersham, Surrey con mi esposa Kate y mis hijos Jim y Barbra.`
+  );
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState<FormattedLangIdentResp | null>(null);
   const [rawOutput, setRawOutput] = useState<string | null>(null);
@@ -69,10 +68,12 @@ export const LangIdentModel: FC<Props> = ({ model }) => {
   return (
     <>
       <EuiTextArea
-        placeholder="Input text"
+        placeholder={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText', {
+          defaultMessage: 'Input text',
+        })}
         value={inputText}
         disabled={isRunning === true}
-        fullWidth={true}
+        fullWidth
         onChange={(e) => {
           setInputText(e.target.value);
         }}
@@ -85,7 +86,7 @@ export const LangIdentModel: FC<Props> = ({ model }) => {
           fullWidth={false}
         >
           <FormattedMessage
-            id="xpack.ml.trainedModels.testModelsFlyout.lang_ident.runButton"
+            id="xpack.ml.trainedModels.testModelsFlyout.langIdent.runButton"
             defaultMessage="Run inference"
           />
         </EuiButton>
@@ -94,15 +95,21 @@ export const LangIdentModel: FC<Props> = ({ model }) => {
         <>
           <EuiSpacer size="m" />
           <EuiTabs size={'s'}>
-            <EuiTab isSelected={selectedTab === TAB.TEXT} onClick={() => setSelectedTab(TAB.TEXT)}>
+            <EuiTab
+              isSelected={selectedTab === TAB.TEXT}
+              onClick={setSelectedTab.bind(null, TAB.TEXT)}
+            >
               <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.lang_ident.markupTab"
+                id="xpack.ml.trainedModels.testModelsFlyout.langIdent.markupTab"
                 defaultMessage="Output"
               />
             </EuiTab>
-            <EuiTab isSelected={selectedTab === TAB.RAW} onClick={() => setSelectedTab(TAB.RAW)}>
+            <EuiTab
+              isSelected={selectedTab === TAB.RAW}
+              onClick={setSelectedTab.bind(null, TAB.RAW)}
+            >
               <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.lang_ident.rawOutput"
+                id="xpack.ml.trainedModels.testModelsFlyout.langIdent.rawOutput"
                 defaultMessage="Raw output"
               />
             </EuiTab>

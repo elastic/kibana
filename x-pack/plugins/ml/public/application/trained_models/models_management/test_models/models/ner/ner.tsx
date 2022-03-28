@@ -8,6 +8,7 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, useState, useMemo } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTextArea, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
 
@@ -36,9 +37,9 @@ export const NerModel: FC<Props> = ({ model }) => {
 
   // const [inputText, setInputText] = useState('');
   const [inputText, setInputText] =
-    useState(`Hello, my name is James and i live in Hersham, Surrey with my wife Kate, and my children Jonathan and Emily.
+    useState(`Hello, my name is Bob and i live in London with my wife Sally, and my children Bob and Barbra.
 
-  I used to live in London, but we moved out into the sticks about 3 years ago.`);
+  I used to live in Cornwall, but it was pretty boring.`);
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState<FormattedNerResp | null>(null);
   const [rawOutput, setRawOutput] = useState<string | null>(null);
@@ -68,10 +69,12 @@ export const NerModel: FC<Props> = ({ model }) => {
   return (
     <>
       <EuiTextArea
-        placeholder="Input text"
+        placeholder={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.ner.inputText', {
+          defaultMessage: 'Input text',
+        })}
         value={inputText}
         disabled={isRunning === true}
-        fullWidth={true}
+        fullWidth
         onChange={(e) => {
           setInputText(e.target.value);
         }}
@@ -93,13 +96,19 @@ export const NerModel: FC<Props> = ({ model }) => {
         <>
           <EuiSpacer size="m" />
           <EuiTabs size={'s'}>
-            <EuiTab isSelected={selectedTab === TAB.TEXT} onClick={() => setSelectedTab(TAB.TEXT)}>
+            <EuiTab
+              isSelected={selectedTab === TAB.TEXT}
+              onClick={setSelectedTab.bind(null, TAB.TEXT)}
+            >
               <FormattedMessage
                 id="xpack.ml.trainedModels.testModelsFlyout.ner.markupTab"
                 defaultMessage="Output"
               />
             </EuiTab>
-            <EuiTab isSelected={selectedTab === TAB.RAW} onClick={() => setSelectedTab(TAB.RAW)}>
+            <EuiTab
+              isSelected={selectedTab === TAB.RAW}
+              onClick={setSelectedTab.bind(null, TAB.RAW)}
+            >
               <FormattedMessage
                 id="xpack.ml.trainedModels.testModelsFlyout.ner.rawOutput"
                 defaultMessage="Raw output"

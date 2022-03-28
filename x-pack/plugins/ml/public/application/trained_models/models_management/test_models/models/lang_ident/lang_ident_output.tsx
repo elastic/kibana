@@ -38,7 +38,7 @@ export const LangIdentOutput: FC<{ result: FormattedLangIdentResp }> = ({ result
     {
       field: 'className',
       name: i18n.translate(
-        'xpack.ml.trainedModels.testModelsFlyout.lang_ident.output.language_title',
+        'xpack.ml.trainedModels.testModelsFlyout.langIdent.output.language_title',
         {
           defaultMessage: 'Language',
         }
@@ -50,7 +50,7 @@ export const LangIdentOutput: FC<{ result: FormattedLangIdentResp }> = ({ result
     {
       field: 'classProbability',
       name: i18n.translate(
-        'xpack.ml.trainedModels.testModelsFlyout.lang_ident.output.probability_title',
+        'xpack.ml.trainedModels.testModelsFlyout.langIdent.output.probability_title',
         {
           defaultMessage: 'Probability',
         }
@@ -62,11 +62,11 @@ export const LangIdentOutput: FC<{ result: FormattedLangIdentResp }> = ({ result
 
   const title =
     lang !== 'unknown'
-      ? i18n.translate('xpack.ml.trainedModels.testModelsFlyout.lang_ident.output.title', {
+      ? i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.output.title', {
           defaultMessage: 'This looks like {lang}',
           values: { lang },
         })
-      : i18n.translate('xpack.ml.trainedModels.testModelsFlyout.lang_ident.output.titleUnknown', {
+      : i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.output.titleUnknown', {
           defaultMessage: 'Language code unknown: {code}',
           values: { code: result[0].className },
         });

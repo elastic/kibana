@@ -74,8 +74,6 @@ export class LangIdentInference {
         })),
         rawResponse: resp,
       };
-    } else {
-      // / use just the lang_ident in response
     }
     return { response: [], rawResponse: resp };
   }

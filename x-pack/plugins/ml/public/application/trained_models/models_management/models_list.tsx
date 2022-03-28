@@ -482,10 +482,8 @@ export const ModelsList: FC<Props> = ({
           icon: 'inputOutput',
           type: 'icon',
           isPrimary: true,
-          available: (item) => isTestable(item),
-          onClick: (model) => {
-            setShowTestFlyout(model);
-          },
+          available: isTestable,
+          onClick: setShowTestFlyout,
         },
       ] as Array<Action<ModelItem>>)
     );
@@ -787,7 +785,10 @@ export const ModelsList: FC<Props> = ({
         />
       )}
       {showTestFlyout === null ? null : (
-        <TestTrainedModelFlyout model={showTestFlyout} onClose={() => setShowTestFlyout(null)} />
+        <TestTrainedModelFlyout
+          model={showTestFlyout}
+          onClose={setShowTestFlyout.bind(null, null)}
+        />
       )}
     </>
   );

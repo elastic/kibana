@@ -17,9 +17,16 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+import {
+  useCurrentEuiTheme,
+  EuiThemeType,
+} from '../../../../../components/color_range_legend/use_color_range';
 import type { FormattedNerResp } from './ner_inference';
 
+const ICON_PADDING = '2px';
+
 export const NerOutput: FC<{ result: FormattedNerResp }> = ({ result }) => {
+  const { euiTheme } = useCurrentEuiTheme();
   const lineSplit: JSX.Element[] = [];
   result.forEach(({ value, entity }) => {
     if (entity === null) {
@@ -38,12 +45,12 @@ export const NerOutput: FC<{ result: FormattedNerResp }> = ({ result }) => {
                 <EuiIcon
                   size="m"
                   type={getClassIcon(entity.class_name)}
-                  style={{ marginRight: '2px', verticalAlign: 'text-top' }}
+                  style={{ marginRight: ICON_PADDING, verticalAlign: 'text-top' }}
                 />
                 {value}
               </div>
               <EuiHorizontalRule margin="none" />
-              <div style={{ fontSize: '12px', marginTop: '2px' }}>
+              <div style={{ fontSize: euiTheme.euiFontSizeXS, marginTop: ICON_PADDING }}>
                 <div>
                   <FormattedMessage
                     id="xpack.ml.trainedModels.testModelsFlyout.ner.output.typeTitle"
@@ -76,29 +83,32 @@ const EntityBadge = ({
 }: {
   entity: estypes.MlTrainedModelEntities;
   children: ReactNode;
-}) => (
-  <EuiBadge
-    color={getClassColor(entity.class_name)}
-    style={{
-      marginRight: '2px',
-      marginTop: '-2px',
-      border: `1px solid ${getClassColor(entity.class_name, true)}`,
-      fontSize: '12px',
-      padding: '0px 6px',
-    }}
-  >
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <EuiIcon
-          size="s"
-          type={getClassIcon(entity.class_name)}
-          style={{ marginRight: '2px', marginTop: '2px' }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>{children}</EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiBadge>
-);
+}) => {
+  const { euiTheme } = useCurrentEuiTheme();
+  return (
+    <EuiBadge
+      color={getClassColor(euiTheme, entity.class_name)}
+      style={{
+        marginRight: ICON_PADDING,
+        marginTop: `-${ICON_PADDING}`,
+        border: `1px solid ${getClassColor(euiTheme, entity.class_name, true)}`,
+        fontSize: euiTheme.euiFontSizeXS,
+        padding: '0px 6px',
+      }}
+    >
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiIcon
+            size="s"
+            type={getClassIcon(entity.class_name)}
+            style={{ marginRight: ICON_PADDING, marginTop: ICON_PADDING }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>{children}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiBadge>
+  );
+};
 
 function getClassIcon(className: string) {
   switch (className) {
@@ -124,15 +134,13 @@ function getClassLabel(className: string) {
   }
 }
 
-// TODO, these colors should be imported from EUI
-function getClassColor(className: string, border: boolean = false) {
+function getClassColor(euiTheme: EuiThemeType, className: string, border: boolean = false) {
   switch (className) {
     case 'PER':
-      return border ? '#D6BF57' : '#F1D86F'; // $euiColorVis5 or $euiColorVis5_behindText
+      return border ? euiTheme.euiColorVis5 : euiTheme.euiColorVis5_behindText;
     case 'LOC':
-      return border ? '#6092C0' : '#79AAD9'; // $euiColorVis1 or $euiColorVis1_behindText
-
+      return border ? euiTheme.euiColorVis1 : euiTheme.euiColorVis1_behindText;
     default:
-      return border ? '#D6BF57' : '#F1D86F'; // $euiColorVis5 or $euiColorVis5_behindText
+      return border ? euiTheme.euiColorVis5 : euiTheme.euiColorVis5_behindText;
   }
 }
