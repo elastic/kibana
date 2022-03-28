@@ -109,7 +109,7 @@ export enum SecurityPageName {
   networkHttp = 'network-http',
   networkTls = 'network-tls',
   overview = 'overview',
-  policies = 'policies',
+  policies = 'policy',
   rules = 'rules',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
