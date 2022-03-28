@@ -92,7 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         operation: 'average',
         field: 'bytes',
       });
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       await PageObjects.lens.notLinkedToOriginatingApp();
 
       // return to origin should not be present in save modal
