@@ -33,10 +33,19 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { DetailsPanel } from '../../../../timelines/components/side_panel';
 import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';
+import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
+import { InspectButtonContainer } from '../../../../common/components/inspect';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
   margin: 0 auto;
+`;
+
+const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
+  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
+  flex: 1 1 auto;
+  display: flex;
+  width: 100%;
 `;
 
 export const ID = 'previewHistogram';
@@ -86,7 +95,6 @@ export const PreviewHistogram = ({
     dataProviders,
     deletedEventIds,
     kqlMode,
-    isLive,
     itemsPerPage,
     itemsPerPageOptions,
     graphEventId,
@@ -101,6 +109,7 @@ export const PreviewHistogram = ({
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
+  const { globalFullScreen } = useGlobalFullScreen();
   const previousPreviewId = usePrevious(previewId);
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
     'tGridEventRenderedViewEnabled'
@@ -193,40 +202,44 @@ export const PreviewHistogram = ({
       </Panel>
       <EuiSpacer />
       <CasesContext owner={[APP_ID]} userCanCrud={false}>
-        {timelinesUi.getTGrid<'embedded'>({
-          additionalFilters: <></>,
-          appId: APP_UI_ID,
-          browserFields,
-          columns,
-          dataProviders,
-          deletedEventIds,
-          disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-          docValueFields,
-          end: to,
-          entityType: 'alerts',
-          filters: [],
-          globalFullScreen: false,
-          graphEventId,
-          hasAlertsCrud: false,
-          id: TimelineId.detectionsPage,
-          indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
-          indexPattern,
-          isLive,
-          isLoadingIndexPattern,
-          itemsPerPage,
-          itemsPerPageOptions,
-          kqlMode,
-          query: { query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' },
-          renderCellValue: PreviewRenderCellValue,
-          rowRenderers: defaultRowRenderers,
-          runtimeMappings,
-          setQuery: () => {},
-          sort,
-          start: from,
-          tGridEventRenderedViewEnabled,
-          type: 'embedded',
-          leadingControlColumns: getPreviewTableControlColumn(1.5),
-        })}
+        <FullScreenContainer $isFullScreen={globalFullScreen}>
+          <InspectButtonContainer>
+            {timelinesUi.getTGrid<'embedded'>({
+              additionalFilters: <></>,
+              appId: APP_UI_ID,
+              browserFields,
+              columns,
+              dataProviders,
+              deletedEventIds,
+              disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+              docValueFields,
+              end: to,
+              entityType: 'alerts',
+              filters: [],
+              globalFullScreen,
+              graphEventId,
+              hasAlertsCrud: false,
+              id: TimelineId.detectionsPage,
+              indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
+              indexPattern,
+              isLive: false,
+              isLoadingIndexPattern,
+              itemsPerPage,
+              itemsPerPageOptions,
+              kqlMode,
+              query: { query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' },
+              renderCellValue: PreviewRenderCellValue,
+              rowRenderers: defaultRowRenderers,
+              runtimeMappings,
+              setQuery: () => {},
+              sort,
+              start: from,
+              tGridEventRenderedViewEnabled,
+              type: 'embedded',
+              leadingControlColumns: getPreviewTableControlColumn(1.5),
+            })}
+          </InspectButtonContainer>
+        </FullScreenContainer>
         <DetailsPanel
           browserFields={browserFields}
           entityType={'alerts'}
