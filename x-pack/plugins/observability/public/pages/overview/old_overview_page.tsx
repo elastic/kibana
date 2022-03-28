@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useRef, useCallback, useState } from 'react';
 import { observabilityFeatureId } from '../../../common';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { useTrackPageview } from '../..';
+import { useTrackPageview, useUiTracker } from '../..';
 import { EmptySections } from '../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../components/app/header';
 import { NewsFeed } from '../../components/app/news_feed';
@@ -45,7 +45,10 @@ import { ObservabilityAppServices } from '../../application/types';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { paths } from '../../config';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
-import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
+import {
+  LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY,
+  ObservabilityStatusProgress,
+} from '../../components/app/observability_status/observability_status_progress';
 import { ObservabilityStatus } from '../../components/app/observability_status';
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -58,6 +61,7 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 }
 
 export function OverviewPage({ routeParams }: Props) {
+  const trackMetric = useUiTracker({ app: 'observability-overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview', delay: 15000 });
   useBreadcrumbs([
@@ -94,6 +98,14 @@ export function OverviewPage({ routeParams }: Props) {
     refetch.current = ref;
   }, []);
 
+  const handleGuidedSetupClick = useCallback(() => {
+    if (window.localStorage.getItem(LOCAL_STORAGE_HIDE_GUIDED_SETUP_KEY) === 'true') {
+      trackMetric({ metric: 'guided_setup_view_details_after_dismiss' });
+    }
+
+    setIsFlyoutVisible(true);
+  }, [trackMetric]);
+
   const onTimeRangeRefresh = useCallback(() => {
     return refetch.current && refetch.current();
   }, []);
@@ -125,7 +137,7 @@ export function OverviewPage({ routeParams }: Props) {
           ? {
               pageTitle: overviewPageTitle,
               rightSideItems: [
-                <EuiButton color="text" iconType="wrench" onClick={() => setIsFlyoutVisible(true)}>
+                <EuiButton color="text" iconType="wrench" onClick={handleGuidedSetupClick}>
                   <FormattedMessage
                     id="xpack.observability.overview.guidedSetupButton"
                     defaultMessage="Guided setup"
