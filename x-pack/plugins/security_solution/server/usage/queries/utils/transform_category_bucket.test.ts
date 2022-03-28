@@ -19,9 +19,4 @@ describe('transform_category_bucket', () => {
       count: 10,
     });
   });
-
-  test('it will return undefined if the bucket is undefined', () => {
-    const result = transformCategoryBucket(undefined);
-    expect(result).toEqual(undefined);
-  });
 });

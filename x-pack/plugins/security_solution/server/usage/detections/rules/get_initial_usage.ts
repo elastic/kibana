@@ -128,9 +128,9 @@ export const getInitialSingleEventLogUsage = (): SingleEventLogStatusMetric => (
  */
 export const getInitialSingleEventMetric = (): SingleEventMetric => ({
   failed: 0,
-  top_failed: {},
+  top_failed: [],
   partial_failure: 0,
-  top_partial_failure: {},
+  top_partial_failure: [],
   succeeded: 0,
   index_duration: getInitialMaxAvgMin(),
   search_duration: getInitialMaxAvgMin(),

@@ -9,7 +9,7 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsFindResponse } from 'kibana/server';
 import type { AlertAggs, EventLogTypeStatusAggs } from '../../types';
 import { CommentAttributes, CommentType } from '../../../../../cases/common/api/cases/comment';
-import { EventLogStatusMetric, SingleEventLogStatusMetric } from './types';
+import type { EventLogStatusMetric, SingleEventLogStatusMetric } from './types';
 
 export const getMockRuleAlertsResponse = (docCount: number): SearchResponse<never, AlertAggs> => ({
   took: 7,
@@ -2463,9 +2463,9 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
 export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
   eql: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2486,9 +2486,9 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
   },
   indicator: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2509,9 +2509,9 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
   },
   mlRule: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2532,51 +2532,51 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
   },
   query: {
     failed: 4,
-    top_failed: {
-      '1': {
+    top_failed: [
+      {
         message:
           'an hour were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name * id rule id execution id space ID default',
         count: 2,
       },
-      '2': {
+      {
         message:
           'hours were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name * id rule id execution id space ID default',
         count: 2,
       },
-      '3': {
+      {
         message:
           'an hour were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name Endpoint Security id rule id execution id space ID default',
         count: 1,
       },
-      '4': {
+      {
         message:
           'an hour were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name Telnet Port Activity id rule id execution id space ID default',
         count: 1,
       },
-      '5': {
+      {
         message:
           'hours were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name Endpoint Security id rule id execution id space ID default',
         count: 1,
       },
-      '6': {
+      {
         message:
           'hours were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name Telnet Port Activity id rule id execution id space ID default',
         count: 1,
       },
-    },
+    ],
     partial_failure: 2,
-    top_partial_failure: {
-      '1': {
+    top_partial_failure: [
+      {
         message:
           'This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching blah frank was found This warning will continue to appear until matching index is created or this rule is disabled',
         count: 163,
       },
-      '2': {
+      {
         message:
           'This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching logs-endpoint.alerts was found This warning will continue to appear until matching index is created or this rule is disabled If you have recently enrolled agents enabled with Endpoint Security through Fleet this warning should stop once an alert is sent from an agent',
         count: 162,
       },
-    },
+    ],
     succeeded: 2,
     index_duration: {
       max: 228568,
@@ -2597,9 +2597,9 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
   },
   savedQuery: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2620,9 +2620,9 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
   },
   threshold: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2656,9 +2656,9 @@ export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
 export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => ({
   eql: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2679,9 +2679,9 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
   },
   indicator: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2702,9 +2702,9 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
   },
   mlRule: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2725,36 +2725,36 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
   },
   query: {
     failed: 2,
-    top_failed: {
-      '1': {
+    top_failed: [
+      {
         message:
           'an hour were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name Endpoint Security id rule id execution id space ID default',
         count: 1,
       },
-      '2': {
+      {
         message:
           'an hour were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name Telnet Port Activity id rule id execution id space ID default',
         count: 1,
       },
-      '3': {
+      {
         message:
           'hours were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name Endpoint Security id rule id execution id space ID default',
         count: 1,
       },
-      '4': {
+      {
         message:
           'hours were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name Telnet Port Activity id rule id execution id space ID default',
         count: 1,
       },
-    },
+    ],
     partial_failure: 1,
-    top_partial_failure: {
-      '1': {
+    top_partial_failure: [
+      {
         message:
           'This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching logs-endpoint.alerts was found This warning will continue to appear until matching index is created or this rule is disabled If you have recently enrolled agents enabled with Endpoint Security through Fleet this warning should stop once an alert is sent from an agent',
         count: 162,
       },
-    },
+    ],
     succeeded: 1,
     index_duration: {
       max: 0,
@@ -2775,9 +2775,9 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
   },
   savedQuery: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2798,9 +2798,9 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
   },
   threshold: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2834,9 +2834,9 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
 export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
   eql: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2857,9 +2857,9 @@ export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
   },
   indicator: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2880,9 +2880,9 @@ export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
   },
   mlRule: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2903,26 +2903,26 @@ export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
   },
   query: {
     failed: 2,
-    top_failed: {
-      '1': {
+    top_failed: [
+      {
         message:
           'an hour were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name * id rule id execution id space ID default',
         count: 2,
       },
-      '2': {
+      {
         message:
           'hours were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances name * id rule id execution id space ID default',
         count: 2,
       },
-    },
+    ],
     partial_failure: 1,
-    top_partial_failure: {
-      '1': {
+    top_partial_failure: [
+      {
         message:
           'This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching blah frank was found This warning will continue to appear until matching index is created or this rule is disabled',
         count: 163,
       },
-    },
+    ],
     succeeded: 1,
     index_duration: {
       max: 228568,
@@ -2943,9 +2943,9 @@ export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
   },
   savedQuery: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,
@@ -2966,9 +2966,9 @@ export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
   },
   threshold: {
     failed: 0,
-    top_failed: {},
+    top_failed: [],
     partial_failure: 0,
-    top_partial_failure: {},
+    top_partial_failure: [],
     succeeded: 0,
     index_duration: {
       max: 0,

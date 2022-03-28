@@ -317,64 +317,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -383,64 +334,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -501,64 +403,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -567,64 +420,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -685,64 +489,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -751,64 +506,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -869,64 +575,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -935,64 +592,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -1053,64 +661,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -1119,64 +678,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -1237,64 +747,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -1303,64 +764,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -1437,64 +849,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -1503,64 +866,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -1621,64 +935,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -1687,64 +952,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -1805,64 +1021,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -1871,64 +1038,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -1989,64 +1107,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -2055,64 +1124,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -2173,64 +1193,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -2239,64 +1210,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -2357,64 +1279,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -2423,64 +1296,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -2557,64 +1381,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -2623,64 +1398,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -2741,64 +1467,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -2807,64 +1484,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -2925,64 +1553,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -2991,64 +1570,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -3109,64 +1639,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -3175,64 +1656,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -3293,64 +1725,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -3359,64 +1742,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -3477,64 +1811,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of failed rules' },
                 },
                 top_failed: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },
@@ -3543,64 +1828,15 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of partial failure rules' },
                 },
                 top_partial_failure: {
-                  '1': {
+                  type: 'array',
+                  items: {
                     message: {
                       type: 'keyword',
-                      _meta: { description: 'Top 1 partial failed rule message' },
+                      _meta: { description: 'Failed rule message' },
                     },
-                  },
-                  '2': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 2 partial failed rule message' },
-                    },
-                  },
-                  '3': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 3 partial failed rule message' },
-                    },
-                  },
-                  '4': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 4 partial failed rule message' },
-                    },
-                  },
-                  '5': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 5 partial failed rule message' },
-                    },
-                  },
-                  '6': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 6 partial failed rule message' },
-                    },
-                  },
-                  '7': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 7 partial failed rule message' },
-                    },
-                  },
-                  '8': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 8 partial failed rule message' },
-                    },
-                  },
-                  '9': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 9 partial failed rule message' },
-                    },
-                  },
-                  '10': {
-                    message: {
-                      type: 'keyword',
-                      _meta: { description: 'Top 10 partial failed rule message' },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
                     },
                   },
                 },

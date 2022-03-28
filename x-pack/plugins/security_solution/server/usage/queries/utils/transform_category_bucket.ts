@@ -15,12 +15,6 @@ import type { Categories } from '../../types';
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/8.1/search-aggregations-bucket-categorize-text-aggregation.html
  * @returns the bucket transformed
  */
-export const transformCategoryBucket = (
-  bucket: Categories['buckets'][0] | undefined
-): FailureMessage | undefined => {
-  if (bucket != null) {
-    return { message: bucket.key, count: bucket.doc_count };
-  } else {
-    return undefined;
-  }
+export const transformCategoryBucket = (bucket: Categories['buckets'][0]): FailureMessage => {
+  return { message: bucket.key, count: bucket.doc_count };
 };

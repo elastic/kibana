@@ -78,9 +78,9 @@ export interface MaxAvgMin {
  */
 export interface SingleEventMetric {
   failed: number;
-  top_failed: Top10Failure;
+  top_failed: FailureMessage[];
   partial_failure: number;
-  top_partial_failure: Top10Failure;
+  top_partial_failure: FailureMessage[];
   succeeded: number;
   index_duration: MaxAvgMin;
   search_duration: MaxAvgMin;
@@ -114,22 +114,4 @@ export interface SingleEventLogStatusMetric {
 export interface FailureMessage {
   message: string;
   count: number;
-}
-
-/**
- * This is used to get the top 10 failure messages
- * or top 10 partial failure messages from the metrics
- * @see EventLogStatusMetric
- */
-export interface Top10Failure {
-  '1'?: FailureMessage | undefined;
-  '2'?: FailureMessage | undefined;
-  '3'?: FailureMessage | undefined;
-  '4'?: FailureMessage | undefined;
-  '5'?: FailureMessage | undefined;
-  '6'?: FailureMessage | undefined;
-  '7'?: FailureMessage | undefined;
-  '8'?: FailureMessage | undefined;
-  '9'?: FailureMessage | undefined;
-  '10'?: FailureMessage | undefined;
 }

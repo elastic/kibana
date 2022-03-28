@@ -90,31 +90,31 @@ describe('transform_single_rule_metric', () => {
 
     expect(result).toEqual<SingleEventMetric>({
       failed: 2,
-      top_failed: {
-        '1': {
+      top_failed: [
+        {
           message:
             'This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching blah frank was found This warning will continue to appear until matching index is created or this rule is disabled',
           count: 163,
         },
-        '2': {
+        {
           message:
             'This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching logs-endpoint.alerts was found This warning will continue to appear until matching index is created or this rule is disabled If you have recently enrolled agents enabled with Endpoint Security through Fleet this warning should stop once an alert is sent from an agent',
           count: 162,
         },
-      },
+      ],
       partial_failure: 2,
-      top_partial_failure: {
-        '1': {
+      top_partial_failure: [
+        {
           message:
             'This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching blah frank was found This warning will continue to appear until matching index is created or this rule is disabled',
           count: 163,
         },
-        '2': {
+        {
           message:
             'This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching logs-endpoint.alerts was found This warning will continue to appear until matching index is created or this rule is disabled If you have recently enrolled agents enabled with Endpoint Security through Fleet this warning should stop once an alert is sent from an agent',
           count: 162,
         },
-      },
+      ],
       succeeded: 5,
       index_duration: {
         max: 5,
