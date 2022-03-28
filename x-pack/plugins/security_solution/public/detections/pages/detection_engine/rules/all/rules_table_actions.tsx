@@ -11,26 +11,22 @@ import {
   EuiTableActionsColumnType,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { Dispatch } from 'react';
+import React from 'react';
 import { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
-import { ActionToaster } from '../../../../../common/components/toasters';
+import { BulkAction } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { Rule } from '../../../../containers/detection_engine/rules';
-import { RulesTableActions } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
-import {
-  deleteRulesAction,
-  duplicateRulesAction,
-  editRuleAction,
-  exportRulesAction,
-} from './actions';
+import { executeRulesBulkAction, goToRuleEditPage } from './actions';
+import { RulesTableActions } from './rules_table/rules_table_context';
 
 type NavigateToApp = (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
 export const getRulesTableActions = (
-  dispatchToaster: Dispatch<ActionToaster>,
+  toasts: UseAppToasts,
   navigateToApp: NavigateToApp,
   invalidateRules: () => void,
   actionsPrivileges: boolean,
@@ -48,7 +44,7 @@ export const getRulesTableActions = (
       i18n.EDIT_RULE_SETTINGS
     ),
     icon: 'controlsHorizontal',
-    onClick: (rule: Rule) => editRuleAction(rule.id, navigateToApp),
+    onClick: (rule: Rule) => goToRuleEditPage(rule.id, navigateToApp),
     enabled: (rule: Rule) => canEditRuleWithActions(rule, actionsPrivileges),
   },
   {
@@ -65,15 +61,17 @@ export const getRulesTableActions = (
     ),
     enabled: (rule: Rule) => canEditRuleWithActions(rule, actionsPrivileges),
     onClick: async (rule: Rule) => {
-      const createdRules = await duplicateRulesAction(
-        [rule],
-        [rule.id],
-        dispatchToaster,
-        setLoadingRules
-      );
+      const result = await executeRulesBulkAction({
+        action: BulkAction.duplicate,
+        setLoadingRules,
+        visibleRuleIds: [rule.id],
+        toasts,
+        search: { ids: [rule.id] },
+      });
       invalidateRules();
+      const createdRules = result?.attributes.results.created;
       if (createdRules?.length) {
-        editRuleAction(createdRules[0].id, navigateToApp);
+        goToRuleEditPage(createdRules[0].id, navigateToApp);
       }
     },
   },
@@ -83,7 +81,14 @@ export const getRulesTableActions = (
     description: i18n.EXPORT_RULE,
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
-    onClick: (rule: Rule) => exportRulesAction([rule.rule_id], dispatchToaster, setLoadingRules),
+    onClick: (rule: Rule) =>
+      executeRulesBulkAction({
+        action: BulkAction.export,
+        setLoadingRules,
+        visibleRuleIds: [rule.id],
+        toasts,
+        search: { ids: [rule.id] },
+      }),
     enabled: (rule: Rule) => !rule.immutable,
   },
   {
@@ -93,7 +98,13 @@ export const getRulesTableActions = (
     icon: 'trash',
     name: i18n.DELETE_RULE,
     onClick: async (rule: Rule) => {
-      await deleteRulesAction([rule.id], dispatchToaster, setLoadingRules);
+      await executeRulesBulkAction({
+        action: BulkAction.delete,
+        setLoadingRules,
+        visibleRuleIds: [rule.id],
+        toasts,
+        search: { ids: [rule.id] },
+      });
       invalidateRules();
     },
   },

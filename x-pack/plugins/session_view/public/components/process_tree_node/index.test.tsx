@@ -36,7 +36,7 @@ describe('ProcessTreeNode component', () => {
       },
     } as unknown as RefObject<HTMLDivElement>,
     onChangeJumpToEventVisibility: jest.fn(),
-    handleOnAlertDetailsClosed: (_alertUuid: string) => {},
+    onShowAlertDetails: jest.fn(),
   };
 
   beforeEach(() => {
@@ -203,10 +203,6 @@ describe('ProcessTreeNode component', () => {
       it('renders Alert button when process has one alert', async () => {
         const processMockWithOneAlert = {
           ...sessionViewAlertProcessMock,
-          events: sessionViewAlertProcessMock.events.slice(
-            0,
-            sessionViewAlertProcessMock.events.length - 1
-          ),
           getAlerts: () => [sessionViewAlertProcessMock.getAlerts()[0]],
         };
         renderResult = mockedContext.render(

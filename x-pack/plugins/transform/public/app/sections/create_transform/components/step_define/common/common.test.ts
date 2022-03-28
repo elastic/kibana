@@ -6,18 +6,18 @@
  */
 
 import { getPivotDropdownOptions } from '../common';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
 import { FilterAggForm } from './filter_agg/components';
 import type { RuntimeField } from '../../../../../../../../../../src/plugins/data/common';
 
 describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {
-    // The field name includes the characters []> as well as a leading and ending space charcter
+    // The field name includes the characters []> as well as a leading and ending space character
     // which cannot be used for aggregation names. The test results verifies that the characters
     // should still be present in field and dropDownName values, but should be stripped for aggName values.
-    const indexPattern = {
-      id: 'the-index-pattern-id',
-      title: 'the-index-pattern-title',
+    const dataView = {
+      id: 'the-data-view-id',
+      title: 'the-data-view-title',
       fields: [
         {
           name: ' the-f[i]e>ld ',
@@ -27,9 +27,9 @@ describe('Transform: Define Pivot Common', () => {
           searchable: true,
         },
       ],
-    } as IndexPattern;
+    } as DataView;
 
-    const options = getPivotDropdownOptions(indexPattern);
+    const options = getPivotDropdownOptions(dataView);
 
     expect(options).toMatchObject({
       aggOptions: [
@@ -120,7 +120,7 @@ describe('Transform: Define Pivot Common', () => {
         },
       } as RuntimeField,
     };
-    const optionsWithRuntimeFields = getPivotDropdownOptions(indexPattern, runtimeMappings);
+    const optionsWithRuntimeFields = getPivotDropdownOptions(dataView, runtimeMappings);
     expect(optionsWithRuntimeFields).toMatchObject({
       aggOptions: [
         {

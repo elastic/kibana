@@ -6,7 +6,6 @@
  */
 
 export * from './authentications_query_tab_body';
-export * from './events_query_tab_body';
 export * from './hosts_query_tab_body';
 export * from './uncommon_process_query_tab_body';
 export * from './alerts_query_tab_body';

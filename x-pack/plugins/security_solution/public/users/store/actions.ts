@@ -31,6 +31,7 @@ export const updateTableActivePage = actionCreator<{
 
 export const updateTableSorting = actionCreator<{
   sort: RiskScoreSortField;
+  tableType: usersModel.UsersTableType.risk;
 }>('UPDATE_USERS_SORTING');
 
 export const updateUserRiskScoreSeverityFilter = actionCreator<{
