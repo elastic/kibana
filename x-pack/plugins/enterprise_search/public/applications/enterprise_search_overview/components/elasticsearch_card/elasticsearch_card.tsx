@@ -31,7 +31,7 @@ export const ElasticsearchCard: React.FC = () => {
           <EuiText size="s">
             {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchCard.description', {
               defaultMessage:
-                'Design and build performant, relevant search-powered application or large-scale search implementations directly in Elasticsearch',
+                'Design and build performant, relevant search-powered applications or large-scale search implementations directly in Elasticsearch',
             })}
           </EuiText>
           <EuiSpacer size="s" />
