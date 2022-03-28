@@ -32,7 +32,12 @@ export const getThreatList = async ({
   threatListConfig,
   pitId,
   reassignPitId,
+  perPage,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
+  const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
+  if (calculatedPerPage > 10000) {
+    throw new TypeError('perPage cannot exceed the size of 10000');
+  }
   const queryFilter = getQueryFilter(
     query,
     language ?? 'kuery',
@@ -43,7 +48,7 @@ export const getThreatList = async ({
 
   logger.debug(
     buildRuleMessage(
-      `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${INDICATOR_PER_PAGE} indicator items`
+      `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
     )
   );
 
@@ -58,7 +63,7 @@ export const getThreatList = async ({
       sort: ['_shard_doc', { '@timestamp': 'asc' }],
     },
     track_total_hits: false,
-    size: INDICATOR_PER_PAGE,
+    size: calculatedPerPage,
     pit: { id: pitId },
   });
 

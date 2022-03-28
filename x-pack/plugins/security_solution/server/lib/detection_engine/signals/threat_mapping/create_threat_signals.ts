@@ -28,6 +28,7 @@ export const createThreatSignals = async ({
   buildRuleMessage,
   bulkCreate,
   completeRule,
+  concurrentSearches,
   eventsTelemetry,
   exceptionItems,
   filters,
@@ -53,6 +54,7 @@ export const createThreatSignals = async ({
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = completeRule.ruleParams;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
+  const perPage = concurrentSearches * itemsPerSearch;
   const verifyExecutionCanProceed = buildExecutionIntervalValidator(
     completeRule.ruleConfig.schedule.interval
   );
@@ -191,6 +193,7 @@ export const createThreatSignals = async ({
           searchAfter,
           logger,
           buildRuleMessage,
+          perPage,
           tuple,
         }),
 
@@ -242,6 +245,7 @@ export const createThreatSignals = async ({
           searchAfter,
           logger,
           buildRuleMessage,
+          perPage,
           threatListConfig,
           pitId: threatPitId,
           reassignPitId: reassignThreatPitId,
