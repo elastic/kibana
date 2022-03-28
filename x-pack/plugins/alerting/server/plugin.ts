@@ -65,6 +65,7 @@ import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
+import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
@@ -282,15 +283,13 @@ export class AlertingPlugin {
       encryptedSavedObjects: plugins.encryptedSavedObjects,
     });
 
-    const alertingConfig: AlertingConfig = this.config;
-
     return {
-      registerType<
-        Params extends AlertTypeParams = AlertTypeParams,
-        ExtractedParams extends AlertTypeParams = AlertTypeParams,
-        State extends AlertTypeState = AlertTypeState,
-        InstanceState extends AlertInstanceState = AlertInstanceState,
-        InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+      registerType: <
+        Params extends AlertTypeParams = never,
+        ExtractedParams extends AlertTypeParams = never,
+        State extends AlertTypeState = never,
+        InstanceState extends AlertInstanceState = never,
+        InstanceContext extends AlertInstanceContext = never,
         ActionGroupIds extends string = never,
         RecoveryActionGroupId extends string = never
       >(
@@ -303,14 +302,17 @@ export class AlertingPlugin {
           ActionGroupIds,
           RecoveryActionGroupId
         >
-      ) {
+      ) => {
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
-        ruleType.ruleTaskTimeout =
-          ruleType.ruleTaskTimeout ?? alertingConfig.defaultRuleTaskTimeout;
+        ruleType.ruleTaskTimeout = getRuleTaskTimeout({
+          config: this.config.rules,
+          ruleTaskTimeout: ruleType.ruleTaskTimeout,
+          ruleTypeId: ruleType.id,
+        });
         ruleType.cancelAlertsOnRuleTimeout =
-          ruleType.cancelAlertsOnRuleTimeout ?? alertingConfig.cancelAlertsOnRuleTimeout;
+          ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
         ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
         ruleTypeRegistry.register(ruleType);
       },
@@ -325,7 +327,7 @@ export class AlertingPlugin {
         );
       },
       getConfig: () => {
-        return pick(alertingConfig.rules, 'minimumScheduleInterval');
+        return pick(this.config.rules, 'minimumScheduleInterval');
       },
     };
   }

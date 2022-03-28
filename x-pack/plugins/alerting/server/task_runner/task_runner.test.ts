@@ -65,6 +65,7 @@ import {
   DATE_1969,
   DATE_1970,
   DATE_1970_5_MIN,
+  DATE_9999,
 } from './fixtures';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
@@ -419,7 +420,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `no scheduling of actions for rule test:1: '${RULE_NAME}': rule is muted.`
+      `no scheduling of actions for rule test:1: '${RULE_NAME}': rule is snoozed.`
     );
     expect(logger.debug).nthCalledWith(
       4,
@@ -472,6 +473,69 @@ describe('Task Runner', () => {
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
+
+  type SnoozeTestParams = [
+    muteAll: boolean,
+    snoozeEndTime: string | undefined | null,
+    shouldBeSnoozed: boolean
+  ];
+
+  const snoozeTestParams: SnoozeTestParams[] = [
+    [false, null, false],
+    [false, undefined, false],
+    [false, DATE_1970, false],
+    [false, DATE_9999, true],
+    [true, null, true],
+    [true, undefined, true],
+    [true, DATE_1970, true],
+    [true, DATE_9999, true],
+  ];
+
+  test.each(snoozeTestParams)(
+    'snoozing works as expected with muteAll: %s; snoozeEndTime: %s',
+    async (muteAll, snoozeEndTime, shouldBeSnoozed) => {
+      taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+      taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+      ruleType.executor.mockImplementation(
+        async ({
+          services: executorServices,
+        }: AlertExecutorOptions<
+          AlertTypeParams,
+          AlertTypeState,
+          AlertInstanceState,
+          AlertInstanceContext,
+          string
+        >) => {
+          executorServices.alertFactory.create('1').scheduleActions('default');
+        }
+      );
+      const taskRunner = new TaskRunner(
+        ruleType,
+        mockedTaskInstance,
+        taskRunnerFactoryInitializerParams,
+        inMemoryMetrics
+      );
+      rulesClient.get.mockResolvedValue({
+        ...mockedRuleTypeSavedObject,
+        muteAll,
+        snoozeEndTime: snoozeEndTime != null ? new Date(snoozeEndTime) : snoozeEndTime,
+      });
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+      await taskRunner.run();
+
+      const expectedExecutions = shouldBeSnoozed ? 0 : 1;
+      expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(expectedExecutions);
+      expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
+
+      const logger = taskRunnerFactoryInitializerParams.logger;
+      const expectedMessage = `no scheduling of actions for rule test:1: '${RULE_NAME}': rule is snoozed.`;
+      if (expectedExecutions) {
+        expect(logger.debug).not.toHaveBeenCalledWith(expectedMessage);
+      } else {
+        expect(logger.debug).toHaveBeenCalledWith(expectedMessage);
+      }
+    }
+  );
 
   test.each(ephemeralTestParams)(
     'skips firing actions for active alert if alert is muted %s',

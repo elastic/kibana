@@ -87,6 +87,7 @@ import {
   TotalUsersKpiRequestOptions,
   TotalUsersKpiStrategyResponse,
 } from './users/kpi/total_users';
+import { UsersRequestOptions, UsersStrategyResponse } from './users/all';
 
 export * from './cti';
 export * from './hosts';
@@ -147,6 +148,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? UserDetailsStrategyResponse
   : T extends UsersQueries.kpiTotalUsers
   ? TotalUsersKpiStrategyResponse
+  : T extends UsersQueries.users
+  ? UsersStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -207,6 +210,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? UserDetailsRequestOptions
   : T extends UsersQueries.kpiTotalUsers
   ? TotalUsersKpiRequestOptions
+  : T extends UsersQueries.users
+  ? UsersRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
