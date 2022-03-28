@@ -50,7 +50,7 @@ const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitor
 });
 
 const ERROR_HEADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.manageMonitorError', {
-  defaultMessage: 'Error loading monitor management',
+  defaultMessage: 'Error loading Monitor Management',
 });
 
 const SERVICE_LOCATIONS_ERROR_LABEL = i18n.translate(

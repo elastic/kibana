@@ -37,7 +37,7 @@ journey(
       expect(await uptime.checkIsEnabled()).toBe(false);
     });
 
-    step('enable monitor management', async () => {
+    step('enable Monitor Management', async () => {
       await uptime.enableMonitorManagement();
       expect(await uptime.checkIsEnabled()).toBe(true);
     });

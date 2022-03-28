@@ -132,7 +132,7 @@ const CALLOUT_MANAGEMENT_DESCRIPTION = i18n.translate(
   'xpack.uptime.monitorManagement.callout.description.disabled',
   {
     defaultMessage:
-      'Monitor management is currently disabled. To run your monitors on Elastic managed Synthetics service, enable Monitor management. Your existing monitors are paused.',
+      'Monitor Management is currently disabled. To run your monitors on Elastic managed Synthetics service, enable Monitor Management. Your existing monitors are paused.',
   }
 );
 

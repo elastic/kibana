@@ -45,7 +45,7 @@ describe('ServiceAllowedWrapper', () => {
       </ServiceAllowedWrapper>
     );
 
-    expect(await findByText('Monitor management')).toBeInTheDocument();
+    expect(await findByText('Monitor Management')).toBeInTheDocument();
   });
 
   it('renders when enabled state is true', async () => {

@@ -126,7 +126,7 @@ const createMonitorJourney = ({
         expect(isSuccessful).toBeTruthy();
       });
 
-      step(`view ${monitorType} details in monitor management UI`, async () => {
+      step(`view ${monitorType} details in Monitor Management UI`, async () => {
         await uptime.navigateToMonitorManagement();
         const hasFailure = await uptime.findMonitorConfiguration(monitorDetails);
         expect(hasFailure).toBeFalsy();
@@ -184,14 +184,14 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
 
   step('Check breadcrumb', async () => {
     const lastBreadcrumb = await (await uptime.findByTestSubj('"breadcrumb last"')).textContent();
-    expect(lastBreadcrumb).toEqual('Monitor management');
+    expect(lastBreadcrumb).toEqual('Monitor Management');
   });
 
   step('check breadcrumbs', async () => {
     await uptime.enableMonitorManagement();
     await uptime.clickAddMonitor();
     const breadcrumbs = await page.$$('[data-test-subj="breadcrumb"]');
-    expect(await breadcrumbs[1].textContent()).toEqual('Monitor management');
+    expect(await breadcrumbs[1].textContent()).toEqual('Monitor Management');
     const lastBreadcrumb = await (await uptime.findByTestSubj('"breadcrumb last"')).textContent();
     expect(lastBreadcrumb).toEqual('Add monitor');
   });
@@ -212,7 +212,7 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
     // breadcrumb is available before edit page is loaded, make sure its edit view
     await page.waitForSelector(byTestId('monitorManagementMonitorName'), { timeout: 60 * 1000 });
     const breadcrumbs = await page.$$('[data-test-subj=breadcrumb]');
-    expect(await breadcrumbs[1].textContent()).toEqual('Monitor management');
+    expect(await breadcrumbs[1].textContent()).toEqual('Monitor Management');
     const lastBreadcrumb = await (await uptime.findByTestSubj('"breadcrumb last"')).textContent();
     expect(lastBreadcrumb).toEqual('Edit monitor');
   });
