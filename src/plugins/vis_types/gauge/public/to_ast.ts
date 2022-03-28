@@ -67,11 +67,12 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
     shape: gaugeTypeToShape(gaugeType),
     metric: schemas.metric.map(prepareDimension),
     ticksPosition: scale.show ? 'auto' : 'hidden',
-    labelMajorMode: 'auto',
+    labelMajorMode: 'none',
     colorMode: 'palette',
     centralMajorMode,
     ...(centralMajorMode === 'custom' ? { labelMinor: style.subText } : {}),
     percentageMode,
+    commonLabel: schemas.metric?.[0]?.label,
   });
 
   if (colorsRange && colorsRange.length) {
