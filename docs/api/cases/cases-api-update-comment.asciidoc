@@ -31,28 +31,32 @@ default space is used.
 
 === Request body
 
+////
 `alertId`::
 (Required*, string) The identifier for the alert. It is required only when
 `type` is `alert`.
+////
 
 `comment`::
-(Required*, string) The updated comment. It is required only when `type` is
-`user`.
+(Required, string) The updated comment.
+//It is required only when `type` is `user`.
 
 `id`::
 (Required, string) The identifier for the comment.
 //To retrieve comment IDs, use <<cases-api-get-all-case-comments>>.
 
+////
 `index`::
 (Required*, string) The alert index. It is required only when `type` is `alert`.
+////
 
 `owner`::
 (Required, string) The application that owns the case. It can be `cases`,
-`observability`, or `securitySolution`. It is required only when `type` is
-`alert`.
+`observability`, or `securitySolution`.
 +
 NOTE: You cannot change the owner of a comment.
 
+////
 `rule`::
 (Required*, object) The rule that is associated with the alert. It is required
 only when `type` is `alert`.
@@ -68,11 +72,11 @@ only when `type` is `alert`.
 (Required, string) The rule name.
 //TBD: Ditto
 ====
+////
 
 `type`::
-(Required, string) The comment type, which can be `user` or `alert`.
-+
-NOTE: You cannot change the comment type.
+(Required, string) The comment type, which must be `user`.
+//or `alert`. NOTE: You cannot change the comment type.
 
 `version`::
 (Required, string) The current comment version.
@@ -155,7 +159,7 @@ The API returns details about the case and its comments. For example:
   "external_service": null
 }
 --------------------------------------------------
-
+////
 Update an alert in the case:
 
 [source,sh]
@@ -176,3 +180,4 @@ PATCH api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/comments
 }
 --------------------------------------------------
 // KIBANA
+////
