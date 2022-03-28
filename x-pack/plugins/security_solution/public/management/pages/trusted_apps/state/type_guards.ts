@@ -7,7 +7,7 @@
 
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import {
-  ConditionEntry,
+  TrustedAppConditionEntry,
   EffectScope,
   GlobalEffectScope,
   MacosLinuxConditionEntry,
@@ -17,13 +17,13 @@ import {
 } from '../../../../../common/endpoint/types';
 
 export const isWindowsTrustedAppCondition = (
-  condition: ConditionEntry
+  condition: TrustedAppConditionEntry
 ): condition is WindowsConditionEntry => {
   return condition.field === ConditionEntryField.SIGNER || true;
 };
 
 export const isMacosLinuxTrustedAppCondition = (
-  condition: ConditionEntry
+  condition: TrustedAppConditionEntry
 ): condition is MacosLinuxConditionEntry => {
   return condition.field !== ConditionEntryField.SIGNER;
 };

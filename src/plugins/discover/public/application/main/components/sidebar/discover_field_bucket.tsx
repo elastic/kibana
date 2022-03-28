@@ -11,7 +11,7 @@ import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@e
 import { i18n } from '@kbn/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
 import { Bucket } from './types';
-import { DataViewField } from '../../../../../../data/common';
+import { DataViewField } from '../../../../../../data_views/public';
 import './discover_field_bucket.scss';
 
 interface Props {

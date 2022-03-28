@@ -23,6 +23,7 @@ import {
 } from '.';
 
 import { DataViewsServicePublic } from './data_views_service_public';
+import { HasData } from './services';
 
 export class DataViewsPublicPlugin
   implements
@@ -33,6 +34,8 @@ export class DataViewsPublicPlugin
       DataViewsPublicStartDependencies
     >
 {
+  private readonly hasData = new HasData();
+
   public setup(
     core: CoreSetup<DataViewsPublicStartDependencies, DataViewsPublicPluginStart>,
     { expressions }: DataViewsPublicSetupDependencies
@@ -47,8 +50,8 @@ export class DataViewsPublicPlugin
     { fieldFormats }: DataViewsPublicStartDependencies
   ): DataViewsPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, theme, overlays, application } = core;
-
     return new DataViewsServicePublic({
+      hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
       apiClient: new DataViewsApiClient(http),

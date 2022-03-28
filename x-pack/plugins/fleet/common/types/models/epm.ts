@@ -72,8 +72,10 @@ export enum KibanaAssetType {
   map = 'map',
   lens = 'lens',
   securityRule = 'security_rule',
+  cloudSecurityPostureRuleTemplate = 'csp_rule_template',
   mlModule = 'ml_module',
   tag = 'tag',
+  osqueryPackAsset = 'osquery_pack_asset',
 }
 
 /*
@@ -88,7 +90,9 @@ export enum KibanaSavedObjectType {
   lens = 'lens',
   mlModule = 'ml-module',
   securityRule = 'security-rule',
+  cloudSecurityPostureRuleTemplate = 'csp-rule-template',
   tag = 'tag',
+  osqueryPackAsset = 'osquery-pack-asset',
 }
 
 export enum ElasticsearchAssetType {
@@ -483,6 +487,25 @@ export interface IndexTemplate {
   _meta: object;
 }
 
+export interface ESAssetMetadata {
+  package?: {
+    name: string;
+  };
+  managed_by: string;
+  managed: boolean;
+}
+export interface TemplateMapEntry {
+  _meta: ESAssetMetadata;
+  template:
+    | {
+        mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
+      }
+    | {
+        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
+      };
+}
+
+export type TemplateMap = Record<string, TemplateMapEntry>;
 export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;

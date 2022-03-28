@@ -236,6 +236,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
+        vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
       },
       symlinks: false,
     },

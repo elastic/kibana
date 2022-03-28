@@ -39,6 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      // This fails and should be investigated or removed if it no longer applies
       it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
         await createSignalsIndex(supertest, log);
         const { body } = await supertest
@@ -160,6 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
+        // This fails and should be investigated or removed if it no longer applies
         it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
           await createSignalsIndex(supertest, log);
           const { body } = await supertest

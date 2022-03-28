@@ -49,7 +49,6 @@ export function FrameLayout(props: FrameLayoutProps) {
         </section>
         <section
           className={classNames('lnsFrameLayout__pageBody', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsFrameLayout__pageBody-isFullscreen': isFullscreen,
           })}
           aria-labelledby="workspaceId"
@@ -66,7 +65,6 @@ export function FrameLayout(props: FrameLayoutProps) {
         </section>
         <section
           className={classNames('lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsFrameLayout__sidebar-isFullscreen': isFullscreen,
           })}
           aria-labelledby="configPanel"

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import sinon, { SinonFakeServer } from 'sinon';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { API_BASE_PATH } from '../../../common/constants';
 
 type HttpResponse = Record<string, any> | any[];
+type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';
 
 export interface ResponseError {
   status: number;
@@ -17,87 +18,105 @@ export interface ResponseError {
 }
 
 // Register helpers to mock HTTP Requests
-export const init = () => {
-  const server = sinon.fakeServer.create();
-  server.respondImmediately = true;
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+) => {
+  const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
+    ['GET', 'PUT', 'DELETE', 'POST'].map(
+      (method) => [method, new Map()] as [HttpMethod, Map<string, Promise<unknown>>]
+    )
+  );
 
-  // Define default response for unhandled requests.
-  // We make requests to APIs which don't impact the component under test, e.g. UI metric telemetry,
-  // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, 'DefaultSinonMockServerResponse']);
-
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
-
-  return {
-    server,
-    httpRequestsMockHelpers,
+  const mockMethodImplementation = (method: HttpMethod, path: string) => {
+    return mockResponses.get(method)?.get(path) ?? Promise.resolve({});
   };
-};
 
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setResponse = (
-    url: string,
-    method: string,
-    response: HttpResponse = [],
+  httpSetup.get.mockImplementation((path) =>
+    mockMethodImplementation('GET', path as unknown as string)
+  );
+  httpSetup.delete.mockImplementation((path) =>
+    mockMethodImplementation('DELETE', path as unknown as string)
+  );
+  httpSetup.post.mockImplementation((path) =>
+    mockMethodImplementation('POST', path as unknown as string)
+  );
+  httpSetup.put.mockImplementation((path) =>
+    mockMethodImplementation('PUT', path as unknown as string)
+  );
+
+  const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
+    const defuse = (promise: Promise<unknown>) => {
+      promise.catch(() => {});
+      return promise;
+    };
+
+    return mockResponses
+      .get(method)!
+      .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
+  };
+
+  const setLoadTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/index_templates`, response, error);
+
+  const setLoadIndicesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/indices`, response, error);
+
+  const setReloadIndicesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/indices/reload`, response, error);
+
+  const setLoadDataStreamsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/data_streams`, response, error);
+
+  const setLoadDataStreamResponse = (
+    dataStreamId: string,
+    response?: HttpResponse,
     error?: ResponseError
-  ) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ?? response;
+  ) =>
+    mockResponse(
+      'GET',
+      `${API_BASE_PATH}/data_streams/${encodeURIComponent(dataStreamId)}`,
+      response,
+      error
+    );
 
-    server.respondWith(method, `${API_BASE_PATH}${url}`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
+  const setDeleteDataStreamResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/delete_data_streams`, response, error);
 
-  const setLoadTemplatesResponse = (response: HttpResponse, error?: ResponseError) =>
-    setResponse('/index_templates', 'GET', response, error);
+  const setDeleteTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/delete_index_templates`, response, error);
 
-  const setLoadIndicesResponse = (response: HttpResponse, error?: ResponseError) =>
-    setResponse('/indices', 'GET', response, error);
-
-  const setReloadIndicesResponse = (response: HttpResponse, error?: ResponseError) =>
-    setResponse('/indices/reload', 'POST', response, error);
-
-  const setLoadDataStreamsResponse = (response: HttpResponse, error?: ResponseError) =>
-    setResponse('/data_streams', 'GET', response, error);
-
-  const setLoadDataStreamResponse = (response: HttpResponse, error?: ResponseError) =>
-    setResponse('/data_streams/:id', 'GET', response, error);
-
-  const setDeleteDataStreamResponse = (response: HttpResponse, error?: ResponseError) =>
-    setResponse('/delete_data_streams', 'POST', response, error);
-
-  const setDeleteTemplateResponse = (response: HttpResponse, error?: ResponseError) =>
-    setResponse('/delete_index_templates', 'POST', response, error);
-
-  const setLoadTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
-    setResponse('/index_templates/:id', 'GET', response, error);
+  const setLoadTemplateResponse = (
+    templateId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/index_templates/${templateId}`, response, error);
 
   const setCreateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
-    setResponse('/index_templates', 'POST', response, error);
+    mockResponse('POST', `${API_BASE_PATH}/index_templates`, response, error);
 
-  const setLoadIndexMappingResponse = (response?: HttpResponse, error?: ResponseError) =>
-    setResponse('/mapping/:name', 'GET', response, error);
+  const setUpdateTemplateResponse = (
+    templateId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('PUT', `${API_BASE_PATH}/index_templates/${templateId}`, response, error);
 
-  const setLoadIndexStatsResponse = (response?: HttpResponse, error?: ResponseError) =>
-    setResponse('/stats/:name', 'GET', response, error);
-
-  const setLoadIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) =>
-    setResponse('/settings/:name', 'GET', response, error);
-
-  const setUpdateIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) =>
-    setResponse('/settings/:name', 'PUT', response, error);
+  const setUpdateIndexSettingsResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('PUT', `${API_BASE_PATH}/settings/${indexName}`, response, error);
 
   const setSimulateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
-    setResponse('/index_templates/simulate', 'POST', response, error);
+    mockResponse('POST', `${API_BASE_PATH}/index_templates/simulate`, response, error);
 
   const setLoadComponentTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
-    setResponse('/component_templates', 'GET', response, error);
+    mockResponse('GET', `${API_BASE_PATH}/component_templates`, response, error);
 
   const setLoadNodesPluginsResponse = (response?: HttpResponse, error?: ResponseError) =>
-    setResponse('/nodes/plugins', 'GET', response, error);
+    mockResponse('GET', `${API_BASE_PATH}/nodes/plugins`, response, error);
+
+  const setLoadTelemetryResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', '/api/ui_counters/_report', response, error);
 
   return {
     setLoadTemplatesResponse,
@@ -116,5 +135,16 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setSimulateTemplateResponse,
     setLoadComponentTemplatesResponse,
     setLoadNodesPluginsResponse,
+    setLoadTelemetryResponse,
+  };
+};
+
+export const init = () => {
+  const httpSetup = httpServiceMock.createSetupContract();
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
+
+  return {
+    httpSetup,
+    httpRequestsMockHelpers,
   };
 };

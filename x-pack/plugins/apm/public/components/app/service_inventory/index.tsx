@@ -10,16 +10,15 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import uuid from 'uuid';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { SearchBar } from '../../shared/search_bar';
-import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { ServiceList } from './service_list';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 
 const initialData = {
   requestId: '',
@@ -30,11 +29,15 @@ const initialData = {
 
 function useServicesFetcher() {
   const {
-    urlParams: { comparisonEnabled, comparisonType },
-  } = useLegacyUrlParams();
-
-  const {
-    query: { rangeFrom, rangeTo, environment, kuery, serviceGroup },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      serviceGroup,
+      comparisonEnabled,
+      comparisonType,
+    },
   } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -188,6 +191,10 @@ export function ServiceInventory() {
             isLoading={isLoading}
             isFailure={isFailure}
             items={items}
+            comparisonDataLoading={
+              comparisonFetch.status === FETCH_STATUS.LOADING ||
+              comparisonFetch.status === FETCH_STATUS.NOT_INITIATED
+            }
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
           />

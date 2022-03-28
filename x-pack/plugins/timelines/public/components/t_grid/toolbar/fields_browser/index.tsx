@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import type { FieldBrowserProps } from '../../../../../common/types/fields_browser';
 import { FieldsBrowser } from './field_browser';
-import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
+import { filterBrowserFieldsByFieldName, filterSelectedBrowserFields } from './helpers';
 import * as i18n from './translations';
 
 const FIELDS_BUTTON_CLASS_NAME = 'fields-button';
@@ -44,6 +44,8 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   const [appliedFilterInput, setAppliedFilterInput] = useState('');
   /** all fields in this collection have field names that match the filterInput */
   const [filteredBrowserFields, setFilteredBrowserFields] = useState<BrowserFields | null>(null);
+  /** when true, show only the the selected field */
+  const [filterSelectedEnabled, setFilterSelectedEnabled] = useState(false);
   /** when true, show a spinner in the input to indicate the field browser is searching for matching field names */
   const [isSearching, setIsSearching] = useState(false);
   /** this category will be displayed in the right-hand pane of the field browser */
@@ -67,14 +69,23 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     };
   }, [debouncedApplyFilterInput]);
 
+  const selectionFilteredBrowserFields = useMemo<BrowserFields>(
+    () =>
+      filterSelectedEnabled
+        ? filterSelectedBrowserFields({ browserFields, columnHeaders })
+        : browserFields,
+    [browserFields, columnHeaders, filterSelectedEnabled]
+  );
+
   useEffect(() => {
-    const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
-      browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
-      substring: appliedFilterInput,
-    });
-    setFilteredBrowserFields(newFilteredBrowserFields);
+    setFilteredBrowserFields(
+      filterBrowserFieldsByFieldName({
+        browserFields: selectionFilteredBrowserFields,
+        substring: appliedFilterInput,
+      })
+    );
     setIsSearching(false);
-  }, [appliedFilterInput, browserFields]);
+  }, [appliedFilterInput, selectionFilteredBrowserFields]);
 
   /** Shows / hides the field browser */
   const onShow = useCallback(() => {
@@ -86,6 +97,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     setFilterInput('');
     setAppliedFilterInput('');
     setFilteredBrowserFields(null);
+    setFilterSelectedEnabled(false);
     setIsSearching(false);
     setSelectedCategoryIds([]);
     setShow(false);
@@ -101,10 +113,13 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     [debouncedApplyFilterInput]
   );
 
-  // only merge in the default category if the field browser is visible
-  const browserFieldsWithDefaultCategory = useMemo(() => {
-    return show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {};
-  }, [show, browserFields]);
+  /** Invoked when the user changes the view all/selected value  */
+  const onFilterSelectedChange = useCallback(
+    (filterSelected: boolean) => {
+      setFilterSelectedEnabled(filterSelected);
+    },
+    [setFilterSelectedEnabled]
+  );
 
   return (
     <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
@@ -125,13 +140,14 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
 
       {show && (
         <FieldsBrowser
-          browserFields={browserFieldsWithDefaultCategory}
           columnHeaders={columnHeaders}
           filteredBrowserFields={
-            filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory
+            filteredBrowserFields != null ? filteredBrowserFields : browserFields
           }
+          filterSelectedEnabled={filterSelectedEnabled}
           isSearching={isSearching}
           setSelectedCategoryIds={setSelectedCategoryIds}
+          onFilterSelectedChange={onFilterSelectedChange}
           onHide={onHide}
           onSearchInputChange={updateFilter}
           options={options}

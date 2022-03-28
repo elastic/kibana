@@ -14,14 +14,14 @@ import {
   Settings,
   XYBrushEvent,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
@@ -58,11 +58,12 @@ export function APMSection({ bucketSize }: Props) {
   const chartTheme = useChartTheme();
   const history = useHistory();
   const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
+    useDatePickerContext();
 
   const { data, status } = useFetcher(
     () => {
-      if (bucketSize) {
+      if (bucketSize && absoluteStart && absoluteEnd) {
         return getDataHandler('apm')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
@@ -70,9 +71,9 @@ export function APMSection({ bucketSize }: Props) {
         });
       }
     },
-    // Absolute times shouldn't be used here, since it would refetch on every render
+    // `forceUpdate` and `lastUpdated` should trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, forceUpdate]
+    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, lastUpdated]
   );
 
   if (!hasDataMap.apm?.hasData) {
@@ -116,9 +117,26 @@ export function APMSection({ bucketSize }: Props) {
         <EuiFlexItem grow={false}>
           <StyledStat
             title={`${formatTpmStat(stats?.transactions.value)} tpm`}
-            description={i18n.translate('xpack.observability.overview.apm.throughput', {
-              defaultMessage: 'Throughput',
-            })}
+            description={
+              <EuiToolTip
+                content={i18n.translate('xpack.observability.overview.apm.throughputTip', {
+                  defaultMessage:
+                    'Values are calculated for transactions with type "Request" or "page-load". If neither are available, values reflect the top transaction type.',
+                })}
+              >
+                <>
+                  {i18n.translate('xpack.observability.overview.apm.throughput', {
+                    defaultMessage: 'Throughput',
+                  })}{' '}
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="questionInCircle"
+                    className="eui-alignCenter"
+                  />
+                </>
+              </EuiToolTip>
+            }
             isLoading={isLoading}
             color={transactionsColor}
           />

@@ -22,7 +22,8 @@ import { i18n } from '@kbn/i18n';
 
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedObjects, getSpaces } from './services';
-import { IAggConfigs, IndexPattern, ISearchSource, AggConfigSerialized } from '../../data/public';
+import { IAggConfigs, ISearchSource, AggConfigSerialized } from '../../data/public';
+import type { DataView } from '../../data_views/public';
 import { BaseVisType } from './vis_types';
 import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
 
@@ -33,7 +34,7 @@ export type { SerializedVis, SerializedVisData };
 export interface VisData {
   ast?: string;
   aggs?: IAggConfigs;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   searchSource?: ISearchSource;
   savedSearchId?: string;
 }

@@ -97,6 +97,7 @@ interface Props {
   enableOverflowButton?: boolean;
   field: string;
   goGetTimelineId?: (args: boolean) => void;
+  hideAddToTimeline?: boolean;
   hideTopN?: boolean;
   isObjectArray: boolean;
   onFilterAdded?: () => void;
@@ -137,6 +138,7 @@ export const HoverActions: React.FC<Props> = React.memo(
     field,
     goGetTimelineId,
     isObjectArray,
+    hideAddToTimeline = false,
     hideTopN = false,
     onFilterAdded,
     ownFocus,
@@ -218,6 +220,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       enableOverflowButton: enableOverflowButton && !isCaseView,
       field,
       handleHoverActionClicked,
+      hideAddToTimeline,
       hideTopN,
       isCaseView,
       isObjectArray,

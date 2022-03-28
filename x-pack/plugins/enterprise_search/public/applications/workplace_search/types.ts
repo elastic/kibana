@@ -66,7 +66,6 @@ export interface Configuration {
   needsConfiguration?: boolean;
   hasOauthRedirect: boolean;
   baseUrlTitle?: string;
-  helpText?: string;
   documentationUrl: string;
   applicationPortalUrl?: string;
   applicationLinkTitle?: string;
@@ -87,6 +86,7 @@ export interface SourceDataItem {
   internalConnectorAvailable?: boolean;
   externalConnectorAvailable?: boolean;
   customConnectorAvailable?: boolean;
+  isBeta?: boolean;
 }
 
 export interface ContentSource {

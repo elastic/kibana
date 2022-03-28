@@ -8,177 +8,19 @@
 import './expression_reference_lines.scss';
 import React from 'react';
 import { groupBy } from 'lodash';
-import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { FieldFormat } from 'src/plugins/field_formats/common';
-import { euiLightVars } from '@kbn/ui-theme';
-import type { ReferenceLineLayerArgs, YConfig } from '../../common/expressions';
+import type { ReferenceLineLayerArgs } from '../../common/expressions';
 import type { LensMultiTable } from '../../common/types';
-import { hasIcon } from './xy_config_panel/shared/icon_select';
-
-export const REFERENCE_LINE_MARKER_SIZE = 20;
-
-export const computeChartMargins = (
-  referenceLinePaddings: Partial<Record<Position, number>>,
-  labelVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
-  titleVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
-  axesMap: Record<'left' | 'right', unknown>,
-  isHorizontal: boolean
-) => {
-  const result: Partial<Record<Position, number>> = {};
-  if (!labelVisibility?.x && !titleVisibility?.x && referenceLinePaddings.bottom) {
-    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('bottom') : 'bottom';
-    result[placement] = referenceLinePaddings.bottom;
-  }
-  if (
-    referenceLinePaddings.left &&
-    (isHorizontal || (!labelVisibility?.yLeft && !titleVisibility?.yLeft))
-  ) {
-    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('left') : 'left';
-    result[placement] = referenceLinePaddings.left;
-  }
-  if (
-    referenceLinePaddings.right &&
-    (isHorizontal || !axesMap.right || (!labelVisibility?.yRight && !titleVisibility?.yRight))
-  ) {
-    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('right') : 'right';
-    result[placement] = referenceLinePaddings.right;
-  }
-  // there's no top axis, so just check if a margin has been computed
-  if (referenceLinePaddings.top) {
-    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('top') : 'top';
-    result[placement] = referenceLinePaddings.top;
-  }
-  return result;
-};
-
-// Note: it does not take into consideration whether the reference line is in view or not
-export const getReferenceLineRequiredPaddings = (
-  referenceLineLayers: ReferenceLineLayerArgs[],
-  axesMap: Record<'left' | 'right', unknown>
-) => {
-  // collect all paddings for the 4 axis: if any text is detected double it.
-  const paddings: Partial<Record<Position, number>> = {};
-  const icons: Partial<Record<Position, number>> = {};
-  referenceLineLayers.forEach((layer) => {
-    layer.yConfig?.forEach(({ axisMode, icon, iconPosition, textVisibility }) => {
-      if (axisMode && (hasIcon(icon) || textVisibility)) {
-        const placement = getBaseIconPlacement(iconPosition, axisMode, axesMap);
-        paddings[placement] = Math.max(
-          paddings[placement] || 0,
-          REFERENCE_LINE_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
-        );
-        icons[placement] = (icons[placement] || 0) + (hasIcon(icon) ? 1 : 0);
-      }
-    });
-  });
-  // post-process the padding based on the icon presence:
-  // if no icon is present for the placement, just reduce the padding
-  (Object.keys(paddings) as Position[]).forEach((placement) => {
-    if (!icons[placement]) {
-      paddings[placement] = REFERENCE_LINE_MARKER_SIZE;
-    }
-  });
-
-  return paddings;
-};
-
-function mapVerticalToHorizontalPlacement(placement: Position) {
-  switch (placement) {
-    case Position.Top:
-      return Position.Right;
-    case Position.Bottom:
-      return Position.Left;
-    case Position.Left:
-      return Position.Bottom;
-    case Position.Right:
-      return Position.Top;
-  }
-}
-
-// if there's just one axis, put it on the other one
-// otherwise use the same axis
-// this function assume the chart is vertical
-function getBaseIconPlacement(
-  iconPosition: YConfig['iconPosition'],
-  axisMode: YConfig['axisMode'],
-  axesMap: Record<string, unknown>
-) {
-  if (iconPosition === 'auto') {
-    if (axisMode === 'bottom') {
-      return Position.Top;
-    }
-    if (axisMode === 'left') {
-      return axesMap.right ? Position.Left : Position.Right;
-    }
-    return axesMap.left ? Position.Right : Position.Left;
-  }
-
-  if (iconPosition === 'left') {
-    return Position.Left;
-  }
-  if (iconPosition === 'right') {
-    return Position.Right;
-  }
-  if (iconPosition === 'below') {
-    return Position.Bottom;
-  }
-  return Position.Top;
-}
-
-function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
-  if (!label) {
-    return;
-  }
-  if (isHorizontal) {
-    return (
-      <div className="eui-textTruncate" style={{ maxWidth: REFERENCE_LINE_MARKER_SIZE * 3 }}>
-        {label}
-      </div>
-    );
-  }
-  return (
-    <div
-      className="lnsXyDecorationRotatedWrapper"
-      style={{
-        width: REFERENCE_LINE_MARKER_SIZE,
-      }}
-    >
-      <div
-        className="eui-textTruncate lnsXyDecorationRotatedWrapper__label"
-        style={{
-          maxWidth: REFERENCE_LINE_MARKER_SIZE * 3,
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function getMarkerToShow(
-  yConfig: YConfig,
-  label: string | undefined,
-  isHorizontal: boolean,
-  hasReducedPadding: boolean
-) {
-  // show an icon if present
-  if (hasIcon(yConfig.icon)) {
-    return <EuiIcon type={yConfig.icon} />;
-  }
-  // if there's some text, check whether to show it as marker, or just show some padding for the icon
-  if (yConfig.textVisibility) {
-    if (hasReducedPadding) {
-      return getMarkerBody(
-        label,
-        (!isHorizontal && yConfig.axisMode === 'bottom') ||
-          (isHorizontal && yConfig.axisMode !== 'bottom')
-      );
-    }
-    return <EuiIcon type="empty" />;
-  }
-}
+import { defaultReferenceLineColor } from './color_assignment';
+import {
+  MarkerBody,
+  Marker,
+  LINES_MARKER_SIZE,
+  mapVerticalToHorizontalPlacement,
+  getBaseIconPlacement,
+} from './annotations_helpers';
 
 export interface ReferenceLineAnnotationsProps {
   layers: ReferenceLineLayerArgs[];
@@ -235,32 +77,40 @@ export const ReferenceLineAnnotations = ({
 
           const formatter = formatters[groupId || 'bottom'];
 
-          const defaultColor = euiLightVars.euiColorDarkShade;
-
           // get the position for vertical chart
           const markerPositionVertical = getBaseIconPlacement(
             yConfig.iconPosition,
-            yConfig.axisMode,
-            axesMap
+            axesMap,
+            yConfig.axisMode
           );
           // the padding map is built for vertical chart
-          const hasReducedPadding =
-            paddingMap[markerPositionVertical] === REFERENCE_LINE_MARKER_SIZE;
+          const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
 
           const props = {
             groupId,
-            marker: getMarkerToShow(
-              yConfig,
-              columnToLabelMap[yConfig.forAccessor],
-              isHorizontal,
-              hasReducedPadding
+            marker: (
+              <Marker
+                config={yConfig}
+                label={columnToLabelMap[yConfig.forAccessor]}
+                isHorizontal={
+                  (!isHorizontal && yConfig.axisMode === 'bottom') ||
+                  (isHorizontal && yConfig.axisMode !== 'bottom')
+                }
+                hasReducedPadding={hasReducedPadding}
+              />
             ),
-            markerBody: getMarkerBody(
-              yConfig.textVisibility && !hasReducedPadding
-                ? columnToLabelMap[yConfig.forAccessor]
-                : undefined,
-              (!isHorizontal && yConfig.axisMode === 'bottom') ||
-                (isHorizontal && yConfig.axisMode !== 'bottom')
+            markerBody: (
+              <MarkerBody
+                label={
+                  yConfig.textVisibility && !hasReducedPadding
+                    ? columnToLabelMap[yConfig.forAccessor]
+                    : undefined
+                }
+                isHorizontal={
+                  (!isHorizontal && yConfig.axisMode === 'bottom') ||
+                  (isHorizontal && yConfig.axisMode !== 'bottom')
+                }
+              />
             ),
             // rotate the position if required
             markerPosition: isHorizontal
@@ -278,7 +128,7 @@ export const ReferenceLineAnnotations = ({
 
           const sharedStyle = {
             strokeWidth: yConfig.lineWidth || 1,
-            stroke: yConfig.color || defaultColor,
+            stroke: yConfig.color || defaultReferenceLineColor,
             dash: dashStyle,
           };
 
@@ -349,7 +199,7 @@ export const ReferenceLineAnnotations = ({
                 })}
                 style={{
                   ...sharedStyle,
-                  fill: yConfig.color || defaultColor,
+                  fill: yConfig.color || defaultReferenceLineColor,
                   opacity: 0.1,
                 }}
               />

@@ -116,7 +116,7 @@ steps.push({
   label: 'Build Kibana Distribution and Plugins',
   agents: { queue: 'c2-8' },
   key: 'build',
-  if: "build.env('BUILD_ID_FOR_ARTIFACTS') == null || build.env('BUILD_ID_FOR_ARTIFACTS') == ''",
+  if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
 
 for (const testSuite of testSuites) {
@@ -186,6 +186,8 @@ for (const testSuite of testSuites) {
         concurrency_group: UUID,
         concurrency_method: 'eager',
       });
+      break;
+
     case 'cypress':
       const CYPRESS_SUITE = CI_GROUP;
       const group = groups.find((group) => group.key.includes(CYPRESS_SUITE));

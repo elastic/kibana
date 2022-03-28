@@ -100,7 +100,7 @@ pageLoadAssetSize:
   bfetch: 22837
   kibanaUtils: 79713
   data: 491273
-  dataViews: 42532
+  dataViews: 43532
   expressions: 140958
   fieldFormats: 65209
   kibanaReact: 74422
@@ -124,3 +124,4 @@ pageLoadAssetSize:
   sessionView: 77750
   cloudSecurityPosture: 19109
   visTypeGauge: 24113
+  eventAnnotation: 19334

@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> If `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where `createNewCopies` mode is disabled and ambiguous source conflicts are detected. When `createNewCopies` mode is permanently enabled, this field will be redundant and can be removed.
+> Can be removed when https://github.com/elastic/kibana/issues/91615 is done. If `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where `createNewCopies` mode is disabled and ambiguous source conflicts are detected. When `createNewCopies` mode is permanently enabled, this field will be redundant and can be removed.
 > 
 
 <b>Signature:</b>
