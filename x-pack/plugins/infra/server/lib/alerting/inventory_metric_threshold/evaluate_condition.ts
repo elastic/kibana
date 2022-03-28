@@ -34,7 +34,7 @@ export const evaluateCondition = async ({
   compositeSize,
   filterQuery,
   lookbackSize,
-  startedAt,
+  executionTimestamp,
   logger,
 }: {
   condition: InventoryMetricConditions;
@@ -45,14 +45,20 @@ export const evaluateCondition = async ({
   compositeSize: number;
   filterQuery?: string;
   lookbackSize?: number;
-  startedAt: Date;
+  executionTimestamp: Date;
   logger: Logger;
 }): Promise<Record<string, ConditionResult>> => {
   const { metric, customMetric } = condition;
 
   const timerange = {
-    to: startedAt.valueOf(),
-    from: calculateFromBasedOnMetric(moment(startedAt), condition, nodeType, metric, customMetric),
+    to: executionTimestamp.valueOf(),
+    from: calculateFromBasedOnMetric(
+      moment(executionTimestamp),
+      condition,
+      nodeType,
+      metric,
+      customMetric
+    ),
     interval: `${condition.timeSize}${condition.timeUnit}`,
     forceInterval: true,
   } as InfraTimerangeInput;

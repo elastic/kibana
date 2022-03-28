@@ -128,7 +128,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           esClient: services.scopedClusterClient.asCurrentUser,
           compositeSize,
           filterQuery,
-          startedAt,
+          executionTimestamp: startedAt,
           logger,
         })
       )
