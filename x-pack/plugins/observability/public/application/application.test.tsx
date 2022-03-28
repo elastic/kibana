@@ -64,7 +64,7 @@ describe('renderApp', () => {
         alertingExperience: { enabled: true },
         cases: { enabled: true },
         overviewNext: { enabled: false },
-        rules: { enabled: false },
+        rules: { enabled: true },
       },
     };
 
@@ -83,6 +83,7 @@ describe('renderApp', () => {
         appMountParameters: params,
         observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
         ObservabilityPageTemplate: KibanaPageTemplate,
+        kibanaFeatures: [],
       });
       unmount();
     }).not.toThrowError();

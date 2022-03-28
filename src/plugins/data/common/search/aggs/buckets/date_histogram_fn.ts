@@ -118,6 +118,13 @@ export const aggDateHistogram = (): FunctionDefinition => ({
           'With extended_bounds setting, you now can "force" the histogram aggregation to start building buckets on a specific min value and also keep on building buckets up to a max value ',
       }),
     },
+    extendToTimeRange: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.dateHistogram.extendToTimeRange.help', {
+        defaultMessage:
+          'Auto-sets the extended bounds to the currently applied time range. Is ignored if extended_bounds is set',
+      }),
+    },
     json: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.dateHistogram.json.help', {

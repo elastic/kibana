@@ -15,6 +15,8 @@ import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 import { Direction } from '../../../../common/search_strategy';
+import { useQueryToggle } from '../../containers/query_toggle';
+jest.mock('../../containers/query_toggle');
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
@@ -36,37 +38,41 @@ const mockTheme = getMockTheme({
 });
 
 describe('Paginated Table Component', () => {
-  let loadPage: jest.Mock<number>;
-  let updateLimitPagination: jest.Mock<number>;
-  let updateActivePage: jest.Mock<number>;
+  const loadPage = jest.fn();
+  const updateLimitPagination = jest.fn();
+  const updateActivePage = jest.fn();
+  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockSetToggle = jest.fn();
+  const mockSetQuerySkip = jest.fn();
+
   beforeEach(() => {
-    loadPage = jest.fn();
-    updateLimitPagination = jest.fn();
-    updateActivePage = jest.fn();
+    jest.clearAllMocks();
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
   });
+
+  const testProps = {
+    activePage: 0,
+    columns: getHostsColumns(),
+    headerCount: 1,
+    headerSupplement: <p>{'My test supplement.'}</p>,
+    headerTitle: 'Hosts',
+    headerTooltip: 'My test tooltip',
+    headerUnit: 'Test Unit',
+    itemsPerRow: rowItems,
+    limit: 1,
+    loading: false,
+    loadPage,
+    pageOfItems: mockData.Hosts.edges,
+    setQuerySkip: jest.fn(),
+    showMorePagesIndicator: true,
+    totalCount: 10,
+    updateActivePage,
+    updateLimitPagination: (limit: number) => updateLimitPagination({ limit }),
+  };
 
   describe('rendering', () => {
     test('it renders the default load more table', () => {
-      const wrapper = shallow(
-        <PaginatedTable
-          activePage={0}
-          columns={getHostsColumns()}
-          headerCount={1}
-          headerSupplement={<p>{'My test supplement.'}</p>}
-          headerTitle="Hosts"
-          headerTooltip="My test tooltip"
-          headerUnit="Test Unit"
-          itemsPerRow={rowItems}
-          limit={1}
-          loading={false}
-          loadPage={loadPage}
-          pageOfItems={mockData.Hosts.edges}
-          showMorePagesIndicator={true}
-          totalCount={10}
-          updateActivePage={updateActivePage}
-          updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-        />
-      );
+      const wrapper = shallow(<PaginatedTable {...testProps} />);
 
       expect(wrapper).toMatchSnapshot();
     });
@@ -74,24 +80,7 @@ describe('Paginated Table Component', () => {
     test('it renders the loading panel at the beginning ', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={-1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
-            limit={1}
-            loading={true}
-            loadPage={loadPage}
-            pageOfItems={[]}
-            showMorePagesIndicator={true}
-            totalCount={10}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
+          <PaginatedTable {...testProps} headerCount={-1} loading={true} pageOfItems={[]} />
         </ThemeProvider>
       );
 
@@ -103,24 +92,7 @@ describe('Paginated Table Component', () => {
     test('it renders the over loading panel after data has been in the table ', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
-            limit={1}
-            loading={true}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
-            totalCount={10}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
+          <PaginatedTable {...testProps} loading={true} />
         </ThemeProvider>
       );
 
@@ -130,24 +102,7 @@ describe('Paginated Table Component', () => {
     test('it renders the correct amount of pages and starts at activePage: 0', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
-            limit={1}
-            loading={false}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
-            totalCount={10}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
+          <PaginatedTable {...testProps} />
         </ThemeProvider>
       );
 
@@ -167,24 +122,7 @@ describe('Paginated Table Component', () => {
     test('it render popover to select new limit in table', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
-            limit={2}
-            loading={false}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
-            totalCount={10}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
+          <PaginatedTable {...testProps} limit={2} />
         </ThemeProvider>
       );
 
@@ -195,24 +133,7 @@ describe('Paginated Table Component', () => {
     test('it will NOT render popover to select new limit in table if props itemsPerRow is empty', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={[]}
-            limit={2}
-            loading={false}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
-            totalCount={10}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
+          <PaginatedTable {...testProps} itemsPerRow={[]} limit={2} />
         </ThemeProvider>
       );
 
@@ -224,24 +145,11 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
           <PaginatedTable
-            activePage={0}
+            {...testProps}
             columns={sortedHosts}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
             limit={2}
-            loading={false}
-            loadPage={jest.fn()}
             onChange={mockOnChange}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
-            totalCount={10}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
@@ -253,22 +161,9 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
           <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
+            {...testProps}
             limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
-            loading={false}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
             totalCount={DEFAULT_MAX_TABLE_QUERY_SIZE * 3}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
@@ -279,24 +174,7 @@ describe('Paginated Table Component', () => {
     test('Should show items per row if totalCount is greater than items', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
-            limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
-            loading={false}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
-            totalCount={30}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
+          <PaginatedTable {...testProps} limit={DEFAULT_MAX_TABLE_QUERY_SIZE} totalCount={30} />
         </ThemeProvider>
       );
       expect(wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"]').exists()).toBeTruthy();
@@ -305,24 +183,7 @@ describe('Paginated Table Component', () => {
     test('Should hide items per row if totalCount is less than items', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
-            limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
-            loading={false}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
-            totalCount={1}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
+          <PaginatedTable {...testProps} limit={DEFAULT_MAX_TABLE_QUERY_SIZE} totalCount={1} />
         </ThemeProvider>
       );
       expect(wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"]').exists()).toBeFalsy();
@@ -331,24 +192,7 @@ describe('Paginated Table Component', () => {
     test('Should hide pagination if totalCount is zero', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
-            limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
-            loading={false}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
-            totalCount={0}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
+          <PaginatedTable {...testProps} limit={DEFAULT_MAX_TABLE_QUERY_SIZE} totalCount={0} />
         </ThemeProvider>
       );
 
@@ -360,24 +204,7 @@ describe('Paginated Table Component', () => {
     test('should call updateActivePage with 1 when clicking to the first page', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
-            limit={1}
-            loading={false}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
-            totalCount={10}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
+          <PaginatedTable {...testProps} />
         </ThemeProvider>
       );
       wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
@@ -387,24 +214,7 @@ describe('Paginated Table Component', () => {
     test('Should call updateActivePage with 0 when you pick a new limit', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
-            limit={2}
-            loading={false}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
-            totalCount={10}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
+          <PaginatedTable {...testProps} limit={2} />
         </ThemeProvider>
       );
       wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
@@ -417,22 +227,8 @@ describe('Paginated Table Component', () => {
 
     test('should update the page when the activePage is changed from redux', () => {
       const ourProps: BasicTableProps<unknown> = {
+        ...testProps,
         activePage: 3,
-        columns: getHostsColumns(),
-        headerCount: 1,
-        headerSupplement: <p>{'My test supplement.'}</p>,
-        headerTitle: 'Hosts',
-        headerTooltip: 'My test tooltip',
-        headerUnit: 'Test Unit',
-        itemsPerRow: rowItems,
-        limit: 1,
-        loading: false,
-        loadPage,
-        pageOfItems: mockData.Hosts.edges,
-        showMorePagesIndicator: true,
-        totalCount: 10,
-        updateActivePage,
-        updateLimitPagination: (limit) => updateLimitPagination({ limit }),
       };
 
       // enzyme does not allow us to pass props to child of HOC
@@ -462,24 +258,7 @@ describe('Paginated Table Component', () => {
     test('Should call updateLimitPagination when you pick a new limit', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <PaginatedTable
-            activePage={0}
-            columns={getHostsColumns()}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
-            limit={2}
-            loading={false}
-            loadPage={loadPage}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
-            totalCount={10}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
-          />
+          <PaginatedTable {...testProps} limit={2} />
         </ThemeProvider>
       );
 
@@ -494,24 +273,11 @@ describe('Paginated Table Component', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
           <PaginatedTable
-            activePage={0}
+            {...testProps}
             columns={sortedHosts}
-            headerCount={1}
-            headerSupplement={<p>{'My test supplement.'}</p>}
-            headerTitle="Hosts"
-            headerTooltip="My test tooltip"
-            headerUnit="Test Unit"
-            itemsPerRow={rowItems}
             limit={2}
-            loading={false}
-            loadPage={jest.fn()}
             onChange={mockOnChange}
-            pageOfItems={mockData.Hosts.edges}
-            showMorePagesIndicator={true}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
-            totalCount={10}
-            updateActivePage={updateActivePage}
-            updateLimitPagination={(limit) => updateLimitPagination({ limit })}
           />
         </ThemeProvider>
       );
@@ -522,6 +288,43 @@ describe('Paginated Table Component', () => {
       expect(mockOnChange.mock.calls[0]).toEqual([
         { page: undefined, sort: { direction: 'desc', field: 'node.host.name' } },
       ]);
+    });
+  });
+
+  describe('Toggle query', () => {
+    test('toggleQuery updates toggleStatus', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={mockTheme}>
+          <PaginatedTable {...testProps} setQuerySkip={mockSetQuerySkip} />
+        </ThemeProvider>
+      );
+      wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
+      expect(mockSetToggle).toBeCalledWith(false);
+      expect(mockSetQuerySkip).toBeCalledWith(true);
+    });
+
+    test('toggleStatus=true, render table', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={mockTheme}>
+          <PaginatedTable {...testProps} />
+        </ThemeProvider>
+      );
+      expect(wrapper.find('[data-test-subj="paginated-basic-table"]').first().exists()).toEqual(
+        true
+      );
+    });
+
+    test('toggleStatus=false, hide table', () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+
+      const wrapper = mount(
+        <ThemeProvider theme={mockTheme}>
+          <PaginatedTable {...testProps} />
+        </ThemeProvider>
+      );
+      expect(wrapper.find('[data-test-subj="paginated-basic-table"]').first().exists()).toEqual(
+        false
+      );
     });
   });
 });

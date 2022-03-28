@@ -8,14 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { DatasourcePublicAPI, OperationMetadata, VisualizationType } from '../types';
-import { State, visualizationTypes, XYState } from './types';
-import { isHorizontalChart } from './state_helpers';
 import {
-  SeriesType,
-  XYDataLayerConfig,
+  State,
+  visualizationTypes,
+  XYState,
+  XYAnnotationLayerConfig,
   XYLayerConfig,
+  XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '../../common/expressions';
+} from './types';
+import { isHorizontalChart } from './state_helpers';
+import { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '..';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
@@ -127,7 +130,7 @@ export function checkScaleOperation(
   };
 }
 
-export const isDataLayer = (layer: Pick<XYLayerConfig, 'layerType'>): layer is XYDataLayerConfig =>
+export const isDataLayer = (layer: XYLayerConfig): layer is XYDataLayerConfig =>
   layer.layerType === layerTypes.DATA || !layer.layerType;
 
 export const getDataLayers = (layers: XYLayerConfig[]) =>
@@ -140,8 +143,30 @@ export const isReferenceLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
 ): layer is XYReferenceLineLayerConfig => layer.layerType === layerTypes.REFERENCELINE;
 
-export const getReferenceLayers = (layers: XYLayerConfig[]) =>
+export const getReferenceLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYReferenceLineLayerConfig => isReferenceLayer(layer));
+
+export const isAnnotationsLayer = (
+  layer: Pick<XYLayerConfig, 'layerType'>
+): layer is XYAnnotationLayerConfig => layer.layerType === layerTypes.ANNOTATIONS;
+
+export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
+  (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
+
+export interface LayerTypeToLayer {
+  [layerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;
+  [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => XYReferenceLineLayerConfig;
+  [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => XYAnnotationLayerConfig;
+}
+
+export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLayer) => {
+  if (isDataLayer(layer)) {
+    return options[layerTypes.DATA](layer);
+  } else if (isReferenceLayer(layer)) {
+    return options[layerTypes.REFERENCELINE](layer);
+  }
+  return options[layerTypes.ANNOTATIONS](layer);
+};
 
 export function getVisualizationType(state: State): VisualizationType | 'mixed' {
   if (!state.layers.length) {
@@ -254,6 +279,11 @@ const newLayerFn = {
     layerId,
     layerType: layerTypes.REFERENCELINE,
     accessors: [],
+  }),
+  [layerTypes.ANNOTATIONS]: ({ layerId }: { layerId: string }): XYAnnotationLayerConfig => ({
+    layerId,
+    layerType: layerTypes.ANNOTATIONS,
+    annotations: [],
   }),
 };
 

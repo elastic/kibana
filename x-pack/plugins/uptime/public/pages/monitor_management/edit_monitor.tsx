@@ -13,7 +13,7 @@ import { MonitorFields } from '../../../common/runtime_types';
 import { EditMonitorConfig } from '../../components/monitor_management/edit_monitor_config';
 import { Loader } from '../../components/monitor_management/loader/loader';
 import { getMonitor } from '../../state/api';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { DecryptedSyntheticsMonitorSavedObject } from '../../../common/types';
 import { useLocations } from '../../components/monitor_management/hooks/use_locations';
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 
@@ -23,12 +23,14 @@ export const EditMonitorPage: React.FC = () => {
   useMonitorManagementBreadcrumbs({ isEditMonitor: true });
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const { data, status } = useFetcher<Promise<SyntheticsMonitorSavedObject | undefined>>(() => {
+  const { data, status } = useFetcher<
+    Promise<DecryptedSyntheticsMonitorSavedObject | undefined>
+  >(() => {
     return getMonitor({ id: Buffer.from(monitorId, 'base64').toString('utf8') });
   }, [monitorId]);
 
   const monitor = data?.attributes as MonitorFields;
-  const { error: locationsError, loading: locationsLoading } = useLocations();
+  const { error: locationsError, loading: locationsLoading, throttling } = useLocations();
 
   return (
     <Loader
@@ -38,7 +40,7 @@ export const EditMonitorPage: React.FC = () => {
       errorTitle={ERROR_HEADING_LABEL}
       errorBody={locationsError ? SERVICE_LOCATIONS_ERROR_LABEL : MONITOR_LOADING_ERROR_LABEL}
     >
-      {monitor && <EditMonitorConfig monitor={monitor} />}
+      {monitor && <EditMonitorConfig monitor={monitor} throttling={throttling} />}
     </Loader>
   );
 };

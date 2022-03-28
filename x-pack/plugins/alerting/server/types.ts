@@ -39,9 +39,10 @@ import {
   SanitizedRuleConfig,
   RuleMonitoring,
   MappedParams,
+  AlertExecutionStatusWarningReasons,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
-
+import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -124,6 +125,7 @@ export type ExecutorType<
 export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
   validate: (object: unknown) => Params;
 }
+
 export interface RuleType<
   Params extends AlertTypeParams = never,
   ExtractedParams extends AlertTypeParams = never,
@@ -168,6 +170,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  config?: RuleTypeConfig;
 }
 export type UntypedRuleType = RuleType<
   AlertTypeParams,
@@ -192,11 +195,14 @@ export interface AlertMeta extends SavedObjectAttributes {
 // delete any previous error if the current status has no error
 export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   status: AlertExecutionStatuses;
-  numberOfTriggeredActions?: number;
   lastExecutionDate: string;
   lastDuration?: number;
   error: null | {
     reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
+  warning: null | {
+    reason: AlertExecutionStatusWarningReasons;
     message: string;
   };
 }

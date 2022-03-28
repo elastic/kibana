@@ -76,7 +76,9 @@ describe('take action dropdown', () => {
     onAddExceptionTypeClick: jest.fn(),
     onAddIsolationStatusClick: jest.fn(),
     refetch: jest.fn(),
+    refetchFlyoutData: jest.fn(),
     timelineId: TimelineId.active,
+    onOsqueryClick: jest.fn(),
   };
 
   beforeAll(() => {
@@ -88,8 +90,11 @@ describe('take action dropdown', () => {
           ...mockStartServicesMock,
           timelines: { ...mockTimelines },
           cases: mockCasesContract(),
+          osquery: {
+            isOsqueryAvailable: jest.fn().mockReturnValue(true),
+          },
           application: {
-            capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+            capabilities: { siem: { crud_alerts: true, read_alerts: true }, osquery: true },
           },
         },
       };
@@ -187,6 +192,13 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').first().text()
         ).toEqual('Investigate in timeline');
+      });
+    });
+    test('should render "Run Osquery"', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="osquery-action-item"]').first().text()).toEqual(
+          'Run Osquery'
+        );
       });
     });
   });

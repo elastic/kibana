@@ -279,6 +279,28 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(signalsOrderedByEventId.length).equal(2);
         });
+
+        it('should generate 2 signals when timestamp override does not exist', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['myfa*']),
+            timestamp_override: 'event.fakeingestfield',
+          };
+          const { id } = await createRule(supertest, log, rule);
+
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
+          await sleep(5000);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
+          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+
+          expect(signalsOrderedByEventId.length).equal(2);
+        });
       });
     });
 

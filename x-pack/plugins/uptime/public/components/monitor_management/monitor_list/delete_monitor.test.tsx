@@ -40,7 +40,7 @@ describe('<Actions />', () => {
   it('calls set refresh when deletion is successful', () => {
     const id = 'test-id';
     const name = 'sample monitor';
-    render(<Actions id={id} name={name} onUpdate={onUpdate} />);
+    render(<Actions id={id} name={name} onUpdate={onUpdate} monitors={[]} />);
 
     userEvent.click(screen.getByLabelText('Delete monitor'));
 
@@ -54,7 +54,7 @@ describe('<Actions />', () => {
       status: FETCH_STATUS.LOADING,
       refetch: () => {},
     });
-    render(<Actions id={id} name="sample name" onUpdate={onUpdate} />);
+    render(<Actions id={id} name="sample name" onUpdate={onUpdate} monitors={[]} />);
 
     expect(screen.getByLabelText('Deleting monitor...')).toBeInTheDocument();
   });
