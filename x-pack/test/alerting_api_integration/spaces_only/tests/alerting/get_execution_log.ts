@@ -26,7 +26,8 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
 
   const dateStart = new Date(Date.now() - 600000).toISOString();
 
-  describe('getExecutionLog', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/128225
+  describe.skip('getExecutionLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
