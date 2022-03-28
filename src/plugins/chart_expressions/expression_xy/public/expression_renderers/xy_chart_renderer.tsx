@@ -60,7 +60,10 @@ export const getXyChartRenderer = ({
     ReactDOM.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
         <I18nProvider>
-          <div style={{ width: '100%', height: '100%' }} data-test-subj="xyVisChart">
+          <div
+            style={{ width: '100%', height: '100%', overflowX: 'hidden' }}
+            data-test-subj="xyVisChart"
+          >
             <XYChartReportable
               {...config}
               formatFactory={deps.formatFactory}

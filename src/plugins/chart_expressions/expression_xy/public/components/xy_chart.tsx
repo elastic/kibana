@@ -178,7 +178,7 @@ export function XYChart({
 
   if (filteredLayers.length === 0) {
     const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]?.seriesType || 'bar');
-    return <EmptyPlaceholder icon={icon} />;
+    return <EmptyPlaceholder className="xyChart__empty" icon={icon} />;
   }
 
   // use formatting hint of first x axis column to format ticks

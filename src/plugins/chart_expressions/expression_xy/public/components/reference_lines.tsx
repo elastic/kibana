@@ -141,13 +141,13 @@ function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
   }
   return (
     <div
-      className="lnsXyDecorationRotatedWrapper"
+      className="xyDecorationRotatedWrapper"
       style={{
         width: REFERENCE_LINE_MARKER_SIZE,
       }}
     >
       <div
-        className="eui-textTruncate lnsXyDecorationRotatedWrapper__label"
+        className="eui-textTruncate xyDecorationRotatedWrapper__label"
         style={{
           maxWidth: REFERENCE_LINE_MARKER_SIZE * 3,
         }}
