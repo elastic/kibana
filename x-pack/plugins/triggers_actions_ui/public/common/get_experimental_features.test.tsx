@@ -30,8 +30,12 @@ describe('getIsExperimentalFeatureEnabled', () => {
 
     expect(result).toEqual(true);
 
-    expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrowError(
-      'Invalid enable value doesNotExist. Allowed values are: rulesListDatagrid, rulesDetailLogs'
-    );
+    let err;
+    try {
+      getIsExperimentalFeatureEnabled('doesNotExist' as any);
+    } catch (e) {
+      err = e;
+    }
+    expect(err.message).toContain('Invalid enable value doesNotExist. Allowed values are');
   });
 });
