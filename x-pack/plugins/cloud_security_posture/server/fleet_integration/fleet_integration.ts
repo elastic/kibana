@@ -15,10 +15,11 @@ import type {
 } from 'src/core/server';
 import {
   PostPackagePolicyCreateCallback,
+  PostPackagePolicyPostCreateCallback,
   PostPackagePolicyDeleteCallback,
 } from '../../../fleet/server';
 
-import { NewPackagePolicy } from '../../../fleet/common';
+import { NewPackagePolicy, PackagePolicy } from '../../../fleet/common';
 import {
   cloudSecurityPostureRuleTemplateSavedObjectType,
   CloudSecurityPostureRuleTemplateSchema,
@@ -36,15 +37,17 @@ const isCspPackagePolicy = <T extends { package?: { name: string } }>(
 /**
  * Callback to handle creation of PackagePolicies in Fleet
  */
-export const getPackagePolicyCreateCallback = (logger: Logger): PostPackagePolicyCreateCallback => {
+export const getPackagePolicyCreateCallback = (
+  logger: Logger
+): PostPackagePolicyPostCreateCallback => {
   return async (
-    newPackagePolicy: NewPackagePolicy,
+    packagePolicy: PackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<NewPackagePolicy> => {
+  ): Promise<PackagePolicy> => {
     // We only care about Endpoint package policies
-    if (!isCspPackagePolicy(newPackagePolicy)) {
-      return newPackagePolicy;
+    if (!isCspPackagePolicy(packagePolicy)) {
+      return packagePolicy;
     }
 
     // Create csp-rules from the generic asset
@@ -53,11 +56,11 @@ export const getPackagePolicyCreateCallback = (logger: Logger): PostPackagePolic
       await savedObjectsClient.find({ type: cloudSecurityPostureRuleTemplateSavedObjectType });
 
     if (existingRuleTemplates.total === 0) {
-      return newPackagePolicy;
+      return packagePolicy;
     }
 
     const cspRules = generateRulesFromTemplates(
-      newPackagePolicy.policy_id,
+      packagePolicy.policy_id,
       //   newPackagePolicy.policy_id,
       existingRuleTemplates.saved_objects
     );
@@ -68,7 +71,7 @@ export const getPackagePolicyCreateCallback = (logger: Logger): PostPackagePolic
       logger.error('failed to generate rules out of template, Error: ', e);
     }
     // The callback cannot change the package policy
-    return newPackagePolicy;
+    return packagePolicy;
   };
 };
 

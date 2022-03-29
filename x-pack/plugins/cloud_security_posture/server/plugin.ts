@@ -63,10 +63,10 @@ export class CspPlugin
     core.savedObjects.registerType(cspRuleAssetType);
     core.savedObjects.registerType(cspRuleTemplateAssetType);
 
-    core.getStartServices().then(([coreStart]) => {
-      initializeCspRuleTemplates(coreStart.savedObjects.createInternalRepository());
-      this.logger.debug('csp rule templates has been installed');
-    });
+    // core.getStartServices().then(([coreStart]) => {
+    //   initializeCspRuleTemplates(coreStart.savedObjects.createInternalRepository());
+    //   this.logger.debug('csp rule templates has been installed');
+    // });
 
     const router = core.http.createRouter<CspRequestHandlerContext>();
 
@@ -90,7 +90,7 @@ export class CspPlugin
     await plugins.fleet.fleetSetupCompleted;
 
     plugins.fleet.registerExternalCallback(
-      'packagePolicyCreate',
+      'packagePolicyPostCreate',
       getPackagePolicyCreateCallback(this.logger)
     );
 
