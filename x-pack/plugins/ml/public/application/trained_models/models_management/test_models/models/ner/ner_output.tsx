@@ -51,13 +51,13 @@ const ENTITY_TYPES = {
     color: 'euiColorVis7_behindText',
     borderColor: 'euiColorVis7',
   },
+};
 
-  unknown: {
-    label: '',
-    icon: 'questionInCircle',
-    color: 'euiColorVis5_behindText',
-    borderColor: 'euiColorVis5',
-  },
+const UNKNOWN_ENTITY_TYPE = {
+  label: '',
+  icon: 'questionInCircle',
+  color: 'euiColorVis5_behindText',
+  borderColor: 'euiColorVis5',
 };
 
 export const NerOutput: FC<{ result: FormattedNerResp }> = ({ result }) => {
@@ -148,7 +148,7 @@ const EntityBadge = ({
 
 function getClassIcon(className: string) {
   const entity = ENTITY_TYPES[className as keyof typeof ENTITY_TYPES];
-  return entity?.icon ?? ENTITY_TYPES.unknown.icon;
+  return entity?.icon ?? UNKNOWN_ENTITY_TYPE.icon;
 }
 
 function getClassLabel(className: string) {
@@ -158,9 +158,9 @@ function getClassLabel(className: string) {
 
 function getClassColor(euiTheme: EuiThemeType, className: string, border: boolean = false) {
   const entity = ENTITY_TYPES[className as keyof typeof ENTITY_TYPES];
-  let color = entity?.color ?? ENTITY_TYPES.unknown.color;
+  let color = entity?.color ?? UNKNOWN_ENTITY_TYPE.color;
   if (border) {
-    color = entity?.borderColor ?? ENTITY_TYPES.unknown.borderColor;
+    color = entity?.borderColor ?? UNKNOWN_ENTITY_TYPE.borderColor;
   }
   return euiTheme[color as keyof typeof euiTheme];
 }
