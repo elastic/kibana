@@ -499,11 +499,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           '[data-test-subj="rulesErrorBanner"]'
         );
         expect(alertsErrorBannerExistErrors).to.have.length(1);
-        expect(
+        expect(x
           await (
-            await alertsErrorBannerExistErrors[0].findByCssSelector('.euiCallOutHeader')
+            await alertsErrorBannerExistErrors[0].findByTagName('p')
           ).getVisibleText()
-        ).to.equal('Error found in 1 rule.');
+        ).to.equal('Error found in 1 rule. Show rule with error');
       });
 
       await refreshAlertsList();

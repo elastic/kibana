@@ -488,7 +488,7 @@ export const RulesList: React.FunctionComponent = () => {
         ),
       },
     ];
-  }
+  };
 
   const toggleErrorMessage = (_executionStatus: AlertExecutionStatus, ruleItem: RuleTableItem) => {
     setItemIdToExpandedRowMap((itemToExpand) => {
@@ -496,34 +496,36 @@ export const RulesList: React.FunctionComponent = () => {
       if (_itemToExpand[ruleItem.id]) {
         delete _itemToExpand[ruleItem.id];
       } else {
-        _itemToExpand[ruleItem.id] = <EuiDescriptionList listItems={buildErrorListItems(_executionStatus)} />;
+        _itemToExpand[ruleItem.id] = (
+          <EuiDescriptionList listItems={buildErrorListItems(_executionStatus)} />
+        );
       }
       return _itemToExpand;
     });
   };
 
   const toggleRuleErrors = useCallback(() => {
-
-    setShowErrors(prevValue => {
+    setShowErrors((prevValue) => {
       if (!prevValue) {
-        setItemIdToExpandedRowMap(rulesState.data.reduce((acc, ruleItem) => {
-          if (ruleItem.executionStatus.status === 'error') {
-            return {
-              ...acc,
-              [ruleItem.id]: <EuiDescriptionList listItems={buildErrorListItems(ruleItem.executionStatus)} />
+        setItemIdToExpandedRowMap(
+          rulesState.data.reduce((acc, ruleItem) => {
+            if (ruleItem.executionStatus.status === 'error') {
+              return {
+                ...acc,
+                [ruleItem.id]: (
+                  <EuiDescriptionList listItems={buildErrorListItems(ruleItem.executionStatus)} />
+                ),
+              };
             }
-          }
-          return acc;
-        }, {}));
+            return acc;
+          }, {})
+        );
       } else {
         setItemIdToExpandedRowMap({});
       }
       return !prevValue;
     });
-
   }, [showErrors, rulesState]);
-
-
 
   const getRulesTableColumns = (): Array<
     | EuiTableFieldDataColumnType<RuleTableItem>
@@ -1178,20 +1180,24 @@ export const RulesList: React.FunctionComponent = () => {
         {rulesStatusesTotal.error > 0 && (
           <EuiFlexItem grow={false}>
             <EuiLink color="primary" onClick={toggleRuleErrors}>
-              {!showErrors && (<FormattedMessage
-                id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
-                defaultMessage="Show {totalStatusesError, plural, one {error} other {errors}}"
-                values={{
-                  totalStatusesError: rulesStatusesTotal.error,
-                }}
-              />)}
-              {showErrors && (<FormattedMessage
-                id="xpack.triggersActionsUI.sections.rulesList.hideAllErrors"
-                defaultMessage="Hide {totalStatusesError, plural, one {error} other {errors}}"
-                values={{
-                  totalStatusesError: rulesStatusesTotal.error,
-                }}
-              />)}
+              {!showErrors && (
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
+                  defaultMessage="Show {totalStatusesError, plural, one {error} other {errors}}"
+                  values={{
+                    totalStatusesError: rulesStatusesTotal.error,
+                  }}
+                />
+              )}
+              {showErrors && (
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.hideAllErrors"
+                  defaultMessage="Hide {totalStatusesError, plural, one {error} other {errors}}"
+                  values={{
+                    totalStatusesError: rulesStatusesTotal.error,
+                  }}
+                />
+              )}
             </EuiLink>
           </EuiFlexItem>
         )}
