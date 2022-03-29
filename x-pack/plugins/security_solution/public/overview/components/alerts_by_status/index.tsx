@@ -10,11 +10,7 @@ import React, { useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import classnames from 'classnames';
 import uuid from 'uuid';
-import {
-  DonutChart,
-  DonutChartData,
-  NO_LEGEND_DATA,
-} from '../../../common/components/charts/donutchart';
+import { DonutChart, NO_LEGEND_DATA } from '../../../common/components/charts/donutchart';
 import { APP_ID } from '../../../../common/constants';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import { HeaderSection } from '../../../common/components/header_section';
@@ -31,6 +27,7 @@ import { LegendItem } from '../../../common/components/charts/draggable_legend_i
 import { ThemeContext } from '../../../common/components/charts/donut_theme_context';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { DraggableLegend } from '../../../common/components/charts/draggable_legend';
+import { ParsedStatusBucket } from './types';
 
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
@@ -41,7 +38,7 @@ const defaultPanelHeight = 300;
 const donutHeight = 120;
 
 interface DonutCardProps {
-  donutData: Array<{ key: string; buckets: DonutChartData[] }> | undefined;
+  donutData: ParsedStatusBucket[] | undefined;
   filterQuery: string;
   headerChildren?: React.ReactNode;
   id: string;
@@ -68,7 +65,7 @@ type VisualizationActionsOptions = Omit<
 
 interface Others {
   panelSettings?: PanelSettings;
-  visualizationActionsOptions: VisualizationActionsOptions;
+  visualizationActionsOptions?: VisualizationActionsOptions;
   detailsButtonOptions?: ViewDetailsButtonProps;
 }
 
@@ -79,7 +76,7 @@ const DefaultPanelSettings = {
   paddingSize: 'm' as PaddingSize,
 };
 
-export const DonutCard = ({
+export const AlertsByStatus = ({
   detailsButtonOptions,
   donutData,
   filterQuery,
@@ -104,9 +101,9 @@ export const DonutCard = ({
   const legendItems: LegendItem[] = useMemo(
     () =>
       donutData && donutData?.length > 0 && legendField
-        ? donutData[0].buckets.map((d, i) => ({
+        ? (donutData[0] && donutData[0].buckets).map((d, i) => ({
             color: colors[i],
-            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.name}`),
+            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.status}`),
             timelineId: undefined,
             field: legendField,
             value: `${d.label}`,
@@ -183,6 +180,7 @@ export const DonutCard = ({
                     height={donutHeight}
                     data={data.buckets}
                     name={data.key}
+                    link={data.link}
                     showLegend={false}
                   />
                 </EuiFlexItem>

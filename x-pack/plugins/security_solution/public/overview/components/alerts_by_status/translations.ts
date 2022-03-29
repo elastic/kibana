@@ -27,3 +27,21 @@ export const STATUS_LOW_LABEL = i18n.translate(
     defaultMessage: 'Low',
   }
 );
+
+export const STATUS_OPEN = i18n.translate('xpack.securitySolution.responseOps.donut.title.open', {
+  defaultMessage: 'Open',
+});
+
+export const STATUS_ACKNOWLEDGED = i18n.translate(
+  'xpack.securitySolution.responseOps.donut.title.acknowledged',
+  {
+    defaultMessage: 'Acknowledged',
+  }
+);
+
+export const STATUS_CLOSED = i18n.translate(
+  'xpack.securitySolution.responseOps.donut.title.closed',
+  {
+    defaultMessage: 'Closed',
+  }
+);

@@ -20,8 +20,8 @@ import { HeaderPage } from '../../common/components/header_page';
 import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING } from './translations';
 import { inputsSelectors } from '../../common/store/selectors';
-import { alertsData } from './mock_data';
-import { DonutCard } from '../components/alerts_by_status';
+import { alertsData } from '../components/alerts_by_status/mock_data';
+import { AlertsByStatus } from '../components/alerts_by_status';
 
 const DetectionResponseComponent = () => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
@@ -75,12 +75,15 @@ const DetectionResponseComponent = () => {
                   <EuiFlexItem>
                     {hasIndexRead && hasKibanaREAD && (
                       <EuiFlexGroup>
-                        <DonutCard
+                        <AlertsByStatus
                           title="Alerts"
-                          donutData={alertsData()}
+                          donutData={alertsData()} // Todo
                           id="alertByStatus"
-                          filterQuery={''}
+                          filterQuery={''} // Todo
                           legendField="kibana.alert.severity"
+                          isInitialLoading={false} // Todo
+                          loading={false} // Todo
+                          showInspectButton={true} // Todo
                         />
                       </EuiFlexGroup>
                     )}
