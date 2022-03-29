@@ -37,6 +37,7 @@ import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_typ
 import { AnomalySource } from '../../../maps/anomaly_source';
 import { CUSTOM_COLOR_RAMP } from '../../../maps/anomaly_layer_wizard_factory';
 import { LAYER_TYPE } from '../../../../../maps/common';
+import { APP_ID as MAPS_APP_ID, MAPS_APP_LOCATOR } from '../../../../../maps/public';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
@@ -99,58 +100,29 @@ function ExplorerChartContainer({
   } = useMlKibana();
 
   const getMapsLink = useCallback(async () => {
-    const initialLayers = [
-      {
-        id: htmlIdGenerator()(),
-        type: LAYER_TYPE.GEOJSON_VECTOR,
-        sourceDescriptor: AnomalySource.createDescriptor({
-          jobId: series.jobId,
-          typicalActual: ML_ANOMALY_LAYERS.ACTUAL,
-        }),
-        style: {
-          type: 'VECTOR',
-          properties: {
-            fillColor: CUSTOM_COLOR_RAMP,
-            lineColor: CUSTOM_COLOR_RAMP,
+    const initialLayers = [];
+    for (const layer in ML_ANOMALY_LAYERS) {
+      if (ML_ANOMALY_LAYERS.hasOwnProperty(layer)) {
+        initialLayers.push({
+          id: htmlIdGenerator()(),
+          type: LAYER_TYPE.GEOJSON_VECTOR,
+          sourceDescriptor: AnomalySource.createDescriptor({
+            jobId: series.jobId,
+            typicalActual: ML_ANOMALY_LAYERS[layer],
+          }),
+          style: {
+            type: 'VECTOR',
+            properties: {
+              fillColor: CUSTOM_COLOR_RAMP,
+              lineColor: CUSTOM_COLOR_RAMP,
+            },
+            isTimeAware: false,
           },
-          isTimeAware: false,
-        },
-      },
-      {
-        id: htmlIdGenerator()(),
-        type: LAYER_TYPE.GEOJSON_VECTOR,
-        sourceDescriptor: AnomalySource.createDescriptor({
-          jobId: series.jobId,
-          typicalActual: ML_ANOMALY_LAYERS.TYPICAL,
-        }),
-        style: {
-          type: 'VECTOR',
-          properties: {
-            fillColor: CUSTOM_COLOR_RAMP,
-            lineColor: CUSTOM_COLOR_RAMP,
-          },
-          isTimeAware: false,
-        },
-      },
-      {
-        id: htmlIdGenerator()(),
-        type: LAYER_TYPE.GEOJSON_VECTOR,
-        sourceDescriptor: AnomalySource.createDescriptor({
-          jobId: series.jobId,
-          typicalActual: ML_ANOMALY_LAYERS.TYPICAL_TO_ACTUAL,
-        }),
-        style: {
-          type: 'VECTOR',
-          properties: {
-            fillColor: CUSTOM_COLOR_RAMP,
-            lineColor: CUSTOM_COLOR_RAMP,
-          },
-          isTimeAware: false,
-        },
-      },
-    ];
+        });
+      }
+    }
 
-    const locator = share.url.locators.get('MAPS_APP_LOCATOR');
+    const locator = share.url.locators.get(MAPS_APP_LOCATOR);
     const location = await locator.getLocation({
       initialLayers: initialLayers,
       timeRange: data.query.timefilter.timefilter.getTime(),
@@ -300,7 +272,7 @@ function ExplorerChartContainer({
                   iconType="logoMaps"
                   size="xs"
                   onClick={async () => {
-                    await navigateToApp('maps', { path: mapsLink });
+                    await navigateToApp(MAPS_APP_ID, { path: mapsLink });
                   }}
                 >
                   <FormattedMessage
