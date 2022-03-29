@@ -22091,7 +22091,6 @@
     "xpack.security.account.changePasswordTitle": "密码",
     "xpack.security.account.currentPasswordRequired": "当前密码必填。",
     "xpack.security.account.noEmailMessage": "没有电子邮件地址",
-    "xpack.security.account.pageTitle": "{strongUsername} 的设置",
     "xpack.security.account.passwordLengthDescription": "密码过短。",
     "xpack.security.account.passwordsDoNotMatch": "密码不匹配。",
     "xpack.security.account.usernameGroupDescription": "不能更改此信息。",

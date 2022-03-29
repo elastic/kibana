@@ -22062,7 +22062,6 @@
     "xpack.security.account.changePasswordTitle": "パスワード",
     "xpack.security.account.currentPasswordRequired": "現在のパスワードが必要です。",
     "xpack.security.account.noEmailMessage": "メールアドレスがありません",
-    "xpack.security.account.pageTitle": "{strongUsername}の設定",
     "xpack.security.account.passwordLengthDescription": "パスワードが短すぎます。",
     "xpack.security.account.passwordsDoNotMatch": "パスワードが一致していません。",
     "xpack.security.account.usernameGroupDescription": "この情報は変更できません。",
