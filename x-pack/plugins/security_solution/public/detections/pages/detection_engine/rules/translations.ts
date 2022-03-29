@@ -391,13 +391,6 @@ export const EXPORT_FILENAME = i18n.translate(
   }
 );
 
-export const ALL_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tableTitle',
-  {
-    defaultMessage: 'All rules',
-  }
-);
-
 export const SEARCH_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchAriaLabel',
   {
@@ -408,7 +401,7 @@ export const SEARCH_RULES = i18n.translate(
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchPlaceholder',
   {
-    defaultMessage: 'e.g. rule name',
+    defaultMessage: 'Search by rule name, index pattern, or MITRE ATT&CK tactic or technique',
   }
 );
 
