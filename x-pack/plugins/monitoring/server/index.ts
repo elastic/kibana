@@ -21,6 +21,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   deprecations,
   exposeToBrowser: {
     ui: true,
+    uiPublic: true,
     kibana: true,
   },
 };

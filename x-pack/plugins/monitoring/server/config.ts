@@ -80,6 +80,30 @@ export const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
   }),
+  uiPublic: schema.object({
+    enabled: schema.boolean({ defaultValue: schema.siblingRef('ui.enabled') }),
+    ccs: schema.object({
+      enabled: schema.boolean({ defaultValue: schema.siblingRef('ui.ccs.enabled') }),
+    }),
+    min_interval_seconds: schema.number({
+      defaultValue: schema.siblingRef('ui.min_interval_seconds'),
+    }),
+    show_license_expiration: schema.boolean({
+      defaultValue: schema.siblingRef('ui.show_license_expiration'),
+    }),
+    container: schema.object({
+      elasticsearch: schema.object({
+        enabled: schema.boolean({
+          defaultValue: schema.siblingRef('ui.container.elasticsearch.enabled'),
+        }),
+      }),
+      logstash: schema.object({
+        enabled: schema.boolean({
+          defaultValue: schema.siblingRef('ui.container.elasticsearch.enabled'),
+        }),
+      }),
+    }),
+  }),
 });
 
 export class MonitoringElasticsearchConfig extends ElasticsearchConfig {
