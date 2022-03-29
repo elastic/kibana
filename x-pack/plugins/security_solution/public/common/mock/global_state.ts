@@ -88,6 +88,7 @@ export const mockGlobalState: State = {
           sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
+        sessions: { activePage: 0, limit: 10 },
       },
     },
     details: {
@@ -109,6 +110,7 @@ export const mockGlobalState: State = {
           sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
+        sessions: { activePage: 0, limit: 10 },
       },
     },
   },
