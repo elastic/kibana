@@ -16,7 +16,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup6');
 
     before(async function () {
-      return await browser.setWindowSize(1300, 800);
+      await browser.setWindowSize(1300, 800);
     });
 
     after(async function unloadMakelogs() {
