@@ -84,12 +84,10 @@ interface MarkerDecorationConfig {
 export const MarkerDecorationSettings = ({
   currentConfig,
   setConfig,
-  isHorizontal,
   customIconSet,
 }: {
   currentConfig?: MarkerDecorationConfig;
   setConfig: (config: MarkerDecorationConfig) => void;
-  isHorizontal: boolean;
   customIconSet?: IconSet;
 }) => {
   return (
@@ -146,8 +144,22 @@ export const MarkerDecorationSettings = ({
           }}
         />
       </EuiFormRow>
-      {currentConfig?.iconPosition &&
-      (hasIcon(currentConfig?.icon) || currentConfig?.textVisibility) ? (
+    </>
+  );
+};
+
+export const MarkerDecorationPosition = ({
+  currentConfig,
+  setConfig,
+  isHorizontal,
+}: {
+  currentConfig?: MarkerDecorationConfig;
+  setConfig: (config: MarkerDecorationConfig) => void;
+  isHorizontal: boolean;
+}) => {
+  return (
+    <>
+      {hasIcon(currentConfig?.icon) || currentConfig?.textVisibility ? (
         <EuiFormRow
           display="columnCompressed"
           fullWidth
