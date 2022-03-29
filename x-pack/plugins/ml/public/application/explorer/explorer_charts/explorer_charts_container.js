@@ -7,6 +7,7 @@
 import './_index.scss';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { escapeKuery } from '@kbn/es-query';
 
 import {
   EuiButtonEmpty,
@@ -65,6 +66,17 @@ const openInMapsPluginMessage = i18n.translate('xpack.ml.explorer.charts.openInM
   defaultMessage: 'Open in Maps',
 });
 
+export function getEntitiesQuery(series) {
+  const queryString = series.entityFields
+    ?.map(({ fieldName, fieldValue }) => `${escapeKuery(fieldName)}:${escapeKuery(fieldValue)}`)
+    .join(' or ');
+  const query = {
+    language: SEARCH_QUERY_LANGUAGE.KUERY,
+    query: queryString,
+  };
+  return { query, queryString };
+}
+
 // create a somewhat unique ID
 // from charts metadata for React's key attribute
 function getChartId(series) {
@@ -101,14 +113,7 @@ function ExplorerChartContainer({
   } = useMlKibana();
 
   const getMapsLink = useCallback(async () => {
-    const queryString = series.entityFields
-      ?.map(({ fieldName, fieldValue }) => `${fieldName}:${fieldValue}`)
-      .join(' or ');
-    const query = {
-      language: SEARCH_QUERY_LANGUAGE.KUERY,
-      query: queryString,
-    };
-
+    const { queryString, query } = getEntitiesQuery(series);
     const initialLayers = [];
     const typicalStyle = {
       type: 'VECTOR',
