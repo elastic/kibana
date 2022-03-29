@@ -86,7 +86,8 @@ export function ProcessTreeNode({
       ),
     [hasAlerts, alerts, jumpToAlertID]
   );
-  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert });
+  const isSelected = selectedProcessId === process.id;
+  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected });
   const buttonStyles = useButtonStyles({});
 
   const nodeRef = useVisible({
@@ -249,15 +250,12 @@ export function ProcessTreeNode({
                     [exit_code: {exitCode}]
                   </small>
                 )}
-                {timeStampOn && (
-                  <span
-                    data-test-subj="sessionView:processTreeNodeTimestamp"
-                    css={styles.timeStamp}
-                  >
-                    {timeStampsNormal}
-                  </span>
-                )}
               </span>
+              {timeStampOn && (
+                <span data-test-subj="sessionView:processTreeNodeTimestamp" css={styles.timeStamp}>
+                  {timeStampsNormal}
+                </span>
+              )}
             </span>
           )}
 
