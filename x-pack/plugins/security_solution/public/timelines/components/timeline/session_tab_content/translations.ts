@@ -13,3 +13,10 @@ export const CLOSE_ANALYZER = i18n.translate(
     defaultMessage: 'Close analyzer',
   }
 );
+
+export const CLOSE_SESSION = i18n.translate(
+  'xpack.securitySolution.timeline.graphOverlay.closeSessionButton',
+  {
+    defaultMessage: 'Close Session',
+  }
+);
