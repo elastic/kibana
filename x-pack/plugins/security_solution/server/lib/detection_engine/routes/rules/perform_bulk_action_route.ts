@@ -9,10 +9,12 @@ import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
 import { KibanaResponseFactory, Logger } from 'src/core/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 
 import { RuleAlertType } from '../../rules/types';
 
 import type { RulesClient } from '../../../../../../alerting/server';
+import { SanitizedAlert } from '../../../../../../alerting/common';
 
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -43,6 +45,7 @@ import { buildSiemResponse } from '../utils';
 import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { legacyMigrate } from '../../rules/utils';
+import { RuleParams } from '../../schemas/rule_schemas';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
@@ -192,6 +195,39 @@ const fetchRulesByQueryOrIds = async ({
   };
 };
 
+/**
+ * Helper method to migrate any legacy actions a rule may have. If no actions or no legacy actions
+ * no migration is performed.
+ * @params rulesClient
+ * @params savedObjectsClient
+ * @params rule - rule to be migrated
+ * @returns The migrated rule
+ */
+export const migrateRuleActions = async ({
+  rulesClient,
+  savedObjectsClient,
+  rule,
+}: {
+  rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  rule: RuleAlertType;
+}): Promise<SanitizedAlert<RuleParams>> => {
+  const migratedRule = await legacyMigrate({
+    rulesClient,
+    savedObjectsClient,
+    rule,
+  });
+
+  // This should only be hit if `rule` passed into `legacyMigrate`
+  // is `null` or `rule.id` is null which right now, as typed, should not occur
+  // but catching if does, in which case something upstream would be breaking down
+  if (migratedRule == null) {
+    throw new Error(`An error occurred processing rule with id:${rule.id}`);
+  }
+
+  return migratedRule;
+};
+
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
@@ -265,17 +301,11 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                const migratedRule = await legacyMigrate({
+                const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
                   rule,
                 });
-
-                // This should only be hit if `rule` passed into `legacyMigrate`
-                // is `null` or `rule.id` is null which right now, as typed, should not occur
-                if (migratedRule == null) {
-                  throw new BadRequestError(`An error occurred enabling rule with id:${rule.id}`);
-                }
 
                 if (!migratedRule.enabled) {
                   throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
@@ -295,17 +325,11 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                const migratedRule = await legacyMigrate({
+                const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
                   rule,
                 });
-
-                // This should only be hit if `rule` passed into `legacyMigrate`
-                // is `null` or `rule.id` is null which right now, as typed, should not occur
-                if (migratedRule == null) {
-                  throw new BadRequestError(`An error occurred disabling rule with id:${rule.id}`);
-                }
 
                 if (migratedRule.enabled) {
                   throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
@@ -325,17 +349,11 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                const migratedRule = await legacyMigrate({
+                const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
                   rule,
                 });
-
-                // This should only be hit if `rule` passed into `legacyMigrate`
-                // is `null` or `rule.id` is null which right now, as typed, should not occur
-                if (migratedRule == null) {
-                  throw new BadRequestError(`An error occurred deleting rule with id:${rule.id}`);
-                }
 
                 await deleteRules({
                   ruleId: migratedRule.id,
@@ -353,19 +371,11 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                const migratedRule = await legacyMigrate({
+                const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
                   rule,
                 });
-
-                // This should only be hit if `rule` passed into `legacyMigrate`
-                // is `null` or `rule.id` is null which right now, as typed, should not occur
-                if (migratedRule == null) {
-                  throw new BadRequestError(
-                    `An error occurred duplicating rule with id:${rule.id}`
-                  );
-                }
 
                 throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
 
@@ -408,17 +418,11 @@ export const performBulkActionRoute = (
 
                 throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
 
-                const migratedRule = await legacyMigrate({
+                const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
                   rule,
                 });
-
-                // This should only be hit if `rule` passed into `legacyMigrate`
-                // is `null` or `rule.id` is null which right now, as typed, should not occur
-                if (migratedRule == null) {
-                  throw new BadRequestError(`An error occurred editing rule with id:${rule.id}`);
-                }
 
                 const editedRule = body[BulkAction.edit].reduce(
                   (acc, action) => applyBulkActionEditToRule(acc, action),
@@ -430,7 +434,7 @@ export const performBulkActionRoute = (
 
                 await patchRules({
                   rulesClient,
-                  rule: editedRule,
+                  rule: migratedRule,
                   tags,
                   index,
                   timelineTitle,
