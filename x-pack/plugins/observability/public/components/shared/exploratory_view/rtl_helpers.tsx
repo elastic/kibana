@@ -12,7 +12,6 @@ import { stringify } from 'query-string';
 import {
   render as reactTestLibRender,
   RenderOptions,
-  Nullish,
   MatcherFunction,
 } from '@testing-library/react';
 import { Route, Router } from 'react-router-dom';
@@ -168,7 +167,7 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
   );
 }
 
-export function MockRouter<ExtraCore>({
+export function MockRouter<ExtraCore extends Partial<CoreStart>>({
   children,
   core,
   history = createMemoryHistory(),
@@ -386,7 +385,7 @@ export const mockDataView = createStubDataView({
 export const forNearestButton =
   (getByText: (f: MatcherFunction) => HTMLElement | null) =>
   (text: string): HTMLElement | null =>
-    getByText((_content: string, node: Nullish<Element>) => {
+    getByText((_content: string, node: Element | null) => {
       if (!node) return false;
       const noOtherButtonHasText = Array.from(node.children).every(
         (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== 'button')
