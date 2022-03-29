@@ -263,30 +263,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: [
-        {
-          id: 'services',
-          title: servicesTitle,
-          // path: serviceGroupsEnabled ? '/service-groups' : '/services',
-          deepLinks: serviceGroupsEnabled
-            ? [
-                {
-                  id: 'service-groups-list',
-                  title: 'Service groups',
-                  path: '/service-groups',
-                },
-                {
-                  id: 'service-groups-services',
-                  title: servicesTitle,
-                  path: '/services',
-                },
-                {
-                  id: 'service-groups-service-map',
-                  title: serviceMapTitle,
-                  path: '/service-map',
-                },
-              ]
-            : [],
-        },
+        ...(serviceGroupsEnabled
+          ? [
+              {
+                id: 'service-groups-list',
+                title: 'Service groups',
+                path: '/service-groups',
+              },
+            ]
+          : []),
+        { id: 'services', title: servicesTitle, path: '/services' },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         { id: 'backends', title: dependenciesTitle, path: '/backends' },
