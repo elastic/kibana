@@ -8,13 +8,13 @@ Gets a comment or all comments for a case.
 
 === Request
 
-`GET <kibana host>:<port>/api/cases/<case_id>/comments` 
-
-`GET <kibana host>:<port>/s/<space_id>/api/cases/<case_id>/comments`
-
 `GET <kibana host>:<port>/api/cases/<case ID>/comments/<comment ID>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/cases/<case ID>/comments/<comment ID>`
+
+`GET <kibana host>:<port>/api/cases/<case_id>/comments` deprecated:[8.1.0]
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/<case_id>/comments` deprecated:[8.1.0]
 
 === Prerequisite
 
@@ -30,8 +30,8 @@ You must have `read` privileges for the *Cases* feature in the *Management*,
 <<cases-api-find-cases>>.
 
 `<comment_id>`::
-(Optional, string) The identifier for the comment.
-//To retrieve comment IDs, use <<cases-api-get-case>>.
+(Optional, string) The identifier for the comment. To retrieve comment IDs, use
+<<cases-api-get-case>>.
 +
 If it is not specified, all comments are retrieved.
 deprecated:[8.1.0,The comment identifier will no longer be optional.]
