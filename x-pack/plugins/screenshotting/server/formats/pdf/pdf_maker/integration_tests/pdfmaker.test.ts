@@ -7,13 +7,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-jest.mock('worker_threads', () => {
-  return {
-    ...jest.requireActual('worker_threads'),
-    isMainThread: false,
-  };
-});
-
 import path from 'path';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { isUint8Array } from 'util/types';
