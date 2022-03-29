@@ -595,19 +595,43 @@ describe('Detections Rules API', () => {
     });
 
     test('calls API with correct parameters', async () => {
-      await fetchRuleExecutionEvents({ ruleId: '42', signal: abortCtrl.signal });
+      await fetchRuleExecutionEvents({
+        ruleId: '42',
+        start: '2001-01-01T17:00:00.000Z',
+        end: '2001-01-02T17:00:00.000Z',
+        queryText: '',
+        statusFilters: '',
+        signal: abortCtrl.signal,
+      });
 
       expect(fetchMock).toHaveBeenCalledWith(
         '/internal/detection_engine/rules/42/execution/events',
         {
           method: 'GET',
+          query: {
+            end: '2001-01-02T17:00:00.000Z',
+            page: undefined,
+            per_page: undefined,
+            query_text: '',
+            sort_field: undefined,
+            sort_order: undefined,
+            start: '2001-01-01T17:00:00.000Z',
+            status_filters: '',
+          },
           signal: abortCtrl.signal,
         }
       );
     });
 
     test('returns API response as is', async () => {
-      const response = await fetchRuleExecutionEvents({ ruleId: '42', signal: abortCtrl.signal });
+      const response = await fetchRuleExecutionEvents({
+        ruleId: '42',
+        start: 'now-30',
+        end: 'now',
+        queryText: '',
+        statusFilters: '',
+        signal: abortCtrl.signal,
+      });
       expect(response).toEqual(responseMock);
     });
   });

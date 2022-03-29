@@ -221,6 +221,13 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             path: `${HOSTS_PATH}/anomalies`,
             isPremium: true,
           },
+          {
+            id: SecurityPageName.sessions,
+            title: i18n.translate('xpack.securitySolution.search.hosts.sessions', {
+              defaultMessage: 'Sessions',
+            }),
+            path: `${HOSTS_PATH}/sessions`,
+          },
         ],
       },
       {

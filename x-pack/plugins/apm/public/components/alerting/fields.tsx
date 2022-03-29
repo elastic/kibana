@@ -39,12 +39,9 @@ export function ServiceField({
     >
       <SuggestionsSelect
         allOption={allowAll ? ENVIRONMENT_ALL : undefined}
-        customOptionText={i18n.translate(
-          'xpack.apm.serviceNamesSelectCustomOptionText',
-          {
-            defaultMessage: 'Add \\{searchValue\\} as a new service name',
-          }
-        )}
+        customOptionText={i18n.translate('xpack.apm.selectCustomOptionText', {
+          defaultMessage: 'Add \\{searchValue\\} as a new option',
+        })}
         defaultValue={currentValue}
         field={SERVICE_NAME}
         onChange={onChange}
@@ -72,12 +69,9 @@ export function EnvironmentField({
     >
       <SuggestionsSelect
         allOption={ENVIRONMENT_ALL}
-        customOptionText={i18n.translate(
-          'xpack.apm.environmentsSelectCustomOptionText',
-          {
-            defaultMessage: 'Add \\{searchValue\\} as a new environment',
-          }
-        )}
+        customOptionText={i18n.translate('xpack.apm.selectCustomOptionText', {
+          defaultMessage: 'Add \\{searchValue\\} as a new option',
+        })}
         defaultValue={getEnvironmentLabel(currentValue)}
         field={SERVICE_ENVIRONMENT}
         onChange={onChange}
@@ -103,12 +97,9 @@ export function TransactionTypeField({
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
         allOption={ENVIRONMENT_ALL}
-        customOptionText={i18n.translate(
-          'xpack.apm.transactionTypesSelectCustomOptionText',
-          {
-            defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
-          }
-        )}
+        customOptionText={i18n.translate('xpack.apm.selectCustomOptionText', {
+          defaultMessage: 'Add \\{searchValue\\} as a new option',
+        })}
         defaultValue={currentValue}
         field={TRANSACTION_TYPE}
         onChange={onChange}
