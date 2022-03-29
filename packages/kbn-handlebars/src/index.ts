@@ -514,7 +514,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
           // stash parent program data
           const tmpRuntimeOptions = this.runtimeOptions;
           this.runtimeOptions = runtimeOptions;
-          this.scopes.unshift(nextContext);
+          const shiftContext = nextContext !== this.scopes[0];
+          if (shiftContext) this.scopes.unshift(nextContext);
           this.blockParamValues.unshift(runtimeOptions.blockParams || []);
 
           // execute child program
@@ -522,7 +523,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
           // unstash parent program data
           this.blockParamValues.shift();
-          this.scopes.shift();
+          if (shiftContext) this.scopes.shift();
           this.runtimeOptions = tmpRuntimeOptions;
 
           // return result of child program
