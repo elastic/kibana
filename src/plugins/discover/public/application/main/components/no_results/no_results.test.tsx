@@ -34,11 +34,11 @@ function mountAndFindSubjects(props: Omit<DiscoverNoResultsProps, 'onDisableFilt
   );
   return {
     mainMsg: findTestSubject(component, 'discoverNoResults').exists(),
-    timeFieldMsg: findTestSubject(component, 'discoverNoResultsTimefilter').exists(),
     errorMsg: findTestSubject(component, 'discoverNoResultsError').exists(),
+    adjustTimeRange: findTestSubject(component, 'discoverNoResultsAdjustTimeRange').exists(),
     adjustSearch: findTestSubject(component, 'discoverNoResultsAdjustSearch').exists(),
     adjustFilters: findTestSubject(component, 'discoverNoResultsAdjustFilters').exists(),
-    adjustIndices: findTestSubject(component, 'discoverNoResultsIndices').exists(),
+    checkIndices: findTestSubject(component, 'discoverNoResultsCheckIndices').exists(),
     disableFiltersButton: findTestSubject(component, 'discoverNoResultsDisableFilters').exists(),
   };
 }
@@ -51,12 +51,12 @@ describe('DiscoverNoResults', () => {
         expect(result).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
-            "adjustIndices": true,
             "adjustSearch": false,
+            "adjustTimeRange": false,
+            "checkIndices": true,
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
-            "timeFieldMsg": false,
           }
         `);
       });
@@ -69,12 +69,12 @@ describe('DiscoverNoResults', () => {
         expect(result).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
-            "adjustIndices": false,
             "adjustSearch": false,
+            "adjustTimeRange": true,
+            "checkIndices": false,
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
-            "timeFieldMsg": true,
           }
         `);
       });
@@ -103,12 +103,12 @@ describe('DiscoverNoResults', () => {
         expect(result).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
-            "adjustIndices": false,
             "adjustSearch": false,
+            "adjustTimeRange": false,
+            "checkIndices": false,
             "disableFiltersButton": false,
             "errorMsg": true,
             "mainMsg": false,
-            "timeFieldMsg": false,
           }
         `);
       });

@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../data/public';
-import { AdjustSearch } from './no_results_helper';
+import { NoResultsSuggestions } from './no_results_suggestions/no_results_suggestions';
 import './_no_results.scss';
 import { NoResultsIllustration } from './assets/no_results_illustration';
 
@@ -54,7 +54,7 @@ export function DiscoverNoResults({
           <NoResultsIllustration />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <AdjustSearch
+          <NoResultsSuggestions
             isTimeBased={isTimeBased}
             hasFilters={hasFilters}
             hasQuery={hasQuery}
