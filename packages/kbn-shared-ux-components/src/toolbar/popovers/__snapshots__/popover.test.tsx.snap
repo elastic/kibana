@@ -32,6 +32,7 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
           <EuiButton
             color="primary"
             fill={true}
+            iconSide="left"
             onClick={[Function]}
             size="m"
           >
@@ -41,6 +42,7 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
               disabled={false}
               element="button"
               fill={true}
+              iconSide="left"
               isDisabled={false}
               onClick={[Function]}
               size="m"

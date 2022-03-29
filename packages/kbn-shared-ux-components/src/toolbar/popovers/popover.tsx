@@ -23,13 +23,15 @@ export type Props = AllowedButtonProps &
     children: (arg: { closePopover: () => void }) => React.ReactNode;
   };
 
-export const ToolbarPopover = ({ label, iconType, children, ...popover }: Props) => {
+export const ToolbarPopover = ({ label, iconType, children, iconSide, ...popover }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onButtonClick = () => setIsOpen((status) => !status);
   const closePopover = () => setIsOpen(false);
 
-  const button = <ToolbarButton onClick={onButtonClick} iconType={iconType} {...{ label }} />;
+  const button = (
+    <ToolbarButton onClick={onButtonClick} iconType={iconType} iconSide={iconSide} {...{ label }} />
+  );
 
   return (
     // @ts-ignore Types of property 'css' are incompatible. Type 'ArrayInterpolation<undefined>' is not assignable to type 'Interpolation<Theme>'.

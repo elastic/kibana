@@ -7,6 +7,8 @@
  */
 
 import { EuiContextMenu } from '@elastic/eui';
+import { ButtonContentIconSide } from '@elastic/eui/src/components/button/button_content';
+import { useArgTypes } from '@storybook/api';
 import { Story } from '@storybook/react';
 import React from 'react';
 import { ToolbarPopover } from './popover';
@@ -21,21 +23,20 @@ export default {
     },
   },
   argTypes: {
-    iconType: {
+    iconSide: {
       control: {
         type: 'radio',
-        expanded: true,
-        options: ['apps', 'logoGithub', 'folderCheck', 'documents'],
+        options: ['left', 'right', 'undefined'],
       },
     },
   },
 };
 
 export const Component: Story<{
-  iconType: any;
-}> = () => {
+  iconSide: ButtonContentIconSide | undefined;
+}> = ({ iconSide }) => {
   return (
-    <ToolbarPopover label="Add element" iconType="plusInCircle">
+    <ToolbarPopover label="Add element" iconType="plusInCircle" iconSide={iconSide}>
       {() => (
         <EuiContextMenu
           initialPanelId={0}
@@ -66,5 +67,5 @@ export const Component: Story<{
 };
 
 Component.args = {
-  iconType: 'apps',
+  iconSide: 'left',
 };
