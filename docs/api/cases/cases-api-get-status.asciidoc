@@ -1,0 +1,60 @@
+[[cases-api-get-status]]
+== Get case status API
+++++
+<titleabbrev>Get case status</titleabbrev>
+++++
+
+Returns the number of open and closed cases.
+
+deprecated::[8.1.0]
+
+=== Request
+
+`GET <kibana host>:<port>/api/cases/status`
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/status`
+
+=== Prerequisite
+
+You must have `read` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases you're seeking.
+
+=== Path parameters
+
+<space_id>::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== Query parameters
+
+`owner`::
+(Optional, string or array of strings) A filter to limit the retrieved case
+statistics to a specific set of applications. Valid values are: `cases`,
+`observability`, and `securitySolution`. If this parameter is omitted, the
+response contains all cases that the user has access to read.
+
+=== Response code
+
+`200`::
+   Indicates a successful call.
+
+=== Example
+
+[source,sh]
+--------------------------------------------------
+GET api/cases/status
+--------------------------------------------------
+// KIBANA
+
+The API returns the following type of information:
+
+[source,json]
+--------------------------------------------------
+{
+  "count_open_cases": 27,
+  "count_in_progress_cases": 50,
+  "count_closed_cases": 1198,
+}
+--------------------------------------------------
