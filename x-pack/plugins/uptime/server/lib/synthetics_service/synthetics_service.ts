@@ -7,6 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { SavedObject } from 'kibana/server';
 import { KibanaRequest, Logger } from '../../../../../../src/core/server';
 import {
   ConcreteTaskInstance,
@@ -18,7 +19,7 @@ import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
-import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
+import { syntheticsMonitorType, syntheticsMonitor } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../../common/config';
 import { ServiceAPIClient } from './service_api_client';
@@ -30,10 +31,13 @@ import {
   SyntheticsMonitor,
   ThrottlingOptions,
   SyntheticsMonitorWithId,
+  SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 import { hydrateSavedObjects } from './hydrate_saved_object';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { DecryptedSyntheticsMonitorSavedObject } from '../../../common/types';
+
+import { normalizeSecrets } from './utils/secrets';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -302,31 +306,53 @@ export class SyntheticsService {
 
   async getMonitorConfigs() {
     const savedObjectsClient = this.server.savedObjectsClient;
+    const encryptedClient = this.server.encryptedSavedObjects.getClient();
 
     if (!savedObjectsClient?.find) {
       return [] as SyntheticsMonitorWithId[];
     }
 
-    const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
+    const { saved_objects: encryptedMonitors } = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
       namespaces: ['*'],
       perPage: 10000,
     });
 
+    const start = performance.now();
+
+    const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = await Promise.all(
+      encryptedMonitors.map((monitor) =>
+        encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+          syntheticsMonitor.name,
+          monitor.id
+        )
+      )
+    );
+
+    const end = performance.now();
+    const duration = end - start;
+
+    this.logger.debug(`Decrypted ${monitors.length} monitors. Took ${duration} milliseconds`, {
+      event: {
+        duration,
+      },
+      monitors: monitors.length,
+    });
+
     if (this.indexTemplateExists) {
       // without mapping, querying won't make sense
       hydrateSavedObjects({
-        monitors: findResult.saved_objects as unknown as SyntheticsMonitorSavedObject[],
+        monitors: monitors as unknown as DecryptedSyntheticsMonitorSavedObject[],
         server: this.server,
       });
     }
 
-    return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
-      ...attributes,
-      id,
+    return (monitors ?? []).map((monitor) => ({
+      ...normalizeSecrets(monitor).attributes,
+      id: monitor.id,
       fields_under_root: true,
-      fields: { config_id: id },
-    })) as SyntheticsMonitorWithId[];
+      fields: { config_id: monitor.id },
+    }));
   }
 
   formatConfigs(configs: SyntheticsMonitorWithId[]) {

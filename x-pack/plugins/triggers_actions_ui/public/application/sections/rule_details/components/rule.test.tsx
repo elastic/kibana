@@ -10,12 +10,19 @@ import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { RuleComponent, AlertListItem, alertToListItem } from './rule';
+import { RuleComponent, alertToListItem } from './rule';
+import { AlertListItem } from './types';
+import { RuleAlertList } from './rule_alert_list';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
-import { EuiBasicTable } from '@elastic/eui';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 
 jest.mock('../../../../common/lib/kibana');
+
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn(),
+}));
+
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
@@ -29,12 +36,16 @@ const mockAPIs = {
 };
 
 beforeAll(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
   global.Date.now = jest.fn(() => fakeNow.getTime());
 });
 
+beforeEach(() => {
+  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+});
+
 describe('rules', () => {
-  it('render a list of rules', () => {
+  it('render a list of rules', async () => {
     const rule = mockRule();
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary({
@@ -59,19 +70,22 @@ describe('rules', () => {
       alertToListItem(fakeNow.getTime(), ruleType, 'first_rule', ruleSummary.alerts.first_rule),
     ];
 
-    expect(
-      shallow(
-        <RuleComponent
-          {...mockAPIs}
-          rule={rule}
-          ruleType={ruleType}
-          ruleSummary={ruleSummary}
-          readOnly={false}
-        />
-      )
-        .find(EuiBasicTable)
-        .prop('items')
-    ).toEqual(rules);
+    const wrapper = mountWithIntl(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      wrapper.update();
+    });
+
+    expect(wrapper.find(RuleAlertList).prop('items')).toEqual(rules);
   });
 
   it('render a hidden field with duration epoch', () => {
@@ -95,7 +109,7 @@ describe('rules', () => {
     ).toEqual(fake2MinutesAgo.getTime());
   });
 
-  it('render all active rules', () => {
+  it('render all active rules', async () => {
     const rule = mockRule();
     const ruleType = mockRuleType();
     const alerts: Record<string, AlertStatus> = {
@@ -108,27 +122,31 @@ describe('rules', () => {
         muted: false,
       },
     };
-    expect(
-      shallow(
-        <RuleComponent
-          {...mockAPIs}
-          rule={rule}
-          ruleType={ruleType}
-          readOnly={false}
-          ruleSummary={mockRuleSummary({
-            alerts,
-          })}
-        />
-      )
-        .find(EuiBasicTable)
-        .prop('items')
-    ).toEqual([
+
+    const wrapper = mountWithIntl(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        readOnly={false}
+        ruleSummary={mockRuleSummary({
+          alerts,
+        })}
+      />
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      wrapper.update();
+    });
+
+    expect(wrapper.find(RuleAlertList).prop('items')).toEqual([
       alertToListItem(fakeNow.getTime(), ruleType, 'us-central', alerts['us-central']),
       alertToListItem(fakeNow.getTime(), ruleType, 'us-east', alerts['us-east']),
     ]);
   });
 
-  it('render all inactive rules', () => {
+  it('render all inactive rules', async () => {
     const rule = mockRule({
       mutedInstanceIds: ['us-west', 'us-east'],
     });
@@ -136,30 +154,33 @@ describe('rules', () => {
     const ruleUsWest: AlertStatus = { status: 'OK', muted: false };
     const ruleUsEast: AlertStatus = { status: 'OK', muted: false };
 
-    expect(
-      shallow(
-        <RuleComponent
-          {...mockAPIs}
-          rule={rule}
-          ruleType={ruleType}
-          readOnly={false}
-          ruleSummary={mockRuleSummary({
-            alerts: {
-              'us-west': {
-                status: 'OK',
-                muted: false,
-              },
-              'us-east': {
-                status: 'OK',
-                muted: false,
-              },
+    const wrapper = mountWithIntl(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        readOnly={false}
+        ruleSummary={mockRuleSummary({
+          alerts: {
+            'us-west': {
+              status: 'OK',
+              muted: false,
             },
-          })}
-        />
-      )
-        .find(EuiBasicTable)
-        .prop('items')
-    ).toEqual([
+            'us-east': {
+              status: 'OK',
+              muted: false,
+            },
+          },
+        })}
+      />
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      wrapper.update();
+    });
+
+    expect(wrapper.find(RuleAlertList).prop('items')).toEqual([
       alertToListItem(fakeNow.getTime(), ruleType, 'us-west', ruleUsWest),
       alertToListItem(fakeNow.getTime(), ruleType, 'us-east', ruleUsEast),
     ]);
@@ -376,6 +397,64 @@ describe('execution duration overview', () => {
         .find(ExecutionDurationChart)
         .exists()
     ).toBeTruthy();
+  });
+});
+
+describe('tabbed content', () => {
+  it('tabbed content renders when the event log experiment is on', async () => {
+    // Enable the event log experiment
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const ruleSummary = mockRuleSummary({
+      alerts: {
+        first_rule: {
+          status: 'OK',
+          muted: false,
+          actionGroupId: 'default',
+        },
+        second_rule: {
+          status: 'Active',
+          muted: false,
+          actionGroupId: 'action group id unknown',
+        },
+      },
+    });
+
+    const wrapper = shallow(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+
+    const tabbedContent = wrapper.find('[data-test-subj="ruleDetailsTabbedContent"]').dive();
+
+    // Need to mock this function
+    (tabbedContent.instance() as any).focusTab = jest.fn();
+    tabbedContent.update();
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      tabbedContent.update();
+    });
+
+    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
+    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
+
+    tabbedContent.find('[data-test-subj="ruleAlertListTab"]').simulate('click');
+
+    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
+    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
+
+    tabbedContent.find('[data-test-subj="eventLogListTab"]').simulate('click');
+
+    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
+    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
   });
 });
 
