@@ -35,6 +35,7 @@ describe('Alert Event Details', () => {
   it('should be able to run live query', () => {
     const PACK_NAME = 'testpack';
     const RULE_NAME = 'Test-rule';
+    const TIMELINE_NAME = 'Untitled timeline';
     navigateTo('/app/osquery/packs');
     preparePack(PACK_NAME);
     findAndClickButton('Edit');
@@ -61,5 +62,10 @@ describe('Alert Event Details', () => {
     inputQuery('select * from uptime;');
     submitQuery();
     checkResults();
+    cy.getBySel('add-to-timeline').click();
+    cy.getBySel('globalToastList').contains('Added');
+    cy.contains('Cancel').click();
+    cy.contains(TIMELINE_NAME).click();
+    cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
   });
 });
