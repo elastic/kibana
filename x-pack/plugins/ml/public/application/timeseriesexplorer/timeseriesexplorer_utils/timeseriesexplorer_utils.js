@@ -240,12 +240,12 @@ export function findNearestChartPointToTime(chartData, time) {
     // grab the current and previous items and compare the time differences
     let foundItem;
     for (let i = 0; i < chartData.length; i++) {
-      const itemTime = chartData[i].date.getTime();
+      const itemTime = chartData[i]?.date?.getTime();
       if (itemTime > time) {
         const item = chartData[i];
         const previousItem = chartData[i - 1];
 
-        const diff1 = Math.abs(time - previousItem.date.getTime());
+        const diff1 = Math.abs(time - previousItem?.date?.getTime());
         const diff2 = Math.abs(time - itemTime);
 
         // foundItem should be the item with a date closest to bucketTime
