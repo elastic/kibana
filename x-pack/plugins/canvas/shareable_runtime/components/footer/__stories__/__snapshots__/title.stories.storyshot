@@ -34,9 +34,7 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
         <span
           data-euiicon-type="logoElastic"
           size="l"
-        >
-          
-        </span>
+        />
       </a>
     </div>
     <div
@@ -101,9 +99,7 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
         <span
           data-euiicon-type="logoElastic"
           size="l"
-        >
-          
-        </span>
+        />
       </a>
     </div>
     <div
@@ -168,9 +164,7 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
         <span
           data-euiicon-type="logoElastic"
           size="l"
-        >
-          
-        </span>
+        />
       </a>
     </div>
     <div

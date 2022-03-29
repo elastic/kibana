@@ -252,7 +252,7 @@ describe('<RemoteClusterList />', () => {
         ],
         [
           '',
-          remoteCluster2.name.concat('Info'), //Tests include the word "info" to account for the rendered text coming from EuiIcon
+          remoteCluster2.name,
           'Not connected',
           PROXY_MODE,
           remoteCluster2.proxyAddress,
@@ -261,7 +261,7 @@ describe('<RemoteClusterList />', () => {
         ],
         [
           '',
-          remoteCluster3.name.concat('Info'), //Tests include the word "info" to account for the rendered text coming from EuiIcon
+          remoteCluster3.name,
           'Not connected',
           PROXY_MODE,
           remoteCluster2.proxyAddress,
@@ -360,7 +360,7 @@ describe('<RemoteClusterList />', () => {
         ({ rows } = table.getMetaData('remoteClusterListTable'));
 
         expect(rows.length).toBe(2);
-        expect(rows[0].columns[1].value).toContain(remoteCluster2.name);
+        expect(rows[0].columns[1].value).toEqual(remoteCluster2.name);
       });
     });
 

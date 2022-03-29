@@ -56,7 +56,7 @@ describe('LinkPreview', () => {
         removeExternalLinkText(
           (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
         )
-      ).toContain('https://baz.co');
+      ).toEqual('https://baz.co');
     });
   });
 
@@ -74,7 +74,7 @@ describe('LinkPreview', () => {
         removeExternalLinkText(
           (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
         )
-      ).toContain('https://baz.co?service.name={{invalid}');
+      ).toEqual('https://baz.co?service.name={{invalid}');
       expect(getByTestId(container, 'preview-warning')).toBeInTheDocument();
     });
   });
@@ -94,7 +94,7 @@ describe('LinkPreview', () => {
         removeExternalLinkText(
           (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
         )
-      ).toContain('https://baz.co?transaction=0');
+      ).toEqual('https://baz.co?transaction=0');
     });
   });
 });

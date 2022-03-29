@@ -179,11 +179,10 @@ exports[`UrlFormatEditor should render normally 1`] = `
             URL template help
           </span>
           <span
+            aria-label="External link"
             class="euiLink__externalIcon"
             data-euiicon-type="popout"
-          >
-            External link
-          </span>
+          />
           <span
             class="euiScreenReaderOnly"
           >
@@ -244,11 +243,10 @@ exports[`UrlFormatEditor should render normally 1`] = `
             Label template help
           </span>
           <span
+            aria-label="External link"
             class="euiLink__externalIcon"
             data-euiicon-type="popout"
-          >
-            External link
-          </span>
+          />
           <span
             class="euiScreenReaderOnly"
           >
