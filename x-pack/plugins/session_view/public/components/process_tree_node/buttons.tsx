@@ -5,9 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Process } from '../../../common/types/process_tree';
 import { useButtonStyles } from './use_button_styles';
 
 export const ChildrenProcessesButton = ({
@@ -30,58 +29,6 @@ export const ChildrenProcessesButton = ({
       <EuiIcon css={buttonArrow} size="s" type={expandedIcon} />
     </EuiButton>
   );
-};
-
-export const SessionLeaderButton = ({
-  process,
-  onClick,
-  showGroupLeadersOnly,
-  childCount,
-}: {
-  process: Process;
-  onClick: () => void;
-  showGroupLeadersOnly: boolean;
-  childCount: number;
-}) => {
-  const groupLeaderCount = process.getChildren(false).length;
-  const sameGroupCount = childCount - groupLeaderCount;
-  const { button, buttonArrow, expandedIcon } = useButtonStyles({
-    isExpanded: !showGroupLeadersOnly,
-  });
-
-  if (sameGroupCount > 0) {
-    return (
-      <EuiToolTip
-        key="samePgidTooltip"
-        position="top"
-        content={
-          <p>
-            <FormattedMessage
-              id="xpack.sessionView.groupLeaderTooltip"
-              defaultMessage="Hide or show other processes in the same 'process group' (pgid) as the session leader. This typically includes forks from bash builtins, auto completions and other shell startup activity."
-            />
-          </p>
-        }
-      >
-        <EuiButton
-          key="group-leaders-only-button"
-          css={button}
-          onClick={onClick}
-          data-test-subj="sessionView:processTreeNodeChildProcessesButton"
-        >
-          <FormattedMessage
-            id="xpack.sessionView.plusCountMore"
-            defaultMessage="+{count} more"
-            values={{
-              count: sameGroupCount,
-            }}
-          />
-          <EuiIcon css={buttonArrow} size="s" type={expandedIcon} />
-        </EuiButton>
-      </EuiToolTip>
-    );
-  }
-  return null;
 };
 
 export const AlertButton = ({
