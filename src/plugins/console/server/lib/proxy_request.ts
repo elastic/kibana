@@ -36,7 +36,7 @@ const sanitizeHostname = (hostName: string): string =>
  * We need to decode the percent-encoded pathname, and encode it correctly with encodeURIComponent
  */
 
-export const encodePathname = (pathname: string) => {
+const encodePathname = (pathname: string) => {
   const decodedPath = new URLSearchParams(`path=${pathname}`).get('path') ?? '';
 
   // Skip if it is valid
