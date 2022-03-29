@@ -513,6 +513,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await testSubjects.getVisibleText('totalUnknownRulesCount')).to.be('Unknown: 0');
     });
 
+    it('Expand error in rules table when there is rule with an error associated', async () => {
+      const createdAlert = await createAlert({ supertest, objectRemover });
+      await retry.try(async () => {
+        await refreshAlertsList();
+        const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(refreshResults.length).to.equal(1);
+        expect(refreshResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
+        expect(refreshResults[0].interval).to.equal('1 min');
+        expect(refreshResults[0].status).to.equal('Ok');
+        expect(refreshResults[0].duration).to.match(/\d{2,}:\d{2}/);
+      });
+
+      let expandRulesErrorLink = await find.allByCssSelector(
+        '[data-test-subj="expandRulesError"]'
+      );
+      expect(expandRulesErrorLink).to.have.length(0);
+
+      await createFailingAlert({ supertest, objectRemover });
+      await retry.try(async () => {
+        await refreshAlertsList();
+        expandRulesErrorLink = await find.allByCssSelector(
+          '[data-test-subj="expandRulesError"]'
+        );
+        expect(expandRulesErrorLink).to.have.length(1);
+      });
+      await refreshAlertsList();
+      await testSubjects.click('expandRulesError');
+      const expandedRow = await find.allByCssSelector('.euiTableRow-isExpandedRow');
+      expect(expandedRow).to.have.length(1);
+      expect(
+        await (await expandedRow[0].findByTagName('div')).getVisibleText()
+      ).to.equal('Error from last run\nFailed to execute alert type');
+    });
+
     it('should filter alerts by the alert type', async () => {
       await createAlert({ supertest, objectRemover });
       const failingAlert = await createFailingAlert({ supertest, objectRemover });

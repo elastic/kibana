@@ -1179,7 +1179,7 @@ export const RulesList: React.FunctionComponent = () => {
         </EuiFlexItem>
         {rulesStatusesTotal.error > 0 && (
           <EuiFlexItem grow={false}>
-            <EuiLink color="primary" onClick={toggleRuleErrors}>
+            <EuiLink data-test-subj="expandRulesError" color="primary" onClick={toggleRuleErrors}>
               {!showErrors && (
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
