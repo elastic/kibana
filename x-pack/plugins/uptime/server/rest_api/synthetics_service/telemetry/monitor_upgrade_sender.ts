@@ -9,7 +9,7 @@ import type { Logger } from 'src/core/server';
 import { SavedObjectsUpdateResponse, SavedObject } from 'kibana/server';
 import {
   MonitorFields,
-  SyntheticsMonitor,
+  EncryptedSyntheticsMonitor,
   ConfigKey,
   ServiceLocationErrors,
 } from '../../../../common/runtime_types';
@@ -48,12 +48,12 @@ export function formatTelemetryEvent({
   deletedAt,
   errors,
 }: {
-  monitor: SavedObject<SyntheticsMonitor>;
+  monitor: SavedObject<EncryptedSyntheticsMonitor>;
   kibanaVersion: string;
   lastUpdatedAt?: string;
   durationSinceLastUpdated?: number;
   deletedAt?: string;
-  errors?: ServiceLocationErrors;
+  errors?: ServiceLocationErrors | null;
 }) {
   const { attributes } = monitor;
 
@@ -70,7 +70,7 @@ export function formatTelemetryEvent({
     monitorNameLength: attributes[ConfigKey.NAME].length,
     monitorInterval: parseInt(attributes[ConfigKey.SCHEDULE].number, 10) * 60 * 1000,
     stackVersion: kibanaVersion,
-    scriptType: getScriptType(attributes as MonitorFields),
+    scriptType: getScriptType(attributes as Partial<MonitorFields>),
     errors:
       errors && errors?.length
         ? errors.map((e) => ({
@@ -88,10 +88,10 @@ export function formatTelemetryEvent({
 }
 
 export function formatTelemetryUpdateEvent(
-  currentMonitor: SavedObjectsUpdateResponse<SyntheticsMonitor>,
-  previousMonitor: SavedObject<SyntheticsMonitor>,
+  currentMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
   kibanaVersion: string,
-  errors?: ServiceLocationErrors
+  errors?: ServiceLocationErrors | null
 ) {
   let durationSinceLastUpdated: number = 0;
   if (currentMonitor.updated_at && previousMonitor.updated_at) {
@@ -101,7 +101,7 @@ export function formatTelemetryUpdateEvent(
   }
 
   return formatTelemetryEvent({
-    monitor: currentMonitor as SavedObject<SyntheticsMonitor>,
+    monitor: currentMonitor as SavedObject<EncryptedSyntheticsMonitor>,
     kibanaVersion,
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,
@@ -110,10 +110,10 @@ export function formatTelemetryUpdateEvent(
 }
 
 export function formatTelemetryDeleteEvent(
-  previousMonitor: SavedObject<SyntheticsMonitor>,
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
   kibanaVersion: string,
   deletedAt: string,
-  errors?: ServiceLocationErrors
+  errors?: ServiceLocationErrors | null
 ) {
   let durationSinceLastUpdated: number = 0;
   if (deletedAt && previousMonitor.updated_at) {
@@ -122,7 +122,7 @@ export function formatTelemetryDeleteEvent(
   }
 
   return formatTelemetryEvent({
-    monitor: previousMonitor as SavedObject<SyntheticsMonitor>,
+    monitor: previousMonitor as SavedObject<EncryptedSyntheticsMonitor>,
     kibanaVersion,
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,
@@ -131,12 +131,14 @@ export function formatTelemetryDeleteEvent(
   });
 }
 
-function getScriptType(attributes: MonitorFields): 'inline' | 'recorder' | 'zip' | undefined {
+function getScriptType(
+  attributes: Partial<MonitorFields>
+): 'inline' | 'recorder' | 'zip' | undefined {
   if (attributes[ConfigKey.SOURCE_ZIP_URL]) {
     return 'zip';
   } else if (
     attributes[ConfigKey.SOURCE_INLINE] &&
-    attributes[ConfigKey.METADATA].script_source?.is_generated_script
+    attributes[ConfigKey.METADATA]?.script_source?.is_generated_script
   ) {
     return 'recorder';
   } else if (attributes[ConfigKey.SOURCE_INLINE]) {
