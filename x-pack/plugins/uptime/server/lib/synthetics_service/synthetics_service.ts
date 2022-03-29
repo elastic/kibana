@@ -63,7 +63,7 @@ export class SyntheticsService {
 
   public isAllowed: boolean;
 
-  public syncErrors?: ServiceLocationErrors = [];
+  public syncErrors?: ServiceLocationErrors | null = [];
 
   constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
@@ -223,7 +223,7 @@ export class SyntheticsService {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
-      return;
+      return null;
     }
 
     this.apiKey = await this.getApiKey();
