@@ -8,6 +8,7 @@
 
 import type { HttpResponse, HttpSetup } from 'kibana/public';
 import { parse } from 'query-string';
+import { trimStart } from 'lodash';
 import { API_BASE_PATH } from '../../../common/constants';
 
 const esVersion: string[] = [];
@@ -32,6 +33,8 @@ interface SendProps {
   asResponse?: boolean;
 }
 
+type Method = 'get' | 'post' | 'delete' | 'put' | 'head';
+
 export async function send({
   http,
   method,
@@ -44,12 +47,12 @@ export async function send({
   const isKibanaApiRequest = path.includes(KIBANA_API_KEYWORD);
 
   if (isKibanaApiRequest) {
-    const _method = method.toLowerCase() as 'get' | 'post' | 'delete' | 'put' | 'head';
+    const _method = method.toLowerCase() as Method;
     const hasQueryParams = path.includes('?');
     const [pathname, queryString] = path.split('?');
     const url = hasQueryParams
-      ? `/${pathname.split(KIBANA_API_KEYWORD)[1]}`
-      : `/${path.split(KIBANA_API_KEYWORD)[1]}`;
+      ? `/${trimStart(pathname.split(KIBANA_API_KEYWORD)[1], '/')}`
+      : `/${trimStart(path.split(KIBANA_API_KEYWORD)[1], '/')}`;
     const query = hasQueryParams ? parse(queryString) : {};
 
     return await http[_method]<HttpResponse>(url, {

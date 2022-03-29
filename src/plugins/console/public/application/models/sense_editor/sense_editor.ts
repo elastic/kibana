@@ -482,9 +482,10 @@ export class SenseEditor {
         url = es.constructUrl(kibanaBaseUrl, path);
       }
 
-      let ret = 'curl -X' + method + ' "' + url + '"';
+      // let ret = 'curl -X' + method + ' "' + url + '"';
+      let ret = `curl -X${method} "${url}" -H 'kbn-xsrf: reporting'`;
       if (data && data.length) {
-        ret += " -H 'Content-Type: application/json' -H 'kbn-xsrf: reporting' -d'\n";
+        ret += " -H 'Content-Type: application/json' -d'\n";
         const dataAsString = collapseLiteralStrings(data.join('\n'));
 
         // We escape single quoted strings that that are wrapped in single quoted strings
