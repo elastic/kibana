@@ -53,6 +53,7 @@ import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constan
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { MLSavedObjectsSpacesList } from '../../components/ml_saved_objects_spaces_list';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
+import { TestTrainedModelFlyout, isTestable } from './test_models';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -134,6 +135,7 @@ export const ModelsList: FC<Props> = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
+  const [showTestFlyout, setShowTestFlyout] = useState<ModelItem | null>(null);
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
   const navigateToPath = useNavigateToPath();
@@ -470,6 +472,19 @@ export const ModelsList: FC<Props> = ({
             return !isPopulatedObject(item.pipelines);
           },
         },
+        {
+          name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
+            defaultMessage: 'Test model',
+          }),
+          description: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
+            defaultMessage: 'Test model',
+          }),
+          icon: 'inputOutput',
+          type: 'icon',
+          isPrimary: true,
+          available: isTestable,
+          onClick: setShowTestFlyout,
+        },
       ] as Array<Action<ModelItem>>)
     );
   }
@@ -767,6 +782,12 @@ export const ModelsList: FC<Props> = ({
             }
           }}
           modelIds={modelIdsToDelete}
+        />
+      )}
+      {showTestFlyout === null ? null : (
+        <TestTrainedModelFlyout
+          model={showTestFlyout}
+          onClose={setShowTestFlyout.bind(null, null)}
         />
       )}
     </>
