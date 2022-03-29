@@ -12,6 +12,144 @@ import Handlebars from '.';
 import { expectTemplate } from './__jest__/test_bench';
 
 describe('builtin helpers', () => {
+  describe('#if', () => {
+    it('if', () => {
+      const string = '{{#if goodbye}}GOODBYE {{/if}}cruel {{world}}!';
+
+      expectTemplate(string)
+        .withInput({
+          goodbye: true,
+          world: 'world',
+        })
+        .toCompileTo('GOODBYE cruel world!');
+
+      expectTemplate(string)
+        .withInput({
+          goodbye: 'dummy',
+          world: 'world',
+        })
+        .toCompileTo('GOODBYE cruel world!');
+
+      expectTemplate(string)
+        .withInput({
+          goodbye: false,
+          world: 'world',
+        })
+        .toCompileTo('cruel world!');
+
+      expectTemplate(string).withInput({ world: 'world' }).toCompileTo('cruel world!');
+
+      expectTemplate(string)
+        .withInput({
+          goodbye: ['foo'],
+          world: 'world',
+        })
+        .toCompileTo('GOODBYE cruel world!');
+
+      expectTemplate(string)
+        .withInput({
+          goodbye: [],
+          world: 'world',
+        })
+        .toCompileTo('cruel world!');
+
+      expectTemplate(string)
+        .withInput({
+          goodbye: 0,
+          world: 'world',
+        })
+        .toCompileTo('cruel world!');
+
+      expectTemplate('{{#if goodbye includeZero=true}}GOODBYE {{/if}}cruel {{world}}!')
+        .withInput({
+          goodbye: 0,
+          world: 'world',
+        })
+        .toCompileTo('GOODBYE cruel world!');
+    });
+
+    it('if with function argument', () => {
+      const string = '{{#if goodbye}}GOODBYE {{/if}}cruel {{world}}!';
+
+      expectTemplate(string)
+        .withInput({
+          goodbye() {
+            return true;
+          },
+          world: 'world',
+        })
+        .toCompileTo('GOODBYE cruel world!');
+
+      expectTemplate(string)
+        .withInput({
+          goodbye() {
+            return this.world;
+          },
+          world: 'world',
+        })
+        .toCompileTo('GOODBYE cruel world!');
+
+      expectTemplate(string)
+        .withInput({
+          goodbye() {
+            return false;
+          },
+          world: 'world',
+        })
+        .toCompileTo('cruel world!');
+
+      expectTemplate(string)
+        .withInput({
+          goodbye() {
+            return this.foo;
+          },
+          world: 'world',
+        })
+        .toCompileTo('cruel world!');
+    });
+
+    it('should not change the depth list', () => {
+      expectTemplate('{{#with foo}}{{#if goodbye}}GOODBYE cruel {{../world}}!{{/if}}{{/with}}')
+        .withInput({
+          foo: { goodbye: true },
+          world: 'world',
+        })
+        .toCompileTo('GOODBYE cruel world!');
+    });
+  });
+
+  describe('#with', () => {
+    it('with', () => {
+      expectTemplate('{{#with person}}{{first}} {{last}}{{/with}}')
+        .withInput({
+          person: {
+            first: 'Alan',
+            last: 'Johnson',
+          },
+        })
+        .toCompileTo('Alan Johnson');
+    });
+
+    it('with with function argument', () => {
+      expectTemplate('{{#with person}}{{first}} {{last}}{{/with}}')
+        .withInput({
+          person() {
+            return {
+              first: 'Alan',
+              last: 'Johnson',
+            };
+          },
+        })
+        .toCompileTo('Alan Johnson');
+    });
+
+    it('with with else', () => {
+      expectTemplate(
+        '{{#with person}}Person is present{{else}}Person is not present{{/with}}'
+      ).toCompileTo('Person is not present');
+    });
+  });
+
   describe('#each', () => {
     it('each', () => {
       const string = '{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!';
@@ -276,6 +414,195 @@ describe('builtin helpers', () => {
         })
         .toCompileTo('cruel world!');
     });
+  });
+
+  describe('#log', function () {
+    /* eslint-disable no-console */
+    let $log: typeof console.log;
+    let $info: typeof console.info;
+    let $error: typeof console.error;
+
+    beforeEach(function () {
+      $log = console.log;
+      $info = console.info;
+      $error = console.error;
+
+      global.kbnHandlebarsEnv = Handlebars.create();
+    });
+
+    afterEach(function () {
+      console.log = $log;
+      console.info = $info;
+      console.error = $error;
+    });
+
+    it('should call logger at default level', function () {
+      let levelArg;
+      let logArg;
+      kbnHandlebarsEnv!.log = function (level, arg) {
+        levelArg = level;
+        logArg = arg;
+      };
+
+      expectTemplate('{{log blah}}').withInput({ blah: 'whee' }).toCompileTo('');
+      expect(1).toEqual(levelArg);
+      expect('whee').toEqual(logArg);
+    });
+
+    it('should call logger at data level', function () {
+      let levelArg;
+      let logArg;
+      kbnHandlebarsEnv!.log = function (level, arg) {
+        levelArg = level;
+        logArg = arg;
+      };
+
+      expectTemplate('{{log blah}}')
+        .withInput({ blah: 'whee' })
+        .withRuntimeOptions({ data: { level: '03' } })
+        .withCompileOptions({ data: true })
+        .toCompileTo('');
+      expect('03').toEqual(levelArg);
+      expect('whee').toEqual(logArg);
+    });
+
+    it('should output to info', function () {
+      let called;
+
+      console.info = function (info) {
+        expect('whee').toEqual(info);
+        called = true;
+        console.info = $info;
+        console.log = $log;
+      };
+      console.log = function (log) {
+        expect('whee').toEqual(log);
+        called = true;
+        console.info = $info;
+        console.log = $log;
+      };
+
+      expectTemplate('{{log blah}}').withInput({ blah: 'whee' }).toCompileTo('');
+      expect(true).toEqual(called);
+    });
+
+    it('should log at data level', function () {
+      let called;
+
+      console.error = function (log) {
+        expect('whee').toEqual(log);
+        called = true;
+        console.error = $error;
+      };
+
+      expectTemplate('{{log blah}}')
+        .withInput({ blah: 'whee' })
+        .withRuntimeOptions({ data: { level: '03' } })
+        .withCompileOptions({ data: true })
+        .toCompileTo('');
+      expect(true).toEqual(called);
+    });
+
+    it('should handle missing logger', function () {
+      let called = false;
+
+      // @ts-expect-error
+      console.error = undefined;
+      console.log = function (log) {
+        expect('whee').toEqual(log);
+        called = true;
+        console.log = $log;
+      };
+
+      expectTemplate('{{log blah}}')
+        .withInput({ blah: 'whee' })
+        .withRuntimeOptions({ data: { level: '03' } })
+        .withCompileOptions({ data: true })
+        .toCompileTo('');
+      expect(true).toEqual(called);
+    });
+
+    it('should handle string log levels', function () {
+      let called;
+
+      console.error = function (log) {
+        expect('whee').toEqual(log);
+        called = true;
+      };
+
+      expectTemplate('{{log blah}}')
+        .withInput({ blah: 'whee' })
+        .withRuntimeOptions({ data: { level: 'error' } })
+        .withCompileOptions({ data: true })
+        .toCompileTo('');
+      expect(true).toEqual(called);
+
+      called = false;
+
+      expectTemplate('{{log blah}}')
+        .withInput({ blah: 'whee' })
+        .withRuntimeOptions({ data: { level: 'ERROR' } })
+        .withCompileOptions({ data: true })
+        .toCompileTo('');
+      expect(true).toEqual(called);
+    });
+
+    it('should handle hash log levels [1]', function () {
+      let called;
+
+      console.error = function (log) {
+        expect('whee').toEqual(log);
+        called = true;
+      };
+
+      expectTemplate('{{log blah level="error"}}').withInput({ blah: 'whee' }).toCompileTo('');
+      expect(true).toEqual(called);
+    });
+
+    it('should handle hash log levels [2]', function () {
+      let called = false;
+
+      console.info =
+        console.log =
+        console.error =
+        console.debug =
+          function () {
+            called = true;
+            console.info = console.log = console.error = console.debug = $log;
+          };
+
+      expectTemplate('{{log blah level="debug"}}').withInput({ blah: 'whee' }).toCompileTo('');
+      expect(false).toEqual(called);
+    });
+
+    it('should pass multiple log arguments', function () {
+      let called;
+
+      console.info = console.log = function (log1, log2, log3) {
+        expect('whee').toEqual(log1);
+        expect('foo').toEqual(log2);
+        expect(1).toEqual(log3);
+        called = true;
+        console.log = $log;
+      };
+
+      expectTemplate('{{log blah "foo" 1}}').withInput({ blah: 'whee' }).toCompileTo('');
+      expect(true).toEqual(called);
+    });
+
+    it('should pass zero log arguments', function () {
+      let called;
+
+      console.info = console.log = function () {
+        expect(arguments.length).toEqual(0);
+        called = true;
+        console.log = $log;
+      };
+
+      expectTemplate('{{log}}').withInput({ blah: 'whee' }).toCompileTo('');
+      expect(called).toEqual(true);
+    });
+    /* eslint-enable no-console */
   });
 
   describe('#lookup', () => {
