@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export * from './configuration_constants';
 export * from './rule_type_constants';
 export * from './rule_type_mappings';
 export * from './utils';

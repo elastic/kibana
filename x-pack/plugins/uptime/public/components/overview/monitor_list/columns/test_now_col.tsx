@@ -58,7 +58,7 @@ export const TEST_NOW_ARIA_LABEL = i18n.translate('xpack.uptime.monitorList.test
 export const TEST_NOW_AVAILABLE_LABEL = i18n.translate(
   'xpack.uptime.monitorList.testNow.available',
   {
-    defaultMessage: 'Test now is only available for monitors added via Monitor management.',
+    defaultMessage: 'Test now is only available for monitors added via Monitor Management.',
   }
 );
 

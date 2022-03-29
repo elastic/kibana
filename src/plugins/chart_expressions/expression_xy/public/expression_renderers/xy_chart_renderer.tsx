@@ -11,14 +11,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeServiceStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ChartsPluginStart, PaletteRegistry } from '../../../../charts/public';
+import type { ChartsPluginStart, PaletteRegistry } from '../../../../charts/public';
 import { EventAnnotationServiceType } from '../../../../event_annotation/public';
 import { ExpressionRenderDefinition } from '../../../../expressions';
 import { FormatFactory } from '../../../../field_formats/common';
 import { KibanaThemeProvider } from '../../../../kibana_react/public';
-import { XYChartProps } from '../../common';
-import { calculateMinInterval } from '../helpers';
-import { BrushEvent, FilterEvent } from '../types';
+import type { XYChartProps } from '../../common';
+import { calculateMinInterval } from '../helpers/interval';
+import type { BrushEvent, FilterEvent } from '../types';
 
 export type GetStartDepsFn = () => Promise<{
   formatFactory: FormatFactory;

@@ -48,11 +48,6 @@ const apisToIntercept = [
   },
   {
     endpoint:
-      '/internal/apm/services/opbeans-node/errors/groups/main_statistics?*',
-    name: 'errorGroupsMainStatisticsRequest',
-  },
-  {
-    endpoint:
       '/internal/apm/services/opbeans-node/transaction/charts/breakdown?*',
     name: 'transactonBreakdownRequest',
   },
@@ -144,7 +139,7 @@ describe('Service overview - header filters', () => {
         .find('li')
         .first()
         .click();
-      cy.get('[data-test-subj="suggestionContainer"]').realPress('{enter}');
+      cy.get('[data-test-subj="headerFilterKuerybar"]').type('{enter}');
       cy.url().should('include', '&kuery=transaction.name');
     });
   });

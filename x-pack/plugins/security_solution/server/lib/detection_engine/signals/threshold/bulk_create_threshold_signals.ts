@@ -9,10 +9,7 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
 import set from 'set-value';
-import {
-  ThresholdNormalized,
-  TimestampOverrideOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { Logger } from '../../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
@@ -21,7 +18,7 @@ import {
 } from '../../../../../../alerting/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
-import { GenericBulkCreateResponse } from '../bulk_create_factory';
+import { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
 import { calculateThresholdSignalUuid, getThresholdAggregationParts } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type {
@@ -54,12 +51,8 @@ const getTransformedHits = (
   inputIndex: string,
   startedAt: Date,
   from: Date,
-  logger: Logger,
   threshold: ThresholdNormalized,
-  ruleId: string,
-  filter: unknown,
-  timestampOverride: TimestampOverrideOrUndefined,
-  signalHistory: ThresholdSignalHistory
+  ruleId: string
 ) => {
   if (results.aggregations == null) {
     return [];
@@ -184,24 +177,16 @@ export const transformThresholdResultsToEcs = (
   inputIndex: string,
   startedAt: Date,
   from: Date,
-  filter: unknown,
-  logger: Logger,
   threshold: ThresholdNormalized,
-  ruleId: string,
-  timestampOverride: TimestampOverrideOrUndefined,
-  signalHistory: ThresholdSignalHistory
+  ruleId: string
 ): SignalSearchResponse => {
   const transformedHits = getTransformedHits(
     results,
     inputIndex,
     startedAt,
     from,
-    logger,
     threshold,
-    ruleId,
-    filter,
-    timestampOverride,
-    signalHistory
+    ruleId
   );
   const thresholdResults = {
     ...results,
@@ -228,12 +213,8 @@ export const bulkCreateThresholdSignals = async (
     params.inputIndexPattern.join(','),
     params.startedAt,
     params.from,
-    params.filter,
-    params.logger,
     ruleParams.threshold,
-    ruleParams.ruleId,
-    ruleParams.timestampOverride,
-    params.signalHistory
+    ruleParams.ruleId
   );
 
   return params.bulkCreate(

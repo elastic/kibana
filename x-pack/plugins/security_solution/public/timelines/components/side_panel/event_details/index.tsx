@@ -193,7 +193,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   }
 
   return isFlyoutView ? (
-    <>
+    <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
       <EuiFlyoutHeader hasBorder={isHostIsolationPanelOpen}>
         {isHostIsolationPanelOpen ? (
           backToAlertDetailsLink
@@ -249,7 +249,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         onAddIsolationStatusClick={showHostIsolationPanel}
         timelineId={timelineId}
       />
-    </>
+    </CasesContext>
   ) : (
     <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
       <ExpandableEventTitle
