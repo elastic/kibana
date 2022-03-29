@@ -98,9 +98,7 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
    *   );
    * }
    */
-  flyoutDowngradedLicenseDocsInfo: (
-    securitySolutionDocsLinks: DocLinks['securitySolution']
-  ): React.ReactNode =>
+  flyoutDowngradedLicenseDocsInfo: (_: DocLinks['securitySolution']): React.ReactNode =>
     i18n.translate('xpack.securitySolution.artifactListPage.flyoutDowngradedLicenseDocsInfo', {
       defaultMessage: 'For more information, see our documentation.',
     }),
