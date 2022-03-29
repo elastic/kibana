@@ -26,6 +26,7 @@
     "eventAnnotation"
   ],
   "optionalPlugins": [
+    "expressionXY",
     "usageCollection",
     "taskManager",
     "globalSearch",

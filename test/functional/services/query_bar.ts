@@ -94,4 +94,16 @@ export class QueryBarService extends FtrService {
       }
     });
   }
+
+  private async getSuggestionsDescription() {
+    const suggestions = await this.testSubjects.findAll('autoCompleteSuggestionDescription');
+    return Promise.all(suggestions.map((suggestion) => suggestion.getVisibleText()));
+  }
+
+  public async expectSuggestionsDescription({ count }: { count: number }) {
+    await this.retry.try(async () => {
+      const suggestions = await this.getSuggestionsDescription();
+      expect(suggestions.length).to.be(count);
+    });
+  }
 }
