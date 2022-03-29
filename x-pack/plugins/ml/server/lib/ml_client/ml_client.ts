@@ -494,6 +494,10 @@ export function getMlClient(
       await modelIdsCheck(p);
       return mlClient.stopTrainedModelDeployment(...p);
     },
+    async inferTrainedModelDeployment(...p: Parameters<MlClient['inferTrainedModelDeployment']>) {
+      await modelIdsCheck(p);
+      return mlClient.inferTrainedModelDeployment(...p);
+    },
     async info(...p: Parameters<MlClient['info']>) {
       return mlClient.info(...p);
     },
