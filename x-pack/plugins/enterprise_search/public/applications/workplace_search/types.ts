@@ -92,6 +92,7 @@ export interface SourceDataItem {
 export interface ContentSource {
   id: string;
   serviceType: string;
+  baseServiceType?: string;
   name: string;
 }
 

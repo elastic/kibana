@@ -14,10 +14,6 @@ import { useLegacyUrlParams } from '../../../../context/url_params_context/use_u
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { APMQueryParams } from '../url_helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import {
-  TimeRangeComparisonEnum,
-  TimeRangeComparisonType,
-} from '../../../../../common/runtime_types/comparison_type_rt';
 import { getComparisonEnabled } from '../../time_comparison/get_comparison_enabled';
 
 interface Props extends APMLinkExtendProps {
@@ -29,7 +25,7 @@ interface Props extends APMLinkExtendProps {
   latencyAggregationType?: string;
   environment?: string;
   comparisonEnabled?: boolean;
-  comparisonType?: TimeRangeComparisonType;
+  offset?: string;
 }
 
 const persistedFilters: Array<keyof APMQueryParams> = [
@@ -46,7 +42,7 @@ export function TransactionDetailLink({
   latencyAggregationType,
   environment,
   comparisonEnabled,
-  comparisonType = TimeRangeComparisonEnum.DayBefore,
+  offset = '1d',
   ...rest
 }: Props) {
   const { urlParams } = useLegacyUrlParams();
@@ -65,7 +61,7 @@ export function TransactionDetailLink({
       transactionName,
       transactionType,
       comparisonEnabled: defaultComparisonEnabled,
-      comparisonType,
+      offset,
       ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
       ...pickBy({ latencyAggregationType, environment }, identity),
     },
