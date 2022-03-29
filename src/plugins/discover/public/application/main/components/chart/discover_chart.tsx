@@ -217,25 +217,6 @@ export function DiscoverChart({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {isTimeBased && !hideChart && (
-        <EuiFlexItem grow={false}>
-          <section
-            ref={(element) => (chartRefRandom.current.element = element)}
-            tabIndex={-1}
-            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
-              defaultMessage: '[Random sampler] Histogram of found documents',
-            })}
-            className="dscTimechart"
-          >
-            <DiscoverHistogramMemoized
-              savedSearchData$={savedSearchRandomSamplingCharts$}
-              timefilterUpdateHandler={timefilterUpdateHandler}
-              random={true}
-            />
-          </section>
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
-      )}
 
       {isTimeBased && !hideChart && (
         <EuiFlexItem grow={false}>
@@ -250,6 +231,25 @@ export function DiscoverChart({
             <DiscoverHistogramMemoized
               savedSearchData$={savedSearchDataChart$}
               timefilterUpdateHandler={timefilterUpdateHandler}
+            />
+          </section>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+      )}
+      {isTimeBased && !hideChart && (
+        <EuiFlexItem grow={false}>
+          <section
+            ref={(element) => (chartRefRandom.current.element = element)}
+            tabIndex={-1}
+            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
+              defaultMessage: '[Random sampler] Histogram of found documents',
+            })}
+            className="dscTimechart"
+          >
+            <DiscoverHistogramMemoized
+              savedSearchData$={savedSearchRandomSamplingCharts$}
+              timefilterUpdateHandler={timefilterUpdateHandler}
+              random={true}
             />
           </section>
           <EuiSpacer size="s" />
