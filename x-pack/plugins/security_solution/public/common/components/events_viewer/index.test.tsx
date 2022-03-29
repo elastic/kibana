@@ -80,7 +80,7 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
 
-    expect(wrapper.findByTestId(`InspectButtonContainer`)).toBeTruthy();
+    expect(wrapper.getByTestId(`hoverVisibilityContainer`)).toBeTruthy();
   });
 
   test('it closes field editor when unmounted', async () => {

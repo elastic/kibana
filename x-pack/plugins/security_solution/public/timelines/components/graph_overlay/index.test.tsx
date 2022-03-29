@@ -236,11 +236,15 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay
+            timelineId={timelineId}
+            SessionView={<div />}
+            Navigation={<div>{'Close Session'}</div>}
+          />
         </TestProviders>
       );
 
-      expect(wrapper.findByText('Close Session')).toBeTruthy();
+      expect(wrapper.getByText('Close Session')).toBeTruthy();
     });
   });
 });
