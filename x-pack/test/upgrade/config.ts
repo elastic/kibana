@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
 import { ReportingAPIProvider } from './reporting_services';
-import { MapsHelper } from './maps_services';
+import { MapsHelper } from './maps_upgrade_services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
