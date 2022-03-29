@@ -22,19 +22,3 @@ export async function removeYarnIntegrityFileIfExists(nodeModulesPath: string) {
     // no-op
   }
 }
-
-export async function yarnIntegrityFileExists(nodeModulesPath: string) {
-  try {
-    const nodeModulesRealPath = await tryRealpath(nodeModulesPath);
-    const yarnIntegrityFilePath = join(nodeModulesRealPath, '.yarn-integrity');
-
-    // check if the file already exists
-    if (await isFile(yarnIntegrityFilePath)) {
-      return true;
-    }
-  } catch {
-    // no-op
-  }
-
-  return false;
-}
