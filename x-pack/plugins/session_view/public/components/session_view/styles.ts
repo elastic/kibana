@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 
 interface StylesDeps {
   height: string | undefined;
@@ -17,9 +18,7 @@ export const useStyles = ({ height = '500px' }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { border, colors } = euiTheme;
-
-    const thinBorder = `${border.width.thin} solid ${colors.lightShade}!important`;
+    const { border } = euiTheme;
 
     const processTree: CSSObject = {
       height: `${height}`,
@@ -27,9 +26,8 @@ export const useStyles = ({ height = '500px' }: StylesDeps) => {
     };
 
     const detailPanel: CSSObject = {
-      height: `${height}`,
-      borderLeft: thinBorder,
-      borderRight: thinBorder,
+      height: `${height}px`,
+      borderRightWidth: '0px',
     };
 
     const resizeHandle: CSSObject = {
@@ -50,6 +48,15 @@ export const useStyles = ({ height = '500px' }: StylesDeps) => {
       margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
     };
 
+    const sessionViewerComponent: CSSObject = {
+      border: border.thin,
+      borderRadius: border.radius.medium,
+    };
+
+    const toolBar: CSSObject = {
+      backgroundColor: `${theme.euiFormBackgroundDisabledColor} !important`,
+    };
+
     return {
       processTree,
       detailPanel,
@@ -57,6 +64,8 @@ export const useStyles = ({ height = '500px' }: StylesDeps) => {
       resizeHandle,
       searchBar,
       buttonsEyeDetail,
+      sessionViewerComponent,
+      toolBar,
     };
   }, [height, euiTheme]);
 

@@ -6,7 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { BoolQuery } from '@kbn/es-query';
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -31,7 +30,7 @@ import { Logger } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
 import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
-import { GenericBulkCreateResponse } from './bulk_create_factory';
+import { GenericBulkCreateResponse } from '../rule_types/factories';
 import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
 import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
 import { BuildReasonMessage } from './reason_formatters';
@@ -275,13 +274,6 @@ export interface AlertAttributes<T extends RuleParams = RuleParams> {
 
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
 
-/**
- * TODO: Remove this if/when the return filter has its own type exposed
- */
-export interface QueryFilter {
-  bool: BoolQuery;
-}
-
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
 export type BulkCreate = <T extends Record<string, unknown>>(
@@ -314,9 +306,8 @@ export interface SearchAfterAndBulkCreateParams {
   eventsTelemetry: ITelemetryEventsSender | undefined;
   id: string;
   inputIndexPattern: string[];
-  signalsIndex: string;
   pageSize: number;
-  filter: unknown;
+  filter: estypes.QueryDslQueryContainer;
   buildRuleMessage: BuildRuleMessage;
   buildReasonMessage: BuildReasonMessage;
   enrichment?: SignalsEnrichment;
