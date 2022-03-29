@@ -30,7 +30,10 @@ const PopoverTooltipComponent = ({ columnName, children }: PopoverTooltipProps) 
       button={
         <EuiButtonIcon
           aria-label={i18n.POPOVER_TOOLTIP_ARIA_LABEL(columnName)}
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+            setIsPopoverOpen(!isPopoverOpen);
+            event.stopPropagation();
+          }}
           size="xs"
           color="primary"
           iconType="questionInCircle"

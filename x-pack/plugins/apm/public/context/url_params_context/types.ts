@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TimeRangeComparisonType } from '../../../common/runtime_types/comparison_type_rt';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 
 export interface UrlParams {
@@ -34,7 +33,7 @@ export interface UrlParams {
   percentile?: number;
   latencyAggregationType?: LatencyAggregationType;
   comparisonEnabled?: boolean;
-  comparisonType?: TimeRangeComparisonType;
+  offset?: string;
 }
 
 export type UxUrlParams = UrlParams;

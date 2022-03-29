@@ -30,7 +30,7 @@ const services = {
 interface Props {
   failedPermissionCheck: boolean;
   importResults?: ImportResults;
-  indexPatternResp?: object;
+  dataViewResp?: object;
   indexName: string;
 }
 
@@ -213,11 +213,11 @@ export class ImportCompleteView extends Component<Props, {}> {
           'indexRespCopyButton'
         )}
         {this._renderCodeEditor(
-          this.props.indexPatternResp,
-          i18n.translate('xpack.fileUpload.importComplete.indexPatternResponse', {
+          this.props.dataViewResp,
+          i18n.translate('xpack.fileUpload.importComplete.dataViewResponse', {
             defaultMessage: 'Data view response',
           }),
-          'indexPatternRespCopyButton'
+          'dataViewRespCopyButton'
         )}
         {this._renderIndexManagementMsg()}
       </KibanaContextProvider>

@@ -30,7 +30,6 @@ import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
 import type { OsqueryPluginStart } from '../../osquery/public';
-
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
