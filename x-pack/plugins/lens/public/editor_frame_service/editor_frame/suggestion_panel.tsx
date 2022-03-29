@@ -19,9 +19,6 @@ import {
   EuiToolTip,
   EuiButtonEmpty,
   EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
