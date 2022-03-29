@@ -20,7 +20,7 @@ interface AdjustSearchProps {
   hasFilters?: boolean;
   hasQuery?: boolean;
   isTimeBased?: boolean;
-  onDisableFilters: () => void;
+  onDisableFilters: AdjustFiltersProps['onDisableFilters'];
 }
 
 export function AdjustSearch({
@@ -29,9 +29,9 @@ export function AdjustSearch({
   hasQuery,
   onDisableFilters,
 }: AdjustSearchProps) {
-  const canAdjustSearchParams = isTimeBased || hasFilters || hasQuery;
+  const canAdjustSearchCriteria = isTimeBased || hasFilters || hasQuery;
 
-  if (canAdjustSearchParams) {
+  if (canAdjustSearchCriteria) {
     return (
       <>
         {isTimeBased && <AdjustTimeField />}
@@ -85,7 +85,11 @@ function AdjustQuery() {
   );
 }
 
-function AdjustFilters({ onDisableFilters }: Pick<AdjustSearchProps, 'onDisableFilters'>) {
+interface AdjustFiltersProps {
+  onDisableFilters: () => void;
+}
+
+function AdjustFilters({ onDisableFilters }: AdjustFiltersProps) {
   return (
     <>
       <EuiSpacer size="s" />
@@ -125,7 +129,7 @@ function AdjustIndices() {
     <EuiDescriptionList compressed>
       <EuiDescriptionListDescription data-test-subj="discoverNoResultsIndices">
         <FormattedMessage
-          id="discover.noResults.noDocumentsOrPermissionsText"
+          id="discover.noResults.noDocumentsOrCheckPermissionsDescription"
           defaultMessage="Make sure you have permission to view the indices and that they contain documents."
         />
       </EuiDescriptionListDescription>
