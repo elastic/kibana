@@ -487,7 +487,9 @@ export function DiscoverSidebarComponent({
             onClick={() => editField()}
             size="s"
           >
-            Add a field
+            {i18n.translate('discover.fieldChooser.addField.label', {
+              defaultMessage: 'Add a field',
+            })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
