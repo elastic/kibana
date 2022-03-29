@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import uuid from 'uuid';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
@@ -23,7 +28,9 @@ import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
 import { ElasticDocsLink } from '../links/elastic_docs_link';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { ManagedTable } from '../managed_table';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
+import { fromQuery, toQuery } from '../links/url_helpers';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -63,6 +70,7 @@ interface Props {
   kuery: string;
   start: string;
   end: string;
+  saveTableOptionsToUrl?: boolean;
 }
 
 export function TransactionsTable({
@@ -76,29 +84,46 @@ export function TransactionsTable({
   kuery,
   start,
   end,
+  saveTableOptionsToUrl = false,
 }: Props) {
-  const [tableOptions] = useState<{
-    pageIndex: number;
-    sort: {
-      direction: SortDirection;
-      field: SortField;
-    };
+  const history = useHistory();
+
+  const {
+    query: {
+      page: urlPage = 0,
+      pageSize: urlPageSize = numberOfTransactionsPerPage,
+      sortField: urlSortField = 'impact',
+      sortDirection: urlSortDirection = 'desc',
+    },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions',
+    '/services/{serviceName}/overview'
+  );
+
+  const {
+    urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
+  } = useLegacyUrlParams();
+
+  const [tableOptions, setTableOptions] = useState<{
+    page: { index: number; size: number };
+    sort: { direction: SortDirection; field: SortField };
   }>({
-    pageIndex: 0,
-    sort: DEFAULT_SORT,
+    page: { index: urlPage, size: urlPageSize },
+    sort: {
+      field: urlSortField as SortField,
+      direction: urlSortDirection as SortDirection,
+    },
   });
 
   // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
   const { isXl } = useBreakpoints();
   const shouldShowSparkPlots = isSingleColumn || !isXl;
 
-  const { pageIndex, sort } = tableOptions;
+  const { page, sort } = tableOptions;
   const { direction, field } = sort;
+  const { index, size } = page;
 
   const { transactionType, serviceName } = useApmServiceContext();
-  const {
-    urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
-  } = useLegacyUrlParams();
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
@@ -132,10 +157,7 @@ export function TransactionsTable({
           response.transactionGroups,
           field,
           direction
-        ).slice(
-          pageIndex * numberOfTransactionsPerPage,
-          (pageIndex + 1) * numberOfTransactionsPerPage
-        );
+        ).slice(index * size, (index + 1) * size);
 
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
@@ -157,7 +179,8 @@ export function TransactionsTable({
       end,
       transactionType,
       latencyAggregationType,
-      pageIndex,
+      index,
+      size,
       direction,
       field,
       // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
@@ -227,6 +250,21 @@ export function TransactionsTable({
 
   const isLoading = status === FETCH_STATUS.LOADING;
   const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex: index,
+      pageSize: size,
+      totalItemCount: transactionGroupsTotalItems,
+      hidePerPageOptions,
+    }),
+    [index, size, transactionGroupsTotalItems, hidePerPageOptions]
+  );
+
+  const sorting = useMemo(
+    () => ({ sort: { field, direction } }),
+    [field, direction]
+  );
 
   return (
     <EuiFlexGroup
@@ -306,24 +344,49 @@ export function TransactionsTable({
               transactionGroupsTotalItems === 0 && isNotInitiated
             }
           >
-            <ManagedTable
-              isLoading={isLoading}
-              error={status === FETCH_STATUS.FAILURE}
-              columns={columns}
-              items={transactionGroups}
-              initialSortField="impact"
-              initialSortDirection="desc"
-              initialPageSize={numberOfTransactionsPerPage}
-              noItemsMessage={
-                isLoading
-                  ? i18n.translate('xpack.apm.transactionsTable.loading', {
-                      defaultMessage: 'Loading...',
+            <EuiBasicTable
+              loading={isLoading}
+              error={
+                status === FETCH_STATUS.FAILURE
+                  ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
+                      defaultMessage: 'Failed to fetch',
                     })
-                  : i18n.translate('xpack.apm.transactionsTable.noResults', {
-                      defaultMessage: 'No transaction groups found',
-                    })
+                  : ''
               }
-              hidePerPageOptions={hidePerPageOptions}
+              items={transactionGroups}
+              columns={columns}
+              pagination={pagination}
+              sorting={sorting}
+              onChange={(newTableOptions: {
+                page?: { index: number; size: number };
+                sort?: { field: string; direction: SortDirection };
+              }) => {
+                setTableOptions({
+                  page: {
+                    index: newTableOptions.page?.index ?? 0,
+                    size:
+                      newTableOptions.page?.size ?? numberOfTransactionsPerPage,
+                  },
+                  sort: newTableOptions.sort
+                    ? {
+                        field: newTableOptions.sort.field as SortField,
+                        direction: newTableOptions.sort.direction,
+                      }
+                    : DEFAULT_SORT,
+                });
+                if (saveTableOptionsToUrl) {
+                  history.push({
+                    ...history.location,
+                    search: fromQuery({
+                      ...toQuery(history.location.search),
+                      page: newTableOptions.page?.index,
+                      pageSize: newTableOptions.page?.size,
+                      sortField: newTableOptions.sort?.field,
+                      sortDirection: newTableOptions.sort?.direction,
+                    }),
+                  });
+                }
+              }}
             />
           </OverviewTableContainer>
         </EuiFlexItem>
