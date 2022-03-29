@@ -5,41 +5,43 @@
  * 2.0.
  */
 
-import { essqlSearchStrategyProvider } from './essql_strategy';
-import { EssqlSearchStrategyRequest } from '../../types';
-import { zipObject } from 'lodash';
+// import { essqlSearchStrategyProvider } from './essql_strategy';
+// import { EssqlSearchStrategyRequest } from '../../types';
+// import { zipObject } from 'lodash';
+//
+// const getMockEssqlResponse = () => ({
+//   body: {
+//     columns: [
+//       { name: 'One', type: 'keyword' },
+//       { name: 'Two', type: 'keyword' },
+//     ],
+//     rows: [
+//       ['foo', 'bar'],
+//       ['buz', 'baz'],
+//       ['beep', 'boop'],
+//     ],
+//     cursor: 'cursor-value',
+//   },
+//   statusCode: 200,
+// });
 
-const getMockEssqlResponse = () => ({
-  body: {
-    columns: [
-      { name: 'One', type: 'keyword' },
-      { name: 'Two', type: 'keyword' },
-    ],
-    rows: [
-      ['foo', 'bar'],
-      ['buz', 'baz'],
-      ['beep', 'boop'],
-    ],
-    cursor: 'cursor-value',
-  },
-  statusCode: 200,
-});
+// const basicReq: EssqlSearchStrategyRequest = {
+//   query: 'SELECT * FROM my_index;',
+//   count: 3,
+//   params: ['my_var'],
+//   filter: [
+//     {
+//       type: 'filter',
+//       filterType: 'exactly',
+//       value: 'Test Value',
+//       column: 'One',
+//       and: [],
+//     },
+//   ],
+//   timezone: 'UTC',
+// };
 
-const basicReq: EssqlSearchStrategyRequest = {
-  query: 'SELECT * FROM my_index;',
-  count: 3,
-  params: ['my_var'],
-  filter: [
-    {
-      type: 'filter',
-      filterType: 'exactly',
-      value: 'Test Value',
-      column: 'One',
-      and: [],
-    },
-  ],
-  timezone: 'UTC',
-};
+test.skip('TODO', () => {});
 
 // TODO:
 // describe('ESSQL search strategy', () => {
