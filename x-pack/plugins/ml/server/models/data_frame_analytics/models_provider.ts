@@ -111,6 +111,7 @@ export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient)
      * Provides the ML nodes overview with allocated models.
      */
     async getNodesOverview(): Promise<NodesOverviewResponse> {
+      // @ts-expect-error typo in type definition: MlGetMemoryStatsResponse.cluser_name
       const response = (await mlClient.getMemoryStats()) as MemoryStatsResponse;
 
       const { trained_model_stats: trainedModelStats } = await mlClient.getTrainedModelsStats({
