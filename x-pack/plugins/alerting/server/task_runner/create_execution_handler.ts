@@ -125,7 +125,7 @@ export function createExecutionHandler<
       if (alertExecutionStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
         alertExecutionStore.setTriggeredActionsStatus(ActionsCompletion.PARTIAL);
         logger.debug(
-          `The maximum number of actions (${actionsConfigMap.default.max}) for this rule type has been reached`
+          `The maximum number of actions (${actionsConfigMap.default.max}) for this rule type with ruleId:${ruleId} has been reached:`
         );
         break;
       }
@@ -137,9 +137,6 @@ export function createExecutionHandler<
         })
       ) {
         alertExecutionStore.setTriggeredActionsStatus(ActionsCompletion.PARTIAL);
-        logger.debug(
-          `The maximum number of actions for this connector type (${action.actionTypeId}) type has been reached`
-        );
         continue;
       }
 
