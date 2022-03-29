@@ -7,9 +7,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
-
-const DEFAULT_INPUT_FIELD = 'text_field';
+import { InferenceBase } from '../inference_base';
 
 export type FormattedLangIdentResp = Array<{
   className: string;
@@ -17,20 +15,7 @@ export type FormattedLangIdentResp = Array<{
   classScore: number;
 }>;
 
-export class LangIdentInference {
-  private trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>;
-  private model: estypes.MlTrainedModelConfig;
-  private inputField: string;
-
-  constructor(
-    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
-    model: estypes.MlTrainedModelConfig
-  ) {
-    this.trainedModelsApi = trainedModelsApi;
-    this.model = model;
-    this.inputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
-  }
-
+export class LangIdentInference extends InferenceBase {
   public async infer(
     inputText: string
   ): Promise<{ response: FormattedLangIdentResp; rawResponse: estypes.IngestSimulateResponse }> {
