@@ -45,10 +45,12 @@ jest.mock('../../contexts/kibana', () => ({
           url: {
             locators: {
               get: jest.fn(() => {
-                  return { getLocation: jest.fn(() => { path: '/#maps' }) };
-                })
-            }
-          }
+                return {
+                  getLocation: jest.fn(() => ({ path: '/#maps' })),
+                };
+              }),
+            },
+          },
         },
         data: {
           query: {
@@ -62,7 +64,7 @@ jest.mock('../../contexts/kibana', () => ({
           },
         },
         application: {
-          navigateToApp: jest.fn()
+          navigateToApp: jest.fn(),
         },
       },
     };

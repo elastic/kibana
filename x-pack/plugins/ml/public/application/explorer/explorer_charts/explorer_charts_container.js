@@ -28,6 +28,7 @@ import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 import { CHART_TYPE } from '../explorer_constants';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
@@ -100,6 +101,14 @@ function ExplorerChartContainer({
   } = useMlKibana();
 
   const getMapsLink = useCallback(async () => {
+    const queryString = series.entityFields
+      ?.map(({ fieldName, fieldValue }) => `${fieldName}:${fieldValue}`)
+      .join(' or ');
+    const query = {
+      language: SEARCH_QUERY_LANGUAGE.KUERY,
+      query: queryString,
+    };
+
     const initialLayers = [];
     const typicalStyle = {
       type: 'VECTOR',
@@ -158,6 +167,7 @@ function ExplorerChartContainer({
     const location = await locator.getLocation({
       initialLayers: initialLayers,
       timeRange: data.query.timefilter.timefilter.getTime(),
+      ...(queryString !== undefined ? { query } : {}),
     });
 
     return location;
