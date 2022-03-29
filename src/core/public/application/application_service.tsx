@@ -241,14 +241,13 @@ export class ApplicationService {
         state,
         replace = false,
         openInNewTab = false,
-        skipAppLeave,
+        skipAppLeave = false,
       }: NavigateToAppOptions = {}
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
-      const shouldNavigate = navigatingToSameApp
-        ? true
-        : await this.shouldNavigate(overlays, appId, !!skipAppLeave);
+      const shouldNavigate =
+        navigatingToSameApp || skipAppLeave ? true : await this.shouldNavigate(overlays, appId);
 
       const targetApp = applications$.value.get(appId);
 
@@ -364,16 +363,9 @@ export class ApplicationService {
     this.currentActionMenu$.next(currentActionMenu);
   };
 
-  private async shouldNavigate(
-    overlays: OverlayStart,
-    nextAppId: string,
-    skipAppLeave: boolean
-  ): Promise<boolean> {
+  private async shouldNavigate(overlays: OverlayStart, nextAppId: string): Promise<boolean> {
     const currentAppId = this.currentAppId$.value;
     if (currentAppId === undefined) {
-      return true;
-    }
-    if (skipAppLeave === true) {
       return true;
     }
     const action = getLeaveAction(

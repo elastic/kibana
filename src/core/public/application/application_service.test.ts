@@ -902,10 +902,10 @@ describe('#start()', () => {
       const shouldNavigateSpy = jest.spyOn(service as any, 'shouldNavigate');
       const { navigateToApp } = await service.start(startDeps);
       await navigateToApp('myTestApp');
-      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myTestApp', false);
+      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myTestApp');
 
       await navigateToApp('myOtherApp');
-      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myOtherApp', false);
+      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myOtherApp');
     });
 
     it('should call private function shouldNavigate with overlays, nextAppId and skipAppLeave', async () => {
@@ -913,7 +913,7 @@ describe('#start()', () => {
       const shouldNavigateSpy = jest.spyOn(service as any, 'shouldNavigate');
       const { navigateToApp } = await service.start(startDeps);
       await navigateToApp('myTestApp', { skipAppLeave: true });
-      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myTestApp', true);
+      expect(shouldNavigateSpy).not.toHaveBeenCalledWith(startDeps.overlays, 'myTestApp');
     });
 
     describe('when `replace` option is true', () => {
