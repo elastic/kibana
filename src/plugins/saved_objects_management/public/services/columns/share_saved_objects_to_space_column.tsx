@@ -20,6 +20,7 @@ import type {
 } from '../../../../../../x-pack/plugins/spaces/public';
 import type { SavedObjectsManagementRecord } from '../types';
 import { SavedObjectsManagementColumn } from '../types';
+import { SHAREABLE_SOON_OBJECT_TYPES } from './constants';
 
 interface WrapperProps {
   objectType: string;
@@ -65,26 +66,6 @@ const globalObjectTypeContent = i18n.translate(
   'savedObjectsManagement.shareToSpace.globalObjectTypeContent',
   { defaultMessage: 'This saved object is available in all spaces and cannot be changed.' }
 );
-
-/**
- * This is a hard-coded list that can be removed when each of these "share-capable" object types are made to be shareable.
- * Note, this list does not preclude other object types from being made shareable in the future, it just consists of the object types that
- * we are working towards making shareable in the near term.
- */
-const SHAREABLE_SOON_OBJECT_TYPES = [
-  'tag',
-  'dashboard',
-  'canvas-workpad',
-  'canvas-element',
-  'lens',
-  'visualization',
-  'map',
-  'graph-workspace',
-  'search',
-  'query',
-  'rule',
-  'connector',
-];
 
 const Wrapper = ({
   objectType,
