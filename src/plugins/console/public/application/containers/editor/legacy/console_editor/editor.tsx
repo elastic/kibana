@@ -120,6 +120,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
         // Fire and forget.
         $.ajax(loadFrom).done(async (data) => {
+          // when we load data from another Api we also must pass history
           await editor.update(`${initialTextValue}\n ${data}`, true);
           editor.moveToNextRequestEdge(false);
           coreEditor.clearSelection();
