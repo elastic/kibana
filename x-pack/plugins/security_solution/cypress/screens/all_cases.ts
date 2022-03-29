@@ -44,8 +44,8 @@ export const ALL_CASES_SERVICE_NOW_INCIDENT =
 
 export const ALL_CASES_IN_PROGRESS_STATUS = '[data-test-subj="status-badge-in-progress"]';
 
-export const ALL_CASES_TAGS = (index: string) => {
-  return `[data-test-subj="case-table-column-tags-${index}"]`;
+export const ALL_CASES_TAGS = (tag: string) => {
+  return `[data-test-subj="case-table-column-tags-${tag}"]`;
 };
 
 export const ALL_CASES_TAGS_COUNT = '[data-test-subj="options-filter-popover-button-Tags"]';

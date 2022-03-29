@@ -254,7 +254,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         const lensMetricField = testData.expected.metricFields![0];
 
         if (lensMetricField) {
-          await ml.dataVisualizerTable.assertLensActionShowChart(lensMetricField.fieldName);
+          await ml.dataVisualizerTable.assertLensActionShowChart(
+            lensMetricField.fieldName,
+            'mtrVis'
+          );
           await ml.navigation.browserBackTo('dataVisualizerTable');
         }
         const lensNonMetricField = testData.expected.nonMetricFields?.find(
@@ -262,7 +265,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         );
 
         if (lensNonMetricField) {
-          await ml.dataVisualizerTable.assertLensActionShowChart(lensNonMetricField.fieldName);
+          await ml.dataVisualizerTable.assertLensActionShowChart(
+            lensNonMetricField.fieldName,
+            'mtrVis'
+          );
           await ml.navigation.browserBackTo('dataVisualizerTable');
         }
       });
