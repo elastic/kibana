@@ -6,7 +6,7 @@
  */
 
 import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
-import { filter, get, pickBy } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import styled from 'styled-components';
 
 import {
