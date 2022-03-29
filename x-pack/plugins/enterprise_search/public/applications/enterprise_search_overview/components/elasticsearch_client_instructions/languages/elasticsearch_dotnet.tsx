@@ -11,7 +11,7 @@ import dedent from 'dedent';
 
 import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { docLinks } from '../../../shared/doc_links';
+import { docLinks } from '../../../../shared/doc_links';
 
 export const ElasticsearchDotnet: React.FC<{ cloudId?: string }> = ({ cloudId }) => {
   return (

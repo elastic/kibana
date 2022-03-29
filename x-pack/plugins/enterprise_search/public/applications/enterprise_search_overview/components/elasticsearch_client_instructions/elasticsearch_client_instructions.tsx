@@ -11,14 +11,16 @@ import { useValues } from 'kea';
 
 import { KibanaLogic } from '../../../shared/kibana';
 
-import { ElasticsearchDotnet } from './elasticsearch_dotnet';
-import { ElasticsearchGo } from './elasticsearch_go';
-import { ElasticsearchJava } from './elasticsearch_java';
-import { ElasticsearchJavascript } from './elasticsearch_javascript';
-import { ElasticsearchPhp } from './elasticsearch_php';
-import { ElasticsearchPython } from './elasticsearch_python';
-import { ElasticsearchRuby } from './elasticsearch_ruby';
-import { ElasticsearchRust } from './elasticsearch_rust';
+import {
+  ElasticsearchDotnet,
+  ElasticsearchGo,
+  ElasticsearchJava,
+  ElasticsearchJavascript,
+  ElasticsearchPhp,
+  ElasticsearchPython,
+  ElasticsearchRuby,
+  ElasticsearchRust,
+} from './languages';
 
 const useCloudId = (): string | undefined => {
   const { cloud } = useValues(KibanaLogic);
