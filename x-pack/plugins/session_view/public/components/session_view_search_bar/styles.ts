@@ -26,7 +26,7 @@ export const useStyles = ({ hasSearchResults }: StylesDeps) => {
     const searchBarWithResult: CSSObject = {
       position: 'relative',
       'input.euiFieldSearch.euiFieldSearch-isClearable': {
-        paddingRight: hasSearchResults ? '200px' : '40px',
+        paddingRight: hasSearchResults ? '200px' : euiTheme.size.xxl,
       },
     };
 

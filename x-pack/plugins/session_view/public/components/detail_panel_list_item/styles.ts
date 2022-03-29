@@ -23,7 +23,7 @@ export const useStyles = ({ display }: StylesDeps) => {
       padding: `0px ${euiTheme.size.s} `,
       width: '100%',
       fontWeight: 'inherit',
-      height: '32px',
+      height: euiTheme.size.xl,
       lineHeight: euiTheme.size.l,
       letterSpacing: '0px',
       textAlign: 'left',
