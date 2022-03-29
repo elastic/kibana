@@ -121,7 +121,7 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate('xpack.securitySolution.endpoint.policy.blocklists.list.totalItemCount', {
       defaultMessage:
-        'Showing {totalItemsCount, plural, one {# blocklist} other {# blocklist entries}}',
+        'Showing {totalItemsCount, plural, one {# blocklist entry} other {# blocklist entries}}',
       values: { totalItemsCount },
     }),
   listRemoveActionNotAllowedMessage: i18n.translate(
