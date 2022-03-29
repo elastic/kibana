@@ -331,11 +331,15 @@ export class PluginsStatusService {
    */
   private updatePluginReportedStatus(plugin: PluginName, reportedStatus: ServiceStatus): void {
     const previousReportedLevel = this.pluginData[plugin].reportedStatus?.level;
+    const previousReportedSummary = this.pluginData[plugin].reportedStatus?.summary;
 
     this.pluginData[plugin].reportedStatus = reportedStatus;
     this.pluginStatus[plugin] = reportedStatus;
 
-    if (reportedStatus.level !== previousReportedLevel) {
+    if (
+      reportedStatus.level !== previousReportedLevel ||
+      reportedStatus.summary !== previousReportedSummary
+    ) {
       this.updatePluginsStatuses([plugin]);
     }
   }
