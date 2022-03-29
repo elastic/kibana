@@ -274,4 +274,64 @@ describe('Event filter form', () => {
     expect(component.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
     expect(getState().form.entry?.tags).toEqual([`policy:all`]);
   });
+
+  it('should not show warning text when unique fields are added', async () => {
+    component = await renderWithData({
+      entries: [
+        {
+          field: 'event.category',
+          operator: 'included',
+          type: 'match',
+          value: 'some value',
+        },
+        {
+          field: 'file.name',
+          operator: 'excluded',
+          type: 'match',
+          value: 'some other value',
+        },
+      ],
+    });
+    expect(component.queryByTestId('duplicate-fields-warning-message')).toBeNull();
+  });
+
+  it('should not show warning text when field values are not added', async () => {
+    component = await renderWithData({
+      entries: [
+        {
+          field: 'event.category',
+          operator: 'included',
+          type: 'match',
+          value: '',
+        },
+        {
+          field: 'event.category',
+          operator: 'excluded',
+          type: 'match',
+          value: '',
+        },
+      ],
+    });
+    expect(component.queryByTestId('duplicate-fields-warning-message')).toBeNull();
+  });
+
+  it('should show warning text when duplicate fields are added with values', async () => {
+    component = await renderWithData({
+      entries: [
+        {
+          field: 'event.category',
+          operator: 'included',
+          type: 'match',
+          value: 'some value',
+        },
+        {
+          field: 'event.category',
+          operator: 'excluded',
+          type: 'match',
+          value: 'some other value',
+        },
+      ],
+    });
+    expect(component.queryByTestId('duplicate-fields-warning-message')).not.toBeNull();
+  });
 });
