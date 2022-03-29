@@ -45,7 +45,7 @@ export class KibanaClusterRuleMetric extends ClusterMetric {
   static getMetricFields() {
     return {
       uuidField: 'cluster_uuid',
-      timestampField: '@timestamp',
+      timestampField: 'timestamp', // This will alias to @timestamp
     };
   }
 }
@@ -61,8 +61,8 @@ export class KibanaInstanceRuleMetric extends Metric {
 
   static getMetricFields() {
     return {
-      uuidField: 'service.id',
-      timestampField: '@timestamp',
+      uuidField: 'kibana_stats.kibana.uuid', // This field does not exist in the MB document but the alias exists
+      timestampField: 'timestamp', // This will alias to @timestamp
     };
   }
 }
@@ -79,7 +79,7 @@ export class KibanaClusterActionMetric extends ClusterMetric {
   static getMetricFields() {
     return {
       uuidField: 'cluster_uuid',
-      timestampField: '@timestamp',
+      timestampField: 'timestamp', // This will alias to @timestamp
     };
   }
 }
@@ -95,8 +95,8 @@ export class KibanaInstanceActionMetric extends Metric {
 
   static getMetricFields() {
     return {
-      uuidField: 'kibana.node_action.kibana.uuid',
-      timestampField: '@timestamp',
+      uuidField: 'kibana_stats.kibana.uuid', // This field does not exist in the MB document but the alias exists
+      timestampField: 'timestamp', // This will alias to @timestamp
     };
   }
 }

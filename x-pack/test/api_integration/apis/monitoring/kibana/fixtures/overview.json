@@ -109,7 +109,17 @@
           "hasCalculation": false,
           "isDerivative": false
         },
-        "data": []
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
       }
     ],
     "kibana_cluster_rule_overdue_duration": [
@@ -127,7 +137,17 @@
           "hasCalculation": false,
           "isDerivative": false
         },
-        "data": []
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
       },
       {
         "bucket_size": "10 seconds",
@@ -143,7 +163,17 @@
           "hasCalculation": false,
           "isDerivative": false
         },
-        "data": []
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
       }
     ]
   }
