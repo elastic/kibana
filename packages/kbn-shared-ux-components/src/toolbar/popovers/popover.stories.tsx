@@ -8,7 +8,6 @@
 
 import { EuiContextMenu } from '@elastic/eui';
 import { ButtonContentIconSide } from '@elastic/eui/src/components/button/button_content';
-import { useArgTypes } from '@storybook/api';
 import { Story } from '@storybook/react';
 import React from 'react';
 import { ToolbarPopover } from './popover';
