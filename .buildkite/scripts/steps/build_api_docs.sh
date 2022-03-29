@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+export BUILD_TS_REFS_DISABLE=false
+
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Build API Docs"
