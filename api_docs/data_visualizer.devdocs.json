@@ -16,18 +16,18 @@
         "children": [
           {
             "parentPluginId": "dataVisualizer",
-            "id": "def-public.IndexDataVisualizerViewProps.currentIndexPattern",
+            "id": "def-public.IndexDataVisualizerViewProps.currentDataView",
             "type": "Object",
             "tags": [],
-            "label": "currentIndexPattern",
+            "label": "currentDataView",
             "description": [],
             "signature": [
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               }
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
