@@ -8,8 +8,7 @@ import 'cypress-real-events/support';
 import { Interception } from 'cypress/types/net-stubbing';
 import 'cypress-axe';
 import moment from 'moment';
-// Commenting this out since it's breaking the tests. It was caused by https://github.com/elastic/kibana/commit/bef90a58663b6c4b668a7fe0ce45a002fb68c474#diff-8a4659c6955a712376fe5ca0d81636164d1b783a63fe9d1a23da4850bd0dfce3R10
-// import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/test';
+import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 
 Cypress.Commands.add('loginAsReadOnlyUser', () => {
   cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
@@ -88,13 +87,11 @@ Cypress.Commands.add(
 // A11y configuration
 
 const axeConfig = {
-  // See comment on line 11
-  // ...AXE_CONFIG,
+  ...AXE_CONFIG,
 };
 const axeOptions = {
-  // See comment on line 11
-  // ...AXE_OPTIONS,
-  // runOnly: [...AXE_OPTIONS.runOnly, 'best-practice'],
+  ...AXE_OPTIONS,
+  runOnly: [...AXE_OPTIONS.runOnly, 'best-practice'],
 };
 
 export const checkA11y = ({ skipFailures }: { skipFailures: boolean }) => {
