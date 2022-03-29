@@ -71,7 +71,6 @@ interface FieldTypeTableItem {
   description: string;
 }
 
-const TABLE_STYLE = { width: 350 };
 const FIELD_TYPES_PER_PAGE = 6;
 
 /**
@@ -372,6 +371,7 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
             isOpen={isHelpOpen}
             panelPaddingSize="m"
             className="dscFieldTypesHelp__popover"
+            panelClassName="dscFieldTypesHelp__panel"
             closePopover={closeHelp}
           >
             <EuiPopoverTitle paddingSize="s">
@@ -380,7 +380,6 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
               })}
             </EuiPopoverTitle>
             <EuiBasicTable
-              style={TABLE_STYLE}
               tableCaption={i18n.translate('discover.fieldTypesPopover.tableTitle', {
                 defaultMessage: 'Description of field types',
               })}
