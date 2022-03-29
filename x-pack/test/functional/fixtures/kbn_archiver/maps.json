@@ -636,31 +636,6 @@
 {
   "attributes": {
     "description": "",
-    "layerListJSON": "[{\"sourceDescriptor\":{\"id\":\"5b46884e-062f-4ff4-9dd2-bd410d9e8754\",\"type\":\"ES_SEARCH\",\"geoField\":\"location\",\"filterByMapBounds\":false,\"tooltipProperties\":[],\"topHitsSize\":1,\"applyGlobalQuery\":true,\"scalingType\":\"LIMIT\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"},\"id\":\"8fcb7c4b-7d6a-4b69-82c2-74f53ec0df24\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"__kbn__custom_icon_sdf__5e3c7e53-e19a-4671-b032-1de25b99f4e3\"}},\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Reds\",\"field\":{\"label\":\"altitude\",\"name\":\"altitude\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"minSize\":30,\"maxSize\":64,\"field\":{\"label\":\"altitude\",\"name\":\"altitude\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"iconOrientation\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"heading\",\"name\":\"heading\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"labelText\":{\"type\":\"STATIC\",\"options\":{\"value\":\"\"}},\"labelColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#000000\"}},\"labelSize\":{\"type\":\"STATIC\",\"options\":{\"size\":14}},\"labelBorderColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"symbolizeAs\":{\"options\":{\"value\":\"icon\"}},\"labelBorderSize\":{\"options\":{\"size\":\"SMALL\"}}},\"isTimeAware\":true},\"type\":\"GEOJSON_VECTOR\"}]",
-    "mapStateJSON": "{\"zoom\":4.13,\"center\":{\"lon\":5.95655,\"lat\":1.67502},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filters\":[],\"settings\":{\"autoFitToDataBounds\":false,\"backgroundColor\":\"#ffffff\",\"customIcons\":[{\"symbolId\":\"__kbn__custom_icon_sdf__5e3c7e53-e19a-4671-b032-1de25b99f4e3\",\"label\":\"source_icons_mic\",\"svg\":\"PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHN0cm9rZS13aWR0aD0iMS41IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHg9IjkiIHk9IjIiIHdpZHRoPSI2IiBoZWlnaHQ9IjEyIiByeD0iMyIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMS41Ii8+CjxwYXRoIGQ9Ik01IDEwVjExQzUgMTQuODY2IDguMTM0MDEgMTggMTIgMThWMThWMThDMTUuODY2IDE4IDE5IDE0Ljg2NiAxOSAxMVYxMCIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTIgMThWMjJNMTIgMjJIOU0xMiAyMkgxNSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K\",\"cutoff\":0.25,\"radius\":0.25}],\"disableInteractive\":false,\"disableTooltipControl\":false,\"hideToolbarOverlay\":false,\"hideLayerControl\":false,\"hideViewControl\":false,\"initialLocation\":\"LAST_SAVED_LOCATION\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"maxZoom\":24,\"minZoom\":0,\"showScaleControl\":false,\"showSpatialFilters\":true,\"showTimesliderToggleButton\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
-    "title": "custom icon demo",
-    "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[\"8fcb7c4b-7d6a-4b69-82c2-74f53ec0df24\"]}"
-  },
-  "coreMigrationVersion": "8.2.0",
-  "id": "f82671f0-aedc-11ec-8fa5-43082fe88e17",
-  "migrationVersion": {
-    "map": "8.1.0"
-  },
-  "references": [
-    {
-      "name": "layer_0_source_index_pattern",
-      "type": "index-pattern",
-      "id": "f7fc94a0-936b-11e9-a43f-eb6ee3467b2b"
-    }
-  ],
-  "type": "map",
-  "updated_at": "2022-03-28T21:21:02.099Z",
-  "version": "WzE4MiwyXQ=="
-}
-
-{
-  "attributes": {
-    "description": "",
     "layerListJSON": "[{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"topHitsSplitField\":\"machine.os.raw\",\"topHitsSize\":2,\"indexPatternRefName\":\"layer_1_source_index_pattern\",\"sortField\":\"@timestamp\",\"sortOrder\":\"desc\",\"applyGlobalQuery\":true,\"scalingType\":\"TOP_HITS\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
     "mapStateJSON": "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-24T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"settings\":{\"autoFitToDataBounds\":false}}",
     "title": "document example top hits",

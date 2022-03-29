@@ -22,18 +22,6 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    describe('symbolize custom icon', () => {
-      before(async () => {
-        await PageObjects.maps.loadSavedMap('custom icon demo');
-        await PageObjects.maps.enterFullScreen();
-        await PageObjects.maps.closeLegend();
-      });
-
-      it('should symbolize custom icons with expected color, size, and orientation', async () => {
-        await visualTesting.snapshot({});
-      });
-    });
-
     describe('dynamic coloring', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('join and dynamic coloring demo');
