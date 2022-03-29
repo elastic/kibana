@@ -142,6 +142,7 @@ export const DevConsole = memo(() => {
         consoleProps: {
           prompt: '>>',
           commandService,
+          'data-test-subj': 'dev',
         },
       })
       .show();

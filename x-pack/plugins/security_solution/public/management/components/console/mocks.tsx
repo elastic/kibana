@@ -36,6 +36,39 @@ export interface ConsoleTestSetup {
   ): void;
 }
 
+/**
+ * Finds the console in the Render Result and enters the command provided
+ * @param renderResult
+ * @param cmd
+ * @param inputOnly
+ * @param useKeyboard
+ * @param dataTestSubj
+ */
+export const enterConsoleCommand = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  cmd: string,
+  {
+    inputOnly = false,
+    useKeyboard = false,
+    dataTestSubj = 'test',
+  }: Partial<{ inputOnly: boolean; useKeyboard: boolean; dataTestSubj: string }> = {}
+): void => {
+  const keyCaptureInput = renderResult.getByTestId(`${dataTestSubj}-keyCapture-input`);
+
+  act(() => {
+    if (useKeyboard) {
+      userEvent.click(keyCaptureInput);
+      userEvent.keyboard(cmd);
+    } else {
+      userEvent.type(keyCaptureInput, cmd);
+    }
+
+    if (!inputOnly) {
+      userEvent.keyboard('{enter}');
+    }
+  });
+};
+
 export const getConsoleTestSetup = (): ConsoleTestSetup => {
   const mockedContext = createAppRootMockRenderer();
 
@@ -63,24 +96,8 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     ));
   };
 
-  const enterCommand: ConsoleTestSetup['enterCommand'] = (
-    cmd,
-    { inputOnly = false, useKeyboard = false } = {}
-  ) => {
-    const keyCaptureInput = renderResult.getByTestId('test-keyCapture-input');
-
-    act(() => {
-      if (useKeyboard) {
-        userEvent.click(keyCaptureInput);
-        userEvent.keyboard(cmd);
-      } else {
-        userEvent.type(keyCaptureInput, cmd);
-      }
-
-      if (!inputOnly) {
-        userEvent.keyboard('{enter}');
-      }
-    });
+  const enterCommand: ConsoleTestSetup['enterCommand'] = (cmd, options = {}) => {
+    enterConsoleCommand(renderResult, cmd, options);
   };
 
   return {

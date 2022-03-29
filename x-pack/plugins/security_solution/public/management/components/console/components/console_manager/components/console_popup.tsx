@@ -103,13 +103,17 @@ export const ConsolePopup = memo<ConsolePopupProps>(
 
           {!isHidden && (
             <EuiModalFooter>
-              <EuiButtonEmpty color="danger" onClick={handleTerminateOnClick}>
+              <EuiButtonEmpty
+                color="danger"
+                onClick={handleTerminateOnClick}
+                data-test-subj="consolePopupTerminateButton"
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.console.manager.popup.terminateLabel"
                   defaultMessage="Terminate"
                 />
               </EuiButtonEmpty>
-              <EuiButton onClick={onHide} fill>
+              <EuiButton onClick={onHide} fill data-test-subj="consolePopupHideButton">
                 <FormattedMessage
                   id="xpack.securitySolution.console.manager.popup.hideLabel"
                   defaultMessage="hide"
