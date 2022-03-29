@@ -328,7 +328,7 @@ export const QueryBarTopRow = React.memo(
         <SuperUpdateButton
           display="base"
           iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
-          aria-label={props.isDirty ? 'Update query' : 'Refresh query'}
+          aria-label={props.isLoading ? 'Update query' : 'Refresh query'}
           isDisabled={isDateRangeInvalid}
           onClick={onClickSubmitButton}
           size="m"
