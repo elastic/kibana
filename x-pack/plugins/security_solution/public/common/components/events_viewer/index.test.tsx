@@ -9,9 +9,8 @@ import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
-import { waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
-import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
@@ -61,37 +60,27 @@ const testProps = {
   start: from,
 };
 describe('StatefulEventsViewer', () => {
-  const mount = useMountAppended();
-
   (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
 
   test('it renders the events viewer', async () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
 
-    await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.text()).toMatchInlineSnapshot(`"hello grid"`);
-    });
+    expect(wrapper.getByText('hello grid')).toBeTruthy();
   });
 
   // InspectButtonContainer controls displaying InspectButton components
   test('it renders InspectButtonContainer', async () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
 
-    await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find(`InspectButtonContainer`).exists()).toBe(true);
-    });
+    expect(wrapper.findByTestId(`InspectButtonContainer`)).toBeTruthy();
   });
 
   test('it closes field editor when unmounted', async () => {
@@ -101,42 +90,14 @@ describe('StatefulEventsViewer', () => {
       return {};
     });
 
-    const wrapper = mount(
+    const { unmount } = render(
       <TestProviders>
         <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
     expect(mockCloseEditor).not.toHaveBeenCalled();
 
-    wrapper.unmount();
+    unmount();
     expect(mockCloseEditor).toHaveBeenCalled();
-  });
-
-  test('renders the graph overlay when a graph event id is set', async () => {
-    const propsWithGraphId = {
-      ...testProps,
-      graphEventId: 'test',
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulEventsViewer {...propsWithGraphId} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('overlayContainer').exists()).toBe(true);
-  });
-
-  test('renders the graph overlay when a session event id is set', async () => {
-    const propsWithGraphId = {
-      ...testProps,
-      sessionViewId: 'test',
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulEventsViewer {...propsWithGraphId} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('overlayContainer').exists()).toBe(true);
   });
 });

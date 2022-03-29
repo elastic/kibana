@@ -40,7 +40,7 @@ export const PINNED_TAB = i18n.translate(
 );
 
 export const SESSION_TAB = i18n.translate(
-  'pack.securitySolution.timeline.tabs.sessionTabTimelineTitle',
+  'xpack.securitySolution.timeline.tabs.sessionTabTimelineTitle',
   {
     defaultMessage: 'Session View',
   }
