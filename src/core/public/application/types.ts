@@ -822,7 +822,7 @@ export interface ApplicationStart {
   /**
    * Navigate to a given url
    *
-   * The method removes the eventListener and assigns the window location to the url provided
+   * The method removes the beforeunload eventListener and assigns the window location to the url provided
    */
   navigateToUrlSkipUnload(url: string): void;
   /**
