@@ -37,6 +37,38 @@ jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
   },
 }));
 
+jest.mock('../../contexts/kibana', () => ({
+  useMlKibana: () => {
+    return {
+      services: {
+        share: {
+          url: {
+            locators: {
+              get: jest.fn(() => {
+                  return { getLocation: jest.fn(() => { path: '/#maps' }) };
+                })
+            }
+          }
+        },
+        data: {
+          query: {
+            timefilter: {
+              timefilter: {
+                getTime: jest.fn(() => {
+                  return { from: '', to: '' };
+                }),
+              },
+            },
+          },
+        },
+        application: {
+          navigateToApp: jest.fn()
+        },
+      },
+    };
+  },
+}));
+
 const getUtilityProps = () => {
   const mlUrlGenerator = {
     createUrl: jest.fn(),

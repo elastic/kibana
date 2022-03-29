@@ -36,8 +36,8 @@ import { useMlKibana } from '../../contexts/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { AnomalySource } from '../../../maps/anomaly_source';
 import { CUSTOM_COLOR_RAMP } from '../../../maps/anomaly_layer_wizard_factory';
-import { LAYER_TYPE } from '../../../../../maps/common';
-import { APP_ID as MAPS_APP_ID, MAPS_APP_LOCATOR } from '../../../../../maps/public';
+import { LAYER_TYPE, APP_ID as MAPS_APP_ID } from '../../../../../maps/common';
+import { MAPS_APP_LOCATOR } from '../../../../../maps/public';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
@@ -101,6 +101,45 @@ function ExplorerChartContainer({
 
   const getMapsLink = useCallback(async () => {
     const initialLayers = [];
+    const typicalStyle = {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'STATIC',
+          options: {
+            color: '#98A2B2',
+          },
+        },
+        lineColor: {
+          type: 'STATIC',
+          options: {
+            color: '#fff',
+          },
+        },
+        lineWidth: {
+          type: 'STATIC',
+          options: {
+            size: 2,
+          },
+        },
+        iconSize: {
+          type: 'STATIC',
+          options: {
+            size: 6,
+          },
+        },
+      },
+    };
+
+    const style = {
+      type: 'VECTOR',
+      properties: {
+        fillColor: CUSTOM_COLOR_RAMP,
+        lineColor: CUSTOM_COLOR_RAMP,
+      },
+      isTimeAware: false,
+    };
+
     for (const layer in ML_ANOMALY_LAYERS) {
       if (ML_ANOMALY_LAYERS.hasOwnProperty(layer)) {
         initialLayers.push({
@@ -110,14 +149,7 @@ function ExplorerChartContainer({
             jobId: series.jobId,
             typicalActual: ML_ANOMALY_LAYERS[layer],
           }),
-          style: {
-            type: 'VECTOR',
-            properties: {
-              fillColor: CUSTOM_COLOR_RAMP,
-              lineColor: CUSTOM_COLOR_RAMP,
-            },
-            isTimeAware: false,
-          },
+          style: ML_ANOMALY_LAYERS[layer] === ML_ANOMALY_LAYERS.TYPICAL ? typicalStyle : style,
         });
       }
     }

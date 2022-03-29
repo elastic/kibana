@@ -17,7 +17,7 @@ export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
   return new MapsPlugin(initContext);
 };
 
-export { APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 export { MAPS_APP_LOCATOR } from './locators';
 export type { PreIndexedShape } from '../common/elasticsearch_util';
 

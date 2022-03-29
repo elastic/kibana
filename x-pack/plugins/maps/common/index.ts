@@ -7,6 +7,7 @@
 
 export {
   AGG_TYPE,
+  APP_ID,
   COLOR_MAP_TYPE,
   ES_GEO_FIELD_TYPE,
   FIELD_ORIGIN,
