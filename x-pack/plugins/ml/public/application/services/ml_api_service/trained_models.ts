@@ -141,12 +141,13 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    inferTrainedModel(modelId: string, payload: any) {
+    inferTrainedModel(modelId: string, payload: any, timeout?: string) {
       const body = JSON.stringify(payload);
       return httpService.http<estypes.MlInferTrainedModelDeploymentResponse>({
         path: `${apiBasePath}/trained_models/infer/${modelId}`,
         method: 'POST',
         body,
+        ...(timeout ? { query: { timeout } as HttpFetchQuery } : {}),
       });
     },
 

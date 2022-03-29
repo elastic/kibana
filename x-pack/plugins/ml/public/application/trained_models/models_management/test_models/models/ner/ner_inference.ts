@@ -22,7 +22,7 @@ interface InferResponse {
 export class NerInference extends InferenceBase<InferResponse> {
   public async infer(inputText: string) {
     const payload = { docs: { [this.inputField]: inputText } };
-    const resp = await this.trainedModelsApi.inferTrainedModel(this.model.model_id, payload);
+    const resp = await this.trainedModelsApi.inferTrainedModel(this.model.model_id, payload, '30s');
 
     return { response: parseResponse(resp), rawResponse: resp };
   }

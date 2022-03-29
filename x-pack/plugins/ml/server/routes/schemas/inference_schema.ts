@@ -41,3 +41,8 @@ export const pipelineSchema = schema.object({
   docs: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
   verbose: schema.maybe(schema.boolean()),
 });
+
+export const inferTrainedModelQuery = schema.object({ timeout: schema.maybe(schema.string()) });
+export const inferTrainedModelBody = schema.object({
+  docs: schema.any(),
+});

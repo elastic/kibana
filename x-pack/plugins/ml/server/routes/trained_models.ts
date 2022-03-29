@@ -15,6 +15,8 @@ import {
   optionalModelIdSchema,
   putTrainedModelQuerySchema,
   pipelineSchema,
+  inferTrainedModelQuery,
+  inferTrainedModelBody,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -367,10 +369,8 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       path: '/api/ml/trained_models/infer/{modelId}',
       validate: {
         params: modelIdSchema,
-        body: schema.object({
-          docs: schema.any(),
-          timeout: schema.maybe(schema.number()),
-        }),
+        query: inferTrainedModelQuery,
+        body: inferTrainedModelBody,
       },
       options: {
         tags: ['access:ml:canStartStopTrainedModels'],
@@ -382,7 +382,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const body = await mlClient.inferTrainedModelDeployment({
           model_id: modelId,
           docs: request.body.docs,
-          ...(request.body.timeout ? { timeout: request.body.timeout } : {}),
+          ...(request.query.timeout ? { timeout: request.query.timeout } : {}),
         });
         return response.ok({
           body,
