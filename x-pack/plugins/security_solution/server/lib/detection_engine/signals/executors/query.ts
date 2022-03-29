@@ -84,7 +84,6 @@ export const queryExecutor = async ({
       eventsTelemetry,
       id: completeRule.alertId,
       inputIndexPattern: inputIndex,
-      signalsIndex: ruleParams.outputIndex,
       filter: esFilter,
       pageSize: searchAfterSize,
       buildReasonMessage: buildReasonMessageForQueryAlert,

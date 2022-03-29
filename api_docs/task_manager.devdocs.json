@@ -1130,7 +1130,84 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.IdleTaskWithExpiredRunAt",
+        "type": "Object",
+        "tags": [],
+        "label": "IdleTaskWithExpiredRunAt",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.IdleTaskWithExpiredRunAt.bool",
+            "type": "Object",
+            "tags": [],
+            "label": "bool",
+            "description": [],
+            "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "taskManager",
+                "id": "def-server.IdleTaskWithExpiredRunAt.bool.must",
+                "type": "Array",
+                "tags": [],
+                "label": "must",
+                "description": [],
+                "signature": [
+                  "({ term: { 'task.status': string; }; } | { range: { 'task.runAt': { lte: string; }; }; })[]"
+                ],
+                "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.RunningOrClaimingTaskWithExpiredRetryAt",
+        "type": "Object",
+        "tags": [],
+        "label": "RunningOrClaimingTaskWithExpiredRetryAt",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.RunningOrClaimingTaskWithExpiredRetryAt.bool",
+            "type": "Object",
+            "tags": [],
+            "label": "bool",
+            "description": [],
+            "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "taskManager",
+                "id": "def-server.RunningOrClaimingTaskWithExpiredRetryAt.bool.must",
+                "type": "Array",
+                "tags": [],
+                "label": "must",
+                "description": [],
+                "signature": [
+                  "({ bool: { should: { term: { 'task.status': string; }; }[]; }; } | { range: { 'task.retryAt': { lte: string; }; }; })[]"
+                ],
+                "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "taskManager",
       "id": "def-server.TaskManagerSetupContract",
