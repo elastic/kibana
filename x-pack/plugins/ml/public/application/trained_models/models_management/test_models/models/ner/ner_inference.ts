@@ -43,12 +43,16 @@ function parseResponse(resp: estypes.MlInferTrainedModelDeploymentResponse): For
     if (matchedEntity) {
       const entityValue = matchedEntity[3];
       const entity = entities[count];
-      if (entityValue !== entity.entity) {
+      if (entityValue !== entity.entity && entityValue.replaceAll('+', ' ') !== entity.entity) {
+        // entityValue may not equal entity.entity if the entity is comprised of
+        // two words as they are joined with a plus symbol
+        // Replace any plus symbols and check again. If they still don't match, log an error
+
         // eslint-disable-next-line no-console
         console.error('mismatch entity', entity);
       }
       count++;
-      return { value: entityValue, entity };
+      return { value: entity.entity, entity };
     }
     return { value: chunk, entity: null };
   });

@@ -117,6 +117,8 @@ function getClassIcon(className: string) {
       return 'user';
     case 'LOC':
       return 'visMapCoordinate';
+    case 'ORG':
+      return 'home';
     case 'MISC':
       return 'questionInCircle';
 
@@ -131,6 +133,8 @@ function getClassLabel(className: string) {
       return 'Person';
     case 'LOC':
       return 'Location';
+    case 'ORG':
+      return 'Organization';
     case 'MISC':
       return 'Miscellaneous';
 
@@ -145,6 +149,11 @@ function getClassColor(euiTheme: EuiThemeType, className: string, border: boolea
       return border ? euiTheme.euiColorVis5 : euiTheme.euiColorVis5_behindText;
     case 'LOC':
       return border ? euiTheme.euiColorVis1 : euiTheme.euiColorVis1_behindText;
+    case 'ORG':
+      return border ? euiTheme.euiColorVis0 : euiTheme.euiColorVis0_behindText;
+    case 'MISC':
+      return border ? euiTheme.euiColorVis7 : euiTheme.euiColorVis7_behindText;
+
     default:
       return border ? euiTheme.euiColorVis5 : euiTheme.euiColorVis5_behindText;
   }
