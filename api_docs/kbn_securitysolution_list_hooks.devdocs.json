@@ -377,7 +377,7 @@
           "\nHook for fetching ExceptionLists\n"
         ],
         "signature": [
-          "({ errorMessage, http, initialPagination, filterOptions, namespaceTypes, notifications, showTrustedApps, showEventFilters, showHostIsolationExceptions, }: ",
+          "({ errorMessage, http, initialPagination, filterOptions, namespaceTypes, notifications, hideLists, }: ",
           "UseExceptionListsProps",
           ") => ",
           {
@@ -396,7 +396,7 @@
             "id": "def-common.useExceptionLists.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  errorMessage,\n  http,\n  initialPagination = DEFAULT_PAGINATION,\n  filterOptions = {},\n  namespaceTypes,\n  notifications,\n  showTrustedApps = false,\n  showEventFilters = false,\n  showHostIsolationExceptions = false,\n}",
+            "label": "{\n  errorMessage,\n  http,\n  initialPagination = DEFAULT_PAGINATION,\n  filterOptions = {},\n  namespaceTypes,\n  notifications,\n  hideLists = [],\n}",
             "description": [],
             "signature": [
               "UseExceptionListsProps"

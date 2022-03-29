@@ -19,7 +19,6 @@ import { ServiceList } from './service_list';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { apmServiceInventoryOptimizedSorting } from '../../../../../observability/common';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
@@ -40,19 +39,12 @@ function useServicesFetcher() {
       environment,
       kuery,
       serviceGroup,
+      offset,
       comparisonEnabled,
-      comparisonType,
     },
   } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
 
   const sortedAndFilteredServicesFetch = useFetcher(
     (callApmApi) => {
@@ -118,7 +110,7 @@ function useServicesFetcher() {
                   // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
                   .sort()
               ),
-              offset,
+              offset: comparisonEnabled ? offset : undefined,
             },
           },
         });
@@ -126,7 +118,7 @@ function useServicesFetcher() {
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatisticsData.requestId, offset],
+    [mainStatisticsData.requestId, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 

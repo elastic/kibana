@@ -19,10 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import {
-  isPrereleaseVersion,
-  SUPPORTED_APM_PACKAGE_VERSION,
-} from '../../../common/fleet';
 import { APIReturnType } from '../../services/rest/create_call_apm_api';
 
 interface Props {
@@ -78,9 +74,7 @@ function TutorialFleetInstructions({
 
   const apmIntegrationHref = shouldLinkToMigration
     ? `${basePath}/app/apm/settings/schema`
-    : isPrereleaseVersion(kibanaVersion)
-    ? `${basePath}/app/integrations#/detail/apm/overview`
-    : `${basePath}/app/integrations/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`;
+    : `${basePath}/app/integrations#/detail/apm/overview`;
 
   if (isLoading) {
     return (
@@ -96,7 +90,7 @@ function TutorialFleetInstructions({
       <EuiButton
         iconType="gear"
         fill
-        href={`${basePath}/app/integrations/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/policies`}
+        href={`${basePath}/app/integrations/detail/apm/policies`}
       >
         {i18n.translate(
           'xpack.apm.tutorial.apmServer.fleet.manageApmIntegration.button',
