@@ -15,12 +15,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('discover app', function () {
     this.tags('ciGroup6');
 
-    before(function () {
-      return browser.setWindowSize(1300, 800);
+    before(async function () {
+      return await browser.setWindowSize(1300, 800);
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    after(async function unloadMakelogs() {
+      return await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     loadTestFile(require.resolve('./_saved_queries'));
