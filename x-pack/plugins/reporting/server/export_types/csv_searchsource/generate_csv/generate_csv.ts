@@ -369,14 +369,12 @@ export class CsvGenerator {
     } catch (err) {
       this.logger.error(err);
       if (err instanceof KbnServerError && err.errBody) {
-        throw JSON.stringify(err.errBody.error);
+        throw new UnknownError(JSON.stringify(err.errBody.error));
       }
 
       if (err instanceof esErrors.ResponseError && [401, 403].includes(err.statusCode ?? 0)) {
         reportingError = new AuthenticationExpiredError();
         warnings.push(i18nTexts.authenticationError.partialResultsMessage);
-      } else {
-        throw new UnknownError(err.message);
       }
     } finally {
       // clear scrollID
