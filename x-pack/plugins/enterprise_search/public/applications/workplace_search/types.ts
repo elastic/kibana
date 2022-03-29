@@ -66,7 +66,6 @@ export interface Configuration {
   needsConfiguration?: boolean;
   hasOauthRedirect: boolean;
   baseUrlTitle?: string;
-  helpText?: string;
   documentationUrl: string;
   applicationPortalUrl?: string;
   applicationLinkTitle?: string;
@@ -93,6 +92,7 @@ export interface SourceDataItem {
 export interface ContentSource {
   id: string;
   serviceType: string;
+  baseServiceType?: string;
   name: string;
 }
 

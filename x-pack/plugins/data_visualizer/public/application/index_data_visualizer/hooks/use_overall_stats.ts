@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
 import { from, of, Subscription, Observable } from 'rxjs';
-import { mergeMap, switchMap, last, map, toArray } from 'rxjs/operators';
+import { mergeMap, last, map, toArray } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from 'kibana/public';
 import { chunk } from 'lodash';
@@ -161,11 +161,11 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           searchOptions
         )
         .pipe(
-          switchMap((resp) => {
-            return of({
+          map((resp) => {
+            return {
               ...resp,
               rawResponse: { ...resp.rawResponse, fieldName },
-            } as IKibanaSearchResponse);
+            } as IKibanaSearchResponse;
           })
         )
     );
@@ -192,11 +192,11 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           searchOptions
         )
         .pipe(
-          switchMap((resp) => {
-            return of({
+          map((resp) => {
+            return {
               ...resp,
               aggregatableFields: aggregatableFieldsChunk,
-            } as AggregatableFieldOverallStats);
+            } as AggregatableFieldOverallStats;
           })
         )
     );
@@ -210,19 +210,9 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           )
         : of(undefined);
 
-    const documentCountStatsRandom$ =
-      !fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
-        ? data.search.search(
-            {
-              params: getDocumentCountStatsRequest(searchStrategyParams, true),
-            },
-            searchOptions
-          )
-        : of(undefined);
-
     const sub = rateLimitingForkJoin<
       AggregatableFieldOverallStats | IKibanaSearchResponse | undefined
-    >(
+      >(
       [
         // documentCountStats$,
         // documentCountStatsRandom$,

@@ -35,7 +35,7 @@ export type { FindResult } from './rules_client';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration } from './lib';
 export { getEsErrorMessage } from './lib/errors';
-export type { PublicAlertingConfig } from './config';
+export type { AlertingRulesConfig } from './config';
 export {
   ReadOperations,
   AlertingAuthorizationFilterType,
@@ -59,6 +59,13 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
       'xpack.alerts.invalidateApiKeysTask.removalDelay',
       'xpack.alerting.invalidateApiKeysTask.removalDelay',
       { level: 'warning' }
+    ),
+    renameFromRoot(
+      'xpack.alerting.defaultRuleTaskTimeout',
+      'xpack.alerting.rules.execution.timeout',
+      {
+        level: 'warning',
+      }
     ),
   ],
 };

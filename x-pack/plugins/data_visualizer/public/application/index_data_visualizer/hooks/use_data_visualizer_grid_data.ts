@@ -408,7 +408,7 @@ export const useDataVisualizerGridData = (
         ...fieldData,
         fieldFormat: currentDataView.getFormatterForField(field),
         type: JOB_FIELD_TYPES.NUMBER,
-        loading: true,
+        loading: fieldData?.existsInDocs ?? true,
         aggregatable: true,
         deletable: field.runtimeField !== undefined,
       };
@@ -546,7 +546,6 @@ export const useDataVisualizerGridData = (
             : c;
         });
       }
-
       return combinedConfigs;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -599,7 +598,6 @@ export const useDataVisualizerGridData = (
     return [actionColumn];
   }, [input.dataView, services, searchQueryLanguage, searchString, input.allowEditDataView]);
 
-  // console.log('documentCountStats', documentCountStats);
   return {
     progress: combinedProgress,
     configs,

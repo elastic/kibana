@@ -6,11 +6,7 @@
  */
 
 import { get } from 'lodash';
-import {
-  FilterOptions,
-  Rule,
-  SortingOptions,
-} from '../../../../../containers/detection_engine/rules/types';
+import { Rule, SortingOptions } from '../../../../../containers/detection_engine/rules/types';
 
 /**
  * Returns a comparator function to be used with .sort()
@@ -79,29 +75,3 @@ const compareNumbers = (a: number, b: number, direction: number) => {
   }
   return 0;
 };
-
-/**
- * Returns a predicate function to be used with .filter()
- *
- * @param filterOptions Current table filter
- */
-export function getRulesPredicate(filterOptions: FilterOptions) {
-  return (rule: Rule) => {
-    if (
-      filterOptions.filter &&
-      !rule.name.toLowerCase().includes(filterOptions.filter.toLowerCase())
-    ) {
-      return false;
-    }
-    if (filterOptions.showCustomRules && rule.immutable) {
-      return false;
-    }
-    if (filterOptions.showElasticRules && !rule.immutable) {
-      return false;
-    }
-    if (filterOptions.tags.length && !filterOptions.tags.every((tag) => rule.tags.includes(tag))) {
-      return false;
-    }
-    return true;
-  };
-}

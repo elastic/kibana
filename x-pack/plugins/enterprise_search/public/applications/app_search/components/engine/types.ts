@@ -12,6 +12,7 @@ export enum EngineTypes {
   default = 'default',
   indexed = 'indexed',
   meta = 'meta',
+  elasticsearch = 'elasticsearch',
 }
 export interface Engine {
   name: string;
@@ -44,6 +45,7 @@ export interface EngineDetails extends Engine {
   unsearchedUnconfirmedFields: boolean;
   apiTokens: ApiToken[];
   apiKey: string;
+  elasticsearchIndexName?: string;
   schema: Schema;
   schemaConflicts?: SchemaConflicts;
   unconfirmedFields?: string[];
