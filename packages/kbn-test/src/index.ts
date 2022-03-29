@@ -69,3 +69,5 @@ export { runJest } from './jest/run';
 export * from './kbn_archiver_cli';
 
 export * from './kbn_client';
+
+export { AXE_CONFIG, AXE_OPTIONS } from './a11y/config';
