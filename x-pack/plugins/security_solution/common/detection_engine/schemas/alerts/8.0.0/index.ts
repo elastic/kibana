@@ -83,7 +83,7 @@ new schemas to the union of all alert schemas, and re-export the new schemas as 
 */
 
 export interface Ancestor800 {
-  rule?: string;
+  rule: string | undefined;
   id: string;
   type: string;
   index: string;

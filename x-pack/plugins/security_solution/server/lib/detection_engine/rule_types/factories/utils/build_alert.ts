@@ -108,10 +108,8 @@ export const buildParent = (doc: SimpleHit): AncestorLatest => {
     type: isSignal ? 'signal' : 'event',
     index: doc._index,
     depth: isSignal ? (getField(doc, ALERT_DEPTH) as number | undefined) ?? 1 : 0,
+    rule: isSignal ? (getField(doc, ALERT_RULE_UUID) as string) : undefined,
   };
-  if (isSignal) {
-    parent.rule = getField(doc, ALERT_RULE_UUID) as string | undefined;
-  }
   return parent;
 };
 
