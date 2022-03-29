@@ -11,8 +11,7 @@ import { LocationDescriptorObject } from 'history';
 
 import { HttpSetup } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
-import { setUiMetricService, httpService } from '../../../public/application/services/http';
-import {
+import { setUiMetricService, httpService } from '../../../public/application/services/http'; import {
   breadcrumbService,
   docTitleService,
 } from '../../../public/application/services/navigation';
@@ -61,6 +60,8 @@ export const setupEnvironment = () => {
 };
 
 export const WithAppDependencies = (Comp: any, httpSetup?: HttpSetup) => (props: any) => {
+  // We need to optionally setup the httpService since some cit helpers (such as snapshot_list.helpers)
+  // use jest mocks to stub the fetch hooks instead of mocking api responses.
   if (httpSetup) {
     httpService.setup(httpSetup);
   }
