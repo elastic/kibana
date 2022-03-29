@@ -4,8 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Process, ProcessEvent, ProcessMap } from '../../../common/types/process_tree';
+import {
+  EventKind,
+  AlertStatusEventEntityIdMap,
+  Process,
+  ProcessEvent,
+  ProcessMap,
+} from '../../../common/types/process_tree';
 import { ProcessImpl } from './hooks';
+
+// if given event is an alert, and it exist in updatedAlertsStatus, update the alert's status
+// with the updated status value in updatedAlertsStatus Map
+export const updateAlertEventStatus = (
+  events: ProcessEvent[],
+  updatedAlertsStatus: AlertStatusEventEntityIdMap
+) =>
+  events.map((event) => {
+    // do nothing if event is not an alert
+    if (!event.kibana) {
+      return event;
+    }
+
+    return {
+      ...event,
+      kibana: {
+        ...event.kibana,
+        alert: {
+          ...event.kibana.alert,
+          workflow_status:
+            updatedAlertsStatus[event.kibana.alert?.uuid]?.status ??
+            event.kibana.alert?.workflow_status,
+        },
+      },
+    };
+  });
 
 // given a page of new events, add these events to the appropriate process class model
 // create a new process if none are created and return the mutated processMap
@@ -19,7 +51,11 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
       processMap[id] = process;
     }
 
-    process.addEvent(event);
+    if (event.event.kind === EventKind.signal) {
+      process.addAlert(event);
+    } else {
+      process.addEvent(event);
+    }
   });
 
   return processMap;

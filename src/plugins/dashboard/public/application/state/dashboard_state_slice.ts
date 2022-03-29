@@ -10,8 +10,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { Filter, Query, TimeRange } from '../../services/data';
 import { ViewMode } from '../../services/embeddable';
-import type { DashboardControlGroupInput } from '../lib/dashboard_control_group';
 import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
+import { DashboardContainerControlGroupInput } from '../embeddable';
 
 export const dashboardStateSlice = createSlice({
   name: 'dashboardState',
@@ -44,7 +44,7 @@ export const dashboardStateSlice = createSlice({
     },
     setControlGroupState: (
       state,
-      action: PayloadAction<DashboardControlGroupInput | undefined>
+      action: PayloadAction<DashboardContainerControlGroupInput | undefined>
     ) => {
       state.controlGroupInput = action.payload;
     },

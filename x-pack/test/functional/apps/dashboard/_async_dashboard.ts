@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check at least one visualization
       await renderable.waitForRender();
       log.debug('Checking charts rendered');
-      await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
+      await elasticChart.waitForRenderComplete('xyVisChart');
 
       await appMenu.clickLink('Discover');
       await retry.try(async function () {
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       log.debug('Checking charts rendered');
-      await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
+      await elasticChart.waitForRenderComplete('xyVisChart');
     });
 
     it('toggle from Discover to Dashboard attempt 1', async () => {
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       log.debug('Checking charts rendered');
-      await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
+      await elasticChart.waitForRenderComplete('xyVisChart');
     });
 
     it('toggle from Discover to Dashboard attempt 2', async () => {
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       log.debug('Checking charts rendered');
-      await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
+      await elasticChart.waitForRenderComplete('xyVisChart');
 
       log.debug('Checking saved searches rendered');
       await dashboardExpect.savedSearchRowCount(10);

@@ -22,7 +22,7 @@ import { useKibana } from '../../common/hooks/use_kibana';
 import { allNavigationItems } from '../../common/navigation/constants';
 
 interface BenchmarksTableProps
-  extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage'>,
+  extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
     Pagination {
   benchmarks: Benchmark[];
   setQuery(pagination: CriteriaWithPagination<Benchmark>): void;
@@ -66,12 +66,14 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
       </Link>
     ),
     truncateText: true,
+    sortable: true,
   },
   {
     field: 'package_policy.package.title',
     name: TABLE_COLUMN_HEADERS.INTEGRATION_TYPE,
     dataType: 'string',
     truncateText: true,
+    sortable: true,
   },
   {
     field: 'agent_policy.name',
@@ -91,6 +93,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     name: TABLE_COLUMN_HEADERS.CREATED_BY,
     dataType: 'string',
     truncateText: true,
+    sortable: true,
   },
   {
     field: 'package_policy.created_at',
@@ -98,6 +101,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     dataType: 'date',
     truncateText: true,
     render: (date: Benchmark['package_policy']['created_at']) => moment(date).fromNow(),
+    sortable: true,
   },
   {
     field: 'package_policy.rules', // TODO: add fields
@@ -117,6 +121,7 @@ export const BenchmarksTable = ({
   error,
   setQuery,
   noItemsMessage,
+  sorting,
   ...rest
 }: BenchmarksTableProps) => {
   const history = useHistory();
@@ -137,9 +142,8 @@ export const BenchmarksTable = ({
     totalItemCount,
   };
 
-  const onChange = ({ page }: CriteriaWithPagination<Benchmark>) => {
-    if (!page) return;
-    setQuery({ page: { ...page, index: page.index + 1 } });
+  const onChange = ({ page, sort }: CriteriaWithPagination<Benchmark>) => {
+    setQuery({ page: { ...page, index: page.index + 1 }, sort });
   };
 
   return (
@@ -155,6 +159,7 @@ export const BenchmarksTable = ({
       loading={loading}
       noItemsMessage={noItemsMessage}
       error={error}
+      sorting={sorting}
     />
   );
 };

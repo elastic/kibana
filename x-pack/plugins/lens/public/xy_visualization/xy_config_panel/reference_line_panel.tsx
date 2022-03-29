@@ -10,10 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYState } from '../types';
+import { State, XYState, XYReferenceLineLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
-import { YConfig } from '../../../common/expressions';
-import { FillStyle, XYReferenceLineLayerConfig } from '../../../common/expressions/xy_chart';
+import {
+  FillStyle,
+  YConfig,
+} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 import { ColorPicker } from './color_picker';
 import { updateLayer } from '.';
@@ -70,6 +72,7 @@ export const ReferenceLinePanel = (
 
   return (
     <>
+      {' '}
       <MarkerDecorationSettings
         isHorizontal={isHorizontal}
         setConfig={setConfig}

@@ -33,10 +33,10 @@ describe('Transform: <DefinePivotSummary />', () => {
     const mlSharedImports = await getMlSharedImports();
 
     const searchItems = {
-      indexPattern: {
-        title: 'the-index-pattern-title',
+      dataView: {
+        title: 'the-data-view-title',
         fields: [] as any[],
-      } as SearchItems['indexPattern'],
+      } as SearchItems['dataView'],
     };
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,

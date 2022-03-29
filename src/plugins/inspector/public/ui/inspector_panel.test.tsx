@@ -13,6 +13,7 @@ import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import type { ApplicationStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
 import { SharePluginStart } from '../../../share/public';
+import { sharePluginMock } from '../../../share/public/mocks';
 import { applicationServiceMock } from '../../../../core/public/mocks';
 
 describe('InspectorPanel', () => {
@@ -21,7 +22,7 @@ describe('InspectorPanel', () => {
   const dependencies = {
     application: applicationServiceMock.createStartContract(),
     http: {},
-    share: {},
+    share: sharePluginMock.createStartContract(),
     uiSettings: {},
   } as unknown as {
     application: ApplicationStart;
