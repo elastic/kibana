@@ -713,10 +713,7 @@ export class VectorStyle implements IVectorStyle {
 
   getIconSvg(symbolId: string) {
     const meta = this._getIconMeta(symbolId);
-    if (meta) {
-      return meta.svg;
-    }
-    return;
+    return meta ? meta.svg : undefined
   }
 
   _getSymbolId() {
@@ -728,13 +725,12 @@ export class VectorStyle implements IVectorStyle {
   _getIconMeta(
     symbolId: string
   ): { svg: string; label: string; iconSource: ICON_SOURCE } | undefined {
-    if (!symbolId) return;
     const icon = this._customIcons.find(({ symbolId: value }) => value === symbolId);
     if (icon) {
       return { ...icon, iconSource: ICON_SOURCE.CUSTOM };
     }
     const symbol = getMakiSymbol(symbolId);
-    return symbol ? { ...symbol, iconSource: ICON_SOURCE.MAKI } : {};
+    return symbol ? { ...symbol, iconSource: ICON_SOURCE.MAKI } : undefined;
   }
 
   getPrimaryColor() {
