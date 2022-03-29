@@ -177,6 +177,7 @@ export interface XYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  xAxisInterval?: string;
 }
 
 export interface AnnotationLayerArgs {

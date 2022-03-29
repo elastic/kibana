@@ -190,6 +190,12 @@ export const xyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Show values in legend',
       }),
     },
+    xAxisInterval: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.xyVis.interval.help', {
+        defaultMessage: 'Specifies the interval for x-axis',
+      }),
+    },
     ariaLabel: {
       types: ['string'],
       help: i18n.translate('expressionXY.xyVis.ariaLabel.help', {
