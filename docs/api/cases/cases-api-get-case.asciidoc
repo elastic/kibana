@@ -32,9 +32,8 @@ default space is used.
 === Query parameters
 
 `includeComments`::
-deprecated:[8.1.0, "The `includeComments` query parameter is deprecated and will be removed in a future release."]
 (Optional, boolean) Determines whether case comments are returned. Defaults to 
-`true`.
+`true`. deprecated:[8.1.0, "The `includeComments` query parameter is deprecated and will be removed in a future release."]
 
 
 ==== Response code
