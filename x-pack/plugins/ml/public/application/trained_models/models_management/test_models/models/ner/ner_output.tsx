@@ -139,7 +139,7 @@ function getClassLabel(className: string) {
       return 'Miscellaneous';
 
     default:
-      return 'Unknown';
+      return className;
   }
 }
 
