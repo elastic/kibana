@@ -131,7 +131,7 @@ export const SessionView = ({
 
   return (
     <>
-      <EuiPanel color={'subdued'}>
+      <EuiPanel color={'subdued'} grow={false}>
         <div css={styles.nonGrowGroup}>
           <EuiFlexItem
             data-test-subj="sessionView:sessionViewProcessEventsSearch"

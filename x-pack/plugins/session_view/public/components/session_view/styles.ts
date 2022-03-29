@@ -10,10 +10,10 @@ import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 
 interface StylesDeps {
-  height: number | undefined;
+  height: string | undefined;
 }
 
-export const useStyles = ({ height = 500 }: StylesDeps) => {
+export const useStyles = ({ height = '500px' }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
@@ -22,12 +22,12 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
     const thinBorder = `${border.width.thin} solid ${colors.lightShade}!important`;
 
     const processTree: CSSObject = {
-      height: `${height}px`,
+      height: `${height}`,
       position: 'relative',
     };
 
     const detailPanel: CSSObject = {
-      height: `${height}px`,
+      height: `${height}`,
       borderLeft: thinBorder,
       borderRight: thinBorder,
     };

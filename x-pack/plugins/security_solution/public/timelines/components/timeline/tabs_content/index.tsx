@@ -60,6 +60,7 @@ interface BasicTimelineTab {
   timelineId: TimelineId;
   timelineType: TimelineType;
   graphEventId?: string;
+  sessionViewId?: string | null;
   timelineDescription: string;
 }
 
@@ -234,6 +235,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineFullScreen,
   timelineType,
   graphEventId,
+  sessionViewId,
   timelineDescription,
 }) => {
   const dispatch = useDispatch();
@@ -376,7 +378,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.session}`}
             onClick={setSessionAsActiveTab}
             isSelected={activeTab === TimelineTabs.session}
-            disabled={false}
+            disabled={sessionViewId === null}
             key={TimelineTabs.session}
           >
             {i18n.SESSION_TAB}

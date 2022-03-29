@@ -37,6 +37,24 @@ jest.mock('../../../resolver/view/use_state_syncing_actions');
 const useStateSyncingActionsMock = useStateSyncingActions as jest.Mock;
 
 jest.mock('../../../resolver/view/use_sync_selected_node');
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        sessionView: {
+          getSessionView: () => <div />,
+        },
+        data: {
+          search: {
+            search: jest.fn(),
+          },
+        },
+      },
+    }),
+  };
+});
 
 describe('GraphOverlay', () => {
   const { storage } = createSecuritySolutionStorageMock();
@@ -57,7 +75,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} />
+          <GraphOverlay timelineId={TimelineId.test} openDetailsPanel={() => {}} />
         </TestProviders>
       );
 
@@ -79,7 +97,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} />
+          <GraphOverlay timelineId={TimelineId.test} openDetailsPanel={() => {}} />
         </TestProviders>
       );
 
@@ -110,7 +128,7 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay timelineId={TimelineId.test} />
+          <GraphOverlay timelineId={TimelineId.test} openDetailsPanel={() => {}} />
         </TestProviders>
       );
 
@@ -126,7 +144,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} />
+          <GraphOverlay timelineId={timelineId} openDetailsPanel={() => {}} />
         </TestProviders>
       );
 
@@ -148,7 +166,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} />
+          <GraphOverlay timelineId={timelineId} openDetailsPanel={() => {}} />
         </TestProviders>
       );
 
@@ -189,7 +207,7 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay timelineId={timelineId} />
+          <GraphOverlay timelineId={timelineId} openDetailsPanel={() => {}} />
         </TestProviders>
       );
 

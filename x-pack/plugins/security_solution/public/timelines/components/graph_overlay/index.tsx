@@ -92,6 +92,7 @@ interface NavigationProps {
   timelineId: TimelineId;
   timelineFullScreen: boolean;
   toggleFullScreen: () => void;
+  graphEventId?: string;
 }
 
 const NavigationComponent: React.FC<NavigationProps> = ({
@@ -101,11 +102,12 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   timelineId,
   timelineFullScreen,
   toggleFullScreen,
+  graphEventId,
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
-        {i18n.CLOSE_ANALYZER}
+        {graphEventId ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION}
       </EuiButtonEmpty>
     </EuiFlexItem>
     {timelineId !== TimelineId.active && (
@@ -245,16 +247,43 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDe
   );
 
   if (!isInTimeline && sessionViewId !== null) {
-    return (
-      <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
-            {i18n.CLOSE_SESSION}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>
-      </EuiFlexGroup>
-    );
+    if (fullScreen) {
+      return (
+        <FullScreenOverlayContainer data-test-subj="overlayContainer">
+          <EuiFlexItem grow={false}>
+            <Navigation
+              fullScreen={fullScreen}
+              globalFullScreen={globalFullScreen}
+              onCloseOverlay={onCloseOverlay}
+              timelineId={timelineId}
+              timelineFullScreen={timelineFullScreen}
+              toggleFullScreen={toggleFullScreen}
+              graphEventId={graphEventId}
+            />
+          </EuiFlexItem>
+          <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>
+        </FullScreenOverlayContainer>
+      );
+    } else {
+      return (
+        <OverlayContainer data-test-subj="overlayContainer">
+          <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
+            <EuiFlexItem grow={false}>
+              <Navigation
+                fullScreen={fullScreen}
+                globalFullScreen={globalFullScreen}
+                onCloseOverlay={onCloseOverlay}
+                timelineId={timelineId}
+                timelineFullScreen={timelineFullScreen}
+                toggleFullScreen={toggleFullScreen}
+                graphEventId={graphEventId}
+              />
+            </EuiFlexItem>
+            <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>
+          </EuiFlexGroup>
+        </OverlayContainer>
+      );
+    }
   } else if (fullScreen && !isInTimeline) {
     return (
       <FullScreenOverlayContainer data-test-subj="overlayContainer">
@@ -268,6 +297,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDe
               timelineId={timelineId}
               timelineFullScreen={timelineFullScreen}
               toggleFullScreen={toggleFullScreen}
+              graphEventId={graphEventId}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

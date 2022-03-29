@@ -192,7 +192,7 @@ export class ProcessImpl implements Process {
     // TODO: add these to generator
     const actionsToFind = [EventAction.fork, EventAction.exec, EventAction.end];
     const filtered = events.filter((processEvent) => {
-      return true;
+      return actionsToFind.includes(processEvent.event.action);
     });
 
     // because events is already ordered by @timestamp we take the last event
