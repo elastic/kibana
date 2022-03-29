@@ -48,7 +48,8 @@ import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/publ
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
-import applyChangesIllustration from '../../../assets/apply_changes_illustration.png';
+import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
+import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
 import {
   getOriginalRequestErrorMessages,
   getUnknownVisualizationTypeError,
@@ -342,6 +343,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, expressionExists, dispatchLens]);
 
+  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
+
   const renderDragDropPrompt = () => {
     return (
       <EuiText
@@ -408,7 +411,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       >
         <img
           aria-hidden={true}
-          src={applyChangesIllustration}
+          src={IS_DARK_THEME ? applyChangesIllustrationDark : applyChangesIllustrationLight}
           alt={applyChangesString}
           className="lnsWorkspacePanel__promptIllustration"
         />
