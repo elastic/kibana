@@ -32,45 +32,38 @@ default space is used.
 
 === Request body
 
-////
 `alertId`::
 (Required*, string) The alert identifier. It is required only when `type` is
-`alert`.
-////
+`alert`. preview:[]
 
 `comment`::
-(Required, string) The new comment.
-//It is required only when `type` is `user`.
+(Required*, string) The new comment. It is required only when `type` is `user`.
 
-////
 `index`::
 (Required*, string) The alert index. It is required only when `type` is `alert`.
-////
+preview:[]
 
 `owner`::
 (Required, string) The application that owns the case. Valid values are:
 `cases`, `observability`, or `securitySolution`.
 
-////
 `rule`::
 (Required*, object) The rule that is associated with the alert. It is required
-only when `type` is `alert`.
+only when `type` is `alert`. preview:[]
 +
 .Properties of `rule`
 [%collapsible%open]
 ====
 `id`::
-(Required, string) The rule identifier.
-//TBD: Is there an API to retrieve this value for an alert?
+(Required, string) The rule identifier. preview:[]
 
 `name`::
-(Required, string) The rule name.
-//TBD: Ditto
+(Required, string) The rule name. preview:[]
+
 ====
-////
+
 `type`::
-(Required, string) The comment type, which must be `user`.
-//or `alert`
+(Required, string) The comment type, which must be `user` or `alert`.
 
 === Response code
 
@@ -152,7 +145,6 @@ The API returns details about the case and its comments. For example:
 } 
 --------------------------------------------------
 
-////
 Add an alert to the case:
 
 [source,sh]
@@ -170,4 +162,3 @@ POST api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/comments
 }
 --------------------------------------------------
 // KIBANA
-////
