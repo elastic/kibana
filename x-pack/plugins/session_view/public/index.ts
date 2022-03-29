@@ -7,7 +7,7 @@
 
 import { SessionViewPlugin } from './plugin';
 
-export type { SessionViewUIStart } from './types';
+export type { SessionViewStart } from './types';
 
 export function plugin() {
   return new SessionViewPlugin();
