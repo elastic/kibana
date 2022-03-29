@@ -9288,7 +9288,10 @@ class CiStatsReporter {
           headers,
           data: body,
           params: query,
-          adapter: _http.default
+          adapter: _http.default,
+          // if it can be serialized into a string, send it
+          maxBodyLength: Infinity,
+          maxContentLength: Infinity
         });
         return resp.data;
       } catch (error) {
