@@ -34,6 +34,9 @@ Defaults to `OR`.
 `fields`::
 (Optional, array of strings) The fields in the entity to return in the response.
 
+`from`::
+(Optional, string) **experimental** A KQL date to limit the retrieved cases to after a specific date. It supports date math expressions.
+
 `owner`::
 (Optional, string or array of strings) A filter to limit the retrieved cases to
 a specific set of applications. Valid values are: `cases`, `observability`,
@@ -77,6 +80,9 @@ Defaults to `desc`.
 
 `tags`::
 (Optional, string or array of strings) Filters the returned cases by tags.
+
+`to`::
+(Optional, string) **experimental** A KQL date to limit the retrieved cases to before a specific date. It supports date math expressions.
 
 === Response code
 
