@@ -22,7 +22,7 @@ describe('ServiceAllowedWrapper', () => {
     expect(await findByText('Test text')).toBeInTheDocument();
   });
 
-  it('renders loading state when enabled state is loading', async () => {
+  it('renders loading state when allowed state is loading', async () => {
     jest
       .spyOn(allowedHook, 'useSyntheticsServiceAllowed')
       .mockReturnValue({ loading: true, signupUrl: null });
