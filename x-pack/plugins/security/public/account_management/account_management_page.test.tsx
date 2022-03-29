@@ -21,6 +21,14 @@ const UserProfileMock = jest.spyOn(UserProfileImports, 'UserProfile');
 
 describe('<AccountManagementPage>', () => {
   const coreStart = coreMock.createStart();
+  // @ts-ignore Capabilities are marked as readonly without a way of overriding.
+  coreStart.application.capabilities = {
+    management: {
+      security: {
+        users: true,
+      },
+    },
+  };
   const theme$ = themeServiceMock.createTheme$();
   let history = scopedHistoryMock.create();
   const authc = securityMock.createSetup().authc;

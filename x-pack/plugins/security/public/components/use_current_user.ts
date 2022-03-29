@@ -11,7 +11,7 @@ import useAsync from 'react-use/lib/useAsync';
 import type { CoreStart } from 'src/core/public';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import type { UserAvatar, UserData } from '../../common';
+import type { UserData } from '../../common';
 import { UserProfileAPIClient } from '../account_management/user_profile/user_profile_api_client';
 import type { AuthenticationServiceSetup } from '../authentication';
 
@@ -30,7 +30,7 @@ export function useCurrentUser() {
   return useAsync(authc.getCurrentUser, [authc]);
 }
 
-export function useUserProfile<T extends UserData = { avatar: UserAvatar }>(dataPath = 'avatar') {
+export function useUserProfile<T extends UserData>(dataPath?: string) {
   const { services } = useKibana<CoreStart>();
   return useAsync(() => new UserProfileAPIClient(services.http).get<T>(dataPath), [services.http]);
 }
