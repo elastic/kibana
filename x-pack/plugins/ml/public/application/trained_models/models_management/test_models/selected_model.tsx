@@ -8,9 +8,11 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC } from 'react';
 
-import { NerOutput } from './models/ner';
-import { LangIdentInference, LangIdentOutput, FormattedLangIdentResp } from './models/lang_ident';
-import { NerInference, FormattedNerResp } from './models/ner';
+import { NerOutput, NerInference } from './models/ner';
+import type { FormattedNerResp } from './models/ner';
+import { LangIdentOutput, LangIdentInference } from './models/lang_ident';
+import type { FormattedLangIdentResp } from './models/lang_ident';
+
 import { TRAINED_MODEL_TYPE } from '../../../../../common/constants/trained_models';
 import { useMlApiContext } from '../../../contexts/kibana';
 import { InferenceInputForm } from './models/inference_input_form';
