@@ -26,7 +26,7 @@ import { DOC_TYPE } from '../../common/constants';
 import { ErrorMessage } from '../editor_frame_service/types';
 import { extract, inject } from '../../common/embeddable_factory';
 import type { SpacesPluginStart } from '../../../spaces/public';
-import { VisualizationMap } from '../types';
+import { DatasourceMap, VisualizationMap } from '../types';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
@@ -43,6 +43,7 @@ export interface LensEmbeddableStartServices {
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
+  datasourceMap: DatasourceMap;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
 }
@@ -92,6 +93,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       documentToExpression,
       injectFilterReferences,
       visualizationMap,
+      datasourceMap,
       uiActions,
       coreHttp,
       attributeService,
@@ -118,9 +120,12 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         documentToExpression,
         injectFilterReferences,
         visualizationMap,
+        datasourceMap,
         capabilities: {
           canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
           canSaveVisualizations: Boolean(capabilities.visualize.save),
+          navLinks: capabilities.navLinks,
+          discover: capabilities.discover,
         },
         usageCollection,
         theme,
