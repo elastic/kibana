@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { ConfigKey } from './config_key';
-import { LocationsCodec } from './locations';
+import { LocationsCodec, ServiceLocationErrors } from './locations';
 import {
   DataStreamCodec,
   ModeCodec,
@@ -228,6 +228,7 @@ export const MonitorManagementListResultCodec = t.type({
   page: t.number,
   perPage: t.number,
   total: t.union([t.number, t.null]),
+  syncErrors: ServiceLocationErrors,
 });
 
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;

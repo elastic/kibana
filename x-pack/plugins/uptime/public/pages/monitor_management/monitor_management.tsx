@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer, useCallback, Reducer } from 'react';
+import React, { useEffect, useReducer, useCallback, Reducer, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '../../../../observability/public';
@@ -19,6 +19,8 @@ import { MonitorListTabs } from '../../components/monitor_management/monitor_lis
 import { AllMonitors } from '../../components/monitor_management/monitor_list/all_monitors';
 import { InvalidMonitors } from '../../components/monitor_management/monitor_list/invalid_monitors';
 import { useInvalidMonitors } from '../../components/monitor_management/hooks/use_invalid_monitors';
+import { showSyncErrors } from '../../components/monitor_management/show_sync_errors';
+import { useLocations } from '../../components/monitor_management/hooks/use_locations';
 
 export const MonitorManagementPage: React.FC = () => {
   const [pageState, dispatchPageAction] = useReducer<typeof monitorManagementPageReducer>(
@@ -48,6 +50,10 @@ export const MonitorManagementPage: React.FC = () => {
   const dispatch = useDispatch();
   const monitorList = useSelector(monitorManagementListSelector);
 
+  const [hasShowedSyncErrors, setHasShowedSyncErrors] = useState(false);
+
+  const { locations } = useLocations();
+
   const { pageIndex, pageSize, sortField, sortOrder } = pageState as MonitorManagementListPageState;
 
   const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
@@ -64,6 +70,18 @@ export const MonitorManagementPage: React.FC = () => {
   }, [dispatch, pageState, pageIndex, pageSize, sortField, sortOrder, viewType]);
 
   const { data: monitorSavedObjects, loading: objectsLoading } = useInvalidMonitors(errorSummaries);
+
+  useEffect(() => {
+    if (
+      monitorList.list.syncErrors &&
+      monitorList.list.syncErrors.length > 0 &&
+      locations.length > 0 &&
+      !hasShowedSyncErrors
+    ) {
+      setHasShowedSyncErrors(true);
+      showSyncErrors(monitorList.list.syncErrors, monitorList.locations);
+    }
+  }, [monitorList, locations, hasShowedSyncErrors]);
 
   return (
     <>

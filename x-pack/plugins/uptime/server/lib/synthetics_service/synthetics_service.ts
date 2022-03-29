@@ -30,6 +30,7 @@ import {
   SyntheticsMonitor,
   ThrottlingOptions,
   SyntheticsMonitorWithId,
+  ServiceLocationErrors,
 } from '../../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 import { hydrateSavedObjects } from './hydrate_saved_object';
@@ -57,6 +58,8 @@ export class SyntheticsService {
   private indexTemplateInstalling?: boolean;
 
   public isAllowed: boolean;
+
+  public syncErrors?: ServiceLocationErrors = [];
 
   constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
@@ -140,7 +143,7 @@ export class SyntheticsService {
 
               if (service.isAllowed) {
                 service.setupIndexTemplates();
-                await service.pushConfigs();
+                service.syncErrors = await service.pushConfigs();
               }
 
               return { state };
