@@ -22,7 +22,8 @@ import type { SavedObjectsManagementRecord } from '../types';
 import { SavedObjectsManagementColumn } from '../types';
 
 interface WrapperProps {
-  namespaceType: SavedObjectsNamespaceType;
+  objectType: string;
+  objectNamespaceType: SavedObjectsNamespaceType;
   spacesApiUi: SpacesApiUi;
   spaceListProps: SpaceListProps;
   flyoutProps: ShareToSpaceFlyoutProps;
@@ -45,8 +46,49 @@ const isolatedObjectTypeContent = i18n.translate(
       'This saved object type only exists in one space, it cannot be assigned to multiple spaces.',
   }
 );
+const shareableSoonObjectTypeContent = i18n.translate(
+  'savedObjectsManagement.shareToSpace.shareableSoonObjectTypeContent',
+  {
+    defaultMessage:
+      'Coming soon: this saved object type only exists in one space, but it will be assignable to multiple spaces in a future release.',
+  }
+);
+const globalObjectTypeTitle = i18n.translate(
+  'savedObjectsManagement.shareToSpace.globalObjectTypeTitle',
+  { defaultMessage: 'Global object type' }
+);
+const globalObjectTypeContent = i18n.translate(
+  'savedObjectsManagement.shareToSpace.globalObjectTypeContent',
+  { defaultMessage: 'This saved object type always exists in all spaces.' }
+);
 
-const Wrapper = ({ namespaceType, spacesApiUi, spaceListProps, flyoutProps }: WrapperProps) => {
+/**
+ * This is a hard-coded list that can be removed when each of these "share-capable" object types are made to be shareable.
+ * Note, this list does not preclude other object types from being made shareable in the future, it just consists of the object types that
+ * we are working towards making shareable in the near term.
+ */
+const SHAREABLE_SOON_OBJECT_TYPES = [
+  'tag',
+  'dashboard',
+  'canvas-workpad',
+  'canvas-element',
+  'lens',
+  'visualization',
+  'map',
+  'graph-workspace',
+  'search',
+  'query',
+  'rule',
+  'connector',
+];
+
+const Wrapper = ({
+  objectType,
+  objectNamespaceType,
+  spacesApiUi,
+  spaceListProps,
+  flyoutProps,
+}: WrapperProps) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   function listOnClick() {
@@ -64,18 +106,29 @@ const Wrapper = ({ namespaceType, spacesApiUi, spaceListProps, flyoutProps }: Wr
     [spacesApiUi]
   );
 
-  if (namespaceType === 'single' || namespaceType === 'multiple-isolated') {
+  if (objectNamespaceType === 'single' || objectNamespaceType === 'multiple-isolated') {
+    const content = SHAREABLE_SOON_OBJECT_TYPES.includes(objectType)
+      ? shareableSoonObjectTypeContent
+      : isolatedObjectTypeContent;
     return (
       <EuiIconTip
         type="minus"
         position="left"
         delay="long"
         title={isolatedObjectTypeTitle}
-        content={isolatedObjectTypeContent}
+        content={content}
       />
     );
-  } else if (namespaceType === 'agnostic') {
-    return null;
+  } else if (objectNamespaceType === 'agnostic') {
+    return (
+      <EuiIconTip
+        type="minus"
+        position="left"
+        delay="long"
+        title={globalObjectTypeTitle}
+        content={globalObjectTypeContent}
+      />
+    );
   }
 
   return (
@@ -120,7 +173,8 @@ export class ShareToSpaceSavedObjectsManagementColumn extends SavedObjectsManage
 
       return (
         <Wrapper
-          namespaceType={record.meta.namespaceType}
+          objectType={record.type}
+          objectNamespaceType={record.meta.namespaceType}
           spacesApiUi={this.spacesApiUi}
           spaceListProps={spaceListProps}
           flyoutProps={flyoutProps}
