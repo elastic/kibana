@@ -25,6 +25,11 @@ export interface AlertingUsage {
     string,
     Record<string, number>
   >;
+  percentile_num_scheduled_actions_per_day: {
+    p50: number;
+    p90: number;
+    p99: number;
+  };
   avg_execution_time_per_day: number;
   avg_execution_time_by_type_per_day: Record<string, number>;
   avg_es_search_duration_per_day: number;

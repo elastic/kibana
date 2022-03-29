@@ -66,6 +66,13 @@ const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_fail
     unknown: { type: 'long' },
   };
 
+const byPercentileSchema: MakeSchemaFrom<AlertingUsage>['percentile_num_scheduled_actions_per_day'] =
+  {
+    p50: { type: 'long' },
+    p90: { type: 'long' },
+    p99: { type: 'long' },
+  };
+
 const byReasonSchemaByType: MakeSchemaFrom<AlertingUsage>['count_rules_executions_failured_by_reason_by_type_per_day'] =
   {
     // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
@@ -160,6 +167,11 @@ export function createAlertingUsageCollector(
           avg_es_search_duration_by_type_per_day: {},
           avg_total_search_duration_per_day: 0,
           avg_total_search_duration_by_type_per_day: {},
+          percentile_num_scheduled_actions_per_day: {
+            p50: 0,
+            p90: 0,
+            p99: 0,
+          },
         };
       }
     },
@@ -211,6 +223,7 @@ export function createAlertingUsageCollector(
       avg_es_search_duration_by_type_per_day: byTypeSchema,
       avg_total_search_duration_per_day: { type: 'long' },
       avg_total_search_duration_by_type_per_day: byTypeSchema,
+      percentile_num_scheduled_actions_per_day: byPercentileSchema,
     },
   });
 }

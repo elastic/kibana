@@ -409,6 +409,12 @@ export async function getExecutionsPerDayCount(
         avgTotalSearchDuration: {
           avg: { field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms' },
         },
+        percentileScheduledActions: {
+          percentiles: {
+            field: 'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
+            percents: [50, 90, 99],
+          },
+        },
       },
     },
   });
@@ -438,6 +444,10 @@ export async function getExecutionsPerDayCount(
     // @ts-expect-error aggegation type is not specified
     searchResult.aggregations.avgTotalSearchDuration.value
   );
+
+  const aggsScheduledActionsPercentiles =
+    // @ts-expect-error aggegation type is not specified
+    searchResult.aggregations.percentileScheduledActions.values;
 
   const executionFailuresAggregations = searchResult.aggregations as {
     failuresByReason: { value: { reasons: Record<string, Record<string, string>> } };
@@ -537,6 +547,7 @@ export async function getExecutionsPerDayCount(
       }),
       {}
     ),
+    scheduledActionsPercentiles: aggsScheduledActionsPercentiles,
   };
 }
 

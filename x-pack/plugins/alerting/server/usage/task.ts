@@ -144,8 +144,10 @@ export function telemetryTaskRunner(
                   avg_total_search_duration_per_day: dailyExecutionCounts.avgTotalSearchDuration,
                   avg_total_search_duration_by_type_per_day:
                     dailyExecutionCounts.avgTotalSearchDurationByType,
+                  percentile_num_scheduled_actions_per_day:
+                    dailyExecutionCounts.scheduledActionsPercentiles,
                 },
-                runAt: getNextMidnight(),
+                runAt: new Date(), // getNextMidnight(),
               };
             }
           )
@@ -153,7 +155,7 @@ export function telemetryTaskRunner(
             logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {
               state: {},
-              runAt: getNextMidnight(),
+              runAt: new Date(), // getNextMidnight(),
             };
           });
       },
