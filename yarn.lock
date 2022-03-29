@@ -2921,6 +2921,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/axe-config@link:bazel-bin/packages/kbn-axe-config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/babel-code-parser@link:bazel-bin/packages/kbn-babel-code-parser":
   version "0.0.0"
   uid ""
@@ -5940,6 +5944,10 @@
   uid ""
 
 "@types/kbn__apm-utils@link:bazel-bin/packages/kbn-apm-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__axe-config@link:bazel-bin/packages/kbn-axe-config/npm_module_types":
   version "0.0.0"
   uid ""
 
