@@ -109,6 +109,22 @@ describe('config schema', () => {
           "min_interval_seconds": 10,
           "show_license_expiration": true,
         },
+        "uiPublic": Object {
+          "ccs": Object {
+            "enabled": true,
+          },
+          "container": Object {
+            "elasticsearch": Object {
+              "enabled": false,
+            },
+            "logstash": Object {
+              "enabled": false,
+            },
+          },
+          "enabled": true,
+          "min_interval_seconds": 10,
+          "show_license_expiration": true,
+        },
       }
     `);
   });
