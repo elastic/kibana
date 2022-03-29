@@ -7,19 +7,17 @@
 import { act } from 'react-dom/test-utils';
 
 import { HttpSetup } from 'src/core/public';
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { RestoreSnapshot } from '../../../public/application/sections/restore_snapshot';
 import { WithAppDependencies } from './setup_environment';
 import { REPOSITORY_NAME, SNAPSHOT_NAME } from '../helpers/constant';
 
-const testBedConfig = () => {
-  return {
-    memoryRouter: {
-      initialEntries: [`/restore/${REPOSITORY_NAME}/${SNAPSHOT_NAME}`],
-      componentRoutePath: '/restore/:repositoryName?/:snapshotId*',
-    },
-    doMountAsync: true,
-  };
+const testBedConfig: AsyncTestBedConfig = {
+  memoryRouter: {
+    initialEntries: [`/restore/${REPOSITORY_NAME}/${SNAPSHOT_NAME}`],
+    componentRoutePath: '/restore/:repositoryName?/:snapshotId*',
+  },
+  doMountAsync: true,
 };
 
 const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
@@ -86,7 +84,7 @@ export type RestoreSnapshotTestBed = TestBed<RestoreSnapshotFormTestSubject> & {
 export const setup = async (httpSetup: HttpSetup): Promise<RestoreSnapshotTestBed> => {
   const initTestBed = registerTestBed<RestoreSnapshotFormTestSubject>(
     WithAppDependencies(RestoreSnapshot, httpSetup),
-    testBedConfig()
+    testBedConfig
   );
 
   const testBed = await initTestBed();
