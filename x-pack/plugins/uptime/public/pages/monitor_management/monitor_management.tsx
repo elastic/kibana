@@ -16,13 +16,14 @@ import { MonitorManagementListPageState } from '../../components/monitor_managem
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 import { useInlineErrors } from '../../components/monitor_management/hooks/use_inline_errors';
 import { MonitorListTabs } from '../../components/monitor_management/monitor_list/list_tabs';
+import { MonitorAsyncError } from '../../components/monitor_management/monitor_list/monitor_async_error';
 import { AllMonitors } from '../../components/monitor_management/monitor_list/all_monitors';
 import { InvalidMonitors } from '../../components/monitor_management/monitor_list/invalid_monitors';
 import { useInvalidMonitors } from '../../components/monitor_management/hooks/use_invalid_monitors';
-import { showSyncErrors } from '../../components/monitor_management/show_sync_errors';
 import { useLocations } from '../../components/monitor_management/hooks/use_locations';
 
 export const MonitorManagementPage: React.FC = () => {
+  useLocations();
   const [pageState, dispatchPageAction] = useReducer<typeof monitorManagementPageReducer>(
     monitorManagementPageReducer,
     {
@@ -50,10 +51,6 @@ export const MonitorManagementPage: React.FC = () => {
   const dispatch = useDispatch();
   const monitorList = useSelector(monitorManagementListSelector);
 
-  const [hasShowedSyncErrors, setHasShowedSyncErrors] = useState(false);
-
-  const { locations } = useLocations();
-
   const { pageIndex, pageSize, sortField, sortOrder } = pageState as MonitorManagementListPageState;
 
   const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
@@ -71,20 +68,9 @@ export const MonitorManagementPage: React.FC = () => {
 
   const { data: monitorSavedObjects, loading: objectsLoading } = useInvalidMonitors(errorSummaries);
 
-  useEffect(() => {
-    if (
-      monitorList.list.syncErrors &&
-      monitorList.list.syncErrors.length > 0 &&
-      locations.length > 0 &&
-      !hasShowedSyncErrors
-    ) {
-      setHasShowedSyncErrors(true);
-      showSyncErrors(monitorList.list.syncErrors, monitorList.locations);
-    }
-  }, [monitorList, locations, hasShowedSyncErrors]);
-
   return (
     <>
+      <MonitorAsyncError />
       <MonitorListTabs
         invalidTotal={monitorSavedObjects?.length ?? 0}
         onUpdate={onUpdate}

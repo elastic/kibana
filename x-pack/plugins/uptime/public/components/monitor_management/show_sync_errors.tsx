@@ -14,18 +14,19 @@ import { ServiceLocationErrors, ServiceLocations } from '../../../common/runtime
 export const showSyncErrors = (errors: ServiceLocationErrors, locations: ServiceLocations) => {
   Object.values(errors).forEach((location) => {
     const { status: responseStatus, reason } = location.error || {};
-    const locationName = locations?.find((loc) => loc?.id === location.locationId)?.label;
-
-    const isPublicBetaError = reason?.toLocaleLowerCase().includes('public beta');
-
     kibanaService.toasts.addWarning({
-      title: isPublicBetaError ? BETA_ERROR_MESSAGE : UNABLE_SYNC_MESSAGE,
+      title: i18n.translate('xpack.uptime.monitorManagement.service.error.title', {
+        defaultMessage: `Unable to sync monitor config`,
+      }),
       text: toMountPoint(
         <>
           <p>
-            {!isPublicBetaError
-              ? getSyncErrorDescription(locationName)
-              : getBetaErrorDescription(locationName)}
+            {i18n.translate('xpack.uptime.monitorManagement.service.error.message', {
+              defaultMessage: `Your monitor was saved, but there was a problem syncing the configuration for {location}. We will automatically try again later. If this problem continues, your monitors will stop running in {location}. Please contact Support for assistance.`,
+              values: {
+                location: locations?.find((loc) => loc?.id === location.locationId)?.label,
+              },
+            })}
           </p>
           {responseStatus || reason ? (
             <p>
@@ -45,7 +46,7 @@ export const showSyncErrors = (errors: ServiceLocationErrors, locations: Service
           ) : null}
         </>
       ),
-      toastLifeTimeMs: isPublicBetaError ? 60000 : 30000,
+      toastLifeTimeMs: 30000,
     });
   });
 };
