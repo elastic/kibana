@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExecutionLogSearchBar snapshots renders correctly against snapshot 1`] = `
+<EuiFlexGroup
+  gutterSize="s"
+>
+  <EuiFlexItem
+    grow={true}
+  />
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFilterGroup>
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiFilterButton
+            data-test-subj="status-filter-popover-button"
+            grow={false}
+            hasActiveFilters={false}
+            iconType="arrowDown"
+            isSelected={false}
+            numActiveFilters={0}
+            numFilters={3}
+            onClick={[Function]}
+          >
+            Status
+          </EuiFilterButton>
+        }
+        closePopover={[Function]}
+        display="inlineBlock"
+        hasArrow={true}
+        isOpen={false}
+        ownFocus={true}
+        panelPaddingSize="none"
+        repositionOnScroll={true}
+      >
+        <EuiFilterSelectItem
+          key="0-succeeded"
+          onClick={[Function]}
+          showIcons={true}
+          title="succeeded"
+        >
+          <EuiHealth
+            color="success"
+          >
+            Succeeded
+          </EuiHealth>
+        </EuiFilterSelectItem>
+        <EuiFilterSelectItem
+          key="1-failed"
+          onClick={[Function]}
+          showIcons={true}
+          title="failed"
+        >
+          <EuiHealth
+            color="danger"
+          >
+            Failed
+          </EuiHealth>
+        </EuiFilterSelectItem>
+        <EuiFilterSelectItem
+          key="2-partial failure"
+          onClick={[Function]}
+          showIcons={true}
+          title="partial failure"
+        >
+          <EuiHealth
+            color="warning"
+          >
+            Partial failure
+          </EuiHealth>
+        </EuiFilterSelectItem>
+      </EuiPopover>
+    </EuiFilterGroup>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

@@ -22,6 +22,7 @@ describe('<MonitorAsyncError />', () => {
   const state = {
     monitorManagementList: {
       throttling: DEFAULT_THROTTLING,
+      enablement: null,
       list: {
         perPage: 5,
         page: 1,
@@ -52,6 +53,7 @@ describe('<MonitorAsyncError />', () => {
             lat: 0,
             lon: 0,
           },
+          url: '',
         },
         {
           id: 'us_north',
@@ -60,15 +62,18 @@ describe('<MonitorAsyncError />', () => {
             lat: 0,
             lon: 0,
           },
+          url: '',
         },
       ],
       error: {
         serviceLocations: null,
         monitorList: null,
+        enablement: null,
       },
       loading: {
         monitorList: true,
         serviceLocations: false,
+        enablement: false,
       },
       syntheticsService: {
         loading: false,

@@ -40,7 +40,7 @@ cd elastic-agent-${kibanaVersion}-darwin-x86_64
 sudo ./elastic-agent install ${enrollArgs}`;
 
   const windowsCommand = `wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
-Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip
 .\\elastic-agent.exe install ${enrollArgs}`;
 
   const linuxDebCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-amd64.deb

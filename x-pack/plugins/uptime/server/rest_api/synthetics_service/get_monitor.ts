@@ -12,6 +12,7 @@ import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from './service_errors';
+import { normalizeSecrets } from '../../lib/synthetics_service/utils/secrets';
 
 export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -21,10 +22,21 @@ export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerL
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ request, response, savedObjectsClient }): Promise<any> => {
+  handler: async ({
+    request,
+    response,
+    server: { encryptedSavedObjects },
+    savedObjectsClient,
+  }): Promise<any> => {
     const { monitorId } = request.params;
+    const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
     try {
-      return await libs.requests.getSyntheticsMonitor({ monitorId, savedObjectsClient });
+      const monitorWithSecrets = await libs.requests.getSyntheticsMonitor({
+        monitorId,
+        encryptedSavedObjectsClient,
+        savedObjectsClient,
+      });
+      return normalizeSecrets(monitorWithSecrets);
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return getMonitorNotFoundResponse(response, monitorId);

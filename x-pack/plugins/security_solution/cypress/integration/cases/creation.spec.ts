@@ -87,8 +87,8 @@ describe('Cases', () => {
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', this.mycase.name);
     cy.get(ALL_CASES_REPORTER).should('have.text', this.mycase.reporter);
-    (this.mycase as TestCase).tags.forEach((tag, index) => {
-      cy.get(ALL_CASES_TAGS(index)).should('have.text', tag);
+    (this.mycase as TestCase).tags.forEach((tag) => {
+      cy.get(ALL_CASES_TAGS(tag)).should('have.text', tag);
     });
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
     cy.get(ALL_CASES_OPENED_ON).should('include.text', 'ago');
