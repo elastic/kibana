@@ -127,7 +127,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   <EuiToolTip
                     content={
                       <FormattedMessage
-                        id="xpack.security.accountManagement.userProfile.reservedUserWarning"
+                        id="xpack.security.accountManagement.userProfile.cannotChangePasswordWarning"
                         defaultMessage="You can't change the password for this account."
                       />
                     }
@@ -523,13 +523,13 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
         await Promise.all(promises);
         resetInitialValues(values);
         services.notifications.toasts.addSuccess(
-          i18n.translate('xpack.spaces.management.customizeSpaceAvatar.initialsHelpText', {
+          i18n.translate('xpack.security.accountManagement.userProfile.submitSuccessTitle', {
             defaultMessage: 'Profile updated',
           })
         );
       } catch (error) {
         services.notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.spaces.management.customizeSpaceAvatar.initialsHelpText', {
+          title: i18n.translate('xpack.security.accountManagement.userProfile.submitErrorTitle', {
             defaultMessage: "Couldn't update profile",
           }),
         });
