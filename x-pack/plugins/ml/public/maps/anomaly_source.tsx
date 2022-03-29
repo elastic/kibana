@@ -33,6 +33,8 @@ import { getResultsForJobId, ML_ANOMALY_LAYERS, MlAnomalyLayersType } from './ut
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
 import type { MlApiServices } from '../application/services/ml_api_service';
 
+const RESULT_LIMIT = 1000;
+
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
   jobId: string;
   typicalActual: MlAnomalyLayersType;
@@ -77,7 +79,7 @@ export class AnomalySource implements IVectorSource {
       data: results,
       meta: {
         // Set this to true if data is incomplete (e.g. capping number of results to first 1k)
-        areResultsTrimmed: results.features.length === 1000,
+        areResultsTrimmed: results.features.length === RESULT_LIMIT,
       },
     };
   }
@@ -148,15 +150,22 @@ export class AnomalySource implements IVectorSource {
   }
 
   getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
-    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
-    if (!featureCollection || !meta) {
+
+    if (meta?.areResultsTrimmed) {
       return {
-        tooltipContent: null,
-        areResultsTrimmed: false,
+        tooltipContent: i18n.translate('xpack.ml.maps.resultsTrimmedMsg', {
+          defaultMessage: `Results limited to first {count} documents.`,
+          values: { count: RESULT_LIMIT },
+        }),
+        areResultsTrimmed: true,
       };
     }
-    return { tooltipContent: null, areResultsTrimmed: meta?.areEntitiesTrimmed ?? false };
+
+    return {
+      tooltipContent: null,
+      areResultsTrimmed: false,
+    };
   }
 
   getType(): string {
