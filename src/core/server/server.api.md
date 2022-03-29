@@ -2362,6 +2362,7 @@ export interface SavedObjectsExportTransformContext {
 // @public
 export type SavedObjectsFieldMapping = estypes.MappingProperty & {
     dynamic?: false | 'strict';
+    properties?: Record<estypes.PropertyName, estypes.MappingProperty>;
 };
 
 // @public (undocumented)
