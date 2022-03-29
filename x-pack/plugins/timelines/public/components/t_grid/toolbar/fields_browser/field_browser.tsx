@@ -252,7 +252,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     return show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {};
   }, [show, browserFields]);
 
-  const filteredBrowserFieldsToUse =
+  const activeFilteredBrowserFields =
     filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory;
   return (
     <EuiModal onClose={closeAndRestoreFocus} style={{ width, maxWidth: width }}>
@@ -268,7 +268,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             <EuiFlexItem>
               <Search
                 data-test-subj="header"
-                filteredBrowserFields={filteredBrowserFieldsToUse}
+                filteredBrowserFields={activeFilteredBrowserFields}
                 isSearching={isSearching}
                 onSearchInputChange={onInputChange}
                 searchInput={filterInput}
@@ -287,7 +287,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             <EuiFlexItem grow={false}>
               <CategoriesPane
                 data-test-subj="left-categories-pane"
-                filteredBrowserFields={filteredBrowserFieldsToUse}
+                filteredBrowserFields={activeFilteredBrowserFields}
                 width={CATEGORY_PANE_WIDTH}
                 onCategorySelected={setSelectedCategoryId}
                 selectedCategoryId={selectedCategoryId}
@@ -299,7 +299,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               <FieldsPane
                 columnHeaders={columnHeaders}
                 data-test-subj="fields-pane"
-                filteredBrowserFields={filteredBrowserFieldsToUse}
+                filteredBrowserFields={activeFilteredBrowserFields}
                 onCategorySelected={setSelectedCategoryId}
                 onUpdateColumns={onUpdateColumns}
                 searchInput={appliedFilterInput}
