@@ -61,5 +61,8 @@ describe('Alert Event Details', () => {
     inputQuery('select * from uptime;');
     submitQuery();
     checkResults();
+    cy.contains('Save for later').click();
+    cy.contains('Save query');
+    cy.react('EuiButtonDisplay').contains('Save');
   });
 });
