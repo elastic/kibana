@@ -29,13 +29,10 @@ export const ToolbarPopover = ({ label, iconType, children, iconSide, ...popover
   const onButtonClick = () => setIsOpen((status) => !status);
   const closePopover = () => setIsOpen(false);
 
-  const button = (
-    <ToolbarButton onClick={onButtonClick} iconType={iconType} iconSide={iconSide} {...{ label }} />
-  );
+  const button = <ToolbarButton onClick={onButtonClick} {...{ label, iconSide, iconType }} />;
 
   return (
-    // @ts-ignore Types of property 'css' are incompatible. Type 'ArrayInterpolation<undefined>' is not assignable to type 'Interpolation<Theme>'.
-    <EuiPopover {...{ isOpen, button, closePopover }} {...popover}>
+    <EuiPopover panelPaddingSize="none" {...{ isOpen, button, closePopover }} {...popover}>
       {children({ closePopover })}
     </EuiPopover>
   );
