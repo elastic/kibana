@@ -41,7 +41,7 @@ a specific set of applications. Valid values are: `cases`, `observability`,
 and `securitySolution`. If this parameter is omitted, the response contains all
 cases that the user has access to read.
 
-WARNING: The `includeComments` query parameter is deprecated and will be removed 
+ deprecated:[8.1.0]
 in a future release.
 
 ==== Response code
@@ -55,7 +55,7 @@ Returns case ID `a18b38a0-71b0-11ea-a0b2-c51ea50a58e2` without comments:
 
 [source,sh]
 --------------------------------------------------
-GET api/cases/a18b38a0-71b0-11ea-a0b2-c51ea50a58e2?includeComments=false
+GET api/cases/a18b38a0-71b0-11ea-a0b2-c51ea50a58e2
 --------------------------------------------------
 // KIBANA
 
