@@ -12,7 +12,7 @@ import { ActionMenuContent } from './action_menu_content';
 
 describe('ActionMenuContent', () => {
   it('renders alerts dropdown', async () => {
-    const { getByLabelText, getByText } = render(<ActionMenuContent config={{}} />);
+    const { getByLabelText, getByText } = render(<ActionMenuContent />);
 
     const alertsDropdown = getByLabelText('Open alerts and rules context menu');
     fireEvent.click(alertsDropdown);
@@ -24,7 +24,7 @@ describe('ActionMenuContent', () => {
   });
 
   it('renders settings link', () => {
-    const { getByRole, getByText } = render(<ActionMenuContent config={{}} />);
+    const { getByRole, getByText } = render(<ActionMenuContent />);
 
     const settingsAnchor = getByRole('link', { name: 'Navigate to the Uptime settings page' });
     expect(settingsAnchor.getAttribute('href')).toBe('/settings');
@@ -32,7 +32,7 @@ describe('ActionMenuContent', () => {
   });
 
   it('renders exploratory view link', () => {
-    const { getByLabelText, getByText } = render(<ActionMenuContent config={{}} />);
+    const { getByLabelText, getByText } = render(<ActionMenuContent />);
 
     const analyzeAnchor = getByLabelText(
       'Navigate to the "Explore Data" view to visualize Synthetics/User data'
@@ -43,7 +43,7 @@ describe('ActionMenuContent', () => {
   });
 
   it('renders Add Data link', () => {
-    const { getByLabelText, getByText } = render(<ActionMenuContent config={{}} />);
+    const { getByLabelText, getByText } = render(<ActionMenuContent />);
 
     const addDataAnchor = getByLabelText('Navigate to a tutorial about adding Uptime data');
 
