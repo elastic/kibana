@@ -7,8 +7,9 @@
     "name": "Unified Search",
     "githubTeam": "kibana-app-services"
   },
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": ["dataViews", "data", "uiActions"],
+  "serviceFolders": ["autocomplete"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "data"]
 }

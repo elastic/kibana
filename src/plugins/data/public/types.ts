@@ -14,7 +14,6 @@ import { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { DatatableUtilitiesService } from '../common';
-import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
@@ -36,13 +35,13 @@ export interface DataStartDependencies {
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsPublicPluginStart;
+  autocomplete: '';
 }
 
 /**
  * Data plugin public Setup contract
  */
 export interface DataPublicPluginSetup {
-  autocomplete: AutocompleteSetup;
   search: ISearchSetup;
   query: QuerySetup;
 }
@@ -64,11 +63,6 @@ export interface DataPublicPluginStart {
    * {@link DataPublicPluginStartActions}
    */
   actions: DataPublicPluginStartActions;
-  /**
-   * autocomplete service
-   * {@link AutocompleteStart}
-   */
-  autocomplete: AutocompleteStart;
   /**
    * data views service
    * {@link DataViewsContract}

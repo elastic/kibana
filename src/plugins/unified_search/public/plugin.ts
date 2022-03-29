@@ -20,14 +20,17 @@ import type { UnifiedSearchStartDependencies, UnifiedSearchSetupDependencies } f
 import { createFilterAction } from './actions/apply_filter_action';
 import { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 import { APPLY_FILTER_TRIGGER } from '../../data/public';
+import { AutocompleteService } from './autocomplete';
 
 export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
 {
+  private readonly autocomplete: AutocompleteService;
   private readonly storage: IStorageWrapper;
   private usageCollection: UsageCollectionSetup | undefined;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
   }
 
@@ -40,7 +43,12 @@ export class UnifiedSearchPublicPlugin
       createFilterAction(query.filterManager, query.timefilter.timefilter, core.theme)
     );
 
-    return {};
+    return {
+      autocomplete: this.autocomplete.setup(core, {
+        timefilter: queryService.timefilter,
+        usageCollection,
+      }),
+    };
   }
 
   public start(
@@ -68,8 +76,11 @@ export class UnifiedSearchPublicPlugin
         IndexPatternSelect: createIndexPatternSelect(dataViews),
         SearchBar,
       },
+      autocomplete: this.autocomplete.start(),
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.autocomplete.clearProviders();
+  }
 }

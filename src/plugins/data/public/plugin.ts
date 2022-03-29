@@ -17,7 +17,6 @@ import type {
   DataSetupDependencies,
   DataStartDependencies,
 } from './types';
-import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
 import {
@@ -48,7 +47,6 @@ export class DataPublicPlugin
       DataStartDependencies
     >
 {
-  private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
@@ -58,7 +56,6 @@ export class DataPublicPlugin
     this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
 
-    this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
     this.nowProvider = new NowProvider();
   }
@@ -109,10 +106,6 @@ export class DataPublicPlugin
     );
 
     return {
-      autocomplete: this.autocomplete.setup(core, {
-        timefilter: queryService.timefilter,
-        usageCollection,
-      }),
       search: searchService,
       query: queryService,
     };
@@ -120,7 +113,7 @@ export class DataPublicPlugin
 
   public start(
     core: CoreStart,
-    { uiActions, fieldFormats, dataViews }: DataStartDependencies
+    { uiActions, fieldFormats, dataViews, autocomplete }: DataStartDependencies
   ): DataPublicPluginStart {
     const { uiSettings, notifications, overlays } = core;
     setNotifications(notifications);
@@ -157,7 +150,7 @@ export class DataPublicPlugin
         createFiltersFromValueClickAction,
         createFiltersFromRangeSelectAction,
       },
-      autocomplete: this.autocomplete.start(),
+      autocomplete: 'autocomplete',
       datatableUtilities,
       fieldFormats,
       indexPatterns: dataViews,
@@ -171,7 +164,6 @@ export class DataPublicPlugin
   }
 
   public stop() {
-    this.autocomplete.clearProviders();
     this.queryService.stop();
     this.searchService.stop();
   }

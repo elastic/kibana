@@ -10,14 +10,16 @@ import type { FieldFormatsStart } from '../../field_formats/public';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './index';
 import type { DataPublicPluginStart } from '../../data/public';
 import type { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
+import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;
   data: DataPublicPluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UnifiedSearchPluginSetup {}
+export interface UnifiedSearchPluginSetup {
+  autocomplete: AutocompleteSetup;
+}
 
 export interface UnifiedSearchStartDependencies {
   dataViews: DataViewsPublicPluginStart;
@@ -38,6 +40,12 @@ export interface UnifiedSearchPublicPluginStartUi {
  * Unified search plugin public Start contract
  */
 export interface UnifiedSearchPublicPluginStart {
+  /**
+   * autocomplete service
+   * {@link AutocompleteStart}
+   */
+  autocomplete: AutocompleteStart;
+
   /**
    * prewired UI components
    * {@link DataPublicPluginStartUi}

@@ -32,8 +32,6 @@ export const UI_SETTINGS = {
   TIMEPICKER_TIME_DEFAULTS: 'timepicker:timeDefaults',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
-  AUTOCOMPLETE_USE_TIMERANGE: 'autocomplete:useTimeRange',
-  AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: 'autocomplete:valueSuggestionMethod',
   DATE_FORMAT: 'dateFormat',
   DATEFORMAT_TZ: 'dateFormat:tz',
 } as const;

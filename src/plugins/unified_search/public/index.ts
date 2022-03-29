@@ -25,3 +25,18 @@ export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new UnifiedSearchPublicPlugin(initializerContext);
 }
+
+/*
+ * Autocomplete query suggestions:
+ */
+
+export type {
+  QuerySuggestion,
+  QuerySuggestionGetFn,
+  QuerySuggestionGetFnArgs,
+  QuerySuggestionBasic,
+  QuerySuggestionField,
+  AutocompleteStart,
+} from './autocomplete';
+
+export { QuerySuggestionTypes } from './autocomplete';
