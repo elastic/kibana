@@ -91,8 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
-    // setting set in kibana.yml to work (not enabled by default)
-    it('should be able to drill down to discover', async () => {
+    // setting set in kibana.yml to test (not enabled by default)
+    it('should hide old "explore underlying data" action', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
@@ -102,13 +102,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.dashboard.saveDashboard('lnsDrilldown');
       await panelActions.openContextMenu();
-      await testSubjects.clickWhenNotDisabled('embeddablePanelAction-ACTION_EXPLORE_DATA');
-      await PageObjects.discover.waitForDiscoverAppOnScreen();
 
-      const el = await testSubjects.find('indexPattern-switch-link');
-      const text = await el.getVisibleText();
-
-      expect(text).to.be('logstash-*');
+      expect(await testSubjects.exists('embeddablePanelAction-ACTION_EXPLORE_DATA')).not.to.be.ok();
     });
 
     it('should be able to add filters by clicking in pie chart', async () => {

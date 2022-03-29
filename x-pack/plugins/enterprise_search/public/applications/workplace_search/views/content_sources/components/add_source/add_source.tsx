@@ -41,17 +41,27 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const { initializeAddSource, setAddSourceStep, saveSourceConfig, resetSourceState } =
     useActions(AddSourceLogic);
   const { addSourceCurrentStep, sourceConfigData, dataLoading } = useValues(AddSourceLogic);
-  const { name, categories, needsPermissions, accountContextOnly, privateSourcesEnabled } =
-    sourceConfigData;
-  const { serviceType, configuration, features, objTypes } = props.sourceData;
+  const {
+    name,
+    categories,
+    needsPermissions,
+    accountContextOnly,
+    privateSourcesEnabled,
+    configured,
+  } = sourceConfigData;
+  const { serviceType, configuration, features, objTypes, externalConnectorAvailable } =
+    props.sourceData;
   const addPath = getAddPath(serviceType);
   const { isOrganization } = useValues(AppLogic);
   const { externalConfigured } = useValues(SourcesLogic);
 
   useEffect(() => {
-    initializeAddSource(props);
+    // We can land on this page from a choice page for multiple types of connectors
+    // If that's the case we want to skip the intro and configuration, if the external & internal connector have already been configured
+    const goToConnect = externalConnectorAvailable && externalConfigured && configured;
+    initializeAddSource(goToConnect ? { ...props, connect: true } : props);
     return resetSourceState;
-  }, []);
+  }, [configured]);
 
   const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);

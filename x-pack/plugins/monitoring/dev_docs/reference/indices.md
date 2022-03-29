@@ -29,6 +29,10 @@ The index templates for `.monitoring-*` are shipped with and managed by Elastics
 
 To verify changes to these templates, either make them in place on a running cluster or run elasticsearch from source.
 
+When updating the templates, it is important to increment the version number [here](https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/monitoring/src/main/java/org/elasticsearch/xpack/monitoring/MonitoringTemplateRegistry.java#L81). Elasticsearch uses this version number to decide if it should re-install the templates.
+PRs should add the labels ":Data Management/Monitoring" and "Team:Data Management" to involve the right Elasticsearch members.
+[Reference PR](https://github.com/elastic/elasticsearch/pull/85447)
+
 The `metrics-*` and `metricbeat-*` mappings are managed by metricbeat and elastic agent, **code locations TBD**.
 
 ## Aliasing

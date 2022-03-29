@@ -1,0 +1,52 @@
+[[cases-api-delete-cases]]
+== Delete cases API
+++++
+<titleabbrev>Delete cases</titleabbrev>
+++++
+
+Deletes one or more cases.
+
+=== Request
+
+`DELETE <kibana host>:<port>/api/cases?ids=["<case ID1>","<case ID2>"]`
+
+`DELETE <kibana host>:<port>/s/<space_id>/api/cases?ids=["<case ID1>","<case ID2>"]`
+
+=== Prerequisite
+
+You must have `all` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases you're deleting.
+
+=== Path parameters
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== Query parameters
+
+`ids`::
+(Required, string) The cases that you want to remove. To retrieve case IDs, use
+<<cases-api-find-cases>>.
++
+NOTE: All non-ASCII characters must be URL encoded.
+
+==== Response code
+
+`204`::
+   Indicates a successful call.
+
+=== Example
+
+Delete cases with these IDs:
+
+* `2e3a54f0-6754-11ea-a1c2-e3a8bc9f7aca`
+* `40b9a450-66a0-11ea-be1b-2bd3fef48984`
+
+[source,console]
+--------------------------------------------------
+DELETE api/cases?ids=%5B%222e3a54f0-6754-11ea-a1c2-e3a8bc9f7aca%22%2C%2240b9a450-66a0-11ea-be1b-2bd3fef48984%22%5D
+--------------------------------------------------
+// KIBANA

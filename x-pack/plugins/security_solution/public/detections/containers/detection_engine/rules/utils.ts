@@ -6,7 +6,17 @@
  */
 
 import { INTERNAL_IMMUTABLE_KEY } from '../../../../../common/constants';
+import { escapeKuery } from '../../../../common/lib/keury';
 import { FilterOptions } from './types';
+
+const SEARCHABLE_RULE_PARAMS = [
+  'alert.attributes.name',
+  'alert.attributes.params.index',
+  'alert.attributes.params.threat.tactic.id',
+  'alert.attributes.params.threat.tactic.name',
+  'alert.attributes.params.threat.technique.id',
+  'alert.attributes.params.threat.technique.name',
+];
 
 /**
  * Convert rules filter options object to KQL query
@@ -15,27 +25,35 @@ import { FilterOptions } from './types';
  *
  * @returns KQL string
  */
-export const convertRulesFilterToKQL = (filterOptions: FilterOptions): string => {
-  const showCustomRuleFilter = filterOptions.showCustomRules
-    ? [`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`]
-    : [];
-  const showElasticRuleFilter = filterOptions.showElasticRules
-    ? [`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`]
-    : [];
-  const filtersWithoutTags = [
-    ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
-    ...showCustomRuleFilter,
-    ...showElasticRuleFilter,
-  ].join(' AND ');
+export const convertRulesFilterToKQL = ({
+  showCustomRules,
+  showElasticRules,
+  filter,
+  tags,
+}: FilterOptions): string => {
+  const filters: string[] = [];
 
-  const tags = filterOptions.tags
-    .map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`)
-    .join(' AND ');
+  if (showCustomRules) {
+    filters.push(`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`);
+  }
 
-  const filterString =
-    filtersWithoutTags !== '' && tags !== ''
-      ? `${filtersWithoutTags} AND (${tags})`
-      : filtersWithoutTags + tags;
+  if (showElasticRules) {
+    filters.push(`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`);
+  }
 
-  return filterString;
+  if (tags.length > 0) {
+    filters.push(
+      `alert.attributes.tags:(${tags.map((tag) => `"${escapeKuery(tag)}"`).join(' AND ')})`
+    );
+  }
+
+  if (filter.length) {
+    const searchQuery = SEARCHABLE_RULE_PARAMS.map(
+      (param) => `${param}: "${escapeKuery(filter)}"`
+    ).join(' OR ');
+
+    filters.push(`(${searchQuery})`);
+  }
+
+  return filters.join(' AND ');
 };
