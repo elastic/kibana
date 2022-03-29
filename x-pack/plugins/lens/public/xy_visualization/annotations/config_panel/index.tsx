@@ -102,7 +102,6 @@ export const AnnotationsPanel = (
           }}
         />
         <MarkerDecorationSettings
-          isHorizontal={isHorizontal}
           setConfig={setAnnotations}
           currentConfig={{
             axisMode: 'bottom',
