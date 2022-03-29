@@ -28,7 +28,7 @@ export const newVectorLayerWizardConfig: LayerWizard = {
   }),
   getIsDisabled: async () => {
     const hasImportPermission = await getFileUpload().hasImportPermission({
-      checkCreateIndexPattern: true,
+      checkCreateDataView: true,
       checkHasManagePipeline: false,
     });
     return !hasImportPermission;

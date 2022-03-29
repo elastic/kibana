@@ -13,4 +13,5 @@ export * from './read_only_user';
 export * from './monitor_details.journey';
 export * from './monitor_name.journey';
 export * from './monitor_management.journey';
+export * from './monitor_management_enablement.journey';
 export * from './monitor_details';

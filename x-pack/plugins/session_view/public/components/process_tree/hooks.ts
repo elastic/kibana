@@ -83,7 +83,7 @@ export class ProcessImpl implements Process {
           child.getDetails().process;
 
         // search matches or processes with alerts will never be filtered out
-        if (child.searchMatched || child.hasAlerts()) {
+        if (child.autoExpand || child.searchMatched || child.hasAlerts()) {
           return true;
         }
 
@@ -91,11 +91,6 @@ export class ProcessImpl implements Process {
         // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
         // other shell startup activities (e.g bashrc .profile etc)
         if (groupLeader.pid === sessionLeader.pid) {
-          return false;
-        }
-
-        // If the process has no children and has not exec'd (fork only), we hide it.
-        if (child.children.length === 0 && !child.hasExec()) {
           return false;
         }
 

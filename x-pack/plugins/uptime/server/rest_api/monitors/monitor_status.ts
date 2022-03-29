@@ -21,8 +21,9 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
       dateEnd: schema.string(),
     }),
   },
-  handler: async ({ uptimeEsClient, request, server }): Promise<any> => {
+  handler: async ({ uptimeEsClient, request, server, savedObjectsClient }): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
+    const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
     const latestMonitor = await libs.requests.getLatestMonitor({
       uptimeEsClient,
@@ -42,7 +43,8 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
     try {
       const monitorSavedObject = await libs.requests.getSyntheticsMonitor({
         monitorId,
-        savedObjectsClient: server.savedObjectsClient,
+        encryptedSavedObjectsClient,
+        savedObjectsClient,
       });
 
       if (!monitorSavedObject) {
@@ -54,7 +56,7 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
         [ConfigKey.NAME]: name,
         [ConfigKey.HOSTS]: host,
         [ConfigKey.MONITOR_TYPE]: type,
-      } = monitorSavedObject.attributes as MonitorFields;
+      } = monitorSavedObject.attributes as Partial<MonitorFields>;
 
       return {
         url: {

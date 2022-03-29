@@ -108,7 +108,7 @@ export const SavedObjectsWarning: FC<Props> = ({
                   <EuiLink onClick={setShowSyncFlyout.bind(null, true)}>
                     <FormattedMessage
                       id="xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link"
-                      defaultMessage="Synchronize your jobs."
+                      defaultMessage="Synchronize your jobs and trained models."
                     />
                   </EuiLink>
                 ),
@@ -117,7 +117,7 @@ export const SavedObjectsWarning: FC<Props> = ({
           ) : (
             <FormattedMessage
               id="xpack.ml.jobsList.missingSavedObjectWarning.noPermission"
-              defaultMessage="An Administrator can synchronize the jobs in Stack Management."
+              defaultMessage="An Administrator can synchronize the jobs and trained models in Stack Management."
             />
           )}
           {showSyncFlyout && <JobSpacesSyncFlyout onClose={onClose} />}
