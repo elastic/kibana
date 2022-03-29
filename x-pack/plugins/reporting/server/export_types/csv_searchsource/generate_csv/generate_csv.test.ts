@@ -28,7 +28,6 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../../../../common/constants';
-import { UnknownError } from '../../../../common/errors';
 import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { JobParamsCSV } from '../types';
 import { CsvGenerator } from './generate_csv';

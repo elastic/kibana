@@ -29,11 +29,7 @@ import type {
 } from '../../../../../../../src/plugins/field_formats/common';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
-import {
-  AuthenticationExpiredError,
-  ReportingError,
-  UnknownError,
-} from '../../../../common/errors';
+import { AuthenticationExpiredError, ReportingError } from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import type { TaskRunResult } from '../../../lib/tasks';
 import type { JobParamsCSV } from '../types';
