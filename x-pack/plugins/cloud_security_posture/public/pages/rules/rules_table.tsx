@@ -72,6 +72,7 @@ export const RulesTable = ({
   };
 
   const rowProps = (row: RuleSavedObject) => ({
+    ['data-test-subj']: TEST_SUBJECTS.getCspRulesTableRowItemTestId(row.id),
     style: { background: row.id === selectedRuleId ? euiTheme.colors.highlight : undefined },
     onClick: (e: MouseEvent) => {
       const tag = (e.target as HTMLDivElement).tagName;
@@ -120,6 +121,7 @@ const getColumns = ({
           e.stopPropagation();
           setSelectedRuleId(rule.id);
         }}
+        data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
       >
         {name}
       </EuiButtonEmpty>

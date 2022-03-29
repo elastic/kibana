@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { RuleSavedObject } from './use_csp_rules';
 import * as TEXT from './translations';
+import * as TEST_SUBJECTS from './test_subjects';
 
 interface RuleFlyoutProps {
   onClose(): void;
@@ -43,38 +44,31 @@ const getOverviewCard = (rule: RuleSavedObject): EuiDescriptionListProps['listIt
     title: i18n.translate('xpack.csp.rules.ruleFlyout.frameworkSourcesLabel', {
       defaultMessage: 'Framework Sources',
     }),
-    description: '',
+    description: '-', // TODO: add value
   },
   {
     title: i18n.translate('xpack.csp.rules.ruleFlyout.sectionsLabel', {
       defaultMessage: 'Sections',
     }),
-    description: '',
+    description: '-', // TODO: add value
   },
   {
     title: i18n.translate('xpack.csp.rules.ruleFlyout.profileApplicabilityLabel', {
       defaultMessage: 'Profile Applicability',
     }),
-    description: '',
-  },
-
-  {
-    title: i18n.translate('xpack.csp.rules.ruleFlyout.profileApplicabilityLabel', {
-      defaultMessage: 'Profile Applicability',
-    }),
-    description: rule.attributes.description,
+    description: rule.attributes.description || '',
   },
   {
     title: i18n.translate('xpack.csp.rules.ruleFlyout.auditLabel', {
       defaultMessage: 'Audit',
     }),
-    description: '',
+    description: '-', // TODO: add value
   },
   {
     title: i18n.translate('xpack.csp.rules.ruleFlyout.referencesLabel', {
       defaultMessage: 'References',
     }),
-    description: '',
+    description: '-', // TODO: add value
   },
 ];
 
@@ -109,7 +103,12 @@ export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
 
   return (
-    <EuiFlyout ownFocus={false} onClose={onClose} outsideClickCloses>
+    <EuiFlyout
+      ownFocus={false}
+      onClose={onClose}
+      outsideClickCloses
+      data-test-subj={TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER}
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="l">
           <h2>{rule.attributes.name}</h2>
@@ -147,6 +146,7 @@ const RuleOverviewTab = ({ rule, toggleRule }: { rule: RuleSavedObject; toggleRu
             label={TEXT.ACTIVATED}
             checked={rule.attributes.enabled}
             onChange={toggleRule}
+            data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.attributes.id)}
           />
         </EuiToolTip>
       </span>
