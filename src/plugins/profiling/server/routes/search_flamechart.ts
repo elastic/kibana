@@ -168,6 +168,27 @@ function getNumberOfUniqueStacktracesWithoutLeafNode(
   return stackTracesNoLeaf.size;
 }
 
+export function parallelMget(
+  nQueries: number,
+  stackTraceIDs: StackTraceID[],
+  chunkSize: number,
+  client: ElasticsearchClient
+): Array<Promise<any>> {
+  const futures: Array<Promise<any>> = [];
+  [...Array(nQueries).keys()].forEach((i) => {
+    const chunk = stackTraceIDs.slice(chunkSize * i, chunkSize * (i + 1));
+    futures.push(
+      client.mget({
+        index: 'profiling-stacktraces',
+        ids: [...chunk],
+        _source_includes: ['FrameID', 'Type'],
+      })
+    );
+  });
+
+  return futures;
+}
+
 async function queryFlameGraph(
   logger: Logger,
   client: ElasticsearchClient,
@@ -271,6 +292,7 @@ async function queryFlameGraph(
     logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
   }
 
+  // profiling-stacktraces is configured with 16 shards
   const nQueries = 8;
   const stackTraces = new Map<StackTraceID, StackTrace>();
 
@@ -328,7 +350,9 @@ async function queryFlameGraph(
       }
 
       logger.info('B');
-      await Promise.all(promises);
+      await Promise.all(promises).catch((err) => {
+        logger.error('Failed to get stacktraces from _mget: ' + err.message);
+      });
     }
   );
   /*
@@ -364,6 +388,7 @@ async function queryFlameGraph(
     }
   }
 */
+
   if (stackTraces.size < stackTraceEvents.size) {
     logger.info(
       'failed to find ' +
