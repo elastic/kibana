@@ -27,19 +27,15 @@ import {
   useStartServices,
   useLink,
   sendGetOneAgentPolicyFull,
-  sendGetOneAgentPolicy,
   useKibanaVersion,
 } from '../../hooks';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../services';
-
-import type { PackagePolicy } from '../../../common';
-
-import { FLEET_KUBERNETES_PACKAGE } from '../../../common';
 
 import { PlatformSelector } from '../enrollment_instructions/manual/platform_selector';
 
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 import type { InstructionProps } from './types';
+import { useIsK8sPolicy, useAgentPolicyWithPackagePolicies } from './hooks';
 
 export const StandaloneInstructions = React.memo<InstructionProps>(
   ({ agentPolicy, agentPolicies, refreshAgentPolicies }) => {
@@ -49,11 +45,13 @@ export const StandaloneInstructions = React.memo<InstructionProps>(
 
     const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(agentPolicy?.id);
     const [fullAgentPolicy, setFullAgentPolicy] = useState<any | undefined>();
-    const [isK8s, setIsK8s] = useState<'IS_LOADING' | 'IS_KUBERNETES' | 'IS_NOT_KUBERNETES'>(
-      'IS_LOADING'
-    );
     const [yaml, setYaml] = useState<string | string>('');
     const kibanaVersion = useKibanaVersion();
+
+    const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
+    const { isK8s } = useIsK8sPolicy(
+      agentPolicyWithPackagePolicies ? agentPolicyWithPackagePolicies : undefined
+    );
 
     const KUBERNETES_RUN_INSTRUCTIONS = 'kubectl apply -f elastic-agent-standalone-kubernetes.yaml';
 
@@ -83,28 +81,6 @@ sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm \nsudo systemctl enable e
       isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS_WINDOWS;
 
     const { docLinks } = useStartServices();
-
-    useEffect(() => {
-      async function checkifK8s() {
-        if (!selectedPolicyId) {
-          return;
-        }
-        const agentPolicyRequest = await sendGetOneAgentPolicy(selectedPolicyId);
-        const agentPol = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
-
-        if (!agentPol) {
-          setIsK8s('IS_NOT_KUBERNETES');
-          return;
-        }
-        const k8s = (pkg: PackagePolicy) => pkg.package?.name === FLEET_KUBERNETES_PACKAGE;
-        setIsK8s(
-          (agentPol.package_policies as PackagePolicy[]).some(k8s)
-            ? 'IS_KUBERNETES'
-            : 'IS_NOT_KUBERNETES'
-        );
-      }
-      checkifK8s();
-    }, [selectedPolicyId, notifications.toasts]);
 
     useEffect(() => {
       async function fetchFullPolicy() {
