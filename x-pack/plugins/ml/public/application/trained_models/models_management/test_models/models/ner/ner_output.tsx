@@ -24,6 +24,7 @@ import {
 import type { FormattedNerResp } from './ner_inference';
 
 const ICON_PADDING = '2px';
+const PROBABILITY_SIG_FIGS = 3;
 
 export const NerOutput: FC<{ result: FormattedNerResp }> = ({ result }) => {
   const { euiTheme } = useCurrentEuiTheme();
@@ -63,7 +64,7 @@ export const NerOutput: FC<{ result: FormattedNerResp }> = ({ result }) => {
                     id="xpack.ml.trainedModels.testModelsFlyout.ner.output.probabilityTitle"
                     defaultMessage="Probability"
                   />
-                  : {entity.class_probability}
+                  : {Number(entity.class_probability).toPrecision(PROBABILITY_SIG_FIGS)}
                 </div>
               </div>
             </div>

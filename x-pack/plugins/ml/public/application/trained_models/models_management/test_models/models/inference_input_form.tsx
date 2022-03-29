@@ -81,7 +81,7 @@ export const InferenceInputForm: FC<Props> = ({ inferrer, getOutputComponent }) 
         >
           <FormattedMessage
             id="xpack.ml.trainedModels.testModelsFlyout.langIdent.runButton"
-            defaultMessage="Run inference"
+            defaultMessage="Test"
           />
         </EuiButton>
       </div>

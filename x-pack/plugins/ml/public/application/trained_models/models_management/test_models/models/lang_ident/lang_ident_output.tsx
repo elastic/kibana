@@ -12,6 +12,8 @@ import { EuiSpacer, EuiBasicTable, EuiTitle } from '@elastic/eui';
 import type { FormattedLangIdentResp } from './lang_ident_inference';
 import { getLanguage } from './lang_codes';
 
+const PROBABILITY_SIG_FIGS = 3;
+
 export const LangIdentOutput: FC<{ result: FormattedLangIdentResp }> = ({ result }) => {
   if (result.length === 0) {
     return null;
@@ -19,11 +21,11 @@ export const LangIdentOutput: FC<{ result: FormattedLangIdentResp }> = ({ result
 
   const lang = getLanguage(result[0].className);
 
-  const items = result.map((r, i) => {
+  const items = result.map(({ className, classProbability }, i) => {
     return {
       noa: `${i + 1}`,
-      className: getLanguage(r.className),
-      classProbability: `${r.classProbability}`,
+      className: getLanguage(className),
+      classProbability: `${Number(classProbability).toPrecision(PROBABILITY_SIG_FIGS)}`,
     };
   });
 
