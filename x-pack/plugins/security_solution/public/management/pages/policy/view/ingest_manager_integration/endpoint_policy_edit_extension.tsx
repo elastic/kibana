@@ -51,7 +51,7 @@ export const BLOCKLISTS_LABELS = {
     }),
   cardTitle: (
     <FormattedMessage
-      id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
+      id="xpack.securitySolution.endpoint.blocklist.fleetIntegration.title"
       defaultMessage="Blocklist"
     />
   ),

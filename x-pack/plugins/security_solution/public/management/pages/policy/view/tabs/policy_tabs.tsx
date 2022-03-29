@@ -155,7 +155,7 @@ export const PolicyTabs = React.memo(() => {
       ...POLICY_ARTIFACT_BLOCKLISTS_LABELS,
       layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.policy.blocklists.list.about"
+          id="xpack.securitySolution.endpoint.policy.blocklist.list.about"
           defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {blocklist} other {blocklists}} associated with this policy. Click here to {link}"
           values={{ count, link }}
         />

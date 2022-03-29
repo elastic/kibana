@@ -51,7 +51,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
   flyoutCreateSubmitSuccess: ({ name }) =>
     i18n.translate('xpack.securitySolution.blocklist.flyoutCreateSubmitSuccess', {
-      defaultMessage: '"{name}" has been added to your blocklist.', // FIXME: match this to design (needs count of items)
+      defaultMessage: '"{name}" has been added to your blocklist.',
       values: { name },
     }),
   flyoutEditSubmitSuccess: ({ name }) =>
@@ -65,11 +65,14 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
     return (
       <>
         <FormattedMessage
-          id="xpack.securitySolution.artifactListPage.flyoutDowngradedLicenseDocsInfo"
+          id="xpack.securitySolution.blocklist.flyoutDowngradedLicenseDocsInfo"
           defaultMessage="For more information, see our "
         />
         <EuiLink target="_blank" href={`${securitySolutionDocsLinks.blocklist}`}>
-          <FormattedMessage id="dome-id-2" defaultMessage="Blocklist documentation" />
+          <FormattedMessage
+            id="xpack.securitySolution.blocklist.flyoutDowngradedLicenseDocsLink"
+            defaultMessage="Blocklist documentation"
+          />
         </EuiLink>
       </>
     );
