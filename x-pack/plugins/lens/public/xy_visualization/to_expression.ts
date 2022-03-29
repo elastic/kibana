@@ -480,29 +480,31 @@ const dataLayerToExpression = (
           seriesType: [layer.seriesType],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
-          ...(layer.palette
-            ? {
-                palette: [
-                  {
-                    type: 'expression',
-                    chain: [
-                      {
-                        type: 'function',
-                        function: 'theme',
-                        arguments: {
-                          variable: ['palette'],
-                          default: [
-                            paletteService
-                              .get(layer.palette.name)
-                              .toExpression(layer.palette.params),
-                          ],
-                        },
+          palette: [
+            {
+              type: 'expression',
+              chain: [
+                layer.palette
+                  ? {
+                      type: 'function',
+                      function: 'theme',
+                      arguments: {
+                        variable: ['palette'],
+                        default: [
+                          paletteService.get(layer.palette.name).toExpression(layer.palette.params),
+                        ],
                       },
-                    ],
-                  },
-                ],
-              }
-            : {}),
+                    }
+                  : {
+                      type: 'function',
+                      function: 'system_palette',
+                      arguments: {
+                        name: ['default'],
+                      },
+                    },
+              ],
+            },
+          ],
         },
       },
     ],

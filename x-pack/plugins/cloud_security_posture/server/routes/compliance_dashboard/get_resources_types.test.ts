@@ -31,7 +31,7 @@ const resourceTypeBuckets: ResourceTypeBucket[] = [
 ];
 
 describe('getResourceTypeFromAggs', () => {
-  it('should return value matching CloudPostureStats["resourcesTypes"]', async () => {
+  it('should return value matching ComplianceDashboardData["resourcesTypes"]', async () => {
     const resourceTypes = getResourceTypeFromAggs(resourceTypeBuckets);
     expect(resourceTypes).toEqual([
       {
