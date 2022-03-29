@@ -145,14 +145,16 @@ export const ProcessTree = ({
       if (processEl) {
         processEl.prepend(selectionAreaEl);
 
-        const cTop = scrollerRef.current.scrollTop;
-        const cBottom = cTop + scrollerRef.current.clientHeight;
+        const { height: elHeight, y: elTop } = processEl.getBoundingClientRect();
+        const { y: viewPortElTop, height: viewPortElHeight } =
+          scrollerRef.current.getBoundingClientRect();
 
-        const eTop = processEl.offsetTop;
-        const eBottom = eTop + processEl.clientHeight;
-        const isVisible = eTop >= cTop && eBottom <= cBottom;
+        const viewPortElBottom = viewPortElTop + viewPortElHeight;
+        const elBottom = elTop + elHeight;
+        const isVisible = elBottom >= viewPortElTop && elTop <= viewPortElBottom;
 
-        if (!isVisible) {
+        // jest will die when calling scrollIntoView (perhaps not part of the DOM it executes under)
+        if (!isVisible && processEl.scrollIntoView) {
           processEl.scrollIntoView({ block: 'center' });
         }
       }
@@ -174,7 +176,9 @@ export const ProcessTree = ({
 
       if (process) {
         onProcessSelected(process);
-        selectProcess(process);
+      } else {
+        // auto selects the session leader process if jumpToEvent is not found in processMap
+        onProcessSelected(sessionLeader);
       }
     } else if (!selectedProcess) {
       // auto selects the session leader process if no selection is made yet
@@ -207,6 +211,7 @@ export const ProcessTree = ({
             onShowAlertDetails={onShowAlertDetails}
             timeStampOn={timeStampOn}
             verboseModeOn={verboseModeOn}
+            searchResults={searchResults}
           />
         )}
         <div

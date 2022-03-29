@@ -10,6 +10,7 @@ import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { getPolicyDetailPath } from '../common/routing';
 import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useAppUrl } from '../../common/lib/kibana/hooks';
+import { PolicyDetailsRouteState } from '../../../common/endpoint/types';
 
 /**
  * A policy link (to details) that first checks to see if the policy id exists against
@@ -20,17 +21,18 @@ export const EndpointPolicyLink = memo<
   Omit<EuiLinkAnchorProps, 'href'> & {
     policyId: string;
     missingPolicies?: Record<string, boolean>;
+    backLink?: PolicyDetailsRouteState['backLink'];
   }
->(({ policyId, children, onClick, missingPolicies = {}, ...otherProps }) => {
+>(({ policyId, backLink, children, missingPolicies = {}, ...otherProps }) => {
   const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
     const path = getPolicyDetailPath(policyId);
     return {
-      toRoutePath: path,
+      toRoutePath: backLink ? { pathname: path, state: { backLink } } : path,
       toRouteUrl: getAppUrl({ path }),
     };
-  }, [policyId, getAppUrl]);
-  const clickHandler = useNavigateByRouterEventHandler(toRoutePath, onClick);
+  }, [policyId, getAppUrl, backLink]);
+  const clickHandler = useNavigateByRouterEventHandler(toRoutePath);
 
   if (missingPolicies[policyId]) {
     return (
