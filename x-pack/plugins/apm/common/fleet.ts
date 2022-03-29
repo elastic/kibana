@@ -8,3 +8,5 @@
 export const POLICY_ELASTIC_AGENT_ON_CLOUD = 'policy-elastic-agent-on-cloud';
 
 export const SUPPORTED_APM_PACKAGE_VERSION = '7.16.0';
+
+export const ELASTIC_CLOUD_APM_AGENT_POLICY_ID = 'elastic-cloud-apm';
