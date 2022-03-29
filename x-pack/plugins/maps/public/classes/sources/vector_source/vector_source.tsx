@@ -43,7 +43,7 @@ export interface BoundsRequestMeta {
   timeFilters: TimeRange;
   timeslice?: Timeslice;
   joinKeyFilter?: Filter;
-  editModeActiveForLayer?: boolean;
+  editModeActiveForLayer: boolean;
 }
 
 export interface IVectorSource extends ISource {

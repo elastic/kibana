@@ -158,6 +158,15 @@ export class FilterEditor extends Component<Props, State> {
   }
 
   _renderQuery() {
+    if (this.props.editModeActiveForLayer) {
+      return (
+        <FormattedMessage
+          id="xpack.maps.layerPanel.filterEditor.isLayerFilterNotApplied"
+          defaultMessage="Layer filter is not applied while editing features"
+        />
+      );
+    }
+
     const query = this.props.layer.getQuery();
     if (!query || !query.query) {
       return (

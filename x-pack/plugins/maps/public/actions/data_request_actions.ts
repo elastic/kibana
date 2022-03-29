@@ -68,7 +68,7 @@ export type DataRequestContext = {
   dataFilters: DataFilters;
   forceRefreshDueToDrawing: boolean; // Boolean signaling data request triggered by a user updating layer features via drawing tools. When true, layer will re-load regardless of "source.applyForceRefresh" flag.
   isForceRefresh: boolean; // Boolean signaling data request triggered by auto-refresh timer or user clicking refresh button. When true, layer will re-load only when "source.applyForceRefresh" flag is set to true.
-  isEditingFeatures?: boolean;
+  isEditingFeatures: boolean; // Boolean signaling that feature editor menu is open for a layer. When true, layer will ignore all global and layer filtering so drawn features are displayed and not filtered out.
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -121,8 +121,7 @@ function getDataRequestContext(
   getState: () => MapStoreState,
   layerId: string,
   forceRefreshDueToDrawing: boolean,
-  isForceRefresh: boolean,
-  isEditingFeatures: boolean
+  isForceRefresh: boolean
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState(), layerId),
@@ -187,8 +186,7 @@ export function syncDataForLayerDueToDrawing(layer: ILayer) {
       getState,
       layer.getId(),
       true,
-      false,
-      getEditState(getState())?.layerId === layer.getId()
+      false
     );
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
@@ -204,8 +202,7 @@ export function syncDataForLayer(layer: ILayer, isForceRefresh: boolean) {
       getState,
       layer.getId(),
       false,
-      isForceRefresh,
-      getEditState(getState())?.layerId === layer.getId()
+      isForceRefresh
     );
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
@@ -399,14 +396,7 @@ export function fitToLayerExtent(layerId: string) {
     if (targetLayer) {
       try {
         const bounds = await targetLayer.getBounds(
-          getDataRequestContext(
-            dispatch,
-            getState,
-            layerId,
-            false,
-            false,
-            getEditState(getState())?.layerId === layerId
-          )
+          getDataRequestContext(dispatch, getState, layerId, false, false)
         );
         if (bounds) {
           await dispatch(setGotoWithBounds(scaleBounds(bounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
@@ -439,14 +429,7 @@ export function fitToDataBounds(onNoBounds?: () => void) {
         return null;
       }
       return layer.getBounds(
-        getDataRequestContext(
-          dispatch,
-          getState,
-          layer.getId(),
-          false,
-          false,
-          getEditState(getState())?.layerId === layer.getId()
-        )
+        getDataRequestContext(dispatch, getState, layer.getId(), false, false)
       );
     });
 
