@@ -979,7 +979,8 @@ class TimeseriesChartIntl extends Component {
       ? [...annotationData].sort((a, b) => a.timestamp - b.timestamp)
       : [];
 
-    // Merging overlapping annotations into bigger blocks
+    // Since there might be lots of annotations which is hard to view
+    // we should merge overlapping annotations into bigger annotation "blocks"
     let mergedAnnotations = [];
     if (focusAnnotationData.length > 0) {
       mergedAnnotations = [
@@ -991,16 +992,21 @@ class TimeseriesChartIntl extends Component {
       ];
       let lastEndTime = focusAnnotationData[0].end_timestamp;
 
+      // Since annotations/intervals are already sorted from earliest to latest
+      // we can keep checking if next annotation starts before the last merged end_timestamp
       for (let i = 1; i < focusAnnotationData.length; i++) {
         if (focusAnnotationData[i].timestamp < lastEndTime) {
+          // If it overlaps with last annotation block, update block with latest end_timestamp
           const itemToMerge = mergedAnnotations.pop();
           const newMergedItem = {
             ...itemToMerge,
             end: lastEndTime,
+            // and add to list of annotations for that block
             annotations: [...itemToMerge.annotations, focusAnnotationData[i]],
           };
           mergedAnnotations.push(newMergedItem);
         } else {
+          // If annotation does not overlap with previous block, add it as a new block
           mergedAnnotations.push({
             start: focusAnnotationData[i].timestamp,
             end: focusAnnotationData[i].end_timestamp,

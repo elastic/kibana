@@ -153,7 +153,6 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
                 // @ts-ignore skipping header so it doesn't have other params
                 tooltipData.push({ skipHeader: true });
               }
-
               d.annotations.forEach((item) => {
                 let timespan = moment(item.timestamp).format('MMMM Do YYYY, HH:mm');
 
@@ -163,15 +162,36 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
                   )}`;
                 }
 
-                tooltipData.push({
-                  label: timespan,
-                  value: `${item.annotation}`,
-                  seriesIdentifier: {
-                    key: 'anomaly_timeline',
-                    specId: item._id ?? `${item.annotation}-${item.timestamp}-label`,
-                  },
-                  valueAccessor: 'annotation',
-                });
+                if (hasMergedAnnotations) {
+                  tooltipData.push({
+                    label: timespan,
+                    value: `${item.annotation}`,
+                    seriesIdentifier: {
+                      key: 'anomaly_timeline',
+                      specId: item._id ?? `${item.annotation}-${item.timestamp}-label`,
+                    },
+                    valueAccessor: 'annotation',
+                  });
+                } else {
+                  tooltipData.push(
+                    {
+                      label: `${item.annotation}`,
+                      seriesIdentifier: {
+                        key: 'anomaly_timeline',
+                        specId: item._id ?? `${item.annotation}-${item.timestamp}-label`,
+                      },
+                      valueAccessor: 'label',
+                    },
+                    {
+                      label: `${timespan}`,
+                      seriesIdentifier: {
+                        key: 'anomaly_timeline',
+                        specId: item._id ?? `${item.annotation}-${item.timestamp}-ts`,
+                      },
+                      valueAccessor: 'time',
+                    }
+                  );
+                }
 
                 if (
                   item.partition_field_name !== undefined &&
