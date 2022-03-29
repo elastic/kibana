@@ -103,10 +103,11 @@ export const parseAlertsData = (
       parsedSeverityBuckets = [
         ...parsedSeverityBuckets,
         {
-          status: status[statusBucket.key],
           value: severityBucket.doc_count,
+          status: status[statusBucket.key],
           label: label[severityBucket.key],
           group: statusBucket.key,
+          key: severityBucket.key,
         },
       ];
     }, []);
@@ -117,6 +118,7 @@ export const parseAlertsData = (
         ...statusBucket,
         link: links[statusBucket.key],
         buckets: parsedSeverityBuckets,
+        label: status[statusBucket.key],
       },
     ];
   });

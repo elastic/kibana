@@ -69,10 +69,10 @@ export const DonutChart = ({
       data != null && legendField
         ? data.map((d, i) => ({
             color: colors[i],
-            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.status}`),
+            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.group}`),
             timelineId: undefined,
             field: legendField,
-            value: `${d.label}`,
+            value: d.key,
           }))
         : NO_LEGEND_DATA,
     [colors, data, legendField]
@@ -118,15 +118,13 @@ export const DonutChart = ({
               valueAccessor={(d: Datum) => d.value as number}
               layers={[
                 {
-                  groupByRollup: () => '',
-                  nodeLabel: () => '',
+                  groupByRollup: (d: Datum) => d.status,
                   shape: {
                     fillColor: () => '#fff',
                   },
                 },
                 {
-                  groupByRollup: () => '',
-                  nodeLabel: () => '',
+                  groupByRollup: (d: Datum) => d.status,
                   shape: {
                     fillColor: () => '#fff',
                   },
@@ -135,7 +133,7 @@ export const DonutChart = ({
                to make the one above thinner.
                */
                 {
-                  groupByRollup: (d: Datum) => d.key,
+                  groupByRollup: (d: Datum) => d.label,
                   nodeLabel: (d: Datum) => d,
                   shape: {
                     fillColor: (d: Datum) => {

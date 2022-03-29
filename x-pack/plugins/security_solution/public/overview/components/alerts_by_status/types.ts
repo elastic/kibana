@@ -35,6 +35,7 @@ export interface StatusBucket {
 export interface ParsedStatusBucket extends StatusBucket {
   buckets: ParsedSeverityBucket[];
   link?: string | null;
+  label: string;
 }
 
 export interface SeverityBucket {
@@ -43,10 +44,11 @@ export interface SeverityBucket {
 }
 
 export interface ParsedSeverityBucket {
-  status: string;
   value: number;
+  status: string;
   label: string;
   group: StatusSequence;
+  key: SeveritySequence;
 }
 
 export interface AlertsByStatusAgg {

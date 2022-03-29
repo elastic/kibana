@@ -103,10 +103,10 @@ export const AlertsByStatus = ({
       donutData && donutData?.length > 0 && legendField
         ? (donutData[0] && donutData[0].buckets).map((d, i) => ({
             color: colors[i],
-            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.status}`),
+            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.group}`),
             timelineId: undefined,
             field: legendField,
-            value: `${d.label}`,
+            value: `${d.key}`,
           }))
         : NO_LEGEND_DATA,
     [colors, donutData, legendField]
@@ -179,7 +179,7 @@ export const AlertsByStatus = ({
                   <DonutChart
                     height={donutHeight}
                     data={data.buckets}
-                    name={data.key}
+                    name={data.label}
                     link={data.link}
                     showLegend={false}
                   />
