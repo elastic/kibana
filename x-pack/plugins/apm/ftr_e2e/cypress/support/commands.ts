@@ -87,13 +87,11 @@ Cypress.Commands.add(
 // A11y configuration
 
 const axeConfig = {
-  // See comment on line 11
-  // ...AXE_CONFIG,
+  ...AXE_CONFIG,
 };
 const axeOptions = {
-  // See comment on line 11
-  // ...AXE_OPTIONS,
-  // runOnly: [...AXE_OPTIONS.runOnly, 'best-practice'],
+  ...AXE_OPTIONS,
+  runOnly: [...AXE_OPTIONS.runOnly, 'best-practice'],
 };
 
 export const checkA11y = ({ skipFailures }: { skipFailures: boolean }) => {
