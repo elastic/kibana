@@ -78,8 +78,8 @@ Any changes to these types should be bug fixes so the types more accurately repr
 If you are adding new fields for a new release of Kibana, create a new sibling folder to this one
 for the version to be released and add the field(s) to the schema in that folder.
 
-Then, update `../index.ts` to import from the new folder that has the latest schemas and add the
-new schemas to the union of all alert schemas.
+Then, update `../index.ts` to import from the new folder that has the latest schemas, add the
+new schemas to the union of all alert schemas, and re-export the new schemas as the `*Latest` schemas.
 */
 
 export interface Ancestor800 {
