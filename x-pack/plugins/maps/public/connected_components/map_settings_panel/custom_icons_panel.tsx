@@ -98,7 +98,7 @@ export class CustomIconsPanel extends Component<Props, State> {
         return i.symbolId !== symbolId;
       }),
       {
-        symbolId: symbolId || getCustomIconId(),
+        symbolId,
         svg,
         label,
         cutoff,
@@ -139,7 +139,7 @@ export class CustomIconsPanel extends Component<Props, State> {
             <p>
               <EuiTextColor color="subdued">
                 <FormattedMessage
-                  id="mapSettingsPanel.customIcons.emptyState.description"
+                  id="xpack.maps.mapSettingsPanel.customIcons.emptyState.description"
                   defaultMessage="Add a custom icon that can be used in layers in this map."
                 />
               </EuiTextColor>

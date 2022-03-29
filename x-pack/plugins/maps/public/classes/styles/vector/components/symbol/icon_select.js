@@ -17,12 +17,14 @@ import {
   keys,
   EuiSelectable,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   DEFAULT_CUSTOM_ICON_CUTOFF,
   DEFAULT_CUSTOM_ICON_RADIUS,
 } from '../../../../../../common/constants';
 import { SymbolIcon } from '../legend/symbol_icon';
-import { getCustomIconId, SYMBOL_OPTIONS } from '../../symbol_utils';
+import { SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
 import { CustomIconModal } from './custom_icon_modal';
 
@@ -36,8 +38,7 @@ export class IconSelect extends Component {
     isModalVisible: false,
   };
 
-  _handleSave = ({ svg, cutoff, radius, label }) => {
-    const symbolId = getCustomIconId();
+  _handleSave = ({ symbolId, svg, cutoff, radius, label }) => {
     const icons = { ...this.props.customIcons };
     icons[symbolId] = { symbolId, label, svg, cutoff, radius };
     this.props.onCustomIconsChange(icons);
@@ -130,7 +131,9 @@ export class IconSelect extends Component {
   _renderIconSelectable() {
     const makiOptions = [
       {
-        label: 'Maki icons',
+        label: i18n.translate('xpack.maps.styles.vector.iconSelect.kibanaIconsGroupLabel', {
+          defaultMessage: 'Kibana icons',
+        }),
         isGroupLabel: true,
       },
       ...SYMBOL_OPTIONS.map(({ value, label, svg }) => {
@@ -149,11 +152,9 @@ export class IconSelect extends Component {
       }),
     ];
 
-    const customOptions = [];
-
-    if (this.props.customIcons) {
-      for (const [symbolId, { label, svg }] of Object.entries(this.props.customIcons)) {
-        customOptions.push({
+    const customOptions = Object.entries(this.props.customIcons).map(
+      ([symbolId, { label, svg }]) => {
+        return {
           key: symbolId,
           label,
           prepend: (
@@ -164,13 +165,15 @@ export class IconSelect extends Component {
               fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
             />
           ),
-        });
+        };
       }
-    }
+    );
 
     if (customOptions.length)
       customOptions.splice(0, 0, {
-        label: 'Custom icons',
+        label: i18n.translate('xpack.maps.styles.vector.iconSelect.customIconsGroupLabel', {
+          defaultMessage: 'Custom icons',
+        }),
         isGroupLabel: true,
       });
 
@@ -185,7 +188,10 @@ export class IconSelect extends Component {
             <EuiPopoverFooter>
               {' '}
               <EuiButton fullWidth size="s" onClick={this._toggleModal}>
-                Add custom icon
+                <FormattedMessage
+                  id="xpack.maps.styles.vector.iconSelect.addCustomIconButtonLabel"
+                  defaultMessage="Add custom icon"
+                />
               </EuiButton>
             </EuiPopoverFooter>
           </div>

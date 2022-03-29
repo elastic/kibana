@@ -103,8 +103,8 @@ export interface IVectorStyle extends IStyle {
   isTimeAware(): boolean;
   getPrimaryColor(): string;
   getIcon(showIncompleteIndicator: boolean): ReactElement;
-  getIconMeta(symbolId: string): { svg: string; label: string; iconSource: ICON_SOURCE };
-  getCustomIconIdsInUse(): string[];
+  getIconSvg(symbolId: string): string | undefined;
+  isUsingCustomIcon(symbolId: string): boolean;
   hasLegendDetails: () => Promise<boolean>;
   renderLegendDetails: () => ReactElement;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
@@ -157,7 +157,7 @@ export interface IVectorStyle extends IStyle {
 export class VectorStyle implements IVectorStyle {
   private readonly _descriptor: VectorStyleDescriptor;
   private readonly _layer: IVectorLayer;
-  private readonly _customIcons: Record<string, CustomIcon> | undefined;
+  private readonly _customIcons: Record<string, CustomIcon>;
   private readonly _source: IVectorSource;
   private readonly _styleMeta: StyleMeta;
 
@@ -193,12 +193,12 @@ export class VectorStyle implements IVectorStyle {
     descriptor: VectorStyleDescriptor | null,
     source: IVectorSource,
     layer: IVectorLayer,
-    customIcons?: CustomIcon[],
+    customIcons: CustomIcon[],
     chartsPaletteServiceGetColor?: (value: string) => string | null
   ) {
     this._source = source;
     this._layer = layer;
-    this._customIcons = customIcons ? customIconsToObject(customIcons) : undefined;
+    this._customIcons = customIconsToObject(customIcons);
     this._descriptor = descriptor
       ? {
           ...descriptor,
@@ -711,15 +711,22 @@ export class VectorStyle implements IVectorStyle {
     return formatters ? formatters[fieldName] : null;
   };
 
+  getIconSvg(symbolId: string) {
+    const { svg } = { ...this._getIconMeta(symbolId) };
+    return svg;
+  }
+
   _getSymbolId() {
     return this.arePointsSymbolizedAsCircles() || this._iconStyleProperty.isDynamic()
       ? undefined
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  getIconMeta(symbolId: string | undefined) {
+  _getIconMeta(
+    symbolId: string
+  ): { svg: string; label: string; iconSource: ICON_SOURCE } | undefined {
     if (!symbolId) return;
-    if (this._customIcons && this._customIcons[symbolId]) {
+    if (this._customIcons[symbolId]) {
       return { ...this._customIcons[symbolId], iconSource: ICON_SOURCE.CUSTOM };
     }
     const symbol = getMakiSymbol(symbolId);
@@ -764,6 +771,9 @@ export class VectorStyle implements IVectorStyle {
         }
       : {};
 
+    const symbolId = this._getSymbolId();
+    const svg = symbolId ? this.getIconSvg(symbolId) : undefined;
+
     return (
       <VectorIcon
         borderStyle={borderStyle}
@@ -771,23 +781,19 @@ export class VectorStyle implements IVectorStyle {
         isLinesOnly={isLinesOnly}
         strokeColor={strokeColor}
         fillColor={fillColor}
-        symbolId={this._getSymbolId()}
-        svg={this.getIconMeta(this._getSymbolId())?.svg}
+        symbolId={symbolId}
+        svg={svg}
       />
     );
   }
 
-  getCustomIconIdsInUse() {
+  isUsingCustomIcon(symbolId: string) {
     if (this._iconStyleProperty.isDynamic()) {
       const { customIconStops } = this._iconStyleProperty.getOptions() as IconDynamicOptions;
-      return customIconStops
-        ? customIconStops
-            .filter(({ iconSource }) => iconSource === ICON_SOURCE.CUSTOM)
-            .map(({ icon }) => icon)
-        : [];
+      return customIconStops ? customIconStops.some(({ icon }) => icon === symbolId) : false;
     }
-    const { value, iconSource } = this._iconStyleProperty.getOptions() as IconStaticOptions;
-    return iconSource === ICON_SOURCE.CUSTOM ? [value] : [];
+    const { value } = this._iconStyleProperty.getOptions() as IconStaticOptions;
+    return value === symbolId;
   }
 
   _getLegendDetailStyleProperties = () => {
@@ -821,13 +827,15 @@ export class VectorStyle implements IVectorStyle {
 
   renderLegendDetails() {
     const symbolId = this._getSymbolId();
+    const svg = symbolId ? this.getIconSvg(symbolId) : undefined;
+
     return (
       <VectorStyleLegend
         styles={this._getLegendDetailStyleProperties()}
         isPointsOnly={this.getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
         symbolId={symbolId}
-        svg={this.getIconMeta(symbolId)?.svg}
+        svg={svg}
       />
     );
   }
@@ -1080,7 +1088,7 @@ export class VectorStyle implements IVectorStyle {
       return new StaticIconProperty({ value: DEFAULT_ICON }, VECTOR_STYLES.ICON);
     } else if (descriptor.type === StaticStyleProperty.type) {
       const { value } = { ...descriptor.options } as IconStaticOptions;
-      const { svg, label, iconSource } = this.getIconMeta(value);
+      const { svg, label, iconSource } = { ...this._getIconMeta(value) };
       return new StaticIconProperty(
         { value, svg, label, iconSource } as IconStaticOptions,
         VECTOR_STYLES.ICON
@@ -1089,7 +1097,8 @@ export class VectorStyle implements IVectorStyle {
       const options = { ...descriptor.options } as IconDynamicOptions;
       if (options.customIconStops) {
         options.customIconStops.forEach((iconStop) => {
-          iconStop.iconSource = this.getIconMeta(iconStop.icon).iconSource;
+          const { iconSource } = { ...this._getIconMeta(iconStop.icon) };
+          iconStop.iconSource = iconSource;
         });
       }
       const field = this._makeField(options.field);

@@ -52,7 +52,7 @@ exports[`Should render icon select 1`] = `
           Array [
             Object {
               "isGroupLabel": true,
-              "label": "Maki icons",
+              "label": "Kibana icons",
             },
             Object {
               "key": "symbol1",
@@ -165,7 +165,7 @@ exports[`Should render icon select with custom icons 1`] = `
             },
             Object {
               "isGroupLabel": true,
-              "label": "Maki icons",
+              "label": "Kibana icons",
             },
             Object {
               "key": "symbol1",

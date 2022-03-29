@@ -69,7 +69,7 @@ interface Props {
   styleProperties: StyleProperties;
   isTimeAware: boolean;
   showIsTimeAware: boolean;
-  customIcons?: Record<string, CustomIcon>;
+  customIcons: Record<string, CustomIcon>;
 }
 
 interface State {

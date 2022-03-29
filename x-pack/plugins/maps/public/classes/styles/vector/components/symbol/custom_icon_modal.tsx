@@ -28,6 +28,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { IconPreview } from './icon_preview';
 // @ts-expect-error
+import { getCustomIconId } from '../../symbol_utils';
+// @ts-expect-error
 import { ValidatedRange } from '../../../../../components/validated_range';
 import { CustomIcon } from '../../../../../../common/descriptor_types';
 
@@ -149,10 +151,6 @@ interface Props {
 
 interface State {
   /**
-   * id of image added to map
-   */
-  symbolId: string;
-  /**
    * label of the custom element to be saved
    */
   label: string;
@@ -170,7 +168,6 @@ export class CustomIconModal extends Component<Props, State> {
   private _isMounted: boolean = false;
 
   public state = {
-    symbolId: this.props.symbolId || '',
     label: this.props.label || '',
     svg: this.props.svg || '',
     cutoff: this.props.cutoff,
@@ -317,8 +314,8 @@ export class CustomIconModal extends Component<Props, State> {
   }
 
   public render() {
-    const { onSave, onCancel, onDelete, title } = this.props;
-    const { symbolId, label, svg, cutoff, radius, isFileInvalid } = this.state;
+    const { symbolId, onSave, onCancel, onDelete, title } = this.props;
+    const { label, svg, cutoff, radius, isFileInvalid } = this.state;
     const isComplete = label.length !== 0 && svg.length !== 0 && !isFileInvalid;
     const fileError = svg && isFileInvalid ? strings.getInvalidFileLabel() : '';
     return (
@@ -363,7 +360,7 @@ export class CustomIconModal extends Component<Props, State> {
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={onCancel}>{strings.getCancelButtonLabel()}</EuiButtonEmpty>
             </EuiFlexItem>
-            {onDelete ? (
+            {onDelete && symbolId ? (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="danger"
@@ -380,7 +377,7 @@ export class CustomIconModal extends Component<Props, State> {
               <EuiButton
                 fill
                 onClick={() => {
-                  onSave({ symbolId, label, svg, cutoff, radius });
+                  onSave({ symbolId: symbolId ?? getCustomIconId(), label, svg, cutoff, radius });
                 }}
                 data-test-subj="mapsCustomIconForm-submit"
                 isDisabled={!isComplete}

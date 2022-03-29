@@ -36,7 +36,9 @@ import { shallow } from 'enzyme';
 import { IconSelect } from './icon_select';
 
 test('Should render icon select', () => {
-  const component = shallow(<IconSelect icon={{ value: 'symbol1' }} onChange={() => {}} />);
+  const component = shallow(
+    <IconSelect customIcons={{}} icon={{ value: 'symbol1' }} onChange={() => {}} />
+  );
 
   expect(component).toMatchSnapshot();
 });

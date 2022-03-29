@@ -9,7 +9,7 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { StyleSettings } from './style_settings';
-import { getCustomIcons, getSelectedLayer } from '../../../selectors/map_selectors';
+import { getSelectedLayer } from '../../../selectors/map_selectors';
 import { updateCustomIcons, updateLayerStyleForSelectedLayer } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { CustomIcon, StyleDescriptor } from '../../../../common/descriptor_types';
@@ -17,7 +17,6 @@ import { CustomIcon, StyleDescriptor } from '../../../../common/descriptor_types
 function mapStateToProps(state: MapStoreState) {
   return {
     layer: getSelectedLayer(state)!,
-    customIcons: getCustomIcons(state),
   };
 }
 

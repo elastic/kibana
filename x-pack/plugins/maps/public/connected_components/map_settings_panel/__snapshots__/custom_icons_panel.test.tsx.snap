@@ -27,7 +27,7 @@ exports[`should render 1`] = `
         >
           <FormattedMessage
             defaultMessage="Add a custom icon that can be used in layers in this map."
-            id="mapSettingsPanel.customIcons.emptyState.description"
+            id="xpack.maps.mapSettingsPanel.customIcons.emptyState.description"
             values={Object {}}
           />
         </EuiTextColor>

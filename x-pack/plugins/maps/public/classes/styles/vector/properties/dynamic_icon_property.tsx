@@ -81,7 +81,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     const mbStops = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      mbStops.push(`${style}`);
+      mbStops.push(style);
     });
 
     if (fallbackSymbolId) {
@@ -120,7 +120,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     const layerStyle = this._layer.getCurrentStyle() as IVectorStyle;
     stops.forEach(({ stop, style }) => {
       if (stop) {
-        const { svg } = layerStyle.getIconMeta(style);
+        const svg = layerStyle.getIconSvg(style);
         breaks.push({
           color: 'grey',
           label: this.formatField(stop),
@@ -131,7 +131,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     });
 
     if (fallbackSymbolId) {
-      const { svg } = layerStyle.getIconMeta(fallbackSymbolId);
+      const svg = layerStyle.getIconSvg(fallbackSymbolId);
       breaks.push({
         color: 'grey',
         label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,

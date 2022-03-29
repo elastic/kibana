@@ -62,7 +62,8 @@ const vectorStyleDescriptor = {
 const vectorStyle = new VectorStyle(
   vectorStyleDescriptor,
   {} as unknown as IVectorSource,
-  {} as unknown as IVectorLayer
+  {} as unknown as IVectorLayer,
+  [] as CustomIcon[]
 );
 const styleProperties: StyleProperties = {};
 vectorStyle.getAllStyleProperties().forEach((styleProperty) => {

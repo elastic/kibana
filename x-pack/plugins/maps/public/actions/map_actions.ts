@@ -135,7 +135,7 @@ export function deleteCustomIcon(value: string) {
       if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
         return false;
       }
-      return (style as IVectorStyle).getCustomIconIdsInUse().includes(value);
+      return (style as IVectorStyle).isUsingCustomIcon(value);
     });
 
     if (layersContainingCustomIcon.length > 0) {
