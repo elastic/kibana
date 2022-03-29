@@ -24309,7 +24309,6 @@
     "xpack.securitySolution.endpoint.policyList.onboardingDocsLink": "查看 Elastic Security 文档",
     "xpack.securitySolution.endpoint.policyList.onboardingSectionOne": "使用威胁防御、检测和深度安全数据可见性功能保护您的主机。",
     "xpack.securitySolution.endpoint.policyList.onboardingSectionThree": "首先，将 Endpoint Security 集成添加到您的代理。有关更多信息，",
-    "xpack.securitySolution.endpoint.policyList.onboardingSectionTwo": "从此页面，您将可以查看和管理环境中运行 Endpoint Security 的主机。",
     "xpack.securitySolution.endpoint.policyList.onboardingTitle": "开始使用 Endpoint Security",
     "xpack.securitySolution.endpoint.policyResponse.appliedOn": "修订 {rev} 应用于 {date}",
     "xpack.securitySolution.endpoint.policyResponse.backLinkTitle": "终端详情",

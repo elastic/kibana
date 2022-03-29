@@ -21188,7 +21188,6 @@
     "xpack.securitySolution.endpoint.policyList.onboardingDocsLink": "afficher la documentation Elastic Security",
     "xpack.securitySolution.endpoint.policyList.onboardingSectionOne": "Protégez vos hôtes grâce à la prévention des menaces, la détection et la visibilité des données en profondeur en toute sécurité.",
     "xpack.securitySolution.endpoint.policyList.onboardingSectionThree": "Pour commencer, ajoutez l'intégration Endpoint Security à vos agents. Pour en savoir plus, ",
-    "xpack.securitySolution.endpoint.policyList.onboardingSectionTwo": "À partir de cette page, vous pourrez afficher et gérer les hôtes dans votre environnement exécutant Endpoint Security.",
     "xpack.securitySolution.endpoint.policyList.onboardingTitle": "Débuter avec Endpoint Security",
     "xpack.securitySolution.endpoint.policyResponse.appliedOn": "Révision {rev} appliquée le {date}",
     "xpack.securitySolution.endpoint.policyResponse.backLinkTitle": "Détails de point de terminaison",

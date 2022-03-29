@@ -24281,7 +24281,6 @@
     "xpack.securitySolution.endpoint.policyList.onboardingDocsLink": "Elasticsearch Securityドキュメントを表示",
     "xpack.securitySolution.endpoint.policyList.onboardingSectionOne": "脅威防御、検出、深いセキュリティデータの可視化を実現し、ホストを保護します。",
     "xpack.securitySolution.endpoint.policyList.onboardingSectionThree": "開始するには、Endpoint Security 統合をエージェントに追加します。詳細については、",
-    "xpack.securitySolution.endpoint.policyList.onboardingSectionTwo": "このページでは、Endpoint Securityを実行している環境でホストを表示して管理できます。",
     "xpack.securitySolution.endpoint.policyList.onboardingTitle": "Endpoint Securityの基本",
     "xpack.securitySolution.endpoint.policyResponse.appliedOn": "{date}に改訂{rev}が適用されました",
     "xpack.securitySolution.endpoint.policyResponse.backLinkTitle": "エンドポイント詳細",
