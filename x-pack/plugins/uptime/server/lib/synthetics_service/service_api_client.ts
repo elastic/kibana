@@ -88,7 +88,7 @@ export class ServiceAPIClient {
   async checkAccountAccessStatus() {
     if (this.authorization) {
       // in case username/password is provided, we assume it's always allowed
-      return { allowed: true, betaFormUrl: null };
+      return { allowed: true, signupUrl: null };
     }
 
     const httpsAgent = this.getHttpsAgent();
@@ -110,14 +110,14 @@ export class ServiceAPIClient {
           httpsAgent,
         });
 
-        const { allowed, betaFormUrl } = data;
-        return { allowed, betaFormUrl };
+        const { allowed, signupUrl } = data;
+        return { allowed, signupUrl };
       } catch (e) {
         this.logger.error(e);
       }
     }
 
-    return { allowed: false, betaFormUrl: null };
+    return { allowed: false, signupUrl: null };
   }
 
   async callAPI(

@@ -40,7 +40,7 @@ export interface MonitorManagementList {
   list: MonitorManagementListResult;
   locations: ServiceLocations;
   enablement: MonitorManagementEnablementResult | null;
-  syntheticsService: { isAllowed?: boolean; betaFormUrl: string | null; loading: boolean };
+  syntheticsService: { isAllowed?: boolean; signupUrl: string | null; loading: boolean };
   throttling: ThrottlingOptions;
 }
 
@@ -64,7 +64,7 @@ export const initialState: MonitorManagementList = {
     enablement: null,
   },
   syntheticsService: {
-    betaFormUrl: null,
+    signupUrl: null,
     loading: false,
   },
   throttling: DEFAULT_THROTTLING,
@@ -270,7 +270,7 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         ...state,
         syntheticsService: {
           isAllowed: state.syntheticsService?.isAllowed,
-          betaFormUrl: state.syntheticsService?.betaFormUrl,
+          signupUrl: state.syntheticsService?.signupUrl,
           loading: true,
         },
       })
@@ -284,7 +284,7 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         ...state,
         syntheticsService: {
           isAllowed: action.payload.serviceAllowed,
-          betaFormUrl: action.payload.betaFormUrl,
+          signupUrl: action.payload.signupUrl,
           loading: false,
         },
       })
@@ -295,7 +295,7 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         ...state,
         syntheticsService: {
           isAllowed: false,
-          betaFormUrl: null,
+          signupUrl: null,
           loading: false,
         },
       })

@@ -22,5 +22,5 @@ export type DecryptedSyntheticsMonitorSavedObject = SimpleSavedObject<Synthetics
 
 export interface SyntheticsServiceAllowed {
   serviceAllowed: boolean;
-  betaFormUrl: string;
+  signupUrl: string;
 }

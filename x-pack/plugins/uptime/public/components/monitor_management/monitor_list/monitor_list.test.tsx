@@ -63,7 +63,7 @@ describe('<MonitorManagementList />', () => {
       },
       syntheticsService: {
         loading: false,
-        betaFormUrl: null,
+        signupUrl: null,
       },
     } as MonitorManagementListState,
   };

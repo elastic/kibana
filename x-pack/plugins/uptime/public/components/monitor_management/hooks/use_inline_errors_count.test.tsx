@@ -74,6 +74,7 @@ describe('useInlineErrorsCount', function () {
           locations: [],
           syntheticsService: {
             loading: false,
+            signupUrl: null,
           },
           throttling: DEFAULT_THROTTLING,
         },

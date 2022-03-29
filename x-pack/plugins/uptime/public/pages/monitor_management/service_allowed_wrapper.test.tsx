@@ -25,7 +25,7 @@ describe('ServiceAllowedWrapper', () => {
   it('renders loading state when enabled state is loading', async () => {
     jest
       .spyOn(allowedHook, 'useSyntheticsServiceAllowed')
-      .mockReturnValue({ loading: true, betaFormUrl: null });
+      .mockReturnValue({ loading: true, signupUrl: null });
 
     const { findByText } = render(
       <ServiceAllowedWrapper>
@@ -39,7 +39,7 @@ describe('ServiceAllowedWrapper', () => {
   it('renders children when enabled state is true', async () => {
     jest
       .spyOn(allowedHook, 'useSyntheticsServiceAllowed')
-      .mockReturnValue({ loading: false, isAllowed: true, betaFormUrl: 'https://example.com' });
+      .mockReturnValue({ loading: false, isAllowed: true, signupUrl: 'https://example.com' });
 
     const { findByText, queryByText } = render(
       <ServiceAllowedWrapper>
@@ -55,7 +55,7 @@ describe('ServiceAllowedWrapper', () => {
     it('renders an enabled button if there is a form URL', async () => {
       jest
         .spyOn(allowedHook, 'useSyntheticsServiceAllowed')
-        .mockReturnValue({ loading: false, isAllowed: false, betaFormUrl: 'https://example.com' });
+        .mockReturnValue({ loading: false, isAllowed: false, signupUrl: 'https://example.com' });
 
       const { findByText, getByText } = render(
         <ServiceAllowedWrapper>
@@ -70,7 +70,7 @@ describe('ServiceAllowedWrapper', () => {
     it('renders a disabled button if there is no form URL', async () => {
       jest
         .spyOn(allowedHook, 'useSyntheticsServiceAllowed')
-        .mockReturnValue({ loading: false, isAllowed: false, betaFormUrl: null });
+        .mockReturnValue({ loading: false, isAllowed: false, signupUrl: null });
 
       const { findByText, getByText } = render(
         <ServiceAllowedWrapper>
@@ -85,7 +85,7 @@ describe('ServiceAllowedWrapper', () => {
     it('renders when enabled state is false', async () => {
       jest
         .spyOn(allowedHook, 'useSyntheticsServiceAllowed')
-        .mockReturnValue({ loading: false, isAllowed: false, betaFormUrl: 'https://example.com' });
+        .mockReturnValue({ loading: false, isAllowed: false, signupUrl: 'https://example.com' });
 
       const { findByText } = render(
         <ServiceAllowedWrapper>
