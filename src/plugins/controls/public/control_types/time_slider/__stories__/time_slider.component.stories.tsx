@@ -111,6 +111,22 @@ export const TimeSliderWithLowRangeOverlap = () => {
   );
 };
 
+export const TimeSliderWithLowRangeOverlapAndIgnoredValidation = () => {
+  const lastWeek = moment().subtract(7, 'days');
+  const now = moment();
+
+  const threeDays = moment().subtract(3, 'days');
+  const twoDays = moment().subtract(2, 'days');
+
+  return (
+    <TimeSliderWrapper
+      ignoreValidation={true}
+      range={[threeDays.unix() * 1000, now.unix() * 1000]}
+      value={[lastWeek.unix() * 1000, twoDays.unix() * 1000]}
+    />
+  );
+};
+
 export const TimeSliderWithRangeLowerThanValue = () => {
   const twoWeeksAgo = moment().subtract(14, 'days');
   const lastWeek = moment().subtract(7, 'days');

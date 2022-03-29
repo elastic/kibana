@@ -169,11 +169,11 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         }
       } else {
         // If we have a value or a range use the min/max of those, otherwise undefined
-        if (min !== null || this.componentState.range!.min !== undefined) {
+        if (min !== null && this.componentState.range!.min !== undefined) {
           filterMin = Math.max(min || 0, this.componentState.range!.min || 0);
         }
 
-        if (max || this.componentState.range!.max) {
+        if (max !== null && this.componentState.range!.max) {
           filterMax = Math.min(
             max || Number.MAX_SAFE_INTEGER,
             this.componentState.range!.max || Number.MAX_SAFE_INTEGER
@@ -308,6 +308,11 @@ export class TimeSliderControlEmbeddable extends Embeddable<
           timezone={this.getTimezone()}
           dateFormat={this.getDateFormat()}
           fieldName={this.getInput().fieldName}
+          ignoreValidation={
+            this.getInput().ignoreParentSettings !== undefined &&
+            this.getInput().ignoreParentSettings?.ignoreValidations !== undefined &&
+            this.getInput().ignoreParentSettings?.ignoreValidations!
+          }
         />
       </TimeSliderControlReduxWrapper>,
       node

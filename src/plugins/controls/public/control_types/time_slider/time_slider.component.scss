@@ -39,4 +39,9 @@
   .timeSlider__anchorText--default {
     color: $euiColorMediumShade;
   }
+
+  .timeSlider__anchorText--invalid {
+    text-decoration: line-through;
+    color: $euiColorMediumShade;
+  }
 }

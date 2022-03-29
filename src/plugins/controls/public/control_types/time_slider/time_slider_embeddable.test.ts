@@ -15,12 +15,12 @@ import { pluginServices } from '../../services';
 import { TestScheduler } from 'rxjs/testing';
 import { buildRangeFilter } from '@kbn/es-query';
 
-const buildFilter = (range: [number | undefined, number | undefined]) => {
+const buildFilter = (range: [number | null, number | null]) => {
   const filterPieces: Record<string, number> = {};
-  if (range[0]) {
+  if (range[0] !== null) {
     filterPieces.gte = range[0];
   }
-  if (range[1]) {
+  if (range[1] !== null) {
     filterPieces.lte = range[1];
   }
 
@@ -40,6 +40,8 @@ const range = { min: rangeMin, max: rangeMax };
 
 const lowerValue: [number, number] = [15, 25];
 const upperValue: [number, number] = [25, 35];
+const partialLowValue: [number, null] = [25, null];
+const partialHighValue: [null, number] = [null, 25];
 const withinRangeValue: [number, number] = [21, 29];
 const outOfRangeValue: [number, number] = [31, 40];
 
@@ -48,6 +50,9 @@ const lowerValueFilter = buildFilter(lowerValue);
 const lowerValuePartialFilter = buildFilter([20, 25]);
 const upperValueFilter = buildFilter(upperValue);
 const upperValuePartialFilter = buildFilter([25, 30]);
+
+const partialLowValueFilter = buildFilter(partialLowValue);
+const partialHighValueFilter = buildFilter(partialHighValue);
 const withinRangeValueFilter = buildFilter(withinRangeValue);
 const outOfRangeValueFilter = buildFilter(outOfRangeValue);
 
@@ -101,12 +106,20 @@ describe('Time Slider Control Embeddable', () => {
       });
     };
 
-    it('outputs filter of the range when no value is given', () => {
-      testFilterOutput(baseInput, rangeFilter);
+    it('outputs no filter when no value is given', () => {
+      testFilterOutput(baseInput, undefined);
     });
 
     it('outputs the value filter after the range is fetched', () => {
       testFilterOutput({ ...baseInput, value: withinRangeValue }, withinRangeValueFilter);
+    });
+
+    it('outputs a partial filter for a low partial value', () => {
+      testFilterOutput({ ...baseInput, value: partialLowValue }, partialLowValueFilter);
+    });
+
+    it('outputs a partial filter for a high partial value', () => {
+      testFilterOutput({ ...baseInput, value: partialHighValue }, partialHighValueFilter);
     });
 
     describe('with validation', () => {

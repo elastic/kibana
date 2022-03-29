@@ -28,6 +28,7 @@ interface TimeSliderProps {
   dateFormat: string;
   timezone: string;
   fieldName: string;
+  ignoreValidation: boolean;
 }
 
 export const TimeSlider: FC<TimeSliderProps> = ({
@@ -35,6 +36,7 @@ export const TimeSlider: FC<TimeSliderProps> = ({
   dateFormat,
   timezone,
   fieldName,
+  ignoreValidation,
 }) => {
   const {
     useEmbeddableDispatch,
@@ -86,6 +88,7 @@ export const TimeSlider: FC<TimeSliderProps> = ({
       dateFormat={dateFormat}
       timezone={timezone}
       fieldName={fieldName}
+      ignoreValidation={ignoreValidation}
     />
   );
 };

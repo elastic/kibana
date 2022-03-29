@@ -76,15 +76,25 @@ export interface TimeSliderProps {
   dateFormat?: string;
   timezone?: string;
   fieldName: string;
+  ignoreValidation?: boolean;
 }
 
 const isValidRange = (maybeRange: TimeSliderProps['range']): maybeRange is [number, number] => {
   return maybeRange !== undefined && !isNil(maybeRange[0]) && !isNil(maybeRange[1]);
 };
 
+const unselectedClass = 'timeSlider__anchorText--default';
+const validClass = 'timeSlider__anchorText';
+const invalidClass = 'timeSlider__anchorText--invalid';
+
 export const TimeSlider: FC<TimeSliderProps> = (props) => {
-  const defaultProps = { dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS', timezone: 'Browser', ...props };
-  const { range, value, timezone, dateFormat, fieldName } = defaultProps;
+  const defaultProps = {
+    dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+    ignoreValidation: false,
+    timezone: 'Browser',
+    ...props,
+  };
+  const { range, value, timezone, dateFormat, fieldName, ignoreValidation } = defaultProps;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -123,30 +133,35 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
       lower = upper;
     }
 
-    // has value and doesn't have a
     const hasLowerValueInRange =
-      value[0] !== null && (!isValidRange(range) || (value[0] >= range[0] && value[0] <= range[1]));
+      value[0] !== null && isValidRange(range) && value[0] >= range[0] && value[0] <= range[1];
     // It's out of range if the upper value is above the upper range or below the lower range
     const hasUpperValueInRange =
-      value[1] !== null && (!isValidRange(range) || (value[1] <= range[1] && value[1] >= range[0]));
+      value[1] !== null && isValidRange(range) && value[1] <= range[1] && value[1] >= range[0];
+
+    let lowClass = unselectedClass;
+    let highClass = unselectedClass;
+    if (value[0] !== null && (hasLowerValueInRange || ignoreValidation)) {
+      lowClass = validClass;
+    } else if (value[0] !== null) {
+      lowClass = invalidClass;
+    }
+
+    if (value[1] !== null && (hasUpperValueInRange || ignoreValidation)) {
+      highClass = validClass;
+    } else if (value[1] !== null) {
+      highClass = invalidClass;
+    }
+
+    // if no value then anchorText default
+    // if hasLowerValueInRange || skipValidation then anchor text
+    // else strikethrough
 
     valueText = (
       <EuiText className="eui-textTruncate" size="s">
-        <span
-          className={
-            hasLowerValueInRange ? 'timeSlider__anchorText' : 'timeSlider__anchorText--default'
-          }
-        >
-          {epochToKbnDateFormat(lower)}
-        </span>
+        <span className={lowClass}>{epochToKbnDateFormat(lower)}</span>
         &nbsp;&nbsp;→&nbsp;&nbsp;
-        <span
-          className={
-            hasUpperValueInRange ? 'timeSlider__anchorText' : 'timeSlider__anchorText--default'
-          }
-        >
-          {epochToKbnDateFormat(upper)}
-        </span>
+        <span className={highClass}>{epochToKbnDateFormat(upper)}</span>
       </EuiText>
     );
   }
