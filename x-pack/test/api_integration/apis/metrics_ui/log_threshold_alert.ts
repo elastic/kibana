@@ -30,9 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('without group by', () => {
         it('should work', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const scheduleActions = sinon.fake();
-          const replaceState = sinon.fake();
-          const alertFactory = sinon.fake.returns({ scheduleActions, replaceState });
+          const alertFactory = sinon.fake();
           const ruleParams = {
             count: {
               comparator: Comparator.GT_OR_EQ,
@@ -58,18 +56,23 @@ export default function ({ getService }: FtrProviderContext) {
             timestamp.valueOf()
           );
           expect(alertFactory.callCount).to.equal(1);
-          expect(scheduleActions.callCount).to.equal(1);
-          expect(replaceState.callCount).to.equal(1);
-          expect(scheduleActions.getCall(0).args).to.eql([
-            'logs.threshold.fired',
-            {
-              timestamp: timestamp.toISOString(),
-              matchingDocuments: 2,
-              conditions: 'env does not equal dev',
-              group: null,
-              isRatio: false,
-              reason: '2 log entries in the last 5 mins. Alert when ≥ 1.',
-            },
+          expect(alertFactory.getCall(0).args).to.eql([
+            '*',
+            '2 log entries in the last 5 mins. Alert when ≥ 1.',
+            2,
+            1,
+            [
+              {
+                actionGroup: 'logs.threshold.fired',
+                context: {
+                  conditions: 'env does not equal dev',
+                  group: null,
+                  isRatio: false,
+                  matchingDocuments: 2,
+                  reason: '2 log entries in the last 5 mins. Alert when ≥ 1.',
+                },
+              },
+            ],
           ]);
         });
       });
@@ -77,9 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('with group by', () => {
         it('should work', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const scheduleActions = sinon.fake();
-          const replaceState = sinon.fake();
-          const alertFactory = sinon.fake.returns({ scheduleActions, replaceState });
+          const alertFactory = sinon.fake();
           const ruleParams = {
             count: {
               comparator: Comparator.GT_OR_EQ,
@@ -106,29 +107,23 @@ export default function ({ getService }: FtrProviderContext) {
             timestamp.valueOf()
           );
           expect(alertFactory.callCount).to.equal(2);
-          expect(scheduleActions.callCount).to.equal(2);
-          expect(replaceState.callCount).to.equal(2);
-          expect(scheduleActions.getCall(0).args).to.eql([
-            'logs.threshold.fired',
-            {
-              timestamp: timestamp.toISOString(),
-              matchingDocuments: 2,
-              conditions: 'env does not equal test',
-              group: 'dev',
-              isRatio: false,
-              reason: '2 log entries in the last 5 mins for dev. Alert when ≥ 1.',
-            },
-          ]);
-          expect(scheduleActions.getCall(1).args).to.eql([
-            'logs.threshold.fired',
-            {
-              timestamp: timestamp.toISOString(),
-              matchingDocuments: 2,
-              conditions: 'env does not equal test',
-              group: 'prod',
-              isRatio: false,
-              reason: '2 log entries in the last 5 mins for prod. Alert when ≥ 1.',
-            },
+          expect(alertFactory.getCall(0).args).to.eql([
+            'dev',
+            '2 log entries in the last 5 mins for dev. Alert when ≥ 1.',
+            2,
+            1,
+            [
+              {
+                actionGroup: 'logs.threshold.fired',
+                context: {
+                  conditions: 'env does not equal test',
+                  group: 'dev',
+                  isRatio: false,
+                  matchingDocuments: 2,
+                  reason: '2 log entries in the last 5 mins for dev. Alert when ≥ 1.',
+                },
+              },
+            ],
           ]);
         });
       });
@@ -141,9 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('without group by', () => {
         it('should work', async () => {
           const timestamp = new Date(DATES.ten_thousand_plus.max);
-          const scheduleActions = sinon.fake();
-          const replaceState = sinon.fake();
-          const alertFactory = sinon.fake.returns({ scheduleActions, replaceState });
+          const alertFactory = sinon.fake();
           const ruleParams = {
             count: {
               comparator: Comparator.GT_OR_EQ,
@@ -166,20 +159,25 @@ export default function ({ getService }: FtrProviderContext) {
             timestamp.valueOf()
           );
           expect(alertFactory.callCount).to.equal(1);
-          expect(scheduleActions.callCount).to.equal(1);
-          expect(replaceState.callCount).to.equal(1);
-          expect(scheduleActions.getCall(0).args).to.eql([
-            'logs.threshold.fired',
-            {
-              timestamp: '2021-10-19T00:53:59.997Z',
-              ratio: 0.5526081141328578,
-              numeratorConditions: 'event.dataset equals nginx.error',
-              denominatorConditions: 'event.dataset does not equal nginx.error',
-              group: null,
-              isRatio: true,
-              reason:
-                'The ratio of selected logs is 0.5526081141328578 in the last 5 mins. Alert when ≥ 0.5.',
-            },
+          expect(alertFactory.getCall(0).args).to.eql([
+            '*',
+            'The ratio of selected logs is 0.5526081141328578 in the last 5 mins. Alert when ≥ 0.5.',
+            0.5526081141328578,
+            0.5,
+            [
+              {
+                actionGroup: 'logs.threshold.fired',
+                context: {
+                  denominatorConditions: 'event.dataset does not equal nginx.error',
+                  group: null,
+                  isRatio: true,
+                  numeratorConditions: 'event.dataset equals nginx.error',
+                  ratio: 0.5526081141328578,
+                  reason:
+                    'The ratio of selected logs is 0.5526081141328578 in the last 5 mins. Alert when ≥ 0.5.',
+                },
+              },
+            ],
           ]);
         });
       });
@@ -187,9 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('with group by', () => {
         it('should work', async () => {
           const timestamp = new Date(DATES.ten_thousand_plus.max);
-          const scheduleActions = sinon.fake();
-          const replaceState = sinon.fake();
-          const alertFactory = sinon.fake.returns({ scheduleActions, replaceState });
+          const alertFactory = sinon.fake();
           const ruleParams = {
             count: {
               comparator: Comparator.GT_OR_EQ,
@@ -213,20 +209,25 @@ export default function ({ getService }: FtrProviderContext) {
             timestamp.valueOf()
           );
           expect(alertFactory.callCount).to.equal(1);
-          expect(scheduleActions.callCount).to.equal(1);
-          expect(replaceState.callCount).to.equal(1);
-          expect(scheduleActions.getCall(0).args).to.eql([
-            'logs.threshold.fired',
-            {
-              timestamp: '2021-10-19T00:53:59.997Z',
-              ratio: 0.5526081141328578,
-              numeratorConditions: 'event.dataset equals nginx.error',
-              denominatorConditions: 'event.dataset does not equal nginx.error',
-              group: 'web',
-              isRatio: true,
-              reason:
-                'The ratio of selected logs is 0.5526081141328578 in the last 5 mins for web. Alert when ≥ 0.5.',
-            },
+          expect(alertFactory.getCall(0).args).to.eql([
+            'web',
+            'The ratio of selected logs is 0.5526081141328578 in the last 5 mins for web. Alert when ≥ 0.5.',
+            0.5526081141328578,
+            0.5,
+            [
+              {
+                actionGroup: 'logs.threshold.fired',
+                context: {
+                  denominatorConditions: 'event.dataset does not equal nginx.error',
+                  group: 'web',
+                  isRatio: true,
+                  numeratorConditions: 'event.dataset equals nginx.error',
+                  ratio: 0.5526081141328578,
+                  reason:
+                    'The ratio of selected logs is 0.5526081141328578 in the last 5 mins for web. Alert when ≥ 0.5.',
+                },
+              },
+            ],
           ]);
         });
       });

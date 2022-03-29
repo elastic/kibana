@@ -119,7 +119,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           : relativeViewInAppUrl;
 
         const sharedContext = {
-          timestamp: new Date().toISOString(),
+          timestamp: startedAt.toISOString(),
           viewInAppUrl,
         };
         actions.forEach((actionSet) => {
