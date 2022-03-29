@@ -7,13 +7,12 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { Query } from '../../../data/common';
 import { DataPublicPluginSetup } from '../../../data/public';
 import { FieldFormatsSetup } from '../../../field_formats/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { IFieldFormat, SerializedFieldFormat } from '../../../../plugins/field_formats/common';
 import type { RangeSelectContext, ValueClickContext } from '../../../../plugins/embeddable/public';
-import { Datatable, ExpressionsServiceStart, ExpressionsSetup } from '../../../expressions/public';
+import { ExpressionsServiceStart, ExpressionsSetup } from '../../../expressions/public';
 
 export interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -72,41 +71,6 @@ export interface Operation extends OperationMetadata {
   // User-facing label for the operation
   label: string;
   sortingHint?: SortingHint;
-}
-
-export interface FramePublicAPI {
-  datasourceLayers: Record<string, DatasourcePublicAPI>;
-  appliedDatasourceLayers?: Record<string, DatasourcePublicAPI>; // this is only set when auto-apply is turned off
-  /**
-   * Data of the chart currently rendered in the preview.
-   * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
-   * If accessing, make sure to check whether expected columns actually exist.
-   */
-  activeData?: Record<string, Datatable>;
-}
-
-/**
- * This is an API provided to visualizations by the frame, which calls the publicAPI on the datasource
- */
-export interface DatasourcePublicAPI {
-  datasourceId: string;
-  getTableSpec: () => Array<{ columnId: string; fields: string[] }>;
-  getOperationForColumnId: (columnId: string) => OperationDescriptor | null;
-  /**
-   * Collect all default visual values given the current state
-   */
-  getVisualDefaults: () => Record<string, Record<string, unknown>>;
-  /**
-   * Retrieve the specific source id for the current state
-   */
-  getSourceId: () => string | undefined;
-  /**
-   * Collect all defined filters from all the operations in the layer
-   */
-  getFilters: (activeData?: FramePublicAPI['activeData']) => {
-    kuery: Query[][];
-    lucene: Query[][];
-  };
 }
 
 /**

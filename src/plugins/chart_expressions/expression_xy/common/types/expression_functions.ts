@@ -213,16 +213,14 @@ export interface LensMultiTable {
   };
 }
 
-export type ReferenceLineLayerConfigResult = Omit<ReferenceLineLayerArgs, 'yConfig'> & {
+export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
   type: typeof REFERENCE_LINE_LAYER;
   layerType: typeof LayerTypes.REFERENCELINE;
-  yConfig?: YConfigResult[];
 };
 
-export type DataLayerConfigResult = Omit<DataLayerArgs, 'yConfig'> & {
+export type DataLayerConfigResult = DataLayerArgs & {
   type: typeof DATA_LAYER;
   layerType: typeof LayerTypes.DATA;
-  yConfig?: YConfigResult[];
 };
 
 export type YConfigResult = YConfig & { type: typeof Y_CONFIG };

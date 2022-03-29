@@ -190,7 +190,7 @@ export const Annotations = ({
                     isHorizontal: !isHorizontal,
                     hasReducedPadding,
                     label: annotation.label,
-                    rotateClassName: isHorizontal ? 'lnsXyAnnotationIcon_rotate90' : undefined,
+                    rotateClassName: isHorizontal ? 'xyAnnotationIcon_rotate90' : undefined,
                   }}
                 />
               ) : undefined
@@ -255,13 +255,13 @@ export function MarkerBody({
   }
   return (
     <div
-      className="lnsXyDecorationRotatedWrapper"
+      className="xyDecorationRotatedWrapper"
       style={{
         width: LINES_MARKER_SIZE,
       }}
     >
       <div
-        className="eui-textTruncate lnsXyDecorationRotatedWrapper__label"
+        className="eui-textTruncate xyDecorationRotatedWrapper__label"
         style={{
           maxWidth: LINES_MARKER_SIZE * 3,
         }}
@@ -276,11 +276,11 @@ function NumberIcon({ number }: { number: number }) {
   return (
     <EuiFlexGroup
       justifyContent="spaceAround"
-      className="lnsXyAnnotationNumberIcon"
+      className="xyAnnotationNumberIcon"
       gutterSize="none"
       alignItems="center"
     >
-      <EuiText color="ghost" className="lnsXyAnnotationNumberIcon__text">
+      <EuiText color="ghost" className="xyAnnotationNumberIcon__text">
         {number < 10 ? number : `9+`}
       </EuiText>
     </EuiFlexGroup>

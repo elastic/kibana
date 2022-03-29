@@ -1,37 +1,18 @@
-.lnsXyDecorationRotatedWrapper {
-  display: inline-block;
-  overflow: hidden;
-  line-height: 1.5;
-
-  .lnsXyDecorationRotatedWrapper__label {
-    display: inline-block;
-    white-space: nowrap;
-    transform: translate(0, 100%) rotate(-90deg);
-    transform-origin: 0 0;
-
-    &::after {
-      content: '';
-      float: left;
-      margin-top: 100%;
-    }
-  }
-}
-
-.lnsXyAnnotationNumberIcon {
+.xyAnnotationNumberIcon {
   border-radius: $euiSize;
   min-width: $euiSize;
   height: $euiSize;
   background-color: currentColor;
 }
 
-.lnsXyAnnotationNumberIcon__text {
+.xyAnnotationNumberIcon__text {
   font-weight: 500;
   font-size: 9px;
   letter-spacing: -.5px;
   line-height: 11px;
 }
 
-.lnsXyAnnotationIcon_rotate90 {
+.xyAnnotationIcon_rotate90 {
   transform: rotate(45deg);
   transform-origin: center;
 }
