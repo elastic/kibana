@@ -25,6 +25,10 @@ export const getSpikeAnalysisFrequentItemsRequest = (
     ...new Set(fieldCandidates.map(({ fieldName }) => fieldName)),
   ];
 
+  if (fieldNames.length > 10) {
+    fieldNames.length = 10;
+  }
+
   const query = getQueryWithParams({
     params,
   });
@@ -63,6 +67,7 @@ export const getSpikeAnalysisFrequentItemsRequest = (
     aggs: {
       fi: {
         frequent_items: {
+          size: 1000,
           minimum_set_size: 2,
           fields: fieldNames.map((field) => ({ field })),
         },
@@ -87,13 +92,15 @@ export const fetchSpikeAnalysisFrequentItems = async (
     deviationMax: number;
   }
 ) => {
-  const resp = await esClient.search<unknown, { fi: FrequentItems }>(
-    getSpikeAnalysisFrequentItemsRequest(
-      params,
-      fieldCandidates,
-      windowParameters
-    )
+  const req = getSpikeAnalysisFrequentItemsRequest(
+    params,
+    fieldCandidates,
+    windowParameters
   );
+
+  const resp = await esClient.search<unknown, { fi: FrequentItems }>(req, {
+    maxRetries: 0,
+  });
   const totalDocCount =
     (typeof resp?.hits?.total !== 'number' && resp?.hits?.total?.value) ?? 0;
 

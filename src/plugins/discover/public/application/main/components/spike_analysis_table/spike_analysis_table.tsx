@@ -405,7 +405,13 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({ dataView, spik
       name: 'Tree',
       content: (
         <div style={{ width: '100%' }}>
-          {response?.tree && <TreeView tree={response?.tree.root.children()} />}
+          {response?.tree && response?.frequentItemsHistograms && response?.overallTimeSeries && (
+            <TreeView
+              frequentItemsHistograms={response?.frequentItemsHistograms}
+              overallHistogram={response?.overallTimeSeries}
+              tree={response?.tree.root.children()}
+            />
+          )}
         </div>
       ),
     },

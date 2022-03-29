@@ -8,15 +8,31 @@
 
 import React, { FC } from 'react';
 
+import { Chart, BarSeries, ScaleType, Settings } from '@elastic/charts';
 import { EuiBadge } from '@elastic/eui';
 
-import type { ChangePointsResponseTree } from './use_change_point_detection';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
+
+import type {
+  ChangePointsResponseTree,
+  FrequentItemsHistograms,
+  HistogramItem,
+} from './use_change_point_detection';
 
 interface TreeViewProps {
+  frequentItemsHistograms: FrequentItemsHistograms;
+  overallHistogram: HistogramItem[];
   tree: Array<ChangePointsResponseTree['root']>;
 }
 
-export const TreeView: FC<TreeViewProps> = ({ tree }) => {
+export const TreeView: FC<TreeViewProps> = ({
+  frequentItemsHistograms,
+  overallHistogram,
+  tree,
+}) => {
+  const { theme } = useDiscoverServices();
+  const chartTheme = theme.useChartsTheme();
+  const chartBaseTheme = theme.useChartsBaseTheme();
   // const treeItems = useMemo(() => {
   //   let id = 1;
   //   const mapL = (d: ItemSetTreeNode): EuiTreeViewNode => {
@@ -51,10 +67,65 @@ export const TreeView: FC<TreeViewProps> = ({ tree }) => {
         );
         const children = d.children();
 
+        const id = JSON.stringify(d.itemSet.items);
+        const cp = frequentItemsHistograms[id];
+
+        const chartData = {
+          ...cp,
+          data:
+            overallHistogram.map((o, i) => {
+              const current = cp.find((d1) => d1.key_as_string === o.key_as_string) ?? {
+                doc_count: 0,
+              };
+              return {
+                ...o,
+                doc_count: current.doc_count,
+                other: Math.max(0, o.doc_count - current.doc_count),
+              };
+            }) ?? [],
+        };
+
         return (
           <li style={{ padding: '2px 0 2px 0', listStyleType: 'disc' }}>
             {label}
-            {children.length > 0 && <TreeView tree={children} />}
+            <div
+              style={{
+                width: '200px',
+                height: '50px',
+                // margin: '0px 0 16px 8px',
+              }}
+            >
+              <Chart>
+                <Settings theme={chartTheme} baseTheme={chartBaseTheme} />
+                <BarSeries
+                  id="Other"
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor={'key'}
+                  yAccessors={['other']}
+                  data={chartData.data}
+                  stackAccessors={[0]}
+                  // color={['lightblue']}
+                />
+                <BarSeries
+                  id={`${label}`}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor={'key'}
+                  yAccessors={['doc_count']}
+                  data={chartData.data}
+                  stackAccessors={[0]}
+                  color={['orange']}
+                />
+              </Chart>
+            </div>
+            {children.length > 0 && (
+              <TreeView
+                frequentItemsHistograms={frequentItemsHistograms}
+                overallHistogram={overallHistogram}
+                tree={children}
+              />
+            )}
           </li>
         );
       })}

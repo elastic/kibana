@@ -11,29 +11,28 @@ import type { ChangePoint, FrequentItems, Items } from './use_change_point_detec
 import { ItemSetFactory, ItemSetTreeFactory } from './itemset_tree';
 
 export function generateItemsets(
+  fields: string[],
   frequentItems: FrequentItems,
   changePoints: ChangePoint[],
   totalDocCount: number
 ) {
+  // console.log('frequentItems #', frequentItems.buckets.length);
+
   // Filter itemsets by significant change point field value pairs
   // TODO possibly move this to the ES query
   const filteredFrequentItems = frequentItems.buckets.filter((fi) => {
-    let match = false;
-
     const { key: currentItems } = fi;
 
-    Object.entries(currentItems).forEach(([key, values]) => {
-      const exists = changePoints.some((cp) => {
-        return cp.fieldName === key && values.includes(`${cp.fieldValue}`);
+    return Object.entries(currentItems).every(([key, values]) => {
+      return values.every((value) => {
+        return changePoints.some((cp) => {
+          return cp.fieldName === key && cp.fieldValue === value;
+        });
       });
-
-      if (exists) {
-        match = true;
-      }
     });
-
-    return match;
   });
+
+  // console.log('filteredFrequentItems #', filteredFrequentItems.length);
 
   // Add max p value to itemsets
   const itemsets = filteredFrequentItems.map((fi) => {
@@ -72,7 +71,8 @@ export function generateItemsets(
     maxItemCount = Math.max(maxItemCount, is.size);
   });
 
-  const tree = ItemSetTreeFactory(
+  const itemSetTree = ItemSetTreeFactory(
+    fields,
     itemsets.map((is) => {
       const { doc_count: count, maxPValue, key } = is;
       return ItemSetFactory(key as Items, maxItemCount, count, totalCount, maxPValue, minPValue);
@@ -82,5 +82,5 @@ export function generateItemsets(
     minPValue
   );
 
-  return tree;
+  return { itemsets, itemSetTree };
 }

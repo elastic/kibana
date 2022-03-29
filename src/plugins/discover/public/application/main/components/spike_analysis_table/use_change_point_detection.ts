@@ -40,7 +40,7 @@ export interface FieldValuePair {
   fieldValue: string | number;
 }
 
-interface HistogramItem {
+export interface HistogramItem {
   doc_count: number;
   key: number;
   key_as_string: string;
@@ -92,12 +92,14 @@ export interface ChangePointsResponseTree {
   parentQualityWeight: number;
   parentSimilarityWeight: number;
 }
+export type FrequentItemsHistograms = Record<string, HistogramItem[]>;
 export interface ChangePointsResponse {
   ccsWarning: boolean;
   changePoints?: ChangePoint[];
   fieldStats?: FieldStats[];
   overallTimeSeries?: HistogramItem[];
   tree?: ChangePointsResponseTree;
+  frequentItemsHistograms?: FrequentItemsHistograms;
 }
 
 type HistogramResponse = Array<{
@@ -305,6 +307,8 @@ export function useChangePointDetection(
       });
       setResponse.flush();
 
+      // console.log('responseUpdate.changePoints', responseUpdate.changePoints);
+
       // time series filtered by fields
       if (responseUpdate.changePoints) {
         await asyncForEach(responseUpdate.changePoints, async (cp, index) => {
@@ -359,6 +363,12 @@ export function useChangePointDetection(
             d.fieldName !== 'extension.keyword'
         );
 
+      const orderedFields = [
+        ...(new Set(frequentItemsFieldCandidates?.map((d) => d.fieldName)) ?? []),
+      ];
+
+      // console.log('orderedFields', orderedFields);
+
       if (frequentItemsFieldCandidates === undefined) {
         setResponse({
           ...responseUpdate,
@@ -395,13 +405,56 @@ export function useChangePointDetection(
       });
       setResponse.flush();
 
-      const tree = generateItemsets(
+      const { itemsets, itemSetTree } = generateItemsets(
+        orderedFields,
         frequentItems,
         responseUpdate.changePoints ?? [],
         totalDocCount
       );
 
-      responseUpdate.tree = tree;
+      const frequentItemsHistograms: FrequentItemsHistograms = {};
+
+      await asyncForEach(itemsets, async (fi, index) => {
+        const fiFilters = [];
+
+        for (const [fieldName, values] of Object.entries(fi.key)) {
+          for (const value of values) {
+            fiFilters.push({
+              term: { [fieldName]: value },
+            });
+          }
+        }
+
+        const histogramQuery = {
+          bool: {
+            filter: [...discoverQuery.bool.filter, ...fiFilters],
+          },
+        };
+
+        const hBody = JSON.stringify({
+          query: histogramQuery,
+          fields: [
+            {
+              fieldName: '@timestamp',
+              type: 'date',
+              interval: overallTimeSeries[0].interval,
+              min: overallTimeSeries[0].stats[0],
+              max: overallTimeSeries[0].stats[1],
+            },
+          ],
+          samplerShardSize: -1,
+        });
+
+        const fiTimeSeries = await http.post<HistogramResponse>({
+          path: `/api/ml/data_visualizer/get_field_histograms/${dataViewTitle}`,
+          body: hBody,
+        });
+
+        frequentItemsHistograms[JSON.stringify(fi.key)] = fiTimeSeries[0].data;
+      });
+
+      responseUpdate.frequentItemsHistograms = frequentItemsHistograms;
+      responseUpdate.tree = itemSetTree;
 
       setResponse({
         ...responseUpdate,
