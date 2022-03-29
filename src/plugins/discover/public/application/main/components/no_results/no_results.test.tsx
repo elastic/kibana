@@ -38,6 +38,7 @@ function mountAndFindSubjects(props: Omit<DiscoverNoResultsProps, 'onDisableFilt
     errorMsg: findTestSubject(component, 'discoverNoResultsError').exists(),
     adjustSearch: findTestSubject(component, 'discoverNoResultsAdjustSearch').exists(),
     adjustFilters: findTestSubject(component, 'discoverNoResultsAdjustFilters').exists(),
+    adjustIndices: findTestSubject(component, 'discoverNoResultsIndices').exists(),
     disableFiltersButton: findTestSubject(component, 'discoverNoResultsDisableFilters').exists(),
   };
 }
@@ -50,6 +51,7 @@ describe('DiscoverNoResults', () => {
         expect(result).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
+            "adjustIndices": true,
             "adjustSearch": false,
             "disableFiltersButton": false,
             "errorMsg": false,
@@ -67,6 +69,7 @@ describe('DiscoverNoResults', () => {
         expect(result).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
+            "adjustIndices": false,
             "adjustSearch": false,
             "disableFiltersButton": false,
             "errorMsg": false,
@@ -100,6 +103,7 @@ describe('DiscoverNoResults', () => {
         expect(result).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
+            "adjustIndices": false,
             "adjustSearch": false,
             "disableFiltersButton": false,
             "errorMsg": true,
