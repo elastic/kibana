@@ -23,11 +23,11 @@ export const MonitorStatusTranslations = {
     defaultMessage:
       'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}',
     values: {
-      monitorName: '{{state.monitorName}}',
-      monitorUrl: '{{{state.monitorUrl}}}',
-      statusMessage: '{{{state.statusMessage}}}',
-      latestErrorMessage: '{{{state.latestErrorMessage}}}',
-      observerLocation: '{{state.observerLocation}}',
+      monitorName: '{{context.monitorName}}',
+      monitorUrl: '{{{context.monitorUrl}}}',
+      statusMessage: '{{{context.statusMessage}}}',
+      latestErrorMessage: '{{{context.latestErrorMessage}}}',
+      observerLocation: '{{context.observerLocation}}',
     },
   }),
   name: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {
@@ -43,10 +43,10 @@ export const TlsTranslations = {
     defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is {status}. Certificate {summary}
 `,
     values: {
-      commonName: '{{state.commonName}}',
-      issuer: '{{state.issuer}}',
-      summary: '{{state.summary}}',
-      status: '{{state.status}}',
+      commonName: '{{context.commonName}}',
+      issuer: '{{context.issuer}}',
+      summary: '{{context.summary}}',
+      status: '{{context.status}}',
     },
   }),
   name: i18n.translate('xpack.uptime.alerts.tls.clientName', {
@@ -95,14 +95,14 @@ export const DurationAnomalyTranslations = {
     defaultMessage: `Abnormal ({severity} level) response time detected on {monitor} with url {monitorUrl} at {anomalyStartTimestamp}. Anomaly severity score is {severityScore}.
 Response times as high as {slowestAnomalyResponse} have been detected from location {observerLocation}. Expected response time is {expectedResponseTime}.`,
     values: {
-      severity: '{{state.severity}}',
-      anomalyStartTimestamp: '{{state.anomalyStartTimestamp}}',
-      monitor: '{{state.monitor}}',
-      monitorUrl: '{{{state.monitorUrl}}}',
-      slowestAnomalyResponse: '{{state.slowestAnomalyResponse}}',
-      expectedResponseTime: '{{state.expectedResponseTime}}',
-      severityScore: '{{state.severityScore}}',
-      observerLocation: '{{state.observerLocation}}',
+      severity: '{{context.severity}}',
+      anomalyStartTimestamp: '{{context.anomalyStartTimestamp}}',
+      monitor: '{{context.monitor}}',
+      monitorUrl: '{{{context.monitorUrl}}}',
+      slowestAnomalyResponse: '{{context.slowestAnomalyResponse}}',
+      expectedResponseTime: '{{context.expectedResponseTime}}',
+      severityScore: '{{context.severityScore}}',
+      observerLocation: '{{context.observerLocation}}',
     },
   }),
   name: i18n.translate('xpack.uptime.alerts.durationAnomaly.clientName', {

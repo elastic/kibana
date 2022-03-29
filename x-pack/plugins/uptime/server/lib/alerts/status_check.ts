@@ -282,7 +282,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       ACTION_VARIABLES[ALERT_REASON_MSG],
       ACTION_VARIABLES[VIEW_IN_APP_URL],
       ...commonMonitorStateI18,
-      ...commonStateTranslations,
     ],
     state: [...commonMonitorStateI18, ...commonStateTranslations],
   },
@@ -291,13 +290,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   async executor({
     params: rawParams,
     state,
-    services: {
-      savedObjectsClient,
-      scopedClusterClient,
-      alertWithLifecycle,
-      getAlertStartedDate,
-      alertFactory,
-    },
+    services: { savedObjectsClient, scopedClusterClient, alertWithLifecycle, getAlertStartedDate },
     rule: {
       schedule: { interval },
     },
@@ -372,10 +365,14 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           fields: getMonitorAlertDocument(monitorSummary),
         });
 
-        alert.replaceState({
-          ...state,
+        const context = {
           ...monitorSummary,
           statusMessage,
+        };
+
+        alert.replaceState({
+          ...state,
+          ...context,
           ...updateState(state, true),
         });
 
@@ -390,7 +387,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
         alert.scheduleActions(MONITOR_STATUS.id, {
           [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
-          ...monitorSummary,
+          ...context,
         });
       }
       return updateState(state, downMonitorsByLocation.length > 0);
@@ -444,10 +441,14 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         fields: getMonitorAlertDocument(monitorSummary),
       });
 
-      alert.replaceState({
-        ...updateState(state, true),
+      const context = {
         ...monitorSummary,
         statusMessage,
+      };
+
+      alert.replaceState({
+        ...updateState(state, true),
+        ...context,
       });
       const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
         monitorId: monitorSummary.monitorId,
@@ -460,7 +461,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
       alert.scheduleActions(MONITOR_STATUS.id, {
         [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
-        ...monitorSummary,
+        ...context,
       });
     });
     return updateState(state, downMonitorsByLocation.length > 0);

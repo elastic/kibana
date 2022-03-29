@@ -59,7 +59,7 @@ export const updateState: UpdateUptimeAlertState = (state, isTriggeredNow) => {
 };
 
 export const generateAlertMessage = (messageTemplate: string, fields: Record<string, any>) => {
-  return Mustache.render(messageTemplate, { state: { ...fields } });
+  return Mustache.render(messageTemplate, { context: { ...fields }, state: { ...fields } });
 };
 export const getViewInAppUrl = (relativeViewInAppUrl: string, basePath: IBasePath) =>
   basePath.publicBaseUrl
