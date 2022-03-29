@@ -113,7 +113,7 @@ export function transformHealthServiceProvider(
         }));
     },
     /**
-     * Returns report about transform that contain error messages
+     * Returns report about transforms that contain error messages
      * @param transformIds
      */
     async getErrorMessagesReport(
@@ -214,7 +214,7 @@ export function transformHealthServiceProvider(
                 'xpack.transform.alertTypes.transformHealth.notStartedMessage',
                 {
                   defaultMessage:
-                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} not started.',
+                    '{count, plural, one {Transform} other {Transform}} {transformsString} {count, plural, one {is} other {are}} not started.',
                   values: { count, transformsString },
                 }
               ),
@@ -237,7 +237,7 @@ export function transformHealthServiceProvider(
                 'xpack.transform.alertTypes.transformHealth.errorMessagesMessage',
                 {
                   defaultMessage:
-                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {contains} other {contains}} error messages.',
+                    '{count, plural, one {Transform} other {Transform}} {transformsString} {count, plural, one {contains} other {contains}} error messages.',
                   values: { count, transformsString },
                 }
               ),

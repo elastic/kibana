@@ -134,12 +134,12 @@ export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
   },
   errorMessages: {
     name: i18n.translate('xpack.transform.alertTypes.transformHealth.errorMessagesCheckName', {
-      defaultMessage: 'Transform contains error messages',
+      defaultMessage: 'Errors in transform messages',
     }),
     description: i18n.translate(
       'xpack.transform.alertTypes.transformHealth.errorMessagesCheckDescription',
       {
-        defaultMessage: 'Get alerts when the transform contains error messages.',
+        defaultMessage: 'Get alerts if a transform contains errors in the transform messages.',
       }
     ),
   },
