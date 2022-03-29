@@ -33,6 +33,7 @@ import {
   updateTimelineSessionViewSessionId,
   setActiveTabTimeline,
 } from '../../../../timelines/store/timeline/actions';
+import { detectionsTimelineIds } from '../../../containers/helpers';
 import * as i18n from './translations';
 
 const FullScreenButtonIcon = styled(EuiButtonIcon)`
@@ -168,10 +169,19 @@ export const useSessionView = ({
     setGlobalFullScreen,
     globalFullScreen,
   ]);
+  const sourcererScope = useMemo(() => {
+    if (timelineId === TimelineId.active) {
+      return SourcererScopeName.timeline;
+    } else if (detectionsTimelineIds.includes(timelineId)) {
+      return SourcererScopeName.detections;
+    } else {
+      return SourcererScopeName.default;
+    }
+  }, [timelineId]);
   const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
     isFlyoutView: timelineId !== TimelineId.active,
     entityType,
-    sourcererScope: SourcererScopeName.timeline,
+    sourcererScope,
     timelineId,
     tabType: timelineId === TimelineId.active ? TimelineTabs.session : TimelineTabs.query,
   });
