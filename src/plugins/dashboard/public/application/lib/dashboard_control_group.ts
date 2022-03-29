@@ -121,7 +121,6 @@ export const syncDashboardControlGroup = async ({
       .pipe(debounceTime(10), distinctUntilKeyChanged('controlGroupInput'))
       .subscribe(() => {
         if (!isControlGroupInputEqual()) {
-          // console.log('op there it is');
           if (!dashboardContainer.getInput().controlGroupInput) {
             controlGroup.updateInput(getDefaultDashboardControlGroupInput());
             return;
