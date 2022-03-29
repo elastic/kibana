@@ -15,6 +15,7 @@ import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views
 export type { InfraConfig } from '../common/plugin_config_types';
 
 export type InfraPluginCoreSetup = CoreSetup<InfraServerPluginStartDeps, InfraPluginStart>;
+export type InfraPluginStartServicesAccessor = InfraPluginCoreSetup['getStartServices'];
 
 export interface InfraPluginSetup {
   defineInternalSourceConfiguration: (

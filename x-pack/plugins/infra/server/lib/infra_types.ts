@@ -9,7 +9,7 @@ import { Logger } from '@kbn/logging';
 import type { IBasePath } from 'kibana/server';
 import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
 import { RulesServiceSetup } from '../services/rules';
-import { InfraConfig, InfraPluginCoreSetup } from '../types';
+import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
@@ -31,7 +31,7 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   handleEsError: typeof handleEsError;
   logsRules: RulesServiceSetup;
   metricsRules: RulesServiceSetup;
-  getStartServices: InfraPluginCoreSetup['getStartServices'];
+  getStartServices: InfraPluginStartServicesAccessor;
   logger: Logger;
   basePath: IBasePath;
 }

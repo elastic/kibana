@@ -13,14 +13,14 @@ import {
 } from '../../../common/http_api/log_views';
 import { createValidationFunction } from '../../../common/runtime_types';
 import type { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
-import { LogViewsServiceStart } from '../../services/log_views/types';
+import type { InfraPluginStartServicesAccessor } from '../../types';
 
 export const initPutLogViewRoute = ({
   framework,
-  getLogViewsService,
+  getStartServices,
 }: {
   framework: KibanaFramework;
-  getLogViewsService: () => Promise<LogViewsServiceStart>;
+  getStartServices: InfraPluginStartServicesAccessor;
 }) => {
   framework.registerRoute(
     {
@@ -34,7 +34,8 @@ export const initPutLogViewRoute = ({
     async (_requestContext, request, response) => {
       const { logViewId } = request.params;
       const { attributes } = request.body;
-      const logViewsClient = (await getLogViewsService()).getScopedClient(request);
+      const { logViews } = (await getStartServices())[2];
+      const logViewsClient = logViews.getScopedClient(request);
 
       try {
         const logView = await logViewsClient.putLogView(logViewId, attributes);

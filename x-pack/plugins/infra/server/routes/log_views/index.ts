@@ -6,13 +6,13 @@
  */
 
 import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
-import { LogViewsServiceStart } from '../../services/log_views/types';
+import { InfraPluginStartServicesAccessor } from '../../types';
 import { initGetLogViewRoute } from './get_log_view';
 import { initPutLogViewRoute } from './put_log_view';
 
 export const initLogViewRoutes = (dependencies: {
   framework: KibanaFramework;
-  getLogViewsService: () => Promise<LogViewsServiceStart>;
+  getStartServices: InfraPluginStartServicesAccessor;
 }) => {
   initGetLogViewRoute(dependencies);
   initPutLogViewRoute(dependencies);

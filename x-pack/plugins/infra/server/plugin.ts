@@ -37,7 +37,6 @@ import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
-import { initLogViewRoutes } from './routes/log_views';
 import { logViewSavedObjectType } from './saved_objects';
 import { LogEntriesService } from './services/log_entries';
 import { LogViewsService } from './services/log_views';
@@ -187,10 +186,6 @@ export class InfraServerPlugin
     ]);
 
     initInfraServer(this.libs);
-    initLogViewRoutes({
-      framework,
-      getLogViewsService: async () => (await core.getStartServices())[2].logViews,
-    });
     registerRuleTypes(plugins.alerting, this.libs, plugins.ml);
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(

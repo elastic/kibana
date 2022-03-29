@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { initIpToHostName } from './routes/ip_to_hostname';
 import { InfraBackendLibs } from './lib/infra_types';
+import { initGetHostsAnomaliesRoute, initGetK8sAnomaliesRoute } from './routes/infra_ml';
+import { initInventoryMetaRoute } from './routes/inventory_metadata';
+import { initIpToHostName } from './routes/ip_to_hostname';
+import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
 import {
+  initGetLogEntryAnomaliesDatasetsRoute,
+  initGetLogEntryAnomaliesRoute,
   initGetLogEntryCategoriesRoute,
   initGetLogEntryCategoryDatasetsRoute,
   initGetLogEntryCategoryDatasetsStatsRoute,
@@ -15,26 +20,21 @@ import {
   initGetLogEntryExamplesRoute,
   initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
-  initGetLogEntryAnomaliesRoute,
-  initGetLogEntryAnomaliesDatasetsRoute,
 } from './routes/log_analysis';
-import { initGetK8sAnomaliesRoute } from './routes/infra_ml';
-import { initGetHostsAnomaliesRoute } from './routes/infra_ml';
-import { initMetricExplorerRoute } from './routes/metrics_explorer';
-import { initMetricsAPIRoute } from './routes/metrics_api';
-import { initMetadataRoute } from './routes/metadata';
-import { initSnapshotRoute } from './routes/snapshot';
-import { initNodeDetailsRoute } from './routes/node_details';
 import {
   initLogEntriesHighlightsRoute,
-  initLogEntriesSummaryRoute,
   initLogEntriesSummaryHighlightsRoute,
+  initLogEntriesSummaryRoute,
 } from './routes/log_entries';
-import { initInventoryMetaRoute } from './routes/inventory_metadata';
+import { initLogViewRoutes } from './routes/log_views';
+import { initMetadataRoute } from './routes/metadata';
+import { initMetricsAPIRoute } from './routes/metrics_api';
+import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetricsSourceConfigurationRoutes } from './routes/metrics_sources';
+import { initNodeDetailsRoute } from './routes/node_details';
 import { initOverviewRoute } from './routes/overview';
-import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
 import { initProcessListRoute } from './routes/process_list';
+import { initSnapshotRoute } from './routes/snapshot';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
@@ -55,6 +55,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initLogEntriesHighlightsRoute(libs);
   initLogEntriesSummaryRoute(libs);
   initLogEntriesSummaryHighlightsRoute(libs);
+  initLogViewRoutes(libs);
   initMetricExplorerRoute(libs);
   initMetricsAPIRoute(libs);
   initMetadataRoute(libs);
