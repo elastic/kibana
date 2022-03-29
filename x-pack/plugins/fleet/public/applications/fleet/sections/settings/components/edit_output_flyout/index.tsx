@@ -45,7 +45,7 @@ export interface EditOutputFlyoutProps {
 
 const OUTPUT_TYPE_OPTIONS = [
   { value: 'elasticsearch', text: 'Elasticsearch' },
-  { value: 'logstash', text: 'Logstash' },
+  { value: 'logstash', text: 'Logstash (BETA)' },
 ];
 
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
@@ -129,6 +129,23 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 id="xpack.fleet.settings.editOutputFlyout.typeInputLabel"
                 defaultMessage="Type"
               />
+            }
+            helpText={
+              isLogstashOutput && (
+                <FormattedMessage
+                  id="xpack.fleet.editOutputFlyout.logstashTypeOutputBetaHelpText"
+                  defaultMessage="Logstash output is in BETA, Please help by reporting any bugs. {learnMoreLink}."
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink href={docLinks.links.fleet.guide} external>
+                        {i18n.translate('xpack.fleet.editOutputFlyout.learnMoreLink', {
+                          defaultMessage: 'Learn more',
+                        })}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              )
             }
           >
             <EuiSelect

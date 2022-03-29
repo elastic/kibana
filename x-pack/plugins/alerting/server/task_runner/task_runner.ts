@@ -252,6 +252,18 @@ export class TaskRunner<
     }
   }
 
+  private isRuleSnoozed(rule: SanitizedAlert<Params>): boolean {
+    if (rule.muteAll) {
+      return true;
+    }
+
+    if (rule.snoozeEndTime == null) {
+      return false;
+    }
+
+    return Date.now() < rule.snoozeEndTime.getTime();
+  }
+
   private shouldLogAndScheduleActionsForAlerts() {
     // if execution hasn't been cancelled, return true
     if (!this.cancelled) {
@@ -312,7 +324,6 @@ export class TaskRunner<
       schedule,
       throttle,
       notifyWhen,
-      muteAll,
       mutedInstanceIds,
       name,
       tags,
@@ -481,10 +492,12 @@ export class TaskRunner<
 
     const alertExecutionStore: AlertExecutionStore = {
       numberOfTriggeredActions: 0,
+      numberOfScheduledActions: 0,
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
-    if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
+    const ruleIsSnoozed = this.isRuleSnoozed(rule);
+    if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
       const alertsWithExecutableActions = Object.entries(alertsWithScheduledActions).filter(
@@ -535,8 +548,8 @@ export class TaskRunner<
         alertExecutionStore,
       });
     } else {
-      if (muteAll) {
-        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is muted.`);
+      if (ruleIsSnoozed) {
+        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
       }
       if (!this.shouldLogAndScheduleActionsForAlerts()) {
         this.logger.debug(
@@ -804,7 +817,12 @@ export class TaskRunner<
       set(
         event,
         'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
-        executionStatus.numberOfTriggeredActions ?? 0
+        executionStatus.numberOfTriggeredActions
+      );
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
+        executionStatus.numberOfScheduledActions
       );
     }
 

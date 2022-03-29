@@ -13,11 +13,14 @@ import { first, tap } from 'rxjs/operators';
 
 import { I18nStart } from '../i18n';
 import { InjectedMetadataSetup } from '../injected_metadata';
+import { ThemeServiceSetup } from '../theme';
+import { CoreContextProvider } from '../utils';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { FatalErrorInfo, getErrorInfo } from './get_error_info';
 
 export interface Deps {
   i18n: I18nStart;
+  theme: ThemeServiceSetup;
   injectedMetadata: InjectedMetadataSetup;
 }
 
@@ -64,13 +67,13 @@ export class FatalErrorsService {
    */
   constructor(private rootDomElement: HTMLElement, private onFirstErrorCb: () => void) {}
 
-  public setup({ i18n, injectedMetadata }: Deps) {
+  public setup(deps: Deps) {
     this.errorInfo$
       .pipe(
         first(),
         tap(() => {
           this.onFirstErrorCb();
-          this.renderError(injectedMetadata, i18n);
+          this.renderError(deps);
         })
       )
       .subscribe({
@@ -99,7 +102,7 @@ export class FatalErrorsService {
       },
     };
 
-    this.setupGlobalErrorHandlers(this.fatalErrors!);
+    this.setupGlobalErrorHandlers();
 
     return this.fatalErrors!;
   }
@@ -112,7 +115,7 @@ export class FatalErrorsService {
     return fatalErrors;
   }
 
-  private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nStart) {
+  private renderError({ i18n, theme, injectedMetadata }: Deps) {
     // delete all content in the rootDomElement
     this.rootDomElement.textContent = '';
 
@@ -121,20 +124,20 @@ export class FatalErrorsService {
     this.rootDomElement.appendChild(container);
 
     render(
-      <i18n.Context>
+      <CoreContextProvider i18n={i18n} theme={theme} globalStyles={true}>
         <FatalErrorsScreen
           buildNumber={injectedMetadata.getKibanaBuildNumber()}
           kibanaVersion={injectedMetadata.getKibanaVersion()}
           errorInfo$={this.errorInfo$}
         />
-      </i18n.Context>,
+      </CoreContextProvider>,
       container
     );
   }
 
-  private setupGlobalErrorHandlers(fatalErrorsSetup: FatalErrorsSetup) {
+  private setupGlobalErrorHandlers() {
     if (window.addEventListener) {
-      window.addEventListener('unhandledrejection', function (e) {
+      window.addEventListener('unhandledrejection', (e) => {
         console.log(`Detected an unhandled Promise rejection.\n${e.reason}`); // eslint-disable-line no-console
       });
     }
