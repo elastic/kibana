@@ -104,10 +104,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.saveDashboard('lnsDrilldown');
       await panelActions.openContextMenu();
 
-      const el = await testSubjects.find('discover-dataView-switch-link');
-      const text = await el.getVisibleText();
-
-      expect(text).to.be('logstash-*');
       expect(await testSubjects.exists('embeddablePanelAction-ACTION_EXPLORE_DATA')).not.to.be.ok();
     });
 
