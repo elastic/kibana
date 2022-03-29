@@ -17,6 +17,7 @@ import {
 } from '../../../common/control_types/options_list/options_list_persistable_state';
 import { TimeSliderEditor } from './time_slider_editor';
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
+import { TimeSliderStrings } from './time_slider_strings';
 
 export class TimesliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<TimeSliderControlEmbeddableInput>
@@ -51,7 +52,8 @@ export class TimesliderEmbeddableFactory
 
   public isEditable = () => Promise.resolve(false);
 
-  public getDisplayName = () => 'Time Slider';
+  public getDisplayName = () => TimeSliderStrings.getDisplayName();
+  public getDescription = () => TimeSliderStrings.getDescription();
 
   public inject = createOptionsListInject();
   public extract = createOptionsListExtract();

@@ -18,6 +18,7 @@ import {
   LazyFieldPicker,
   withSuspense,
 } from '../../../../presentation_util/public';
+import { TimeSliderStrings } from './time_slider_strings';
 
 interface TimeSliderEditorState {
   dataViewListItems: DataViewListItem[];
@@ -70,7 +71,7 @@ export const TimeSliderEditor = ({
   const { dataView, fieldName } = state;
   return (
     <>
-      <EuiFormRow label={'Time Slider'}>
+      <EuiFormRow label={TimeSliderStrings.editor.getDataViewTitle()}>
         <DataViewPicker
           dataViews={state.dataViewListItems}
           selectedDataViewId={dataView?.id}
@@ -81,11 +82,11 @@ export const TimeSliderEditor = ({
             );
           }}
           trigger={{
-            label: state.dataView?.title ?? 'No Title',
+            label: state.dataView?.title ?? TimeSliderStrings.editor.getNoDataViewTitle(),
           }}
         />
       </EuiFormRow>
-      <EuiFormRow label={'Field Title'}>
+      <EuiFormRow label={TimeSliderStrings.editor.getFieldTitle()}>
         <FieldPicker
           filterPredicate={(field) => field.type === 'date'}
           selectedFieldName={fieldName}
