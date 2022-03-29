@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-export const GetRuleExecutionEventsRequestParams = t.exact(
-  t.type({
-    ruleId: t.string,
-  })
-);
-
-export type GetRuleExecutionEventsRequestParams = t.TypeOf<
-  typeof GetRuleExecutionEventsRequestParams
->;
+export { ElasticsearchResources } from './elasticsearch_resources';

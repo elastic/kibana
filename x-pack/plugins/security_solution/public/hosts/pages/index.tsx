@@ -23,7 +23,8 @@ const getHostsTabPath = () =>
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
   `${HostsTableType.risk}|` +
-  `${HostsTableType.alerts})`;
+  `${HostsTableType.alerts}|` +
+  `${HostsTableType.sessions})`;
 
 const getHostDetailsTabPath = () =>
   `${hostDetailsPagePath}/:tabName(` +
@@ -32,7 +33,8 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
   `${HostsTableType.risk}|` +
-  `${HostsTableType.alerts})`;
+  `${HostsTableType.alerts}|` +
+  `${HostsTableType.sessions})`;
 
 export const HostsContainer = React.memo(() => (
   <Switch>
