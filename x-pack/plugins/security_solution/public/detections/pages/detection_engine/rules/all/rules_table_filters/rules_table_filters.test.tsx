@@ -10,13 +10,16 @@ import { mount } from 'enzyme';
 
 import { RulesTableFilters } from './rules_table_filters';
 import { TestProviders } from '../../../../../../common/mock';
+import { RulesFeatureTourContextProvider } from '../feature_tour/rules_feature_tour_context';
 
 jest.mock('../rules_table/rules_table_context');
 
 describe('RulesTableFilters', () => {
   it('renders no numbers next to rule type button filter if none exist', async () => {
     const wrapper = mount(
-      <RulesTableFilters rulesCustomInstalled={null} rulesInstalled={null} allTags={[]} />,
+      <RulesFeatureTourContextProvider>
+        <RulesTableFilters rulesCustomInstalled={null} rulesInstalled={null} allTags={[]} />
+      </RulesFeatureTourContextProvider>,
       { wrappingComponent: TestProviders }
     );
 
@@ -30,7 +33,9 @@ describe('RulesTableFilters', () => {
 
   it('renders number of custom and prepackaged rules', async () => {
     const wrapper = mount(
-      <RulesTableFilters rulesCustomInstalled={10} rulesInstalled={9} allTags={[]} />,
+      <RulesFeatureTourContextProvider>
+        <RulesTableFilters rulesCustomInstalled={10} rulesInstalled={9} allTags={[]} />
+      </RulesFeatureTourContextProvider>,
       { wrappingComponent: TestProviders }
     );
 
