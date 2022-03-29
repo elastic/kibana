@@ -6,15 +6,25 @@
  */
 
 import { has } from 'lodash';
-import { MetricsUIAggregation } from '../../../../../common/inventory_models/types';
+import {
+  MetricsUIAggregation,
+  MetricsUIAggregationRT,
+  ESSumBucketAggRT,
+  ESTermsWithAggregationRT,
+  ESDerivativeAggRT,
+  ESBasicMetricAggRT,
+} from '../../../../../common/inventory_models/types';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 
 export const isMetricRate = (metric: MetricsUIAggregation | undefined): boolean => {
-  if (metric != null) {
-    const values = Object.values(metric);
-    return values.some((agg) => has(agg, 'derivative')) && values.some((agg) => has(agg, 'max'));
+  if (!MetricsUIAggregationRT.is(metric)) {
+    return false;
   }
-  return false;
+  const values = Object.values(metric);
+  return (
+    values.some((agg) => ESDerivativeAggRT.is(agg)) &&
+    values.some((agg) => ESBasicMetricAggRT.is(agg) && has(agg, 'max'))
+  );
 };
 
 export const isCustomMetricRate = (customMetric: SnapshotCustomMetricInput) => {
@@ -22,11 +32,14 @@ export const isCustomMetricRate = (customMetric: SnapshotCustomMetricInput) => {
 };
 
 export const isInterfaceRateAgg = (metric: MetricsUIAggregation | undefined) => {
-  if (metric != null) {
-    const values = Object.values(metric);
-    return values.some((agg) => has(agg, 'terms')) && values.some((agg) => has(agg, 'sum_bucket'));
+  if (!MetricsUIAggregationRT.is(metric)) {
+    return false;
   }
-  return false;
+  const values = Object.values(metric);
+  return (
+    values.some((agg) => ESTermsWithAggregationRT.is(agg)) &&
+    values.some((agg) => ESSumBucketAggRT.is(agg))
+  );
 };
 
 export const isRate = (
