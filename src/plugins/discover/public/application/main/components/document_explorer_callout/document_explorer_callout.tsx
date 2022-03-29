@@ -62,18 +62,20 @@ export const DocumentExplorerCallout = () => {
       iconType="search"
     >
       <p>
-        <span>
-          <FormattedMessage
-            id="discover.docExplorerCallout.bodyMessageOne"
-            defaultMessage="Quickly sort, select, and compare data, resize columns, and view documents in fullscreen with the "
-          />
-        </span>
-        <span css={semiBoldStyle}>
-          <FormattedMessage
-            id="discover.docExplorerCallout.bodyMessageTwo"
-            defaultMessage="Document Explorer."
-          />
-        </span>
+        <FormattedMessage
+          id="discover.docExplorerCallout.bodyMessage"
+          defaultMessage="Quickly sort, select, and compare data, resize columns, and view documents in fullscreen with the {documentExplorer}."
+          values={{
+            documentExplorer: (
+              <span css={semiBoldStyle}>
+                <FormattedMessage
+                  id="discover.docExplorerCallout.documentExplorer"
+                  defaultMessage="Document Explorer"
+                />
+              </span>
+            ),
+          }}
+        />
       </p>
       <EuiFlexGroup
         justifyContent="flexStart"

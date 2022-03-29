@@ -60,30 +60,28 @@ export const DocumentExplorerUpdateCallout = () => {
       iconType="search"
     >
       <p>
-        <span>
-          <FormattedMessage
-            id="discover.docExplorerUpdateCallout.bodyMessageOne"
-            defaultMessage="Experience the new "
-          />
-        </span>
-        <span css={semiBoldStyle}>
-          <FormattedMessage
-            id="discover.docExplorerUpdateCallout.bodyMessageTwo"
-            defaultMessage="Document Explorer."
-          />
-        </span>
-        <span>
-          <FormattedMessage
-            id="discover.docExplorerUpdateCallout.bodyMessageThree"
-            defaultMessage=" Understand the shape of your data with "
-          />
-        </span>
-        <span css={semiBoldStyle}>
-          <FormattedMessage
-            id="discover.docExplorerUpdateCallout.bodyMessageFour"
-            defaultMessage="Field Statistics."
-          />
-        </span>
+        <FormattedMessage
+          id="discover.docExplorerUpdateCallout.bodyMessage"
+          defaultMessage="Experience the new {documentExplorer}. Understand the shape of your data with {fieldStatistics}."
+          values={{
+            fieldStatistics: (
+              <span css={semiBoldStyle}>
+                <FormattedMessage
+                  id="discover.docExplorerUpdateCallout.fieldStatistics"
+                  defaultMessage="Field Statistics"
+                />
+              </span>
+            ),
+            documentExplorer: (
+              <span css={semiBoldStyle}>
+                <FormattedMessage
+                  id="discover.docExplorerUpdateCallout.documentExplorer"
+                  defaultMessage="Document Explorer"
+                />
+              </span>
+            ),
+          }}
+        />
       </p>
       <EuiButton
         iconType="tableDensityNormal"
