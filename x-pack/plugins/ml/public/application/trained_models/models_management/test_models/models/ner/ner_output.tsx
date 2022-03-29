@@ -116,9 +116,11 @@ function getClassIcon(className: string) {
       return 'user';
     case 'LOC':
       return 'visMapCoordinate';
+    case 'MISC':
+      return 'questionInCircle';
 
     default:
-      return 'cross';
+      return 'questionInCircle';
   }
 }
 
@@ -128,9 +130,11 @@ function getClassLabel(className: string) {
       return 'Person';
     case 'LOC':
       return 'Location';
+    case 'MISC':
+      return 'Miscellaneous';
 
     default:
-      return 'cross';
+      return 'Unknown';
   }
 }
 
