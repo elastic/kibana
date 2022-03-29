@@ -52,7 +52,7 @@ const defaultProps = {
   layerDisplayName: 'myLeftJoinField',
   leftJoinFields: [],
   onChange: () => {},
-  editModeActiveForLayer: false,
+  isFeatureEditorOpenForLayer: false,
 };
 
 test('Should render join editor', () => {

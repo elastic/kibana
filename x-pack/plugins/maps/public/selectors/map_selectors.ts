@@ -263,7 +263,7 @@ export const getDataFilters = createSelector(
     searchSessionId,
     searchSessionMapBuffer,
     isReadOnly,
-    editModeActiveForLayer
+    isFeatureEditorOpenForLayer
   ) => {
     return {
       extent: mapExtent,
@@ -275,7 +275,7 @@ export const getDataFilters = createSelector(
       filters,
       searchSessionId,
       isReadOnly,
-      editModeActiveForLayer,
+      isFeatureEditorOpenForLayer,
     };
   }
 );

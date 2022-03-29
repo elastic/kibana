@@ -36,7 +36,7 @@ export interface Props {
   showThisLayerOnly: (layerId: string) => void;
   supportsFitToBounds: boolean;
   toggleVisible: (layerId: string) => void;
-  editModeActiveForLayer: boolean;
+  isFeatureEditorOpenForLayer: boolean;
   numLayers: number;
 }
 

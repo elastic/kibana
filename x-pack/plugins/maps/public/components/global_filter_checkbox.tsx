@@ -13,20 +13,20 @@ interface Props {
   applyGlobalQuery: boolean;
   label: string;
   setApplyGlobalQuery: (applyGlobalQuery: boolean) => void;
-  isEditingFeatures: boolean;
+  isFeatureEditorOpenForLayer: boolean;
 }
 
 export function GlobalFilterCheckbox({
   applyGlobalQuery,
   label,
   setApplyGlobalQuery,
-  isEditingFeatures,
+  isFeatureEditorOpenForLayer,
 }: Props) {
   const onApplyGlobalQueryChange = (event: EuiSwitchEvent) => {
     setApplyGlobalQuery(event.target.checked);
   };
 
-  const tooltipMessage = isEditingFeatures
+  const tooltipMessage = isFeatureEditorOpenForLayer
     ? i18n.translate('xpack.maps.filterEditor.isGlobalSearchNotApplied', {
         defaultMessage: 'Global search is not applied to the layer while editing features',
       })
@@ -39,11 +39,11 @@ export function GlobalFilterCheckbox({
       <EuiToolTip position="top" content={tooltipMessage}>
         <EuiSwitch
           label={label}
-          checked={isEditingFeatures ? false : applyGlobalQuery}
+          checked={isFeatureEditorOpenForLayer ? false : applyGlobalQuery}
           onChange={onApplyGlobalQueryChange}
           data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
           compressed
-          disabled={isEditingFeatures}
+          disabled={isFeatureEditorOpenForLayer}
         />
       </EuiToolTip>
     </EuiFormRow>

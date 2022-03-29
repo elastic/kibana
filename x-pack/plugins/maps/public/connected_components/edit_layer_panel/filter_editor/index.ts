@@ -18,7 +18,7 @@ function mapStateToProps(state: MapStoreState) {
   const layer = getSelectedLayer(state)!;
   return {
     layer,
-    editModeActiveForLayer: getEditState(state)?.layerId === layer.getId(),
+    isFeatureEditorOpenForLayer: getEditState(state)?.layerId === layer.getId(),
   };
 }
 

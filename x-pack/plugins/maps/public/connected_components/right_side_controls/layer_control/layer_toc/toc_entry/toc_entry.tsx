@@ -31,7 +31,7 @@ export interface ReduxStateProps {
   hasDirtyStateSelector: boolean;
   isLegendDetailsOpen: boolean;
   isEditButtonDisabled: boolean;
-  editModeActiveForLayer: boolean;
+  isFeatureEditorOpenForLayer: boolean;
 }
 
 export interface ReduxDispatchProps {
@@ -282,7 +282,7 @@ export class TOCEntry extends Component<Props, State> {
           openLayerSettings={this._openLayerPanelWithCheck}
           isEditButtonDisabled={this.props.isEditButtonDisabled}
           supportsFitToBounds={this.state.supportsFitToBounds}
-          editModeActiveForLayer={this.props.editModeActiveForLayer}
+          isFeatureEditorOpenForLayer={this.props.isFeatureEditorOpenForLayer}
         />
 
         {this._renderQuickActions()}
@@ -317,7 +317,7 @@ export class TOCEntry extends Component<Props, State> {
       'mapTocEntry-isSelected':
         this.props.layer.isPreviewLayer() ||
         (this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId()),
-      'mapTocEntry-isInEditingMode': this.props.editModeActiveForLayer,
+      'mapTocEntry-isInEditingMode': this.props.isFeatureEditorOpenForLayer,
     });
 
     return (
@@ -334,7 +334,7 @@ export class TOCEntry extends Component<Props, State> {
 
         {this._renderCancelModal()}
 
-        {this.props.editModeActiveForLayer && (
+        {this.props.isFeatureEditorOpenForLayer && (
           <div className="mapTocEntry-isInEditingMode__row">
             <EuiIcon type="vector" size="s" />
             <span className="mapTocEntry-isInEditingMode__editFeatureText">

@@ -29,7 +29,7 @@ export interface Props {
   layerDisplayName: string;
   leftJoinFields: JoinField[];
   onChange: (layer: IVectorLayer, joins: JoinDescriptor[]) => void;
-  editModeActiveForLayer: boolean;
+  isFeatureEditorOpenForLayer: boolean;
 }
 
 export function JoinEditor({
@@ -38,7 +38,7 @@ export function JoinEditor({
   onChange,
   leftJoinFields,
   layerDisplayName,
-  editModeActiveForLayer,
+  isFeatureEditorOpenForLayer,
 }: Props) {
   const renderJoins = () => {
     return joins.map((joinDescriptor: JoinDescriptor, index: number) => {
@@ -65,7 +65,7 @@ export function JoinEditor({
               onRemove={handleOnRemove}
               leftFields={leftJoinFields}
               leftSourceName={layerDisplayName}
-              editModeActiveForLayer={editModeActiveForLayer}
+              isFeatureEditorOpenForLayer={isFeatureEditorOpenForLayer}
             />
           </Fragment>
         );
@@ -88,7 +88,7 @@ export function JoinEditor({
 
   function renderContent() {
     const disabledReason = layer.getJoinsDisabledReason();
-    const tooltipMessage = editModeActiveForLayer
+    const tooltipMessage = isFeatureEditorOpenForLayer
       ? i18n.translate('xpack.maps.filterEditor.isJoinsNotApplied', {
           defaultMessage: 'Term joins are not applied while editing features',
         })

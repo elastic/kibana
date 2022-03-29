@@ -12,20 +12,20 @@ interface Props {
   applyGlobalTime: boolean;
   label: string;
   setApplyGlobalTime: (applyGlobalTime: boolean) => void;
-  isEditingFeatures: boolean;
+  isFeatureEditorOpenForLayer: boolean;
 }
 
 export function GlobalTimeCheckbox({
   applyGlobalTime,
   label,
   setApplyGlobalTime,
-  isEditingFeatures,
+  isFeatureEditorOpenForLayer,
 }: Props) {
   const onApplyGlobalTimeChange = (event: EuiSwitchEvent) => {
     setApplyGlobalTime(event.target.checked);
   };
 
-  const tooltipMessage = isEditingFeatures
+  const tooltipMessage = isFeatureEditorOpenForLayer
     ? i18n.translate('xpack.maps.filterEditor.isGlobalTimeNotApplied', {
         defaultMessage: 'Global time is not applied to the layer while editing features',
       })
@@ -38,11 +38,11 @@ export function GlobalTimeCheckbox({
       <EuiToolTip position="top" content={tooltipMessage}>
         <EuiSwitch
           label={label}
-          checked={isEditingFeatures ? false : applyGlobalTime}
+          checked={isFeatureEditorOpenForLayer ? false : applyGlobalTime}
           onChange={onApplyGlobalTimeChange}
           data-test-subj="mapLayerPanelApplyGlobalTimeCheckbox"
           compressed
-          disabled={isEditingFeatures}
+          disabled={isFeatureEditorOpenForLayer}
         />
       </EuiToolTip>
     </EuiFormRow>
