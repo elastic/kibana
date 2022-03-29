@@ -15,7 +15,9 @@ steps:
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
 
-  - command: .buildkite/scripts/steps/lint.sh
+  - wait
+
+  - command: .buildkite/scripts/steps/fleet/install_all_packages.sh
     label: Install All Packages
     agents:
       queue: n2-2
