@@ -325,15 +325,45 @@ describe('When using ConsoleManager', () => {
     });
 
     describe('and the terminate confirmation is shown', () => {
-      it.todo('should show confirmation when terminate button is clicked');
+      const clickOnTerminateButton = async () => {
+        userEvent.click(renderResult.getByTestId('consolePopupTerminateButton'));
 
-      it.todo('should show message confirmation');
+        await waitFor(() => {
+          expect(renderResult.getByTestId('consolePopupTerminateConfirmModal')).toBeTruthy();
+        });
+      };
 
-      it.todo('should show cancel and terminate buttons');
+      beforeEach(async () => {
+        await render();
+        await clickOnTerminateButton();
+      });
 
-      it.todo('should hide the confirmation when cancel is clicked');
+      it('should show confirmation when terminate button is clicked', async () => {
+        expect(renderResult.getByTestId('consolePopupTerminateConfirmMessage')).toBeTruthy();
+      });
 
-      it.todo('should terminate when terminate is clicked');
+      it('should show cancel and terminate buttons', async () => {
+        expect(renderResult.getByTestId('consolePopupTerminateModalCancelButton')).toBeTruthy();
+        expect(renderResult.getByTestId('consolePopupTerminateModalTerminateButton')).toBeTruthy();
+      });
+
+      it('should hide the confirmation when cancel is clicked', async () => {
+        userEvent.click(renderResult.getByTestId('consolePopupTerminateModalCancelButton'));
+
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('consolePopupTerminateConfirmModal')).toBeNull();
+        });
+      });
+
+      it('should terminate when terminate is clicked', async () => {
+        userEvent.click(renderResult.getByTestId('consolePopupTerminateModalTerminateButton'));
+
+        await waitFor(() => {
+          expect(
+            renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
+          ).toBe(true);
+        });
+      });
     });
   });
 });

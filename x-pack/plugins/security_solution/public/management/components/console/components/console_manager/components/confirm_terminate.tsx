@@ -26,12 +26,17 @@ export interface ConfirmTerminateProps {
 
 export const ConfirmTerminate = memo<ConfirmTerminateProps>(({ onConfirm, onCancel }) => {
   return (
-    <div className="euiOverlayMask" style={{ position: 'absolute' }}>
+    <div
+      className="euiOverlayMask"
+      style={{ position: 'absolute' }}
+      data-test-subj="consolePopupTerminateConfirmModal"
+    >
       <EuiFocusTrap>
         <EuiPanel className="terminate-confirm-panel">
           <EuiCallOut
             color="primary"
             iconType="iInCircle"
+            data-test-subj="consolePopupTerminateConfirmMessage"
             title={
               <FormattedMessage
                 id="xpack.securitySolution.console.popup.confirmTitle"
@@ -53,7 +58,10 @@ export const ConfirmTerminate = memo<ConfirmTerminateProps>(({ onConfirm, onCanc
 
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onCancel}>
+              <EuiButtonEmpty
+                onClick={onCancel}
+                data-test-subj="consolePopupTerminateModalCancelButton"
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.console.popup.terminateConfirmCancelLabel"
                   defaultMessage="Cancel"
@@ -61,7 +69,12 @@ export const ConfirmTerminate = memo<ConfirmTerminateProps>(({ onConfirm, onCanc
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={onConfirm} color="danger" fill>
+              <EuiButton
+                onClick={onConfirm}
+                color="danger"
+                fill
+                data-test-subj="consolePopupTerminateModalTerminateButton"
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.console.popup.terminateConfirmSubmitLabel"
                   defaultMessage="Terminate"
