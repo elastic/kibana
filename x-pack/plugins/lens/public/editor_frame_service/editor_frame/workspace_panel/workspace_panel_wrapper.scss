@@ -103,6 +103,11 @@
   overflow: visible; // Shows arrow animation when it gets out of bounds
   margin-top: 0;
   margin-bottom: -$euiSize;
+
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 176px;
+  max-height: 176px;
 }
 
 .lnsWorkspacePanel__dropIllustration {

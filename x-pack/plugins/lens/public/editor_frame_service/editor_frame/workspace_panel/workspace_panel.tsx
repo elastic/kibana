@@ -48,6 +48,7 @@ import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/publ
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
+import applyChangesIllustration from '../../../assets/apply_changes_illustration.png';
 import {
   getOriginalRequestErrorMessages,
   getUnknownVisualizationTypeError,
@@ -77,7 +78,6 @@ import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import type { Datatable } from '../../../../../../../src/plugins/expressions/public';
-import { ApplyChangesIllustration } from '../../../assets/apply_changes_illustration';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
 
 export interface WorkspacePanelProps {
@@ -395,6 +395,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderApplyChangesPrompt = () => {
+    const applyChangesString = i18n.translate('xpack.lens.editorFrame.applyChanges', {
+      defaultMessage: 'Apply changes',
+    });
+
     return (
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
@@ -402,8 +406,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         data-test-subj="workspace-apply-changes-prompt"
         size="s"
       >
-        <ApplyChangesIllustration
+        <img
           aria-hidden={true}
+          src={applyChangesIllustration}
+          alt={applyChangesString}
           className="lnsWorkspacePanel__promptIllustration"
         />
         <h2>
@@ -421,9 +427,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             onClick={() => dispatchLens(applyChanges())}
             data-test-subj="lnsApplyChanges__workspace"
           >
-            {i18n.translate('xpack.lens.editorFrame.applyChanges', {
-              defaultMessage: 'Apply changes',
-            })}
+            {applyChangesString}
           </EuiButtonEmpty>
         </p>
       </EuiText>
