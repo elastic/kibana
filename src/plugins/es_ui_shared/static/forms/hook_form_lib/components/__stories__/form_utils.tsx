@@ -27,7 +27,7 @@ export const submitForm = async (form: FormHook) => {
 };
 
 export interface FormWrapperProps {
-  formConfig?: FormConfig;
+  formConfig?: FormConfig<any>;
 }
 
 export const FormWrapper: FC<FormWrapperProps> = ({ formConfig, children }) => {
