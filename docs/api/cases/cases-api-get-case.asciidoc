@@ -35,14 +35,7 @@ default space is used.
 (Optional, boolean) Determines whether case comments are returned. Defaults to 
 `true`.
 
-`owner`::
-(Optional, string or array of strings) A filter to limit the retrieved cases to
-a specific set of applications. Valid values are: `cases`, `observability`,
-and `securitySolution`. If this parameter is omitted, the response contains all
-cases that the user has access to read.
-
- deprecated:[8.1.0]
-in a future release.
+ deprecated:[8.0.0]
 
 ==== Response code
 
