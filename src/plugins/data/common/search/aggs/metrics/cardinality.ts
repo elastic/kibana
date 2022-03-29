@@ -19,6 +19,7 @@ const uniqueCountTitle = i18n.translate('data.search.aggs.metrics.uniqueCountTit
 
 export interface AggParamsCardinality extends BaseAggParams {
   field: string;
+  emptyAsNull?: boolean;
 }
 
 export const getCardinalityMetricAgg = () =>
@@ -27,6 +28,7 @@ export const getCardinalityMetricAgg = () =>
     valueType: 'number',
     expressionName: aggCardinalityFnName,
     title: uniqueCountTitle,
+    enableEmptyAsNull: true,
     makeLabel(aggConfig: IMetricAggConfig) {
       return i18n.translate('data.search.aggs.metrics.uniqueCountLabel', {
         defaultMessage: 'Unique count of {field}',

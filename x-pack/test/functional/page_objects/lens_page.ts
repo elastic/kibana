@@ -116,6 +116,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         keepOpen?: boolean;
         palette?: string;
         formula?: string;
+        disableEmptyRows?: boolean;
       },
       layerIndex = 0
     ) {
@@ -160,6 +161,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.setPalette(opts.palette);
       }
 
+      if (opts.disableEmptyRows) {
+        await testSubjects.setEuiSwitch('indexPattern-include-empty-rows', 'uncheck');
+      }
+
       if (!opts.keepOpen) {
         await this.closeDimensionEditor();
       }
@@ -196,7 +201,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param field  - the desired field for the dimension
      * */
-    async dragFieldToWorkspace(field: string) {
+    async dragFieldToWorkspace(field: string, visualizationTestSubj?: string) {
       const from = `lnsFieldListPanelField-${field}`;
       await find.existsByCssSelector(from);
       await browser.html5DragAndDrop(
@@ -204,7 +209,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector('lnsWorkspace')
       );
       await this.waitForLensDragDropToFinish();
-      await this.waitForVisualization();
+      await this.waitForVisualization(visualizationTestSubj);
     },
 
     /**

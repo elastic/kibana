@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import uuid from 'uuid';
 import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
 import { alwaysFiringAlertType } from '../../fixtures/plugins/alerts/server/plugin';
@@ -74,11 +75,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createRuleWithActionsAndParams(
     testRunUuid: string,
+    params: Record<string, any> = {},
+    overwrites: Record<string, any> = {}
+  ) {
+    const connectors = await createConnectors(testRunUuid);
+    return await createAlwaysFiringRule({
+      name: `test-rule-${testRunUuid}`,
+      actions: connectors.map((connector) => ({
+        id: connector.id,
+        group: 'default',
+        params: {
+          message: 'from alert 1s',
+          level: 'warn',
+        },
+      })),
+      params,
+      ...overwrites,
+    });
+  }
+
+  async function createRuleWithSmallInterval(
+    testRunUuid: string,
     params: Record<string, any> = {}
   ) {
     const connectors = await createConnectors(testRunUuid);
     return await createAlwaysFiringRule({
       name: `test-rule-${testRunUuid}`,
+      schedule: {
+        interval: '1s',
+      },
       actions: connectors.map((connector) => ({
         id: connector.id,
         group: 'default',
@@ -116,7 +141,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const testRunUuid = uuid.v4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
-        const rule = await createRuleWithActionsAndParams(testRunUuid);
+        const rule = await createRuleWithSmallInterval(testRunUuid);
 
         // refresh to see rule
         await browser.refresh();
@@ -143,6 +168,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const { connectorType } = await pageObjects.ruleDetailsUI.getActionsLabels();
         expect(connectorType).to.be(`Slack`);
+      });
+
+      it('renders toast when schedule is less than configured minimum', async () => {
+        await testSubjects.existOrFail('intervalConfigToast');
+
+        const editButton = await testSubjects.find('ruleIntervalToastEditButton');
+        await editButton.click();
+
+        await testSubjects.click('cancelSaveEditedRuleButton');
       });
 
       it('should disable the rule', async () => {
@@ -550,6 +584,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Get action groups
         const { actionGroups } = alwaysFiringAlertType;
 
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
@@ -648,6 +685,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // refresh to see rule
         await browser.refresh();
 
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         const alertsList: any[] = await pageObjects.ruleDetailsUI.getAlertsList();
         expect(alertsList.filter((a) => a.alert === 'eu/east')).to.eql([
           {
@@ -660,6 +700,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('allows the user to mute a specific alert', async () => {
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
@@ -674,6 +717,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('allows the user to unmute a specific alert', async () => {
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
@@ -694,6 +740,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('allows the user unmute an inactive alert', async () => {
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         log.debug(`Ensuring eu/east is muted`);
         await pageObjects.ruleDetailsUI.ensureAlertMuteState('eu/east', true);
 
@@ -747,6 +796,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const PAGE_SIZE = 10;
       it('renders the first page', async () => {
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
@@ -760,6 +812,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('navigates to the next page', async () => {
+        // If the tab exists, click on the alert list
+        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
@@ -771,6 +826,121 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const [firstItem] = await pageObjects.ruleDetailsUI.getAlertsList();
           expect(firstItem.alert).to.eql(Object.keys(alertInstances)[PAGE_SIZE]);
         });
+      });
+    });
+
+    describe('Execution log', () => {
+      const testRunUuid = uuid.v4();
+      let rule: any;
+
+      before(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+
+        const alerts = [{ id: 'us-central' }];
+        rule = await createRuleWithActionsAndParams(
+          testRunUuid,
+          {
+            instances: alerts,
+          },
+          {
+            schedule: { interval: '1s' },
+            throttle: null,
+          }
+        );
+
+        // refresh to see rule
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // click on first rule
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
+
+        // await first run to complete so we have an initial state
+        await retry.try(async () => {
+          const { alerts: alertInstances } = await getAlertSummary(rule.id);
+          expect(Object.keys(alertInstances).length).to.eql(alerts.length);
+        });
+      });
+
+      after(async () => {
+        await objectRemover.removeAll();
+      });
+
+      it('renders the event log list and can filter/sort', async () => {
+        await browser.refresh();
+
+        // Check to see if the experimental is enabled, if not, just return
+        const tabbedContentExists = await testSubjects.exists('ruleDetailsTabbedContent');
+        if (!tabbedContentExists) {
+          return;
+        }
+
+        // Ensure we have some log data to work with
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        const refreshButton = await testSubjects.find('superDatePickerApplyTimeButton');
+        await refreshButton.click();
+
+        // List, date picker, and status picker all exists
+        await testSubjects.existOrFail('ruleEventLogList');
+        await testSubjects.existOrFail('ruleEventLogListDatePicker');
+        await testSubjects.existOrFail('ruleEventLogStatusFilterButton');
+
+        let statusFilter = await testSubjects.find('ruleEventLogStatusFilterButton');
+        let statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
+
+        expect(statusNumber.getVisibleText()).to.eql(0);
+
+        await statusFilter.click();
+        await testSubjects.click('ruleEventLogStatusFilter-success');
+        await statusFilter.click();
+
+        statusFilter = await testSubjects.find('ruleEventLogStatusFilterButton');
+        statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
+
+        expect(statusNumber.getVisibleText()).to.eql(1);
+
+        const eventLogList = await find.byCssSelector('.euiDataGridRow');
+        const rows = await eventLogList.parseDomContent();
+        expect(rows.length).to.be.greaterThan(0);
+
+        await pageObjects.triggersActionsUI.ensureEventLogColumnExists('timestamp');
+        await pageObjects.triggersActionsUI.ensureEventLogColumnExists('total_search_duration');
+
+        const timestampCells = await find.allByCssSelector(
+          '[data-gridcell-column-id="timestamp"][data-test-subj="dataGridRowCell"]'
+        );
+
+        // The test can be flaky and sometimes we'll get results without dates,
+        // This is a reasonable compromise as we still validate the good rows
+        let validTimestamps = 0;
+        await asyncForEach(timestampCells, async (cell) => {
+          const text = await cell.getVisibleText();
+          if (text.toLowerCase() !== 'invalid date') {
+            if (moment(text).isValid()) {
+              validTimestamps += 1;
+            }
+          }
+        });
+        expect(validTimestamps).to.be.greaterThan(0);
+
+        // Ensure duration cells are properly formatted
+        const durationCells = await find.allByCssSelector(
+          '[data-gridcell-column-id="total_search_duration"][data-test-subj="dataGridRowCell"]'
+        );
+
+        await asyncForEach(durationCells, async (cell) => {
+          const text = await cell.getVisibleText();
+          if (text) {
+            expect(text).to.match(/^N\/A|\d{2,}:\d{2}$/);
+          }
+        });
+
+        await pageObjects.triggersActionsUI.sortEventLogColumn('timestamp', 'asc');
+        await pageObjects.triggersActionsUI.sortEventLogColumn('total_search_duration', 'asc');
+
+        await testSubjects.existOrFail('dataGridHeaderCellSortingIcon-timestamp');
+        await testSubjects.existOrFail('dataGridHeaderCellSortingIcon-total_search_duration');
       });
     });
   });

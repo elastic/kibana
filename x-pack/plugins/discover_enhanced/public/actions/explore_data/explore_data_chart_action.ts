@@ -12,7 +12,7 @@ import {
 } from '../../../../../../src/plugins/discover/public';
 import {
   ApplyGlobalFilterActionContext,
-  esFilters,
+  extractTimeRange,
 } from '../../../../../../src/plugins/data/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { KibanaLocation } from '../../../../../../src/plugins/share/public';
@@ -55,7 +55,7 @@ export class ExploreDataChartAction
     }
 
     const { embeddable } = context;
-    const { restOfFilters: filters, timeRange } = esFilters.extractTimeRange(
+    const { restOfFilters: filters, timeRange } = extractTimeRange(
       context.filters,
       context.timeFieldName
     );

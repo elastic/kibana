@@ -23,7 +23,7 @@ const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> & { layout: Lay
   total: 0,
   deprecated: 0,
   app: { 'canvas workpad': 0, search: 0, visualization: 0, dashboard: 0 },
-  sizes: ['1.0', '5.0', '25.0', '50.0', '75.0', '95.0', '99.0'].reduce(
+  output_size: ['1.0', '5.0', '25.0', '50.0', '75.0', '95.0', '99.0'].reduce(
     (sps, p) => ({ ...sps, [p]: null }),
     {} as SizePercentiles
   ),
@@ -79,7 +79,7 @@ function getAvailableTotalForFeature(
     available: isAvailable(featureAvailability, exportType),
     total: jobType?.total || 0,
     deprecated,
-    sizes: { ...defaultTotalsForFeature.sizes, ...jobType?.sizes },
+    output_size: { ...defaultTotalsForFeature.output_size, ...jobType?.output_size },
     metrics: { ...metricsForFeature[exportType], ...jobType?.metrics },
     app: { ...defaultTotalsForFeature.app, ...jobType?.app },
     layout: jobTypeIsPdf(exportType)

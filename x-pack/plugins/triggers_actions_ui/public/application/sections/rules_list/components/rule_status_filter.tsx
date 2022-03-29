@@ -59,7 +59,7 @@ export const RuleStatusFilter: React.FunctionComponent<RuleStatusFilterProps> = 
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.ruleStatusFilterLabel"
-              defaultMessage="Status"
+              defaultMessage="Last response"
             />
           </EuiFilterButton>
         }
