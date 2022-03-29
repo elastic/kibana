@@ -9,7 +9,6 @@
 import React, { FC, useState, useMemo, useCallback } from 'react';
 import { isNil } from 'lodash';
 import {
-  EuiDualRangeProps,
   EuiText,
   EuiLoadingSpinner,
   EuiInputPopover,
@@ -309,7 +308,7 @@ export const TimeSliderComponentPopover: FC<
             <EuiButtonIcon
               iconType="eraser"
               color="danger"
-              onClick={() => onChangeHandler([null, null])}
+              onClick={() => onChange([null, null])}
               aria-label={TimeSliderStrings.resetButton.getLabel()}
               data-test-subj="timeSlider__clearRangeButton"
             />

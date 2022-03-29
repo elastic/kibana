@@ -16,7 +16,7 @@ import {
   createOptionsListInject,
 } from '../../../common/control_types/options_list/options_list_persistable_state';
 import { TimeSliderEditor } from './time_slider_editor';
-import { TimeSliderControlEmbeddableInput } from './time_slider_embeddable';
+import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 
 export class TimesliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<TimeSliderControlEmbeddableInput>

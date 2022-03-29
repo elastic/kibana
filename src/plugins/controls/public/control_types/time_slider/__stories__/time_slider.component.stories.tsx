@@ -30,7 +30,7 @@ const TimeSliderWrapper: FC<Omit<TimeSliderProps, 'onChange' | 'fieldName'>> = (
 
   return (
     <div style={{ width: '600px' }}>
-      <EuiFormControlLayout style={{ 'max-width': '100%' }}>
+      <EuiFormControlLayout style={{ width: '100%' }}>
         <TimeSlider {...props} value={value} fieldName={'Field Name'} onChange={onChange} />
       </EuiFormControlLayout>
     </div>

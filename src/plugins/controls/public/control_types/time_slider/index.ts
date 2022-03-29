@@ -7,5 +7,5 @@
  */
 
 export { TimesliderEmbeddableFactory } from './time_slider_embeddable_factory';
-export { TimeSliderControlEmbeddableInput } from './time_slider_embeddable';
+export { type TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 export {} from '../../../common';

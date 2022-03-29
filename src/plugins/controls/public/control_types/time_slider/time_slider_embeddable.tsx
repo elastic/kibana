@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import { isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { merge, Subscription, BehaviorSubject, Observable } from 'rxjs';
-import { map, distinctUntilChanged, skip, take, mergeMap, tap } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, take, mergeMap } from 'rxjs/operators';
 
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 

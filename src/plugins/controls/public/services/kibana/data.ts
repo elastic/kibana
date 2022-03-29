@@ -47,7 +47,11 @@ export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
   } = startPlugins;
   const { data } = startPlugins;
 
-  const fetchFieldRange = async (dataView, fieldName, input) => {
+  const fetchFieldRange: ControlsDataService['fetchFieldRange'] = async (
+    dataView,
+    fieldName,
+    input
+  ) => {
     const { ignoreParentSettings, query, timeRange } = input;
     let { filters = [] } = input;
 
@@ -93,5 +97,7 @@ export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
     getDataView$: (id: string) => from(data.dataViews.get(id)),
     autocomplete,
     query: queryPlugin,
+    searchSource: search.searchSource,
+    timefilter: queryPlugin.timefilter.timefilter,
   };
 };

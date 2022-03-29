@@ -6,20 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useState, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { debounce } from 'lodash';
 import { useStateObservable } from '../../hooks/use_state_observable';
 import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
-import { TimeSliderControlEmbeddableInput } from './time_slider_embeddable';
+import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 import { timeSliderReducers } from './time_slider_reducers';
-import {
-  TimeSlider as Component,
-  TimeSliderProps as TimeSliderComponentProps,
-} from './time_slider.component';
-
-// This is a container component that wraps the TimeSliderComponent
-// It expects a behavior subject
+import { TimeSlider as Component } from './time_slider.component';
 
 export interface TimeSliderSubjectState {
   range?: {

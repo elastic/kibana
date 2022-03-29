@@ -9,7 +9,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
-import { TimeSliderControlEmbeddableInput } from './time_slider_embeddable';
+import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 
 export const timeSliderReducers = {
   selectRange: (

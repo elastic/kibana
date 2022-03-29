@@ -6,22 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { interval, from, of } from 'rxjs';
-import { take, skipWhile, first, tap, mergeMap, delay, map } from 'rxjs/operators';
-import { TimeSliderControlEmbeddableInput, TimesliderEmbeddableFactory } from '.';
+import { of } from 'rxjs';
+import { delay, map } from 'rxjs/operators';
+import { TimeSliderControlEmbeddableInput } from '.';
 import { TimeSliderControlEmbeddable } from './time_slider_embeddable';
 import { stubLogstashDataView } from '../../../../data_views/common/data_view.stub';
 import { pluginServices } from '../../services';
 import { TestScheduler } from 'rxjs/testing';
-import {
-  Filter,
-  buildEsQuery,
-  compareFilters,
-  buildRangeFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  RangeFilterParams,
-} from '@kbn/es-query';
+import { buildRangeFilter } from '@kbn/es-query';
 
 const buildFilter = (range: [number | undefined, number | undefined]) => {
   const filterPieces: Record<string, number> = {};
@@ -63,13 +55,6 @@ const baseInput: TimeSliderControlEmbeddableInput = {
   id: 'id',
   fieldName: 'bytes',
   dataViewId: stubLogstashDataView.id!,
-};
-
-const inputWithValue: TimeSliderControlEmbeddableInput = {
-  id: 'id',
-  fieldName: 'bytes',
-  dataViewId: stubLogstashDataView.id!,
-  value: [10, 20],
 };
 
 describe('Time Slider Control Embeddable', () => {

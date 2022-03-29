@@ -26,4 +26,6 @@ export interface ControlsDataService {
   getDataView$: (id: string) => Observable<DataView>;
   autocomplete: DataPublicPluginStart['autocomplete'];
   query: DataPublicPluginStart['query'];
+  searchSource: DataPublicPluginStart['search']['searchSource'];
+  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
 }
