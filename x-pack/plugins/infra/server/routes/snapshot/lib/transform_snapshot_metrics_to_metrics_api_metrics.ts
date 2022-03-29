@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { identity } from 'lodash';
 import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import {
@@ -19,6 +20,10 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = (
   return snapshotRequest.metrics
     .map((metric, index) => {
       const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
+      const aggregations = inventoryModel.metrics.snapshot?.[metric.type];
+      if (aggregations) {
+        return { id: metric.type, aggregations };
+      }
       if (SnapshotCustomMetricInputRT.is(metric)) {
         const isUniqueId = snapshotRequest.metrics.findIndex((m) =>
           SnapshotCustomMetricInputRT.is(m) ? m.id === metric.id : false
@@ -38,11 +43,7 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = (
           },
         };
       }
-      const aggregations = inventoryModel.metrics.snapshot?.[metric.type];
-      if (!aggregations) {
-        return null;
-      }
-      return { id: metric.type, aggregations };
+      return null;
     })
-    .filter((val) => val != null) as MetricsAPIMetric[];
+    .filter(identity) as MetricsAPIMetric[];
 };
