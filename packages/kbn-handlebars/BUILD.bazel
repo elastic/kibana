@@ -30,12 +30,10 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "@npm//handlebars",
-  "@npm//lodash",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/jest",
-  "@npm//@types/lodash",
   "@npm//@types/node",
   "@npm//handlebars",
 ]

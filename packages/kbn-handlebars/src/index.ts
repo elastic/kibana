@@ -15,7 +15,6 @@ import AST from 'handlebars/dist/cjs/handlebars/compiler/ast';
 import { indexOf, createFrame } from 'handlebars/dist/cjs/handlebars/utils';
 // @ts-expect-error: Could not find a declaration file for module
 import { moveHelperToHooks } from 'handlebars/dist/cjs/handlebars/helpers';
-import get from 'lodash/get';
 
 export type ExtendedCompileOptions = Pick<
   CompileOptions,
@@ -211,21 +210,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   PathExpression(path: hbs.AST.PathExpression) {
-    const context = this.scopes[path.depth];
-    const name = path.parts[0];
-    const value = name === undefined ? context : get(context, path.parts);
-    const scoped = AST.helpers.scopedId(path);
-    const blockParamId = !path.depth && !scoped && this.blockParamIndex(name);
-
-    if (blockParamId) {
-      this.output.push(this.lookupBlockParam(blockParamId, path.parts));
-    } else if (path.data) {
-      const data = this.runtimeOptions!.data;
-      const result = this.resolvePath(path.depth, data, path.parts);
-      this.output.push(result);
-    } else {
-      this.output.push(value);
-    }
+    const blockParamId =
+      !path.depth && !AST.helpers.scopedId(path) && this.blockParamIndex(path.parts[0]);
+    const result = blockParamId
+      ? this.lookupBlockParam(blockParamId, path.parts)
+      : this.resolvePath(path);
+    this.output.push(result);
   }
 
   ContentStatement(content: hbs.AST.ContentStatement) {
@@ -326,6 +316,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   private processSimpleNode(node: ProcessableNodeWithPathParts) {
     const path = node.path;
+    // @ts-expect-error strict is not a valid property on PathExpression, but we used in the same way it's also used in the original handlebars
+    path.strict = true;
     const result = this.resolveNodes(path)[0];
     const lambdaResult = this.container.lambda(result, this.scopes[0]);
 
@@ -362,6 +354,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         node
       );
     } else {
+      // @ts-expect-error strict is not a valid property on PathExpression, but we used in the same way it's also used in the original handlebars
+      path.strict = true;
       this.invokeHelper(node);
     }
   }
@@ -549,14 +543,43 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     return result;
   }
 
-  private resolvePath(depth: number, data: any, parts: string[]) {
-    if (depth) {
-      data = this.container.data(data, depth);
+  private resolvePath(path: hbs.AST.PathExpression) {
+    let obj;
+    if (path.data) {
+      obj = this.runtimeOptions!.data;
+      if (path.depth) {
+        obj = this.container.data(this.runtimeOptions!.data, path.depth);
+      }
+    } else {
+      obj = this.scopes[path.depth];
     }
-    for (let i = 0; i < parts.length; i++) {
-      data = data ? this.container.lookupProperty(data, parts[i]) : data;
+
+    if (this.compileOptions.strict) {
+      return this.strictLookup(obj, path);
     }
-    return data;
+
+    for (let i = 0; i < path.parts.length; i++) {
+      if (obj == null) return;
+      obj = this.container.lookupProperty(obj, path.parts[i]);
+    }
+
+    return obj;
+  }
+
+  private strictLookup(obj: any, path: hbs.AST.PathExpression) {
+    // @ts-expect-error strict is not a valid property on PathExpression, but we used in the same way it's also used in the original handlebars
+    const requireTerminal = this.compileOptions.strict && path.strict;
+    const len = path.parts.length - (requireTerminal ? 1 : 0);
+
+    for (let i = 0; i < len; i++) {
+      obj = obj ? this.container.lookupProperty(obj, path.parts[i]) : obj;
+    }
+
+    if (requireTerminal) {
+      return this.container.strict(obj, path.parts[len], path.loc);
+    } else {
+      return obj;
+    }
   }
 
   private resolveNodes(nodes: hbs.AST.Node | hbs.AST.Node[]): any[] {

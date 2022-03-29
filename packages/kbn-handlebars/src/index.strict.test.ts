@@ -16,11 +16,32 @@ describe('strict', () => {
         .toThrow(/"hello" not defined in/);
     });
 
+    it('should error on missing child', () => {
+      expectTemplate('{{hello.bar}}')
+        .withCompileOptions({ strict: true })
+        .withInput({ hello: { bar: 'foo' } })
+        .toCompileTo('foo');
+
+      expectTemplate('{{hello.bar}}')
+        .withCompileOptions({ strict: true })
+        .withInput({ hello: {} })
+        .toThrow(/"bar" not defined in/);
+    });
+
     it('should handle explicit undefined', () => {
       expectTemplate('{{hello.bar}}')
         .withCompileOptions({ strict: true })
         .withInput({ hello: { bar: undefined } })
         .toCompileTo('');
+    });
+
+    it('should error on missing property lookup in known helpers mode', () => {
+      expectTemplate('{{hello}}')
+        .withCompileOptions({
+          strict: true,
+          knownHelpersOnly: true,
+        })
+        .toThrow(/"hello" not defined in/);
     });
 
     it('should error on missing context', () => {
@@ -47,6 +68,21 @@ describe('strict', () => {
         .withCompileOptions({ strict: true })
         .withInput({ foo: true })
         .toThrow(/"hello" not defined in/);
+    });
+
+    it('should throw on ambiguous blocks', () => {
+      expectTemplate('{{#hello}}{{/hello}}')
+        .withCompileOptions({ strict: true })
+        .toThrow(/"hello" not defined in/);
+
+      expectTemplate('{{^hello}}{{/hello}}')
+        .withCompileOptions({ strict: true })
+        .toThrow(/"hello" not defined in/);
+
+      expectTemplate('{{#hello.bar}}{{/hello.bar}}')
+        .withCompileOptions({ strict: true })
+        .withInput({ hello: {} })
+        .toThrow(/"bar" not defined in/);
     });
 
     it('should allow undefined hash when passed to helpers', () => {
