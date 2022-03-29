@@ -12,16 +12,16 @@ import { getEventLog, getTestRuleData, getUrlPrefix, ObjectRemover } from '../..
 
 // eslint-disable-next-line import/no-default-export
 export default function createCappedActionsTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
 
   describe('Capped action type', () => {
-    const objectRemover = new ObjectRemover(supertest);
+    const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
     after(() => objectRemover.removeAll());
 
     it('should not trigger actions more than connector types limit', async () => {
-      const { body: createdAction01 } = await supertest
+      const { body: createdAction01 } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
@@ -31,7 +31,7 @@ export default function createCappedActionsTests({ getService }: FtrProviderCont
           secrets: {},
         })
         .expect(200);
-      const { body: createdAction02 } = await supertest
+      const { body: createdAction02 } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
@@ -41,7 +41,7 @@ export default function createCappedActionsTests({ getService }: FtrProviderCont
           secrets: {},
         })
         .expect(200);
-      const { body: createdAction03 } = await supertest
+      const { body: createdAction03 } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
@@ -56,7 +56,7 @@ export default function createCappedActionsTests({ getService }: FtrProviderCont
       objectRemover.add(Spaces.space1.id, createdAction02.id, 'action', 'actions');
       objectRemover.add(Spaces.space1.id, createdAction03.id, 'action', 'actions');
 
-      const { body: createdRule } = await supertest
+      const { body: createdRule } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
