@@ -63,6 +63,26 @@ describe('format_column', () => {
     });
   });
 
+  it('wraps in suffix formatter if provided', async () => {
+    datatable.columns[0].meta.params = { id: 'myformatter', params: {} };
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'number',
+      decimals: 5,
+      suffix: 'ABC',
+    });
+    expect(result.columns[0].meta.params).toEqual({
+      id: 'suffix',
+      params: {
+        suffixString: 'ABC',
+        id: 'number',
+        params: {
+          pattern: '0,0.00000',
+        },
+      },
+    });
+  });
+
   it('has special handling for 0 decimals', async () => {
     datatable.columns[0].meta.params = { id: 'myformatter', params: {} };
     const result = await fn(datatable, { columnId: 'test', format: 'number', decimals: 0 });
@@ -135,6 +155,32 @@ describe('format_column', () => {
           id: 'myformatter',
           params: {
             innerParam: 456,
+          },
+        },
+      });
+    });
+
+    it('double-nests suffix formatters', async () => {
+      datatable.columns[0].meta.params = {
+        id: 'suffix',
+        params: { suffixString: 'ABC', id: 'myformatter', params: { innerParam: 456 } },
+      };
+      const result = await fn(datatable, {
+        columnId: 'test',
+        format: '',
+        parentFormat: JSON.stringify({ id: 'suffix', params: { suffixString: 'DEF' } }),
+      });
+      expect(result.columns[0].meta.params).toEqual({
+        id: 'suffix',
+        params: {
+          suffixString: 'DEF',
+          id: 'suffix',
+          params: {
+            suffixString: 'ABC',
+            id: 'myformatter',
+            params: {
+              innerParam: 456,
+            },
           },
         },
       });

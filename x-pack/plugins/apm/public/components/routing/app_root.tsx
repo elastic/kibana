@@ -37,6 +37,7 @@ import { RedirectWithDefaultDateRange } from '../shared/redirect_with_default_da
 import { apmRouter } from './apm_route_config';
 import { TrackPageview } from './track_pageview';
 import { RedirectWithDefaultEnvironment } from '../shared/redirect_with_default_environment';
+import { RedirectWithOffset } from '../shared/redirect_with_offset';
 
 export function ApmAppRoot({
   apmPluginContextValue,
@@ -63,24 +64,28 @@ export function ApmAppRoot({
               <RouterProvider history={history} router={apmRouter as any}>
                 <RedirectWithDefaultEnvironment>
                   <RedirectWithDefaultDateRange>
-                    <TrackPageview>
-                      <BreadcrumbsContextProvider>
-                        <UrlParamsProvider>
-                          <LicenseProvider>
-                            <AnomalyDetectionJobsContextProvider>
-                              <InspectorContextProvider>
-                                <ApmThemeProvider>
-                                  <MountApmHeaderActionMenu />
+                    <RedirectWithOffset>
+                      <TrackPageview>
+                        <BreadcrumbsContextProvider>
+                          <UrlParamsProvider>
+                            <LicenseProvider>
+                              <AnomalyDetectionJobsContextProvider>
+                                <InspectorContextProvider>
+                                  <ApmThemeProvider>
+                                    <MountApmHeaderActionMenu />
 
-                                  <Route component={ScrollToTopOnPathChange} />
-                                  <RouteRenderer />
-                                </ApmThemeProvider>
-                              </InspectorContextProvider>
-                            </AnomalyDetectionJobsContextProvider>
-                          </LicenseProvider>
-                        </UrlParamsProvider>
-                      </BreadcrumbsContextProvider>
-                    </TrackPageview>
+                                    <Route
+                                      component={ScrollToTopOnPathChange}
+                                    />
+                                    <RouteRenderer />
+                                  </ApmThemeProvider>
+                                </InspectorContextProvider>
+                              </AnomalyDetectionJobsContextProvider>
+                            </LicenseProvider>
+                          </UrlParamsProvider>
+                        </BreadcrumbsContextProvider>
+                      </TrackPageview>
+                    </RedirectWithOffset>
                   </RedirectWithDefaultDateRange>
                 </RedirectWithDefaultEnvironment>
               </RouterProvider>

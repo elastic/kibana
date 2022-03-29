@@ -32,9 +32,11 @@ import {
   TRUSTED_APPLICATIONS,
   POLICIES,
   ENDPOINTS,
+  GETTING_STARTED,
 } from '../translations';
 import {
   OVERVIEW_PATH,
+  LANDING_PATH,
   DETECTION_RESPONSE_PATH,
   ALERTS_PATH,
   RULES_PATH,
@@ -83,6 +85,18 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
       }),
     ],
     order: 9000,
+  },
+  {
+    id: SecurityPageName.landing,
+    title: GETTING_STARTED,
+    path: LANDING_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    features: [FEATURE.general],
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.getStarted', {
+        defaultMessage: 'Getting started',
+      }),
+    ],
   },
   {
     id: SecurityPageName.detectionAndResponse,
@@ -206,6 +220,13 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             }),
             path: `${HOSTS_PATH}/anomalies`,
             isPremium: true,
+          },
+          {
+            id: SecurityPageName.sessions,
+            title: i18n.translate('xpack.securitySolution.search.hosts.sessions', {
+              defaultMessage: 'Sessions',
+            }),
+            path: `${HOSTS_PATH}/sessions`,
           },
         ],
       },

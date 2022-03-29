@@ -19,11 +19,20 @@ import { setUsersPageQueriesActivePageToZero } from './helpers';
 import { UsersTableType, UsersModel } from './model';
 import { Direction } from '../../../common/search_strategy/common';
 import { RiskScoreFields } from '../../../common/search_strategy';
+import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 
 export const initialUsersState: UsersModel = {
   page: {
     queries: {
       [UsersTableType.allUsers]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: UsersFields.lastSeen,
+          direction: Direction.desc,
+        },
+      },
+      [UsersTableType.authentications]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
@@ -37,11 +46,27 @@ export const initialUsersState: UsersModel = {
         severitySelection: [],
       },
       [UsersTableType.anomalies]: null,
+      [UsersTableType.events]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [UsersTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
   details: {
     queries: {
       [UsersTableType.anomalies]: null,
+      [UsersTableType.events]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [UsersTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
 };
@@ -80,14 +105,14 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
       },
     },
   }))
-  .case(updateTableSorting, (state, { sort }) => ({
+  .case(updateTableSorting, (state, { sort, tableType }) => ({
     ...state,
     page: {
       ...state.page,
       queries: {
         ...state.page.queries,
-        [UsersTableType.risk]: {
-          ...state.page.queries[UsersTableType.risk],
+        [tableType]: {
+          ...state.page.queries[tableType],
           sort,
         },
       },

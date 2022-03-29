@@ -21,12 +21,14 @@ import {
   processNewEvents,
   searchProcessTree,
   autoExpandProcessTree,
+  updateProcessMap,
 } from './helpers';
 import { sortProcesses } from '../../../common/utils/sort_processes';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
   data: ProcessEventsPage[];
+  alerts: ProcessEvent[];
   searchQuery?: string;
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
 }
@@ -34,6 +36,7 @@ interface UseProcessTreeDeps {
 export class ProcessImpl implements Process {
   id: string;
   events: ProcessEvent[];
+  alerts: ProcessEvent[];
   children: Process[];
   parent: Process | undefined;
   autoExpand: boolean;
@@ -43,6 +46,7 @@ export class ProcessImpl implements Process {
   constructor(id: string) {
     this.id = id;
     this.events = [];
+    this.alerts = [];
     this.children = [];
     this.orphans = [];
     this.autoExpand = false;
@@ -53,6 +57,10 @@ export class ProcessImpl implements Process {
     // rather than push new events on the array, we return a new one
     // this helps the below memoizeOne functions to behave correctly.
     this.events = this.events.concat(event);
+  }
+
+  addAlert(alert: ProcessEvent) {
+    this.alerts = this.alerts.concat(alert);
   }
 
   clearSearch() {
@@ -75,7 +83,7 @@ export class ProcessImpl implements Process {
           child.getDetails().process;
 
         // search matches or processes with alerts will never be filtered out
-        if (child.searchMatched || child.hasAlerts()) {
+        if (child.autoExpand || child.searchMatched || child.hasAlerts()) {
           return true;
         }
 
@@ -83,11 +91,6 @@ export class ProcessImpl implements Process {
         // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
         // other shell startup activities (e.g bashrc .profile etc)
         if (groupLeader.pid === sessionLeader.pid) {
-          return false;
-        }
-
-        // If the process has no children and has not exec'd (fork only), we hide it.
-        if (child.children.length === 0 && !child.hasExec()) {
           return false;
         }
 
@@ -103,15 +106,15 @@ export class ProcessImpl implements Process {
   }
 
   hasAlerts() {
-    return !!this.findEventByKind(this.events, EventKind.signal);
+    return !!this.alerts.length;
   }
 
   getAlerts() {
-    return this.filterEventsByKind(this.events, EventKind.signal);
+    return this.alerts;
   }
 
   updateAlertsStatus(updatedAlertsStatus: AlertStatusEventEntityIdMap) {
-    this.events = updateAlertEventStatus(this.events, updatedAlertsStatus);
+    this.alerts = updateAlertEventStatus(this.alerts, updatedAlertsStatus);
   }
 
   hasExec() {
@@ -196,6 +199,7 @@ export class ProcessImpl implements Process {
 export const useProcessTree = ({
   sessionEntityId,
   data,
+  alerts,
   searchQuery,
   updatedAlertsStatus,
 }: UseProcessTreeDeps) => {
@@ -221,6 +225,7 @@ export const useProcessTree = ({
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);
   const [processedPages, setProcessedPages] = useState<ProcessEventsPage[]>([]);
+  const [alertsProcessed, setAlertsProcessed] = useState(false);
   const [searchResults, setSearchResults] = useState<Process[]>([]);
   const [orphans, setOrphans] = useState<Process[]>([]);
 
@@ -256,6 +261,15 @@ export const useProcessTree = ({
       setOrphans(newOrphans);
     }
   }, [data, processMap, orphans, processedPages, sessionEntityId]);
+
+  useEffect(() => {
+    // currently we are loading a single page of alerts, with no pagination
+    // so we only need to add these alert events to processMap once.
+    if (!alertsProcessed) {
+      updateProcessMap(processMap, alerts);
+      setAlertsProcessed(true);
+    }
+  }, [processMap, alerts, alertsProcessed]);
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));

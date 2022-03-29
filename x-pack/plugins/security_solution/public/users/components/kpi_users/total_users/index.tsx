@@ -6,7 +6,7 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
 import { UpdateDateRange } from '../../../../common/components/charts/common';
 
@@ -17,6 +17,7 @@ import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/c
 import { kpiTotalUsersMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_metric';
 import { kpiTotalUsersAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_area';
 import * as i18n from './translations';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis1 = euiVisColorPalette[1];
@@ -60,15 +61,21 @@ const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
   setQuery,
   skip,
 }) => {
+  const { toggleStatus } = useQueryToggle(QUERY_ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const { loading, result, search, refetch, inspect } =
     useSearchStrategy<UsersQueries.kpiTotalUsers>({
       factoryQueryType: UsersQueries.kpiTotalUsers,
       initialResult: { users: 0, usersHistogram: [] },
       errorMessage: i18n.ERROR_USERS_KPI,
+      abort: querySkip,
     });
 
   useEffect(() => {
-    if (!skip) {
+    if (!querySkip) {
       search({
         filterQuery,
         defaultIndex: indexNames,
@@ -79,7 +86,7 @@ const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
         },
       });
     }
-  }, [search, from, to, filterQuery, indexNames, skip]);
+  }, [search, from, to, filterQuery, indexNames, querySkip]);
 
   return (
     <KpiBaseComponentManage
@@ -93,6 +100,7 @@ const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
     />
   );
 };

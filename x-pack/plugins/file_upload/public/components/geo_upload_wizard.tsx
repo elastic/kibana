@@ -8,7 +8,7 @@
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiProgress, EuiText } from '@elastic/eui';
-import { getIndexPatternService } from '../kibana_services';
+import { getDataViewsService } from '../kibana_services';
 import { GeoUploadForm, OnFileSelectParameters } from './geo_upload_form';
 import { ImportCompleteView } from './import_complete_view';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
@@ -38,7 +38,7 @@ interface State {
   importResults?: ImportResults;
   indexName: string;
   indexNameError?: string;
-  indexPatternResp?: object;
+  dataViewResp?: object;
   phase: PHASE;
 }
 
@@ -81,7 +81,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     // check permissions
     //
     const canImport = await hasImportPermission({
-      checkCreateIndexPattern: true,
+      checkCreateDataView: true,
       checkHasManagePipeline: false,
       indexName: this.state.indexName,
     });
@@ -179,24 +179,24 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     //
     this.setState({
       importResults,
-      importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.creatingIndexPattern', {
+      importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.creatingDataView', {
         defaultMessage: 'Creating data view: {indexName}',
         values: { indexName: this.state.indexName },
       }),
     });
-    let indexPattern;
+    let dataView;
     let results: FileUploadGeoResults | undefined;
     try {
-      indexPattern = await getIndexPatternService().createAndSave(
+      dataView = await getDataViewsService().createAndSave(
         {
           title: this.state.indexName,
         },
         true
       );
-      if (!indexPattern.id) {
+      if (!dataView.id) {
         throw new Error('id not provided');
       }
-      const geoField = indexPattern.fields.find((field) =>
+      const geoField = dataView.fields.find((field) =>
         [ES_FIELD_TYPES.GEO_POINT as string, ES_FIELD_TYPES.GEO_SHAPE as string].includes(
           field.type
         )
@@ -205,7 +205,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         throw new Error('geo field not created');
       }
       results = {
-        indexPatternId: indexPattern.id,
+        indexPatternId: dataView.id,
         geoFieldName: geoField.name,
         geoFieldType: geoField.type as ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE,
         docCount: importResults.docCount !== undefined ? importResults.docCount : 0,
@@ -213,7 +213,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     } catch (error) {
       if (this._isMounted) {
         this.setState({
-          importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.indexPatternError', {
+          importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.dataViewError', {
             defaultMessage: 'Unable to create data view',
           }),
           phase: PHASE.COMPLETE,
@@ -230,10 +230,10 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     // Successful import
     //
     this.setState({
-      indexPatternResp: {
+      dataViewResp: {
         success: true,
-        id: indexPattern.id,
-        fields: indexPattern.fields,
+        id: dataView.id,
+        fields: dataView.fields,
       },
       phase: PHASE.COMPLETE,
       importStatus: '',
@@ -297,7 +297,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
       return (
         <ImportCompleteView
           importResults={this.state.importResults}
-          indexPatternResp={this.state.indexPatternResp}
+          dataViewResp={this.state.dataViewResp}
           indexName={this.state.indexName}
           failedPermissionCheck={this.state.failedPermissionCheck}
         />
