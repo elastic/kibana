@@ -11,6 +11,5 @@
   "ui": true,
   "requiredPlugins": ["expressions", "charts", "data", "fieldFormats", "uiActions", "eventAnnotation", "visualizations"],
   "requiredBundles": ["kibanaReact"],
-  "optionalPlugins": [],
-  "extraPublicDirs": ["common"]
+  "optionalPlugins": []
 }

@@ -7,7 +7,8 @@
  */
 
 import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
-import { DataLayerConfigResult, LensMultiTable, XYLayerConfigResult } from '../../common';
+import { LensMultiTable } from '../../common';
+import { DataLayerConfigResult, XYLayerConfigResult } from '../../common/types';
 import { getDataLayers } from './visualization';
 
 export function getFilteredLayers(layers: XYLayerConfigResult[], data: LensMultiTable) {

@@ -13,7 +13,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
     ExperimentalFeaturesService.init({
       experimentalFeatures: {
         rulesListDatagrid: true,
-        rulesDetailLogs: false,
+        rulesDetailLogs: true,
       },
     });
 
@@ -23,7 +23,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
 
     result = getIsExperimentalFeatureEnabled('rulesDetailLogs');
 
-    expect(result).toEqual(false);
+    expect(result).toEqual(true);
 
     expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrowError(
       'Invalid enable value doesNotExist. Allowed values are: rulesListDatagrid, rulesDetailLogs'

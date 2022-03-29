@@ -285,12 +285,14 @@ export function XYChart({
   const annotationsLayers = getAnnotationsLayers(layers);
   const firstTable = data.tables[filteredLayers[0].layerId];
 
-  const xColumnId = firstTable.columns.find((col) => col.id === filteredLayers[0].xAccessor)?.id;
+  const columnId =
+    filteredLayers[0].xAccessor &&
+    getAccessorByDimension(filteredLayers[0].xAccessor, firstTable.columns);
 
   const groupedAnnotations = getAnnotationsGroupedByInterval(
     annotationsLayers,
     minInterval,
-    xColumnId ? firstTable.rows[0]?.[xColumnId] : undefined,
+    columnId ? firstTable.rows[0]?.[columnId] : undefined,
     xAxisFormatter
   );
   const visualConfigs = [

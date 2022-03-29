@@ -17,7 +17,6 @@ export type {
   XYLayerConfig,
   XYDataLayerConfig,
   XYAnnotationLayerConfig,
-  YLensConfig,
 } from './xy_visualization/types';
 export type {
   DatasourcePublicAPI,
