@@ -136,7 +136,7 @@ Urgency::              The extent to which the incident resolution can delay.
 Severity::             The severity of the incident.
 Impact::               The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
 Category::             The category of the incident.
-Subcategory::          The category of the incident.
+//Subcategory::          The category of the incident.
 Correlation ID::            Connectors using the same Correlation ID will be associated with the same {sn} incident. This value determines whether a new {sn} incident will be created or an existing one is updated. Modifying this value is optional; if not modified, the rule ID and alert ID are combined as `{{ruleID}}:{{alert ID}}` to form the Correlation ID value in {sn}. The maximum character length for this value is 100 characters.
 
 NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that {sn} will create a separate incident record for every generated alert that uses a unique alert ID. If the rule generates multiple alerts that use the same alert IDs, {sn} creates and continually updates a single incident record for the alert.
@@ -145,9 +145,3 @@ Correlation Display::  A descriptive label of the alert for correlation purposes
 Short description::    A short description for the incident, used for searching the contents of the knowledge base.
 Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
-
-[float]
-[[configuring-servicenow]]
-==== Configure {sn}
-
-{sn} offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

@@ -88,9 +88,3 @@ Severity::     The severity of the event.
 Description::  The details about the event.
 
 Refer to https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[ServiceNow documentation] for more information about the properties.
-
-[float]
-[[configuring-servicenow-itom]]
-==== Configure {sn} ITOM
-
-{sn} offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.
