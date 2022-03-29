@@ -14,7 +14,7 @@ these APIs:
 * <<cases-api-find-connectors>>
 * {security-guide}/cases-api-get-case-activity.html[Get all case activity]
 * {security-guide}/cases-api-get-all-case-comments.html[Get all case comments]
-* {security-guide}/cases-api-get-case.html[Get case]
+* <<cases-api-get-case>>
 * {security-guide}/cases-api-get-comment.html[Get comment]
 * {security-guide}/cases-get-connector.html[Get current connector]
 * {security-guide}/cases-api-get-reporters.html[Get reporters]
@@ -36,6 +36,8 @@ include::cases/cases-api-delete-comments.asciidoc[leveloffset=+1]
 //FIND
 include::cases/cases-api-find-cases.asciidoc[leveloffset=+1]
 include::cases/cases-api-find-connectors.asciidoc[leveloffset=+1]
+//GET
+include::cases/cases-api-get-case.asciidoc[leveloffset=+1]
 //UPDATE
 include::cases/cases-api-update.asciidoc[leveloffset=+1]
 include::cases/cases-api-update-comment.asciidoc[leveloffset=+1]

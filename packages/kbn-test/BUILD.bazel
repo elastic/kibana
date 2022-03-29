@@ -86,6 +86,7 @@ TYPES_DEPS = [
   "@npm//@elastic/elasticsearch",
   "@npm//@jest/console",
   "@npm//@jest/reporters",
+  "@npm//axe-core",
   "@npm//axios",
   "@npm//elastic-apm-node",
   "@npm//del",

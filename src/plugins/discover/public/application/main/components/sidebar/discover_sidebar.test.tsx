@@ -31,11 +31,9 @@ import { AvailableFields$ } from '../../utils/use_saved_search';
 
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
-
-  // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
-    Record<string, unknown>
-  > as ElasticSearchHit[];
+  const hits = each(cloneDeep(realHits), (hit) =>
+    flattenHit(hit, indexPattern)
+  ) as unknown as ElasticSearchHit[];
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
