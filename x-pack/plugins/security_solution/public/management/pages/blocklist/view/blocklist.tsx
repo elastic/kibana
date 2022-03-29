@@ -7,6 +7,9 @@
 
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { DocLinks } from '@kbn/doc-links';
+import { EuiLink } from '@elastic/eui';
 
 import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
@@ -56,8 +59,9 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       defaultMessage: '"{name}" has been updated.',
       values: { name },
     }),
-  flyoutDowngradedLicenseDocsInfo: () => {
-    return 'tbd...';
+  flyoutDowngradedLicenseDocsInfo: (
+    securitySolutionDocsLinks: DocLinks['securitySolution']
+  ): React.ReactNode => {
     // FIXME: define docs link for license downgrade message. sample code below
 
     // const { docLinks } = useKibana().services;
@@ -78,6 +82,19 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
     //     }}
     //   />
     // );
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.artifactListPage.flyoutDowngradedLicenseDocsInfo"
+        defaultMessage="For more information, see our {link}."
+        values={{
+          link: (
+            <EuiLink target="_blank" href={`${securitySolutionDocsLinks.blocklist}`}>
+              <FormattedMessage id="dome-id-2" defaultMessage="Blocklist documentation" />
+            </EuiLink>
+          ),
+        }}
+      />
+    );
   },
   deleteActionSuccess: (itemName) =>
     i18n.translate('xpack.securitySolution.blocklist.deleteSuccess', {
