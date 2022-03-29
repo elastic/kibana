@@ -132,4 +132,15 @@ export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
       }
     ),
   },
+  errorMessages: {
+    name: i18n.translate('xpack.transform.alertTypes.transformHealth.errorMessagesCheckName', {
+      defaultMessage: 'Transform contains error messages',
+    }),
+    description: i18n.translate(
+      'xpack.transform.alertTypes.transformHealth.errorMessagesCheckDescription',
+      {
+        defaultMessage: 'Get alerts when the transform contains error messages.',
+      }
+    ),
+  },
 };

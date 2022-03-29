@@ -17,12 +17,14 @@ import {
 } from '../../../../common/constants';
 import { getResultTestConfig } from '../../../../common/utils/alerts';
 import {
+  ErrorMessagesTransformResponse,
   NotStartedTransformResponse,
   TransformHealthAlertContext,
 } from './register_transform_health_rule_type';
 import type { RulesClient } from '../../../../../alerting/server';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
 import { isContinuousTransform } from '../../../../common/types/transform';
+import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../routes/api/transforms_audit_messages';
 
 interface TestResult {
   name: string;
@@ -110,6 +112,70 @@ export function transformHealthServiceProvider(
         }));
     },
     /**
+     * Returns report about transform that contain error messages
+     * @param transformIds
+     */
+    async getErrorMessagesReport(
+      transformIds: string[]
+    ): Promise<ErrorMessagesTransformResponse[]> {
+      interface TransformErrorsBucket {
+        key: string;
+        doc_count: number;
+        error_messages: estypes.AggregationsTopHitsAggregate;
+      }
+
+      const response = await esClient.search<
+        unknown,
+        Record<'by_transform', estypes.AggregationsMultiBucketAggregateBase<TransformErrorsBucket>>
+      >({
+        index: ML_DF_NOTIFICATION_INDEX_PATTERN,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  level: 'error',
+                },
+              },
+              {
+                terms: {
+                  transform_id: transformIds,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          by_transform: {
+            terms: {
+              field: 'transform_id',
+              size: transformIds.length,
+            },
+            aggs: {
+              error_messages: {
+                top_hits: {
+                  size: 10,
+                  _source: {
+                    includes: ['message', 'level', 'timestamp', 'node_name'],
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return (response.aggregations?.by_transform.buckets as TransformErrorsBucket[]).map(
+        ({ key, error_messages: errorMessages }) => {
+          return {
+            transform_id: key,
+            error_messages: errorMessages.hits.hits.map((v) => v._source),
+          } as ErrorMessagesTransformResponse;
+        }
+      );
+    },
+    /**
      * Returns results of the transform health checks
      * @param params
      */
@@ -138,6 +204,29 @@ export function transformHealthServiceProvider(
                 {
                   defaultMessage:
                     '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} not started.',
+                  values: { count, transformsString },
+                }
+              ),
+            },
+          });
+        }
+      }
+
+      if (testsConfig.errorMessages.enabled) {
+        const response = await this.getErrorMessagesReport(transformIds);
+        if (response.length > 0) {
+          const count = response.length;
+          const transformsString = response.map((t) => t.transform_id).join(', ');
+
+          result.push({
+            name: TRANSFORM_HEALTH_CHECK_NAMES.errorMessages.name,
+            context: {
+              results: response,
+              message: i18n.translate(
+                'xpack.transform.alertTypes.transformHealth.errorMessagesMessage',
+                {
+                  defaultMessage:
+                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {contains} other {contains}} error messages.',
                   values: { count, transformsString },
                 }
               ),
