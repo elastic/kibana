@@ -52,10 +52,10 @@ export const configSchema = schema.object({
     min_interval_seconds: schema.number({ defaultValue: 10 }),
     show_license_expiration: schema.boolean({ defaultValue: true }),
   }),
-  // the `ui` configuration object contains necessary for the public code to
-  // function but also sensitive informations like credentials.
+  // the `ui` configuration object contains necessary properties for the public code
+  // to function but also sensitive informations like credentials.
   // to avoid leaking these to the browser we reference the properties in this
-  // dedicated object
+  // sanitized object
   uiPublic: schema.object({
     enabled: schema.boolean({ defaultValue: schema.siblingRef('...ui.enabled') }),
     ccs: schema.object({
