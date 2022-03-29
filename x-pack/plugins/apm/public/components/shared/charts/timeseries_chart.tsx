@@ -232,7 +232,7 @@ export function TimeseriesChart({
         name: (
           <>
             {i18n.translate(
-              'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
+              'xpack.apm.correlations.failedTransactions.correlationsTable.normalizedScoreLabel',
               {
                 defaultMessage: 'Score',
               }
