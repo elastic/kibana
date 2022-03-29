@@ -7,8 +7,10 @@
 
 import { services as functionalServices } from '../functional/services';
 import { services as reportingServices } from './reporting_services';
+import { services as mapsServices } from './maps_services';
 
 export const services = {
   ...functionalServices,
   ...reportingServices,
+  ...mapsServices,
 };

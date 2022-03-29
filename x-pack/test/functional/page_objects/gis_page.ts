@@ -294,40 +294,6 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.click('layerVisibilityToggleButton');
   }
 
-  async toggleLayerVisibilityRoadMap() {
-    const isRoadMapDesaturated = await this.testSubjects.exists(
-      'layerTocActionsPanelToggleButtonRoad_map_-_desaturated'
-    );
-    const isRoadMap = await this.testSubjects.exists('layerTocActionsPanelToggleButtonRoad_map');
-    if (!isRoadMapDesaturated && !isRoadMap) {
-      throw new Error('Layer road map not found');
-    }
-    if (isRoadMapDesaturated) {
-      await this.toggleLayerVisibility('Road map - desaturated');
-    }
-    if (isRoadMap) {
-      await this.toggleLayerVisibility('Road map');
-    }
-  }
-
-  async toggleLayerVisibilityTotalRequests() {
-    const isRequestByCountry = await this.testSubjects.exists(
-      'layerTocActionsPanelToggleButtonTotal_Requests_by_Country'
-    );
-    const isRequestByDestination = await this.testSubjects.exists(
-      'layerTocActionsPanelToggleButtonTotal_Requests_by_Destination'
-    );
-    if (!isRequestByCountry && !isRequestByDestination) {
-      throw new Error('Layer total requests not found');
-    }
-    if (isRequestByCountry) {
-      await this.toggleLayerVisibility('Total Requests by Country');
-    }
-    if (isRequestByDestination) {
-      await this.toggleLayerVisibility('Total Requests by Destination');
-    }
-  }
-
   async openLegend() {
     const isOpen = await this.testSubjects.exists('mapLayerTOC');
     if (isOpen === false) {
