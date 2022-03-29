@@ -45,6 +45,7 @@ export const DownloadStep = (
       `${semverMajor(kibanaVersion)}-${semverMinor(kibanaVersion)}-${semverPatch(kibanaVersion)}`,
     [kibanaVersion]
   );
+  const { notifications } = core;
 
   const [yaml, setYaml] = useState<any | undefined>();
   const [fleetServer, setFleetServer] = useState<string | ''>();
@@ -72,11 +73,15 @@ export const DownloadStep = (
 
         setYaml(res.data.item);
       } catch (error) {
-        throw new Error('No data while fetching agent manifest');
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.fleet.agentEnrollment.loadk8sManifestErrorTitle', {
+            defaultMessage: 'Error while fetching agent manifest',
+          }),
+        });
       }
     }
     fetchK8sManifest();
-  }, [isK8s, enrollmentAPIKey, settings.data?.item.fleet_server_hosts]);
+  }, [isK8s, notifications.toasts, enrollmentAPIKey, settings.data?.item.fleet_server_hosts]);
 
   const altTitle =
     isK8s === 'IS_KUBERNETES'
