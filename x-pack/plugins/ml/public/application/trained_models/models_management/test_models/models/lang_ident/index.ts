@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { LangIdentModel } from './lang_ident';
+export { LangIdentInference, FormattedLangIdentResp } from './lang_ident_inference';
+export { LangIdentOutput } from './lang_ident_output';

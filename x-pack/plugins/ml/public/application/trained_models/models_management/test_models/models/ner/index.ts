@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { NerModel } from './ner';
+export { NerInference, FormattedNerResp } from './ner_inference';
+export { NerOutput } from './ner_output';

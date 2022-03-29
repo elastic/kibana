@@ -8,24 +8,41 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC } from 'react';
 
-import { NerModel } from './models/ner';
-import { LangIdentModel } from './models/lang_ident';
+import { NerOutput } from './models/ner';
+import { LangIdentInference, LangIdentOutput, FormattedLangIdentResp } from './models/lang_ident';
+import { NerInference, FormattedNerResp } from './models/ner';
 import { TRAINED_MODEL_TYPE } from '../../../../../common/constants/trained_models';
+import { useMlApiContext } from '../../../contexts/kibana';
+import { InferenceInputForm } from './models/inference_input_form';
 
 interface Props {
   model: estypes.MlTrainedModelConfig | null;
 }
 
 export const SelectedModel: FC<Props> = ({ model }) => {
+  const { trainedModels } = useMlApiContext();
+
   if (model === null) {
     return null;
   }
 
   if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
-    return <NerModel model={model} />;
+    const inferrer = new NerInference(trainedModels, model);
+    return (
+      <InferenceInputForm
+        inferrer={inferrer}
+        getOutputComponent={(output: FormattedNerResp) => <NerOutput result={output} />}
+      />
+    );
   }
   if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
-    return <LangIdentModel model={model} />;
+    const inferrer = new LangIdentInference(trainedModels, model);
+    return (
+      <InferenceInputForm
+        inferrer={inferrer}
+        getOutputComponent={(output: FormattedLangIdentResp) => <LangIdentOutput result={output} />}
+      />
+    );
   }
 
   return null;

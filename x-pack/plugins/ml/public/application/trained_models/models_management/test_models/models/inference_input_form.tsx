@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTextArea, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
 
-import { useMlApiContext } from '../../../../../contexts/kibana';
-import { NerInference } from './ner_inference';
-import type { FormattedNerResp } from './ner_inference';
-import { NerOutput } from './ner_output';
-import { MLJobEditor } from '../../../../../jobs/jobs_list/components/ml_job_editor';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
-import { ErrorMessage } from '../../inference_error';
-import { OutputLoadingContent } from '../../output_loading';
+import { LangIdentInference } from './lang_ident/lang_ident_inference';
+import { NerInference } from './ner/ner_inference';
+import type { FormattedLangIdentResp } from './lang_ident/lang_ident_inference';
+import type { FormattedNerResp } from './ner/ner_inference';
+
+import { MLJobEditor } from '../../../../jobs/jobs_list/components/ml_job_editor';
+import { extractErrorMessage } from '../../../../../../common/util/errors';
+import { ErrorMessage } from '../inference_error';
+import { OutputLoadingContent } from '../output_loading';
 
 interface Props {
-  model: estypes.MlTrainedModelConfig;
+  inferrer: LangIdentInference | NerInference;
+  getOutputComponent(output: any): JSX.Element;
 }
 
 enum TAB {
@@ -30,14 +31,10 @@ enum TAB {
   RAW,
 }
 
-export const NerModel: FC<Props> = ({ model }) => {
-  const { trainedModels } = useMlApiContext();
-
-  const ner = useMemo(() => new NerInference(trainedModels, model), [trainedModels, model]);
-
+export const InferenceInputForm: FC<Props> = ({ inferrer, getOutputComponent }) => {
   const [inputText, setInputText] = useState('');
   const [isRunning, setIsRunning] = useState(false);
-  const [output, setOutput] = useState<FormattedNerResp | null>(null);
+  const [output, setOutput] = useState<FormattedLangIdentResp | FormattedNerResp | null>(null);
   const [rawOutput, setRawOutput] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [showOutput, setShowOutput] = useState(false);
@@ -50,7 +47,7 @@ export const NerModel: FC<Props> = ({ model }) => {
     setIsRunning(true);
     setErrorText(null);
     try {
-      const { response, rawResponse } = await ner.infer(inputText);
+      const { response, rawResponse } = await inferrer.infer(inputText);
       setOutput(response);
       setRawOutput(JSON.stringify(rawResponse, null, 2));
     } catch (e) {
@@ -65,7 +62,7 @@ export const NerModel: FC<Props> = ({ model }) => {
   return (
     <>
       <EuiTextArea
-        placeholder={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.ner.inputText', {
+        placeholder={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText', {
           defaultMessage: 'Input text',
         })}
         value={inputText}
@@ -83,7 +80,7 @@ export const NerModel: FC<Props> = ({ model }) => {
           fullWidth={false}
         >
           <FormattedMessage
-            id="xpack.ml.trainedModels.testModelsFlyout.ner.runButton"
+            id="xpack.ml.trainedModels.testModelsFlyout.langIdent.runButton"
             defaultMessage="Run inference"
           />
         </EuiButton>
@@ -97,7 +94,7 @@ export const NerModel: FC<Props> = ({ model }) => {
               onClick={setSelectedTab.bind(null, TAB.TEXT)}
             >
               <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.ner.markupTab"
+                id="xpack.ml.trainedModels.testModelsFlyout.langIdent.markupTab"
                 defaultMessage="Output"
               />
             </EuiTab>
@@ -106,7 +103,7 @@ export const NerModel: FC<Props> = ({ model }) => {
               onClick={setSelectedTab.bind(null, TAB.RAW)}
             >
               <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.ner.rawOutput"
+                id="xpack.ml.trainedModels.testModelsFlyout.langIdent.rawOutput"
                 defaultMessage="Raw output"
               />
             </EuiTab>
@@ -121,7 +118,7 @@ export const NerModel: FC<Props> = ({ model }) => {
               ) : output === null ? (
                 <OutputLoadingContent text={inputText} />
               ) : (
-                <NerOutput result={output} />
+                <>{getOutputComponent(output)}</>
               )}
             </>
           ) : (
