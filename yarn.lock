@@ -6061,6 +6061,22 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-utility@link:bazel-bin/packages/kbn-shared-ux-utility/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__std@link:bazel-bin/packages/kbn-std/npm_module_types":
   version "0.0.0"
   uid ""
