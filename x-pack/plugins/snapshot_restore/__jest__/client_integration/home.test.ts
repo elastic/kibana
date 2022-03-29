@@ -758,8 +758,8 @@ describe('<SnapshotRestoreHome />', () => {
                 const setSnapshotStateAndUpdateDetail = async (state: string) => {
                   const updatedSnapshot = { ...snapshot1, state };
                   httpRequestsMockHelpers.setGetSnapshotResponse(
-                    snapshot1.repository,
-                    snapshot1.snapshot,
+                    itemIndexToClickOn === 0 ? snapshot1.repository : snapshot2.repository,
+                    itemIndexToClickOn === 0 ? snapshot1.snapshot : snapshot2.snapshot,
                     updatedSnapshot
                   );
                   await actions.clickSnapshotAt(itemIndexToClickOn); // click another snapshot to trigger the HTTP call
@@ -791,7 +791,7 @@ describe('<SnapshotRestoreHome />', () => {
                 };
 
                 // Call sequentially each state and verify that the message is ok
-                return Object.entries(mapStateToMessage).reduce((promise, [state, message]) => {
+                return Object.entries(mapStateToMessage).reduce(async (promise, [state, message]) => {
                   return promise.then(async () => expectMessageForSnapshotState(state, message));
                 }, Promise.resolve());
               });
@@ -809,10 +809,10 @@ describe('<SnapshotRestoreHome />', () => {
 
               test('should display a message when snapshot in progress ', async () => {
                 const { find, actions } = testBed;
-                const updatedSnapshot = { ...snapshot1, state: 'IN_PROGRESS' };
+                const updatedSnapshot = { ...snapshot2, state: 'IN_PROGRESS' };
                 httpRequestsMockHelpers.setGetSnapshotResponse(
-                  snapshot1.repository,
-                  snapshot1.snapshot,
+                  snapshot2.repository,
+                  snapshot2.snapshot,
                   updatedSnapshot
                 );
 

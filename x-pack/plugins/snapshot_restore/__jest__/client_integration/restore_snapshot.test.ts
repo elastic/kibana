@@ -6,6 +6,7 @@
  */
 import { act } from 'react-dom/test-utils';
 
+import { API_BASE_PATH } from '../../common';
 import { pageHelpers, setupEnvironment } from './helpers';
 import { RestoreSnapshotTestBed } from './helpers/restore_snapshot.helpers';
 import * as fixtures from '../../test/fixtures';
@@ -15,19 +16,17 @@ const {
 } = pageHelpers;
 
 describe('<RestoreSnapshot />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: RestoreSnapshotTestBed;
-
-  afterAll(() => {
-    server.restore();
-  });
 
   describe('wizard navigation', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
+      const snapshot = fixtures.getSnapshot();
+      console.log(snapshot);
+      httpRequestsMockHelpers.setGetSnapshotResponse(snapshot.repository, snapshot.snapshot, snapshot);
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -42,12 +41,13 @@ describe('<RestoreSnapshot />', () => {
     });
   });
 
-  describe('with data streams', () => {
+  describe.skip('with data streams', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
+      const snapshot = fixtures.getSnapshot();
+      httpRequestsMockHelpers.setGetSnapshotResponse(snapshot.repository, snapshot.snapshot, snapshot);
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -59,11 +59,12 @@ describe('<RestoreSnapshot />', () => {
     });
   });
 
-  describe('without data streams', () => {
+  describe.skip('without data streams', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot({ totalDataStreams: 0 }));
+      const snapshot = fixtures.getSnapshot({ totalDataStreams: 0 });
+      httpRequestsMockHelpers.setGetSnapshotResponse(snapshot.repository, snapshot.snapshot, snapshot);
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -75,11 +76,12 @@ describe('<RestoreSnapshot />', () => {
     });
   });
 
-  describe('global state', () => {
+  describe.skip('global state', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
+      const snapshot = fixtures.getSnapshot();
+      httpRequestsMockHelpers.setGetSnapshotResponse(snapshot.repository, snapshot.snapshot, snapshot);
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -98,13 +100,14 @@ describe('<RestoreSnapshot />', () => {
 
   // NOTE: This suite can be expanded to simulate the user setting non-default values for all of
   // the form controls and asserting that the correct payload is sent to the API.
-  describe('include aliases', () => {
+  describe.skip('include aliases', () => {
+    const snapshot = fixtures.getSnapshot();
+
     beforeEach(async () => {
-      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
-      httpRequestsMockHelpers.setRestoreSnapshotResponse({});
+      httpRequestsMockHelpers.setRestoreSnapshotResponse(snapshot.repository, snapshot.snapshot, {});
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -116,9 +119,12 @@ describe('<RestoreSnapshot />', () => {
       actions.goToStep(3);
       await actions.clickRestore();
 
-      const expectedPayload = { includeAliases: false };
-      const latestRequest = server.requests[server.requests.length - 1];
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expectedPayload);
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}restore/${snapshot.repository}/${snapshot.snapshot}`,
+        expect.objectContaining({ body: JSON.stringify({
+          includeAliases: false
+        })})
+      );
     });
   });
 });

@@ -19,11 +19,13 @@ const testBedConfig: AsyncTestBedConfig = {
   doMountAsync: true,
 };
 
-export const setup = (httpSetup: HttpSetup) => {
-  return registerTestBed<RepositoryEditTestSubjects>(
+export const setup = async (httpSetup: HttpSetup) => {
+  const initTestBed = registerTestBed<RepositoryEditTestSubjects>(
     WithAppDependencies(RepositoryEdit, httpSetup),
     testBedConfig
   );
+
+  return await initTestBed();
 };
 
 export type RepositoryEditTestSubjects = TestSubjects | ThreeLevelDepth | NonVisibleTestSubjects;

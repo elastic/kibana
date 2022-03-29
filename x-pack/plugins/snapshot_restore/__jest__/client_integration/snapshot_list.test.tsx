@@ -15,7 +15,7 @@ import { DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../public/application/lib';
 import * as fixtures from '../../test/fixtures';
 import { SnapshotListTestBed } from './helpers/snapshot_list.helpers';
 import { REPOSITORY_NAME } from './helpers/constant';
-import { pageHelpers, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 
 /*
  * We are mocking useLoadSnapshots instead of sinon fake server because it's not
@@ -53,6 +53,7 @@ describe('<SnapshotList />', () => {
   let setSearchText: SnapshotListTestBed['actions']['setSearchText'];
   let searchErrorExists: SnapshotListTestBed['actions']['searchErrorExists'];
   let getSearchErrorText: SnapshotListTestBed['actions']['getSearchErrorText'];
+  const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -81,7 +82,7 @@ describe('<SnapshotList />', () => {
   });
 
   beforeEach(async () => {
-    testBed = await setup();
+    testBed = await setup(httpSetup);
     ({
       actions: { setSearchText, searchErrorExists, getSearchErrorText },
     } = testBed);
@@ -90,7 +91,7 @@ describe('<SnapshotList />', () => {
   describe('search', () => {
     describe('url parameters', () => {
       test('query is updated with repository name from the url', async () => {
-        testBed = await setup('?repository=test_repo');
+        testBed = await setup(httpSetup, '?repository=test_repo');
         expect(useLoadSnapshots).lastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
           searchField: 'repository',
@@ -101,7 +102,7 @@ describe('<SnapshotList />', () => {
       });
 
       test('query is updated with snapshot policy name from the url', async () => {
-        testBed = await setup('?policy=test_policy');
+        testBed = await setup(httpSetup, '?policy=test_policy');
         expect(useLoadSnapshots).lastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
           searchField: 'policyName',
@@ -112,7 +113,7 @@ describe('<SnapshotList />', () => {
       });
 
       test('query is not updated with unknown params from the url', async () => {
-        testBed = await setup('?some_param=test_param');
+        testBed = await setup(httpSetup, '?some_param=test_param');
         expect(useLoadSnapshots).lastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
         });
