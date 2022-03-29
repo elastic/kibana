@@ -15,6 +15,7 @@ import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_message
 import { HttpLogic } from '../../../shared/http';
 import { AppLogic } from '../../app_logic';
 import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
+import { sortByName } from '../../utils';
 
 import { staticSourceData } from './source_data';
 
@@ -50,7 +51,7 @@ export interface IPermissionsModalProps {
   additionalConfiguration: boolean;
 }
 
-type CombinedDataItem = SourceDataItem & SourceDataItem & { connected: boolean };
+type CombinedDataItem = SourceDataItem & { connected: boolean };
 
 export interface ISourcesValues {
   contentSources: ContentSourceDetails[];
@@ -145,16 +146,12 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     availableSources: [
       () => [selectors.sourceData],
       (sourceData: SourceDataItem[]) =>
-        sourceData
-          .filter(({ configured }) => !configured)
-          .sort((a, b) => a.name.localeCompare(b.name)),
+        sortByName(sourceData.filter(({ configured }) => !configured)),
     ],
     configuredSources: [
       () => [selectors.sourceData],
       (sourceData: SourceDataItem[]) =>
-        sourceData
-          .filter(({ configured }) => configured)
-          .sort((a, b) => a.name.localeCompare(b.name)),
+        sortByName(sourceData.filter(({ configured }) => configured)),
     ],
     externalConfigured: [
       () => [selectors.configuredSources],
@@ -314,19 +311,16 @@ export const mergeServerAndStaticData = (
   staticData: SourceDataItem[],
   contentSources: ContentSourceDetails[]
 ): CombinedDataItem[] => {
-  return staticData
-    .map((staticItem) => {
-      const serverItem = serverData.find(
-        ({ serviceType }) => serviceType === staticItem.serviceType
-      );
-      const connectedSource = contentSources.find(
-        ({ serviceType }) => serviceType === staticItem.serviceType
-      );
-      return {
-        ...staticItem,
-        ...serverItem,
-        connected: !!connectedSource,
-      };
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const unsortedData = staticData.map((staticItem) => {
+    const serverItem = serverData.find(({ serviceType }) => serviceType === staticItem.serviceType);
+    const connectedSource = contentSources.find(
+      ({ serviceType }) => serviceType === staticItem.serviceType
+    );
+    return {
+      ...staticItem,
+      ...serverItem,
+      connected: !!connectedSource,
+    };
+  });
+  return sortByName(unsortedData);
 };

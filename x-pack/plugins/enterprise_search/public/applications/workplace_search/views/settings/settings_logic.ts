@@ -20,6 +20,7 @@ import { AppLogic } from '../../app_logic';
 import { ORG_UPDATED_MESSAGE, OAUTH_APP_UPDATED_MESSAGE } from '../../constants';
 import { ORG_SETTINGS_CONNECTORS_PATH } from '../../routes';
 import { Connector } from '../../types';
+import { sortByName } from '../../utils';
 
 interface IOauthApplication {
   name: string;
@@ -118,8 +119,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     connectors: [
       [],
       {
-        onInitializeConnectors: (_, connectors) =>
-          connectors.sort((a, b) => a.name.localeCompare(b.name)),
+        onInitializeConnectors: (_, connectors) => sortByName(connectors),
       },
     ],
     orgNameInputValue: [
