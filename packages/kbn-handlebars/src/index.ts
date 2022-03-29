@@ -212,9 +212,16 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   PathExpression(path: hbs.AST.PathExpression) {
     const blockParamId =
       !path.depth && !AST.helpers.scopedId(path) && this.blockParamIndex(path.parts[0]);
-    const result = blockParamId
-      ? this.lookupBlockParam(blockParamId, path.parts)
-      : this.resolvePath(path);
+
+    let result;
+    if (blockParamId) {
+      result = this.lookupBlockParam(blockParamId, path);
+    } else if (path.data) {
+      result = this.lookupData(this.runtimeOptions!.data, path);
+    } else {
+      result = this.resolvePath(this.scopes[path.depth], path);
+    }
+
     this.output.push(result);
   }
 
@@ -310,8 +317,18 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   // Looks up the value of `parts` on the given block param and pushes
   // it onto the stack.
-  private lookupBlockParam(blockParamId: [number, any], parts: any) {
-    return this.blockParamValues[blockParamId[0]][blockParamId[1]];
+  private lookupBlockParam(blockParamId: [number, any], path: hbs.AST.PathExpression) {
+    const value = this.blockParamValues[blockParamId[0]][blockParamId[1]];
+    return this.resolvePath(value, path, 1);
+  }
+
+  // Push the data lookup operator
+  private lookupData(data: any, path: hbs.AST.PathExpression) {
+    if (path.depth) {
+      data = this.container.data(data, path.depth);
+    }
+
+    return this.resolvePath(data, path);
   }
 
   private processSimpleNode(node: ProcessableNodeWithPathParts) {
@@ -545,24 +562,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     return result;
   }
 
-  private resolvePath(path: hbs.AST.PathExpression) {
-    let obj;
-    if (path.data) {
-      obj = this.runtimeOptions!.data;
-      if (path.depth) {
-        obj = this.container.data(this.runtimeOptions!.data, path.depth);
-      }
-    } else {
-      obj = this.scopes[path.depth];
-    }
-
+  private resolvePath(obj: any, path: hbs.AST.PathExpression, index = 0) {
     if (this.compileOptions.strict) {
       return this.strictLookup(obj, path);
     }
 
-    for (let i = 0; i < path.parts.length; i++) {
+    for (; index < path.parts.length; index++) {
       if (obj == null) return;
-      obj = this.container.lookupProperty(obj, path.parts[i]);
+      obj = this.container.lookupProperty(obj, path.parts[index]);
     }
 
     return obj;

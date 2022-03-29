@@ -148,6 +148,24 @@ describe('builtin helpers', () => {
         '{{#with person}}Person is present{{else}}Person is not present{{/with}}'
       ).toCompileTo('Person is not present');
     });
+
+    it('with provides block parameter', () => {
+      expectTemplate('{{#with person as |foo|}}{{foo.first}} {{last}}{{/with}}')
+        .withInput({
+          person: {
+            first: 'Alan',
+            last: 'Johnson',
+          },
+        })
+        .toCompileTo('Alan Johnson');
+    });
+
+    it('works when data is disabled', () => {
+      expectTemplate('{{#with person as |foo|}}{{foo.first}} {{last}}{{/with}}')
+        .withInput({ person: { first: 'Alan', last: 'Johnson' } })
+        .withCompileOptions({ data: false })
+        .toCompileTo('Alan Johnson');
+    });
   });
 
   describe('#each', () => {
@@ -243,6 +261,17 @@ describe('builtin helpers', () => {
         .toCompileTo(
           '0. goodbye! 0 1 2 After 0 1. Goodbye! 0 1 2 After 1 2. GOODBYE! 0 1 2 After 2 cruel world!'
         );
+    });
+
+    it('each with block params', () => {
+      expectTemplate(
+        '{{#each goodbyes as |value index|}}{{index}}. {{value.text}}! {{#each ../goodbyes as |childValue childIndex|}} {{index}} {{childIndex}}{{/each}} After {{index}} {{/each}}{{index}}cruel {{world}}!'
+      )
+        .withInput({
+          goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }],
+          world: 'world',
+        })
+        .toCompileTo('0. goodbye!  0 0 0 1 After 0 1. Goodbye!  1 0 1 1 After 1 cruel world!');
     });
 
     it('each object with @index', () => {
