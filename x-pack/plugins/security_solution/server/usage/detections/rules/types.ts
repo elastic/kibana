@@ -77,10 +77,10 @@ export interface MaxAvgMin {
  * @see EventLogStatusMetric
  */
 export interface SingleEventMetric {
-  failed: number;
-  top_failed: FailureMessage[];
-  partial_failure: number;
-  top_partial_failure: FailureMessage[];
+  failures: number;
+  top_failures: FailureMessage[];
+  partial_failures: number;
+  top_partial_failures: FailureMessage[];
   succeeded: number;
   index_duration: MaxAvgMin;
   search_duration: MaxAvgMin;
@@ -94,14 +94,14 @@ export interface SingleEventMetric {
  */
 export interface SingleEventLogStatusMetric {
   eql: SingleEventMetric;
-  indicator: SingleEventMetric;
-  mlRule: SingleEventMetric;
+  threat_match: SingleEventMetric;
+  machine_learning: SingleEventMetric;
   query: SingleEventMetric;
-  savedQuery: SingleEventMetric;
+  saved_query: SingleEventMetric;
   threshold: SingleEventMetric;
   total: {
-    failed: number;
-    partial_failure: number;
+    failures: number;
+    partial_failures: number;
     succeeded: number;
   };
 }

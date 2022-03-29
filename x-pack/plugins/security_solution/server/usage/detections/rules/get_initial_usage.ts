@@ -108,14 +108,14 @@ export const getInitialEventLogUsage = (): EventLogStatusMetric => ({
  */
 export const getInitialSingleEventLogUsage = (): SingleEventLogStatusMetric => ({
   eql: getInitialSingleEventMetric(),
-  indicator: getInitialSingleEventMetric(),
-  mlRule: getInitialSingleEventMetric(),
+  threat_match: getInitialSingleEventMetric(),
+  machine_learning: getInitialSingleEventMetric(),
   query: getInitialSingleEventMetric(),
-  savedQuery: getInitialSingleEventMetric(),
+  saved_query: getInitialSingleEventMetric(),
   threshold: getInitialSingleEventMetric(),
   total: {
-    failed: 0,
-    partial_failure: 0,
+    failures: 0,
+    partial_failures: 0,
     succeeded: 0,
   },
 });
@@ -127,10 +127,10 @@ export const getInitialSingleEventLogUsage = (): SingleEventLogStatusMetric => (
  * @returns The initial event log usage for a single event metric.
  */
 export const getInitialSingleEventMetric = (): SingleEventMetric => ({
-  failed: 0,
-  top_failed: [],
-  partial_failure: 0,
-  top_partial_failure: [],
+  failures: 0,
+  top_failures: [],
+  partial_failures: 0,
+  top_partial_failures: [],
   succeeded: 0,
   index_duration: getInitialMaxAvgMin(),
   search_duration: getInitialMaxAvgMin(),

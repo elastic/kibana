@@ -37,10 +37,10 @@ export const transformSingleRuleMetric = ({
   singleMetric,
 }: TransformSingleRuleMetricOptions): SingleEventMetric => {
   return {
-    failed: failed.cardinality.value ?? 0,
-    top_failed: transformCategories(failed.categories),
-    partial_failure: partialFailed.cardinality.value ?? 0,
-    top_partial_failure: transformCategories(partialFailed.categories),
+    failures: failed.cardinality.value ?? 0,
+    top_failures: transformCategories(failed.categories),
+    partial_failures: partialFailed.cardinality.value ?? 0,
+    top_partial_failures: transformCategories(partialFailed.categories),
     succeeded: succeeded.cardinality.value ?? 0,
     index_duration: {
       max: singleMetric.maxTotalIndexDuration.value ?? 0.0,

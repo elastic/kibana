@@ -312,11 +312,11 @@ export const registerCollector: RegisterCollector = ({
           detection_rule_status: {
             all_rules: {
               eql: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -329,11 +329,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -397,12 +397,12 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The count of gaps' },
                 },
               },
-              indicator: {
-                failed: {
+              threat_match: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -415,11 +415,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -483,12 +483,12 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The count of gaps' },
                 },
               },
-              mlRule: {
-                failed: {
+              machine_learning: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -501,11 +501,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -570,11 +570,11 @@ export const registerCollector: RegisterCollector = ({
                 },
               },
               query: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -587,11 +587,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -655,12 +655,12 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The count of gaps' },
                 },
               },
-              savedQuery: {
-                failed: {
+              saved_query: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -673,11 +673,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -742,11 +742,11 @@ export const registerCollector: RegisterCollector = ({
                 },
               },
               threshold: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -759,11 +759,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -828,11 +828,11 @@ export const registerCollector: RegisterCollector = ({
                 },
               },
               total: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
@@ -844,11 +844,11 @@ export const registerCollector: RegisterCollector = ({
             },
             elastic_rules: {
               eql: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -861,11 +861,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -929,12 +929,12 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The count of gaps' },
                 },
               },
-              indicator: {
-                failed: {
+              threat_match: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -947,11 +947,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1015,12 +1015,12 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The count of gaps' },
                 },
               },
-              mlRule: {
-                failed: {
+              machine_learning: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1033,11 +1033,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1102,11 +1102,11 @@ export const registerCollector: RegisterCollector = ({
                 },
               },
               query: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1119,11 +1119,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1187,12 +1187,12 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The count of gaps' },
                 },
               },
-              savedQuery: {
-                failed: {
+              saved_query: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1205,11 +1205,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1274,11 +1274,11 @@ export const registerCollector: RegisterCollector = ({
                 },
               },
               threshold: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1291,11 +1291,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1360,11 +1360,11 @@ export const registerCollector: RegisterCollector = ({
                 },
               },
               total: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
@@ -1376,11 +1376,11 @@ export const registerCollector: RegisterCollector = ({
             },
             custom_rules: {
               eql: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1393,11 +1393,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1461,12 +1461,12 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The count of gaps' },
                 },
               },
-              indicator: {
-                failed: {
+              threat_match: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1479,11 +1479,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1547,12 +1547,12 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The count of gaps' },
                 },
               },
-              mlRule: {
-                failed: {
+              machine_learning: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1565,11 +1565,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1634,11 +1634,11 @@ export const registerCollector: RegisterCollector = ({
                 },
               },
               query: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1651,11 +1651,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1719,12 +1719,12 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The count of gaps' },
                 },
               },
-              savedQuery: {
-                failed: {
+              saved_query: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1737,11 +1737,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1806,11 +1806,11 @@ export const registerCollector: RegisterCollector = ({
                 },
               },
               threshold: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                top_failed: {
+                top_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1823,11 +1823,11 @@ export const registerCollector: RegisterCollector = ({
                     },
                   },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },
-                top_partial_failure: {
+                top_partial_failures: {
                   type: 'array',
                   items: {
                     message: {
@@ -1892,11 +1892,11 @@ export const registerCollector: RegisterCollector = ({
                 },
               },
               total: {
-                failed: {
+                failures: {
                   type: 'long',
                   _meta: { description: 'The number of failed rules' },
                 },
-                partial_failure: {
+                partial_failures: {
                   type: 'long',
                   _meta: { description: 'The number of partial failure rules' },
                 },

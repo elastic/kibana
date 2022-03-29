@@ -89,8 +89,8 @@ describe('transform_single_rule_metric', () => {
     });
 
     expect(result).toEqual<SingleEventMetric>({
-      failed: 2,
-      top_failed: [
+      failures: 2,
+      top_failures: [
         {
           message:
             'This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching blah frank was found This warning will continue to appear until matching index is created or this rule is disabled',
@@ -102,8 +102,8 @@ describe('transform_single_rule_metric', () => {
           count: 162,
         },
       ],
-      partial_failure: 2,
-      top_partial_failure: [
+      partial_failures: 2,
+      top_partial_failures: [
         {
           message:
             'This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching blah frank was found This warning will continue to appear until matching index is created or this rule is disabled',

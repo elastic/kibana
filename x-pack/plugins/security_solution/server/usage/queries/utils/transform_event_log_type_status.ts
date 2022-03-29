@@ -78,13 +78,13 @@ export const transformEventLogTypeStatus = ({
       succeeded: eqlSuccess,
       singleMetric: eqlMetrics,
     }),
-    indicator: transformSingleRuleMetric({
+    threat_match: transformSingleRuleMetric({
       failed: indicatorFailure,
       partialFailed: indicatorPartialFailure,
       succeeded: indicatorSuccess,
       singleMetric: indicatorMetrics,
     }),
-    mlRule: transformSingleRuleMetric({
+    machine_learning: transformSingleRuleMetric({
       failed: mlFailure,
       partialFailed: mlPartialFailure,
       succeeded: mlSuccess,
@@ -96,7 +96,7 @@ export const transformEventLogTypeStatus = ({
       succeeded: querySuccess,
       singleMetric: queryMetrics,
     }),
-    savedQuery: transformSingleRuleMetric({
+    saved_query: transformSingleRuleMetric({
       failed: savedQueryFailure,
       partialFailed: savedQueryPartialFailure,
       succeeded: savedQuerySuccess,
@@ -109,7 +109,7 @@ export const transformEventLogTypeStatus = ({
       singleMetric: thresholdMetrics,
     }),
     total: {
-      failed: countTotals([
+      failures: countTotals([
         eqlFailure,
         indicatorFailure,
         mlFailure,
@@ -117,7 +117,7 @@ export const transformEventLogTypeStatus = ({
         savedQueryFailure,
         thresholdFailure,
       ]),
-      partial_failure: countTotals([
+      partial_failures: countTotals([
         eqlPartialFailure,
         indicatorPartialFailure,
         mlPartialFailure,
