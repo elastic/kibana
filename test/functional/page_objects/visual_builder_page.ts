@@ -787,6 +787,15 @@ export class VisualBuilderPageObject extends FtrService {
     await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
   }
 
+  public async setAnotherGroupByTermsField(field: string) {
+    const fieldSelectAddButtons = await this.testSubjects.findAll('fieldSelectItemAddBtn');
+    await fieldSelectAddButtons[fieldSelectAddButtons.length - 1].click();
+    await this.common.sleep(1000);
+    const byFields = await this.testSubjects.findAll('fieldSelectItem');
+    const selectedByField = byFields[byFields.length - 1];
+    await this.comboBox.setElement(selectedByField, field);
+  }
+
   public async setMetricsGroupByFiltering(include?: string, exclude?: string) {
     const setFilterValue = async (value: string | undefined, subjectKey: string) => {
       if (typeof value === 'string') {
