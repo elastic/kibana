@@ -63,6 +63,6 @@ describe('Alert Event Details', () => {
     checkResults();
     cy.contains('Save for later').click();
     cy.contains('Save query');
-    cy.react('EuiButtonDisplay').contains('Save');
+    cy.contains(/^Save$/);
   });
 });
