@@ -159,7 +159,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       let filterMax: number | undefined;
       const field = dataView.getFieldByName(fieldName);
 
-      if (ignoreParentSettings) {
+      if (ignoreParentSettings?.ignoreValidations) {
         if (min !== null) {
           range.gte = min;
         }

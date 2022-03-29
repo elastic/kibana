@@ -145,28 +145,36 @@ describe('Time Slider Control Embeddable', () => {
     describe('with validation off', () => {
       it('outputs the lower value filter', () => {
         testFilterOutput(
-          { ...baseInput, ignoreParentSettings: true, value: lowerValue },
+          { ...baseInput, ignoreParentSettings: { ignoreValidations: true }, value: lowerValue },
           lowerValueFilter
         );
       });
 
       it('outputs the uppwer value filter', () => {
         testFilterOutput(
-          { ...baseInput, ignoreParentSettings: true, value: upperValue },
+          { ...baseInput, ignoreParentSettings: { ignoreValidations: true }, value: upperValue },
           upperValueFilter
         );
       });
 
       it('outputs the out of range filter', () => {
         testFilterOutput(
-          { ...baseInput, ignoreParentSettings: true, value: outOfRangeValue },
+          {
+            ...baseInput,
+            ignoreParentSettings: { ignoreValidations: true },
+            value: outOfRangeValue,
+          },
           outOfRangeValueFilter
         );
       });
 
       it('outputs the value filter when no range found', () => {
         testFilterOutput(
-          { ...baseInput, ignoreParentSettings: true, value: withinRangeValue },
+          {
+            ...baseInput,
+            ignoreParentSettings: { ignoreValidations: true },
+            value: withinRangeValue,
+          },
           withinRangeValueFilter,
           { min: undefined, max: undefined }
         );

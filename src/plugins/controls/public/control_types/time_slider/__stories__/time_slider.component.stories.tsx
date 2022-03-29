@@ -16,12 +16,12 @@ export default {
   description: '',
 };
 
-const TimeSliderWrapper: FC<Omit<TimeSliderProps, 'onChange'>> = (props) => {
+const TimeSliderWrapper: FC<Omit<TimeSliderProps, 'onChange' | 'fieldName'>> = (props) => {
   const [value, setValue] = useState(props.value);
   const onChange = useCallback(
-    (newValue: [number | string, number | string]) => {
-      const lowValue = typeof newValue[0] === 'string' ? parseFloat(newValue[0]) : newValue[0];
-      const highValue = typeof newValue[1] === 'string' ? parseFloat(newValue[1]) : newValue[1];
+    (newValue: [number | null, number | null]) => {
+      const lowValue = newValue[0];
+      const highValue = newValue[1];
 
       setValue([lowValue, highValue]);
     },
@@ -31,13 +31,14 @@ const TimeSliderWrapper: FC<Omit<TimeSliderProps, 'onChange'>> = (props) => {
   return (
     <div style={{ width: '600px' }}>
       <EuiFormControlLayout style={{ 'max-width': '100%' }}>
-        <TimeSlider {...props} value={value} onChange={onChange} />
+        <TimeSlider {...props} value={value} fieldName={'Field Name'} onChange={onChange} />
       </EuiFormControlLayout>
     </div>
   );
 };
 
-const undefinedValue: [undefined, undefined] = [undefined, undefined];
+const undefinedValue: [null, null] = [null, null];
+const undefinedRange: [undefined, undefined] = [undefined, undefined];
 
 export const TimeSliderNoValuesOrRange = () => {
   // If range is undefined, that should be inndicate that we are loading the range
@@ -46,7 +47,7 @@ export const TimeSliderNoValuesOrRange = () => {
 
 export const TimeSliderUndefinedRangeNoValue = () => {
   // If a range is [undefined, undefined] then it was loaded, but no values were found.
-  return <TimeSliderWrapper range={undefinedValue} value={undefinedValue} />;
+  return <TimeSliderWrapper range={undefinedRange} value={undefinedValue} />;
 };
 
 export const TimeSliderUndefinedRangeWithValue = () => {
@@ -54,7 +55,7 @@ export const TimeSliderUndefinedRangeWithValue = () => {
   const now = moment();
 
   return (
-    <TimeSliderWrapper range={undefinedValue} value={[lastWeek.unix() * 1000, now.unix() * 1000]} />
+    <TimeSliderWrapper range={undefinedRange} value={[lastWeek.unix() * 1000, now.unix() * 1000]} />
   );
 };
 
@@ -76,7 +77,7 @@ export const TimeSliderWithRangeAndLowerValue = () => {
   return (
     <TimeSliderWrapper
       range={[lastWeek.unix() * 1000, now.unix() * 1000]}
-      value={[threeDays.unix() * 1000, undefined]}
+      value={[threeDays.unix() * 1000, null]}
     />
   );
 };
@@ -90,7 +91,7 @@ export const TimeSliderWithRangeAndUpperValue = () => {
   return (
     <TimeSliderWrapper
       range={[lastWeek.unix() * 1000, now.unix() * 1000]}
-      value={[undefined, threeDays.unix() * 1000]}
+      value={[null, threeDays.unix() * 1000]}
     />
   );
 };
@@ -136,6 +137,38 @@ export const TimeSliderWithRangeHigherThanValue = () => {
     <TimeSliderWrapper
       value={[twoWeeksAgo.unix() * 1000, lastWeek.unix() * 1000]}
       range={[threeDays.unix() * 1000, now.unix() * 1000]}
+    />
+  );
+};
+
+export const PartialValueLowerThanRange = () => {
+  // Selected value is March 8 -> March 9
+  // Range is March 11 -> 25
+  const eightDaysAgo = moment().subtract(8, 'days');
+
+  const lastWeek = moment().subtract(7, 'days');
+  const today = moment();
+
+  return (
+    <TimeSliderWrapper
+      value={[null, eightDaysAgo.unix() * 1000]}
+      range={[lastWeek.unix() * 1000, today.unix() * 1000]}
+    />
+  );
+};
+
+export const PartialValueHigherThanRange = () => {
+  // Selected value is March 8 -> March 9
+  // Range is March 11 -> 25
+  const eightDaysAgo = moment().subtract(8, 'days');
+
+  const lastWeek = moment().subtract(7, 'days');
+  const today = moment();
+
+  return (
+    <TimeSliderWrapper
+      range={[eightDaysAgo.unix() * 1000, lastWeek.unix() * 1000]}
+      value={[today.unix() * 1000, null]}
     />
   );
 };

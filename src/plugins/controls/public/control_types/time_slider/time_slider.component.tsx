@@ -115,8 +115,14 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
 
   let valueText: JSX.Element | null = null;
   if (hasValues) {
-    const lower = value[0] !== null ? value[0] : range![0]!;
-    const upper = value[1] !== null ? value[1] : range![1]!;
+    let lower = value[0] !== null ? value[0] : range![0]!;
+    let upper = value[1] !== null ? value[1] : range![1]!;
+
+    if (value[0] !== null && lower > upper) {
+      upper = lower;
+    } else if (value[1] !== null && lower > upper) {
+      lower = upper;
+    }
 
     // has value and doesn't have a
     const hasLowerValueInRange =
