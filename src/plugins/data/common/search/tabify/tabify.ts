@@ -172,7 +172,7 @@ export function tabifyAggRandomSamplingResponse(
   aggConfigs: IAggConfigs,
   esResponse: Record<string, any>,
   respOpts?: Partial<TabbedResponseWriterOptions>
-) {
+): Datatable {
   /**
    * read an aggregation from a bucket, which *might* be found at key (if
    * the response came in object form), and will recurse down the aggregation
@@ -197,7 +197,7 @@ export function tabifyAggRandomSamplingResponse(
       switch (agg.type.type) {
         case AggGroupNames.Buckets:
           const aggBucket = get(bucket, agg.id) as Record<string, unknown>;
-          const tabifyBuckets = new TabifyBuckets(aggBucket, agg.params, respOpts?.timeRange);
+          const tabifyBuckets = new TabifyBuckets(aggBucket, agg, respOpts?.timeRange);
           const precisionError = agg.type.hasPrecisionError?.(aggBucket);
 
           if (precisionError) {
@@ -304,5 +304,14 @@ export function tabifyAggRandomSamplingResponse(
 
   collectBucket(aggConfigs, write, topLevelBucket, '', 1);
 
-  return write.response();
+  return {
+    ...write.response(),
+    meta: {
+      type: 'esaggs',
+      source: aggConfigs.indexPattern.id,
+      statistics: {
+        totalCount: esResponse.hits?.total,
+      },
+    },
+  };
 }
