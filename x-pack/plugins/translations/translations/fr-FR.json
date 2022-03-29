@@ -1161,8 +1161,6 @@
     "core.euiRelativeTab.fullDescription": "L'unité peut être modifiée. Elle est actuellement définie sur {unit}.",
     "core.euiRelativeTab.numberInputError": "Doit être >= 0.",
     "core.euiRelativeTab.numberInputLabel": "Nombre d'intervalles",
-    "core.euiRelativeTab.relativeDate": "Date de {position}",
-    "core.euiRelativeTab.roundingLabel": "Arrondir à {unit}",
     "core.euiRelativeTab.unitInputLabel": "Intervalle relatif",
     "core.euiResizableButton.horizontalResizerAriaLabel": "Utilisez les flèches gauche et droite pour ajuster la taille des panneaux.",
     "core.euiResizableButton.verticalResizerAriaLabel": "Utilisez les flèches vers le haut et vers le bas pour ajuster la taille des panneaux.",
