@@ -7,13 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions';
-import { LensMultiTable, XYArgs, XYRender } from '../types';
+import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions';
 import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
+import { XYArgs, XYLayerConfigResult, XYRender } from '../types';
 import {
   XY_VIS,
   DATA_LAYER,
-  MULTITABLE,
   XYCurveTypes,
   LEGEND_CONFIG,
   ValueLabelModes,
@@ -26,7 +25,6 @@ import {
   LABELS_ORIENTATION_CONFIG,
   AXIS_TITLES_VISIBILITY_CONFIG,
   EndValues,
-  ANNOTATION_LAYER,
   LayerTypes,
 } from '../constants';
 
@@ -51,13 +49,13 @@ const strings = {
 
 export const xyVisFunction: ExpressionFunctionDefinition<
   typeof XY_VIS,
-  LensMultiTable,
+  Datatable,
   XYArgs,
   XYRender
 > = {
   name: XY_VIS,
   type: 'render',
-  inputTypes: [MULTITABLE],
+  inputTypes: ['datatable'],
   help: i18n.translate('expressionXY.xyVis.help', {
     defaultMessage: 'An X/Y chart',
   }),
@@ -156,12 +154,17 @@ export const xyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Show x and y axes titles',
       }),
     },
-    layers: {
-      types: [DATA_LAYER, REFERENCE_LINE_LAYER, ANNOTATION_LAYER],
-      help: i18n.translate('expressionXY.xyVis.layers.help', {
-        defaultMessage: 'Layers of visual series',
+    dataLayer: {
+      types: [DATA_LAYER],
+      help: i18n.translate('expressionXY.xyVis.dataLayer.help', {
+        defaultMessage: 'Data layer of visual series',
       }),
-      multi: true,
+    },
+    referenceLineLayer: {
+      types: [REFERENCE_LINE_LAYER],
+      help: i18n.translate('expressionXY.xyVis.referenceLineLayer.help', {
+        defaultMessage: 'Reference line layer',
+      }),
     },
     curveType: {
       types: ['string'],
@@ -199,8 +202,14 @@ export const xyVisFunction: ExpressionFunctionDefinition<
     },
   },
   fn(data, args, handlers) {
+    const { dataLayer, referenceLineLayer, ...restArgs } = args;
+    const inputLayers: Array<XYLayerConfigResult | undefined> = [dataLayer, referenceLineLayer];
+    const layers: XYLayerConfigResult[] = inputLayers.filter(
+      (layer): layer is XYLayerConfigResult => layer !== undefined
+    );
+
     if (handlers?.inspectorAdapters?.tables) {
-      args.layers.forEach((layer) => {
+      layers.forEach((layer, index) => {
         if (layer.layerType === LayerTypes.ANNOTATIONS) {
           return;
         }
@@ -212,9 +221,9 @@ export const xyVisFunction: ExpressionFunctionDefinition<
           splitAccessor = layer.splitAccessor;
         }
 
-        const { layerId, accessors, layerType } = layer;
+        const { accessors, layerType } = layer;
         const logTable = prepareLogTable(
-          data.tables[layerId],
+          layer.table,
           [
             [
               accessors ? accessors : undefined,
@@ -226,7 +235,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
           true
         );
 
-        handlers.inspectorAdapters.tables.logDatatable(layerId, logTable);
+        handlers.inspectorAdapters.tables.logDatatable(index, logTable); // ? what to do with layer id while adding table to inspector.
       });
     }
 
@@ -234,9 +243,9 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       type: 'render',
       as: XY_VIS_RENDERER,
       value: {
-        data,
         args: {
-          ...args,
+          ...restArgs,
+          layers,
           ariaLabel:
             args.ariaLabel ??
             (handlers.variables?.embeddableTitle as string) ??
