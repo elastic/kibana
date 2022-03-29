@@ -373,9 +373,8 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             iconType="help"
             data-test-subj={getTestId('expiredLicenseCallout')}
           >
-            {`${labels.flyoutDowngradedLicenseInfo} ${labels.flyoutDowngradedLicenseDocsInfo(
-              securitySolution
-            )}`}
+            {labels.flyoutDowngradedLicenseInfo}{' '}
+            {labels.flyoutDowngradedLicenseDocsInfo(securitySolution)}
           </EuiCallOut>
         )}
 

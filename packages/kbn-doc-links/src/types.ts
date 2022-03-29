@@ -235,6 +235,7 @@ export interface DocLinks {
   readonly securitySolution: {
     readonly trustedApps: string;
     readonly eventFilters: string;
+    readonly blocklist: string;
   };
   readonly query: {
     readonly eql: string;

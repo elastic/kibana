@@ -62,38 +62,16 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   flyoutDowngradedLicenseDocsInfo: (
     securitySolutionDocsLinks: DocLinks['securitySolution']
   ): React.ReactNode => {
-    // FIXME: define docs link for license downgrade message. sample code below
-
-    // const { docLinks } = useKibana().services;
-    // return (
-    //   <FormattedMessage
-    //     id="some-id-1"
-    //     defaultMessage="For more information, see our {link}."
-    //     value={{
-    //       link: (
-    //         <EuiLink target="_blank" href={`${docLinks.links.securitySolution.eventFilters}`}>
-    //           {' '}
-    //           <FormattedMessage
-    //             id="dome-id-2"
-    //             defaultMessage="Event filters documentation"
-    //           />{' '}
-    //         </EuiLink>
-    //       ),
-    //     }}
-    //   />
-    // );
     return (
-      <FormattedMessage
-        id="xpack.securitySolution.artifactListPage.flyoutDowngradedLicenseDocsInfo"
-        defaultMessage="For more information, see our {link}."
-        values={{
-          link: (
-            <EuiLink target="_blank" href={`${securitySolutionDocsLinks.blocklist}`}>
-              <FormattedMessage id="dome-id-2" defaultMessage="Blocklist documentation" />
-            </EuiLink>
-          ),
-        }}
-      />
+      <>
+        <FormattedMessage
+          id="xpack.securitySolution.artifactListPage.flyoutDowngradedLicenseDocsInfo"
+          defaultMessage="For more information, see our "
+        />
+        <EuiLink target="_blank" href={`${securitySolutionDocsLinks.blocklist}`}>
+          <FormattedMessage id="dome-id-2" defaultMessage="Blocklist documentation" />
+        </EuiLink>
+      </>
     );
   },
   deleteActionSuccess: (itemName) =>
@@ -102,15 +80,15 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       values: { itemName },
     }),
   emptyStateTitle: i18n.translate('xpack.securitySolution.blocklist.emptyStateTitle', {
-    defaultMessage: 'Add your first blocklist',
+    defaultMessage: 'Add your first blocklist entry',
   }),
-  emptyStateInfo: i18n.translate(
-    'xpack.securitySolution.blocklist.emptyStateInfo',
-    { defaultMessage: 'Add a blocklist to prevent execution on the endpoint' } // FIXME: need wording here form PM
-  ),
+  emptyStateInfo: i18n.translate('xpack.securitySolution.blocklist.emptyStateInfo', {
+    defaultMessage:
+      'The blocklist prevents selected applications from running on your hosts by extending the list of processes the Endpoint considers malicious.',
+  }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.blocklist.emptyStatePrimaryButtonLabel',
-    { defaultMessage: 'Add blocklist' }
+    { defaultMessage: 'Add blocklist entry' }
   ),
 };
 
