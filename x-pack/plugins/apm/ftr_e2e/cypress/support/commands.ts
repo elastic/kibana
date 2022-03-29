@@ -7,11 +7,8 @@
 import 'cypress-real-events/support';
 import { Interception } from 'cypress/types/net-stubbing';
 import 'cypress-axe';
-import {
-  AXE_CONFIG,
-  AXE_OPTIONS,
-} from 'test/accessibility/services/a11y/constants';
 import moment from 'moment';
+import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/test';
 
 Cypress.Commands.add('loginAsReadOnlyUser', () => {
   cy.loginAs({ username: 'apm_read_user', password: 'changeme' });

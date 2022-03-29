@@ -21,7 +21,7 @@ import {
 } from 'kibana/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
+import { DataPlugin, DataViewsContract } from '../../../../src/plugins/data/public';
 import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
@@ -52,7 +52,7 @@ export interface GraphDependencies {
   licensing: LicensingPluginStart;
   chrome: ChromeStart;
   toastNotifications: ToastsStart;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   data: ReturnType<DataPlugin['start']>;
   savedObjectsClient: SavedObjectsClientContract;
   addBasePath: (url: string) => string;
