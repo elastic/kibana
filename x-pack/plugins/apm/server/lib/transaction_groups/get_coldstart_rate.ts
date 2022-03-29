@@ -27,6 +27,7 @@ import {
   getTransactionColdstartRateTimeSeries,
 } from '../helpers/transaction_coldstart_rate';
 import { termQuery } from '../../../../observability/server';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
 export async function getColdstartRate({
   environment,
@@ -38,6 +39,7 @@ export async function getColdstartRate({
   searchAggregatedTransactions,
   start,
   end,
+  offset,
 }: {
   environment: string;
   kuery: string;
@@ -48,11 +50,18 @@ export async function getColdstartRate({
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
+  offset?: string;
 }): Promise<{
   transactionColdstartRate: Coordinate[];
   average: number | null;
 }> {
   const { apmEventClient } = setup;
+
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
   const filter = [
     ...termQuery(SERVICE_NAME, serviceName),
@@ -60,7 +69,7 @@ export async function getColdstartRate({
     ...(transactionName ? termQuery(TRANSACTION_NAME, transactionName) : []),
     ...termQuery(TRANSACTION_TYPE, transactionType),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
-    ...rangeQuery(start, end),
+    ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
@@ -80,12 +89,12 @@ export async function getColdstartRate({
           date_histogram: {
             field: '@timestamp',
             fixed_interval: getBucketSizeForAggregatedTransactions({
-              start,
-              end,
+              start: startWithOffset,
+              end: endWithOffset,
               searchAggregatedTransactions,
             }).intervalString,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
             coldstartStates,
@@ -123,10 +132,9 @@ export async function getColdstartRatePeriods({
   transactionName = '',
   setup,
   searchAggregatedTransactions,
-  comparisonStart,
-  comparisonEnd,
   start,
   end,
+  offset,
 }: {
   environment: string;
   kuery: string;
@@ -135,10 +143,9 @@ export async function getColdstartRatePeriods({
   transactionName?: string;
   setup: Setup;
   searchAggregatedTransactions: boolean;
-  comparisonStart?: number;
-  comparisonEnd?: number;
   start: number;
   end: number;
+  offset?: string;
 }) {
   const commonProps = {
     environment,
@@ -152,14 +159,14 @@ export async function getColdstartRatePeriods({
 
   const currentPeriodPromise = getColdstartRate({ ...commonProps, start, end });
 
-  const previousPeriodPromise =
-    comparisonStart && comparisonEnd
-      ? getColdstartRate({
-          ...commonProps,
-          start: comparisonStart,
-          end: comparisonEnd,
-        })
-      : { transactionColdstartRate: [], average: null };
+  const previousPeriodPromise = offset
+    ? getColdstartRate({
+        ...commonProps,
+        start,
+        end,
+        offset,
+      })
+    : { transactionColdstartRate: [], average: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,

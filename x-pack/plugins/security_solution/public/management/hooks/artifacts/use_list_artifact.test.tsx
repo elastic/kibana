@@ -25,6 +25,8 @@ describe('List artifact hook', () => {
         page: number;
         perPage: number;
         policies: string[];
+        sortField?: string;
+        sortOrder?: string;
       }
     | undefined;
 
@@ -73,8 +75,8 @@ describe('List artifact hook', () => {
         namespace_type: ['agnostic'],
         page: 2,
         per_page: 20,
-        sort_field: undefined,
-        sort_order: undefined,
+        sort_field: 'created_at',
+        sort_order: 'desc',
       },
     });
     expect(onSuccessMock).toHaveBeenCalledTimes(1);

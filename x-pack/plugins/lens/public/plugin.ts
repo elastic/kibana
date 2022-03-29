@@ -16,8 +16,12 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddableSetup,
+  EmbeddableStart,
+} from '../../../../src/plugins/embeddable/public';
 import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
-import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import type {
@@ -81,6 +85,7 @@ import type {
   LensTopNavMenuEntryGenerator,
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
+import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
@@ -261,6 +266,7 @@ export class LensPlugin {
         eventAnnotation
       );
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
+      const datasourceMap = await this.editorFrameService!.loadDatasources();
 
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
@@ -271,6 +277,7 @@ export class LensPlugin {
         documentToExpression: this.editorFrameService!.documentToExpression,
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
+        datasourceMap,
         indexPatternService: plugins.dataViews,
         uiActions: plugins.uiActions,
         usageCollection,
@@ -440,6 +447,14 @@ export class LensPlugin {
     startDependencies.uiActions.addTriggerAction(
       VISUALIZE_EDITOR_TRIGGER,
       visualizeTSVBAction(core.application)
+    );
+
+    startDependencies.uiActions.addTriggerAction(
+      CONTEXT_MENU_TRIGGER,
+      createOpenInDiscoverAction(
+        startDependencies.discover!,
+        core.application.capabilities.discover.show as boolean
+      )
     );
 
     return {
