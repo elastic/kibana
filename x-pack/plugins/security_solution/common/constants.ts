@@ -182,9 +182,6 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 
-/** This Kibana Advanced Setting enables the session view component in the UI */
-export const ENABLE_SESSION_VIEW_PLUGIN = 'securitySolution:enableSessionView' as const;
-
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
 

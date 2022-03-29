@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { APP_ID, ENABLE_SESSION_VIEW_PLUGIN } from '../../../../../common/constants';
+import { APP_ID } from '../../../../../common/constants';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import {
   FIRST_ARIA_INDEX,
@@ -108,9 +108,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
-    const { uiSettings } = useKibana().services;
-    const isSessionViewEnabled = uiSettings.get(ENABLE_SESSION_VIEW_PLUGIN);
-    const ACTION_BUTTON_COUNT = isSessionViewEnabled ? 6 : 5;
+    const ACTION_BUTTON_COUNT = 6;
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
@@ -174,10 +172,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
     }, [excludedRowRendererIds, rowRenderers]);
 
-    const actionsColumnWidth = useMemo(
-      () => getActionsColumnWidth(ACTION_BUTTON_COUNT),
-      [ACTION_BUTTON_COUNT]
-    );
+    const actionsColumnWidth = useMemo(() => getActionsColumnWidth(ACTION_BUTTON_COUNT), []);
 
     const columnWidths = useMemo(
       () =>

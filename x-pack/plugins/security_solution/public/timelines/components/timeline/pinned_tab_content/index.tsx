@@ -24,8 +24,6 @@ import { Footer, footerHeight } from '../footer';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useKibana } from '../../../../common/lib/kibana';
-import { ENABLE_SESSION_VIEW_PLUGIN } from '../../../../../common/constants';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
@@ -127,11 +125,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-  const { uiSettings } = useKibana().services;
-
-  const isSessionViewEnabled = uiSettings.get(ENABLE_SESSION_VIEW_PLUGIN);
-
-  const ACTION_BUTTON_COUNT = isSessionViewEnabled ? 6 : 5;
+  const ACTION_BUTTON_COUNT = 6;
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -215,7 +209,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         ...x,
         headerCellRender: HeaderActions,
       })),
-    [ACTION_BUTTON_COUNT]
+    []
   );
 
   return (

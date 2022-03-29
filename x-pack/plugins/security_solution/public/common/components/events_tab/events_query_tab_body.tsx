@@ -30,8 +30,6 @@ import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';
 import { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../users/pages/navigation/types';
 import { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../hosts/pages/navigation/types';
-import { ENABLE_SESSION_VIEW_PLUGIN } from '../../../../common/constants';
-import { useKibana } from '../../lib/kibana';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -86,11 +84,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
-  const { uiSettings } = useKibana().services;
-
-  const isSessionViewEnabled = uiSettings.get(ENABLE_SESSION_VIEW_PLUGIN);
-
-  const ACTION_BUTTON_COUNT = isSessionViewEnabled ? 5 : 4;
+  const ACTION_BUTTON_COUNT = 5;
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
   useEffect(() => {
@@ -117,10 +111,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     };
   }, [deleteQuery]);
 
-  const leadingControlColumns = useMemo(
-    () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
-    [ACTION_BUTTON_COUNT]
-  );
+  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
   return (
     <>

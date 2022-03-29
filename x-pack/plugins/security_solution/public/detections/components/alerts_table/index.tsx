@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import type { Filter } from '@kbn/es-query';
-import { APP_ID, ENABLE_SESSION_VIEW_PLUGIN } from '../../../../common/constants';
+import { APP_ID } from '../../../../common/constants';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
@@ -104,16 +104,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
-  const {
-    uiSettings,
-    data: {
-      query: { filterManager },
-    },
-  } = useKibana().services;
-
-  const isSessionViewEnabled = uiSettings.get(ENABLE_SESSION_VIEW_PLUGIN);
-
-  const ACTION_BUTTON_COUNT = isSessionViewEnabled ? 5 : 4;
+  const ACTION_BUTTON_COUNT = 5;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -343,6 +334,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       return [...defaultFilters, ...alertStatusFilter];
     }
   }, [defaultFilters, filterGroup]);
+  const { filterManager } = useKibana().services.data.query;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
@@ -371,10 +363,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     );
   }, [dispatch, filterManager, tGridEnabled, timelineId]);
 
-  const leadingControlColumns = useMemo(
-    () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
-    [ACTION_BUTTON_COUNT]
-  );
+  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
   const casesPermissions = useGetUserCasesPermissions();
   const CasesContext = kibana.services.cases.ui.getCasesContext();

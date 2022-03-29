@@ -33,7 +33,6 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   ENABLE_CCS_READ_WARNING_SETTING,
-  ENABLE_SESSION_VIEW_PLUGIN,
 } from '../common/constants';
 import { transformConfigSchema } from '../common/transforms/types';
 import { ExperimentalFeatures } from '../common/experimental_features';
@@ -228,22 +227,6 @@ export const initUiSettings = (
       description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
         defaultMessage: '<p>Enables privilege check warnings in rules for CCS indices</p>',
       }),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: false,
-      schema: schema.boolean(),
-    },
-    [ENABLE_SESSION_VIEW_PLUGIN]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableSessionView', {
-        defaultMessage: 'Enable Session View Component',
-      }),
-      value: true,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enableSessionViewDescription',
-        {
-          defaultMessage: '<p>Enables the Session View component in the UI</p>',
-        }
-      ),
       type: 'boolean',
       category: [APP_ID],
       requiresPageReload: false,

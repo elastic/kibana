@@ -22,7 +22,6 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { EntityType } from '../../../../../timelines/common';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
-import { ENABLE_SESSION_VIEW_PLUGIN } from '../../../../common/constants';
 
 export interface OwnProps {
   end: string;
@@ -80,16 +79,8 @@ const AlertsTableComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
-  const {
-    uiSettings,
-    data: {
-      query: { filterManager },
-    },
-  } = useKibana().services;
-
-  const isSessionViewEnabled = uiSettings.get(ENABLE_SESSION_VIEW_PLUGIN);
-
-  const ACTION_BUTTON_COUNT = isSessionViewEnabled ? 5 : 4;
+  const { filterManager } = useKibana().services.data.query;
+  const ACTION_BUTTON_COUNT = 5;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
@@ -115,10 +106,7 @@ const AlertsTableComponent: React.FC<Props> = ({
     );
   }, [dispatch, filterManager, tGridEnabled, timelineId]);
 
-  const leadingControlColumns = useMemo(
-    () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
-    [ACTION_BUTTON_COUNT]
-  );
+  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
   return (
     <StatefulEventsViewer
