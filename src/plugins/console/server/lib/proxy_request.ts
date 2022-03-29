@@ -12,6 +12,7 @@ import net from 'net';
 import stream from 'stream';
 import Boom from '@hapi/boom';
 import { URL, URLSearchParams } from 'url';
+import { trimStart } from 'lodash';
 
 interface Args {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
@@ -35,13 +36,15 @@ const sanitizeHostname = (hostName: string): string =>
  * We need to decode the percent-encoded pathname, and encode it correctly with encodeURIComponent
  */
 
-const encodePathname = (pathname: string) => {
+export const encodePathname = (pathname: string) => {
   const decodedPath = new URLSearchParams(`path=${pathname}`).get('path') ?? '';
 
-  return decodedPath
-    .split('/')
-    .map((str) => encodeURIComponent(str))
-    .join('/');
+  // Skip if it is valid
+  if (pathname === decodedPath) {
+    return pathname;
+  }
+
+  return `/${encodeURIComponent(trimStart(decodedPath, '/'))}`;
 };
 
 // We use a modified version of Hapi's Wreck because Hapi, Axios, and Superagent don't support GET requests
