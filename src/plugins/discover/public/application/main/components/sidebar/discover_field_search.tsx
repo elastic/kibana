@@ -323,7 +323,7 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
       className="dscFieldTypesHelp__button"
       aria-label="Filter type help"
     >
-      <EuiIcon type="questionInCircle" title="Filter type help" />
+      <EuiIcon type="iInCircle" color="primary" title="Filter type help" />
     </EuiFilterButton>
   );
 
