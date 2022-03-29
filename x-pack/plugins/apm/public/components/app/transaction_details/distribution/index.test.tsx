@@ -100,6 +100,7 @@ describe('transaction_details/distribution', () => {
           onChartSelection={jest.fn()}
           onClearSelection={jest.fn()}
           traceSamples={[]}
+          traceSamplesStatus={useFetcherModule.FETCH_STATUS.LOADING}
         />,
 
         { wrapper: Wrapper }
@@ -124,6 +125,7 @@ describe('transaction_details/distribution', () => {
             onChartSelection={jest.fn()}
             onClearSelection={jest.fn()}
             traceSamples={[]}
+            traceSamplesStatus={useFetcherModule.FETCH_STATUS.SUCCESS}
           />
         </Wrapper>
       );
