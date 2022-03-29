@@ -21,14 +21,11 @@ import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING } from './translations';
 import { inputsSelectors } from '../../common/store/selectors';
 
-import { useStatusSeverityAlertCounters } from '../containers/detection_response/alerts_counters';
-
 const DetectionResponseComponent = () => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   // TODO: link queries with global time queries
-  const { to, from, setQuery } = useGlobalTime();
 
   const queriesLoading: boolean = useShallowEqualSelector(
     (state) => !!getGlobalQuery(state).find((query) => query.loading)
@@ -46,8 +43,6 @@ const DetectionResponseComponent = () => {
   );
 
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-
-  console.log({ loading, data });
 
   return (
     <>
@@ -103,22 +98,3 @@ const DetectionResponseComponent = () => {
 };
 
 export const DetectionResponse = React.memo(DetectionResponseComponent);
-
-const AlertsCounterUser = () => {
-  const { to, from, setQuery } = useGlobalTime();
-
-  const { isLoading, data, refetch } = useStatusSeverityAlertCounters({
-    from,
-    to,
-  });
-
-  // we have some type mismatches for refetch and the shape of inspect. further investigation needed as to whether useAlertsQuery is correct or needs to be changed
-  setQuery({
-    id: 'nameOfComponent',
-    loading: isLoading,
-    refetch,
-    inspect: data.inspect,
-  });
-
-  return <div>{data.counters}</div>;
-};
