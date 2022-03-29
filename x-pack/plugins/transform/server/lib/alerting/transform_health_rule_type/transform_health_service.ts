@@ -14,6 +14,7 @@ import {
   ALL_TRANSFORMS_SELECTION,
   TRANSFORM_HEALTH_CHECK_NAMES,
   TRANSFORM_RULE_TYPE,
+  TRANSFORM_STATE,
 } from '../../../../common/constants';
 import { getResultTestConfig } from '../../../../common/utils/alerts';
 import {
@@ -103,7 +104,7 @@ export function transformHealthServiceProvider(
       ).transforms;
 
       return transformsStats
-        .filter((t) => t.state !== 'started' && t.state !== 'indexing')
+        .filter((t) => t.state !== TRANSFORM_STATE.STARTED && t.state !== TRANSFORM_STATE.INDEXING)
         .map((t) => ({
           transform_id: t.id,
           description: transformsDict.get(t.id)?.description,
@@ -166,14 +167,24 @@ export function transformHealthServiceProvider(
         },
       });
 
-      return (response.aggregations?.by_transform.buckets as TransformErrorsBucket[]).map(
-        ({ key, error_messages: errorMessages }) => {
+      // If transform contains errors, it's in a failed state
+      const transformsStats = (
+        await esClient.transform.getTransformStats({
+          transform_id: transformIds.join(','),
+        })
+      ).transforms;
+      const failedTransforms = new Set(
+        transformsStats.filter((t) => t.state === TRANSFORM_STATE.FAILED).map((t) => t.id)
+      );
+
+      return (response.aggregations?.by_transform.buckets as TransformErrorsBucket[])
+        .map(({ key, error_messages: errorMessages }) => {
           return {
             transform_id: key,
             error_messages: errorMessages.hits.hits.map((v) => v._source),
           } as ErrorMessagesTransformResponse;
-        }
-      );
+        })
+        .filter((v) => failedTransforms.has(v.transform_id));
     },
     /**
      * Returns results of the transform health checks
