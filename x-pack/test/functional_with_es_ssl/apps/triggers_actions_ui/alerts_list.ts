@@ -499,7 +499,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           '[data-test-subj="rulesErrorBanner"]'
         );
         expect(alertsErrorBannerExistErrors).to.have.length(1);
-        expect(x
+        expect(
           await (
             await alertsErrorBannerExistErrors[0].findByTagName('p')
           ).getVisibleText()
