@@ -86,11 +86,6 @@ const SHAREABLE_SOON_OBJECT_TYPES = [
   'connector',
 ];
 
-/** Three different icons are displayed for non-shareable objects, depending on the object type. */
-function getNonShareableIcon(objectType: string, objectNamespaceType: SavedObjectsNamespaceType) {
-  return null;
-}
-
 const Wrapper = ({
   objectType,
   objectNamespaceType,
