@@ -3016,6 +3016,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/plugin-discovery@link:bazel-bin/packages/kbn-plugin-discovery":
+  version "0.0.0"
+  uid ""
+
 "@kbn/plugin-generator@link:bazel-bin/packages/kbn-plugin-generator":
   version "0.0.0"
   uid ""
@@ -5970,6 +5974,10 @@
   uid ""
 
 "@types/kbn__optimizer@link:bazel-bin/packages/kbn-optimizer/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__plugin-discovery@link:bazel-bin/packages/kbn-plugin-discovery/npm_module_types":
   version "0.0.0"
   uid ""
 
