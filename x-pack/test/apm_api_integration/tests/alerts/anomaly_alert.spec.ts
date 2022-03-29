@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
-import { range, omit } from 'lodash';
 import { apm, timerange } from '@elastic/apm-synthtrace';
-import archives from '../../common/fixtures/es_archiver/archives_metadata';
+import datemath from '@elastic/datemath';
+import expect from '@kbn/expect';
+import { range } from 'lodash';
+import { AlertType } from '../../../../plugins/apm/common/alert_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
-import { AlertType } from '../../../../plugins/apm/common/alert_types';
-import datemath from '@elastic/datemath';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
   const ml = getService('ml');
   const supertest = getService('supertest');
@@ -61,14 +59,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         await synthtraceEsClient.index(events);
         await createAndRunApmMlJob({ environment: 'production', ml });
-      });
-
-      after(async () => {
-        await synthtraceEsClient.clean();
-        await ml.cleanMlIndices();
-      });
-
-      it('checks if alert is active', async () => {
         const { body: createdRule } = await supertest
           .post(`/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -91,28 +81,62 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             notify_when: 'onActiveAlert',
             actions: [],
           });
+        ruleId = createdRule.id;
+      });
 
-        const response2 = await supertest
-          .get(`/api/alerting/rule/${createdRule.id}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
+      after(async () => {
+        await synthtraceEsClient.clean();
+        await ml.cleanMlIndices();
+        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
+      });
 
-        console.log('### caue ~ response2', JSON.stringify(response2.body, null, 2));
+      const WaitForStatusIncrement = 500;
 
-        const start = datemath.parse('now-30m')!.toISOString();
-        const end = datemath.parse('now')!.toISOString();
-        const response = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/sorted_and_filtered_services',
-          params: {
-            query: {
-              start,
-              end,
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-            },
-          },
+      async function waitForStatus({
+        id,
+        statuses,
+        waitMillis = 10000,
+      }: {
+        statuses: Set<string>;
+        waitMillis?: number;
+        id?: string;
+      }): Promise<Record<string, any>> {
+        if (waitMillis < 0 || !id) {
+          expect().fail(`waiting for alert ${id} statuses ${Array.from(statuses)} timed out`);
+        }
+
+        const response = await supertest.get(`/api/alerting/rule/${id}`);
+        expect(response.status).to.eql(200);
+
+        const { execution_status: executionStatus } = response.body || {};
+        const { status } = executionStatus || {};
+
+        const message = `waitForStatus(${Array.from(statuses)}): got ${JSON.stringify(
+          executionStatus
+        )}`;
+
+        if (statuses.has(status)) {
+          return executionStatus;
+        }
+
+        // eslint-disable-next-line no-console
+        console.log(`${message}, retrying`);
+
+        await delay(WaitForStatusIncrement);
+        return await waitForStatus({
+          id,
+          statuses,
+          waitMillis: waitMillis - WaitForStatusIncrement,
         });
-        await supertest.delete(`/api/alerting/rule/${createdRule.id}`).set('kbn-xsrf', 'foo');
+      }
+
+      async function delay(millis: number): Promise<void> {
+        await new Promise((resolve) => setTimeout(resolve, millis));
+      }
+
+      it('checks if alert is active', async () => {
+        const executionStatus = await waitForStatus({ id: ruleId, statuses: new Set(['active']) });
+        expect(executionStatus.status).to.be('active');
       });
     }
   );
