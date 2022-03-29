@@ -10,16 +10,18 @@ import './reference_lines.scss';
 
 import React from 'react';
 import { groupBy } from 'lodash';
-import { EuiIcon } from '@elastic/eui';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
 import type { FieldFormat } from '../../../../field_formats/common';
 import type { IconPosition, ReferenceLineLayerArgs, YAxisMode } from '../../common/types';
 import type { LensMultiTable } from '../../common/types';
-import { hasIcon } from '../helpers';
-
-export const REFERENCE_LINE_MARKER_SIZE = 20;
+import {
+  LINES_MARKER_SIZE,
+  mapVerticalToHorizontalPlacement,
+  Marker,
+  MarkerBody,
+} from '../helpers';
 
 export const computeChartMargins = (
   referenceLinePaddings: Partial<Record<Position, number>>,
@@ -55,66 +57,24 @@ export const computeChartMargins = (
   return result;
 };
 
-// Note: it does not take into consideration whether the reference line is in view or not
-export const getReferenceLineRequiredPaddings = (
-  referenceLineLayers: ReferenceLineLayerArgs[],
-  axesMap: Record<'left' | 'right', unknown>
-) => {
-  // collect all paddings for the 4 axis: if any text is detected double it.
-  const paddings: Partial<Record<Position, number>> = {};
-  const icons: Partial<Record<Position, number>> = {};
-  referenceLineLayers.forEach((layer) => {
-    layer.yConfig?.forEach(({ axisMode, icon, iconPosition, textVisibility }) => {
-      if (axisMode && (hasIcon(icon) || textVisibility)) {
-        const placement = getBaseIconPlacement(iconPosition, axisMode, axesMap);
-        paddings[placement] = Math.max(
-          paddings[placement] || 0,
-          REFERENCE_LINE_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
-        );
-        icons[placement] = (icons[placement] || 0) + (hasIcon(icon) ? 1 : 0);
-      }
-    });
-  });
-  // post-process the padding based on the icon presence:
-  // if no icon is present for the placement, just reduce the padding
-  (Object.keys(paddings) as Position[]).forEach((placement) => {
-    if (!icons[placement]) {
-      paddings[placement] = REFERENCE_LINE_MARKER_SIZE;
-    }
-  });
-
-  return paddings;
-};
-
-function mapVerticalToHorizontalPlacement(placement: Position) {
-  switch (placement) {
-    case Position.Top:
-      return Position.Right;
-    case Position.Bottom:
-      return Position.Left;
-    case Position.Left:
-      return Position.Bottom;
-    case Position.Right:
-      return Position.Top;
-  }
-}
-
 // if there's just one axis, put it on the other one
 // otherwise use the same axis
 // this function assume the chart is vertical
-function getBaseIconPlacement(
+export function getBaseIconPlacement(
   iconPosition: IconPosition | undefined,
-  axisMode: YAxisMode | undefined,
-  axesMap: Record<string, unknown>
+  axesMap?: Record<string, unknown>,
+  axisMode?: YAxisMode
 ) {
   if (iconPosition === 'auto') {
     if (axisMode === 'bottom') {
       return Position.Top;
     }
-    if (axisMode === 'left') {
-      return axesMap.right ? Position.Left : Position.Right;
+    if (axesMap) {
+      if (axisMode === 'left') {
+        return axesMap.right ? Position.Left : Position.Right;
+      }
+      return axesMap.left ? Position.Right : Position.Left;
     }
-    return axesMap.left ? Position.Right : Position.Left;
   }
 
   if (iconPosition === 'left') {
@@ -127,65 +87,6 @@ function getBaseIconPlacement(
     return Position.Bottom;
   }
   return Position.Top;
-}
-
-function getMarkerBody(label: string | undefined, isHorizontal: boolean) {
-  if (!label) {
-    return;
-  }
-  if (isHorizontal) {
-    return (
-      <div className="eui-textTruncate" style={{ maxWidth: REFERENCE_LINE_MARKER_SIZE * 3 }}>
-        {label}
-      </div>
-    );
-  }
-  return (
-    <div
-      className="xyDecorationRotatedWrapper"
-      style={{
-        width: REFERENCE_LINE_MARKER_SIZE,
-      }}
-    >
-      <div
-        className="eui-textTruncate xyDecorationRotatedWrapper__label"
-        style={{
-          maxWidth: REFERENCE_LINE_MARKER_SIZE * 3,
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
-
-interface MarkerConfig {
-  axisMode?: YAxisMode;
-  icon?: string;
-  textVisibility?: boolean;
-}
-
-function getMarkerToShow(
-  markerConfig: MarkerConfig,
-  label: string | undefined,
-  isHorizontal: boolean,
-  hasReducedPadding: boolean
-) {
-  // show an icon if present
-  if (hasIcon(markerConfig.icon)) {
-    return <EuiIcon type={markerConfig.icon} />;
-  }
-  // if there's some text, check whether to show it as marker, or just show some padding for the icon
-  if (markerConfig.textVisibility) {
-    if (hasReducedPadding) {
-      return getMarkerBody(
-        label,
-        (!isHorizontal && markerConfig.axisMode === 'bottom') ||
-          (isHorizontal && markerConfig.axisMode !== 'bottom')
-      );
-    }
-    return <EuiIcon type="empty" />;
-  }
 }
 
 export interface ReferenceLineAnnotationsProps {
@@ -248,27 +149,34 @@ export const ReferenceLineAnnotations = ({
           // get the position for vertical chart
           const markerPositionVertical = getBaseIconPlacement(
             yConfig.iconPosition,
-            yConfig.axisMode,
-            axesMap
+            axesMap,
+            yConfig.axisMode
           );
           // the padding map is built for vertical chart
-          const hasReducedPadding =
-            paddingMap[markerPositionVertical] === REFERENCE_LINE_MARKER_SIZE;
+          const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
 
           const props = {
             groupId,
-            marker: getMarkerToShow(
-              yConfig,
-              columnToLabelMap[forAccessor],
-              isHorizontal,
-              hasReducedPadding
+            marker: (
+              <Marker
+                config={yConfig}
+                label={columnToLabelMap[yConfig.forAccessor]}
+                isHorizontal={isHorizontal}
+                hasReducedPadding={hasReducedPadding}
+              />
             ),
-            markerBody: getMarkerBody(
-              yConfig.textVisibility && !hasReducedPadding
-                ? columnToLabelMap[forAccessor]
-                : undefined,
-              (!isHorizontal && yConfig.axisMode === 'bottom') ||
-                (isHorizontal && yConfig.axisMode !== 'bottom')
+            markerBody: (
+              <MarkerBody
+                label={
+                  yConfig.textVisibility && !hasReducedPadding
+                    ? columnToLabelMap[yConfig.forAccessor]
+                    : undefined
+                }
+                isHorizontal={
+                  (!isHorizontal && yConfig.axisMode === 'bottom') ||
+                  (isHorizontal && yConfig.axisMode !== 'bottom')
+                }
+              />
             ),
             // rotate the position if required
             markerPosition: isHorizontal
@@ -277,17 +185,15 @@ export const ReferenceLineAnnotations = ({
           };
           const annotations = [];
 
-          const dashStyle =
-            yConfig.lineStyle === 'dashed'
-              ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
-              : yConfig.lineStyle === 'dotted'
-              ? [yConfig.lineWidth || 1, yConfig.lineWidth || 1]
-              : undefined;
-
           const sharedStyle = {
             strokeWidth: yConfig.lineWidth || 1,
             stroke: yConfig.color || defaultColor,
-            dash: dashStyle,
+            dash:
+              yConfig.lineStyle === 'dashed'
+                ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
+                : yConfig.lineStyle === 'dotted'
+                ? [yConfig.lineWidth || 1, yConfig.lineWidth || 1]
+                : undefined,
           };
 
           annotations.push(

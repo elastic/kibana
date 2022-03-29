@@ -81,7 +81,10 @@ describe('AddSourceList', () => {
       configured: true,
     };
     shallow(<AddSource sourceData={sourceData} />);
-    expect(initializeAddSource).toHaveBeenCalledWith(expect.objectContaining({ connect: true }));
+    expect(initializeAddSource).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ connect: true })
+    );
   });
 
   it('renders default state correctly when there are multiple connector options', () => {
