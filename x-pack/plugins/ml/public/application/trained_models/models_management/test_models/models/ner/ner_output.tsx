@@ -26,6 +26,40 @@ import type { FormattedNerResp } from './ner_inference';
 const ICON_PADDING = '2px';
 const PROBABILITY_SIG_FIGS = 3;
 
+const ENTITY_TYPES = {
+  PER: {
+    label: 'Person',
+    icon: 'user',
+    color: 'euiColorVis5_behindText',
+    borderColor: 'euiColorVis5',
+  },
+  LOC: {
+    label: 'Location',
+    icon: 'visMapCoordinate',
+    color: 'euiColorVis1_behindText',
+    borderColor: 'euiColorVis1',
+  },
+  ORG: {
+    label: 'Organization',
+    icon: 'home',
+    color: 'euiColorVis0_behindText',
+    borderColor: 'euiColorVis0',
+  },
+  MISC: {
+    label: 'Miscellaneous',
+    icon: 'questionInCircle',
+    color: 'euiColorVis7_behindText',
+    borderColor: 'euiColorVis7',
+  },
+
+  unknown: {
+    label: '',
+    icon: 'questionInCircle',
+    color: 'euiColorVis5_behindText',
+    borderColor: 'euiColorVis5',
+  },
+};
+
 export const NerOutput: FC<{ result: FormattedNerResp }> = ({ result }) => {
   const { euiTheme } = useCurrentEuiTheme();
   const lineSplit: JSX.Element[] = [];
@@ -88,6 +122,7 @@ const EntityBadge = ({
   const { euiTheme } = useCurrentEuiTheme();
   return (
     <EuiBadge
+      // @ts-expect-error colors are correct in ENTITY_TYPES
       color={getClassColor(euiTheme, entity.class_name)}
       style={{
         marginRight: ICON_PADDING,
@@ -112,49 +147,20 @@ const EntityBadge = ({
 };
 
 function getClassIcon(className: string) {
-  switch (className) {
-    case 'PER':
-      return 'user';
-    case 'LOC':
-      return 'visMapCoordinate';
-    case 'ORG':
-      return 'home';
-    case 'MISC':
-      return 'questionInCircle';
-
-    default:
-      return 'questionInCircle';
-  }
+  const entity = ENTITY_TYPES[className as keyof typeof ENTITY_TYPES];
+  return entity?.icon ?? ENTITY_TYPES.unknown.icon;
 }
 
 function getClassLabel(className: string) {
-  switch (className) {
-    case 'PER':
-      return 'Person';
-    case 'LOC':
-      return 'Location';
-    case 'ORG':
-      return 'Organization';
-    case 'MISC':
-      return 'Miscellaneous';
-
-    default:
-      return className;
-  }
+  const entity = ENTITY_TYPES[className as keyof typeof ENTITY_TYPES];
+  return entity?.label ?? className;
 }
 
 function getClassColor(euiTheme: EuiThemeType, className: string, border: boolean = false) {
-  switch (className) {
-    case 'PER':
-      return border ? euiTheme.euiColorVis5 : euiTheme.euiColorVis5_behindText;
-    case 'LOC':
-      return border ? euiTheme.euiColorVis1 : euiTheme.euiColorVis1_behindText;
-    case 'ORG':
-      return border ? euiTheme.euiColorVis0 : euiTheme.euiColorVis0_behindText;
-    case 'MISC':
-      return border ? euiTheme.euiColorVis7 : euiTheme.euiColorVis7_behindText;
-
-    default:
-      return border ? euiTheme.euiColorVis5 : euiTheme.euiColorVis5_behindText;
+  const entity = ENTITY_TYPES[className as keyof typeof ENTITY_TYPES];
+  let color = entity?.color ?? ENTITY_TYPES.unknown.color;
+  if (border) {
+    color = entity?.borderColor ?? ENTITY_TYPES.unknown.borderColor;
   }
+  return euiTheme[color as keyof typeof euiTheme];
 }
