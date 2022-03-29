@@ -328,6 +328,9 @@ const generateMessage = ({
     if (actionGroupId === 'recovered') {
       return `rule-name' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${actionId}`;
     }
+    if (status === 'warning') {
+      return `The maximum number of actions for this rule type was reached; excess actions were not triggered.`;
+    }
     return `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
   }
 };
