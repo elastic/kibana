@@ -63,13 +63,13 @@ interface Props {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   onIsTimeAwareChange: (isTimeAware: boolean) => void;
-  onCustomIconsChange: (customIcons: Record<string, CustomIcon>) => void;
+  onCustomIconsChange: (customIcons: CustomIcon[]) => void;
   handlePropertyChange: (propertyName: VECTOR_STYLES, stylePropertyDescriptor: unknown) => void;
   hasBorder: boolean;
   styleProperties: StyleProperties;
   isTimeAware: boolean;
   showIsTimeAware: boolean;
-  customIcons: Record<string, CustomIcon>;
+  customIcons: CustomIcon[];
 }
 
 interface State {
@@ -167,7 +167,7 @@ export class VectorStyleEditor extends Component<Props, State> {
     this.props.handlePropertyChange(propertyName, styleDescriptor);
   };
 
-  _onCustomIconsChange = (icons: Record<string, CustomIcon>) => {
+  _onCustomIconsChange = (icons: CustomIcon[]) => {
     this.props.onCustomIconsChange(icons);
   };
 

@@ -39,8 +39,18 @@ export class IconSelect extends Component {
   };
 
   _handleSave = ({ symbolId, svg, cutoff, radius, label }) => {
-    const icons = { ...this.props.customIcons };
-    icons[symbolId] = { symbolId, label, svg, cutoff, radius };
+    const icons = [
+      ...this.props.customIcons.filter((i) => {
+        return i.symbolId !== symbolId;
+      }),
+      {
+        symbolId,
+        svg,
+        label,
+        cutoff,
+        radius,
+      },
+    ];
     this.props.onCustomIconsChange(icons);
     this._hideModal();
   };
@@ -152,22 +162,20 @@ export class IconSelect extends Component {
       }),
     ];
 
-    const customOptions = Object.entries(this.props.customIcons).map(
-      ([symbolId, { label, svg }]) => {
-        return {
-          key: symbolId,
-          label,
-          prepend: (
-            <SymbolIcon
-              key={symbolId}
-              symbolId={symbolId}
-              svg={svg}
-              fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-            />
-          ),
-        };
-      }
-    );
+    const customOptions = this.props.customIcons.map(({ symbolId, label, svg }) => {
+      return {
+        key: symbolId,
+        label,
+        prepend: (
+          <SymbolIcon
+            key={symbolId}
+            symbolId={symbolId}
+            svg={svg}
+            fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+          />
+        ),
+      };
+    });
 
     if (customOptions.length)
       customOptions.splice(0, 0, {

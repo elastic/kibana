@@ -28,11 +28,11 @@ export interface Props<StaticOptions, DynamicOptions> {
   defaultDynamicStyleOptions: DynamicOptions;
   disabled?: boolean;
   disabledBy?: VECTOR_STYLES;
-  customIcons?: Record<string, CustomIcon>;
+  customIcons?: CustomIcon[];
   fields: StyleField[];
   onDynamicStyleChange: (propertyName: VECTOR_STYLES, options: DynamicOptions) => void;
   onStaticStyleChange: (propertyName: VECTOR_STYLES, options: StaticOptions) => void;
-  onCustomIconsChange?: (customIcons: Record<string, CustomIcon>) => void;
+  onCustomIconsChange?: (customIcons: CustomIcon[]) => void;
   styleProperty: IStyleProperty<StaticOptions | DynamicOptions>;
 }
 

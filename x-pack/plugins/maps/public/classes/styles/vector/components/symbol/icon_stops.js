@@ -53,7 +53,9 @@ export function IconStops({
 }) {
   return iconStops.map(({ stop, icon, iconSource }, index) => {
     const { svg, label } =
-      iconSource === ICON_SOURCE.CUSTOM ? customIcons[icon] : getMakiSymbol(icon);
+      iconSource === ICON_SOURCE.CUSTOM
+        ? customIcons.find(({ symbolId }) => symbolId === icon)
+        : getMakiSymbol(icon);
     const onIconSelect = ({ selectedIconId }) => {
       const newIconStops = [...iconStops];
       newIconStops[index] = {

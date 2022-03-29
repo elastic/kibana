@@ -157,7 +157,7 @@ export interface IVectorStyle extends IStyle {
 export class VectorStyle implements IVectorStyle {
   private readonly _descriptor: VectorStyleDescriptor;
   private readonly _layer: IVectorLayer;
-  private readonly _customIcons: Record<string, CustomIcon>;
+  private readonly _customIcons: CustomIcon[];
   private readonly _source: IVectorSource;
   private readonly _styleMeta: StyleMeta;
 
@@ -198,7 +198,7 @@ export class VectorStyle implements IVectorStyle {
   ) {
     this._source = source;
     this._layer = layer;
-    this._customIcons = customIconsToObject(customIcons);
+    this._customIcons = customIcons;
     this._descriptor = descriptor
       ? {
           ...descriptor,
@@ -469,7 +469,7 @@ export class VectorStyle implements IVectorStyle {
 
   renderEditor(
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
-    onCustomIconsChange: (customIcons: Record<string, CustomIcon>) => void
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ) {
     const rawProperties = this.getRawProperties();
     const handlePropertyChange = (propertyName: VECTOR_STYLES, stylePropertyDescriptor: any) => {
@@ -712,8 +712,11 @@ export class VectorStyle implements IVectorStyle {
   };
 
   getIconSvg(symbolId: string) {
-    const { svg } = { ...this._getIconMeta(symbolId) };
-    return svg;
+    const meta = this._getIconMeta(symbolId);
+    if (meta) {
+      return meta.svg;
+    }
+    return;
   }
 
   _getSymbolId() {
@@ -726,8 +729,9 @@ export class VectorStyle implements IVectorStyle {
     symbolId: string
   ): { svg: string; label: string; iconSource: ICON_SOURCE } | undefined {
     if (!symbolId) return;
-    if (this._customIcons[symbolId]) {
-      return { ...this._customIcons[symbolId], iconSource: ICON_SOURCE.CUSTOM };
+    const icon = this._customIcons.find(({ symbolId: value }) => value === symbolId);
+    if (icon) {
+      return { ...icon, iconSource: ICON_SOURCE.CUSTOM };
     }
     const symbol = getMakiSymbol(symbolId);
     return symbol ? { ...symbol, iconSource: ICON_SOURCE.MAKI } : {};
@@ -1088,7 +1092,13 @@ export class VectorStyle implements IVectorStyle {
       return new StaticIconProperty({ value: DEFAULT_ICON }, VECTOR_STYLES.ICON);
     } else if (descriptor.type === StaticStyleProperty.type) {
       const { value } = { ...descriptor.options } as IconStaticOptions;
-      const { svg, label, iconSource } = { ...this._getIconMeta(value) };
+      const meta = this._getIconMeta(value);
+      let svg;
+      let label;
+      let iconSource;
+      if (meta) {
+        ({ svg, label, iconSource } = meta);
+      }
       return new StaticIconProperty(
         { value, svg, label, iconSource } as IconStaticOptions,
         VECTOR_STYLES.ICON
@@ -1097,8 +1107,10 @@ export class VectorStyle implements IVectorStyle {
       const options = { ...descriptor.options } as IconDynamicOptions;
       if (options.customIconStops) {
         options.customIconStops.forEach((iconStop) => {
-          const { iconSource } = { ...this._getIconMeta(iconStop.icon) };
-          iconStop.iconSource = iconSource;
+          const meta = this._getIconMeta(iconStop.icon);
+          if (meta) {
+            iconStop.iconSource = meta.iconSource;
+          }
         });
       }
       const field = this._makeField(options.field);
@@ -1142,8 +1154,4 @@ function rectifyFieldDescriptor(
     origin: previousFieldDescriptor.origin,
     name: currentField.getName(),
   };
-}
-
-function customIconsToObject(customIcons: CustomIcon[]) {
-  return Object.fromEntries(customIcons.map((icon) => [icon.symbolId, icon]));
 }

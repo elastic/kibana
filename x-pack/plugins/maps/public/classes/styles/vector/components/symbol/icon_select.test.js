@@ -37,7 +37,7 @@ import { IconSelect } from './icon_select';
 
 test('Should render icon select', () => {
   const component = shallow(
-    <IconSelect customIcons={{}} icon={{ value: 'symbol1' }} onChange={() => {}} />
+    <IconSelect customIcons={[]} icon={{ value: 'symbol1' }} onChange={() => {}} />
   );
 
   expect(component).toMatchSnapshot();
@@ -46,22 +46,22 @@ test('Should render icon select', () => {
 test('Should render icon select with custom icons', () => {
   const component = shallow(
     <IconSelect
-      customIcons={{
-        __kbn__custom_icon_sdf__foobar: {
+      customIcons={[
+        {
           symbolId: '__kbn__custom_icon_sdf__foobar',
           label: 'My Custom Icon',
           svg: '<svg width="200" height="250" xmlns="http://www.w3.org/2000/svg"><path stroke="#000" fill="transparent" stroke-width="5" d="M10 10h30v30H10z"/></svg>',
           cutoff: 0.25,
           radius: 0.25,
         },
-        __kbn__custom_icon_sdf__bizzbuzz: {
+        {
           symbolId: '__kbn__custom_icon_sdf__bizzbuzz',
           label: 'My Other Custom Icon',
           svg: '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="531.74" height="460.5" overflow="visible" xml:space="preserve"><path stroke="#000" d="M.866 460 265.87 1l265.004 459z"/></svg>',
           cutoff: 0.3,
           radius: 0.15,
         },
-      }}
+      ]}
       icon={{
         value: '__kbn__custom_icon_sdf__foobar',
         svg: '<svg width="200" height="250" xmlns="http://www.w3.org/2000/svg"><path stroke="#000" fill="transparent" stroke-width="5" d="M10 10h30v30H10z"/></svg>',
