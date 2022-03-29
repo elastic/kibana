@@ -42,7 +42,7 @@ interface ManagementStep {
 }
 
 const StyledDiv = styled.div`
-  padding-left: 15%;
+  padding-left: 20%;
 `;
 
 const PolicyEmptyState = React.memo<{
