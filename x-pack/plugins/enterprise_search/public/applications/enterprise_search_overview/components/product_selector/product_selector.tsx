@@ -36,6 +36,7 @@ import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/
 
 import AppSearchImage from '../../assets/app_search.png';
 import WorkplaceSearchImage from '../../assets/workplace_search.png';
+import { ElasticsearchCard } from '../elasticsearch_card';
 import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
@@ -88,6 +89,10 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+
+      <EuiSpacer size="xxl" />
+
+      <ElasticsearchCard />
 
       <EuiSpacer size="xxl" />
 

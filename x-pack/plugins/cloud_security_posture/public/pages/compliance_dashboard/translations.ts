@@ -82,3 +82,18 @@ export const RESOURCE_TYPE = i18n.translate('xpack.csp.resource_type', {
 export const FINDINGS = i18n.translate('xpack.csp.findings', {
   defaultMessage: 'Findings',
 });
+
+export const NO_DATA_CONFIG_TEXT = {
+  PAGE_TITLE: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.pageTitle', {
+    defaultMessage: 'Cloud Security Compliance Dashboard',
+  }),
+  SOLUTION: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.solutionNameLabel', {
+    defaultMessage: 'Cloud Security Posture',
+  }),
+  BUTTON_TITLE: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.actionTitle', {
+    defaultMessage: 'Try Again',
+  }),
+  DESCRIPTION: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.actionDescription', {
+    defaultMessage: 'You can try to refetch your data',
+  }),
+};
