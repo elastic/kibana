@@ -37,29 +37,33 @@ const columnDescription = i18n.translate('savedObjectsManagement.shareToSpace.co
 });
 const isolatedObjectTypeTitle = i18n.translate(
   'savedObjectsManagement.shareToSpace.isolatedObjectTypeTitle',
-  { defaultMessage: 'Isolated object type' }
+  { defaultMessage: 'Isolated saved object' }
 );
 const isolatedObjectTypeContent = i18n.translate(
   'savedObjectsManagement.shareToSpace.isolatedObjectTypeContent',
   {
     defaultMessage:
-      'This saved object type only exists in one space, it cannot be assigned to multiple spaces.',
+      'This saved object is available in only one space, it cannot be assigned to multiple spaces.',
   }
+);
+const shareableSoonObjectTypeTitle = i18n.translate(
+  'savedObjectsManagement.shareToSpace.shareableSoonObjectTypeTitle',
+  { defaultMessage: 'Coming soon: Assign saved object to multiple spaces' }
 );
 const shareableSoonObjectTypeContent = i18n.translate(
   'savedObjectsManagement.shareToSpace.shareableSoonObjectTypeContent',
   {
     defaultMessage:
-      'Coming soon: this saved object type only exists in one space, but it will be assignable to multiple spaces in a future release.',
+      'This saved object is available in only one space. In a future release, you can assign it to multiple spaces.',
   }
 );
 const globalObjectTypeTitle = i18n.translate(
   'savedObjectsManagement.shareToSpace.globalObjectTypeTitle',
-  { defaultMessage: 'Global object type' }
+  { defaultMessage: 'Global saved object' }
 );
 const globalObjectTypeContent = i18n.translate(
   'savedObjectsManagement.shareToSpace.globalObjectTypeContent',
-  { defaultMessage: 'This saved object type always exists in all spaces.' }
+  { defaultMessage: 'This saved object is available in all spaces.' }
 );
 
 /**
@@ -81,6 +85,19 @@ const SHAREABLE_SOON_OBJECT_TYPES = [
   'rule',
   'connector',
 ];
+
+/** Three different tooltips are displayed for non-shareable objects, depending on the object type. */
+function getTooltipProps(objectType: string, objectNamespaceType: SavedObjectsNamespaceType) {
+  if (objectNamespaceType === 'single' || objectNamespaceType === 'multiple-isolated') {
+    if (SHAREABLE_SOON_OBJECT_TYPES.includes(objectType)) {
+      return { title: shareableSoonObjectTypeTitle, content: shareableSoonObjectTypeContent };
+    }
+    return { title: isolatedObjectTypeTitle, content: isolatedObjectTypeContent };
+  } else if (objectNamespaceType === 'agnostic') {
+    return { title: globalObjectTypeTitle, content: globalObjectTypeContent };
+  }
+  return null;
+}
 
 const Wrapper = ({
   objectType,
@@ -106,29 +123,9 @@ const Wrapper = ({
     [spacesApiUi]
   );
 
-  if (objectNamespaceType === 'single' || objectNamespaceType === 'multiple-isolated') {
-    const content = SHAREABLE_SOON_OBJECT_TYPES.includes(objectType)
-      ? shareableSoonObjectTypeContent
-      : isolatedObjectTypeContent;
-    return (
-      <EuiIconTip
-        type="minus"
-        position="left"
-        delay="long"
-        title={isolatedObjectTypeTitle}
-        content={content}
-      />
-    );
-  } else if (objectNamespaceType === 'agnostic') {
-    return (
-      <EuiIconTip
-        type="minus"
-        position="left"
-        delay="long"
-        title={globalObjectTypeTitle}
-        content={globalObjectTypeContent}
-      />
-    );
+  const tooltipProps = getTooltipProps(objectType, objectNamespaceType);
+  if (tooltipProps) {
+    return <EuiIconTip type="minus" position="left" delay="long" {...tooltipProps} />;
   }
 
   return (
