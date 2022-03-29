@@ -29,6 +29,7 @@ import { getColumns } from './get_columns';
 import { ElasticDocsLink } from '../links/elastic_docs_link';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 
 type ApiResponse =
@@ -89,9 +90,6 @@ export function TransactionsTable({
 
   const {
     query: {
-      comparisonEnabled,
-      comparisonType,
-      latencyAggregationType,
       page: urlPage = 0,
       pageSize: urlPageSize = numberOfTransactionsPerPage,
       sortField: urlSortField = 'impact',
@@ -101,6 +99,10 @@ export function TransactionsTable({
     '/services/{serviceName}/transactions',
     '/services/{serviceName}/overview'
   );
+
+  const {
+    urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
+  } = useLegacyUrlParams();
 
   const [tableOptions, setTableOptions] = useState<{
     page: { index: number; size: number };
@@ -254,7 +256,7 @@ export function TransactionsTable({
       pageIndex: index,
       pageSize: size,
       totalItemCount: transactionGroupsTotalItems,
-      showPerPageOptions: !hidePerPageOptions,
+      hidePerPageOptions,
     }),
     [index, size, transactionGroupsTotalItems, hidePerPageOptions]
   );
