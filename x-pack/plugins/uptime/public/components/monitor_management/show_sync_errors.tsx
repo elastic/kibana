@@ -50,34 +50,3 @@ export const showSyncErrors = (errors: ServiceLocationErrors, locations: Service
     });
   });
 };
-
-const BETA_ERROR_MESSAGE = i18n.translate(
-  'xpack.uptime.monitorManagement.service.error.betaError',
-  {
-    defaultMessage: 'Monitors are not running.',
-  }
-);
-
-const UNABLE_SYNC_MESSAGE = i18n.translate(
-  'xpack.uptime.monitorManagement.service.error.unableToSync',
-  {
-    defaultMessage: 'Unable to sync monitor config',
-  }
-);
-
-const getSyncErrorDescription = (locationName?: string) =>
-  i18n.translate('xpack.uptime.monitorManagement.service.error.message', {
-    defaultMessage: `Your monitor was saved, but there was a problem syncing the configuration for {location}. We will automatically try again later. If this problem continues, your monitors will stop running in {location}. Please contact Support for assistance.`,
-    values: {
-      location: locationName,
-    },
-  });
-
-const getBetaErrorDescription = (locationName?: string) =>
-  i18n.translate('xpack.uptime.monitorManagement.service.beta.error.message', {
-    defaultMessage:
-      'Due to public beta fair usage policy, monitors are not running in location {location}. Monitors will reset tomorrow.',
-    values: {
-      location: locationName,
-    },
-  });
