@@ -216,9 +216,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.setMetricsGroupByTerms('bytes');
 
             const el = await elasticChart.getCanvas();
+            await el.scrollIntoViewIfNecessary();
             await browser
               .getActions()
-              .move({ x: 0, y: 55, origin: el._webElement })
+              .move({ x: 0, y: 95, origin: el._webElement })
               .click()
               .perform();
 
