@@ -7,7 +7,6 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { mapValues } from 'lodash';
-import moment from 'moment';
 import { Logger } from '@kbn/logging';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { InfraTimerangeInput } from '../../../../common/http_api';
@@ -52,13 +51,7 @@ export const evaluateCondition = async ({
 
   const timerange = {
     to: executionTimestamp.valueOf(),
-    from: calculateFromBasedOnMetric(
-      moment(executionTimestamp),
-      condition,
-      nodeType,
-      metric,
-      customMetric
-    ),
+    from: calculateFromBasedOnMetric(executionTimestamp, condition, nodeType, metric, customMetric),
     interval: `${condition.timeSize}${condition.timeUnit}`,
     forceInterval: true,
   } as InfraTimerangeInput;
