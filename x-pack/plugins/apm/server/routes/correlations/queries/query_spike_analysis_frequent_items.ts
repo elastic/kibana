@@ -25,10 +25,6 @@ export const getSpikeAnalysisFrequentItemsRequest = (
     ...new Set(fieldCandidates.map(({ fieldName }) => fieldName)),
   ];
 
-  if (fieldNames.length > 10) {
-    fieldNames.length = 10;
-  }
-
   const query = getQueryWithParams({
     params,
   });

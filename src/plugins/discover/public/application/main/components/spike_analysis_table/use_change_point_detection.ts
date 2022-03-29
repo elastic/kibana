@@ -363,6 +363,10 @@ export function useChangePointDetection(
             d.fieldName !== 'extension.keyword'
         );
 
+      if (frequentItemsFieldCandidates.length > 10) {
+        frequentItemsFieldCandidates.length = 10;
+      }
+
       const orderedFields = [
         ...(new Set(frequentItemsFieldCandidates?.map((d) => d.fieldName)) ?? []),
       ];
