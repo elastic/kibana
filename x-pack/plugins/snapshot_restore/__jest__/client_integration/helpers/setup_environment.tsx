@@ -11,7 +11,8 @@ import { LocationDescriptorObject } from 'history';
 
 import { HttpSetup } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
-import { setUiMetricService, httpService } from '../../../public/application/services/http'; import {
+import { setUiMetricService, httpService } from '../../../public/application/services/http';
+import {
   breadcrumbService,
   docTitleService,
 } from '../../../public/application/services/navigation';
