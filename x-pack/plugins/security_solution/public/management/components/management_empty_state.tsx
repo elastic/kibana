@@ -44,7 +44,8 @@ const PolicyEmptyState = React.memo<{
   loading: boolean;
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled?: boolean;
-}>(({ loading, onActionClick, actionDisabled }) => {
+  policyEntryPoint?: boolean;
+}>(({ loading, onActionClick, actionDisabled, policyEntryPoint = false }) => {
   const docLinks = useKibana().services.docLinks;
   return (
     <div data-test-subj="emptyPolicyTable">
@@ -74,10 +75,17 @@ const PolicyEmptyState = React.memo<{
             </EuiText>
             <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo"
-                defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Endpoint Security."
-              />
+              {policyEntryPoint ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromPolicyPage"
+                  defaultMessage="From this page, you’ll be able to view and manage the Endpoint Security Integration policies in your environment running Endpoint Security."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromEndpointPage"
+                  defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Endpoint Security."
+                />
+              )}
             </EuiText>
             <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">

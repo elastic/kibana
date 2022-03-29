@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-
 import {
   EuiFieldSearch,
   EuiFilterButton,
@@ -15,76 +13,63 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
-
+import React, { useCallback } from 'react';
+import styled from 'styled-components';
 import * as i18n from '../../translations';
-
-import { FilterOptions } from '../../../../../containers/detection_engine/rules';
+import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
 
+const FilterWrapper = styled(EuiFlexGroup)`
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
+`;
+
 interface RulesTableFiltersProps {
-  onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
-  currentFilterTags: string[];
-  tags: string[];
-  isLoadingTags: boolean;
-  reFetchTags: () => void;
+  allTags: string[];
 }
 
 /**
  * Collection of filters for filtering data within the RulesTable. Contains search bar, Elastic/Custom
  * Rules filter button toggle, and tag selection
- *
- * @param onFilterChanged change listener to be notified on filter changes
  */
 const RulesTableFiltersComponent = ({
-  onFilterChanged,
   rulesCustomInstalled,
   rulesInstalled,
-  currentFilterTags,
-  tags,
-  isLoadingTags,
-  reFetchTags,
+  allTags,
 }: RulesTableFiltersProps) => {
-  const [filter, setFilter] = useState<string>('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [showCustomRules, setShowCustomRules] = useState<boolean>(false);
-  const [showElasticRules, setShowElasticRules] = useState<boolean>(false);
+  const {
+    state: { filterOptions },
+    actions: { setFilterOptions },
+  } = useRulesTableContext();
 
-  useEffect(() => {
-    reFetchTags();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rulesCustomInstalled, rulesInstalled]);
+  const { showCustomRules, showElasticRules, tags: selectedTags } = filterOptions;
 
-  // Propagate filter changes to parent
-  useEffect(() => {
-    onFilterChanged({ filter, showCustomRules, showElasticRules, tags: selectedTags });
-  }, [filter, selectedTags, showCustomRules, showElasticRules, onFilterChanged]);
-
-  const handleOnSearch = useCallback((filterString) => setFilter(filterString.trim()), [setFilter]);
+  const handleOnSearch = useCallback(
+    (filterString) => setFilterOptions({ filter: filterString.trim() }),
+    [setFilterOptions]
+  );
 
   const handleElasticRulesClick = useCallback(() => {
-    setShowElasticRules(!showElasticRules);
-    setShowCustomRules(false);
-  }, [setShowElasticRules, showElasticRules, setShowCustomRules]);
+    setFilterOptions({ showElasticRules: !showElasticRules, showCustomRules: false });
+  }, [setFilterOptions, showElasticRules]);
 
   const handleCustomRulesClick = useCallback(() => {
-    setShowCustomRules(!showCustomRules);
-    setShowElasticRules(false);
-  }, [setShowElasticRules, showCustomRules, setShowCustomRules]);
+    setFilterOptions({ showCustomRules: !showCustomRules, showElasticRules: false });
+  }, [setFilterOptions, showCustomRules]);
 
   const handleSelectedTags = useCallback(
-    (newTags) => {
+    (newTags: string[]) => {
       if (!isEqual(newTags, selectedTags)) {
-        setSelectedTags(newTags);
+        setFilterOptions({ tags: newTags });
       }
     },
-    [selectedTags]
+    [selectedTags, setFilterOptions]
   );
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>
+    <FilterWrapper gutterSize="m" justifyContent="flexEnd">
+      <EuiFlexItem grow>
         <EuiFieldSearch
           aria-label={i18n.SEARCH_RULES}
           fullWidth
@@ -93,15 +78,12 @@ const RulesTableFiltersComponent = ({
           onSearch={handleOnSearch}
         />
       </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <TagsFilterPopover
-            isLoading={isLoadingTags}
             onSelectedTagsChanged={handleSelectedTags}
             selectedTags={selectedTags}
-            tags={tags}
-            currentFilterTags={currentFilterTags}
+            tags={allTags}
             data-test-subj="allRulesTagPopover"
           />
         </EuiFilterGroup>
@@ -123,14 +105,12 @@ const RulesTableFiltersComponent = ({
             onClick={handleCustomRulesClick}
             data-test-subj="showCustomRulesFilterButton"
           >
-            <>
-              {i18n.CUSTOM_RULES}
-              {rulesCustomInstalled != null ? ` (${rulesCustomInstalled})` : ''}
-            </>
+            {i18n.CUSTOM_RULES}
+            {rulesCustomInstalled != null ? ` (${rulesCustomInstalled})` : ''}
           </EuiFilterButton>
         </EuiFilterGroup>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </FilterWrapper>
   );
 };
 

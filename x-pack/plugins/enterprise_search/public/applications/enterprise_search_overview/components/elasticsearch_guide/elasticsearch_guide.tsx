@@ -43,11 +43,9 @@ export const ElasticsearchGuide: React.FC = () => {
     { value: 'rust', text: 'Rust' },
   ];
 
-  const client = queryString.parse(window.location.search).client;
+  const client = queryString.parse(window.location.search).client as string;
   const languageExists = languages.some((language) => language.value === client);
-  const [selectedLanguage, setSelectedLanguage] = useState(
-    languageExists ? (client as string) : 'java'
-  );
+  const [selectedLanguage, setSelectedLanguage] = useState(languageExists ? client : 'java');
 
   const basicSelectId = useGeneratedHtmlId({ prefix: 'languageSelect' });
 
