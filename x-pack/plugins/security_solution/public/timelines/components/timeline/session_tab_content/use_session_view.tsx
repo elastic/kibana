@@ -9,6 +9,7 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import type { EntityType } from '../../../../../../timelines/common';
 import { timelineSelectors } from '../../../store/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
@@ -90,7 +91,13 @@ NavigationComponent.displayName = 'NavigationComponent';
 
 const Navigation = React.memo(NavigationComponent);
 
-export const useSessionView = ({ timelineId }: { timelineId: TimelineId }) => {
+export const useSessionView = ({
+  timelineId,
+  entityType,
+}: {
+  timelineId: TimelineId;
+  entityType?: EntityType;
+}) => {
   const { sessionView } = useKibana().services;
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -162,10 +169,13 @@ export const useSessionView = ({ timelineId }: { timelineId: TimelineId }) => {
     globalFullScreen,
   ]);
   const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
+    isFlyoutView: timelineId !== TimelineId.active,
+    entityType,
     sourcererScope: SourcererScopeName.timeline,
     timelineId,
-    tabType: TimelineTabs.session,
+    tabType: timelineId === TimelineId.active ? TimelineTabs.session : TimelineTabs.query,
   });
+
   const sessionViewComponent = useMemo(() => {
     return sessionViewId !== null
       ? sessionView.getSessionView({
@@ -201,6 +211,7 @@ export const useSessionView = ({ timelineId }: { timelineId: TimelineId }) => {
 
   return {
     onCloseOverlay,
+    openDetailsPanel,
     shouldShowDetailsPanel,
     SessionView: sessionViewComponent,
     DetailsPanel,

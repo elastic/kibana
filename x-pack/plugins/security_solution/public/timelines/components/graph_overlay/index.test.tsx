@@ -75,7 +75,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} openDetailsPanel={() => {}} />
+          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
@@ -95,7 +95,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} openDetailsPanel={() => {}} />
+          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
@@ -124,7 +124,7 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay timelineId={TimelineId.test} openDetailsPanel={() => {}} />
+          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
@@ -140,7 +140,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} openDetailsPanel={() => {}} />
+          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
@@ -160,7 +160,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} openDetailsPanel={() => {}} />
+          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
@@ -199,7 +199,7 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay timelineId={timelineId} openDetailsPanel={() => {}} />
+          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
@@ -236,7 +236,7 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay timelineId={timelineId} openDetailsPanel={() => {}} />
+          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 

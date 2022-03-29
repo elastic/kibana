@@ -28,7 +28,6 @@ import {
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { sourcererSelectors } from '../../../common/store';
-import { useSessionView } from '../timeline/session_tab_content/use_session_view';
 
 const OverlayContainer = styled.div`
   display: flex;
@@ -57,11 +56,16 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 `;
 
 interface GraphOverlayProps {
-  openDetailsPanel: (eventId?: string, onClose?: () => void) => void;
   timelineId: TimelineId;
+  SessionView: JSX.Element | null;
+  Navigation: JSX.Element | null;
 }
 
-const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDetailsPanel }) => {
+const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
+  timelineId,
+  SessionView,
+  Navigation,
+}) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();
@@ -129,8 +133,6 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDe
     () => (isInTimeline ? timelinePatterns : defaultDataView.patternList),
     [defaultDataView.patternList, isInTimeline, timelinePatterns]
   );
-
-  const { SessionView, Navigation } = useSessionView({ timelineId });
 
   if (!isInTimeline && sessionViewId !== null) {
     if (fullScreen) {

@@ -10,10 +10,9 @@ import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { timelineSelectors } from '../../../store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 import { GraphOverlay } from '../../graph_overlay';
-import { useDetailPanel } from '../../side_panel/hooks/use_detail_panel';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSessionView } from '../session_tab_content/use_session_view';
 
 interface GraphTabContentProps {
   timelineId: TimelineId;
@@ -36,11 +35,8 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
     (state) => getTimeline(state, timelineId)?.graphEventId
   );
 
-  const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
-    isFlyoutView: true,
-    sourcererScope: SourcererScopeName.timeline,
+  const { shouldShowDetailsPanel, DetailsPanel, Navigation, SessionView } = useSessionView({
     timelineId,
-    tabType: TimelineTabs.query,
   });
 
   if (!graphEventId) {
@@ -49,7 +45,7 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
 
   return (
     <>
-      <GraphOverlay timelineId={timelineId} openDetailsPanel={openDetailsPanel} />
+      <GraphOverlay timelineId={timelineId} Navigation={Navigation} SessionView={SessionView} />
       {shouldShowDetailsPanel && (
         <>
           <VerticalRule />
