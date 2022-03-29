@@ -44,7 +44,7 @@ export default ({ getPageObjects, getService }) => {
           await retry.try(async () => {
             const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
             expect(await executionFailureResultCallout.getVisibleText()).to.be(
-              'Test failed to run\nThe following error was found:\nerror sending email\nDetails:\nMail command failed: 550 5.7.1 Relaying denied'
+              'Test failed to run\nThe following error was found:\nerror sending email\nDetails:\nCan\'t send mail - all recipients were rejected: 550 5.7.1 Relaying denied'
             );
           });
           expect(true).to.be(true);
