@@ -141,6 +141,7 @@ function getProfilesWithStacks({
               events: [ProcessorEvent.profile],
             },
             body: {
+              size: 0,
               query: {
                 bool: {
                   filter,

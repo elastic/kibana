@@ -8,7 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { IconPosition, YAxisMode } from '../../../../common/expressions/xy_chart';
+import {
+  IconPosition,
+  YAxisMode,
+} from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 import { TooltipWrapper } from '../../../shared_components';
 import { hasIcon, IconSelect, IconSet } from './icon_select';

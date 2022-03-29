@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getProcessExecutableCopyText } from './helpers';
+import { getProcessExecutableCopyText, formatProcessArgs, getIsInterativeString } from './helpers';
 
 describe('detail panel process tab helpers tests', () => {
   it('getProcessExecutableCopyText works with empty array', () => {
@@ -32,5 +32,32 @@ describe('detail panel process tab helpers tests', () => {
       ['echo', 'exit'],
     ]);
     expect(result).toEqual('');
+  });
+
+  it("formatProcessArgs returns '-' when given empty args array", () => {
+    const result = formatProcessArgs([]);
+    expect(result).toEqual('-');
+  });
+
+  it('formatProcessArgs returns formatted args string', () => {
+    let result = formatProcessArgs(['ls']);
+    expect(result).toEqual("['ls']");
+
+    // returns formatted string comma separating each arg
+    result = formatProcessArgs(['ls', '--color=auto']);
+    expect(result).toEqual("['ls', '--color=auto']");
+  });
+
+  it('getIsInterativeString works', () => {
+    let result = getIsInterativeString(undefined);
+    expect(result).toBe('False');
+
+    result = getIsInterativeString({
+      char_device: {
+        major: 8,
+        minor: 1,
+      },
+    });
+    expect(result).toBe('True');
   });
 });
