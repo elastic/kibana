@@ -11,12 +11,15 @@ import Path from 'path';
 import globby from 'globby';
 import normalize from 'normalize-path';
 
-import { parseKibanaPlatformPlugin } from './parse_kibana_platform_plugin';
+import { parseKibanaPlatformPlugin, KibanaPlatformPlugin } from './parse_kibana_platform_plugin';
 
 /**
  * Helper to find the new platform plugins.
  */
-export function simpleKibanaPlatformPluginDiscovery(scanDirs: string[], pluginPaths: string[]) {
+export function simpleKibanaPlatformPluginDiscovery(
+  scanDirs: string[],
+  pluginPaths: string[]
+): KibanaPlatformPlugin[] {
   const patterns = Array.from(
     new Set([
       // find kibana.json files up to 5 levels within the scan dir
