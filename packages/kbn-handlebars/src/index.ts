@@ -310,7 +310,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   // Looks up the value of `parts` on the given block param and pushes
   // it onto the stack.
-  lookupBlockParam(blockParamId: [number, any], parts: any) {
+  private lookupBlockParam(blockParamId: [number, any], parts: any) {
     return this.blockParamValues[blockParamId[0]][blockParamId[1]];
   }
 
