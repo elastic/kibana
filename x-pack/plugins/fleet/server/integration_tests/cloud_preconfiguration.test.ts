@@ -18,7 +18,8 @@ import { CLOUD_KIBANA_CONFIG } from './fixtures/cloud_kibana_config';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-describe('Fleet preconfiguration reset', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/127076
+describe.skip('Fleet preconfiguration reset', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let kbnServer: kbnTestServer.TestKibanaUtils;
 
@@ -107,7 +108,8 @@ describe('Fleet preconfiguration reset', () => {
     await stopServers();
   });
 
-  describe('Preconfigred cloud policy', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/127077
+  describe.skip('Preconfigred cloud policy', () => {
     it('Works and preconfigure correctly agent policies', async () => {
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()

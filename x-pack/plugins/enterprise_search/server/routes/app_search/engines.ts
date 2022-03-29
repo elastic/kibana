@@ -55,6 +55,24 @@ export function registerEnginesRoutes({
     })
   );
 
+  router.post(
+    {
+      path: '/internal/app_search/elasticsearch/engines',
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          search_index: schema.object({
+            type: schema.string(),
+            index_name: schema.string(),
+          }),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines',
+    })
+  );
+
   // Single engine endpoints
   router.get(
     {

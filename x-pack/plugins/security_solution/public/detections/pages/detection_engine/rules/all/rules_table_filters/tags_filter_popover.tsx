@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import React, {
-  ChangeEvent,
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFilterButton,
   EuiFilterSelectItem,
@@ -33,10 +25,7 @@ import { caseInsensitiveSort } from '../helpers';
 interface TagsFilterPopoverProps {
   selectedTags: string[];
   tags: string[];
-  onSelectedTagsChanged: Dispatch<SetStateAction<string[]>>;
-  currentFilterTags: string[];
-  // eslint-disable-next-line react/no-unused-prop-types
-  isLoading: boolean; // TO DO reimplement?
+  onSelectedTagsChanged: (newTags: string[]) => void;
 }
 
 const PopoverContentWrapper = styled.div`
@@ -64,11 +53,10 @@ const TagsFilterPopoverComponent = ({
   tags,
   selectedTags,
   onSelectedTagsChanged,
-  currentFilterTags,
 }: TagsFilterPopoverProps) => {
   const sortedTags = useMemo(
-    () => caseInsensitiveSort(Array.from(new Set([...tags, ...currentFilterTags]))),
-    [tags, currentFilterTags]
+    () => caseInsensitiveSort(Array.from(new Set([...tags, ...selectedTags]))),
+    [selectedTags, tags]
   );
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');

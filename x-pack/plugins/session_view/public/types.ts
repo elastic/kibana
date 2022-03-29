@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { CoreStart } from '../../../../src/core/public';
-import { TimelinesUIStart } from '../../timelines/public';
-import { ProcessEvent } from '../common/types/process_tree';
+import { ProcessEvent, Teletype } from '../common/types/process_tree';
 
-export type SessionViewServices = CoreStart & {
-  timelines: TimelinesUIStart;
-};
+export type SessionViewServices = CoreStart;
+
+export interface SessionViewUIStart {
+  getSessionView: (sessionEntityId: string) => ReactElement;
+}
 
 export interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
@@ -20,6 +21,12 @@ export interface SessionViewDeps {
   // if provided, the session view will jump to and select the provided event if it belongs to the session leader
   // session view will fetch a page worth of events starting from jumpToEvent as well as a page backwards.
   jumpToEvent?: ProcessEvent;
+  // Callback to open the alerts flyout
+  loadAlertDetails?: (
+    alertUuid: string,
+    // Callback used when alert flyout panel is closed
+    handleOnAlertDetailsClosed: () => void
+  ) => void;
 }
 
 export interface EuiTabProps {
@@ -36,9 +43,12 @@ export interface DetailPanelProcess {
   start: string;
   end: string;
   exit_code: number;
-  user: string;
+  userName: string;
+  groupName: string;
   args: string[];
   executable: string[][];
+  working_directory: string;
+  tty: Teletype;
   pid: number;
   entryLeader: DetailPanelProcessLeader;
   sessionLeader: DetailPanelProcessLeader;
@@ -50,10 +60,15 @@ export interface DetailPanelProcessLeader {
   id: string;
   name: string;
   start: string;
-  entryMetaType: string;
+  end?: string;
+  exit_code?: number;
   userName: string;
-  interactive: boolean;
+  groupName: string;
+  working_directory: string;
+  tty: Teletype;
+  args: string[];
   pid: number;
+  entryMetaType: string;
   entryMetaSourceIp: string;
   executable: string;
 }

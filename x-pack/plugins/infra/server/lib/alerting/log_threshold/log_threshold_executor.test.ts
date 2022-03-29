@@ -17,13 +17,11 @@ import {
 } from './log_threshold_executor';
 import {
   Comparator,
-  AlertStates,
   RuleParams,
   Criterion,
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold';
-import { alertsMock } from '../../../../../alerting/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 // Mocks //
@@ -31,7 +29,6 @@ const numericField = {
   field: 'numericField',
   value: 10,
 };
-
 const keywordField = {
   field: 'keywordField',
   value: 'error',
@@ -411,7 +408,7 @@ describe('Log threshold executor', () => {
   describe('Results processors', () => {
     describe('Can process ungrouped results', () => {
       test('It handles the ALERT state correctly', () => {
-        const alertUpdaterMock = jest.fn();
+        const alertFactoryMock = jest.fn();
         const ruleParams = {
           ...baseRuleParams,
           criteria: [positiveCriteria[0]],
@@ -423,17 +420,11 @@ describe('Log threshold executor', () => {
             },
           },
         } as UngroupedSearchQueryResponse;
-        processUngroupedResults(
-          results,
-          ruleParams,
-          alertsMock.createAlertFactory.create,
-          alertUpdaterMock,
-          TIMESTAMP
-        );
-        // First call, second argument
-        expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
-        // First call, third argument
-        expect(alertUpdaterMock.mock.calls[0][3]).toEqual([
+
+        processUngroupedResults(results, ruleParams, alertFactoryMock);
+
+        // first call, fifth argument
+        expect(alertFactoryMock.mock.calls[0][4]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
@@ -450,7 +441,7 @@ describe('Log threshold executor', () => {
 
     describe('Can process grouped results', () => {
       test('It handles the ALERT state correctly', () => {
-        const alertUpdaterMock = jest.fn();
+        const alertFactoryMock = jest.fn();
         const ruleParams = {
           ...baseRuleParams,
           criteria: [positiveCriteria[0]],
@@ -489,18 +480,12 @@ describe('Log threshold executor', () => {
             },
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
-        processGroupByResults(
-          results,
-          ruleParams,
-          alertsMock.createAlertFactory.create,
-          alertUpdaterMock,
-          TIMESTAMP
-        );
-        expect(alertUpdaterMock.mock.calls.length).toBe(2);
-        // First call, second argument
-        expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
-        // First call, third argument
-        expect(alertUpdaterMock.mock.calls[0][3]).toEqual([
+
+        processGroupByResults(results, ruleParams, alertFactoryMock);
+        expect(alertFactoryMock.mock.calls.length).toBe(2);
+
+        // First call, fifth argument
+        expect(alertFactoryMock.mock.calls[0][4]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
@@ -514,10 +499,8 @@ describe('Log threshold executor', () => {
           },
         ]);
 
-        // Second call, second argument
-        expect(alertUpdaterMock.mock.calls[1][1]).toBe(AlertStates.ALERT);
-        // Second call, third argument
-        expect(alertUpdaterMock.mock.calls[1][3]).toEqual([
+        // Second call, fifth argument
+        expect(alertFactoryMock.mock.calls[1][4]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
