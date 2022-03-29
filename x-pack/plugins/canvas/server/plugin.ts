@@ -96,7 +96,7 @@ export class CanvasPlugin implements Plugin {
     registerCanvasUsageCollector(plugins.usageCollection, kibanaIndex);
 
     coreSetup.getStartServices().then(([_, depsStart]) => {
-      const strategy = essqlSearchStrategyProvider();
+      const strategy = essqlSearchStrategyProvider(depsStart.data);
       plugins.data.search.registerSearchStrategy(ESSQL_SEARCH_STRATEGY, strategy);
     });
   }

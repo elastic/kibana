@@ -8,7 +8,7 @@
 import { from } from 'rxjs';
 import { map, zipObject } from 'lodash';
 
-import { ISearchStrategy } from 'src/plugins/data/server';
+import { ISearchStrategy, PluginStart } from 'src/plugins/data/server';
 
 import { getKbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../types';
@@ -16,39 +16,48 @@ import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../t
 import { buildBoolArray } from '../../common/lib/request/build_bool_array';
 import { sanitizeName } from '../../common/lib/request/sanitize_name';
 import { normalizeType } from '../../common/lib/request/normalize_type';
+import {
+  SQL_SEARCH_STRATEGY,
+  SqlSearchStrategyRequest,
+  SqlSearchStrategyResponse,
+} from '../../../../../src/plugins/data/common';
 
-export const essqlSearchStrategyProvider = (): ISearchStrategy<
-  EssqlSearchStrategyRequest,
-  EssqlSearchStrategyResponse
-> => {
+export const essqlSearchStrategyProvider = (
+  data: PluginStart
+): ISearchStrategy<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse> => {
   return {
-    search: (request, options, { esClient }) => {
+    search: (request, options, deps) => {
       const { count, query, filter, timezone, params } = request;
+
+      // TODO: improve data.search types
+      const sqlSearch = data.search.getSearchStrategy(
+        SQL_SEARCH_STRATEGY
+      ) as unknown as ISearchStrategy<SqlSearchStrategyRequest, SqlSearchStrategyResponse>;
 
       const searchUntilEnd = async () => {
         try {
-          let response = await esClient.asCurrentUser.sql.query(
-            {
-              format: 'json',
-              body: {
-                query,
-                params,
-                field_multi_value_leniency: true,
-                time_zone: timezone,
-                fetch_size: count,
-                // @ts-expect-error `client_id` missing from `QuerySqlRequest` type
-                client_id: 'canvas',
-                filter: {
-                  bool: {
-                    must: [{ match_all: {} }, ...buildBoolArray(filter)],
+          let response = await sqlSearch
+            .search(
+              {
+                params: {
+                  query,
+                  params,
+                  field_multi_value_leniency: true,
+                  time_zone: timezone,
+                  fetch_size: count,
+                  filter: {
+                    bool: {
+                      must: [{ match_all: {} }, ...buildBoolArray(filter)],
+                    },
                   },
                 },
               },
-            },
-            { meta: true }
-          );
+              {},
+              deps
+            )
+            .toPromise();
 
-          let body = response.body;
+          let body = response.rawResponse;
 
           const columns = body.columns!.map(({ name, type }) => {
             return {
@@ -63,25 +72,26 @@ export const essqlSearchStrategyProvider = (): ISearchStrategy<
           // If we still have rows to retrieve, continue requesting data
           // using the cursor until we have everything
           while (rows.length < count && body.cursor !== undefined) {
-            // @ts-expect-error previous ts-ignore mess with the signature override
-            response = await esClient.asCurrentUser.sql.query(
-              {
-                format: 'json',
-                body: {
-                  cursor: body.cursor,
+            response = await sqlSearch
+              .search(
+                {
+                  params: {
+                    cursor: body.cursor,
+                  },
                 },
-              },
-              { meta: true }
-            );
+                {},
+                deps
+              )
+              .toPromise();
 
-            body = response.body;
+            body = response.rawResponse;
 
             rows = [...rows, ...body.rows.map((row) => zipObject(columnNames, row))];
           }
 
           // If we used a cursor, clean it up
           if (body.cursor !== undefined) {
-            await esClient.asCurrentUser.sql.clearCursor({
+            await deps.esClient.asCurrentUser.sql.clearCursor({
               body: {
                 cursor: body.cursor,
               },
@@ -91,7 +101,7 @@ export const essqlSearchStrategyProvider = (): ISearchStrategy<
           return {
             columns,
             rows,
-            rawResponse: response,
+            rawResponse: response.rawResponse,
           };
         } catch (e) {
           throw getKbnServerError(e);
