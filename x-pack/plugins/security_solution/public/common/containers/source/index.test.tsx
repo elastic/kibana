@@ -6,8 +6,8 @@
  */
 
 import { IndexField } from '../../../../common/search_strategy/index_fields';
-import { getBrowserFields } from '.';
 import { useDataView } from './use_data_view';
+import { getBrowserFields, getAllBrowserFields } from '.';
 import { mockBrowserFields, mocksSource } from './mock';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { createStore, State } from '../../store';
@@ -34,6 +34,11 @@ jest.mock('react-redux', () => {
 jest.mock('../../lib/kibana');
 
 describe('source/index.tsx', () => {
+  describe('getAllBrowserFields', () => {
+    test('it returns an array of all fields in the BrowserFields argument', () => {
+      expect(getAllBrowserFields(mockBrowserFields)).toMatchSnapshot();
+    });
+  });
   describe('getBrowserFields', () => {
     test('it returns an empty object given an empty array', () => {
       const fields = getBrowserFields('title 1', []);
