@@ -92,7 +92,7 @@ export interface DataLayerArgs {
   seriesType: SeriesType;
   xAccessor?: string | ExpressionValueVisDimension;
   hide?: boolean;
-  splitAccessor?: string;
+  splitAccessor?: string | ExpressionValueVisDimension;
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;
   xScaleType: XScaleType;

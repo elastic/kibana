@@ -19,7 +19,7 @@ import { LensIconChartLine } from '../assets/chart_line';
 
 import type { VisualizationType, Suggestion } from '../types';
 import { PaletteOutput } from '../../../../../src/plugins/charts/common';
-import type {
+import {
   SeriesType,
   LegendConfig,
   AxisExtentConfig,
