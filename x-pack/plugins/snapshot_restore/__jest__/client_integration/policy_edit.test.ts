@@ -144,21 +144,23 @@ describe('<PolicyEdit />', () => {
 
         expect(httpSetup.put).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}policies/${name}`,
-          expect.objectContaining({ body: JSON.stringify({
-            name,
-            snapshotName: editedSnapshotName,
-            schedule,
-            repository,
-            config: {
-              ignoreUnavailable: true,
-            },
-            retention: {
-              ...retention,
-              expireAfterUnit: EXPIRE_AFTER_UNIT,
-              expireAfterValue: Number(EXPIRE_AFTER_VALUE),
-            },
-            isManagedPolicy,
-          })})
+          expect.objectContaining({
+            body: JSON.stringify({
+              name,
+              snapshotName: editedSnapshotName,
+              schedule,
+              repository,
+              config: {
+                ignoreUnavailable: true,
+              },
+              retention: {
+                ...retention,
+                expireAfterUnit: EXPIRE_AFTER_UNIT,
+                expireAfterValue: Number(EXPIRE_AFTER_VALUE),
+              },
+              isManagedPolicy,
+            }),
+          })
         );
       });
 
@@ -185,19 +187,21 @@ describe('<PolicyEdit />', () => {
 
         expect(httpSetup.put).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}policies/${name}`,
-          expect.objectContaining({ body: JSON.stringify({
-            name,
-            snapshotName,
-            schedule,
-            repository,
-            config,
-            retention: {
-              ...retention,
-              expireAfterUnit: TIME_UNITS.DAY, // default value
-              expireAfterValue: Number(EXPIRE_AFTER_VALUE),
-            },
-            isManagedPolicy,
-          })})
+          expect.objectContaining({
+            body: JSON.stringify({
+              name,
+              snapshotName,
+              schedule,
+              repository,
+              config,
+              retention: {
+                ...retention,
+                expireAfterUnit: TIME_UNITS.DAY, // default value
+                expireAfterValue: Number(EXPIRE_AFTER_VALUE),
+              },
+              isManagedPolicy,
+            }),
+          })
         );
       });
     });

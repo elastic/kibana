@@ -11,7 +11,7 @@ import { API_BASE_PATH } from '../../../common';
 type HttpMethod = 'GET' | 'PUT' | 'POST';
 type HttpResponse = Record<string, any> | any[];
 
-interface ResponseError {
+export interface ResponseError {
   statusCode: number;
   message: string | Error;
 }

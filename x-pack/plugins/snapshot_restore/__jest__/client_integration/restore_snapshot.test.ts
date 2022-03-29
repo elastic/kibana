@@ -9,6 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../common';
 import { pageHelpers, setupEnvironment } from './helpers';
 import { RestoreSnapshotTestBed } from './helpers/restore_snapshot.helpers';
+import { REPOSITORY_NAME, SNAPSHOT_NAME } from './helpers/constant';
 import * as fixtures from '../../test/fixtures';
 
 const {
@@ -21,9 +22,11 @@ describe('<RestoreSnapshot />', () => {
 
   describe('wizard navigation', () => {
     beforeEach(async () => {
-      const snapshot = fixtures.getSnapshot();
-      console.log(snapshot);
-      httpRequestsMockHelpers.setGetSnapshotResponse(snapshot.repository, snapshot.snapshot, snapshot);
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot()
+      );
 
       await act(async () => {
         testBed = await setup(httpSetup);
@@ -41,10 +44,13 @@ describe('<RestoreSnapshot />', () => {
     });
   });
 
-  describe.skip('with data streams', () => {
+  describe('with data streams', () => {
     beforeEach(async () => {
-      const snapshot = fixtures.getSnapshot();
-      httpRequestsMockHelpers.setGetSnapshotResponse(snapshot.repository, snapshot.snapshot, snapshot);
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot()
+      );
 
       await act(async () => {
         testBed = await setup(httpSetup);
@@ -59,10 +65,13 @@ describe('<RestoreSnapshot />', () => {
     });
   });
 
-  describe.skip('without data streams', () => {
+  describe('without data streams', () => {
     beforeEach(async () => {
-      const snapshot = fixtures.getSnapshot({ totalDataStreams: 0 });
-      httpRequestsMockHelpers.setGetSnapshotResponse(snapshot.repository, snapshot.snapshot, snapshot);
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot({ totalDataStreams: 0 })
+      );
       await act(async () => {
         testBed = await setup(httpSetup);
       });
@@ -76,10 +85,13 @@ describe('<RestoreSnapshot />', () => {
     });
   });
 
-  describe.skip('global state', () => {
+  describe('global state', () => {
     beforeEach(async () => {
-      const snapshot = fixtures.getSnapshot();
-      httpRequestsMockHelpers.setGetSnapshotResponse(snapshot.repository, snapshot.snapshot, snapshot);
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot()
+      );
       await act(async () => {
         testBed = await setup(httpSetup);
       });
@@ -100,11 +112,13 @@ describe('<RestoreSnapshot />', () => {
 
   // NOTE: This suite can be expanded to simulate the user setting non-default values for all of
   // the form controls and asserting that the correct payload is sent to the API.
-  describe.skip('include aliases', () => {
-    const snapshot = fixtures.getSnapshot();
-
+  describe('include aliases', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setRestoreSnapshotResponse(snapshot.repository, snapshot.snapshot, {});
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot()
+      );
 
       await act(async () => {
         testBed = await setup(httpSetup);
@@ -120,10 +134,12 @@ describe('<RestoreSnapshot />', () => {
       await actions.clickRestore();
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}restore/${snapshot.repository}/${snapshot.snapshot}`,
-        expect.objectContaining({ body: JSON.stringify({
-          includeAliases: false
-        })})
+        `${API_BASE_PATH}restore/${REPOSITORY_NAME}/${SNAPSHOT_NAME}`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            includeAliases: false,
+          }),
+        })
       );
     });
   });

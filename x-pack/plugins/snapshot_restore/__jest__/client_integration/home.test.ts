@@ -791,9 +791,12 @@ describe('<SnapshotRestoreHome />', () => {
                 };
 
                 // Call sequentially each state and verify that the message is ok
-                return Object.entries(mapStateToMessage).reduce(async (promise, [state, message]) => {
-                  return promise.then(async () => expectMessageForSnapshotState(state, message));
-                }, Promise.resolve());
+                return Object.entries(mapStateToMessage).reduce(
+                  async (promise, [state, message]) => {
+                    return promise.then(async () => expectMessageForSnapshotState(state, message));
+                  },
+                  Promise.resolve()
+                );
               });
             });
 

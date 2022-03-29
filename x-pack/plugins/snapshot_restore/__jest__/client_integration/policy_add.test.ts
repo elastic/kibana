@@ -239,20 +239,22 @@ describe('<PolicyAdd />', () => {
 
         expect(httpSetup.post).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}policies`,
-          expect.objectContaining({ body: JSON.stringify({
-            name: POLICY_NAME,
-            snapshotName: SNAPSHOT_NAME,
-            schedule: DEFAULT_POLICY_SCHEDULE,
-            repository: repository.name,
-            config: {},
-            retention: {
-              expireAfterValue: Number(EXPIRE_AFTER_VALUE),
-              expireAfterUnit: 'd', // default
-              maxCount: Number(MAX_COUNT),
-              minCount: Number(MIN_COUNT),
-            },
-            isManagedPolicy: false,
-          })})
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: POLICY_NAME,
+              snapshotName: SNAPSHOT_NAME,
+              schedule: DEFAULT_POLICY_SCHEDULE,
+              repository: repository.name,
+              config: {},
+              retention: {
+                expireAfterValue: Number(EXPIRE_AFTER_VALUE),
+                expireAfterUnit: 'd', // default
+                maxCount: Number(MAX_COUNT),
+                minCount: Number(MIN_COUNT),
+              },
+              isManagedPolicy: false,
+            }),
+          })
         );
       });
 

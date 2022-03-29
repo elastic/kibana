@@ -60,8 +60,10 @@ export const setupEnvironment = () => {
   this.terminate = () => {};
 };
 
-export const WithAppDependencies = (Comp: any, httpSetup: HttpSetup) => (props: any) => {
-  httpService.setup(httpSetup);
+export const WithAppDependencies = (Comp: any, httpSetup?: HttpSetup) => (props: any) => {
+  if (httpSetup) {
+    httpService.setup(httpSetup);
+  }
 
   return (
     <AppContextProvider value={appDependencies as any}>

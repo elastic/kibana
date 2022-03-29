@@ -46,11 +46,6 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
     data: snapshotData,
   } = useLoadSnapshot(repositoryName, snapshotId);
 
-  console.log({
-    repositoryName,
-    snapshotId,
-  });
-
   // Update repository state when data is loaded
   useEffect(() => {
     if (snapshotData) {
