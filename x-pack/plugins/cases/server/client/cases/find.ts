@@ -72,11 +72,10 @@ export const find = async (
           ...caseQueryOptions,
           searchFields: asArray(queryParams.searchFields),
           fields: includeFieldsRequiredForAuthentication(fields),
-          defaultSearchOperator: 'AND',
         },
       }),
       caseService.getCaseStatusStats({
-        searchOptions: { ...statusStatsOptions, defaultSearchOperator: 'AND' },
+        searchOptions: statusStatsOptions,
       }),
     ]);
 
