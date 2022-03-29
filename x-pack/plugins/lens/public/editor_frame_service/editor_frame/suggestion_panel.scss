@@ -95,8 +95,8 @@
   height: $lnsSuggestionHeight;
   background-color: $euiColorLightestShade !important;
 
-  .lnsSuggestionPanel__applyChangesMessage {
-    margin-top: 10px;
-    margin-bottom: -10px;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }

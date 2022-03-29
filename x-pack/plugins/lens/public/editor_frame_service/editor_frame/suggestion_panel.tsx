@@ -338,37 +338,28 @@ export function SuggestionPanel({
   }
 
   const renderApplyChangesPrompt = () => (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      className="lnsSuggestionPanel__applyChangesPrompt"
-      paddingSize="m"
-    >
-      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued" className="lnsSuggestionPanel__applyChangesMessage">
-            <p>
-              <FormattedMessage
-                id="xpack.lens.suggestions.applyChangesPrompt"
-                defaultMessage="Latest changes must be applied to view suggestions."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiButtonEmpty
-            iconType="checkInCircleFilled"
-            size="s"
-            className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-            onClick={() => dispatchLens(applyChanges())}
-            data-test-subj="lnsApplyChanges__suggestions"
-          >
-            <FormattedMessage
-              id="xpack.lens.suggestions.applyChangesLabel"
-              defaultMessage="Apply changes"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiPanel hasShadow={false} className="lnsSuggestionPanel__applyChangesPrompt" paddingSize="m">
+      <EuiText size="s" color="subdued" className="lnsSuggestionPanel__applyChangesMessage">
+        <p>
+          <FormattedMessage
+            id="xpack.lens.suggestions.applyChangesPrompt"
+            defaultMessage="Latest changes must be applied to view suggestions."
+          />
+        </p>
+      </EuiText>
+
+      <EuiButtonEmpty
+        iconType="checkInCircleFilled"
+        size="s"
+        className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+        onClick={() => dispatchLens(applyChanges())}
+        data-test-subj="lnsApplyChanges__suggestions"
+      >
+        <FormattedMessage
+          id="xpack.lens.suggestions.applyChangesLabel"
+          defaultMessage="Apply changes"
+        />
+      </EuiButtonEmpty>
     </EuiPanel>
   );
 
