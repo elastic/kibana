@@ -149,6 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('allows saving changes to a currently loaded query via the saved query management component', async () => {
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('OkResponse', false, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');

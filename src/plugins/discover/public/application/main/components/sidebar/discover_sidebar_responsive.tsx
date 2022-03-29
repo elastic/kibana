@@ -18,7 +18,6 @@ import {
   EuiBadge,
   EuiFlyoutHeader,
   EuiFlyout,
-  EuiSpacer,
   EuiIcon,
   EuiLink,
   EuiPortal,
