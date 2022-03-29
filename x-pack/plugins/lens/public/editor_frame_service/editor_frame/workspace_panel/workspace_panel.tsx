@@ -468,7 +468,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
     const renderWorkspaceContents = hasSomethingToRender
       ? renderVisualization
-      : !changesApplied && !hasSomethingToRender
+      : !changesApplied
       ? renderApplyChangesPrompt
       : renderDragDropPrompt;
 
