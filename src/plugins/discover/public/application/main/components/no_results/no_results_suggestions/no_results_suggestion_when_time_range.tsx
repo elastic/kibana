@@ -17,7 +17,7 @@ import {
 export function NoResultsSuggestionWhenTimeRange() {
   return (
     <EuiDescriptionList compressed>
-      <EuiDescriptionListTitle data-test-subj="discoverNoResultsAdjustTimeRange">
+      <EuiDescriptionListTitle data-test-subj="discoverNoResultsTimefilter">
         <FormattedMessage
           id="discover.noResults.expandYourTimeRangeTitle"
           defaultMessage="Expand your time range"

@@ -35,7 +35,7 @@ function mountAndFindSubjects(props: Omit<DiscoverNoResultsProps, 'onDisableFilt
   return {
     mainMsg: findTestSubject(component, 'discoverNoResults').exists(),
     errorMsg: findTestSubject(component, 'discoverNoResultsError').exists(),
-    adjustTimeRange: findTestSubject(component, 'discoverNoResultsAdjustTimeRange').exists(),
+    adjustTimeRange: findTestSubject(component, 'discoverNoResultsTimefilter').exists(),
     adjustSearch: findTestSubject(component, 'discoverNoResultsAdjustSearch').exists(),
     adjustFilters: findTestSubject(component, 'discoverNoResultsAdjustFilters').exists(),
     checkIndices: findTestSubject(component, 'discoverNoResultsCheckIndices').exists(),
