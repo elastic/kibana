@@ -61,12 +61,14 @@ export class SyntheticsService {
   private indexTemplateInstalling?: boolean;
 
   public isAllowed: boolean;
+  public betaFormUrl: string | null;
 
   constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
     this.config = config;
     this.isAllowed = false;
+    this.betaFormUrl = null;
 
     this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
 
@@ -78,7 +80,9 @@ export class SyntheticsService {
   public async init() {
     await this.registerServiceLocations();
 
-    this.isAllowed = await this.apiClient.checkIfAccountAllowed();
+    const { allowed, betaFormUrl } = await this.apiClient.checkAccountAccessStatus();
+    this.isAllowed = allowed;
+    this.betaFormUrl = betaFormUrl;
   }
 
   private setupIndexTemplates() {
@@ -140,7 +144,9 @@ export class SyntheticsService {
 
               await service.registerServiceLocations();
 
-              service.isAllowed = await service.apiClient.checkIfAccountAllowed();
+              const { allowed, betaFormUrl } = await service.apiClient.checkAccountAccessStatus();
+              service.isAllowed = allowed;
+              service.betaFormUrl = betaFormUrl;
 
               if (service.isAllowed) {
                 service.setupIndexTemplates();

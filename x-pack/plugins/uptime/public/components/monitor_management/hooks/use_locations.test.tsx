@@ -55,6 +55,7 @@ describe('useExpViewTimeRange', function () {
         },
         syntheticsService: {
           loading: false,
+          betaFormUrl: null,
         },
       },
     };

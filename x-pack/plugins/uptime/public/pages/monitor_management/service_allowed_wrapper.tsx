@@ -11,7 +11,7 @@ import { EuiButton, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { useSyntheticsServiceAllowed } from '../../components/monitor_management/hooks/use_service_allowed';
 
 export const ServiceAllowedWrapper: React.FC = ({ children }) => {
-  const { isAllowed, loading } = useSyntheticsServiceAllowed();
+  const { isAllowed, betaFormUrl, loading } = useSyntheticsServiceAllowed();
 
   if (loading) {
     return (
@@ -29,7 +29,7 @@ export const ServiceAllowedWrapper: React.FC = ({ children }) => {
         title={<h2>{MONITOR_MANAGEMENT_LABEL}</h2>}
         body={<p>{PUBLIC_BETA_DESCRIPTION}</p>}
         actions={[
-          <EuiButton color="primary" fill isDisabled={true}>
+          <EuiButton color="primary" fill isDisabled={!betaFormUrl} href={betaFormUrl ?? undefined}>
             {REQUEST_ACCESS_LABEL}
           </EuiButton>,
         ]}

@@ -30,6 +30,7 @@ describe('SyntheticsService', () => {
 
     expect(service.isAllowed).toEqual(false);
     expect(service.locations).toEqual([]);
+    expect(service.betaFormUrl).toEqual(null);
   });
 
   it('inits properly with basic auth', async () => {
