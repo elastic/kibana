@@ -130,6 +130,7 @@ const EntityBadge = ({
         border: `1px solid ${getClassColor(euiTheme, entity.class_name, true)}`,
         fontSize: euiTheme.euiFontSizeXS,
         padding: '0px 6px',
+        pointerEvents: 'none',
       }}
     >
       <EuiFlexGroup gutterSize="none">
