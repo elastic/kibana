@@ -482,7 +482,7 @@ export const RulesList: React.FunctionComponent = () => {
         description: (
           <>
             {errorMessage}
-            {hasErrorMessage && statusMessage && <br />}
+            {hasErrorMessage && statusMessage && <EuiSpacer size="xs" />}
             {statusMessage}
           </>
         ),
@@ -507,19 +507,18 @@ export const RulesList: React.FunctionComponent = () => {
   const toggleRuleErrors = useCallback(() => {
     setShowErrors((prevValue) => {
       if (!prevValue) {
-        setItemIdToExpandedRowMap(
-          rulesState.data.reduce((acc, ruleItem) => {
-            if (ruleItem.executionStatus.status === 'error') {
-              return {
-                ...acc,
-                [ruleItem.id]: (
-                  <EuiDescriptionList listItems={buildErrorListItems(ruleItem.executionStatus)} />
-                ),
-              };
-            }
-            return acc;
-          }, {})
-        );
+        const rulesToExpand = rulesState.data.reduce((acc, ruleItem) => {
+          if (ruleItem.executionStatus.status === 'error') {
+            return {
+              ...acc,
+              [ruleItem.id]: (
+                <EuiDescriptionList listItems={buildErrorListItems(ruleItem.executionStatus)} />
+              ),
+            };
+          }
+          return acc;
+        }, {});
+        setItemIdToExpandedRowMap(rulesToExpand);
       } else {
         setItemIdToExpandedRowMap({});
       }
@@ -1007,14 +1006,16 @@ export const RulesList: React.FunctionComponent = () => {
         <>
           <EuiCallOut color="danger" size="s" data-test-subj="rulesErrorBanner">
             <p>
-              <EuiIcon color="danger" type="alert" />{' '}
+              <EuiIcon color="danger" type="alert" />
+              &nbsp;
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.rulesList.attentionBannerTitle"
                 defaultMessage="Error found in {totalStatusesError, plural, one {# rule} other {# rules}}."
                 values={{
                   totalStatusesError: rulesStatusesTotal.error,
                 }}
-              />{' '}
+              />
+              &nbsp;
               <EuiLink color="primary" onClick={() => setRuleStatusesFilter(['error'])}>
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel"
