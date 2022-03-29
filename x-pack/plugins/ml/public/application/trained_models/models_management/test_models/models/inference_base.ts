@@ -16,7 +16,7 @@ export type FormattedNerResp = Array<{
   entity: estypes.MlTrainedModelEntities | null;
 }>;
 
-export abstract class InferenceBase {
+export abstract class InferenceBase<TInferResponse> {
   protected readonly inputField: string;
 
   constructor(
@@ -25,4 +25,6 @@ export abstract class InferenceBase {
   ) {
     this.inputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
   }
+
+  protected abstract infer(inputText: string): Promise<TInferResponse>;
 }

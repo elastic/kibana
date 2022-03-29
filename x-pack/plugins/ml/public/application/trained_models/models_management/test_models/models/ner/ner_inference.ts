@@ -14,11 +14,13 @@ export type FormattedNerResp = Array<{
   entity: estypes.MlTrainedModelEntities | null;
 }>;
 
-export class NerInference extends InferenceBase {
-  public async infer(inputText: string): Promise<{
-    response: FormattedNerResp;
-    rawResponse: estypes.MlInferTrainedModelDeploymentResponse;
-  }> {
+interface InferResponse {
+  response: FormattedNerResp;
+  rawResponse: estypes.MlInferTrainedModelDeploymentResponse;
+}
+
+export class NerInference extends InferenceBase<InferResponse> {
+  public async infer(inputText: string) {
     const payload = { docs: { [this.inputField]: inputText } };
     const resp = await this.trainedModelsApi.inferTrainedModel(this.model.model_id, payload);
 

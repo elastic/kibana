@@ -15,10 +15,13 @@ export type FormattedLangIdentResp = Array<{
   classScore: number;
 }>;
 
-export class LangIdentInference extends InferenceBase {
-  public async infer(
-    inputText: string
-  ): Promise<{ response: FormattedLangIdentResp; rawResponse: estypes.IngestSimulateResponse }> {
+interface InferResponse {
+  response: FormattedLangIdentResp;
+  rawResponse: estypes.IngestSimulateResponse;
+}
+
+export class LangIdentInference extends InferenceBase<InferResponse> {
+  public async infer(inputText: string) {
     const payload: estypes.IngestSimulateRequest['body'] = {
       pipeline: {
         processors: [
