@@ -20,24 +20,16 @@ import styled from 'styled-components';
 
 import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/translations';
-import {
-  FULL_SCREEN_TOGGLED_CLASS_NAME,
-  SCROLLING_DISABLED_CLASS_NAME,
-} from '../../../../common/constants';
+import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../common/containers/use_full_screen';
-import { useKibana } from '../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
-import {
-  updateTimelineGraphEventId,
-  updateTimelineSessionViewSessionId,
-} from '../../../timelines/store/timeline/actions';
 import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
 import {
@@ -49,6 +41,7 @@ import * as i18n from './translations';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { sourcererSelectors } from '../../../common/store';
+import { useSessionView } from '../timeline/session_tab_content/use_session_view';
 
 const OverlayContainer = styled.div`
   display: flex;
@@ -103,34 +96,35 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   timelineFullScreen,
   toggleFullScreen,
   graphEventId,
-}) => (
-  <EuiFlexGroup alignItems="center" gutterSize="none">
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
-        {graphEventId ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    {timelineId !== TimelineId.active && (
+}) => {
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : FULL_SCREEN}>
-          <FullScreenButtonIcon
-            aria-label={
-              isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
-                ? EXIT_FULL_SCREEN
-                : FULL_SCREEN
-            }
-            className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-            color={fullScreen ? 'ghost' : 'primary'}
-            data-test-subj="full-screen"
-            iconType="fullScreen"
-            onClick={toggleFullScreen}
-          />
-        </EuiToolTip>
+        <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
+          {graphEventId ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION}
+        </EuiButtonEmpty>
       </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
-
+      {timelineId !== TimelineId.active && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : FULL_SCREEN}>
+            <FullScreenButtonIcon
+              aria-label={
+                isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
+                  ? EXIT_FULL_SCREEN
+                  : FULL_SCREEN
+              }
+              className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
+              color={fullScreen ? 'ghost' : 'primary'}
+              data-test-subj="full-screen"
+              iconType="fullScreen"
+              onClick={toggleFullScreen}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
 NavigationComponent.displayName = 'NavigationComponent';
 
 const Navigation = React.memo(NavigationComponent);
@@ -144,18 +138,9 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDe
   const graphEventId = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
   );
-  const { sessionView } = useKibana().services;
   const sessionViewId = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewId
   );
-  const sessionViewMain = useMemo(() => {
-    return sessionViewId !== null
-      ? sessionView.getSessionView({
-          sessionEntityId: sessionViewId,
-          loadAlertDetails: openDetailsPanel,
-        })
-      : null;
-  }, [sessionView, sessionViewId, openDetailsPanel]);
 
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
@@ -189,25 +174,6 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDe
   );
 
   const isInTimeline = timelineId === TimelineId.active;
-  const onCloseOverlay = useCallback(() => {
-    const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
-    // Since EUI changes these values directly as a side effect, need to add them back on close.
-    if (isDataGridFullScreen) {
-      if (timelineId === TimelineId.active) {
-        document.body.classList.add('euiDataGrid__restrictBody');
-      } else {
-        document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
-      }
-    } else {
-      if (timelineId === TimelineId.active) {
-        setTimelineFullScreen(false);
-      } else {
-        setGlobalFullScreen(false);
-      }
-    }
-    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
-    dispatch(updateTimelineSessionViewSessionId({ id: timelineId, eventId: null }));
-  }, [dispatch, timelineId, setTimelineFullScreen, setGlobalFullScreen]);
 
   useEffect(() => {
     return () => {
@@ -246,6 +212,8 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDe
     [defaultDataView.patternList, isInTimeline, timelinePatterns]
   );
 
+  const { SessionView, onCloseOverlay } = useSessionView({ timelineId });
+
   if (!isInTimeline && sessionViewId !== null) {
     if (fullScreen) {
       return (
@@ -261,7 +229,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDe
               graphEventId={graphEventId}
             />
           </EuiFlexItem>
-          <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>
+          <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
         </FullScreenOverlayContainer>
       );
     } else {
@@ -279,7 +247,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDe
                 graphEventId={graphEventId}
               />
             </EuiFlexItem>
-            <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>
+            <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
           </EuiFlexGroup>
         </OverlayContainer>
       );
@@ -330,6 +298,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ timelineId, openDe
               timelineId={timelineId}
               timelineFullScreen={timelineFullScreen}
               toggleFullScreen={toggleFullScreen}
+              graphEventId={graphEventId}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

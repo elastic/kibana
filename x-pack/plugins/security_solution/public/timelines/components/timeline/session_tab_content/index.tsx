@@ -5,23 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
-import { timelineSelectors } from '../../../store/timeline';
-import { useKibana } from '../../../../common/lib/kibana';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useDetailPanel } from '../../side_panel/hooks/use_detail_panel';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import {
-  updateTimelineGraphEventId,
-  updateTimelineSessionViewSessionId,
-} from '../../../../timelines/store/timeline/actions';
+import { TimelineId } from '../../../../../common/types/timeline';
 import * as i18n from '../../graph_overlay/translations';
+import { useSessionView } from './use_session_view';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   margin: 0;
@@ -45,39 +34,9 @@ interface Props {
 }
 
 const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
-  const { sessionView } = useKibana().services;
-  const dispatch = useDispatch();
-
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
-  const sessionViewId = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewId
-  );
-  const { setTimelineFullScreen } = useTimelineFullScreen();
-  const onCloseOverlay = useCallback(() => {
-    const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
-    // Since EUI changes these values directly as a side effect, need to add them back on close.
-    if (isDataGridFullScreen) {
-      document.body.classList.add('euiDataGrid__restrictBody');
-    } else {
-      setTimelineFullScreen(false);
-    }
-    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
-    dispatch(updateTimelineSessionViewSessionId({ id: timelineId, eventId: null }));
-  }, [dispatch, timelineId, setTimelineFullScreen]);
-  const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
-    sourcererScope: SourcererScopeName.timeline,
+  const { SessionView, onCloseOverlay, shouldShowDetailsPanel, DetailsPanel } = useSessionView({
     timelineId,
-    tabType: TimelineTabs.session,
   });
-  const sessionViewMain = useMemo(() => {
-    return sessionViewId !== null
-      ? sessionView.getSessionView({
-          sessionEntityId: sessionViewId,
-          loadAlertDetails: openDetailsPanel,
-        })
-      : null;
-  }, [openDetailsPanel, sessionView, sessionViewId]);
 
   return (
     <FullWidthFlexGroup gutterSize="none">
@@ -87,7 +46,7 @@ const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
             {i18n.CLOSE_SESSION}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <ScrollableFlexItem grow={2}>{sessionViewMain}</ScrollableFlexItem>
+        <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
       </EuiFlexGroup>
       {shouldShowDetailsPanel && (
         <>

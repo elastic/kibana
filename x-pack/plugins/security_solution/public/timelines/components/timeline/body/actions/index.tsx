@@ -132,7 +132,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const entryLeader = useMemo(() => {
     const { process } = ecsData;
     const entryLeaderIds = process?.entry_leader?.entity_id;
-    if (entryLeaderIds !== undefined) {
+    if (entryLeaderIds !== undefined && entryLeaderIds.length > 0) {
       return entryLeaderIds[0];
     } else {
       return null;
