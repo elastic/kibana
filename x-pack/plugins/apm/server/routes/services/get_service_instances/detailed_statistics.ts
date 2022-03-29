@@ -27,6 +27,7 @@ interface ServiceInstanceDetailedStatisticsParams {
   start: number;
   end: number;
   serviceNodeIds: string[];
+  offset?: string;
 }
 
 async function getServiceInstancesDetailedStatistics(
@@ -72,10 +73,9 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
   searchAggregatedTransactions,
   numBuckets,
   serviceNodeIds,
-  comparisonStart,
-  comparisonEnd,
   start,
   end,
+  offset,
 }: {
   environment: string;
   kuery: string;
@@ -86,10 +86,9 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
   searchAggregatedTransactions: boolean;
   numBuckets: number;
   serviceNodeIds: string[];
-  comparisonStart?: number;
-  comparisonEnd?: number;
   start: number;
   end: number;
+  offset?: string;
 }) {
   return withApmSpan(
     'get_service_instances_detailed_statistics_periods',
@@ -112,14 +111,14 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
         end,
       });
 
-      const previousPeriodPromise =
-        comparisonStart && comparisonEnd
-          ? getServiceInstancesDetailedStatistics({
-              ...commonParams,
-              start: comparisonStart,
-              end: comparisonEnd,
-            })
-          : [];
+      const previousPeriodPromise = offset
+        ? getServiceInstancesDetailedStatistics({
+            ...commonParams,
+            start,
+            end,
+            offset,
+          })
+        : [];
       const [currentPeriod, previousPeriod] = await Promise.all([
         currentPeriodPromise,
         previousPeriodPromise,

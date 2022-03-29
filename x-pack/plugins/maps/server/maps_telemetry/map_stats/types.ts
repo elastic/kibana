@@ -30,6 +30,7 @@ export enum LAYER_KEYS {
   ES_POINT_TO_POINT = 'es_point_to_point',
   ES_AGG_CLUSTERS = 'es_agg_clusters',
   ES_AGG_GRIDS = 'es_agg_grids',
+  ES_AGG_HEXAGONS = 'es_agg_hexagons',
   ES_AGG_HEATMAP = 'es_agg_heatmap',
   EMS_REGION = 'ems_region',
   EMS_BASEMAP = 'ems_basemap',
