@@ -500,9 +500,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         expect(alertsErrorBannerExistErrors).to.have.length(1);
         expect(
-          await (
-            await alertsErrorBannerExistErrors[0].findByTagName('p')
-          ).getVisibleText()
+          await (await alertsErrorBannerExistErrors[0].findByTagName('p')).getVisibleText()
         ).to.equal('Error found in 1 rule. Show rule with error');
       });
 
