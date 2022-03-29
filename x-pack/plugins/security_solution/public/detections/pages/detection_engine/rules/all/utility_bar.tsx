@@ -22,6 +22,8 @@ import {
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
 import * as i18n from '../translations';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useRulesTableContextOptional } from './rules_table/rules_table_context';
 
 interface AllRulesUtilityBarProps {
   canBulkEdit: boolean;
@@ -55,6 +57,9 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     isBulkActionInProgress,
     hasDisabledActions,
   }) => {
+    const { timelines } = useKibana().services;
+    const rulesTableContext = useRulesTableContextOptional();
+
     const handleGetBulkItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
         if (onGetBulkItemsPopoverContent != null) {
@@ -100,7 +105,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     );
 
     return (
-      <UtilityBar>
+      <UtilityBar border>
         <UtilityBarSection>
           <UtilityBarGroup>
             {hasBulkActions ? (
@@ -180,6 +185,14 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
             </UtilityBarGroup>
           )}
         </UtilityBarSection>
+        {rulesTableContext && (
+          <UtilityBarSection>
+            {timelines.getLastUpdated({
+              showUpdating: rulesTableContext.state.isFetching,
+              updatedAt: rulesTableContext.state.lastUpdated,
+            })}
+          </UtilityBarSection>
+        )}
       </UtilityBar>
     );
   }
