@@ -81,25 +81,6 @@ export const executeRulesBulkAction = async ({
   }
 };
 
-export const initRulesBulkAction = (params: Omit<ExecuteRulesBulkActionArgs, 'search'>) => {
-  const byQuery = (query: string) =>
-    executeRulesBulkAction({
-      ...params,
-      search: { query },
-    });
-
-  const byIds = (ids: string[]) =>
-    executeRulesBulkAction({
-      ...params,
-      search: { ids },
-    });
-
-  return {
-    byQuery,
-    byIds,
-  };
-};
-
 function defaultErrorHandler(toasts: UseAppToasts, action: BulkAction, error: HTTPError) {
   // if response doesn't have number of failed rules, it means the whole bulk action failed
   // and general error toast will be shown. Otherwise - error toast for partial failure

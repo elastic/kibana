@@ -6,22 +6,26 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink, EuiLinkAnchorProps, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
-import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { useAppUrl } from '../../common/lib/kibana/hooks';
-import { getEndpointListPath, getPoliciesPath } from '../common/routing';
-import { APP_UI_ID } from '../../../common/constants';
+import { useAppUrl } from '../../../../../common/lib/kibana';
+import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing';
+import { APP_UI_ID } from '../../../../../../common/constants';
 
 /**
+ * @param policyId
+ * @param nonLinkCondition: boolean where the returned component is just text and not a link
+ *
  * Returns a link component that navigates to the endpoint list page filtered by a specific policy
  */
-export const PolicyEndpointListLink = memo<
+export const PolicyEndpointCount = memo<
   Omit<EuiLinkAnchorProps, 'href'> & {
     policyId: string;
+    nonLinkCondition: boolean;
   }
->(({ policyId, children, ...otherProps }) => {
+>(({ policyId, nonLinkCondition, children, ...otherProps }) => {
   const filterByPolicyQuery = `(language:kuery,query:'united.endpoint.Endpoint.policy.applied.id : "${policyId}"')`;
   const { search } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -54,6 +58,9 @@ export const PolicyEndpointListLink = memo<
   }, [getAppUrl, filterByPolicyQuery, search]);
   const clickHandler = useNavigateByRouterEventHandler(toRoutePathWithBackOptions);
 
+  if (nonLinkCondition) {
+    return <EuiText size="s">{children}</EuiText>;
+  }
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink href={toRouteUrl} onClick={clickHandler} {...otherProps}>
@@ -62,4 +69,4 @@ export const PolicyEndpointListLink = memo<
   );
 });
 
-PolicyEndpointListLink.displayName = 'PolicyEndpointListLink';
+PolicyEndpointCount.displayName = 'PolicyEndpointCount';
