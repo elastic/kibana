@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useCallback, useContext, useMemo, useState } from 'react';
+import React, {
+  memo,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { ConsolePopup } from './components/console_popup';
 import {
   ConsoleManagerClient,
@@ -53,14 +61,17 @@ export type ConsoleManagerProps = PropsWithChildren<{
 export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, children }) => {
   const [consoleStorage, setConsoleStorage] = useState<RunningConsoleStorage>(storage);
 
-  const validateIdOrThrow = useCallback(
-    (id: string) => {
-      if (!consoleStorage[id]) {
-        throw new Error(`Console with id ${id} not found`);
-      }
-    },
-    [consoleStorage]
-  );
+  // `consoleStorageRef` keeps a copy (reference) to the latest copy of the `consoleStorage` so that
+  // some exposed methods (ex. `RegisteredConsoleClient`) are guaranteed to be immutable and function
+  // as expected between state updates without having to re-update every record stored in the `ConsoleStorage`
+  const consoleStorageRef = useRef<RunningConsoleStorage>();
+  consoleStorageRef.current = consoleStorage;
+
+  const validateIdOrThrow = useCallback((id: string) => {
+    if (!consoleStorageRef.current?.[id]) {
+      throw new Error(`Console with id ${id} not found`);
+    }
+  }, []); // << IMPORTANT: this callback should have no dependencies
 
   const show = useCallback<ConsoleManagerClient['show']>(
     (id) => {
@@ -87,7 +98,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         return newState;
       });
     },
-    [validateIdOrThrow]
+    [validateIdOrThrow] // << IMPORTANT: this callback should have immutable dependencies
   );
 
   const hide = useCallback<ConsoleManagerClient['hide']>(
@@ -104,7 +115,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         };
       });
     },
-    [validateIdOrThrow]
+    [validateIdOrThrow] // << IMPORTANT: this callback should have immutable dependencies
   );
 
   const terminate = useCallback<ConsoleManagerClient['terminate']>(
@@ -124,16 +135,16 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         return newState;
       });
     },
-    [validateIdOrThrow]
+    [validateIdOrThrow] // << IMPORTANT: this callback should have immutable dependencies
   );
 
   const getOne = useCallback<ConsoleManagerClient['getOne']>(
     <Meta extends object = Record<string, unknown>>(id: string) => {
-      if (consoleStorage[id]) {
-        return consoleStorage[id].client as Readonly<RegisteredConsoleClient<Meta>>;
+      if (consoleStorageRef.current?.[id]) {
+        return consoleStorageRef.current[id].client as Readonly<RegisteredConsoleClient<Meta>>;
       }
     },
-    [consoleStorage]
+    [] // << IMPORTANT: this callback should have dependencies or only immutable dependencies
   );
 
   const getList = useCallback<ConsoleManagerClient['getList']>(<
@@ -142,18 +153,15 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     return Object.values(consoleStorage).map(
       (managedConsole) => managedConsole.client
     ) as ReadonlyArray<Readonly<RegisteredConsoleClient<Meta>>>;
-  }, [consoleStorage]);
+  }, [consoleStorage]); // << This callack should always use `consoleStorage`
 
-  const isVisible = useCallback(
-    (id: string): boolean => {
-      if (consoleStorage[id]) {
-        return consoleStorage[id].isOpen;
-      }
+  const isVisible = useCallback((id: string): boolean => {
+    if (consoleStorageRef.current?.[id]) {
+      return consoleStorageRef.current[id].isOpen;
+    }
 
-      return false;
-    },
-    [consoleStorage]
-  );
+    return false;
+  }, []); // << IMPORTANT: this callback should have no dependencies
 
   const register = useCallback<ConsoleManagerClient['register']>(
     ({ id, title, meta, consoleProps, ...otherRegisterProps }) => {
@@ -168,6 +176,8 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
           id,
           title,
           meta,
+          // Referencing/using the interface methods here (defined in the outer scope of this function)
+          // is ok because those are immutable and thus will not change between state changes
           show: () => show(id),
           hide: () => hide(id),
           terminate: () => terminate(id),
