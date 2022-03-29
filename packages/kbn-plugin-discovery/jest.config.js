@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './parse_kibana_platform_plugin';
-export * from './simple_kibana_platform_plugin_discovery';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-plugin-discovery'],
+};

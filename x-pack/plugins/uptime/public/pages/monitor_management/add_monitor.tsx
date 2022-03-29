@@ -52,7 +52,7 @@ const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.addMonitorL
 const ERROR_HEADING_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.addMonitorLoadingError',
   {
-    defaultMessage: 'Error loading monitor management',
+    defaultMessage: 'Error loading Monitor Management',
   }
 );
 
