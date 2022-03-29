@@ -35,7 +35,7 @@ default space is used.
 (Optional, boolean) Determines whether case comments are returned. Defaults to 
 `true`.
 
- deprecated:[8.0.0]
+deprecated:[8.1.0]
 
 ==== Response code
 
