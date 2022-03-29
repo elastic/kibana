@@ -354,6 +354,8 @@
 #CC# /x-pack/plugins/stack_alerts @elastic/response-ops
 /x-pack/plugins/cases/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
+/x-pack/test/functional/services/cases/ @elastic/response-ops
+/x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops
 
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend

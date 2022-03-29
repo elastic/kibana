@@ -26,7 +26,17 @@ describe('convertRulesFilterToKQL', () => {
   it('handles presence of "filter" properly', () => {
     const kql = convertRulesFilterToKQL({ ...filterOptions, filter: 'foo' });
 
-    expect(kql).toBe('alert.attributes.name: foo');
+    expect(kql).toBe(
+      '(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo")'
+    );
+  });
+
+  it('escapes "filter" value properly', () => {
+    const kql = convertRulesFilterToKQL({ ...filterOptions, filter: '" OR (foo: bar)' });
+
+    expect(kql).toBe(
+      '(alert.attributes.name: "\\" OR (foo: bar)" OR alert.attributes.params.index: "\\" OR (foo: bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo: bar)")'
+    );
   });
 
   it('handles presence of "showCustomRules" properly', () => {
@@ -44,7 +54,7 @@ describe('convertRulesFilterToKQL', () => {
   it('handles presence of "tags" properly', () => {
     const kql = convertRulesFilterToKQL({ ...filterOptions, tags: ['tag1', 'tag2'] });
 
-    expect(kql).toBe('alert.attributes.tags: "tag1" AND alert.attributes.tags: "tag2"');
+    expect(kql).toBe('alert.attributes.tags:("tag1" AND "tag2")');
   });
 
   it('handles combination of different properties properly', () => {
@@ -56,7 +66,7 @@ describe('convertRulesFilterToKQL', () => {
     });
 
     expect(kql).toBe(
-      `alert.attributes.name: foo AND alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true" AND (alert.attributes.tags: "tag1" AND alert.attributes.tags: "tag2")`
+      `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true" AND alert.attributes.tags:(\"tag1\" AND \"tag2\") AND (alert.attributes.name: \"foo\" OR alert.attributes.params.index: \"foo\" OR alert.attributes.params.threat.tactic.id: \"foo\" OR alert.attributes.params.threat.tactic.name: \"foo\" OR alert.attributes.params.threat.technique.id: \"foo\" OR alert.attributes.params.threat.technique.name: \"foo\")`
     );
   });
 });
