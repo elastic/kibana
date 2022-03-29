@@ -14,7 +14,7 @@ import {
   timeoutWith,
   startWith,
 } from 'rxjs/operators';
-import { sortBy } from 'lodash';
+import { sortBy, isEqual } from 'lodash';
 import { isDeepStrictEqual } from 'util';
 
 import { type PluginName } from '../plugins';
@@ -330,16 +330,12 @@ export class PluginsStatusService {
    * @param {ServiceStatus} reportedStatus The newly reported status for that plugin
    */
   private updatePluginReportedStatus(plugin: PluginName, reportedStatus: ServiceStatus): void {
-    const previousReportedLevel = this.pluginData[plugin].reportedStatus?.level;
-    const previousReportedSummary = this.pluginData[plugin].reportedStatus?.summary;
+    const previousReportedStatus = this.pluginData[plugin].reportedStatus;
 
     this.pluginData[plugin].reportedStatus = reportedStatus;
     this.pluginStatus[plugin] = reportedStatus;
 
-    if (
-      reportedStatus.level !== previousReportedLevel ||
-      reportedStatus.summary !== previousReportedSummary
-    ) {
+    if (!isEqual(previousReportedStatus, reportedStatus)) {
       this.updatePluginsStatuses([plugin]);
     }
   }
