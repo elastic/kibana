@@ -66,7 +66,7 @@ export class MonitoringPlugin
     });
     const monitoring = this.initializerContext.config.get();
 
-    if (!monitoring.ui.enabled) {
+    if (!monitoring.uiPublic.enabled) {
       return false;
     }
 
@@ -141,10 +141,10 @@ export class MonitoringPlugin
   private getExternalConfig() {
     const monitoring = this.initializerContext.config.get();
     return [
-      ['minIntervalSeconds', monitoring.ui.min_interval_seconds],
-      ['showLicenseExpiration', monitoring.ui.show_license_expiration],
-      ['showCgroupMetricsElasticsearch', monitoring.ui.container.elasticsearch.enabled],
-      ['showCgroupMetricsLogstash', monitoring.ui.container.logstash.enabled],
+      ['minIntervalSeconds', monitoring.uiPublic.min_interval_seconds],
+      ['showLicenseExpiration', monitoring.uiPublic.show_license_expiration],
+      ['showCgroupMetricsElasticsearch', monitoring.uiPublic.container.elasticsearch.enabled],
+      ['showCgroupMetricsLogstash', monitoring.uiPublic.container.logstash.enabled],
     ];
   }
 
