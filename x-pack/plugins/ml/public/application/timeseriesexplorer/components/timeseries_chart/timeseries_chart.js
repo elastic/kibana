@@ -975,6 +975,50 @@ class TimeseriesChartIntl extends Component {
       this.props;
     const data = contextChartData;
 
+    const focusAnnotationData = Array.isArray(annotationData)
+      ? [...annotationData].sort((a, b) => a.timestamp - b.timestamp)
+      : [];
+
+    if (focusAnnotationData.length > 0) {
+      const stack = [
+        {
+          start: focusAnnotationData[0].timestamp,
+          end: focusAnnotationData[0].end_timestamp,
+          annotations: [focusAnnotationData[0]],
+        },
+      ];
+      let lastEndTime = focusAnnotationData[0].end_timestamp;
+
+      for (let i = 1; i < focusAnnotationData.length; i++) {
+        if (focusAnnotationData[i].timestamp < lastEndTime) {
+          console.log(
+            focusAnnotationData[i].annotation,
+            focusAnnotationData[i].timestamp,
+            'lastEndTime',
+            lastEndTime,
+            focusAnnotationData[i].timestamp < lastEndTime
+          );
+
+          const itemToMerge = stack.pop();
+          const newMergedItem = {
+            ...itemToMerge,
+            end: lastEndTime,
+            annotations: [...itemToMerge.annotations, focusAnnotationData[i]],
+          };
+          stack.push(newMergedItem);
+        } else {
+          stack.push({
+            start: focusAnnotationData[i].timestamp,
+            end: focusAnnotationData[i].end_timestamp,
+            annotations: [focusAnnotationData[i]],
+          });
+        }
+        lastEndTime = focusAnnotationData[i].end_timestamp;
+      }
+      console.log('stack', stack);
+    }
+    console.log('---annotationData', annotationData);
+
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
     const hideFocusChartTooltip = this.props.tooltipService.hide.bind(this.props.tooltipService);
 
