@@ -162,6 +162,66 @@ const ProcessorTypeConfigurator = ({ basePath }: { basePath: string }) => {
   );
 };
 
+const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
+  return (
+    <UseArray
+      key={ruleType}
+      path="processors"
+      initialNumberOfItems={ruleType === 'type_one' ? 1 : 3}
+    >
+      {({ items, addItem, removeItem }) => {
+        return (
+          <>
+            {items.map(({ id, path }) => {
+              return (
+                <EuiFlexGroup key={id} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    {/* Processor name */}
+                    <UseField
+                      path={`${path}.name`}
+                      config={{
+                        label: 'Name',
+                        validations: [{ validator: emptyField('A name is required.') }],
+                      }}
+                      component={TextField}
+                      componentProps={{
+                        euiFieldProps: {
+                          style: {
+                            maxWidth: '180px',
+                          },
+                        },
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    {/* Processor type & config */}
+                    <ProcessorTypeConfigurator basePath={path} />
+                  </EuiFlexItem>
+                  {items.length > 1 && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        iconType="minusInCircle"
+                        onClick={() => removeItem(id)}
+                        aria-label="Remove processor"
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              );
+            })}
+            <EuiSpacer size="m" />
+
+            {/* Add processor button */}
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiButtonEmpty onClick={addItem}>Add processor</EuiButtonEmpty>
+            </EuiFlexGroup>
+          </>
+        );
+      }}
+    </UseArray>
+  );
+};
+
 const FormContent: FC = () => {
   const [{ ruleType }] = useFormData({ watch: 'ruleType' });
 
@@ -188,63 +248,7 @@ const FormContent: FC = () => {
         <h2>Processors</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {ruleType !== undefined && (
-        <UseArray
-          key={ruleType}
-          path={`processors_${ruleType}`}
-          initialNumberOfItems={ruleType === 'type_one' ? 1 : 3}
-        >
-          {({ items, addItem, removeItem }) => {
-            return (
-              <>
-                {items.map(({ id, path }) => {
-                  return (
-                    <EuiFlexGroup key={id} alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        {/* Processor name */}
-                        <UseField
-                          path={`${path}.name`}
-                          config={{
-                            label: 'Name',
-                            validations: [{ validator: emptyField('A name is required.') }],
-                          }}
-                          component={TextField}
-                          componentProps={{
-                            euiFieldProps: {
-                              style: {
-                                maxWidth: '180px',
-                              },
-                            },
-                          }}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        {/* Processor type & config */}
-                        <ProcessorTypeConfigurator basePath={path} />
-                      </EuiFlexItem>
-                      {items.length > 1 && (
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            iconType="minusInCircle"
-                            onClick={() => removeItem(id)}
-                            aria-label="Remove processor"
-                          />
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                  );
-                })}
-                <EuiSpacer size="m" />
-
-                {/* Add processor button */}
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiButtonEmpty onClick={addItem}>Add processor</EuiButtonEmpty>
-                </EuiFlexGroup>
-              </>
-            );
-          }}
-        </UseArray>
-      )}
+      {ruleType !== undefined && <ProcessorsConfigurator ruleType={ruleType} />}
     </>
   );
 };
