@@ -19,7 +19,11 @@ import {
   combineErrorMessages,
   isColumnOfType,
 } from './helpers';
-import { FieldBasedIndexPatternColumn, BaseIndexPatternColumn, FormatParams } from './column_types';
+import {
+  FieldBasedIndexPatternColumn,
+  BaseIndexPatternColumn,
+  ValueFormatConfig,
+} from './column_types';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
@@ -31,7 +35,7 @@ type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   operationType: T;
   params?: {
     emptyAsNull?: boolean;
-    format?: FormatParams;
+    format?: ValueFormatConfig;
   };
 };
 

@@ -81,6 +81,21 @@ export class ControlGroupContainer extends Container<
   private childOrderCache: ChildEmbeddableOrderCache;
   private recalculateFilters$: Subject<null>;
 
+  private relevantDataViewId?: string;
+  private lastUsedDataViewId?: string;
+
+  public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
+    this.lastUsedDataViewId = lastUsedDataViewId;
+  };
+
+  public setRelevantDataViewId = (newRelevantDataViewId: string) => {
+    this.relevantDataViewId = newRelevantDataViewId;
+  };
+
+  public getMostRelevantDataViewId = () => {
+    return this.lastUsedDataViewId ?? this.relevantDataViewId;
+  };
+
   /**
    * Returns a button that allows controls to be created externally using the embeddable
    * @param buttonType Controls the button styling
@@ -99,6 +114,8 @@ export class ControlGroupContainer extends Container<
         updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
         addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
         closePopover={closePopover}
+        getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
+        setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
       />
     );
   };

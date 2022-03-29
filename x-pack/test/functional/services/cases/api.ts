@@ -7,7 +7,10 @@
 
 import pMap from 'p-map';
 import { CasePostRequest } from '../../../../plugins/cases/common/api';
-import { createCase, deleteAllCaseItems } from '../../../cases_api_integration/common/lib/utils';
+import {
+  createCase as createCaseAPI,
+  deleteAllCaseItems,
+} from '../../../cases_api_integration/common/lib/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
 
@@ -16,12 +19,12 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   return {
-    async createCaseWithData(overwrites: { title?: string } = {}) {
+    async createCase(overwrites: Partial<CasePostRequest> = {}) {
       const caseData = {
         ...generateRandomCaseWithoutConnector(),
         ...overwrites,
       } as CasePostRequest;
-      await createCase(kbnSupertest, caseData);
+      await createCaseAPI(kbnSupertest, caseData);
     },
 
     async createNthRandomCases(amount: number = 3) {
@@ -32,7 +35,7 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       await pMap(
         cases,
         (caseData) => {
-          return createCase(kbnSupertest, caseData);
+          return createCaseAPI(kbnSupertest, caseData);
         },
         { concurrency: 4 }
       );
