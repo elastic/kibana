@@ -170,18 +170,33 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       }
 
       const managedKey = Symbol(id);
+      // Referencing/using the interface methods here (defined in the outer scope of this function)
+      // is ok because those are immutable and thus will not change between state changes
+      const showThisConsole = show.bind(null, id);
+      const hideThisConsole = hide.bind(null, id);
+      const terminateThisConsole = terminate.bind(null, id);
+      const isThisConsoleVisible = isVisible.bind(null, id);
+
       const managedConsole: ManagedConsole = {
         ...otherRegisterProps,
         client: {
           id,
           title,
           meta,
-          // Referencing/using the interface methods here (defined in the outer scope of this function)
-          // is ok because those are immutable and thus will not change between state changes
-          show: () => show(id),
-          hide: () => hide(id),
-          terminate: () => terminate(id),
-          isVisible: () => isVisible(id),
+          // The use of `setTimeout()` below is needed because this client interface can be consumed
+          // prior to the component state being updated. Placing a delay on the execution of these
+          // methods allows for state to be updated first and then the action is applied.
+          // So someone can do: `.register({...}).show()` and it will work
+          show: () => {
+            setTimeout(showThisConsole, 0);
+          },
+          hide: () => {
+            setTimeout(hideThisConsole, 0);
+          },
+          terminate: () => {
+            setTimeout(terminateThisConsole, 0);
+          },
+          isVisible: () => isThisConsoleVisible(),
         },
         consoleProps,
         console: <Console {...consoleProps} managedKey={managedKey} key={id} />,
