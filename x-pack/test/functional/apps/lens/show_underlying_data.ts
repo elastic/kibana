@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
 
-  describe('show underlying data-miaou', () => {
+  describe('show underlying data', () => {
     it('should show the open button for a compatible saved visualization', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
