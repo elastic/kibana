@@ -14,7 +14,8 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
-import { LineStyle } from '../../../../common/expressions/xy_chart';
+import { LineStyle } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
+
 import { idPrefix } from '../dimension_editor';
 
 interface LineStyleConfig {

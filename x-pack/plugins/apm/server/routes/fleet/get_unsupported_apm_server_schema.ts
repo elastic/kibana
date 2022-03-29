@@ -6,14 +6,12 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import { INPUT_VAR_NAME_TO_SCHEMA_PATH } from '../../../common/fleet';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
 } from '../../../common/apm_saved_object_constants';
-import {
-  apmConfigMapping,
-  preprocessLegacyFields,
-} from './get_apm_package_policy_definition';
+import { translateLegacySchemaPaths } from './translate_legacy_schema_paths';
 
 export async function getUnsupportedApmServerSchema({
   savedObjectsClient,
@@ -27,10 +25,9 @@ export async function getUnsupportedApmServerSchema({
   const apmServerSchema: Record<string, any> = JSON.parse(
     (attributes as { schemaJson: string }).schemaJson
   );
-  const preprocessedApmServerSchema = preprocessLegacyFields({
-    apmServerSchema,
-  });
-  return Object.entries(preprocessedApmServerSchema)
-    .filter(([name]) => !(name in apmConfigMapping))
+  const translatedApmServerSchema = translateLegacySchemaPaths(apmServerSchema);
+  const supportedSchemaPaths = Object.values(INPUT_VAR_NAME_TO_SCHEMA_PATH);
+  return Object.entries(translatedApmServerSchema)
+    .filter(([name]) => !supportedSchemaPaths.includes(name))
     .map(([key, value]) => ({ key, value }));
 }
