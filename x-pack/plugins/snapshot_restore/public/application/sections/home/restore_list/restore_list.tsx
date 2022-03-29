@@ -73,7 +73,7 @@ export const RestoreList: React.FunctionComponent = () => {
 
   useExecutionContext(core.executionContext, {
     type: 'application',
-    page: 'snapshotRestoreRestores',
+    page: 'snapshotRestoreRestoreTab',
   });
 
   let content: JSX.Element;

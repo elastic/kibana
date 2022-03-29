@@ -63,7 +63,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   useExecutionContext(executionContext, {
     type: 'application',
-    page: 'indexManagementDataStreams',
+    page: 'indexManagementDataStreamsTab',
   });
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);

@@ -20,7 +20,7 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
 
   useExecutionContext(executionContext, {
     type: 'application',
-    page: 'indexManagementIndices',
+    page: 'indexManagementIndicesTab',
   });
 
   return (

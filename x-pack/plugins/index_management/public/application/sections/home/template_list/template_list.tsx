@@ -77,7 +77,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   useExecutionContext(executionContext, {
     type: 'application',
-    page: 'indexManagementIndexTemplates',
+    page: 'indexManagementIndexTemplatesTab',
   });
 
   const [filters, setFilters] = useState<Filters<FilterName>>({

@@ -70,7 +70,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   useExecutionContext(core.executionContext, {
     type: 'application',
-    page: 'snapshotRestoreRepositories',
+    page: 'snapshotRestoreRepositoryTab',
   });
 
   let content;

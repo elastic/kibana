@@ -30,7 +30,7 @@ export const ComponentTemplateListContainer: React.FunctionComponent<
 
   useExecutionContext(executionContext, {
     type: 'application',
-    page: 'indexManagementComponentTemplates',
+    page: 'indexManagementComponentTemplatesTab',
   });
 
   return (

@@ -89,7 +89,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
 
   useExecutionContext(core.executionContext, {
     type: 'application',
-    page: 'snapshotRestorePolicies',
+    page: 'snapshotRestorePolicyTab',
   });
 
   let content: JSX.Element;

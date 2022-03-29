@@ -83,7 +83,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   useExecutionContext(core.executionContext, {
     type: 'application',
-    page: 'snapshotRestoreSnapshots',
+    page: 'snapshotRestoreSnapshotTab',
   });
 
   // Allow deeplinking to list pre-filtered by repository name or by policy name
