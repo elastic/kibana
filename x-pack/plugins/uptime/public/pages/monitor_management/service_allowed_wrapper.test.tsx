@@ -36,7 +36,7 @@ describe('ServiceAllowedWrapper', () => {
     expect(await findByText('Loading Monitor Management')).toBeInTheDocument();
   });
 
-  it('renders children when enabled state is true', async () => {
+  it('renders children when allowed state is true', async () => {
     jest
       .spyOn(allowedHook, 'useSyntheticsServiceAllowed')
       .mockReturnValue({ loading: false, isAllowed: true, signupUrl: 'https://example.com' });
