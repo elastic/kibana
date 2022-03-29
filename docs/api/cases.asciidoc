@@ -13,9 +13,8 @@ these APIs:
 * {security-guide}/cases-api-find-cases-by-alert.html[Find cases by alert]
 * <<cases-api-find-connectors>>
 * {security-guide}/cases-api-get-case-activity.html[Get all case activity]
-* {security-guide}/cases-api-get-all-case-comments.html[Get all case comments]
 * <<cases-api-get-case>>
-* {security-guide}/cases-api-get-comment.html[Get comment]
+* <<cases-api-get-comments>>
 * {security-guide}/cases-get-connector.html[Get current connector]
 * {security-guide}/cases-api-get-reporters.html[Get reporters]
 * {security-guide}/cases-api-get-status.html[Get status]
@@ -36,5 +35,6 @@ include::cases/cases-api-find-cases.asciidoc[leveloffset=+1]
 include::cases/cases-api-find-connectors.asciidoc[leveloffset=+1]
 //GET
 include::cases/cases-api-get-case.asciidoc[leveloffset=+1]
+include::cases/cases-api-get-comments.asciidoc[leveloffset=+1]
 //UPDATE
 include::cases/cases-api-update.asciidoc[leveloffset=+1]
