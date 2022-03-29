@@ -363,7 +363,7 @@ export function useChangePointDetection(
             d.fieldName !== 'extension.keyword'
         );
 
-      if (frequentItemsFieldCandidates.length > 10) {
+      if (Array.isArray(frequentItemsFieldCandidates) && frequentItemsFieldCandidates.length > 10) {
         frequentItemsFieldCandidates.length = 10;
       }
 
