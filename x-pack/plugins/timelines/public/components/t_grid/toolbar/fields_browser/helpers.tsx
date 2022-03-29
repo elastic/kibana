@@ -105,7 +105,6 @@ export function filterBrowserFieldsByFieldName({
     const filteredFields: Record<string, Partial<BrowserField>> = {};
 
     for (const [fieldName, fieldDescriptor] of Object.entries(categoryDescriptor.fields)) {
-
       // For historical reasons, we consider the name as it appears on the field descriptor, not the `fieldName` (attribute name) itself.
       // It is unclear if there is any point in continuing to do this.
       const fieldNameFromDescriptor = fieldDescriptor.name;
@@ -118,7 +117,6 @@ export function filterBrowserFieldsByFieldName({
 
       // Check if this field matches (via substring comparison) the passed substring
       if (fieldNameFromDescriptor !== null && fieldNameFromDescriptor.includes(trimmedSubstring)) {
-
         // this field is a match, so we should emit this category into the result object.
         hadAMatch = true;
 
@@ -131,8 +129,8 @@ export function filterBrowserFieldsByFieldName({
       // if at least one field matches, emit the category, but replace the `fields` attribute with the filtered fields
       result[categoryName] = {
         ...browserFields[categoryName],
-        fields: filteredFields
-      }
+        fields: filteredFields,
+      };
     }
   }
   return result;
