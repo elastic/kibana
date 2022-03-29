@@ -13,7 +13,7 @@ else
 fi
 
 echo "--- Build Kibana Distribution"
-node scripts/build "$RELEASE_ARG --all-platforms --debug --docker-cross-compile --skip-docker-cloud"
+node scripts/build "$RELEASE_ARG" --all-platforms --debug --docker-cross-compile --skip-docker-cloud
 
 echo "--- Build dependencies report"
 node scripts/licenses_csv_report "--csv=target/dependencies-$VERSION.csv"
