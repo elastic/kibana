@@ -1244,7 +1244,7 @@
             "label": "getFunction",
             "description": [],
             "signature": [
-              "(name: string) => ",
+              "(name: string, namespace?: string | undefined) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -1270,6 +1270,20 @@
                 "path": "src/plugins/expressions/common/executor/executor.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Executor.getFunction.$2",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1282,7 +1296,7 @@
             "label": "getFunctions",
             "description": [],
             "signature": [
-              "() => Record<string, ",
+              "(namespace?: string | undefined) => Record<string, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -1294,7 +1308,22 @@
             ],
             "path": "src/plugins/expressions/common/executor/executor.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Executor.getFunctions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -1966,6 +1995,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunction.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExpressionFunction.aliases",
             "type": "Array",
             "tags": [],
@@ -2527,6 +2569,22 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunctionParameter.strict",
+            "type": "CompoundType",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "strict",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
+            "deprecated": true,
+            "references": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExpressionFunctionParameter.options",
             "type": "Array",
             "tags": [],
@@ -3002,6 +3060,19 @@
             "tags": [],
             "label": "name",
             "description": [],
+            "path": "src/plugins/expressions/common/expression_renderers/expression_renderer.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRenderer.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expressions/common/expression_renderers/expression_renderer.ts",
             "deprecated": false
           },
@@ -3908,7 +3979,7 @@
             "label": "getFunction",
             "description": [],
             "signature": [
-              "(name: string) => ",
+              "(name: string, namespace: string | undefined) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -3934,6 +4005,20 @@
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsService.getFunction.$2",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -3946,7 +4031,7 @@
             "label": "getFunctions",
             "description": [],
             "signature": [
-              "() => Record<string, ",
+              "(namespace: string | undefined) => Record<string, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -3958,7 +4043,22 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsService.getFunctions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -4274,14 +4374,8 @@
             "label": "fork",
             "description": [],
             "signature": [
-              "(name: string | undefined) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              }
+              "(name: string) => ",
+              "ExpressionsServiceFork"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -4294,11 +4388,11 @@
                 "label": "name",
                 "description": [],
                 "signature": [
-                  "string | undefined"
+                  "string"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
                 "deprecated": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -4895,6 +4989,19 @@
             "tags": [],
             "label": "name",
             "description": [],
+            "path": "src/plugins/expressions/common/expression_types/expression_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionType.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expressions/common/expression_types/expression_type.ts",
             "deprecated": false
           },
@@ -5592,6 +5699,21 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -6320,6 +6442,20 @@
                 "text": "DatatableColumn"
               },
               "[]"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.Datatable.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "DatatableMeta",
+              " | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false
@@ -7541,6 +7677,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunctionDefinition.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExpressionFunctionDefinition.type",
             "type": "CompoundType",
             "tags": [],
@@ -8316,6 +8465,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRenderDefinition.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExpressionRenderDefinition.displayName",
             "type": "string",
             "tags": [],
@@ -8521,7 +8683,7 @@
               "\nGet a registered `ExpressionFunction` by its name, which was registered\nusing the `registerFunction` method. The returned `ExpressionFunction`\ninstance is an internal representation of the function in Expressions\nservice - do not mutate that object."
             ],
             "signature": [
-              "(name: string) => ",
+              "(name: string, namespace?: string | undefined) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -8547,6 +8709,20 @@
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsServiceStart.getFunction.$2",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -8561,7 +8737,7 @@
               "\nReturns POJO map of all registered expression functions, where keys are\nnames of the functions and values are `ExpressionFunction` instances."
             ],
             "signature": [
-              "() => Record<string, ",
+              "(namespace?: string | undefined) => Record<string, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -8573,7 +8749,22 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsServiceStart.getFunctions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -8911,6 +9102,208 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsServiceStart.extract",
+            "type": "Function",
+            "tags": [],
+            "label": "extract",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              ") => { state: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              "; references: ",
+              "SavedObjectReference",
+              "[]; }"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsServiceStart.extract.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionAstExpression",
+                    "text": "ExpressionAstExpression"
+                  }
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsServiceStart.inject",
+            "type": "Function",
+            "tags": [],
+            "label": "inject",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              ", references: ",
+              "SavedObjectReference",
+              "[]) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              }
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsServiceStart.inject.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionAstExpression",
+                    "text": "ExpressionAstExpression"
+                  }
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsServiceStart.inject.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "references",
+                "description": [],
+                "signature": [
+                  "SavedObjectReference",
+                  "[]"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsServiceStart.telemetry",
+            "type": "Function",
+            "tags": [],
+            "label": "telemetry",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              ", telemetryData: Record<string, unknown>) => Record<string, unknown>"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsServiceStart.telemetry.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionAstExpression",
+                    "text": "ExpressionAstExpression"
+                  }
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsServiceStart.telemetry.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "telemetryData",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionsServiceStart.getAllMigrations",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllMigrations",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -8946,6 +9339,19 @@
             "description": [],
             "signature": [
               "Name"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionTypeDefinition.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
             "deprecated": false
@@ -10267,7 +10673,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -11075,7 +11481,7 @@
             "\nGet a registered `ExpressionFunction` by its name, which was registered\nusing the `registerFunction` method. The returned `ExpressionFunction`\ninstance is an internal representation of the function in Expressions\nservice - do not mutate that object."
           ],
           "signature": [
-            "(name: string) => ",
+            "(name: string, namespace?: string | undefined) => ",
             {
               "pluginId": "expressions",
               "scope": "common",
@@ -11107,6 +11513,20 @@
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
               "deprecated": false,
               "isRequired": true
+            },
+            {
+              "parentPluginId": "expressions",
+              "id": "def-public.ExpressionsServiceSetup.getFunction.$2",
+              "type": "string",
+              "tags": [],
+              "label": "namespace",
+              "description": [],
+              "signature": [
+                "string | undefined"
+              ],
+              "path": "src/plugins/expressions/common/service/expressions_services.ts",
+              "deprecated": false,
+              "isRequired": false
             }
           ],
           "returnComment": []
@@ -11123,7 +11543,7 @@
             "\nReturns POJO map of all registered expression functions, where keys are\nnames of the functions and values are `ExpressionFunction` instances."
           ],
           "signature": [
-            "() => Record<string, ",
+            "(namespace?: string | undefined) => Record<string, ",
             {
               "pluginId": "expressions",
               "scope": "common",
@@ -11153,7 +11573,22 @@
               "path": "x-pack/plugins/canvas/server/routes/functions/functions.test.ts"
             }
           ],
-          "children": [],
+          "children": [
+            {
+              "parentPluginId": "expressions",
+              "id": "def-public.ExpressionsServiceSetup.getFunctions.$1",
+              "type": "string",
+              "tags": [],
+              "label": "namespace",
+              "description": [],
+              "signature": [
+                "string | undefined"
+              ],
+              "path": "src/plugins/expressions/common/service/expressions_services.ts",
+              "deprecated": false,
+              "isRequired": false
+            }
+          ],
           "returnComment": []
         },
         {
@@ -11207,14 +11642,8 @@
             "\nCreate a new instance of `ExpressionsService`. The new instance inherits\nall state of the original `ExpressionsService`, including all expression\ntypes, expression functions and context. Also, all new types and functions\nregistered in the original services AFTER the forking event will be\navailable in the forked instance. However, all new types and functions\nregistered in the forked instances will NOT be available to the original\nservice."
           ],
           "signature": [
-            "(name?: string | undefined) => ",
-            {
-              "pluginId": "expressions",
-              "scope": "common",
-              "docId": "kibExpressionsPluginApi",
-              "section": "def-common.ExpressionsService",
-              "text": "ExpressionsService"
-            }
+            "(namespace: string) => ",
+            "ExpressionsServiceFork"
           ],
           "path": "src/plugins/expressions/common/service/expressions_services.ts",
           "deprecated": false,
@@ -11224,16 +11653,14 @@
               "id": "def-public.ExpressionsServiceSetup.fork.$1",
               "type": "string",
               "tags": [],
-              "label": "name",
-              "description": [
-                "A fork name that can be used to get fork instance later."
-              ],
+              "label": "namespace",
+              "description": [],
               "signature": [
-                "string | undefined"
+                "string"
               ],
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
               "deprecated": false,
-              "isRequired": false
+              "isRequired": true
             }
           ],
           "returnComment": []
@@ -11421,6 +11848,28 @@
               "isRequired": true
             }
           ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "expressions",
+          "id": "def-public.ExpressionsServiceSetup.getAllMigrations",
+          "type": "Function",
+          "tags": [],
+          "label": "getAllMigrations",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "kibanaUtils",
+              "scope": "common",
+              "docId": "kibKibanaUtilsPluginApi",
+              "section": "def-common.MigrateFunctionsObject",
+              "text": "MigrateFunctionsObject"
+            }
+          ],
+          "path": "src/plugins/expressions/common/service/expressions_services.ts",
+          "deprecated": false,
+          "children": [],
           "returnComment": []
         }
       ],
@@ -12699,7 +13148,7 @@
             "label": "getFunction",
             "description": [],
             "signature": [
-              "(name: string) => ",
+              "(name: string, namespace?: string | undefined) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -12725,6 +13174,20 @@
                 "path": "src/plugins/expressions/common/executor/executor.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Executor.getFunction.$2",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -12737,7 +13200,7 @@
             "label": "getFunctions",
             "description": [],
             "signature": [
-              "() => Record<string, ",
+              "(namespace?: string | undefined) => Record<string, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -12749,7 +13212,22 @@
             ],
             "path": "src/plugins/expressions/common/executor/executor.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Executor.getFunctions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -13421,6 +13899,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunction.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.ExpressionFunction.aliases",
             "type": "Array",
             "tags": [],
@@ -13982,6 +14473,22 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunctionParameter.strict",
+            "type": "CompoundType",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "strict",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
+            "deprecated": true,
+            "references": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.ExpressionFunctionParameter.options",
             "type": "Array",
             "tags": [],
@@ -14104,6 +14611,19 @@
             "tags": [],
             "label": "name",
             "description": [],
+            "path": "src/plugins/expressions/common/expression_renderers/expression_renderer.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExpressionRenderer.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expressions/common/expression_renderers/expression_renderer.ts",
             "deprecated": false
           },
@@ -14683,6 +15203,19 @@
             "tags": [],
             "label": "name",
             "description": [],
+            "path": "src/plugins/expressions/common/expression_types/expression_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExpressionType.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expressions/common/expression_types/expression_type.ts",
             "deprecated": false
           },
@@ -16063,6 +16596,20 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.Datatable.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "DatatableMeta",
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.Datatable.rows",
             "type": "Array",
             "tags": [],
@@ -17249,6 +17796,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunctionDefinition.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.ExpressionFunctionDefinition.type",
             "type": "CompoundType",
             "tags": [],
@@ -18024,6 +18584,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.ExpressionRenderDefinition.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.ExpressionRenderDefinition.displayName",
             "type": "string",
             "tags": [],
@@ -18189,6 +18762,19 @@
             "description": [],
             "signature": [
               "Name"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExpressionTypeDefinition.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
             "deprecated": false
@@ -19111,7 +19697,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -21080,7 +21666,7 @@
             "label": "getFunction",
             "description": [],
             "signature": [
-              "(name: string) => ",
+              "(name: string, namespace?: string | undefined) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -21106,6 +21692,20 @@
                 "path": "src/plugins/expressions/common/executor/executor.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Executor.getFunction.$2",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -21118,7 +21718,7 @@
             "label": "getFunctions",
             "description": [],
             "signature": [
-              "() => Record<string, ",
+              "(namespace?: string | undefined) => Record<string, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -21130,7 +21730,22 @@
             ],
             "path": "src/plugins/expressions/common/executor/executor.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Executor.getFunctions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -21802,6 +22417,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunction.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExpressionFunction.aliases",
             "type": "Array",
             "tags": [],
@@ -22363,6 +22991,22 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunctionParameter.strict",
+            "type": "CompoundType",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "strict",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
+            "deprecated": true,
+            "references": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExpressionFunctionParameter.options",
             "type": "Array",
             "tags": [],
@@ -22485,6 +23129,19 @@
             "tags": [],
             "label": "name",
             "description": [],
+            "path": "src/plugins/expressions/common/expression_renderers/expression_renderer.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionRenderer.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expressions/common/expression_renderers/expression_renderer.ts",
             "deprecated": false
           },
@@ -23056,7 +23713,7 @@
             "label": "getFunction",
             "description": [],
             "signature": [
-              "(name: string) => ",
+              "(name: string, namespace: string | undefined) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -23082,6 +23739,20 @@
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsService.getFunction.$2",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -23094,7 +23765,7 @@
             "label": "getFunctions",
             "description": [],
             "signature": [
-              "() => Record<string, ",
+              "(namespace: string | undefined) => Record<string, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -23106,7 +23777,22 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsService.getFunctions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -23422,14 +24108,8 @@
             "label": "fork",
             "description": [],
             "signature": [
-              "(name: string | undefined) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              }
+              "(name: string) => ",
+              "ExpressionsServiceFork"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -23442,11 +24122,11 @@
                 "label": "name",
                 "description": [],
                 "signature": [
-                  "string | undefined"
+                  "string"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
                 "deprecated": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -24043,6 +24723,19 @@
             "tags": [],
             "label": "name",
             "description": [],
+            "path": "src/plugins/expressions/common/expression_types/expression_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionType.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expressions/common/expression_types/expression_type.ts",
             "deprecated": false
           },
@@ -24740,6 +25433,21 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -25747,11 +26455,9 @@
         "type": "Function",
         "tags": [],
         "label": "getByAlias",
-        "description": [
-          "\nThis is used for looking up function/argument definitions. It looks through\nthe given object/array for a case-insensitive match, which could be either the\n`name` itself, or something under the `aliases` property."
-        ],
+        "description": [],
         "signature": [
-          "(node: T[] | Record<string, T>, nodeName: string) => T | undefined"
+          "(node: T[] | Record<string, T>, nodeName: string, nodeNamespace: string | undefined) => T | undefined"
         ],
         "path": "src/plugins/expressions/common/util/get_by_alias.ts",
         "deprecated": false,
@@ -25783,6 +26489,20 @@
             "path": "src/plugins/expressions/common/util/get_by_alias.ts",
             "deprecated": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.getByAlias.$3",
+            "type": "string",
+            "tags": [],
+            "label": "nodeNamespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/util/get_by_alias.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -26639,6 +27359,20 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.Datatable.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "DatatableMeta",
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.Datatable.rows",
             "type": "Array",
             "tags": [],
@@ -26734,7 +27468,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\" | \"null\""
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false
@@ -28714,6 +29448,19 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionExecutionParams.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -28782,6 +29529,19 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunctionDefinition.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
             "deprecated": false
@@ -29563,6 +30323,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExpressionRenderDefinition.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExpressionRenderDefinition.displayName",
             "type": "string",
             "tags": [],
@@ -29774,7 +30547,7 @@
               "\nGet a registered `ExpressionFunction` by its name, which was registered\nusing the `registerFunction` method. The returned `ExpressionFunction`\ninstance is an internal representation of the function in Expressions\nservice - do not mutate that object."
             ],
             "signature": [
-              "(name: string) => ",
+              "(name: string, namespace?: string | undefined) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -29806,6 +30579,20 @@
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceSetup.getFunction.$2",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -29822,7 +30609,7 @@
               "\nReturns POJO map of all registered expression functions, where keys are\nnames of the functions and values are `ExpressionFunction` instances."
             ],
             "signature": [
-              "() => Record<string, ",
+              "(namespace?: string | undefined) => Record<string, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -29852,7 +30639,22 @@
                 "path": "x-pack/plugins/canvas/server/routes/functions/functions.test.ts"
               }
             ],
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceSetup.getFunctions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -29906,14 +30708,8 @@
               "\nCreate a new instance of `ExpressionsService`. The new instance inherits\nall state of the original `ExpressionsService`, including all expression\ntypes, expression functions and context. Also, all new types and functions\nregistered in the original services AFTER the forking event will be\navailable in the forked instance. However, all new types and functions\nregistered in the forked instances will NOT be available to the original\nservice."
             ],
             "signature": [
-              "(name?: string | undefined) => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionsService",
-                "text": "ExpressionsService"
-              }
+              "(namespace: string) => ",
+              "ExpressionsServiceFork"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -29923,16 +30719,14 @@
                 "id": "def-common.ExpressionsServiceSetup.fork.$1",
                 "type": "string",
                 "tags": [],
-                "label": "name",
-                "description": [
-                  "A fork name that can be used to get fork instance later."
-                ],
+                "label": "namespace",
+                "description": [],
                 "signature": [
-                  "string | undefined"
+                  "string"
                 ],
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
                 "deprecated": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -30121,6 +30915,28 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceSetup.getAllMigrations",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllMigrations",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -30147,7 +30963,7 @@
               "\nGet a registered `ExpressionFunction` by its name, which was registered\nusing the `registerFunction` method. The returned `ExpressionFunction`\ninstance is an internal representation of the function in Expressions\nservice - do not mutate that object."
             ],
             "signature": [
-              "(name: string) => ",
+              "(name: string, namespace?: string | undefined) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -30173,6 +30989,20 @@
                 "path": "src/plugins/expressions/common/service/expressions_services.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceStart.getFunction.$2",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -30187,7 +31017,7 @@
               "\nReturns POJO map of all registered expression functions, where keys are\nnames of the functions and values are `ExpressionFunction` instances."
             ],
             "signature": [
-              "() => Record<string, ",
+              "(namespace?: string | undefined) => Record<string, ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -30199,7 +31029,22 @@
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceStart.getFunctions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -30537,6 +31382,208 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceStart.extract",
+            "type": "Function",
+            "tags": [],
+            "label": "extract",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              ") => { state: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              "; references: ",
+              "SavedObjectReference",
+              "[]; }"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceStart.extract.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionAstExpression",
+                    "text": "ExpressionAstExpression"
+                  }
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceStart.inject",
+            "type": "Function",
+            "tags": [],
+            "label": "inject",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              ", references: ",
+              "SavedObjectReference",
+              "[]) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              }
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceStart.inject.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionAstExpression",
+                    "text": "ExpressionAstExpression"
+                  }
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceStart.inject.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "references",
+                "description": [],
+                "signature": [
+                  "SavedObjectReference",
+                  "[]"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceStart.telemetry",
+            "type": "Function",
+            "tags": [],
+            "label": "telemetry",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              ", telemetryData: Record<string, unknown>) => Record<string, unknown>"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceStart.telemetry.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionAstExpression",
+                    "text": "ExpressionAstExpression"
+                  }
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsServiceStart.telemetry.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "telemetryData",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionsServiceStart.getAllMigrations",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllMigrations",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -30572,6 +31619,19 @@
             "description": [],
             "signature": [
               "Name"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionTypeDefinition.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/types.ts",
             "deprecated": false
@@ -32071,7 +33131,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -33308,11 +34368,27 @@
         "references": [
           {
             "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/target/types/public/functions/index.d.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/target/types/public/functions/index.d.ts"
+          },
+          {
+            "plugin": "canvas",
             "path": "x-pack/plugins/canvas/types/state.ts"
           },
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/types/state.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/target/types/types/state.d.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/target/types/types/state.d.ts"
           },
           {
             "plugin": "canvas",
@@ -33353,6 +34429,14 @@
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/target/types/canvas_plugin_src/functions/browser/markdown.d.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/target/types/canvas_plugin_src/functions/browser/markdown.d.ts"
           },
           {
             "plugin": "visTypeXy",
@@ -34658,7 +35742,9 @@
                 "section": "def-common.DatatableColumn",
                 "text": "DatatableColumn"
               },
-              "[]; }"
+              "[]; meta?: ",
+              "DatatableMeta",
+              " | undefined; }"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -34710,7 +35796,9 @@
                 "section": "def-common.DatatableColumn",
                 "text": "DatatableColumn"
               },
-              "[]; }"
+              "[]; meta?: ",
+              "DatatableMeta",
+              " | undefined; }"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -36942,7 +38030,9 @@
                 "section": "def-common.DatatableRow",
                 "text": "DatatableRow"
               },
-              "[]; type: \"datatable\"; }>"
+              "[]; type: \"datatable\"; meta?: ",
+              "DatatableMeta",
+              " | undefined; }>"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
             "deprecated": false,

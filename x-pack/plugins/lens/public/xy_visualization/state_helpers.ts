@@ -9,13 +9,15 @@ import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
 import type {
   SeriesType,
-  XYLayerConfig,
   YConfig,
   ValidLayer,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import {
+  visualizationTypes,
+  XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '../../common/expressions';
-import { visualizationTypes } from './types';
+} from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {

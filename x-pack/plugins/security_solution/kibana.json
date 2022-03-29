@@ -25,7 +25,8 @@
     "taskManager",
     "timelines",
     "triggersActionsUi",
-    "uiActions"
+    "uiActions",
+    "sessionView"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",

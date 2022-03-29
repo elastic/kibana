@@ -47,6 +47,7 @@ describe('', () => {
           type,
         },
       ],
+      toastContent: 'Successfully added visualization to the case',
     });
     expect(result.current.disabled).toEqual(false);
   });

@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { capitalize, sortBy } from 'lodash';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -28,6 +29,7 @@ import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { RulesTable } from './components/rules_table';
 import { Name } from './components/name';
 import { LastResponseFilter } from './components/last_response_filter';
+import { TypeFilter } from './components/type_filter';
 import { StatusContext } from './components/status_context';
 import { ExecutionStatus } from './components/execution_status';
 import { LastRun } from './components/last_run';
@@ -70,11 +72,10 @@ import {
   SEARCH_PLACEHOLDER,
 } from './translations';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
-
 const ENTER_KEY = 13;
 
 export function RulesPage() {
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, kibanaFeatures } = usePluginContext();
   const {
     http,
     docLinks,
@@ -95,6 +96,7 @@ export function RulesPage() {
   const [refreshInterval, setRefreshInterval] = useState(60000);
   const [isPaused, setIsPaused] = useState(false);
   const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
+  const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
@@ -117,6 +119,7 @@ export function RulesPage() {
   const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
     searchText,
     ruleLastResponseFilter,
+    typesFilter,
     page,
     setPage,
     sort,
@@ -127,6 +130,32 @@ export function RulesPage() {
   });
   const authorizedRuleTypes = [...ruleTypes.values()];
 
+  const getProducerFeatureName = (producer: string) => {
+    return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
+  };
+
+  const groupRuleTypesByProducer = () => {
+    return authorizedRuleTypes.reduce(
+      (
+        result: Record<
+          string,
+          Array<{
+            value: string;
+            name: string;
+          }>
+        >,
+        ruleType
+      ) => {
+        const producer = ruleType.producer;
+        (result[producer] = result[producer] || []).push({
+          value: ruleType.id,
+          name: ruleType.name,
+        });
+        return result;
+      },
+      {}
+    );
+  };
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
@@ -292,6 +321,18 @@ export function RulesPage() {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            <TypeFilter
+              key="type-filter"
+              onChange={(types: string[]) => setTypesFilter(types)}
+              options={sortBy(Object.entries(groupRuleTypesByProducer())).map(
+                ([groupName, ruleTypesOptions]) => ({
+                  groupName: getProducerFeatureName(groupName) ?? capitalize(groupName),
+                  subOptions: ruleTypesOptions.sort((a, b) => a.name.localeCompare(b.name)),
+                })
+              )}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <LastResponseFilter
               key="rule-lastResponse-filter"
               selectedStatuses={ruleLastResponseFilter}
@@ -417,6 +458,7 @@ export function RulesPage() {
           setRulesState({ ...rulesState, isLoading });
         }}
       />
+
       {getRulesTable()}
       {error &&
         toasts.addDanger({

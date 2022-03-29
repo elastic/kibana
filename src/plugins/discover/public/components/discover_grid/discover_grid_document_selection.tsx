@@ -149,6 +149,11 @@ export function DiscoverGridDocumentToolbarBtn({
     setSelectedDocs,
   ]);
 
+  const toggleSelectionToolbar = useCallback(
+    () => setIsSelectionPopoverOpen((prevIsOpen) => !prevIsOpen),
+    []
+  );
+
   return (
     <EuiPopover
       closePopover={() => setIsSelectionPopoverOpen(false)}
@@ -159,7 +164,7 @@ export function DiscoverGridDocumentToolbarBtn({
           size="xs"
           color="text"
           iconType="documents"
-          onClick={() => setIsSelectionPopoverOpen(true)}
+          onClick={toggleSelectionToolbar}
           data-selected-documents={selectedDocs.length}
           data-test-subj="dscGridSelectionBtn"
           isSelected={isFilterActive}
