@@ -24,6 +24,7 @@ import { useShallowEqualSelector } from '../../../../../common/hooks/use_selecto
 import {
   setActiveTabTimeline,
   updateTimelineGraphEventId,
+  updateTimelineSessionViewSessionId,
 } from '../../../../store/timeline/actions';
 import {
   useGlobalFullScreen,
@@ -128,6 +129,35 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
   }, [dispatch, ecsData._id, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
 
+  const entryLeader = useMemo(() => {
+    const { process } = ecsData;
+    const entryLeaderIds = process?.entry_leader?.entity_id;
+    if (entryLeaderIds !== undefined && entryLeaderIds.length > 0) {
+      return entryLeaderIds[0];
+    } else {
+      return null;
+    }
+  }, [ecsData]);
+
+  const openSessionView = useCallback(() => {
+    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
+    if (timelineId === TimelineId.active) {
+      if (dataGridIsFullScreen) {
+        setTimelineFullScreen(true);
+      }
+      if (entryLeader !== null) {
+        dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
+      }
+    } else {
+      if (dataGridIsFullScreen) {
+        setGlobalFullScreen(true);
+      }
+    }
+    if (entryLeader !== null) {
+      dispatch(updateTimelineSessionViewSessionId({ id: timelineId, eventId: entryLeader }));
+    }
+  }, [dispatch, timelineId, entryLeader, setGlobalFullScreen, setTimelineFullScreen]);
+
   return (
     <ActionsContainer>
       {showCheckboxes && !tGridEnabled && (
@@ -214,6 +244,21 @@ const ActionsComponent: React.FC<ActionProps> = ({
                   data-test-subj="view-in-analyzer"
                   iconType="analyzeEvent"
                   onClick={handleClick}
+                  size="s"
+                />
+              </EuiToolTip>
+            </EventsTdContent>
+          </div>
+        ) : null}
+        {entryLeader !== null ? (
+          <div>
+            <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>
+                <EuiButtonIcon
+                  aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                  data-test-subj="session-view-button"
+                  iconType="console"
+                  onClick={openSessionView}
                   size="s"
                 />
               </EuiToolTip>

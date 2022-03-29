@@ -43,21 +43,11 @@ const tourConfig: EuiTourState = {
 const stepsConfig: EuiStatelessTourStep[] = [
   {
     step: 1,
-    title: 'A new feature',
-    content: <p>{'This feature allows for...'}</p>,
-    stepsTotal: 2,
+    title: i18n.SEARCH_CAPABILITIES_TITLE,
+    content: <p>{i18n.SEARCH_CAPABILITIES_DESCRIPTION}</p>,
+    stepsTotal: 1,
     children: <></>,
     onFinish: noop,
-    maxWidth: TOUR_POPOVER_WIDTH,
-  },
-  {
-    step: 2,
-    title: 'Another feature',
-    content: <p>{'This another feature allows for...'}</p>,
-    stepsTotal: 2,
-    children: <></>,
-    onFinish: noop,
-    anchorPosition: 'rightUp',
     maxWidth: TOUR_POPOVER_WIDTH,
   },
 ];
@@ -82,39 +72,43 @@ export const RulesFeatureTourContextProvider: FC = ({ children }) => {
 
   const [tourSteps, tourActions, tourState] = useEuiTour(stepsConfig, restoredState);
 
-  const enhancedSteps = useMemo<EuiTourStepProps[]>(() => {
-    return tourSteps.map((item, index, array) => {
-      return {
+  const enhancedSteps = useMemo<EuiTourStepProps[]>(
+    () =>
+      tourSteps.map((item, index) => ({
         ...item,
         content: (
           <>
             {item.content}
-            <EuiSpacer size="s" />
-            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="arrowLeft"
-                  aria-label="Go to previous step"
-                  display="empty"
-                  disabled={index === 0}
-                  onClick={tourActions.decrementStep}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="arrowRight"
-                  aria-label="Go to next step"
-                  display="base"
-                  disabled={index === array.length - 1}
-                  onClick={tourActions.incrementStep}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            {tourSteps.length > 1 && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="arrowLeft"
+                      aria-label="Go to previous step"
+                      display="empty"
+                      disabled={index === 0}
+                      onClick={tourActions.decrementStep}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="arrowRight"
+                      aria-label="Go to next step"
+                      display="base"
+                      disabled={index === tourSteps.length - 1}
+                      onClick={tourActions.incrementStep}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
           </>
         ),
-      };
-    });
-  }, [tourSteps, tourActions]);
+      })),
+    [tourSteps, tourActions]
+  );
 
   const providerValue = useMemo<RulesFeatureTourContextType>(
     () => ({ steps: enhancedSteps, actions: tourActions }),
