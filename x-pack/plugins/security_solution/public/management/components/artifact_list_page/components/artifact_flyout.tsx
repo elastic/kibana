@@ -39,6 +39,7 @@ import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_dat
 import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
 import { useIsMounted } from '../../hooks/use_is_mounted';
 import { useGetArtifact } from '../../../hooks/artifacts';
+import type { PolicyData } from '../../../../../common/endpoint/types';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -151,6 +152,8 @@ const createFormInitialState = (
 export interface ArtifactFlyoutProps {
   apiClient: ExceptionsListApiClient;
   FormComponent: React.ComponentType<ArtifactFormComponentProps>;
+  policies: PolicyData[];
+  policiesIsLoading: boolean;
   onSuccess(): void;
   onClose(): void;
   submitHandler?: (
@@ -175,6 +178,8 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
   ({
     apiClient,
     item,
+    policies,
+    policiesIsLoading,
     FormComponent,
     onSuccess,
     onClose,
@@ -252,10 +257,10 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       }
 
       // `undefined` will cause params to be dropped from url
-      setUrlParams({ itemId: undefined, show: undefined }, true);
+      setUrlParams({ ...urlParams, itemId: undefined, show: undefined }, true);
 
       onClose();
-    }, [isSubmittingData, onClose, setUrlParams]);
+    }, [isSubmittingData, onClose, setUrlParams, urlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
       ({ item: updatedItem, isValid }) => {
@@ -280,12 +285,12 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         if (isMounted) {
           // Close the flyout
           // `undefined` will cause params to be dropped from url
-          setUrlParams({ itemId: undefined, show: undefined }, true);
+          setUrlParams({ ...urlParams, itemId: undefined, show: undefined }, true);
 
           onSuccess();
         }
       },
-      [isEditFlow, isMounted, labels, onSuccess, setUrlParams, toasts]
+      [isEditFlow, isMounted, labels, onSuccess, setUrlParams, toasts, urlParams]
     );
 
     const handleSubmitClick = useCallback(() => {
@@ -373,6 +378,8 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
               item={formState.item}
               error={submitError ?? undefined}
               mode={formMode}
+              policies={policies}
+              policiesIsLoading={policiesIsLoading}
             />
           )}
         </EuiFlyoutBody>

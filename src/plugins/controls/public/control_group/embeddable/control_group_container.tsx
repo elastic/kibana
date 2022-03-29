@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
 import { EMPTY, merge, pipe, Subject, Subscription } from 'rxjs';
-import { EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
+import { EuiContextMenuPanel } from '@elastic/eui';
 import {
   distinctUntilChanged,
   debounceTime,
@@ -40,18 +40,18 @@ import { pluginServices } from '../../services';
 import { DataView } from '../../../../data_views/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { EditControlGroup } from '../editor/edit_control_group';
-import { DEFAULT_CONTROL_WIDTH } from '../editor/editor_constants';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
+import { Container, EmbeddableFactory } from '../../../../embeddable/public';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
+import { ControlGroupChainingSystems } from './control_group_chaining_system';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-import { Container, EmbeddableFactory, isErrorEmbeddable } from '../../../../embeddable/public';
 
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
 >(LazyReduxEmbeddableWrapper);
 
-interface ChildEmbeddableOrderCache {
+export interface ChildEmbeddableOrderCache {
   IdsToOrder: { [key: string]: number };
   idsInOrder: string[];
   lastChildId: string;
@@ -81,6 +81,21 @@ export class ControlGroupContainer extends Container<
   private childOrderCache: ChildEmbeddableOrderCache;
   private recalculateFilters$: Subject<null>;
 
+  private relevantDataViewId?: string;
+  private lastUsedDataViewId?: string;
+
+  public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
+    this.lastUsedDataViewId = lastUsedDataViewId;
+  };
+
+  public setRelevantDataViewId = (newRelevantDataViewId: string) => {
+    this.relevantDataViewId = newRelevantDataViewId;
+  };
+
+  public getMostRelevantDataViewId = () => {
+    return this.lastUsedDataViewId ?? this.relevantDataViewId;
+  };
+
   /**
    * Returns a button that allows controls to be created externally using the embeddable
    * @param buttonType Controls the button styling
@@ -99,27 +114,14 @@ export class ControlGroupContainer extends Container<
         updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
         addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
         closePopover={closePopover}
+        getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
+        setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
       />
     );
   };
 
   private getEditControlGroupButton = (closePopover: () => void) => {
-    return (
-      <EditControlGroup
-        controlStyle={this.getInput().controlStyle}
-        panels={this.getInput().panels}
-        defaultControlWidth={this.getInput().defaultControlWidth}
-        setControlStyle={(controlStyle) => this.updateInput({ controlStyle })}
-        setDefaultControlWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-        setAllControlWidths={(defaultControlWidth) => {
-          Object.keys(this.getInput().panels).forEach(
-            (panelId) => (this.getInput().panels[panelId].width = defaultControlWidth)
-          );
-        }}
-        removeEmbeddable={(id) => this.removeEmbeddable(id)}
-        closePopover={closePopover}
-      />
-    );
+    return <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />;
   };
 
   /**
@@ -134,13 +136,12 @@ export class ControlGroupContainer extends Container<
         iconType="arrowDown"
         iconSide="right"
         panelPaddingSize="none"
-        data-test-subj="dashboardControlsMenuButton"
+        data-test-subj="dashboard-controls-menu-button"
       >
         {({ closePopover }: { closePopover: () => void }) => (
           <EuiContextMenuPanel
             items={[
               this.getCreateControlButton('toolbar', closePopover),
-              <EuiHorizontalRule margin="none" />,
               this.getEditControlGroupButton(closePopover),
             ]}
           />
@@ -155,12 +156,7 @@ export class ControlGroupContainer extends Container<
       { embeddableLoaded: {} },
       pluginServices.getServices().controls.getControlFactory,
       parent,
-      {
-        childIdInitializeOrder: Object.values(initialInput.panels)
-          .sort((a, b) => (a.order > b.order ? 1 : -1))
-          .map((panel) => panel.explicitInput.id),
-        initializeSequentially: true,
-      }
+      ControlGroupChainingSystems[initialInput.chainingSystem]?.getContainerSettings(initialInput)
     );
 
     this.recalculateFilters$ = new Subject();
@@ -227,20 +223,12 @@ export class ControlGroupContainer extends Container<
         .pipe(anyChildChangePipe)
         .subscribe((childOutputChangedId) => {
           this.recalculateDataViews();
-          if (childOutputChangedId === this.childOrderCache.lastChildId) {
-            // the last control's output has updated, recalculate filters
-            this.recalculateFilters$.next();
-            return;
-          }
-
-          // when output changes on a child which isn't the last - make the next embeddable updateInputFromParent
-          const nextOrder = this.childOrderCache.IdsToOrder[childOutputChangedId] + 1;
-          if (nextOrder >= Object.keys(this.children).length) return;
-          setTimeout(
-            () =>
-              this.getChild(this.childOrderCache.idsInOrder[nextOrder]).refreshInputFromParent(),
-            1 // run on next tick
-          );
+          ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
+            childOutputChangedId,
+            childOrder: this.childOrderCache,
+            getChild: (id) => this.getChild(id),
+            recalculateFilters$: this.recalculateFilters$,
+          });
         })
     );
 
@@ -250,18 +238,6 @@ export class ControlGroupContainer extends Container<
     this.subscriptions.add(
       this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
     );
-  };
-
-  private getPrecedingFilters = (id: string) => {
-    let filters: Filter[] = [];
-    const order = this.childOrderCache.IdsToOrder?.[id];
-    if (!order || order === 0) return filters;
-    for (let i = 0; i < order; i++) {
-      const embeddable = this.getChild<ControlEmbeddable>(this.childOrderCache.idsInOrder[i]);
-      if (!embeddable || isErrorEmbeddable(embeddable)) return filters;
-      filters = [...filters, ...(embeddable.getOutput().filters ?? [])];
-    }
-    return filters;
   };
 
   private getEmbeddableOrderCache = (): ChildEmbeddableOrderCache => {
@@ -315,20 +291,25 @@ export class ControlGroupContainer extends Container<
     }
     return {
       order: nextOrder,
-      width: this.getInput().defaultControlWidth ?? DEFAULT_CONTROL_WIDTH,
+      width: this.getInput().defaultControlWidth,
       ...panelState,
     } as ControlPanelState<TEmbeddableInput>;
   }
 
   protected getInheritedInput(id: string): ControlInput {
-    const { filters, query, ignoreParentSettings, timeRange } = this.getInput();
+    const { filters, query, ignoreParentSettings, timeRange, chainingSystem } = this.getInput();
 
-    const precedingFilters = this.getPrecedingFilters(id);
+    const precedingFilters = ControlGroupChainingSystems[chainingSystem].getPrecedingFilters({
+      id,
+      childOrder: this.childOrderCache,
+      getChild: (getChildId: string) => this.getChild<ControlEmbeddable>(getChildId),
+    });
     const allFilters = [
       ...(ignoreParentSettings?.ignoreFilters ? [] : filters ?? []),
-      ...precedingFilters,
+      ...(precedingFilters ?? []),
     ];
     return {
+      ignoreParentSettings,
       filters: allFilters,
       query: ignoreParentSettings?.ignoreQuery ? undefined : query,
       timeRange: ignoreParentSettings?.ignoreTimerange ? undefined : timeRange,

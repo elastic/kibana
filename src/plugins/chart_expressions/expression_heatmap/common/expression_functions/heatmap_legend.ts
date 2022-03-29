@@ -36,6 +36,7 @@ export const heatmapLegendConfig: ExpressionFunctionDefinition<
       help: i18n.translate('expressionHeatmap.function.args.legend.position.help', {
         defaultMessage: 'Specifies the legend position.',
       }),
+      strict: true,
     },
     maxLines: {
       types: ['number'],

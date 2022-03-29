@@ -51,8 +51,9 @@ import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats
 import { useRefresh } from '../../routing/use_refresh';
 import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
-import { JobSpacesList } from '../../components/job_spaces_list';
+import { MLSavedObjectsSpacesList } from '../../components/ml_saved_objects_spaces_list';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
+import { TestTrainedModelFlyout, isTestable } from './test_models';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -124,18 +125,17 @@ export const ModelsList: FC<Props> = ({
   const trainedModelsApiService = useTrainedModelsApiService();
   const savedObjectsApiService = useSavedObjectsApiService();
 
-  const { displayErrorToast, displayDangerToast, displaySuccessToast } =
-    useToastNotificationService();
+  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
-  const [modelsToDelete, setModelsToDelete] = useState<ModelItemFull[]>([]);
+  const [modelIdsToDelete, setModelIdsToDelete] = useState<string[]>([]);
   const [modelSpaces, setModelSpaces] = useState<{ [modelId: string]: string[] }>({});
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-
+  const [showTestFlyout, setShowTestFlyout] = useState<ModelItem | null>(null);
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
   const navigateToPath = useNavigateToPath();
@@ -260,6 +260,7 @@ export const ModelsList: FC<Props> = ({
           defaultMessage: 'Fetch model stats failed',
         })
       );
+      return false;
     }
   }, []);
 
@@ -280,57 +281,6 @@ export const ModelsList: FC<Props> = ({
       name: v,
     }));
   }, [items]);
-
-  async function prepareModelsForDeletion(models: ModelItem[]) {
-    // Fetch model stats to check associated pipelines
-    if (await fetchModelsStats(models)) {
-      setModelsToDelete(models as ModelItemFull[]);
-    } else {
-      displayDangerToast(
-        i18n.translate('xpack.ml.trainedModels.modelsList.unableToDeleteModelsErrorMessage', {
-          defaultMessage: 'Unable to delete models',
-        })
-      );
-    }
-  }
-
-  /**
-   * Deletes the models marked for deletion.
-   */
-  async function deleteModels() {
-    const modelsToDeleteIds = modelsToDelete.map((model) => model.model_id);
-
-    try {
-      await Promise.all(
-        modelsToDeleteIds.map((modelId) => trainedModelsApiService.deleteTrainedModel(modelId))
-      );
-      setItems(
-        items.filter(
-          (model) => !modelsToDelete.some((toDelete) => toDelete.model_id === model.model_id)
-        )
-      );
-      displaySuccessToast(
-        i18n.translate('xpack.ml.trainedModels.modelsList.successfullyDeletedMessage', {
-          defaultMessage:
-            '{modelsCount, plural, one {Model {modelsToDeleteIds}} other {# models}} {modelsCount, plural, one {has} other {have}} been successfully deleted',
-          values: {
-            modelsCount: modelsToDeleteIds.length,
-            modelsToDeleteIds: modelsToDeleteIds.join(', '),
-          },
-        })
-      );
-    } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
-          defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
-          values: {
-            modelsCount: modelsToDeleteIds.length,
-          },
-        })
-      );
-    }
-  }
 
   /**
    * Table actions
@@ -512,8 +462,8 @@ export const ModelsList: FC<Props> = ({
           type: 'icon',
           color: 'danger',
           isPrimary: false,
-          onClick: async (model) => {
-            await prepareModelsForDeletion([model]);
+          onClick: (model) => {
+            setModelIdsToDelete([model.model_id]);
           },
           available: (item) => canDeleteTrainedModels && !isBuiltInModel(item),
           enabled: (item) => {
@@ -521,6 +471,19 @@ export const ModelsList: FC<Props> = ({
             // ATM undefined means pipelines fetch failed server-side.
             return !isPopulatedObject(item.pipelines);
           },
+        },
+        {
+          name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
+            defaultMessage: 'Test model',
+          }),
+          description: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
+            defaultMessage: 'Test model',
+          }),
+          icon: 'inputOutput',
+          type: 'icon',
+          isPrimary: true,
+          available: isTestable,
+          onClick: setShowTestFlyout,
         },
       ] as Array<Action<ModelItem>>)
     );
@@ -640,11 +603,11 @@ export const ModelsList: FC<Props> = ({
       render: (id: string) => {
         const spaces = modelSpaces[id];
         return (
-          <JobSpacesList
+          <MLSavedObjectsSpacesList
             spacesApi={spacesApi}
             spaceIds={spaces ?? []}
             id={id}
-            jobType="trained-model"
+            mlSavedObjectType="trained-model"
             refresh={fetchModelsData}
           />
         );
@@ -684,7 +647,13 @@ export const ModelsList: FC<Props> = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton color="danger" onClick={prepareModelsForDeletion.bind(null, selectedModels)}>
+          <EuiButton
+            color="danger"
+            onClick={setModelIdsToDelete.bind(
+              null,
+              selectedModels.map((m) => m.model_id)
+            )}
+          >
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel"
               defaultMessage="Delete"
@@ -761,7 +730,7 @@ export const ModelsList: FC<Props> = ({
       {isManagementTable ? null : (
         <>
           <SavedObjectsWarning
-            jobType="trained-model"
+            mlSavedObjectType="trained-model"
             onCloseFlyout={fetchModelsData}
             forceRefresh={isLoading}
           />
@@ -804,15 +773,21 @@ export const ModelsList: FC<Props> = ({
           data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
         />
       </div>
-      {modelsToDelete.length > 0 && (
+      {modelIdsToDelete.length > 0 && (
         <DeleteModelsModal
-          onClose={async (deletionApproved) => {
-            if (deletionApproved) {
-              await deleteModels();
+          onClose={(refreshList) => {
+            setModelIdsToDelete([]);
+            if (refreshList) {
+              fetchModelsData();
             }
-            setModelsToDelete([]);
           }}
-          models={modelsToDelete}
+          modelIds={modelIdsToDelete}
+        />
+      )}
+      {showTestFlyout === null ? null : (
+        <TestTrainedModelFlyout
+          model={showTestFlyout}
+          onClose={setShowTestFlyout.bind(null, null)}
         />
       )}
     </>

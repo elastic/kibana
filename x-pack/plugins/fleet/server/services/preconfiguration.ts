@@ -159,7 +159,10 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             soClient,
             esClient,
             String(preconfiguredAgentPolicy.id),
-            fields
+            fields,
+            {
+              force: true,
+            }
           );
           return { created, policy: updatedPolicy };
         }
@@ -254,7 +257,15 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {
-        await agentPolicyService.update(soClient, esClient, policy!.id, { is_managed: true });
+        await agentPolicyService.update(
+          soClient,
+          esClient,
+          policy!.id,
+          { is_managed: true },
+          {
+            force: true,
+          }
+        );
       }
     }
   }

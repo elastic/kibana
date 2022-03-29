@@ -23,6 +23,7 @@ const createSetupContract = (): Setup => {
     registerFunction: jest.fn(),
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
+    getAllMigrations: jest.fn(),
   };
   return setupContract;
 };
@@ -40,6 +41,10 @@ const createStartContract = (): Start => {
     render: jest.fn(),
     ReactExpressionRenderer: jest.fn((props) => <></>),
     run: jest.fn(),
+    telemetry: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
+    getAllMigrations: jest.fn(),
   };
 };
 

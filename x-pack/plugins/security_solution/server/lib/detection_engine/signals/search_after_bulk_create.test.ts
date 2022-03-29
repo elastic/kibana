@@ -15,7 +15,6 @@ import {
   sampleDocWithSortId,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
-import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import uuid from 'uuid';
 import { listMock } from '../../../../../lists/server/mocks';
@@ -27,17 +26,19 @@ import { getRuleRangeTuples } from './utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { getCompleteRuleMock, getQueryRuleParams } from '../schemas/rule_schemas.mock';
-import { bulkCreateFactory } from './bulk_create_factory';
-import { wrapHitsFactory } from './wrap_hits_factory';
+import { bulkCreateFactory } from '../rule_types/factories/bulk_create_factory';
+import { wrapHitsFactory } from '../rule_types/factories/wrap_hits_factory';
 import { mockBuildRuleMessage } from './__mocks__/build_rule_message.mock';
-import { errors as esErrors } from '@elastic/elasticsearch';
 import { BuildReasonMessage } from './reason_formatters';
 import { QueryRuleParams } from '../schemas/rule_schemas';
+import { createPersistenceServicesMock } from '../../../../../rule_registry/server/utils/create_persistence_rule_type_wrapper.mock';
+import { PersistenceServices } from '../../../../../rule_registry/server';
 
 const buildRuleMessage = mockBuildRuleMessage;
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
+  let mockPersistenceServices: jest.Mocked<PersistenceServices>;
   let buildReasonMessage: BuildReasonMessage;
   let bulkCreate: BulkCreate;
   let wrapHits: WrapHits;
@@ -46,6 +47,9 @@ describe('searchAfterAndBulkCreate', () => {
   const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
   const sampleParams = getQueryRuleParams();
   const queryCompleteRule = getCompleteRuleMock<QueryRuleParams>(sampleParams);
+  const defaultFilter = {
+    match_all: {},
+  };
   sampleParams.maxSignals = 30;
   let tuple: RuleRangeTuple;
   beforeEach(() => {
@@ -65,17 +69,18 @@ describe('searchAfterAndBulkCreate', () => {
       maxSignals: sampleParams.maxSignals,
       buildRuleMessage,
     }).tuples[0];
+    mockPersistenceServices = createPersistenceServicesMock();
     bulkCreate = bulkCreateFactory(
       mockLogger,
-      mockService.scopedClusterClient.asCurrentUser,
+      mockPersistenceServices.alertWithPersistence,
       buildRuleMessage,
       false
     );
     wrapHits = wrapHitsFactory({
       completeRule: queryCompleteRule,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       mergeStrategy: 'missingFields',
       ignoreFields: [],
+      spaceId: 'default',
     });
   });
 
@@ -86,17 +91,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '1', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -105,17 +102,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '2', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -124,17 +113,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '3', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -143,17 +124,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '4', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -185,9 +158,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
-      filter: undefined,
+      filter: defaultFilter,
       buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
@@ -205,17 +177,9 @@ describe('searchAfterAndBulkCreate', () => {
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
       )
     );
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '1', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -224,17 +188,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '2', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -243,17 +199,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '3', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -284,9 +232,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
-      filter: undefined,
+      filter: defaultFilter,
       buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
@@ -305,35 +252,14 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [
+        { _id: '1', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '2', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '3', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '4', _index: '.internal.alerts-security.alerts-default-000001' },
       ],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -364,9 +290,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
-      filter: undefined,
+      filter: defaultFilter,
       buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
@@ -424,9 +349,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
-      filter: undefined,
+      filter: defaultFilter,
       buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
@@ -439,39 +363,14 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('should return success when empty string sortId present', async () => {
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          create: {
-            _id: someGuids[0],
-            _index: 'myfakeindex',
-            status: 201,
-          },
-        },
-        {
-          create: {
-            _id: someGuids[1],
-            _index: 'myfakeindex',
-            status: 201,
-          },
-        },
-        {
-          create: {
-            _id: someGuids[2],
-            _index: 'myfakeindex',
-            status: 201,
-          },
-        },
-        {
-          create: {
-            _id: someGuids[3],
-            _index: 'myfakeindex',
-            status: 201,
-          },
-        },
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [
+        { _id: '1', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '2', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '3', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '4', _index: '.internal.alerts-security.alerts-default-000001' },
       ],
+      errors: {},
     });
     mockService.scopedClusterClient.asCurrentUser.search
       .mockResolvedValueOnce(
@@ -502,9 +401,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
-      filter: undefined,
+      filter: defaultFilter,
       buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
@@ -558,9 +456,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
-      filter: undefined,
+      filter: defaultFilter,
       buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
@@ -579,35 +476,14 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [
+        { _id: '1', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '2', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '3', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '4', _index: '.internal.alerts-security.alerts-default-000001' },
       ],
+      errors: {},
     });
 
     const exceptionItem = getExceptionListItemSchemaMock();
@@ -632,9 +508,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
-      filter: undefined,
+      filter: defaultFilter,
       buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
@@ -653,35 +528,14 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [
+        { _id: '1', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '2', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '3', _index: '.internal.alerts-security.alerts-default-000001' },
+        { _id: '4', _index: '.internal.alerts-security.alerts-default-000001' },
       ],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -708,9 +562,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
-      filter: undefined,
+      filter: defaultFilter,
       buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
@@ -719,58 +572,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
     expect(createdSignalsCount).toEqual(4);
-    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
-  });
-
-  test('if unsuccessful first bulk create', async () => {
-    const exceptionItem = getExceptionListItemSchemaMock();
-    exceptionItem.entries = [
-      {
-        field: 'source.ip',
-        operator: 'included',
-        type: 'list',
-        list: {
-          id: 'ci-badguys.txt',
-          type: 'ip',
-        },
-      },
-    ];
-    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
-      )
-    );
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockReturnValue(
-      elasticsearchClientMock.createErrorTransportRequestPromise(
-        new esErrors.ResponseError(
-          elasticsearchClientMock.createApiResponse({
-            statusCode: 400,
-            body: { error: { type: 'bulk_error_type' } },
-          })
-        )
-      )
-    );
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      listClient,
-      exceptionsList: [exceptionItem],
-      tuple,
-      completeRule: queryCompleteRule,
-      services: mockService,
-      logger: mockLogger,
-      eventsTelemetry: undefined,
-      id: sampleRuleGuid,
-      inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
-      pageSize: 1,
-      filter: undefined,
-      buildReasonMessage,
-      buildRuleMessage,
-      bulkCreate,
-      wrapHits,
-    });
-    expect(mockLogger.error).toHaveBeenCalled();
-    expect(success).toEqual(false);
-    expect(createdSignalsCount).toEqual(0);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -808,9 +609,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
-      filter: undefined,
+      filter: defaultFilter,
       buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
@@ -855,9 +655,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
-      filter: undefined,
+      filter: defaultFilter,
       buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
@@ -895,6 +694,16 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '1', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {
+        'error on creation': {
+          count: 1,
+          statusCode: 500,
+        },
+      },
+    });
+
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce(bulkItem); // adds the response with errors we are testing
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -903,17 +712,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '2', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -922,17 +723,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '3', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -941,17 +734,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '4', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -970,9 +755,8 @@ describe('searchAfterAndBulkCreate', () => {
         eventsTelemetry: undefined,
         id: sampleRuleGuid,
         inputIndexPattern,
-        signalsIndex: DEFAULT_SIGNALS_INDEX,
         pageSize: 1,
-        filter: undefined,
+        filter: defaultFilter,
         buildReasonMessage,
         buildRuleMessage,
         bulkCreate,
@@ -992,17 +776,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '1', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -1011,17 +787,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '2', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -1030,17 +798,9 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
-      took: 100,
-      errors: false,
-      items: [
-        {
-          // @ts-expect-error not full response interface
-          create: {
-            status: 201,
-          },
-        },
-      ],
+    mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
+      createdAlerts: [{ _id: '3', _index: '.internal.alerts-security.alerts-default-000001' }],
+      errors: {},
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -1061,9 +821,8 @@ describe('searchAfterAndBulkCreate', () => {
       eventsTelemetry: undefined,
       id: sampleRuleGuid,
       inputIndexPattern,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
-      filter: undefined,
+      filter: defaultFilter,
       buildReasonMessage,
       buildRuleMessage,
       bulkCreate,

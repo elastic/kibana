@@ -15,7 +15,7 @@ import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
-import { ConditionEntry } from '../../../../common/endpoint/types';
+import { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
 import {
   getDuplicateFields,
   isValidHash,
@@ -230,7 +230,7 @@ export class TrustedAppValidator extends BaseValidator {
 
     await this.validateByPolicyItem(updatedItem);
 
-    return updatedItem as UpdateExceptionListItemOptions;
+    return _updatedItem;
   }
 
   private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {

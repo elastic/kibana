@@ -50,10 +50,10 @@ cluster.
 
 `monitoring.ui.elasticsearch.username`::
 Specifies the username used by {kib} monitoring to establish a persistent connection
-in {kib}  to the {es} monitoring cluster and to verify licensing status on the {es}
-monitoring cluster.
+in {kib} to the {es} monitoring cluster and to verify licensing status on the {es}
+monitoring cluster when using `monitoring.ui.elasticsearch.hosts`.
 +
-Every other request performed by *{stack-monitor-app}* to the monitoring {es}
+All other requests performed by *{stack-monitor-app}* to the monitoring {es}
 cluster uses the authenticated user's credentials, which must be the same on
 both the {es} monitoring cluster and the {es} production cluster.
 +
@@ -62,13 +62,16 @@ If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsea
 `monitoring.ui.elasticsearch.password`::
 Specifies the password used by {kib} monitoring to establish a persistent connection
 in {kib}  to the {es} monitoring cluster and to verify licensing status on the {es}
-monitoring cluster.
+monitoring cluster when using `monitoring.ui.elasticsearch.hosts`.
 +
-Every other request performed by *{stack-monitor-app}* to the monitoring {es}
-cluster uses the authenticated user's credentials, which must be the same on
+All other requests performed by *{stack-monitor-app}* to the monitoring {es}
+cluster use the authenticated user's credentials, which must be the same on
 both the {es} monitoring cluster and the {es} production cluster.
 +
 If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.password`>> setting.
+
+`monitoring.ui.elasticsearch.serviceAccountToken`::
+Specifies a {ref}/security-api-create-service-token.html[service account token] for the {es} cluster where your monitoring data is stored when using `monitoring.ui.elasticsearch.hosts`.  This setting is an alternative to using `monitoring.ui.elasticsearch.username` and `monitoring.ui.elasticsearch.password`.
 
 `monitoring.ui.elasticsearch.pingTimeout`::
 Specifies the time in milliseconds to wait for {es} to respond to internal
@@ -115,6 +118,11 @@ cluster. Defaults to `true`.
 Specifies the name of the indices that are shown on the
 <<logs-monitor-page,*Logs*>> page in *{stack-monitor-app}*. The default value
 is `filebeat-*`.
+
+`monitoring.ui.metricbeat.index`::
+deprecated:[8.1.1]
+Used as a workaround to avoid querying `metricbeat-*` indices which are now no longer queried. The default value
+is `metricbeat-*`.
 
 `monitoring.ui.max_bucket_size`::
 Specifies the number of term buckets to return out of the overall terms list when

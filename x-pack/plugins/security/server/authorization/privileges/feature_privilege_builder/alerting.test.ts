@@ -87,6 +87,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
           ]
         `);
@@ -169,6 +170,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
@@ -207,23 +209,26 @@ describe(`feature_privilege_builder`, () => {
         });
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
-            Array [
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
-            ]
-          `);
+          Array [
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
+          ]
+        `);
       });
 
       test('grants `all` privileges to alerts under feature consumer', () => {
@@ -300,26 +305,29 @@ describe(`feature_privilege_builder`, () => {
         });
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
-            Array [
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
-            ]
-          `);
+          Array [
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
+          ]
+        `);
       });
 
       test('grants both `all` and `read` to rules privileges under feature consumer', () => {
@@ -353,27 +361,31 @@ describe(`feature_privilege_builder`, () => {
         });
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
-            Array [
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getAlertSummary",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/find",
-            ]
-          `);
+          Array [
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getAlertSummary",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getExecutionLog",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/find",
+          ]
+        `);
       });
 
       test('grants both `all` and `read` to alerts privileges under feature consumer', () => {
@@ -452,32 +464,36 @@ describe(`feature_privilege_builder`, () => {
         });
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
-            Array [
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getAlertSummary",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/find",
-              "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/get",
-              "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/find",
-              "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/update",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/get",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/find",
-            ]
-          `);
+          Array [
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleState",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getAlertSummary",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/updateApiKey",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/enable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/disable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAll",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getAlertSummary",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getExecutionLog",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/find",
+            "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/get",
+            "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/find",
+            "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/update",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/get",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/find",
+          ]
+        `);
       });
     });
   });

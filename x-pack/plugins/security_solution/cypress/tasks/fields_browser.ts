@@ -16,6 +16,9 @@ import {
   FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON,
   FIELDS_BROWSER_CATEGORY_FILTER_OPTION,
   FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH,
+  FIELDS_BROWSER_VIEW_ALL,
+  FIELDS_BROWSER_VIEW_BUTTON,
+  FIELDS_BROWSER_VIEW_SELECTED,
 } from '../screens/fields_browser';
 
 export const addsFields = (fields: string[]) => {
@@ -73,4 +76,13 @@ export const removesMessageField = () => {
 
 export const resetFields = () => {
   cy.get(FIELDS_BROWSER_RESET_FIELDS).click({ force: true });
+};
+
+export const activateViewSelected = () => {
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_SELECTED).click({ force: true });
+};
+export const activateViewAll = () => {
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_ALL).click({ force: true });
 };

@@ -72,6 +72,11 @@ export function DataViewContextProvider({ children }: ProviderProps) {
               hasDataT = Boolean(resultMetrics?.hasData);
               indices = resultMetrics?.indices;
               break;
+            case 'infra_logs':
+              const resultLogs = await getDataHandler(dataType)?.hasData();
+              hasDataT = Boolean(resultLogs?.hasData);
+              indices = resultLogs?.indices;
+              break;
             case 'apm':
             case 'mobile':
               const resultApm = await getDataHandler('apm')!.hasData();

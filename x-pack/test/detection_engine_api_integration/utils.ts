@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { KbnClient } from '@kbn/test';
 import { ALERT_RULE_RULE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
@@ -457,6 +458,7 @@ export const getSimpleRulePreviewOutput = (
 ) => ({
   logs,
   previewId,
+  isAborted: false,
 });
 
 export const resolveSimpleRuleOutput = (
@@ -924,7 +926,7 @@ export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
   log: ToolingLog,
-  maxTimeout: number = 100000,
+  maxTimeout: number = 400000,
   timeoutWait: number = 250
 ): Promise<void> => {
   let found = false;
@@ -1461,6 +1463,124 @@ export const waitForSignalsToBePresent = async (
       return signalsOpen.hits.hits.length >= numberOfSignals;
     },
     'waitForSignalsToBePresent',
+    log
+  );
+};
+
+/**
+ * Waits for the event-log execution completed doc count to be greater than the
+ * supplied number before continuing with a default of at least one execution
+ * @param es The ES client
+ * @param log
+ * @param ruleId The id of rule to check execution logs for
+ * @param totalExecutions The number of executions to wait for, default is 1
+ */
+export const waitForEventLogExecuteComplete = async (
+  es: Client,
+  log: ToolingLog,
+  ruleId: string,
+  totalExecutions = 1
+): Promise<void> => {
+  await waitFor(
+    async () => {
+      const executionCount = await getEventLogExecuteCompleteById(es, log, ruleId);
+      return executionCount >= totalExecutions;
+    },
+    'waitForEventLogExecuteComplete',
+    log
+  );
+};
+
+/**
+ * Given a single rule id this will return the number of event-log execution
+ * completed docs
+ * @param es The ES client
+ * @param log
+ * @param ruleId Rule id
+ */
+export const getEventLogExecuteCompleteById = async (
+  es: Client,
+  log: ToolingLog,
+  ruleId: string
+): Promise<number> => {
+  const response = await es.search({
+    index: '.kibana-event-log*',
+    track_total_hits: true,
+    size: 0,
+    query: {
+      bool: {
+        must: [],
+        filter: [
+          {
+            match_phrase: {
+              'event.provider': 'alerting',
+            },
+          },
+          {
+            match_phrase: {
+              'event.action': 'execute',
+            },
+          },
+          {
+            match_phrase: {
+              'rule.id': ruleId,
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    },
+  });
+
+  return (response?.hits?.total as SearchTotalHits)?.value ?? 0;
+};
+
+/**
+ * Indexes provided execution events into .kibana-event-log-*
+ * @param es The ElasticSearch handle
+ * @param log The tooling logger
+ * @param events
+ */
+export const indexEventLogExecutionEvents = async (
+  es: Client,
+  log: ToolingLog,
+  events: object[]
+): Promise<void> => {
+  const operations = events.flatMap((doc: object) => [
+    { index: { _index: '.kibana-event-log-*' } },
+    doc,
+  ]);
+
+  await es.bulk({ refresh: true, operations });
+
+  return;
+};
+
+/**
+ * Remove all .kibana-event-log-* documents with an execution.uuid
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * @param es The ElasticSearch handle
+ * @param log The tooling logger
+ */
+export const deleteAllEventLogExecutionEvents = async (
+  es: Client,
+  log: ToolingLog
+): Promise<void> => {
+  return countDownES(
+    async () => {
+      return es.deleteByQuery(
+        {
+          index: '.kibana-event-log-*',
+          q: '_exists_:kibana.alert.rule.execution.uuid',
+          wait_for_completion: true,
+          refresh: true,
+          body: {},
+        },
+        { meta: true }
+      );
+    },
+    'deleteAllEventLogExecutionEvents',
     log
   );
 };
