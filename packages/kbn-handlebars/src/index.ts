@@ -379,11 +379,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const isSimple = AST.helpers.simpleId(path);
     const helper = this.setupHelper(node, name);
 
+    const loc = isSimple && helper.fn ? node.loc : path.loc;
     helper.fn = (isSimple && helper.fn) || this.resolveNodes(path)[0];
 
     if (!helper.fn) {
       if (this.compileOptions.strict) {
-        helper.fn = this.container.strict(helper.context, name, node.loc);
+        helper.fn = this.container.strict(helper.context, name, loc);
       } else {
         helper.fn = this.container.hooks.helperMissing;
       }
@@ -427,11 +428,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const name = node.path.parts[0];
     const helper = this.setupHelper(node, name);
 
+    const loc = helper.fn ? node.loc : node.path.loc;
     helper.fn = helper.fn ?? this.resolveNodes(node.path)[0];
 
     if (helper.fn === undefined) {
       if (this.compileOptions.strict) {
-        helper.fn = this.container.strict(helper.context, name, node.loc);
+        helper.fn = this.container.strict(helper.context, name, loc);
       } else {
         helper.fn =
           helper.context != null

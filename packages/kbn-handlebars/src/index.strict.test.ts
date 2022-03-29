@@ -99,5 +99,18 @@ describe('strict', () => {
         })
         .toCompileTo('success');
     });
+
+    it('should error contains correct location properties on missing property lookup', () => {
+      try {
+        expectTemplate('\n\n\n   {{hello}}')
+          .withCompileOptions({ strict: true })
+          .toCompileTo('throw before asserting this');
+      } catch (error) {
+        expect(error.lineNumber).toEqual(4);
+        expect(error.endLineNumber).toEqual(4);
+        expect(error.column).toEqual(5);
+        expect(error.endColumn).toEqual(10);
+      }
+    });
   });
 });
