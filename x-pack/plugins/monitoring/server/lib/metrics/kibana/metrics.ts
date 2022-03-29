@@ -263,7 +263,7 @@ export const metrics = {
 
   kibana_instance_rule_failures: new KibanaInstanceRuleMetric({
     derivative: true,
-    field: 'kibana_node_rules.failures',
+    field: 'kibana.node_rules.failures',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleInstanceFailuresLabel', {
       defaultMessage: 'Rule Failures Rate',
     }),
@@ -279,7 +279,7 @@ export const metrics = {
   }),
   kibana_instance_rule_executions: new KibanaInstanceRuleMetric({
     derivative: true,
-    field: 'kibana_node_rules.executions',
+    field: 'kibana.node_rules.executions',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleInstanceExecutionsLabel', {
       defaultMessage: 'Rule Executions Rate',
     }),
@@ -295,7 +295,7 @@ export const metrics = {
   }),
   kibana_instance_action_failures: new KibanaInstanceActionMetric({
     derivative: true,
-    field: 'kibana_node_actions.failures',
+    field: 'kibana.node_actions.failures',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.actionInstanceFailuresLabel', {
       defaultMessage: 'Action Failures Rate',
     }),
@@ -311,7 +311,7 @@ export const metrics = {
   }),
   kibana_instance_action_executions: new KibanaInstanceActionMetric({
     derivative: true,
-    field: 'kibana_node_actions.executions',
+    field: 'kibana.node_actions.executions',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.actionInstanceExecutionsLabel', {
       defaultMessage: 'Action Executions Rate',
     }),
@@ -327,7 +327,7 @@ export const metrics = {
   }),
 
   kibana_cluster_rule_overdue_count: new KibanaClusterRuleMetric({
-    field: 'kibana_cluster_rules.overdue.count',
+    field: 'kibana.cluster_rules.overdue.count',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueCountLabel', {
       defaultMessage: 'Rule Overdue Count',
     }),
@@ -342,7 +342,7 @@ export const metrics = {
     units: '',
   }),
   kibana_cluster_rule_overdue_p50: new KibanaClusterRuleMetric({
-    field: 'kibana_cluster_rules.overdue.delay.p50',
+    field: 'kibana.cluster_rules.overdue.delay.p50',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Label', {
       defaultMessage: 'Average Rule Overdue Delay',
     }),
@@ -357,7 +357,7 @@ export const metrics = {
     units: '',
   }),
   kibana_cluster_rule_overdue_p99: new KibanaClusterRuleMetric({
-    field: 'kibana_cluster_rules.overdue.delay.p99',
+    field: 'kibana.cluster_rules.overdue.delay.p99',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP99Label', {
       defaultMessage: 'Worst Rule Overdue Delay',
     }),
@@ -372,7 +372,7 @@ export const metrics = {
     units: '',
   }),
   kibana_cluster_action_overdue_count: new KibanaClusterActionMetric({
-    field: 'kibana_cluster_actions.overdue.count',
+    field: 'kibana.cluster_actions.overdue.count',
     label: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueCountLabel',
       {
@@ -390,7 +390,7 @@ export const metrics = {
     units: '',
   }),
   kibana_cluster_action_overdue_p50: new KibanaClusterActionMetric({
-    field: 'kibana_cluster_actions.overdue.delay.p50',
+    field: 'kibana.cluster_actions.overdue.delay.p50',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP50Label', {
       defaultMessage: 'Average Action Overdue Delay',
     }),
@@ -405,7 +405,7 @@ export const metrics = {
     units: '',
   }),
   kibana_cluster_action_overdue_p99: new KibanaClusterActionMetric({
-    field: 'kibana_cluster_actions.overdue.delay.p99',
+    field: 'kibana.cluster_actions.overdue.delay.p99',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP99Label', {
       defaultMessage: 'Worst Action Overdue Delay',
     }),

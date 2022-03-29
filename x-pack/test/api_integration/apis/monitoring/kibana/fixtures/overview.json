@@ -100,7 +100,7 @@
         "timeRange": { "min": 1504027457000, "max": 1504027568000 },
         "metric": {
           "app": "kibana",
-          "field": "kibana_cluster_rules.overdue.count",
+          "field": "kibana.cluster_rules.overdue.count",
           "metricAgg": "max",
           "label": "Rule Overdue Count",
           "description": "Number of overdue rules across the entire cluster.",
@@ -118,7 +118,7 @@
         "timeRange": { "min": 1504027457000, "max": 1504027568000 },
         "metric": {
           "app": "kibana",
-          "field": "kibana_cluster_rules.overdue.delay.p50",
+          "field": "kibana.cluster_rules.overdue.delay.p50",
           "metricAgg": "max",
           "label": "Average Rule Overdue Delay",
           "description": "Average delay of all overdue rules across the entire cluster.",
@@ -134,7 +134,7 @@
         "timeRange": { "min": 1504027457000, "max": 1504027568000 },
         "metric": {
           "app": "kibana",
-          "field": "kibana_cluster_rules.overdue.delay.p99",
+          "field": "kibana.cluster_rules.overdue.delay.p99",
           "metricAgg": "max",
           "label": "Worst Rule Overdue Delay",
           "description": "Worst delay of all overdue rules across the entire cluster.",

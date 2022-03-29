@@ -51,17 +51,17 @@ export async function getInstanceRuleDataForClusters(
           aggs: {
             executions: {
               max: {
-                field: 'kibana_node_rules.executions',
+                field: 'kibana.node_rules.executions',
               },
             },
             failures: {
               max: {
-                field: 'kibana_node_rules.failures',
+                field: 'kibana.node_rules.failures',
               },
             },
             timeouts: {
               max: {
-                field: 'kibana_node_rules.timeouts',
+                field: 'kibana.node_rules.timeouts',
               },
             },
           },

@@ -45,7 +45,7 @@ export class KibanaClusterRuleMetric extends ClusterMetric {
   static getMetricFields() {
     return {
       uuidField: 'cluster_uuid',
-      timestampField: 'kibana_cluster_rules.timestamp',
+      timestampField: '@timestamp',
     };
   }
 }
@@ -61,8 +61,8 @@ export class KibanaInstanceRuleMetric extends Metric {
 
   static getMetricFields() {
     return {
-      uuidField: 'kibana_node_rules.kibana.uuid',
-      timestampField: 'kibana_node_rules.timestamp',
+      uuidField: 'service.id',
+      timestampField: '@timestamp',
     };
   }
 }
@@ -79,7 +79,7 @@ export class KibanaClusterActionMetric extends ClusterMetric {
   static getMetricFields() {
     return {
       uuidField: 'cluster_uuid',
-      timestampField: 'kibana_cluster_actions.timestamp',
+      timestampField: '@timestamp',
     };
   }
 }
@@ -95,8 +95,8 @@ export class KibanaInstanceActionMetric extends Metric {
 
   static getMetricFields() {
     return {
-      uuidField: 'kibana_node_action.kibana.uuid',
-      timestampField: 'kibana_node_action.timestamp',
+      uuidField: 'kibana.node_action.kibana.uuid',
+      timestampField: '@timestamp',
     };
   }
 }

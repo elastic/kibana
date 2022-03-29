@@ -51,23 +51,22 @@ export async function getClusterRuleDataForClusters(
           aggs: {
             overdue_count: {
               max: {
-                field: 'kibana_cluster_rules.overdue.count',
+                field: 'kibana.cluster_rules.overdue.count',
               },
             },
             overdue_delay_p50: {
               max: {
-                field: 'kibana_cluster_rules.overdue.delay.p50',
+                field: 'kibana.cluster_rules.overdue.delay.p50',
               },
             },
             overdue_delay_p99: {
               max: {
-                field: 'kibana_cluster_rules.overdue.delay.p99',
+                field: 'kibana.cluster_rules.overdue.delay.p99',
               },
             },
           },
         },
       };
-
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
       const response = await callWithRequest(req, 'search', params);
       return {

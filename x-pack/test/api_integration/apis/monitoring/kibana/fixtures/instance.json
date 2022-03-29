@@ -311,7 +311,7 @@
         "timeRange": { "min": 1504027457000, "max": 1504027568000 },
         "metric": {
           "app": "kibana",
-          "field": "kibana_node_rules.failures",
+          "field": "kibana.node_rules.failures",
           "metricAgg": "max",
           "label": "Rule Failures Rate",
           "description": "Rate of rule executions for the Kibana instance.",
@@ -329,7 +329,7 @@
         "timeRange": { "min": 1504027457000, "max": 1504027568000 },
         "metric": {
           "app": "kibana",
-          "field": "kibana_node_rules.executions",
+          "field": "kibana.node_rules.executions",
           "metricAgg": "max",
           "label": "Rule Executions Rate",
           "description": "Rate of rule executions for the Kibana instance.",
