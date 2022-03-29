@@ -104,7 +104,6 @@ const resolveDataViewReference = async (
   };
 };
 
-// TODO: use new API introduced in https://github.com/elastic/kibana/pull/125183
 // this might take other sources of runtime fields into account in the future
 const resolveRuntimeMappings = (dataView: DataView): estypes.MappingRuntimeFields => {
   return dataView.getRuntimeMappings();
