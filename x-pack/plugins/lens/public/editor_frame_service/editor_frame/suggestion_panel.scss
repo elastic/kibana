@@ -89,9 +89,9 @@
   flex-grow: 0;
 }
 
-.lnsSuggestionPanel__applyChangesPrompt.euiPanel {
+.lnsSuggestionPanel__applyChangesPrompt {
   height: $lnsSuggestionHeight;
-  background-color: $euiColorLightestShade;
+  background-color: $euiColorLightestShade !important;
 
   .lnsSuggestionPanel__applyChangesMessage {
     margin-top: 10px;
