@@ -17,7 +17,7 @@ export const transformHealthRuleParams = schema.object({
           enabled: schema.boolean({ defaultValue: true }),
         })
       ),
-      errorMessaged: schema.nullable(
+      errorMessages: schema.nullable(
         schema.object({
           enabled: schema.boolean({ defaultValue: true }),
         })

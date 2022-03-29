@@ -109,7 +109,7 @@ export function getTransformHealthRuleType(): RuleType<
       } = options;
 
       const transformHealthService = transformHealthServiceProvider(
-        scopedClusterClient.asInternalUser
+        scopedClusterClient.asCurrentUser
       );
 
       const executionResult = await transformHealthService.getHealthChecksResults(params);
