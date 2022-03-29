@@ -1,0 +1,108 @@
+[[cases-api-get-all-case-comments]]
+== Get all case comments API
+++++
+<titleabbrev>Get all case comments</titleabbrev>
+++++
+
+Returns all comments for the specified case.
+
+=== Request
+
+`GET <kibana host>:<port>/api/cases/<case ID>/comments`
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/<case ID>/comments`
+
+=== Prerequisite
+
+You must have `read` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases you're seeking.
+
+=== Path parameters
+
+`<case_id>`::
+(Required, string) An identifier for the case to retrieve. Use 
+<<cases-api-find-cases>> to retrieve case IDs.
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+==== Response code
+
+`200`::
+   Indicates a successful call.
+
+==== Example
+
+Gets all comments for case ID `a18b38a0-71b0-11ea-a0b2-c51ea50a58e2`:
+
+[source,sh]
+--------------------------------------------------
+GET api/cases/a18b38a0-71b0-11ea-a0b2-c51ea50a58e2/comments
+--------------------------------------------------
+// KIBANA
+
+The API returns a JSON object with all the comments for the case. For example:
+
+[source,json]
+--------------------------------------------------
+[
+  {
+    "id": "c6f0dca0-71b3-11ea-a0b2-c51ea50a58e2",
+    "version": "WzEwNSwxXQ==",
+    "type": "user",
+    "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives. Even worse, he likes baked beans.",
+    "created_at": "2020-03-29T11:52:33.889Z",
+    "created_by": {
+      "email": "moneypenny@hms.gov.uk",
+      "full_name": "Ms Moneypenny",
+      "username": "moneypenny"
+    },
+    "owner": "securitySolution",
+    "pushed_at": null,
+    "pushed_by": null,
+    "updated_at": "2020-03-29T12:14:32.997Z",
+    "updated_by": {
+      "email": "jbond@hms.gov.uk",
+      "full_name": "James Bond",
+      "username": "_007"
+    }
+  },
+  {
+    "id": "71ec1870-725b-11ea-a0b2-c51ea50a58e2",
+    "type": "user",
+    "version": "WzEyOCwxXQ==",
+    "comment": "Start operation bubblegum immediately! And chew fast!",
+    "created_at": "2020-03-30T07:52:46.702Z",
+    "created_by": {
+      "email": "classified@hms.oo.gov.uk",
+      "full_name": "Classified",
+      "username": "M"
+    },
+    "owner": "securitySolution",
+    "pushed_at": null,
+    "pushed_by": null,
+    "updated_at": null,
+    "updated_by": null
+  },
+  {
+    "type":"alert",
+    "alertId":"9241255e1e761ff068768671f6971bcbef869862b02188971036ed4ebba842f1",
+    "index":".siem-signals-siem-estc-dev-default-000028",
+    "version": "WyEzOCwxXQ==",
+    "created_at": "2020-03-31T07:52:46.702Z",
+    "created_by": {
+      "email": "classified@hms.oo.gov.uk",
+      "full_name": "Classified",
+      "username": "M"
+    },
+    "owner": "securitySolution",
+    "pushed_at": null,
+    "pushed_by": null,
+    "updated_at": null,
+    "updated_by": null
+  }
+]
+--------------------------------------------------
