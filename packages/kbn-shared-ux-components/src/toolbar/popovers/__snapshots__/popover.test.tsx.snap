@@ -17,7 +17,7 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
     hasArrow={true}
     isOpen={false}
     ownFocus={true}
-    panelPaddingSize="none"
+    panelPaddingSize="m"
   >
     <div
       className="euiPopover euiPopover--anchorDownCenter"
