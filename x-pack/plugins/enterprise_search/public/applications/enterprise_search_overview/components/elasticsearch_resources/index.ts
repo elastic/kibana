@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const ROOT_PATH = '/';
-export const SETUP_GUIDE_PATH = '/setup_guide';
-export const ELASTICSEARCH_GUIDE_PATH = '/elasticsearch_guide';
+export { ElasticsearchResources } from './elasticsearch_resources';
