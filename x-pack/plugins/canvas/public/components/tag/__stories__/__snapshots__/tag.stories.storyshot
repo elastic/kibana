@@ -57,9 +57,7 @@ exports[`Storyshots components/Tags/Tag as health 1`] = `
       <span
         color="#666666"
         data-euiicon-type="dot"
-      >
-        
-      </span>
+      />
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -83,9 +81,7 @@ exports[`Storyshots components/Tags/Tag as health with color 1`] = `
       <span
         color="#9b3067"
         data-euiicon-type="dot"
-      >
-        
-      </span>
+      />
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
