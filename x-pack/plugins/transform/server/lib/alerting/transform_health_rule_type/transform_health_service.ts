@@ -237,7 +237,7 @@ export function transformHealthServiceProvider(
                 'xpack.transform.alertTypes.transformHealth.errorMessagesMessage',
                 {
                   defaultMessage:
-                    '{count, plural, one {Transform} other {Transform}} {transformsString} {count, plural, one {contains} other {contains}} error messages.',
+                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {contains} other {contain}} error messages.',
                   values: { count, transformsString },
                 }
               ),
