@@ -46,6 +46,15 @@ We keep state internally in the `ElasticHandlebarsVisitor` object using the foll
 
 ## Debugging
 
+### Environment variables
+
+By default each test will run both the original `handlebars` code and the modified `@kbn/handlebars` code to compare if the output of the two are identical. When debugging, it can be beneficial to islate a test run to just one or the other. To control this, you can use the following environment variables:
+
+- `EVAL=1` - Set to only run the original `handlebars` implementation that uses `eval`.
+- `AST=1` - Set to only run the modified `@kbn/handlebars` implementation that doesn't use `eval`.
+
+### Print generated code
+
 It's possible to see the generated JavaScript code that `handlebars` create for a given template using the following command line tool:
 
 ```sh

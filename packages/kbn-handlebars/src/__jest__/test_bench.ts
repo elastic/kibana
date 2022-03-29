@@ -64,17 +64,33 @@ class HandlebarsTestBench {
 
   toCompileTo(outputExpected: string) {
     const { outputEval, outputAST } = this.compileAndExecute();
-    expect(outputAST).toEqual(outputExpected);
-    expect(outputAST).toEqual(outputEval);
+    if (process.env.EVAL) {
+      expect(outputEval).toEqual(outputExpected);
+    } else if (process.env.AST) {
+      expect(outputAST).toEqual(outputExpected);
+    } else {
+      expect(outputAST).toEqual(outputExpected);
+      expect(outputAST).toEqual(outputEval);
+    }
   }
 
   toThrow(error?: string | RegExp | jest.Constructable | Error | undefined) {
-    expect(() => {
-      this.compileAndExecuteEval();
-    }).toThrowError(error);
-    expect(() => {
-      this.compileAndExecuteAST();
-    }).toThrowError(error);
+    if (process.env.EVAL) {
+      expect(() => {
+        this.compileAndExecuteEval();
+      }).toThrowError(error);
+    } else if (process.env.AST) {
+      expect(() => {
+        this.compileAndExecuteAST();
+      }).toThrowError(error);
+    } else {
+      expect(() => {
+        this.compileAndExecuteEval();
+      }).toThrowError(error);
+      expect(() => {
+        this.compileAndExecuteAST();
+      }).toThrowError(error);
+    }
   }
 
   toThrowErrorMatchingSnapshot() {
@@ -84,10 +100,20 @@ class HandlebarsTestBench {
   }
 
   private compileAndExecute() {
-    return {
-      outputEval: this.compileAndExecuteEval(),
-      outputAST: this.compileAndExecuteAST(),
-    };
+    if (process.env.EVAL) {
+      return {
+        outputEval: this.compileAndExecuteEval(),
+      };
+    } else if (process.env.AST) {
+      return {
+        outputAST: this.compileAndExecuteAST(),
+      };
+    } else {
+      return {
+        outputEval: this.compileAndExecuteEval(),
+        outputAST: this.compileAndExecuteAST(),
+      };
+    }
   }
 
   private compileAndExecuteEval() {
