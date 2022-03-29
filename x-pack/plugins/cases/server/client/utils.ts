@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest } from '@hapi/boom';
+import { Boom, badRequest } from '@hapi/boom';
 import { get, isPlainObject } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { fold } from 'fp-ts/lib/Either';
@@ -198,14 +198,18 @@ export const buildRangeFilter = ({
     return;
   }
 
-  const fromKQL = from != null ? `${savedObjectType}.attributes.${field} >= ${from}` : undefined;
-  const toKQL = to != null ? `${savedObjectType}.attributes.${field} <= ${to}` : undefined;
+  try {
+    const fromKQL = from != null ? `${savedObjectType}.attributes.${field} >= ${from}` : undefined;
+    const toKQL = to != null ? `${savedObjectType}.attributes.${field} <= ${to}` : undefined;
 
-  const rangeKQLQuery = `${fromKQL != null ? fromKQL : ''} ${
-    fromKQL != null && toKQL != null ? 'and' : ''
-  } ${toKQL != null ? toKQL : ''}`;
+    const rangeKQLQuery = `${fromKQL != null ? fromKQL : ''} ${
+      fromKQL != null && toKQL != null ? 'and' : ''
+    } ${toKQL != null ? toKQL : ''}`;
 
-  return stringToKueryNode(rangeKQLQuery);
+    return stringToKueryNode(rangeKQLQuery);
+  } catch (error) {
+    throw badRequest('Invalid "from" and/or "to" query parameters');
+  }
 };
 
 export const constructQueryOptions = ({
