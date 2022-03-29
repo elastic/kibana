@@ -21,6 +21,7 @@ import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { UserAvatar as IUserAvatar } from '../../common';
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { UserAvatar } from '../account_management/user_profile';
 import { useUserProfile } from '../components/use_current_user';
@@ -47,7 +48,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isOpen, setIsOpen] = useState(false);
 
-  const userProfile = useUserProfile();
+  const userProfile = useUserProfile<{ avatar: IUserAvatar }>('avatar');
 
   const displayName = userProfile.value ? getUserDisplayName(userProfile.value.user) : '';
 
