@@ -59,6 +59,7 @@ interface TransactionDistributionProps {
   onClearSelection: () => void;
   selection?: Selection;
   traceSamples: TabContentProps['traceSamples'];
+  traceSamplesStatus: FETCH_STATUS;
 }
 
 export function TransactionDistribution({
@@ -66,9 +67,14 @@ export function TransactionDistribution({
   onClearSelection,
   selection,
   traceSamples,
+  traceSamplesStatus,
 }: TransactionDistributionProps) {
   const { urlParams } = useLegacyUrlParams();
   const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
+
+  const isLoading =
+    waterfallStatus === FETCH_STATUS.LOADING ||
+    traceSamplesStatus === FETCH_STATUS.LOADING;
 
   const markerCurrentTransaction =
     waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
@@ -189,7 +195,7 @@ export function TransactionDistribution({
         <WaterfallWithSummary
           urlParams={urlParams}
           waterfall={waterfall}
-          isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+          isLoading={isLoading}
           traceSamples={traceSamples}
         />
       </div>

@@ -110,6 +110,22 @@ Object {
                   "isHistogram": Array [
                     false,
                   ],
+                  "palette": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "name": Array [
+                              "default",
+                            ],
+                          },
+                          "function": "system_palette",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ],
                   "seriesType": Array [
                     "area",
                   ],

@@ -309,7 +309,6 @@ export interface LensMultiTable {
 export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
   type: typeof REFERENCE_LINE_LAYER;
   layerType: typeof LayerTypes.REFERENCELINE;
-  yConfig?: YConfigResult[];
   table: Datatable;
 };
 

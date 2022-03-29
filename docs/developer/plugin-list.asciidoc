@@ -165,7 +165,7 @@ for use in their own application.
 
 
 |{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_xy/README.md[expressionXY]
-|A Kibana plugin
+|Expression XY plugin adds a xy renderer and function to the expression plugin. The renderer will display the xy chart.
 
 
 |{kib-repo}blob/{branch}/src/plugins/field_formats/README.md[fieldFormats]

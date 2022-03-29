@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions';
-import { DataLayerConfigResult, ReferenceLineLayerConfigResult, XYArgs, XYRender } from '../types';
 import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
+import { XYArgs, XYLayerConfigResult, XYRender } from '../types';
 import {
   XY_VIS,
   DATA_LAYER,
@@ -203,13 +203,17 @@ export const xyVisFunction: ExpressionFunctionDefinition<
   },
   fn(data, args, handlers) {
     const { dataLayer, referenceLineLayer, ...restArgs } = args;
-    const layers = [dataLayer, referenceLineLayer].filter(
-      (layer): layer is DataLayerConfigResult | ReferenceLineLayerConfigResult =>
-        layer !== undefined
+    const inputLayers: Array<XYLayerConfigResult | undefined> = [dataLayer, referenceLineLayer];
+    const layers: XYLayerConfigResult[] = inputLayers.filter(
+      (layer): layer is XYLayerConfigResult => layer !== undefined
     );
 
     if (handlers?.inspectorAdapters?.tables) {
-      layers.forEach((layer) => {
+      layers.forEach((layer, index) => {
+        if (layer.layerType === LayerTypes.ANNOTATIONS) {
+          return;
+        }
+
         let xAccessor;
         let splitAccessor;
         if (layer.layerType === LayerTypes.DATA) {
@@ -217,9 +221,9 @@ export const xyVisFunction: ExpressionFunctionDefinition<
           splitAccessor = layer.splitAccessor;
         }
 
-        const { table, accessors, layerType } = layer;
+        const { accessors, layerType } = layer;
         const logTable = prepareLogTable(
-          table,
+          layer.table,
           [
             [
               accessors ? accessors : undefined,
@@ -231,8 +235,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
           true
         );
 
-        /* TODO: solve the problem with layerId  */
-        handlers.inspectorAdapters.tables.logDatatable('layerId', logTable);
+        handlers.inspectorAdapters.tables.logDatatable(index, logTable); // ? what to do with layer id while adding table to inspector.
       });
     }
 

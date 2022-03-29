@@ -185,6 +185,7 @@ describe('XYChart component', () => {
                 ...(args.layers[0] as DataLayerConfigResult),
                 seriesType: 'line',
                 xScaleType: 'time',
+                table: timeSampleLayer.table,
               },
             ],
           }}
@@ -340,16 +341,47 @@ describe('XYChart component', () => {
       });
     });
     describe('endzones', () => {
+      const table = createSampleDatatableWithRows([
+        { a: 1, b: 2, c: new Date('2021-04-22').valueOf(), d: 'Foo' },
+        { a: 1, b: 2, c: new Date('2021-04-23').valueOf(), d: 'Foo' },
+        { a: 1, b: 2, c: new Date('2021-04-24').valueOf(), d: 'Foo' },
+      ]);
+      const newData = {
+        ...table,
+        type: 'datatable',
+
+        columns: table.columns.map((c) =>
+          c.id !== 'c'
+            ? c
+            : {
+                ...c,
+                meta: {
+                  type: 'date',
+                  source: 'esaggs',
+                  sourceParams: {
+                    type: 'date_histogram',
+                    params: {},
+                    appliedTimeRange: {
+                      from: '2021-04-22T12:00:00.000Z',
+                      to: '2021-04-24T12:00:00.000Z',
+                    },
+                  },
+                },
+              }
+        ),
+      };
       const timeArgs: XYProps = {
         ...args,
         layers: [
           {
-            ...(args.layers[0] as DataLayerConfigResult),
+            ...args.layers[0],
+            type: 'dataLayer',
             seriesType: 'line',
             xScaleType: 'time',
             isHistogram: true,
             splitAccessor: undefined,
-          },
+            table: newData,
+          } as DataLayerConfigResult,
         ],
       };
 
