@@ -585,7 +585,7 @@ describe('alert actions', () => {
             filters: [
               {
                 meta: {
-                  alias: null,
+                  alias: 'Exceptions',
                   disabled: false,
                   negate: true,
                 },
