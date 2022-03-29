@@ -26,19 +26,13 @@ jest.mock('react-redux', () => {
   };
 });
 const timelineId = 'test';
-const onHide = jest.fn();
+const setShow = jest.fn();
 const testProps = {
   columnHeaders: [],
   browserFields: mockBrowserFields,
-  filteredBrowserFields: mockBrowserFields,
-  searchInput: '',
-  appliedFilterInput: '',
-  isSearching: false,
-  onCategorySelected: jest.fn(),
-  onHide,
-  onSearchInputChange: jest.fn(),
   restoreFocusTo: React.createRef<HTMLButtonElement>(),
-  selectedCategoryId: '',
+  setShow,
+  show: true,
   timelineId,
 };
 const { storage } = createSecuritySolutionStorageMock();
@@ -64,7 +58,7 @@ describe('FieldsBrowser', () => {
     );
 
     wrapper.find('[data-test-subj="close"]').first().simulate('click');
-    expect(onHide).toBeCalled();
+    expect(setShow).toBeCalledWith(false);
   });
 
   test('it renders the Reset Fields button', () => {
@@ -83,15 +77,9 @@ describe('FieldsBrowser', () => {
         <FieldsBrowser
           columnHeaders={defaultHeaders}
           browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          appliedFilterInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={jest.fn()}
-          onSearchInputChange={jest.fn()}
           restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
+          setShow={jest.fn()}
+          show={true}
           timelineId={timelineId}
         />
       </TestProviders>
@@ -107,7 +95,7 @@ describe('FieldsBrowser', () => {
     );
   });
 
-  test('it invokes onHide when the user clicks the Reset Fields button', () => {
+  test('it invokes setShow when the user clicks the Reset Fields button', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsBrowser {...testProps} />
@@ -116,7 +104,7 @@ describe('FieldsBrowser', () => {
 
     wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
 
-    expect(onHide).toBeCalled();
+    expect(setShow).toBeCalledWith(false);
   });
 
   test('it renders the search', () => {
@@ -160,27 +148,6 @@ describe('FieldsBrowser', () => {
       wrapper.find('[data-test-subj="field-search"]').first().getDOMNode().id ===
         document.activeElement?.id
     ).toBe(true);
-  });
-
-  test('it invokes onSearchInputChange when the user types in the field search input', () => {
-    const onSearchInputChange = jest.fn();
-    const inputText = 'event.category';
-
-    const wrapper = mount(
-      <TestProviders>
-        <FieldsBrowser {...testProps} onSearchInputChange={onSearchInputChange} />
-      </TestProviders>
-    );
-
-    const searchField = wrapper.find('[data-test-subj="field-search"]').first();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const changeEvent: any = { target: { value: inputText } };
-    const onChange = searchField.props().onChange;
-
-    onChange?.(changeEvent);
-    searchField.simulate('change').update();
-
-    expect(onSearchInputChange).toBeCalledWith(inputText);
   });
 
   test('does not render the CreateField button when createFieldComponent is provided without a dataViewId', () => {
