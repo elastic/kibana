@@ -13,6 +13,7 @@ import type {
   DeletePackagePoliciesResponse,
   NewPackagePolicy,
   UpdatePackagePolicy,
+  PackagePolicy,
 } from '../../common';
 
 export type PostPackagePolicyDeleteCallback = (
@@ -25,6 +26,12 @@ export type PostPackagePolicyCreateCallback = (
   request: KibanaRequest
 ) => Promise<NewPackagePolicy>;
 
+export type PostPackagePolicyPostCreateCallback = (
+  packagePolicy: PackagePolicy,
+  context: RequestHandlerContext,
+  request: KibanaRequest
+) => Promise<PackagePolicy>;
+
 export type PutPackagePolicyUpdateCallback = (
   updatePackagePolicy: UpdatePackagePolicy,
   context: RequestHandlerContext,
@@ -33,6 +40,10 @@ export type PutPackagePolicyUpdateCallback = (
 
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
 export type ExternalCallbackDelete = ['postPackagePolicyDelete', PostPackagePolicyDeleteCallback];
+export type ExternalCallbackPostCreate = [
+  'packagePolicyPostCreate',
+  PostPackagePolicyPostCreateCallback
+];
 export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
 
 /**
@@ -40,6 +51,7 @@ export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpd
  */
 export type ExternalCallback =
   | ExternalCallbackCreate
+  | ExternalCallbackPostCreate
   | ExternalCallbackDelete
   | ExternalCallbackUpdate;
 
