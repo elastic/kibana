@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Boom, badRequest } from '@hapi/boom';
+import { badRequest } from '@hapi/boom';
 import { get, isPlainObject } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { fold } from 'fp-ts/lib/Either';
