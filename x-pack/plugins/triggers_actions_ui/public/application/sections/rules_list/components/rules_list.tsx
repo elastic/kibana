@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { capitalize, sortBy } from 'lodash';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, useMemo, ReactNode } from 'react';
+import React, { useEffect, useState, useMemo, ReactNode, useCallback } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -163,6 +163,7 @@ export const RulesList: React.FunctionComponent = () => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
+  const [showErrors, setShowErrors] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -463,40 +464,66 @@ export const RulesList: React.FunctionComponent = () => {
     };
   };
 
+  const buildErrorListItems = (_executionStatus: AlertExecutionStatus) => {
+    const hasErrorMessage = _executionStatus.status === 'error';
+    const errorMessage = _executionStatus?.error?.message;
+    const isLicenseError =
+      _executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+    const statusMessage = isLicenseError ? ALERT_STATUS_LICENSE_ERROR : null;
+
+    return [
+      {
+        title: (
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.expandRow.title"
+            defaultMessage="Error from last run"
+          />
+        ),
+        description: (
+          <>
+            {errorMessage}
+            {hasErrorMessage && statusMessage && <br />}
+            {statusMessage}
+          </>
+        ),
+      },
+    ];
+  }
+
   const toggleErrorMessage = (_executionStatus: AlertExecutionStatus, ruleItem: RuleTableItem) => {
     setItemIdToExpandedRowMap((itemToExpand) => {
       const _itemToExpand = { ...itemToExpand };
       if (_itemToExpand[ruleItem.id]) {
         delete _itemToExpand[ruleItem.id];
       } else {
-        const hasErrorMessage = _executionStatus.status === 'error';
-        const errorMessage = _executionStatus?.error?.message;
-        const isLicenseError =
-          _executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
-        const statusMessage = isLicenseError ? ALERT_STATUS_LICENSE_ERROR : null;
-
-        const listItems = [
-          {
-            title: (
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.rulesList.expandRow.title"
-                defaultMessage="Error from last run"
-              />
-            ),
-            description: (
-              <>
-                {errorMessage}
-                {hasErrorMessage && statusMessage && <br />}
-                {statusMessage}
-              </>
-            ),
-          },
-        ];
-        _itemToExpand[ruleItem.id] = <EuiDescriptionList listItems={listItems} />;
+        _itemToExpand[ruleItem.id] = <EuiDescriptionList listItems={buildErrorListItems(_executionStatus)} />;
       }
       return _itemToExpand;
     });
   };
+
+  const toggleRuleErrors = useCallback(() => {
+
+    setShowErrors(prevValue => {
+      if (!prevValue) {
+        setItemIdToExpandedRowMap(rulesState.data.reduce((acc, ruleItem) => {
+          if (ruleItem.executionStatus.status === 'error') {
+            return {
+              ...acc,
+              [ruleItem.id]: <EuiDescriptionList listItems={buildErrorListItems(ruleItem.executionStatus)} />
+            }
+          }
+          return acc;
+        }, {}));
+      } else {
+        setItemIdToExpandedRowMap({});
+      }
+      return !prevValue;
+    });
+
+  }, [showErrors, rulesState]);
+
+
 
   const getRulesTableColumns = (): Array<
     | EuiTableFieldDataColumnType<RuleTableItem>
@@ -1150,14 +1177,21 @@ export const RulesList: React.FunctionComponent = () => {
         </EuiFlexItem>
         {rulesStatusesTotal.error > 0 && (
           <EuiFlexItem grow={false}>
-            <EuiLink color="primary">
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.rulesList.expandAllErrors"
-                defaultMessage="Expand {totalStatusesError, plural, one {error} other {errors}}"
+            <EuiLink color="primary" onClick={toggleRuleErrors}>
+              {!showErrors && (<FormattedMessage
+                id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
+                defaultMessage="Show {totalStatusesError, plural, one {error} other {errors}}"
                 values={{
                   totalStatusesError: rulesStatusesTotal.error,
                 }}
-              />
+              />)}
+              {showErrors && (<FormattedMessage
+                id="xpack.triggersActionsUI.sections.rulesList.hideAllErrors"
+                defaultMessage="Hide {totalStatusesError, plural, one {error} other {errors}}"
+                values={{
+                  totalStatusesError: rulesStatusesTotal.error,
+                }}
+              />)}
             </EuiLink>
           </EuiFlexItem>
         )}
