@@ -50,7 +50,7 @@ pageLoadAssetSize:
   savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
-  security: 95864
+  security: 100000
   snapshotRestore: 79032
   spaces: 57868
   telemetry: 51957

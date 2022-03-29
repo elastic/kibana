@@ -16,6 +16,7 @@ export function defineGetUserProfileRoute({
   router,
   getSession,
   getUserProfileService,
+  logger,
 }: RouteDefinitionParams) {
   router.get(
     {
@@ -27,9 +28,11 @@ export function defineGetUserProfileRoute({
     createLicensedRouteHandler(async (context, request, response) => {
       const session = await getSession().get(request);
       if (!session) {
+        logger.warn('User profile requested without valid session.');
         return response.unauthorized();
       }
       if (!session.userProfileId) {
+        logger.warn(`User profile missing from current session. (sid: ${session.sid})`);
         return response.notFound();
       }
 

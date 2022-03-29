@@ -15,6 +15,7 @@ export function defineUpdateUserProfileDataRoute({
   router,
   getSession,
   getUserProfileService,
+  logger,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -26,9 +27,11 @@ export function defineUpdateUserProfileDataRoute({
     createLicensedRouteHandler(async (context, request, response) => {
       const session = await getSession().get(request);
       if (!session) {
+        logger.warn('User profile requested without valid session.');
         return response.unauthorized();
       }
       if (!session.userProfileId) {
+        logger.warn(`User profile missing from current session. (sid: ${session.sid})`);
         return response.notFound();
       }
 

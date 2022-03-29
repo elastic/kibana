@@ -12,7 +12,7 @@ import type { CoreStart } from 'src/core/public';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import type { UserData } from '../../common';
-import { UserProfileAPIClient } from '../account_management/user_profile/user_profile_api_client';
+import { UserProfileAPIClient } from '../account_management';
 import type { AuthenticationServiceSetup } from '../authentication';
 
 export interface AuthenticationProviderProps {

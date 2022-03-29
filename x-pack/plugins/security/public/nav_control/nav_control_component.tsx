@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { UserAvatar as IUserAvatar } from '../../common';
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
-import { UserAvatar } from '../account_management/user_profile';
+import { UserAvatar } from '../account_management';
 import { useUserProfile } from '../components/use_current_user';
 
 export interface UserMenuLink {
@@ -62,6 +62,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       })}
       onClick={() => setIsOpen((value) => (userProfile.value ? !value : false))}
       data-test-subj="userMenuButton"
+      style={{ lineHeight: 'normal' }}
     >
       {userProfile.value ? (
         <UserAvatar
