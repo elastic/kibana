@@ -31,7 +31,7 @@ describe('ServiceAllowedWrapper', () => {
       </ServiceAllowedWrapper>
     );
 
-    expect(await findByText('Loading monitor management')).toBeInTheDocument();
+    expect(await findByText('Loading Monitor Management')).toBeInTheDocument();
   });
 
   it('renders when enabled state is false', async () => {
@@ -45,7 +45,7 @@ describe('ServiceAllowedWrapper', () => {
       </ServiceAllowedWrapper>
     );
 
-    expect(await findByText('Monitor management')).toBeInTheDocument();
+    expect(await findByText('Monitor Management')).toBeInTheDocument();
   });
 
   it('renders when enabled state is true', async () => {

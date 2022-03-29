@@ -1717,7 +1717,7 @@
         "label": "getFilters",
         "description": [],
         "signature": [
-          "({ filters, namespaceTypes, showTrustedApps, showEventFilters, showHostIsolationExceptions, }: ",
+          "({ filters, namespaceTypes, hideLists }: ",
           {
             "pluginId": "@kbn/securitysolution-list-utils",
             "scope": "common",
@@ -1735,7 +1735,7 @@
             "id": "def-common.getFilters.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filters,\n  namespaceTypes,\n  showTrustedApps,\n  showEventFilters,\n  showHostIsolationExceptions,\n}",
+            "label": "{ filters, namespaceTypes, hideLists }",
             "description": [],
             "signature": [
               {
@@ -2426,66 +2426,6 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-utils",
-        "id": "def-common.getTrustedAppsFilter",
-        "type": "Function",
-        "tags": [],
-        "label": "getTrustedAppsFilter",
-        "description": [],
-        "signature": [
-          "(showTrustedApps: boolean, namespaceTypes: ",
-          {
-            "pluginId": "@kbn/securitysolution-list-utils",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
-            "section": "def-common.SavedObjectType",
-            "text": "SavedObjectType"
-          },
-          "[]) => string"
-        ],
-        "path": "packages/kbn-securitysolution-list-utils/src/get_trusted_apps_filter/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/securitysolution-list-utils",
-            "id": "def-common.getTrustedAppsFilter.$1",
-            "type": "boolean",
-            "tags": [],
-            "label": "showTrustedApps",
-            "description": [],
-            "signature": [
-              "boolean"
-            ],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_trusted_apps_filter/index.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-list-utils",
-            "id": "def-common.getTrustedAppsFilter.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "namespaceTypes",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/securitysolution-list-utils",
-                "scope": "common",
-                "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
-                "section": "def-common.SavedObjectType",
-                "text": "SavedObjectType"
-              },
-              "[]"
-            ],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_trusted_apps_filter/index.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-list-utils",
         "id": "def-common.getUpdatedEntriesOnDelete",
         "type": "Function",
         "tags": [],
@@ -3107,31 +3047,14 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
-            "id": "def-common.GetFiltersParams.showTrustedApps",
-            "type": "boolean",
+            "id": "def-common.GetFiltersParams.hideLists",
+            "type": "Object",
             "tags": [],
-            "label": "showTrustedApps",
+            "label": "hideLists",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-list-utils",
-            "id": "def-common.GetFiltersParams.showEventFilters",
-            "type": "boolean",
-            "tags": [],
-            "label": "showEventFilters",
-            "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-list-utils",
-            "id": "def-common.GetFiltersParams.showHostIsolationExceptions",
-            "type": "boolean",
-            "tags": [],
-            "label": "showHostIsolationExceptions",
-            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
             "deprecated": false
           }
