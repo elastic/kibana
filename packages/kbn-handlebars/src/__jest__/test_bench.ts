@@ -27,7 +27,7 @@ class HandlebarsTestBench {
   private options: TestOptions;
   private compileOptions?: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
-  private helpers: { [key: string]: HelperDelegate } = {};
+  private helpers: { [key: string]: HelperDelegate | undefined } = {};
   private input: any;
 
   constructor(template: string, options: TestOptions = {}) {
@@ -50,7 +50,7 @@ class HandlebarsTestBench {
     return this;
   }
 
-  withHelper(name: string, helper: HelperDelegate) {
+  withHelper(name: string, helper?: HelperDelegate) {
     this.helpers[name] = helper;
     return this;
   }
