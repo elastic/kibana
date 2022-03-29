@@ -56,7 +56,7 @@ export function IconStops({
       iconSource === ICON_SOURCE.CUSTOM
         ? customIcons.find(({ symbolId }) => symbolId === icon)
         : getMakiSymbol(icon);
-    if (!iconInfo) return;
+    if (iconInfo === undefined) return;
     const { svg, label } = iconInfo;
     const onIconSelect = ({ selectedIconId }) => {
       const newIconStops = [...iconStops];
@@ -170,5 +170,8 @@ export function IconStops({
         </EuiFlexGroup>
       </EuiFormRow>
     );
+  })
+  .filter((stop) => {
+    return stop !== undefined;
   });
 }

@@ -80,11 +80,7 @@ export async function createSdfIcon({ svg, renderSize = 64, cutoff = 0.25, radiu
 }
 
 export function getMakiSymbol(symbolId) {
-  const symbol = MAKI_ICONS?.[symbolId];
-  if (!symbol) {
-    return {};
-  }
-  return symbol;
+  return MAKI_ICONS?.[symbolId];
 }
 
 export function getMakiSymbolAnchor(symbolId) {
