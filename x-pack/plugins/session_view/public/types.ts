@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { CoreStart } from '../../../../src/core/public';
-import { TimelinesUIStart } from '../../timelines/public';
 import { ProcessEvent, Teletype } from '../common/types/process_tree';
 
-export type SessionViewServices = CoreStart & {
-  timelines: TimelinesUIStart;
-};
+export type SessionViewServices = CoreStart;
+
+export interface SessionViewUIStart {
+  getSessionView: (sessionEntityId: string) => ReactElement;
+}
 
 export interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id

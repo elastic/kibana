@@ -28,6 +28,7 @@ exports[`SuggestionComponent Should display the suggestion and use the provided 
     </div>
     <div
       className="kbnSuggestionItem__description"
+      data-test-subj="autoCompleteSuggestionDescription"
     >
       This is not a helpful suggestion
     </div>
@@ -63,6 +64,7 @@ exports[`SuggestionComponent Should make the element active if the selected prop
     </div>
     <div
       className="kbnSuggestionItem__description"
+      data-test-subj="autoCompleteSuggestionDescription"
     >
       This is not a helpful suggestion
     </div>

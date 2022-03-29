@@ -26,7 +26,8 @@
     "timelines",
     "triggersActionsUi",
     "uiActions",
-    "unifiedSearch"
+    "unifiedSearch",
+    "sessionView"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
