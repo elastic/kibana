@@ -343,6 +343,7 @@ describe('formula', () => {
           formula: 'moving_average(average(bytes), window=3)',
         },
         references: [],
+        timeScale: 'd',
       });
     });
 
