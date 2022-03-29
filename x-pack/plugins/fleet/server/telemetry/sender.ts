@@ -168,8 +168,8 @@ export class TelemetryEventsSender {
       const resp = await axios.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': clusterUuid,
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.16.0',
+          ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
         },
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);

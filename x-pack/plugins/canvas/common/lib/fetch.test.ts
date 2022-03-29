@@ -9,17 +9,19 @@ import { fetch, arrayBufferFetch } from './fetch';
 
 describe('fetch', () => {
   it('test fetch headers', () => {
-    expect(fetch.defaults.headers.Accept).toBe('application/json');
-    expect(fetch.defaults.headers['Content-Type']).toBe('application/json');
-    expect(fetch.defaults.headers['kbn-xsrf']).toBe('professionally-crafted-string-of-text');
+    // workaround until https://github.com/axios/axios/pull/4557 is merged
+    const headers = fetch.defaults.headers as unknown as Record<string, unknown>;
+    expect(headers.Accept).toBe('application/json');
+    expect(headers['Content-Type']).toBe('application/json');
+    expect(headers['kbn-xsrf']).toBe('professionally-crafted-string-of-text');
   });
 
   it('test arrayBufferFetch headers', () => {
-    expect(arrayBufferFetch.defaults.headers.Accept).toBe('application/json');
-    expect(arrayBufferFetch.defaults.headers['Content-Type']).toBe('application/json');
-    expect(arrayBufferFetch.defaults.headers['kbn-xsrf']).toBe(
-      'professionally-crafted-string-of-text'
-    );
+    // workaround until https://github.com/axios/axios/pull/4557 is merged
+    const headers = fetch.defaults.headers as unknown as Record<string, unknown>;
+    expect(headers.Accept).toBe('application/json');
+    expect(headers['Content-Type']).toBe('application/json');
+    expect(headers['kbn-xsrf']).toBe('professionally-crafted-string-of-text');
     expect(arrayBufferFetch.defaults.responseType).toBe('arraybuffer');
   });
 });

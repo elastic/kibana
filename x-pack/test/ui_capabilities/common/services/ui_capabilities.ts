@@ -61,18 +61,17 @@ export class UICapabilitiesService {
     this.log.debug(
       `requesting ${spaceUrlPrefix}/api/core/capabilities to parse the uiCapabilities`
     );
-    const requestHeaders = credentials
-      ? {
-          Authorization: `Basic ${Buffer.from(
-            `${credentials.username}:${credentials.password}`
-          ).toString('base64')}`,
-        }
-      : {};
     const response = await this.axios.post(
       `${spaceUrlPrefix}/api/core/capabilities`,
       { applications: [...applications, 'kibana:stack_management'] },
       {
-        headers: requestHeaders,
+        headers: credentials
+          ? {
+              Authorization: `Basic ${Buffer.from(
+                `${credentials.username}:${credentials.password}`
+              ).toString('base64')}`,
+            }
+          : {},
       }
     );
 
