@@ -32,6 +32,7 @@ export function getRootPropertiesObjects(mappings: IndexMapping) {
     // we consider the existence of the properties or type of object to designate that this is an object datatype
     if (
       !omittedRootProps.includes(key) &&
+      // @ts-expect-error `properties` not defined on estypes.MappingMatchOnlyTextProperty
       ((value as SavedObjectsFieldMapping).properties || value.type === 'object')
     ) {
       acc[key] = value;
