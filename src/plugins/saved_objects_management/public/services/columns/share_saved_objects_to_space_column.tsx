@@ -130,19 +130,15 @@ export class ShareToSpaceSavedObjectsManagementColumn extends SavedObjectsManage
     name: columnName,
     description: columnDescription,
     render: (namespaces: string[] | undefined, record: SavedObjectsManagementRecord) => {
-      if (!namespaces) {
-        return null;
-      }
-
       const spaceListProps: SpaceListProps = {
-        namespaces,
+        namespaces: namespaces ?? [],
         behaviorContext: 'outside-space',
       };
       const flyoutProps: ShareToSpaceFlyoutProps = {
         savedObjectTarget: {
           type: record.type,
           id: record.id,
-          namespaces: record.namespaces ?? [],
+          namespaces: namespaces ?? [],
           title: record.meta.title,
           icon: record.meta.icon,
         },
