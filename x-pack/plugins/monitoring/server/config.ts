@@ -52,6 +52,34 @@ export const configSchema = schema.object({
     min_interval_seconds: schema.number({ defaultValue: 10 }),
     show_license_expiration: schema.boolean({ defaultValue: true }),
   }),
+  // the `ui` configuration object contains necessary for the public code to
+  // function but also sensitive informations like credentials.
+  // to avoid leaking these to the browser we reference the properties in this
+  // dedicated object
+  uiPublic: schema.object({
+    enabled: schema.boolean({ defaultValue: schema.siblingRef('...ui.enabled') }),
+    ccs: schema.object({
+      enabled: schema.boolean({ defaultValue: schema.siblingRef('....ui.ccs.enabled') }),
+    }),
+    min_interval_seconds: schema.number({
+      defaultValue: schema.siblingRef('...ui.min_interval_seconds'),
+    }),
+    show_license_expiration: schema.boolean({
+      defaultValue: schema.siblingRef('...ui.show_license_expiration'),
+    }),
+    container: schema.object({
+      elasticsearch: schema.object({
+        enabled: schema.boolean({
+          defaultValue: schema.siblingRef('.....ui.container.elasticsearch.enabled'),
+        }),
+      }),
+      logstash: schema.object({
+        enabled: schema.boolean({
+          defaultValue: schema.siblingRef('.....ui.container.elasticsearch.enabled'),
+        }),
+      }),
+    }),
+  }),
   kibana: schema.object({
     collection: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
@@ -78,30 +106,6 @@ export const configSchema = schema.object({
   tests: schema.object({
     cloud_detector: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
-    }),
-  }),
-  uiPublic: schema.object({
-    enabled: schema.boolean({ defaultValue: schema.siblingRef('ui.enabled') }),
-    ccs: schema.object({
-      enabled: schema.boolean({ defaultValue: schema.siblingRef('ui.ccs.enabled') }),
-    }),
-    min_interval_seconds: schema.number({
-      defaultValue: schema.siblingRef('ui.min_interval_seconds'),
-    }),
-    show_license_expiration: schema.boolean({
-      defaultValue: schema.siblingRef('ui.show_license_expiration'),
-    }),
-    container: schema.object({
-      elasticsearch: schema.object({
-        enabled: schema.boolean({
-          defaultValue: schema.siblingRef('ui.container.elasticsearch.enabled'),
-        }),
-      }),
-      logstash: schema.object({
-        enabled: schema.boolean({
-          defaultValue: schema.siblingRef('ui.container.elasticsearch.enabled'),
-        }),
-      }),
     }),
   }),
 });
