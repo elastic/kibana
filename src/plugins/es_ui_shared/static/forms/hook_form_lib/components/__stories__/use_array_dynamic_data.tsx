@@ -203,7 +203,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
   return (
     <UseArray
       key={ruleType}
-      path={ruleType === 'type_one' ? 'typeOneProcessors' : 'typeTwoProcessors'}
+      path="processors"
       initialNumberOfItems={ruleType === 'type_one' ? 1 : 3}
     >
       {({ items, addItem, removeItem }) => {
@@ -270,7 +270,6 @@ const FormContent: FC = () => {
       updateFieldValues({
         // Set dynamically the processors based on the "ruleType" selected.
         // In a real world scenario this would probably occur after fetching data on the server
-        ruleType: updatedRuleType, // we need to provide the new ruleType for the deserializer
         processors: updatedRuleType === 'type_one' ? processorsTypeOne : processorsTypeTwo,
       });
     },
@@ -311,18 +310,6 @@ interface MyForm {
   processors: Array<{ name: string; type: string; config: string }>;
 }
 
-interface Processor {
-  name: string;
-  type: string;
-  config: string;
-}
-
-interface MyFormInternal {
-  ruleType: string;
-  typeOneProcessors?: Processor[];
-  typeTwoProcessors?: Processor[];
-}
-
 /**
  * Form defaultValue - Loaded from backend
  */
@@ -342,34 +329,9 @@ const schema = {
   },
 };
 
-const deserializer = ({ ruleType, processors }: MyForm): MyFormInternal => {
-  const formData: MyFormInternal = {
-    ruleType,
-  };
-
-  if (ruleType === 'type_one') {
-    formData.typeOneProcessors = processors;
-  } else {
-    formData.typeTwoProcessors = processors;
-  }
-
-  return formData;
-};
-
-const serializer = ({
-  ruleType,
-  typeOneProcessors,
-  typeTwoProcessors,
-}: MyFormInternal): MyForm => ({
-  ruleType,
-  processors: [...(typeOneProcessors ?? typeTwoProcessors!)],
-});
-
-const formConfig: FormConfig<MyForm, MyFormInternal> = {
+const formConfig: FormConfig<MyForm> = {
   schema,
   defaultValue,
-  deserializer,
-  serializer,
 };
 
 export function DynamicData() {
