@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const CLOSE_ANALYZER = i18n.translate(
-  'xpack.securitySolution.timeline.graphOverlay.closeAnalyzerButton',
-  {
-    defaultMessage: 'Close analyzer',
-  }
-);
+export type { FormattedNerResp } from './ner_inference';
+export { NerInference } from './ner_inference';
+export { NerOutput } from './ner_output';
