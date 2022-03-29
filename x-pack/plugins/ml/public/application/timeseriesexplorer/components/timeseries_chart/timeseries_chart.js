@@ -1748,11 +1748,13 @@ class TimeseriesChartIntl extends Component {
           timespan += ` - ${moment(annotation.end_timestamp).format('HH:mm')}`;
         }
         tooltipData.push({
-          label: `${timespan}: ${annotation.annotation}`,
+          label: timespan,
+          value: `${annotation.annotation}`,
           seriesIdentifier: {
-            key: seriesKey,
+            key: 'anomaly_timeline',
+            specId: annotation._id ?? `${annotation.annotation}-${annotation.timestamp}-label`,
           },
-          valueAccessor: 'timespan',
+          valueAccessor: 'annotation',
         });
       });
     }
