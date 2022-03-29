@@ -8862,13 +8862,13 @@
                       "properties": {
                         "eql": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -8887,13 +8887,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -8992,15 +8992,15 @@
                             }
                           }
                         },
-                        "indicator": {
+                        "threat_match": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9019,13 +9019,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9124,15 +9124,15 @@
                             }
                           }
                         },
-                        "mlRule": {
+                        "machine_learning": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9151,13 +9151,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9258,13 +9258,13 @@
                         },
                         "query": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9283,13 +9283,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9388,15 +9388,15 @@
                             }
                           }
                         },
-                        "savedQuery": {
+                        "saved_query": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9415,13 +9415,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9522,13 +9522,13 @@
                         },
                         "threshold": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9547,13 +9547,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9654,13 +9654,13 @@
                         },
                         "total": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
@@ -9680,13 +9680,13 @@
                       "properties": {
                         "eql": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9705,13 +9705,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9810,15 +9810,15 @@
                             }
                           }
                         },
-                        "indicator": {
+                        "threat_match": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9837,13 +9837,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9942,15 +9942,15 @@
                             }
                           }
                         },
-                        "mlRule": {
+                        "machine_learning": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -9969,13 +9969,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10076,13 +10076,13 @@
                         },
                         "query": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10101,13 +10101,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10206,15 +10206,15 @@
                             }
                           }
                         },
-                        "savedQuery": {
+                        "saved_query": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10233,13 +10233,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10340,13 +10340,13 @@
                         },
                         "threshold": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10365,13 +10365,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10472,13 +10472,13 @@
                         },
                         "total": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
@@ -10498,13 +10498,13 @@
                       "properties": {
                         "eql": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10523,13 +10523,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10628,15 +10628,15 @@
                             }
                           }
                         },
-                        "indicator": {
+                        "threat_match": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10655,13 +10655,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10760,15 +10760,15 @@
                             }
                           }
                         },
-                        "mlRule": {
+                        "machine_learning": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10787,13 +10787,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10894,13 +10894,13 @@
                         },
                         "query": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -10919,13 +10919,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -11024,15 +11024,15 @@
                             }
                           }
                         },
-                        "savedQuery": {
+                        "saved_query": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -11051,13 +11051,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -11158,13 +11158,13 @@
                         },
                         "threshold": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "top_failed": {
+                            "top_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -11183,13 +11183,13 @@
                                 }
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
                               }
                             },
-                            "top_partial_failure": {
+                            "top_partial_failures": {
                               "type": "array",
                               "items": {
                                 "properties": {
@@ -11290,13 +11290,13 @@
                         },
                         "total": {
                           "properties": {
-                            "failed": {
+                            "failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of failed rules"
                               }
                             },
-                            "partial_failure": {
+                            "partial_failures": {
                               "type": "long",
                               "_meta": {
                                 "description": "The number of partial failure rules"
