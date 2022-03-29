@@ -65,6 +65,10 @@ describe('ServiceAllowedWrapper', () => {
 
       expect(await findByText('Monitor management')).toBeInTheDocument();
       expect(forNearestAnchor(getByText)('Request access')).toBeEnabled();
+      expect(forNearestAnchor(getByText)('Request access')).toHaveAttribute(
+        'href',
+        'https://example.com'
+      );
     });
 
     it('renders a disabled button if there is no form URL', async () => {
