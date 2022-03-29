@@ -25,7 +25,11 @@ export interface BaseProps {
 
   setSelectedPolicyId?: (policyId?: string) => void;
 
+  policyId?: string;
+
   isFleetServerPolicySelected?: boolean;
+
+  isK8s?: string;
 }
 
 export interface InstructionProps extends BaseProps {

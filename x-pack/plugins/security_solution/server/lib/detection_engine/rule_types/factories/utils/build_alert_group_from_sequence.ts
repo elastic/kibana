@@ -16,7 +16,6 @@ import { buildAlert, buildAncestors, generateAlertId } from './build_alert';
 import { buildBulkBody } from './build_bulk_body';
 import { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
-import { objectArrayIntersection } from '../../../signals/build_bulk_body';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 import {
@@ -117,4 +116,55 @@ export const buildAlertRoot = (
     [ALERT_ORIGINAL_TIME]: timestamps[0],
     [ALERT_GROUP_ID]: generateAlertId(doc),
   };
+};
+
+export const objectArrayIntersection = (objects: object[]) => {
+  if (objects.length === 0) {
+    return undefined;
+  } else if (objects.length === 1) {
+    return objects[0];
+  } else {
+    return objects
+      .slice(1)
+      .reduce(
+        (acc: object | undefined, obj): object | undefined => objectPairIntersection(acc, obj),
+        objects[0]
+      );
+  }
+};
+
+export const objectPairIntersection = (a: object | undefined, b: object | undefined) => {
+  if (a === undefined || b === undefined) {
+    return undefined;
+  }
+  const intersection: Record<string, unknown> = {};
+  Object.entries(a).forEach(([key, aVal]) => {
+    if (key in b) {
+      const bVal = (b as Record<string, unknown>)[key];
+      if (
+        typeof aVal === 'object' &&
+        !(aVal instanceof Array) &&
+        aVal !== null &&
+        typeof bVal === 'object' &&
+        !(bVal instanceof Array) &&
+        bVal !== null
+      ) {
+        intersection[key] = objectPairIntersection(aVal, bVal);
+      } else if (aVal === bVal) {
+        intersection[key] = aVal;
+      }
+    }
+  });
+  // Count up the number of entries that are NOT undefined in the intersection
+  // If there are no keys OR all entries are undefined, return undefined
+  if (
+    Object.values(intersection).reduce(
+      (acc: number, value) => (value !== undefined ? acc + 1 : acc),
+      0
+    ) === 0
+  ) {
+    return undefined;
+  } else {
+    return intersection;
+  }
 };
