@@ -14,6 +14,7 @@ export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
 export const PACKAGE_POLICY_API_ROOT = `${API_ROOT}/package_policies`;
 export const AGENT_POLICY_API_ROOT = `${API_ROOT}/agent_policies`;
+export const K8S_API_ROOT = `${API_ROOT}/kubernetes`;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 
@@ -65,6 +66,12 @@ export const AGENT_POLICY_API_ROUTES = {
   DELETE_PATTERN: `${AGENT_POLICY_API_ROOT}/delete`,
   FULL_INFO_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/full`,
   FULL_INFO_DOWNLOAD_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/download`,
+};
+
+// Kubernetes Manifest API routes
+export const K8S_API_ROUTES = {
+  K8S_DOWNLOAD_PATTERN: `${K8S_API_ROOT}/download`,
+  K8S_INFO_PATTERN: `${K8S_API_ROOT}`,
 };
 
 // Output API routes
