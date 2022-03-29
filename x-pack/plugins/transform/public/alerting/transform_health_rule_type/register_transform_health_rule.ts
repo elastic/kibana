@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { TRANSFORM_RULE_TYPE } from '../../../common';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';
 import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
+import { getResultTestConfig } from '../../../common/utils/alerts';
 
 export function getTransformHealthRuleType(): RuleTypeModel<TransformHealthRuleParams> {
   return {
@@ -26,15 +27,29 @@ export function getTransformHealthRuleType(): RuleTypeModel<TransformHealthRuleP
       const validationResult = {
         errors: {
           includeTransforms: new Array<string>(),
+          testsConfig: new Array<string>(),
         } as Record<keyof TransformHealthRuleParams, string[]>,
       };
 
       if (!ruleParams.includeTransforms?.length) {
-        validationResult.errors.includeTransforms?.push(
+        validationResult.errors.includeTransforms.push(
           i18n.translate(
             'xpack.transform.alertTypes.transformHealth.includeTransforms.errorMessage',
             {
               defaultMessage: 'At least one transform has to be selected',
+            }
+          )
+        );
+      }
+
+      const resultTestConfig = getResultTestConfig(ruleParams.testsConfig);
+      const allTestDisabled = Object.values(resultTestConfig).every((v) => !v.enabled);
+      if (allTestDisabled) {
+        validationResult.errors.testsConfig.push(
+          i18n.translate(
+            'xpack.transform.alertTypes.transformHealth.testsConfigTransforms.errorMessage',
+            {
+              defaultMessage: 'At least one health check has to be selected',
             }
           )
         );
