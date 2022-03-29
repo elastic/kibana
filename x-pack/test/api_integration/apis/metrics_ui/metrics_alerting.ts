@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { MetricExpressionParams } from '../../../../plugins/infra/common/alerting/metrics';
+import {
+  Comparator,
+  MetricExpressionParams,
+} from '../../../../plugins/infra/common/alerting/metrics';
 import { getElasticsearchMetricQuery } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/metric_query';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -18,6 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
     ({
       aggType,
       timeUnit: 'm',
+      threshold: [0],
+      comparator: Comparator.GT_OR_EQ,
       timeSize: 5,
       ...(aggType !== 'count' ? { metric: 'test.metric' } : {}),
     } as MetricExpressionParams);
@@ -37,7 +42,12 @@ export default function ({ getService }: FtrProviderContext) {
             start: moment().subtract(25, 'minutes').valueOf(),
             end: moment().valueOf(),
           };
-          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), timeframe, 100);
+          const searchBody = getElasticsearchMetricQuery(
+            getSearchParams(aggType),
+            timeframe,
+            100,
+            true
+          );
           const result = await client.search({
             index,
             body: searchBody,
@@ -58,7 +68,8 @@ export default function ({ getService }: FtrProviderContext) {
           getSearchParams('avg'),
           timeframe,
           100,
-          undefined,
+          true,
+          void 0,
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
         const result = await client.search({
@@ -81,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
             getSearchParams(aggType),
             timeframe,
             100,
+            true,
             'agent.id'
           );
           const result = await client.search({
@@ -101,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
           getSearchParams('avg'),
           timeframe,
           100,
+          true,
           'agent.id',
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );

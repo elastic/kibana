@@ -218,6 +218,10 @@ export class TaskPollingLifecycle {
     });
   }
 
+  public stop() {
+    this.taskClaiming.excludedTaskTypes = ['*'];
+  }
+
   public get events(): Observable<TaskLifecycleEvent> {
     return this.events$;
   }
