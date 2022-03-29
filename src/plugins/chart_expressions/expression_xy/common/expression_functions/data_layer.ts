@@ -100,11 +100,11 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
       }),
     },
     palette: {
-      default: `{theme "palette" default={system_palette name="default"} }`,
+      types: ['palette', 'system_palette'],
       help: i18n.translate('expressionXY.dataLayer.palette.help', {
         defaultMessage: 'Palette',
       }),
-      types: ['palette'],
+      default: '{palette}',
     },
   },
   fn(table, args) {
