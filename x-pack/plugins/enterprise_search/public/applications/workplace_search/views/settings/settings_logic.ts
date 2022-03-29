@@ -118,7 +118,8 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     connectors: [
       [],
       {
-        onInitializeConnectors: (_, connectors) => connectors,
+        onInitializeConnectors: (_, connectors) =>
+          connectors.sort((a, b) => a.name.localeCompare(b.name)),
       },
     ],
     orgNameInputValue: [

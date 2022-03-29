@@ -50,7 +50,7 @@ export interface IPermissionsModalProps {
   additionalConfiguration: boolean;
 }
 
-type CombinedDataItem = SourceDataItem & ContentSourceDetails;
+type CombinedDataItem = SourceDataItem & SourceDataItem & { connected: boolean };
 
 export interface ISourcesValues {
   contentSources: ContentSourceDetails[];
@@ -144,11 +144,17 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   selectors: ({ selectors }) => ({
     availableSources: [
       () => [selectors.sourceData],
-      (sourceData: SourceDataItem[]) => sourceData.filter(({ configured }) => !configured),
+      (sourceData: SourceDataItem[]) =>
+        sourceData
+          .filter(({ configured }) => !configured)
+          .sort((a, b) => a.name.localeCompare(b.name)),
     ],
     configuredSources: [
       () => [selectors.sourceData],
-      (sourceData: SourceDataItem[]) => sourceData.filter(({ configured }) => configured),
+      (sourceData: SourceDataItem[]) =>
+        sourceData
+          .filter(({ configured }) => configured)
+          .sort((a, b) => a.name.localeCompare(b.name)),
     ],
     externalConfigured: [
       () => [selectors.configuredSources],
@@ -307,18 +313,20 @@ export const mergeServerAndStaticData = (
   serverData: Connector[],
   staticData: SourceDataItem[],
   contentSources: ContentSourceDetails[]
-) => {
-  const combined = [] as CombinedDataItem[];
-  staticData.forEach((staticItem) => {
-    const type = staticItem.serviceType;
-    const serverItem = serverData.find(({ serviceType }) => serviceType === type);
-    const connectedSource = contentSources.find(({ serviceType }) => serviceType === type);
-    combined.push({
-      ...staticItem,
-      ...serverItem,
-      connected: !!connectedSource,
-    } as CombinedDataItem);
-  });
-
-  return combined;
+): CombinedDataItem[] => {
+  return staticData
+    .map((staticItem) => {
+      const serverItem = serverData.find(
+        ({ serviceType }) => serviceType === staticItem.serviceType
+      );
+      const connectedSource = contentSources.find(
+        ({ serviceType }) => serviceType === staticItem.serviceType
+      );
+      return {
+        ...staticItem,
+        ...serverItem,
+        connected: !!connectedSource,
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 };
