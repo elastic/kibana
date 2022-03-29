@@ -713,7 +713,7 @@ export class VectorStyle implements IVectorStyle {
 
   getIconSvg(symbolId: string) {
     const meta = this._getIconMeta(symbolId);
-    return meta ? meta.svg : undefined
+    return meta ? meta.svg : undefined;
   }
 
   _getSymbolId() {

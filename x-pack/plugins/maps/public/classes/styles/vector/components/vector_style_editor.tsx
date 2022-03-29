@@ -167,10 +167,6 @@ export class VectorStyleEditor extends Component<Props, State> {
     this.props.handlePropertyChange(propertyName, styleDescriptor);
   };
 
-  _onCustomIconsChange = (icons: CustomIcon[]) => {
-    this.props.onCustomIconsChange(icons);
-  };
-
   _hasMarkerOrIcon() {
     const iconSize = this.props.styleProperties[VECTOR_STYLES.ICON_SIZE];
     return iconSize.isDynamic() || (iconSize as StaticSizeProperty).getOptions().size > 0;
@@ -402,7 +398,7 @@ export class VectorStyleEditor extends Component<Props, State> {
             customIcons={this.props.customIcons}
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
-            onCustomIconsChange={this._onCustomIconsChange}
+            onCustomIconsChange={this.props.onCustomIconsChange}
             styleProperty={
               this.props.styleProperties[VECTOR_STYLES.ICON] as IStyleProperty<
                 IconDynamicOptions | IconStaticOptions

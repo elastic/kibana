@@ -60,6 +60,7 @@ const defaultProps = {
     },
   ],
   customIcons: [],
+  onCustomIconsChange: () => {},
 };
 
 test('Should render default props', () => {

@@ -38,7 +38,7 @@ interface Props {
   customIconStops?: IconStop[];
   iconPaletteId: string | null;
   customIcons: CustomIcon[];
-  onCustomIconsChange?: (customIcons: CustomIcon[]) => void;
+  onCustomIconsChange: (customIcons: CustomIcon[]) => void;
   onChange: ({ customIconStops, iconPaletteId, useCustomIconMap }: StyleOptionChanges) => void;
   styleProperty: IDynamicStyleProperty<IconDynamicOptions>;
   useCustomIconMap?: boolean;

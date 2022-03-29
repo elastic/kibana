@@ -94,7 +94,7 @@ export interface ILayer {
   cloneDescriptor(): Promise<LayerDescriptor>;
   renderStyleEditor(
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
-    onCustomIconChange: (customIcons: CustomIcon[]) => void
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
