@@ -24,19 +24,21 @@ import { Form, FormHook } from '../../../../../../../shared_imports';
 import * as i18n from '../../../translations';
 
 interface BulkEditFormWrapperProps {
+  form: FormHook;
+  title: string;
+  banner?: React.ReactNode;
+  children: React.ReactNode;
   onClose: () => void;
   onSubmit: () => void;
-  title: string;
-  form: FormHook;
-  children: React.ReactNode;
 }
 
 const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
   form,
+  title,
+  banner,
+  children,
   onClose,
   onSubmit,
-  children,
-  title,
 }) => {
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'RulesBulkEditForm',
@@ -50,7 +52,7 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
           <h2 id={simpleFlyoutTitleId}>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody banner={banner}>
         <Form form={form}>{children}</Form>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
