@@ -11,7 +11,7 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { SavedObjectsNamespaceType } from 'src/core/public';
-import { EuiIconTip } from '@elastic/eui';
+import { EuiIconTip, EuiToolTip } from '@elastic/eui';
 
 import type {
   ShareToSpaceFlyoutProps,
@@ -86,16 +86,8 @@ const SHAREABLE_SOON_OBJECT_TYPES = [
   'connector',
 ];
 
-/** Three different tooltips are displayed for non-shareable objects, depending on the object type. */
-function getTooltipProps(objectType: string, objectNamespaceType: SavedObjectsNamespaceType) {
-  if (objectNamespaceType === 'single' || objectNamespaceType === 'multiple-isolated') {
-    if (SHAREABLE_SOON_OBJECT_TYPES.includes(objectType)) {
-      return { title: shareableSoonObjectTypeTitle, content: shareableSoonObjectTypeContent };
-    }
-    return { title: isolatedObjectTypeTitle, content: isolatedObjectTypeContent };
-  } else if (objectNamespaceType === 'agnostic') {
-    return { title: globalObjectTypeTitle, content: globalObjectTypeContent };
-  }
+/** Three different icons are displayed for non-shareable objects, depending on the object type. */
+function getNonShareableIcon(objectType: string, objectNamespaceType: SavedObjectsNamespaceType) {
   return null;
 }
 
@@ -122,10 +114,28 @@ const Wrapper = ({
     () => spacesApiUi.components.getShareToSpaceFlyout,
     [spacesApiUi]
   );
+  const LazySpaceAvatar = useMemo(() => spacesApiUi.components.getSpaceAvatar, [spacesApiUi]);
 
-  const tooltipProps = getTooltipProps(objectType, objectNamespaceType);
-  if (tooltipProps) {
+  if (objectNamespaceType === 'single' || objectNamespaceType === 'multiple-isolated') {
+    const tooltipProps = SHAREABLE_SOON_OBJECT_TYPES.includes(objectType)
+      ? { title: shareableSoonObjectTypeTitle, content: shareableSoonObjectTypeContent }
+      : { title: isolatedObjectTypeTitle, content: isolatedObjectTypeContent };
     return <EuiIconTip type="minus" position="left" delay="long" {...tooltipProps} />;
+  } else if (objectNamespaceType === 'agnostic') {
+    return (
+      <EuiToolTip
+        position="left"
+        delay="long"
+        title={globalObjectTypeTitle}
+        content={globalObjectTypeContent}
+      >
+        <LazySpaceAvatar
+          space={{ id: '*', initials: '*', color: '#D3DAE6' }}
+          isDisabled={true}
+          size={'s'}
+        />
+      </EuiToolTip>
+    );
   }
 
   return (
