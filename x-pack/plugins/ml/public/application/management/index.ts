@@ -20,9 +20,9 @@ export function registerManagementSection(
   deps: { usageCollection?: UsageCollectionSetup }
 ) {
   return management.sections.section.insightsAndAlerting.registerApp({
-    id: 'jobsListLink',
+    id: 'mlLink',
     title: i18n.translate('xpack.ml.management.jobsListTitle', {
-      defaultMessage: 'Machine Learning Jobs',
+      defaultMessage: 'Machine Learning',
     }),
     order: 2,
     async mount(params: ManagementAppMountParams) {
