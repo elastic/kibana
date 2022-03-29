@@ -173,6 +173,6 @@ steps:
   - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
     label: 'Build Webpack Bundle Analyzer reports'
     agents:
-      queue: n2-2
+      queue: c2-4
     key: webpack_bundle_analyzer
     timeout_in_minutes: 60

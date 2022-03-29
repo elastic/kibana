@@ -334,6 +334,8 @@ function getLayerKey(layerDescriptor: LayerDescriptor): LAYER_KEYS | null {
       return LAYER_KEYS.ES_AGG_CLUSTERS;
     } else if (sourceDescriptor.requestType === RENDER_AS.GRID) {
       return LAYER_KEYS.ES_AGG_GRIDS;
+    } else if (sourceDescriptor.requestType === RENDER_AS.HEX) {
+      return LAYER_KEYS.ES_AGG_HEXAGONS;
     }
   }
 

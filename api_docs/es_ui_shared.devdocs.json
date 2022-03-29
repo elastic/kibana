@@ -702,6 +702,37 @@
       },
       {
         "parentPluginId": "esUiShared",
+        "id": "def-public.ViewApiRequestFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "ViewApiRequestFlyout",
+        "description": [],
+        "signature": [
+          "(props: ViewApiRequestFlyoutProps) => JSX.Element"
+        ],
+        "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.ViewApiRequestFlyout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "ViewApiRequestFlyoutProps"
+            ],
+            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "esUiShared",
         "id": "def-public.WithPrivileges",
         "type": "Function",
         "tags": [],
