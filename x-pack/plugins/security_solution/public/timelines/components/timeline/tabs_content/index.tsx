@@ -347,6 +347,15 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           >
             {i18n.ANALYZER_TAB}
           </EuiTab>
+          <EuiTab
+            data-test-subj={`timelineTabs-${TimelineTabs.session}`}
+            onClick={setSessionAsActiveTab}
+            isSelected={activeTab === TimelineTabs.session}
+            disabled={sessionViewId === null}
+            key={TimelineTabs.session}
+          >
+            {i18n.SESSION_TAB}
+          </EuiTab>
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}
@@ -374,15 +383,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               </div>
             )}
           </StyledEuiTab>
-          <EuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.session}`}
-            onClick={setSessionAsActiveTab}
-            isSelected={activeTab === TimelineTabs.session}
-            disabled={sessionViewId === null}
-            key={TimelineTabs.session}
-          >
-            {i18n.SESSION_TAB}
-          </EuiTab>
         </EuiTabs>
       )}
 

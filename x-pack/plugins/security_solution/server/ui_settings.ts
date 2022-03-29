@@ -235,13 +235,13 @@ export const initUiSettings = (
     },
     [ENABLE_SESSION_VIEW_PLUGIN]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableSessionView', {
-        defaultMessage: 'Enable Session Viewer Component',
+        defaultMessage: 'Enable Session View Component',
       }),
       value: true,
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableSessionViewDescription',
         {
-          defaultMessage: '<p>Enables the beta Session View component in the UI</p>',
+          defaultMessage: '<p>Enables the Session View component in the UI</p>',
         }
       ),
       type: 'boolean',

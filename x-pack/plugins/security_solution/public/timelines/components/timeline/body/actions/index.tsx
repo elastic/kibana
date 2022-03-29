@@ -140,11 +140,23 @@ const ActionsComponent: React.FC<ActionProps> = ({
   }, [ecsData]);
 
   const openSessionView = useCallback(() => {
+    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
+    if (timelineId === TimelineId.active) {
+      if (dataGridIsFullScreen) {
+        setTimelineFullScreen(true);
+      }
+      if (entryLeader !== null) {
+        dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
+      }
+    } else {
+      if (dataGridIsFullScreen) {
+        setGlobalFullScreen(true);
+      }
+    }
     if (entryLeader !== null) {
-      dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
       dispatch(updateTimelineSessionViewSessionId({ id: timelineId, eventId: entryLeader }));
     }
-  }, [dispatch, timelineId, entryLeader]);
+  }, [dispatch, timelineId, entryLeader, setGlobalFullScreen, setTimelineFullScreen]);
 
   return (
     <ActionsContainer>

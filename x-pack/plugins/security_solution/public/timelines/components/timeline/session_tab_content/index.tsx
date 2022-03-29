@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { TimelineId } from '../../../../../common/types/timeline';
-import * as i18n from '../../graph_overlay/translations';
 import { useSessionView } from './use_session_view';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
@@ -21,6 +20,7 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)`
 const ScrollableFlexItem = styled(EuiFlexItem)`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
   overflow: hidden;
+  width: 100%;
 `;
 
 const VerticalRule = styled.div`
@@ -34,19 +34,15 @@ interface Props {
 }
 
 const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
-  const { SessionView, onCloseOverlay, shouldShowDetailsPanel, DetailsPanel } = useSessionView({
+  const { SessionView, shouldShowDetailsPanel, DetailsPanel, Navigation } = useSessionView({
     timelineId,
   });
 
   return (
     <FullWidthFlexGroup gutterSize="none">
-      <EuiFlexGroup gutterSize="none" direction="column" justifyContent={'flexStart'}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
-            {i18n.CLOSE_SESSION}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
+      <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
+        <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
+        <ScrollableFlexItem>{SessionView}</ScrollableFlexItem>
       </EuiFlexGroup>
       {shouldShowDetailsPanel && (
         <>

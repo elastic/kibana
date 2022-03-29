@@ -130,8 +130,8 @@ describe('useSessionView', () => {
       },
       { wrapper: Wrapper }
     );
-    result.current.onCloseOverlay();
+    const navigation = result.current.Navigation;
 
-    expect(setTimelineFullScreen).toBeCalledWith(false);
+    expect(navigation).toBeTruthy();
   });
 });
