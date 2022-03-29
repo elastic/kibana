@@ -75,7 +75,12 @@ export const SuggestionComponent = React.memo(function SuggestionComponent(props
         props.suggestion.type
       }-${props.suggestion.text.replace(/\s/g, '-')}`}
     >
-      <div className={'kbnSuggestionItem kbnSuggestionItem--' + props.suggestion.type}>
+      <div
+        className={classNames({
+          kbnSuggestionItem: true,
+          ['kbnSuggestionItem--' + props.suggestion.type]: true,
+        })}
+      >
         <div className="kbnSuggestionItem__type">
           <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
@@ -83,7 +88,12 @@ export const SuggestionComponent = React.memo(function SuggestionComponent(props
           {props.suggestion.text}
         </div>
         {props.shouldDisplayDescription && (
-          <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
+          <div
+            className="kbnSuggestionItem__description"
+            data-test-subj="autoCompleteSuggestionDescription"
+          >
+            {props.suggestion.description}
+          </div>
         )}
       </div>
     </div>

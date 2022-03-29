@@ -83,6 +83,7 @@ describe('renderApp', () => {
         appMountParameters: params,
         observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
         ObservabilityPageTemplate: KibanaPageTemplate,
+        kibanaFeatures: [],
       });
       unmount();
     }).not.toThrowError();

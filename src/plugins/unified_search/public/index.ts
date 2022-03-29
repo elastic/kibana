@@ -8,16 +8,13 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
 import { UnifiedSearchPublicPlugin } from './plugin';
-export type { UnifiedSearchPublicPlugin as UnifiedSearchPlugin };
 
 export type { IndexPatternSelectProps } from './index_pattern_select';
-export { createIndexPatternSelect } from './index_pattern_select';
 export type { QueryStringInputProps } from './query_string_input';
 export { QueryStringInput } from './query_string_input';
-export type { SearchBarProps, StatefulSearchBarProps } from './search_bar';
-export { SearchBar } from './search_bar';
-export { SuggestionsComponent } from './typeahead';
+export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
 export type { UnifiedSearchPublicPluginStart } from './types';
+export { SearchBar } from './search_bar';
 export { FilterLabel, FilterItem } from './filter_bar';
 
 export type { ApplyGlobalFilterActionContext } from './actions';
@@ -28,4 +25,3 @@ export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new UnifiedSearchPublicPlugin(initializerContext);
 }
-export type { UnifiedSearchPluginSetup, UnifiedSearchPluginStart } from './types';

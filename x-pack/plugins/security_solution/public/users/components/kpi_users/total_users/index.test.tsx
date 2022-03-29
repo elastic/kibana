@@ -52,7 +52,7 @@ describe('Total Users KPI', () => {
         <TotalUsersKpi {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseSearchStrategy.mock.calls[0][0].skip).toEqual(false);
+    expect(mockUseSearchStrategy.mock.calls[0][0].abort).toEqual(false);
     expect(mockSearch).toHaveBeenCalled();
   });
   it('toggleStatus=false, skip', () => {
@@ -62,7 +62,7 @@ describe('Total Users KPI', () => {
         <TotalUsersKpi {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseSearchStrategy.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseSearchStrategy.mock.calls[0][0].abort).toEqual(true);
     expect(mockSearch).not.toHaveBeenCalled();
   });
 });

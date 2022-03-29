@@ -18,10 +18,6 @@ export interface UnifiedSearchSetupDependencies {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedSearchPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UnifiedSearchPluginStart {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AppPluginStartDependencies {}
 
 export interface UnifiedSearchStartDependencies {
   dataViews: DataViewsPublicPluginStart;

@@ -56,7 +56,7 @@ pageLoadAssetSize:
   telemetry: 51957
   telemetryManagementSection: 38586
   transform: 41007
-  triggersActionsUi: 100000
+  triggersActionsUi: 102400
   upgradeAssistant: 81241
   uptime: 40825
   urlForwarding: 32579
@@ -125,4 +125,5 @@ pageLoadAssetSize:
   visTypeGauge: 24113
   unifiedSearch: 49195
   data: 454087
+  expressionXY: 41392
   eventAnnotation: 19334

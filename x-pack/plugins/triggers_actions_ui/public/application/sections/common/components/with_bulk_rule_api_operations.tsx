@@ -33,7 +33,10 @@ import {
   loadRuleTypes,
   alertingFrameworkHealth,
   resolveRule,
+  loadExecutionLogAggregations,
+  LoadExecutionLogAggregationsProps,
 } from '../../../lib/rule_api';
+import { IExecutionLogResult } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
@@ -59,6 +62,9 @@ export interface ComponentOpts {
   loadRuleState: (id: Rule['id']) => Promise<RuleTaskState>;
   loadRuleSummary: (id: Rule['id'], numberOfExecutions?: number) => Promise<RuleSummary>;
   loadRuleTypes: () => Promise<RuleType[]>;
+  loadExecutionLogAggregations: (
+    props: LoadExecutionLogAggregationsProps
+  ) => Promise<IExecutionLogResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
 }
@@ -131,6 +137,12 @@ export function withBulkRuleOperations<T>(
           loadRuleSummary({ http, ruleId, numberOfExecutions })
         }
         loadRuleTypes={async () => loadRuleTypes({ http })}
+        loadExecutionLogAggregations={async (loadProps: LoadExecutionLogAggregationsProps) =>
+          loadExecutionLogAggregations({
+            ...loadProps,
+            http,
+          })
+        }
         resolveRule={async (ruleId: Rule['id']) => resolveRule({ http, ruleId })}
         getHealth={async () => alertingFrameworkHealth({ http })}
       />
