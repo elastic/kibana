@@ -63,7 +63,7 @@ const globalObjectTypeTitle = i18n.translate(
 );
 const globalObjectTypeContent = i18n.translate(
   'savedObjectsManagement.shareToSpace.globalObjectTypeContent',
-  { defaultMessage: 'This saved object is available in all spaces.' }
+  { defaultMessage: 'This saved object is available in all spaces and cannot be changed.' }
 );
 
 /**
