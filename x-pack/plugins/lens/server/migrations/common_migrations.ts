@@ -194,6 +194,23 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715): LensD
   return newAttributes as LensDocShape810;
 };
 
+export const commonSetLastValueShowArrayValues = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (
+        column.operationType === 'last_value' &&
+        !(typeof column.params.showArrayValues === 'boolean')
+      ) {
+        column.params.showArrayValues = true;
+      }
+    }
+  }
+  return newAttributes;
+};
+
 export const commonEnhanceTableRowHeight = (
   attributes: LensDocShape810<VisState810>
 ): LensDocShape810<VisState820> => {
@@ -205,6 +222,20 @@ export const commonEnhanceTableRowHeight = (
   const vizState = newAttributes.state.visualization as VisState820;
   vizState.rowHeight = visState810.fitRowToContent ? 'auto' : 'single';
   vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
+  return newAttributes;
+};
+
+export const commonSetIncludeEmptyRowsDateHistogram = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (column.operationType === 'date_histogram') {
+        column.params.includeEmptyRows = true;
+      }
+    }
+  }
   return newAttributes;
 };
 

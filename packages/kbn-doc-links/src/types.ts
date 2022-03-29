@@ -31,6 +31,8 @@ export interface DocLinks {
     readonly droppedTransactionSpans: string;
     readonly upgrading: string;
     readonly metaData: string;
+    readonly overview: string;
+    readonly tailSamplingPolicies: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -99,6 +101,7 @@ export interface DocLinks {
     readonly configuration: string;
     readonly licenseManagement: string;
     readonly mailService: string;
+    readonly troubleshootSetup: string;
     readonly usersAccess: string;
   };
   readonly workplaceSearch: {
@@ -110,6 +113,7 @@ export interface DocLinks {
     readonly customSourcePermissions: string;
     readonly documentPermissions: string;
     readonly dropbox: string;
+    readonly externalSharePointOnline: string;
     readonly externalIdentities: string;
     readonly gitHub: string;
     readonly gettingStarted: string;
@@ -124,6 +128,7 @@ export interface DocLinks {
     readonly security: string;
     readonly serviceNow: string;
     readonly sharePoint: string;
+    readonly sharePointServer: string;
     readonly slack: string;
     readonly synch: string;
     readonly zendesk: string;
@@ -287,6 +292,11 @@ export interface DocLinks {
     monitorUptime: string;
     tlsCertificate: string;
     uptimeDurationAnomaly: string;
+    monitorLogs: string;
+    analyzeMetrics: string;
+    monitorUptimeSynthetics: string;
+    userExperience: string;
+    createAlerts: string;
   }>;
   readonly alerting: Record<string, string>;
   readonly maps: Readonly<{
@@ -361,5 +371,8 @@ export interface DocLinks {
   };
   readonly endpoints: {
     readonly troubleshooting: string;
+  };
+  readonly legal: {
+    readonly privacyStatement: string;
   };
 }

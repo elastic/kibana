@@ -632,7 +632,128 @@ describe('Package policy service', () => {
       ).rejects.toThrow('Saved object [abc/123] conflict');
     });
 
-    it('should only update input vars that are not frozen', async () => {
+    it('should throw if the user try to update input vars that are frozen', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const res = packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: inputsUpdate }
+      );
+
+      await expect(res).rejects.toThrow('cat is a frozen variable and cannot be modified');
+    });
+
+    it('should allow to update input vars that are frozen with the force flag', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
@@ -747,18 +868,18 @@ describe('Package policy service', () => {
         savedObjectsClient,
         elasticsearchClient,
         'the-package-policy-id',
-        { ...mockPackagePolicy, inputs: inputsUpdate }
+        { ...mockPackagePolicy, inputs: inputsUpdate },
+        { force: true }
       );
 
       const [modifiedInput] = result.inputs;
       expect(modifiedInput.enabled).toEqual(true);
       expect(modifiedInput.vars!.dog.value).toEqual('labrador');
-      expect(modifiedInput.vars!.cat.value).toEqual('siamese');
+      expect(modifiedInput.vars!.cat.value).toEqual('tabby');
       const [modifiedStream] = modifiedInput.streams;
-      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['east', 'west']));
       expect(modifiedStream.vars!.period.value).toEqual('12mo');
     });
-
     it('should add new input vars when updating', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const mockPackagePolicy = createPackagePolicyMock();
@@ -810,7 +931,7 @@ describe('Package policy service', () => {
             },
             cat: {
               type: 'text',
-              value: 'tabby',
+              value: 'siamese',
             },
           },
           streams: [
@@ -823,7 +944,7 @@ describe('Package policy service', () => {
               id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
               vars: {
                 paths: {
-                  value: ['east', 'west'],
+                  value: ['north', 'south'],
                   type: 'text',
                 },
                 period: {

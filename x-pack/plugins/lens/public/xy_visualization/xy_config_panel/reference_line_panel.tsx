@@ -13,7 +13,7 @@ import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState } from '../types';
 import { FormatFactory } from '../../../common';
 import { YConfig } from '../../../common/expressions';
-import { FillStyle } from '../../../common/expressions/xy_chart';
+import { FillStyle, XYReferenceLineLayerConfig } from '../../../common/expressions/xy_chart';
 
 import { ColorPicker } from './color_picker';
 import { updateLayer } from '.';
@@ -32,21 +32,26 @@ export const ReferenceLinePanel = (
   const { state, setState, layerId, accessor } = props;
 
   const isHorizontal = isHorizontalChart(state.layers);
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: state,
     onChange: setState,
   });
 
-  const index = localState.layers.findIndex((l) => l.layerId === layerId);
-  const layer = localState.layers[index];
+  const localLayer = localState.layers.find(
+    (l) => l.layerId === layerId
+  ) as XYReferenceLineLayerConfig;
+  const localConfig = localLayer?.yConfig?.find(
+    (yAxisConfig) => yAxisConfig.forAccessor === accessor
+  );
 
   const setConfig = useCallback(
     (yConfig: Partial<YConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }
-      const newYConfigs = [...(layer.yConfig || [])];
+      const newYConfigs = [...(localLayer.yConfig || [])];
       const existingIndex = newYConfigs.findIndex(
         (yAxisConfig) => yAxisConfig.forAccessor === accessor
       );
@@ -58,35 +63,28 @@ export const ReferenceLinePanel = (
           ...yConfig,
         });
       }
-      setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));
+      setLocalState(updateLayer(localState, { ...localLayer, yConfig: newYConfigs }, index));
     },
-    [accessor, index, localState, layer, setLocalState]
+    [accessor, index, localState, localLayer, setLocalState]
   );
-
-  const currentConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
 
   return (
     <>
+      {' '}
       <MarkerDecorationSettings
-        accessor={accessor}
         isHorizontal={isHorizontal}
         setConfig={setConfig}
-        currentConfig={currentConfig}
+        currentConfig={localConfig}
       />
       <LineStyleSettings
-        accessor={accessor}
         isHorizontal={isHorizontal}
         setConfig={setConfig}
-        currentConfig={currentConfig}
+        currentConfig={localConfig}
       />
-      <FillSetting
-        accessor={accessor}
-        isHorizontal={isHorizontal}
-        setConfig={setConfig}
-        currentConfig={currentConfig}
-      />
+      <FillSetting isHorizontal={isHorizontal} setConfig={setConfig} currentConfig={localConfig} />
       <ColorPicker
         {...props}
+        setConfig={setConfig}
         disableHelpTooltip
         label={i18n.translate('xpack.lens.xyChart.lineColor.label', {
           defaultMessage: 'Color',
@@ -142,12 +140,10 @@ function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
 export const FillSetting = ({
   currentConfig,
   setConfig,
-  accessor,
   isHorizontal,
 }: {
   currentConfig?: YConfig;
   setConfig: (yConfig: Partial<YConfig> | undefined) => void;
-  accessor: string;
   isHorizontal: boolean;
 }) => {
   return (
@@ -170,7 +166,7 @@ export const FillSetting = ({
         idSelected={`${idPrefix}${currentConfig?.fill || 'none'}`}
         onChange={(id) => {
           const newMode = id.replace(idPrefix, '') as FillStyle;
-          setConfig({ forAccessor: accessor, fill: newMode });
+          setConfig({ fill: newMode });
         }}
       />
     </EuiFormRow>

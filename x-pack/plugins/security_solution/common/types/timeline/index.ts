@@ -16,6 +16,8 @@ import {
   PinnedEvent,
 } from './pinned_event';
 import {
+  alias_purpose as savedObjectResolveAliasPurpose,
+  outcome as savedObjectResolveOutcome,
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
@@ -312,6 +314,8 @@ export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'sa
  */
 
 export enum TimelineId {
+  usersPageEvents = 'users-page-events',
+  usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
@@ -324,6 +328,8 @@ export enum TimelineId {
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(TimelineId.usersPageEvents),
+  runtimeTypes.literal(TimelineId.usersPageExternalAlerts),
   runtimeTypes.literal(TimelineId.hostsPageEvents),
   runtimeTypes.literal(TimelineId.hostsPageExternalAlerts),
   runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
@@ -366,14 +372,11 @@ export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineRe
 export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes.intersection([
   runtimeTypes.type({
     timeline: TimelineSavedToReturnObjectRuntimeType,
-    outcome: runtimeTypes.union([
-      runtimeTypes.literal('exactMatch'),
-      runtimeTypes.literal('aliasMatch'),
-      runtimeTypes.literal('conflict'),
-    ]),
+    outcome: savedObjectResolveOutcome,
   }),
   runtimeTypes.partial({
     alias_target_id: runtimeTypes.string,
+    alias_purpose: savedObjectResolveAliasPurpose,
   }),
 ]);
 

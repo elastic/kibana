@@ -7,6 +7,7 @@
  */
 
 import { ExpressionsService } from './expressions_services';
+import { ExpressionsServiceFork } from './expressions_fork';
 
 describe('ExpressionsService', () => {
   test('can instantiate', () => {
@@ -58,36 +59,31 @@ describe('ExpressionsService', () => {
   describe('.fork()', () => {
     test('returns a new ExpressionsService instance', () => {
       const service = new ExpressionsService();
-      const fork = service.fork();
+      const fork = service.fork('test');
 
       expect(fork).not.toBe(service);
-      expect(fork).toBeInstanceOf(ExpressionsService);
+      expect(fork).toBeInstanceOf(ExpressionsServiceFork);
     });
 
     test('fork keeps all types of the origin service', () => {
       const service = new ExpressionsService();
-      const fork = service.fork();
+      const fork = service.fork('test');
+      const forkStart = fork.start();
 
-      expect(fork.getTypes()).toEqual(service.getTypes());
+      expect(forkStart.getTypes()).toEqual(service.getTypes());
     });
 
     test('fork keeps all functions of the origin service', () => {
       const service = new ExpressionsService();
-      const fork = service.fork();
+      const fork = service.fork('test');
+      const forkStart = fork.start();
 
-      expect(fork.getFunctions()).toEqual(service.getFunctions());
-    });
-
-    test('fork keeps context of the origin service', () => {
-      const service = new ExpressionsService();
-      const fork = service.fork();
-
-      expect(fork.executor.state.context).toEqual(service.executor.state.context);
+      expect(forkStart.getFunctions()).toEqual(service.getFunctions());
     });
 
     test('newly registered functions in origin are also available in fork', () => {
       const service = new ExpressionsService();
-      const fork = service.fork();
+      const fork = service.fork('test');
 
       service.registerFunction({
         name: '__test__',
@@ -96,29 +92,35 @@ describe('ExpressionsService', () => {
         fn: () => {},
       });
 
-      expect(fork.getFunctions()).toEqual(service.getFunctions());
+      const forkStart = fork.start();
+
+      expect(forkStart.getFunctions()).toEqual(service.getFunctions());
     });
 
     test('newly registered functions in fork are NOT available in origin', () => {
       const service = new ExpressionsService();
-      const fork = service.fork();
+      const fork = service.fork('test');
+      const forkSetup = fork.setup();
 
-      fork.registerFunction({
+      forkSetup.registerFunction({
         name: '__test__',
         args: {},
         help: '',
         fn: () => {},
       });
 
-      expect(Object.values(fork.getFunctions())).toHaveLength(
+      const forkStart = fork.start();
+
+      expect(Object.values(forkStart.getFunctions())).toHaveLength(
         Object.values(service.getFunctions()).length + 1
       );
     });
 
     test('fork can execute an expression with newly registered function', async () => {
       const service = new ExpressionsService();
-      const fork = service.fork();
-      fork.start();
+      const fork = service.fork('test');
+      service.start();
+      const forkStart = fork.start();
 
       service.registerFunction({
         name: '__test__',
@@ -129,7 +131,7 @@ describe('ExpressionsService', () => {
         },
       });
 
-      const { result } = await fork.run('__test__', null).toPromise();
+      const { result } = await forkStart.run('__test__', null).toPromise();
 
       expect(result).toBe('123');
     });
@@ -138,7 +140,7 @@ describe('ExpressionsService', () => {
       const service = new ExpressionsService();
       service.start();
 
-      expect(() => service.fork()).toThrow();
+      expect(() => service.fork('test')).toThrow();
     });
   });
 

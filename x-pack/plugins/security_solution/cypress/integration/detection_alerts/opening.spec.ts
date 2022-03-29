@@ -29,7 +29,7 @@ import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe.skip('Opening alerts', () => {
+describe('Opening alerts', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);

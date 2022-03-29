@@ -81,32 +81,8 @@ export default function (providerContext: FtrProviderContext) {
         { meta: true }
       );
       expect(resLogsTemplate.statusCode).equal(200);
-      expect(
-        resLogsTemplate.body.index_templates[0].index_template.template.mappings.properties
-      ).eql({
-        '@timestamp': {
-          type: 'date',
-        },
-        logs_test_name: {
-          type: 'text',
-        },
-        new_field_name: {
-          ignore_above: 1024,
-          type: 'keyword',
-        },
-        data_stream: {
-          properties: {
-            dataset: {
-              type: 'constant_keyword',
-            },
-            namespace: {
-              type: 'constant_keyword',
-            },
-            type: {
-              type: 'constant_keyword',
-            },
-          },
-        },
+      expect(resLogsTemplate.body.index_templates[0].index_template.template.mappings).eql({
+        _meta: { package: { name: 'all_assets' }, managed_by: 'fleet', managed: true },
       });
       const resMetricsTemplate = await es.transport.request<any>(
         {
@@ -116,27 +92,12 @@ export default function (providerContext: FtrProviderContext) {
         { meta: true }
       );
       expect(resMetricsTemplate.statusCode).equal(200);
-      expect(
-        resMetricsTemplate.body.index_templates[0].index_template.template.mappings.properties
-      ).eql({
-        '@timestamp': {
-          type: 'date',
-        },
-        metrics_test_name2: {
-          ignore_above: 1024,
-          type: 'keyword',
-        },
-        data_stream: {
-          properties: {
-            dataset: {
-              type: 'constant_keyword',
-            },
-            namespace: {
-              type: 'constant_keyword',
-            },
-            type: {
-              type: 'constant_keyword',
-            },
+      expect(resMetricsTemplate.body.index_templates[0].index_template.template.mappings).eql({
+        _meta: {
+          managed: true,
+          managed_by: 'fleet',
+          package: {
+            name: 'all_assets',
           },
         },
       });
@@ -150,8 +111,27 @@ export default function (providerContext: FtrProviderContext) {
         { meta: true }
       );
       expect(resLogsTemplate.statusCode).equal(200);
+      expect(resLogsTemplate.body.index_templates[0].index_template.template.mappings).eql({
+        _meta: {
+          managed: true,
+          managed_by: 'fleet',
+          package: {
+            name: 'all_assets',
+          },
+        },
+      });
+    });
+    it('should have populated the new component template with the correct mapping', async () => {
+      const resMappings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName2}@mappings`,
+        },
+        { meta: true }
+      );
+      expect(resMappings.statusCode).equal(200);
       expect(
-        resLogsTemplate.body.index_templates[0].index_template.template.mappings.properties
+        resMappings.body.component_templates[0].component_template.template.mappings.properties
       ).eql({
         '@timestamp': {
           type: 'date',
@@ -223,7 +203,7 @@ export default function (providerContext: FtrProviderContext) {
       );
       expect(resPipeline2.statusCode).equal(404);
     });
-    it('should have updated the component templates', async function () {
+    it('should have updated the logs component templates', async function () {
       const resMappings = await es.transport.request<any>(
         {
           method: 'GET',
@@ -232,8 +212,42 @@ export default function (providerContext: FtrProviderContext) {
         { meta: true }
       );
       expect(resMappings.statusCode).equal(200);
+      expect(resMappings.body.component_templates[0].component_template.template.settings).eql({
+        index: {
+          mapping: {
+            total_fields: {
+              limit: '10000',
+            },
+          },
+        },
+      });
       expect(resMappings.body.component_templates[0].component_template.template.mappings).eql({
         dynamic: true,
+        properties: {
+          '@timestamp': {
+            type: 'date',
+          },
+          data_stream: {
+            properties: {
+              dataset: {
+                type: 'constant_keyword',
+              },
+              namespace: {
+                type: 'constant_keyword',
+              },
+              type: {
+                type: 'constant_keyword',
+              },
+            },
+          },
+          logs_test_name: {
+            type: 'text',
+          },
+          new_field_name: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+        },
       });
       const resSettings = await es.transport.request<any>(
         {
@@ -247,11 +261,6 @@ export default function (providerContext: FtrProviderContext) {
         index: {
           lifecycle: { name: 'reference2' },
           codec: 'best_compression',
-          mapping: {
-            total_fields: {
-              limit: '10000',
-            },
-          },
           query: {
             default_field: ['logs_test_name', 'new_field_name'],
           },
@@ -283,6 +292,40 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         ],
+      });
+    });
+    it('should have updated the metrics mapping component template', async function () {
+      const resMappings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${metricsTemplateName}@mappings`,
+        },
+        { meta: true }
+      );
+      expect(resMappings.statusCode).equal(200);
+      expect(
+        resMappings.body.component_templates[0].component_template.template.mappings.properties
+      ).eql({
+        '@timestamp': {
+          type: 'date',
+        },
+        metrics_test_name2: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
+        data_stream: {
+          properties: {
+            dataset: {
+              type: 'constant_keyword',
+            },
+            namespace: {
+              type: 'constant_keyword',
+            },
+            type: {
+              type: 'constant_keyword',
+            },
+          },
+        },
       });
     });
     it('should have updated the kibana assets', async function () {
@@ -351,12 +394,20 @@ export default function (providerContext: FtrProviderContext) {
             type: 'security-rule',
           },
           {
+            id: 'sample_csp_rule_template2',
+            type: 'csp-rule-template',
+          },
+          {
             id: 'sample_ml_module',
             type: 'ml-module',
           },
           {
             id: 'sample_tag',
             type: 'tag',
+          },
+          {
+            id: 'sample_osquery_pack_asset',
+            type: 'osquery-pack-asset',
           },
         ],
         installed_es: [
@@ -397,6 +448,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'index_template',
           },
           {
+            id: 'logs-all_assets.test_logs2@mappings',
+            type: 'component_template',
+          },
+          {
             id: 'logs-all_assets.test_logs2@settings',
             type: 'component_template',
           },
@@ -407,6 +462,10 @@ export default function (providerContext: FtrProviderContext) {
           {
             id: 'metrics-all_assets.test_metrics',
             type: 'index_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics@mappings',
+            type: 'component_template',
           },
           {
             id: 'metrics-all_assets.test_metrics@settings',
@@ -437,9 +496,11 @@ export default function (providerContext: FtrProviderContext) {
           { id: '5c3aa147-089c-5084-beca-53c00e72ac80', type: 'epm-packages-assets' },
           { id: '0c8c3c6a-90cb-5f0e-8359-d807785b046c', type: 'epm-packages-assets' },
           { id: '48e582df-b1d2-5f88-b6ea-ba1fafd3a569', type: 'epm-packages-assets' },
+          { id: '7f97600c-d983-53e0-ae2a-a59bf35d7f0d', type: 'epm-packages-assets' },
           { id: 'bf3b0b65-9fdc-53c6-a9ca-e76140e56490', type: 'epm-packages-assets' },
           { id: '7f4c5aca-b4f5-5f0a-95af-051da37513fc', type: 'epm-packages-assets' },
           { id: '4281a436-45a8-54ab-9724-fda6849f789d', type: 'epm-packages-assets' },
+          { id: 'cb0bbdd7-e043-508b-91c0-09e4cc0f5a3c', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
           { id: '4035007b-9c33-5227-9803-2de8a17523b5', type: 'epm-packages-assets' },
           { id: 'e6ae7d31-6920-5408-9219-91ef1662044b', type: 'epm-packages-assets' },

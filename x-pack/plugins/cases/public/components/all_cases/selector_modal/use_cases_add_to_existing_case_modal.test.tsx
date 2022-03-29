@@ -9,6 +9,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { CaseStatuses, StatusAll } from '../../../../common';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
@@ -32,7 +33,7 @@ describe('use cases add to existing case modal hook', () => {
             appTitle: 'jest',
             basePath: '/jest',
             dispatch,
-            features: { alerts: { sync: true }, metrics: [] },
+            features: { alerts: { sync: true, enabled: true }, metrics: [] },
             releasePhase: 'ga',
           }}
         >
@@ -62,6 +63,9 @@ describe('use cases add to existing case modal hook', () => {
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
+        payload: expect.objectContaining({
+          hiddenStatuses: [CaseStatuses.closed, StatusAll],
+        }),
       })
     );
   });

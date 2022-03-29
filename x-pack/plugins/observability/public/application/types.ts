@@ -5,37 +5,44 @@
  * 2.0.
  */
 
-import {
+import type {
   ApplicationStart,
   ChromeStart,
+  DocLinksStart,
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
   OverlayStart,
   SavedObjectsStart,
+  ThemeServiceStart,
 } from 'kibana/public';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
 import { LensPublicStart } from '../../../lens/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
 import { CasesUiStart } from '../../../cases/public';
+import { TimelinesUIStart } from '../../../timelines/public';
 
 export interface ObservabilityAppServices {
-  http: HttpStart;
-  chrome: ChromeStart;
-  overlays: OverlayStart;
-  storage: IStorageWrapper;
-  data: DataPublicPluginStart;
-  uiSettings: IUiSettingsClient;
   application: ApplicationStart;
-  notifications: NotificationsStart;
-  stateTransfer: EmbeddableStateTransfer;
-  navigation: NavigationPublicPluginStart;
-  savedObjectsClient: SavedObjectsStart['client'];
-
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  lens: LensPublicStart;
   cases: CasesUiStart;
+  chrome: ChromeStart;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  docLinks: DocLinksStart;
+  http: HttpStart;
+  lens: LensPublicStart;
+  navigation: NavigationPublicPluginStart;
+  notifications: NotificationsStart;
+  overlays: OverlayStart;
+  savedObjectsClient: SavedObjectsStart['client'];
+  stateTransfer: EmbeddableStateTransfer;
+  storage: IStorageWrapper;
+  theme: ThemeServiceStart;
+  timelines: TimelinesUIStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  uiSettings: IUiSettingsClient;
 }

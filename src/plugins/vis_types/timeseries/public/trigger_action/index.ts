@@ -150,6 +150,9 @@ export const triggerTSVBtoLensConfiguration = async (
       timeInterval: model.interval && !model.interval?.includes('=') ? model.interval : 'auto',
       ...(SUPPORTED_FORMATTERS.includes(layer.formatter) && { format: layer.formatter }),
       ...(layer.label && { label: layer.label }),
+      dropPartialBuckets: layer.override_index_pattern
+        ? layer.series_drop_last_bucket > 0
+        : model.drop_last_bucket > 0,
     };
     layersConfiguration[layerIdx] = layerConfiguration;
   }

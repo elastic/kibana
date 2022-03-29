@@ -81,6 +81,13 @@ import {
   KpiRiskScoreStrategyResponse,
   KpiRiskScoreRequestOptions,
 } from './risk_score';
+import { UsersQueries } from './users';
+import { UserDetailsRequestOptions, UserDetailsStrategyResponse } from './users/details';
+import {
+  TotalUsersKpiRequestOptions,
+  TotalUsersKpiStrategyResponse,
+} from './users/kpi/total_users';
+import { UsersRequestOptions, UsersStrategyResponse } from './users/all';
 
 export * from './cti';
 export * from './hosts';
@@ -91,6 +98,7 @@ export * from './network';
 export type FactoryQueryTypes =
   | HostsQueries
   | HostsKpiQueries
+  | UsersQueries
   | NetworkQueries
   | NetworkKpiQueries
   | RiskQueries
@@ -136,6 +144,12 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsKpiHostsStrategyResponse
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsStrategyResponse
+  : T extends UsersQueries.details
+  ? UserDetailsStrategyResponse
+  : T extends UsersQueries.kpiTotalUsers
+  ? TotalUsersKpiStrategyResponse
+  : T extends UsersQueries.users
+  ? UsersStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -192,6 +206,12 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsKpiHostsRequestOptions
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsRequestOptions
+  : T extends UsersQueries.details
+  ? UserDetailsRequestOptions
+  : T extends UsersQueries.kpiTotalUsers
+  ? TotalUsersKpiRequestOptions
+  : T extends UsersQueries.users
+  ? UsersRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns

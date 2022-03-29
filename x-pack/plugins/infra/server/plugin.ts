@@ -46,7 +46,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
     alerting: schema.object({
       inventory_threshold: schema.object({
-        group_by_page_size: schema.number({ defaultValue: 10_000 }),
+        group_by_page_size: schema.number({ defaultValue: 5_000 }),
       }),
       metric_threshold: schema.object({
         group_by_page_size: schema.number({ defaultValue: 10_000 }),
@@ -154,6 +154,8 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       handleEsError,
       logsRules: this.logsRules.setup(core, plugins),
       metricsRules: this.metricsRules.setup(core, plugins),
+      logger: this.logger,
+      basePath: core.http.basePath,
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);

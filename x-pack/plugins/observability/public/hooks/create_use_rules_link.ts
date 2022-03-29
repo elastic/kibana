@@ -11,11 +11,11 @@ export function createUseRulesLink(isNewRuleManagementEnabled = false) {
     const linkProps = isNewRuleManagementEnabled
       ? {
           app: 'observability',
-          pathname: '/rules',
+          pathname: '/alerts/rules',
         }
       : {
           app: 'management',
-          pathname: '/insightsAndAlerting/triggersActions/alerts',
+          pathname: '/insightsAndAlerting/triggersActions/rules',
         };
     return useLinkProps(linkProps, options);
   };

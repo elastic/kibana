@@ -16,9 +16,8 @@ TIP: In the `Description` area, you can use
 https://www.markdownguide.org/cheat-sheet[Markdown] syntax to create formatted
 text.
 
-. For *External incident management system*, select a connector. If you've
-previously added one, that connector displays as the default selection.
-Otherwise, the default setting is `No connector selected`.
+. For *External incident management system*, select a connector. For more
+information, refer to <<add-case-connectors>>.
 
 . After you've completed all of the required fields, click *Create case*.
 

@@ -105,7 +105,7 @@ import { enablesRule, getDetails } from '../../tasks/rule_details';
 
 import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-describe.skip('Custom detection rules creation', () => {
+describe('Custom detection rules creation', () => {
   const expectedUrls = getNewRule().referenceUrls.join('');
   const expectedFalsePositives = getNewRule().falsePositivesExamples.join('');
   const expectedTags = getNewRule().tags.join('');

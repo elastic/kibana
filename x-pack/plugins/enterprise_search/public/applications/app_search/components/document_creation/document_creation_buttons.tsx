@@ -57,9 +57,6 @@ export const DocumentCreationButtons: React.FC<Props> = ({
       case 'api':
         openDocumentCreation('api');
         break;
-      case 'elasticsearchIndex':
-        openDocumentCreation('elasticsearchIndex');
-        break;
     }
   }, []);
 
@@ -69,7 +66,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({
     <p>
       {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.helperText', {
         defaultMessage:
-          'There are four ways to send documents to your engine for indexing. You can paste or upload a JSON file, POST to the documents API endpoint, connect to an existing Elasticsearch index, or use the  Elastic Web Crawler to automatically index documents from a URL.',
+          'There are three ways to send documents to your engine for indexing. You can paste or upload a JSON file, POST to the documents API endpoint, or use the  Elastic Web Crawler to automatically index documents from a URL.',
       })}
     </p>
   );
@@ -181,22 +178,6 @@ export const DocumentCreationButtons: React.FC<Props> = ({
             )}
             icon={<EuiIcon type="exportAction" size="xl" color="primary" />}
             onClick={() => openDocumentCreation('api')}
-            isDisabled={disabled}
-          />
-          <EuiSpacer size="m" />
-          <EuiCard
-            hasBorder
-            layout="horizontal"
-            title={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.elasticsearchTitle',
-              { defaultMessage: 'Use an Elasticsearch Index' }
-            )}
-            description={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.elasticsearchDescription',
-              { defaultMessage: 'Search your existing indices with App Search' }
-            )}
-            icon={<EuiIcon type="indexOpen" size="xl" color="primary" />}
-            onClick={() => openDocumentCreation('elasticsearchIndex')}
             isDisabled={disabled}
           />
         </EuiFlexItem>

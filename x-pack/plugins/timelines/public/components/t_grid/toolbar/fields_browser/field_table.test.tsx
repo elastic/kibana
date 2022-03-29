@@ -13,7 +13,7 @@ import { defaultColumnHeaderType } from '../../body/column_headers/default_heade
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../body/constants';
 
 import { ColumnHeaderOptions } from '../../../../../common';
-import { FieldTable } from './field_table';
+import { FieldTable, FieldTableProps } from './field_table';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -39,15 +39,21 @@ const columnHeaders: ColumnHeaderOptions[] = [
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
 ];
+const timelineId = 'test';
+const defaultProps: FieldTableProps = {
+  selectedCategoryIds: [],
+  columnHeaders: [],
+  filteredBrowserFields: {},
+  searchInput: '',
+  timelineId,
+  filterSelectedEnabled: false,
+  onFilterSelectedChange: jest.fn(),
+  onHide: jest.fn(),
+};
 
 describe('FieldTable', () => {
-  const timelineId = 'test';
   const timestampField = mockBrowserFields.base.fields![timestampFieldId];
   const defaultPageSize = 10;
-  const totalFields = Object.values(mockBrowserFields).reduce(
-    (total, { fields }) => total + Object.keys(fields ?? {}).length,
-    0
-  );
 
   beforeEach(() => {
     mockDispatch.mockClear();
@@ -56,35 +62,21 @@ describe('FieldTable', () => {
   it('should render empty field table', () => {
     const result = render(
       <TestProviders>
-        <FieldTable
-          selectedCategoryIds={[]}
-          columnHeaders={[]}
-          filteredBrowserFields={{}}
-          searchInput=""
-          timelineId={timelineId}
-        />
+        <FieldTable {...defaultProps} />
       </TestProviders>
     );
 
     expect(result.getByText('No items found')).toBeInTheDocument();
-    expect(result.getByTestId('fields-count').textContent).toContain('0');
   });
 
   it('should render field table with fields of all categories', () => {
     const result = render(
       <TestProviders>
-        <FieldTable
-          selectedCategoryIds={[]}
-          columnHeaders={[]}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput=""
-          timelineId={timelineId}
-        />
+        <FieldTable {...defaultProps} filteredBrowserFields={mockBrowserFields} />
       </TestProviders>
     );
 
     expect(result.container.getElementsByClassName('euiTableRow').length).toBe(defaultPageSize);
-    expect(result.getByTestId('fields-count').textContent).toContain(totalFields);
   });
 
   it('should render field table with fields of categories selected', () => {
@@ -99,17 +91,14 @@ describe('FieldTable', () => {
     const result = render(
       <TestProviders>
         <FieldTable
+          {...defaultProps}
           selectedCategoryIds={selectedCategoryIds}
-          columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
 
     expect(result.container.getElementsByClassName('euiTableRow').length).toBe(fieldCount);
-    expect(result.getByTestId('fields-count').textContent).toContain(fieldCount);
   });
 
   it('should render field table with custom columns', () => {
@@ -124,17 +113,13 @@ describe('FieldTable', () => {
     const result = render(
       <TestProviders>
         <FieldTable
+          {...defaultProps}
           getFieldTableColumns={() => fieldTableColumns}
-          selectedCategoryIds={[]}
-          columnHeaders={[]}
           filteredBrowserFields={mockBrowserFields}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
 
-    expect(result.getByTestId('fields-count').textContent).toContain(totalFields);
     expect(result.getAllByText('Custom column').length).toBeGreaterThan(0);
     expect(result.getAllByTestId('customColumn').length).toEqual(defaultPageSize);
   });
@@ -143,11 +128,9 @@ describe('FieldTable', () => {
     const result = render(
       <TestProviders>
         <FieldTable
+          {...defaultProps}
           selectedCategoryIds={['base']}
-          columnHeaders={[]}
           filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -160,11 +143,10 @@ describe('FieldTable', () => {
     const result = render(
       <TestProviders>
         <FieldTable
+          {...defaultProps}
           selectedCategoryIds={['base']}
           columnHeaders={columnHeaders}
           filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -177,11 +159,10 @@ describe('FieldTable', () => {
     const result = render(
       <TestProviders>
         <FieldTable
+          {...defaultProps}
           selectedCategoryIds={['base']}
           columnHeaders={columnHeaders}
           filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -198,11 +179,9 @@ describe('FieldTable', () => {
     const result = render(
       <TestProviders>
         <FieldTable
+          {...defaultProps}
           selectedCategoryIds={['base']}
-          columnHeaders={[]}
           filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
-          searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );

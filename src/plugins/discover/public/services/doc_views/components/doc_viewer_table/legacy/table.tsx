@@ -10,7 +10,7 @@ import '../table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { useDiscoverServices } from '../../../../../utils/use_discover_services';
-import { flattenHit } from '../../../../../../../data/common';
+import { flattenHit } from '../../../../../../../data/public';
 import { SHOW_MULTIFIELDS } from '../../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../../doc_views_types';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';

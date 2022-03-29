@@ -21,6 +21,8 @@ import { OverviewNetwork } from '.';
 import { createStore, State } from '../../../common/store';
 import { useNetworkOverview } from '../../containers/overview_network';
 import { SecurityPageName } from '../../../app/types';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { render } from '@testing-library/react';
 
 jest.mock('../../../common/components/link_to');
 const mockNavigateToApp = jest.fn();
@@ -46,6 +48,7 @@ const startDate = '2020-01-20T20:49:57.080Z';
 const endDate = '2020-01-21T20:49:57.080Z';
 const defaultProps = {
   endDate,
+  filterQuery: '',
   startDate,
   setQuery: jest.fn(),
   indexNames: [],
@@ -65,9 +68,10 @@ const MOCKED_RESPONSE = {
   },
 };
 
+jest.mock('../../../common/containers/query_toggle');
 jest.mock('../../containers/overview_network');
 const useNetworkOverviewMock = useNetworkOverview as jest.Mock;
-useNetworkOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
+const mockUseQueryToggle = useQueryToggle as jest.Mock;
 
 describe('OverviewNetwork', () => {
   const state: State = mockGlobalState;
@@ -76,6 +80,9 @@ describe('OverviewNetwork', () => {
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    useNetworkOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
     const myState = cloneDeep(state);
     store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
@@ -142,5 +149,25 @@ describe('OverviewNetwork', () => {
       path: '',
       deepLinkId: SecurityPageName.network,
     });
+  });
+
+  it('toggleStatus=true, do not skip', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <OverviewNetwork {...defaultProps} />
+      </TestProviders>
+    );
+    expect(useNetworkOverviewMock.mock.calls[0][0].skip).toEqual(false);
+    expect(queryByTestId('overview-network-stats')).toBeInTheDocument();
+  });
+  it('toggleStatus=false, skip', () => {
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    const { queryByTestId } = render(
+      <TestProviders>
+        <OverviewNetwork {...defaultProps} />
+      </TestProviders>
+    );
+    expect(useNetworkOverviewMock.mock.calls[0][0].skip).toEqual(true);
+    expect(queryByTestId('overview-network-stats')).not.toBeInTheDocument();
   });
 });

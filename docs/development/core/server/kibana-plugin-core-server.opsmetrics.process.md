@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> use the processes field instead.
+> use the processes field instead.  8.8.0
 > 
 
 Process related metrics.

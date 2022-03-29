@@ -14,7 +14,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import {
@@ -27,6 +26,7 @@ import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
@@ -53,6 +53,7 @@ interface Props {
     page?: { index: number };
     sort?: { field: string; direction: SortDirection };
   }) => void;
+  detailedStatsLoading: boolean;
   detailedStatsData?: ServiceInstanceDetailedStatistics;
   isLoading: boolean;
   isNotInitiated: boolean;
@@ -64,6 +65,7 @@ export function ServiceOverviewInstancesTable({
   mainStatsStatus: status,
   tableOptions,
   onChangeTableOptions,
+  detailedStatsLoading,
   detailedStatsData: detailedStatsData,
   isLoading,
   isNotInitiated,
@@ -71,12 +73,8 @@ export function ServiceOverviewInstancesTable({
   const { agentName } = useApmServiceContext();
 
   const {
-    query: { kuery },
+    query: { kuery, latencyAggregationType, comparisonEnabled },
   } = useApmParams('/services/{serviceName}');
-
-  const {
-    urlParams: { latencyAggregationType, comparisonEnabled },
-  } = useLegacyUrlParams();
 
   const [itemIdToOpenActionMenuRowMap, setItemIdToOpenActionMenuRowMap] =
     useState<Record<string, boolean>>({});
@@ -127,7 +125,8 @@ export function ServiceOverviewInstancesTable({
     agentName,
     serviceName,
     kuery,
-    latencyAggregationType,
+    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    detailedStatsLoading,
     detailedStatsData,
     comparisonEnabled,
     toggleRowDetails,
@@ -141,7 +140,7 @@ export function ServiceOverviewInstancesTable({
     pageIndex,
     pageSize: PAGE_SIZE,
     totalItemCount: mainStatsItemCount,
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
   };
 
   return (

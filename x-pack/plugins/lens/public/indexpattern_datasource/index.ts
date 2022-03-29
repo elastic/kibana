@@ -14,6 +14,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
 import type { EditorFrameSetup } from '../types';
 import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import type {
@@ -35,6 +36,7 @@ export interface IndexPatternDatasourceStartPlugins {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
 }
 
@@ -62,7 +64,7 @@ export class IndexPatternDatasource {
         fieldFormatsSetup.register([suffixFormatter]);
       }
 
-      const [coreStart, { dataViewFieldEditor, uiActions, data, fieldFormats }] =
+      const [coreStart, { dataViewFieldEditor, uiActions, data, fieldFormats, dataViews }] =
         await core.getStartServices();
 
       return getIndexPatternDatasource({
@@ -70,6 +72,7 @@ export class IndexPatternDatasource {
         fieldFormats,
         storage: new Storage(localStorage),
         data,
+        dataViews,
         charts,
         dataViewFieldEditor,
         uiActions,
