@@ -9,7 +9,7 @@
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
-import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 
 import { pick } from 'lodash';
 import { DashboardContainer, DashboardContainerControlGroupInput } from '..';
@@ -118,9 +118,10 @@ export const syncDashboardControlGroup = async ({
   subscriptions.add(
     dashboardContainer
       .getInput$()
-      .pipe(distinctUntilKeyChanged('controlGroupInput'))
+      .pipe(debounceTime(10), distinctUntilKeyChanged('controlGroupInput'))
       .subscribe(() => {
         if (!isControlGroupInputEqual()) {
+          // console.log('op there it is');
           if (!dashboardContainer.getInput().controlGroupInput) {
             controlGroup.updateInput(getDefaultDashboardControlGroupInput());
             return;
