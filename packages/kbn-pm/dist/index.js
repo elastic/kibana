@@ -8921,11 +8921,10 @@ const BootstrapCommand = {
           ms: Date.now() - start
         });
       }
-    }; // Force install is set in case a flag is passed into yarn kbn bootstrap or if the `.yarn-integrity`
-    // file is not found which will be indicated by the return of yarnIntegrityFileExists.
+    }; // Force install is set in case a flag is passed into yarn kbn bootstrap
 
 
-    const forceInstall = !!options && options['force-install'] === true || !(await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["yarnIntegrityFileExists"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kibanaProjectPath, 'node_modules'))); // Install bazel machinery tools if needed
+    const forceInstall = !!options && options['force-install'] === true; // Install bazel machinery tools if needed
 
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["installBazelTools"])(rootPath); // Setup remote cache settings in .bazelrc.cache if needed
 
@@ -52669,8 +52668,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _yarn_integrity__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(527);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "removeYarnIntegrityFileIfExists", function() { return _yarn_integrity__WEBPACK_IMPORTED_MODULE_3__["removeYarnIntegrityFileIfExists"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "yarnIntegrityFileExists", function() { return _yarn_integrity__WEBPACK_IMPORTED_MODULE_3__["yarnIntegrityFileExists"]; });
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -52896,6 +52893,7 @@ async function runBazelCommandWithRunner(bazelCommandRunner, bazelArgs, offline 
   try {
     await bazelProc;
   } catch {
+    _log__WEBPACK_IMPORTED_MODULE_5__["log"].error('HINT: If experiencing problems with node_modules try `yarn kbn bootstrap --force-install` or as last resort `yarn kbn reset && yarn kbn bootstrap`');
     throw new _errors__WEBPACK_IMPORTED_MODULE_6__["CliError"](`The bazel command that was running failed to complete.`);
   }
 
@@ -59103,7 +59101,6 @@ function observeReadable(readable) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "removeYarnIntegrityFileIfExists", function() { return removeYarnIntegrityFileIfExists; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "yarnIntegrityFileExists", function() { return yarnIntegrityFileExists; });
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(231);
@@ -59126,19 +59123,6 @@ async function removeYarnIntegrityFileIfExists(nodeModulesPath) {
     }
   } catch {// no-op
   }
-}
-async function yarnIntegrityFileExists(nodeModulesPath) {
-  try {
-    const nodeModulesRealPath = await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["tryRealpath"])(nodeModulesPath);
-    const yarnIntegrityFilePath = Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(nodeModulesRealPath, '.yarn-integrity'); // check if the file already exists
-
-    if (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["isFile"])(yarnIntegrityFilePath)) {
-      return true;
-    }
-  } catch {// no-op
-  }
-
-  return false;
 }
 
 /***/ }),
