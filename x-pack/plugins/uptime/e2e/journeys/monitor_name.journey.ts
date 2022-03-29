@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import { journey, step, expect, after, before, Page } from '@elastic/synthetics';
+import { journey, step, expect, before, Page } from '@elastic/synthetics';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 import { byTestId } from './utils';
 
@@ -21,11 +21,6 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
 
   before(async () => {
     await uptime.waitForLoadingToFinish();
-  });
-
-  after(async () => {
-    await uptime.navigateToMonitorManagement();
-    await uptime.deleteMonitor();
   });
 
   step('Go to monitor-management', async () => {
@@ -39,6 +34,7 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
   });
 
   step(`shows error if name already exists`, async () => {
+    await uptime.enableMonitorManagement();
     await uptime.clickAddMonitor();
     await uptime.createBasicMonitorDetails({
       name: 'Test monitor',
@@ -60,5 +56,11 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
     });
 
     expect(await page.isEnabled(byTestId('monitorTestNowRunBtn'))).toBeTruthy();
+  });
+
+  step('delete monitor', async () => {
+    await uptime.navigateToMonitorManagement();
+    await uptime.deleteMonitors();
+    await uptime.enableMonitorManagement(false);
   });
 });
