@@ -14,12 +14,24 @@ interface Props {
   monitorId: string;
   monitor: SyntheticsMonitor;
   isMonitorSaved: boolean;
+  expectPings: number;
   onDone: () => void;
 }
-export const TestRunResult = ({ monitorId, monitor, isMonitorSaved, onDone }: Props) => {
+export const TestRunResult = ({
+  monitorId,
+  monitor,
+  isMonitorSaved,
+  expectPings,
+  onDone,
+}: Props) => {
   return monitor.type === 'browser' ? (
-    <BrowserTestRunResult monitorId={monitorId} isMonitorSaved={isMonitorSaved} onDone={onDone} />
+    <BrowserTestRunResult
+      monitorId={monitorId}
+      expectPings={expectPings}
+      isMonitorSaved={isMonitorSaved}
+      onDone={onDone}
+    />
   ) : (
-    <SimpleTestResults monitorId={monitorId} onDone={onDone} />
+    <SimpleTestResults monitorId={monitorId} expectPings={expectPings} onDone={onDone} />
   );
 };

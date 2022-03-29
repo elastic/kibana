@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiCallOut,
@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { TestRunResult } from './test_run_results';
-import { MonitorFields } from '../../../../common/runtime_types';
+import { Locations, MonitorFields } from '../../../../common/runtime_types';
 import { runOnceMonitor } from '../../../state/api';
 import { kibanaService } from '../../../state/kibana_service';
 
@@ -43,31 +43,57 @@ export function TestNowMode({
         monitor: testRun.monitor,
         id: testRun.id,
       })
-        .then(() => setServiceError(null))
+        .then((d) => {
+          setServiceError(null);
+          return d;
+        })
         .catch((error) => setServiceError(error));
     }
     return new Promise((resolve) => resolve(null));
   }, [testRun]);
 
-  useEffect(() => {
-    const errors = (data as { errors: Array<{ error: Error }> })?.errors;
+  const locationsById: Record<string, Locations[number]> = useMemo(
+    () =>
+      ((testRun?.monitor.locations ?? []) as Locations).reduce(
+        (acc, cur) => ({ ...acc, [cur.id]: cur }),
+        {}
+      ),
+    [testRun?.monitor.locations]
+  );
 
-    if (errors?.length > 0) {
-      errors.forEach(({ error }) => {
-        kibanaService.toasts.addError(error, { title: PushErrorLabel });
-      });
+  const errors = (data as { errors?: Array<{ locationId: string }> })?.errors;
+  const expectPings = !!testRun ? testRun.monitor.locations.length - (errors?.length ?? 0) : 0;
+
+  const hasBlockingError =
+    serviceError || (errors && errors?.length === testRun?.monitor.locations.length);
+
+  useEffect(() => {
+    if (errors) {
+      if (hasBlockingError) {
+        kibanaService.toasts.addError(
+          { name: 'Error', message: PushErrorService },
+          { title: PushErrorLabel }
+        );
+      } else if (errors?.length > 0) {
+        // If only some of the locations were unsuccessful
+        errors
+          .map(({ locationId }) => locationsById[locationId])
+          .filter((location) => !!location)
+          .forEach((location) => {
+            kibanaService.toasts.addError(
+              { name: 'Error', message: getLocationTestErrorLabel(location.label) },
+              { title: RunErrorLabel }
+            );
+          });
+      }
     }
-  }, [data]);
-
-  const errors = (data as { errors?: Array<{ error: Error }> })?.errors;
-
-  const hasErrors = serviceError || (errors && errors?.length > 0);
+  }, [locationsById, errors, hasBlockingError]);
 
   useEffect(() => {
-    if (!isPushing && (!testRun || hasErrors)) {
+    if (!isPushing && (!testRun || hasBlockingError)) {
       onDone();
     }
-  }, [testRun, hasErrors, isPushing, onDone]);
+  }, [testRun, hasBlockingError, isPushing, onDone]);
 
   if (!testRun) {
     return null;
@@ -81,15 +107,18 @@ export function TestNowMode({
         </EuiCallOut>
       )}
 
-      {hasErrors && !isPushing && <EuiCallOut title={PushError} color="danger" iconType="alert" />}
+      {hasBlockingError && !isPushing && (
+        <EuiCallOut title={PushErrorService} color="danger" iconType="alert" />
+      )}
 
-      {testRun && !hasErrors && !isPushing && (
+      {testRun && !hasBlockingError && !isPushing && (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem key={testRun.id}>
             <TestRunResult
               monitorId={testRun.id}
               monitor={testRun.monitor}
               isMonitorSaved={isMonitorSaved}
+              expectPings={expectPings}
               onDone={onDone}
             />
           </EuiFlexItem>
@@ -104,10 +133,20 @@ const PushingLabel = i18n.translate('xpack.uptime.testRun.pushing.description', 
   defaultMessage: 'Pushing the monitor to service...',
 });
 
-const PushError = i18n.translate('xpack.uptime.testRun.pushError', {
-  defaultMessage: 'Failed to push the monitor to service.',
-});
-
 const PushErrorLabel = i18n.translate('xpack.uptime.testRun.pushErrorLabel', {
   defaultMessage: 'Push error',
 });
+
+const PushErrorService = i18n.translate('xpack.uptime.testRun.pushError', {
+  defaultMessage: 'Failed to push the monitor to service.',
+});
+
+const RunErrorLabel = i18n.translate('xpack.uptime.testRun.runErrorLabel', {
+  defaultMessage: 'Error running test',
+});
+
+const getLocationTestErrorLabel = (locationName: string) =>
+  i18n.translate('xpack.uptime.testRun.runErrorLocation', {
+    defaultMessage: 'Failed to run monitor on location {locationName}.',
+    values: { locationName },
+  });

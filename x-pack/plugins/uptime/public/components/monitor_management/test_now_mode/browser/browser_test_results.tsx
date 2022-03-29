@@ -7,40 +7,108 @@
 
 import { useEffect } from 'react';
 import * as React from 'react';
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { StepsList } from '../../../synthetics/check_steps/steps_list';
-import { JourneyStep } from '../../../../../common/runtime_types';
-import { useBrowserRunOnceMonitors } from './use_browser_run_once_monitors';
+import { CheckGroupResult, useBrowserRunOnceMonitors } from './use_browser_run_once_monitors';
 import { TestResultHeader } from '../test_result_header';
-import { StdErrorLogs } from '../../../synthetics/check_steps/stderr_logs';
 
 interface Props {
   monitorId: string;
   isMonitorSaved: boolean;
+  expectPings: number;
   onDone: () => void;
 }
-export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, onDone }: Props) => {
-  const { data, loading, stepsLoading, stepEnds, journeyStarted, summaryDoc, stepListData } =
-    useBrowserRunOnceMonitors({
-      configId: monitorId,
-    });
+export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, expectPings, onDone }: Props) => {
+  const { summariesLoading, stepLoadingInProgress, checkGroupResults } = useBrowserRunOnceMonitors({
+    configId: monitorId,
+    expectSummaryDocs: expectPings,
+  });
 
   useEffect(() => {
-    if (Boolean(summaryDoc)) {
+    const allSummariesLoaded = checkGroupResults.every(
+      (checkGroupResult) => !!checkGroupResult.summaryDoc
+    );
+    if (!summariesLoading && allSummariesLoaded) {
       onDone();
     }
-  }, [summaryDoc, onDone]);
+  }, [onDone, summariesLoading, checkGroupResults]);
 
-  const hits = data?.hits.hits;
-  const doc = hits?.[0]?._source as JourneyStep;
+  return (
+    <>
+      {checkGroupResults.map((checkGroupResult) => {
+        const { checkGroupId, journeyStarted, summaryDoc, stepsLoading, steps, completedSteps } =
+          checkGroupResult;
+        const isStepsLoading = !summariesLoading && journeyStarted && summaryDoc && stepsLoading;
+        const isStepsLoadingFailed =
+          summaryDoc && !summariesLoading && !stepLoadingInProgress && steps.length === 0;
 
-  const buttonContent = (
+        return (
+          <AccordionWrapper
+            id={'accordion-' + checkGroupId}
+            element="fieldset"
+            className="euiAccordionForm"
+            buttonClassName="euiAccordionForm__button"
+            buttonContent={getButtonContent(checkGroupResult)}
+            paddingSize="s"
+            data-test-subj="expandResults"
+            initialIsOpen={checkGroupResults.length === 1}
+          >
+            {isStepsLoading && (
+              <EuiFlexGroup alignItems="center" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText>{LOADING_STEPS}</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiLoadingSpinner size="s" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+            {isStepsLoadingFailed && (
+              <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
+            )}
+
+            {isStepsLoadingFailed &&
+            summaryDoc?.error?.message?.includes('journey did not finish executing') && (
+              <StdErrorLogs checkGroup={summaryDoc.monitor.check_group} hideTitle={true} />
+            )}
+
+            {completedSteps > 0 && (
+              <StepsList
+                data={steps}
+                compactView={true}
+                showStepDurationTrend={isMonitorSaved}
+                loading={Boolean(stepLoadingInProgress)}
+                error={undefined}
+              />
+            )}
+          </AccordionWrapper>
+        );
+      })}
+    </>
+  );
+};
+
+const AccordionWrapper = styled(EuiAccordion)`
+  .euiAccordion__buttonContent {
+    width: 100%;
+  }
+`;
+
+function getButtonContent({
+  journeyDoc,
+  summaryDoc,
+  checkGroupId,
+  journeyStarted,
+  completedSteps,
+}: CheckGroupResult) {
+  return (
     <div>
       <TestResultHeader
+        title={journeyDoc?.observer?.geo?.name}
         summaryDocs={summaryDoc ? [summaryDoc] : []}
-        doc={doc}
+        checkGroupId={checkGroupId}
         journeyStarted={journeyStarted}
         isCompleted={Boolean(summaryDoc)}
       />
@@ -51,7 +119,7 @@ export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, onDone }: Prop
               defaultMessage:
                 '{stepCount, number} {stepCount, plural, one {step} other {steps}}  completed',
               values: {
-                stepCount: stepEnds.length,
+                stepCount: completedSteps ?? 0,
               },
             })}
           </EuiText>
@@ -59,59 +127,7 @@ export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, onDone }: Prop
       </EuiText>
     </div>
   );
-
-  const isStepsLoading =
-    journeyStarted && stepEnds.length === 0 && (!summaryDoc || (summaryDoc && stepsLoading));
-  const isStepsLoadingFailed = summaryDoc && stepEnds.length === 0 && !isStepsLoading;
-
-  return (
-    <AccordionWrapper
-      id={monitorId}
-      element="fieldset"
-      className="euiAccordionForm"
-      buttonClassName="euiAccordionForm__button"
-      buttonContent={buttonContent}
-      paddingSize="s"
-      data-test-subj="expandResults"
-      initialIsOpen={true}
-    >
-      {isStepsLoading && (
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiText>{LOADING_STEPS}</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiLoadingSpinner size="s" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      {isStepsLoadingFailed && (
-        <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
-      )}
-
-      {isStepsLoadingFailed &&
-        summaryDoc?.error?.message?.includes('journey did not finish executing') && (
-          <StdErrorLogs checkGroup={summaryDoc.monitor.check_group} hideTitle={true} />
-        )}
-
-      {stepEnds.length > 0 && stepListData?.steps && (
-        <StepsList
-          data={stepListData.steps}
-          compactView={true}
-          showStepDurationTrend={isMonitorSaved}
-          loading={Boolean(loading)}
-          error={undefined}
-        />
-      )}
-    </AccordionWrapper>
-  );
-};
-
-const AccordionWrapper = styled(EuiAccordion)`
-  .euiAccordion__buttonContent {
-    width: 100%;
-  }
-`;
+}
 
 const FAILED_TO_RUN = i18n.translate('xpack.uptime.monitorManagement.failedRun', {
   defaultMessage: 'Failed to run steps',

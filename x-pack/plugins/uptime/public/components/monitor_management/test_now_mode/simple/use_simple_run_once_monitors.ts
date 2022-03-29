@@ -13,9 +13,11 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../../common/constants';
 
 export const useSimpleRunOnceMonitors = ({
   configId,
+  expectSummaryDocs,
   testRunId,
 }: {
   configId: string;
+  expectSummaryDocs: number;
   testRunId?: string;
 }) => {
   const { refreshTimer, lastRefresh } = useTickTick(2 * 1000, false);
@@ -62,25 +64,28 @@ export const useSimpleRunOnceMonitors = ({
   );
 
   return useMemo(() => {
-    const doc = data?.hits.hits?.[0];
+    const docs = data?.hits.hits ?? [];
 
-    if (doc) {
-      clearInterval(refreshTimer);
+    if (docs.length > 0) {
+      if (docs.length >= expectSummaryDocs) {
+        clearInterval(refreshTimer);
+      }
+
       return {
         data,
         loading,
-        summaryDoc: {
+        summaryDocs: docs.map((doc) => ({
           ...(doc._source as Ping),
           timestamp: (doc._source as Record<string, string>)?.['@timestamp'],
           docId: doc._id,
-        },
+        })),
       };
     }
 
     return {
       data,
       loading,
-      summaryDoc: null,
+      summaryDocs: null,
     };
-  }, [data, loading, refreshTimer]);
+  }, [expectSummaryDocs, data, loading, refreshTimer]);
 };
