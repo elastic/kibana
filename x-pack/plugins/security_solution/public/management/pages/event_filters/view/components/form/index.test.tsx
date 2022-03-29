@@ -202,7 +202,7 @@ describe('Event filter form', () => {
     expect(component.getByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
   });
 
-  it('should call onChange when a policy is selected from the policy selectiion', async () => {
+  it('should call onChange when a policy is selected from the policy selection', async () => {
     component = await renderWithData();
 
     const policyId = policiesRequest.items[0].id;
