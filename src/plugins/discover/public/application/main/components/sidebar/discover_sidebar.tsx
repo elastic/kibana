@@ -201,9 +201,11 @@ export function DiscoverSidebarComponent({
     const dataViewFieldTypes = new Set<string>();
     if (Array.isArray(fields)) {
       for (const field of fields) {
-        dataViewFieldTypes.add(field.type);
-        if (result.indexOf(field.type) === -1) {
-          result.push(field.type);
+        if (field.type !== '_source') {
+          dataViewFieldTypes.add(field.type);
+          if (result.indexOf(field.type) === -1) {
+            result.push(field.type);
+          }
         }
       }
     }

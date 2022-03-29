@@ -4,4 +4,5 @@
 
 .dscFieldTypesHelp__popover {
   flex-grow: 0;
+  min-width: 0 !important; // Reduce width of icon-only button
 }

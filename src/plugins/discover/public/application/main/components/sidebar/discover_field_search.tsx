@@ -30,11 +30,13 @@ import {
   EuiIcon,
   EuiPagination,
   EuiBasicTableColumn,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
 import { getFieldTypeDescription } from './lib/get_field_type_description';
 import { usePager } from '../../../../utils/use_pager';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 
 export interface State {
   searchable: string;
@@ -105,6 +107,8 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
     missing: true,
   });
 
+  const { docLinks } = useDiscoverServices();
+
   const { curPageIndex, pageSize, totalPages, startIndex, changePageIndex } = usePager({
     initialPageSize: FIELD_TYPES_PER_PAGE,
     totalItems: presentFieldTypes.length,
@@ -129,7 +133,7 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
       name: 'Data type',
       width: '110px',
       render: (name: string) => (
-        <EuiFlexGroup gutterSize="xs">
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
           <EuiFlexItem grow={false}>
             <FieldIcon type={name} />
           </EuiFlexItem>
@@ -366,7 +370,7 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
             display="block"
             button={helpButton}
             isOpen={isHelpOpen}
-            panelPaddingSize="s"
+            panelPaddingSize="m"
             className="dscFieldTypesHelp__popover"
             closePopover={closeHelp}
           >
@@ -377,11 +381,14 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
             </EuiPopoverTitle>
             <EuiBasicTable
               style={TABLE_STYLE}
-              tableCaption="Description of field types"
+              tableCaption={i18n.translate('discover.fieldTypesPopover.tableTitle', {
+                defaultMessage: 'Description of field types',
+              })}
               items={items}
               compressed={true}
               rowHeader="firstName"
               columns={columnsSidebar}
+              responsive={false}
             />
             <EuiSpacer size="s" />
             {presentFieldTypes.length > FIELD_TYPES_PER_PAGE && (
@@ -398,6 +405,15 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
+            <EuiPopoverFooter paddingSize="s">
+              Learn more about&nbsp;
+              <EuiLink href={docLinks.links.discover.fieldTypeHelp}>
+                <FormattedMessage
+                  id="discover.fieldTypesPopover.learnMore"
+                  defaultMessage="field types"
+                />
+              </EuiLink>
+            </EuiPopoverFooter>
           </EuiPopover>
         </EuiFilterGroup>
       </EuiFlexItem>

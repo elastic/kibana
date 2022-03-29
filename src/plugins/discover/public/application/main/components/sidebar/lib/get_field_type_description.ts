@@ -42,11 +42,6 @@ export function getFieldTypeDescription(type: string) {
       return i18n.translate('discover.fieldNameDescription.numberField', {
         defaultMessage: 'Long, integer, short, byte, double, and float values.',
       });
-    case 'source':
-      // Note that this type is currently not provided, type for _source is undefined
-      return i18n.translate('discover.fieldNameDescription.sourceField', {
-        defaultMessage: 'Original JSON body provided during indexing.',
-      });
     case 'string':
       return i18n.translate('discover.fieldNameDescription.stringField', {
         defaultMessage: 'Full text such as the body of an email or a product description.',
