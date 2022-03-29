@@ -34,11 +34,15 @@ export const epmRouteService = {
     return EPM_API_ROUTES.LIMITED_LIST_PATTERN;
   },
 
-  getInfoPath: (pkgName: string, pkgVersion: string) => {
-    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
-      '{pkgVersion}',
-      pkgVersion
-    );
+  getInfoPath: (pkgName: string, pkgVersion?: string) => {
+    if (pkgVersion) {
+      return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
+        '{pkgVersion}',
+        pkgVersion
+      );
+    } else {
+      return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace('/{pkgVersion}', '');
+    }
   },
 
   getStatsPath: (pkgName: string) => {

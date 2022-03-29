@@ -23,7 +23,6 @@ const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
   aliases: [],
 };
 
-// Note: The reindexing flyout UX is subject to change; more tests should be added here once functionality is built out
 describe('Reindex deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
 
@@ -59,6 +58,7 @@ describe('Reindex deprecation flyout', () => {
         aliases: [],
       },
     });
+    httpRequestsMockHelpers.setLoadNodeDiskSpaceResponse([]);
 
     await act(async () => {
       testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
@@ -236,6 +236,34 @@ describe('Reindex deprecation flyout', () => {
       component.update();
 
       expect(find('reindexChecklistTitle').text()).toEqual('Reindexing process');
+    });
+  });
+
+  describe('low disk space', () => {
+    it('renders a warning callout if nodes detected with low disk space', async () => {
+      httpRequestsMockHelpers.setLoadNodeDiskSpaceResponse([
+        {
+          nodeId: '9OFkjpAKS_aPzJAuEOSg7w',
+          nodeName: 'MacBook-Pro.local',
+          available: '25%',
+          lowDiskWatermarkSetting: '50%',
+        },
+      ]);
+
+      await act(async () => {
+        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+      });
+
+      testBed.component.update();
+      const { actions, find } = testBed;
+
+      await actions.table.clickDeprecationRowAt('reindex', 0);
+
+      expect(find('lowDiskSpaceCallout').text()).toContain('Nodes with low disk space');
+      expect(find('impactedNodeListItem').length).toEqual(1);
+      expect(find('impactedNodeListItem').at(0).text()).toContain(
+        'MacBook-Pro.local (25% available)'
+      );
     });
   });
 });

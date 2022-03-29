@@ -323,7 +323,7 @@ And start it with:
 ./apm-server -c apm-server.source.yml -e -d "*"
 ```
 
-Note that on cloud the APM server section will show up as "APM & Fleet Server", but the code paths are the same.
+Note that on cloud the APM server section will show up as "Integrations Server" (previously "APM & Fleet"), but the code paths are the same.
 
 ## Logstash
 

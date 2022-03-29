@@ -53,6 +53,7 @@ interface Props {
     page?: { index: number };
     sort?: { field: string; direction: SortDirection };
   }) => void;
+  detailedStatsLoading: boolean;
   detailedStatsData?: ServiceInstanceDetailedStatistics;
   isLoading: boolean;
   isNotInitiated: boolean;
@@ -64,6 +65,7 @@ export function ServiceOverviewInstancesTable({
   mainStatsStatus: status,
   tableOptions,
   onChangeTableOptions,
+  detailedStatsLoading,
   detailedStatsData: detailedStatsData,
   isLoading,
   isNotInitiated,
@@ -124,6 +126,7 @@ export function ServiceOverviewInstancesTable({
     serviceName,
     kuery,
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    detailedStatsLoading,
     detailedStatsData,
     comparisonEnabled,
     toggleRowDetails,
@@ -137,7 +140,7 @@ export function ServiceOverviewInstancesTable({
     pageIndex,
     pageSize: PAGE_SIZE,
     totalItemCount: mainStatsItemCount,
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
   };
 
   return (

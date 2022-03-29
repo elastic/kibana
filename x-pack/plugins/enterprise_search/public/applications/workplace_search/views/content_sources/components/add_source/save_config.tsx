@@ -35,10 +35,11 @@ import {
 } from '../../../../constants';
 import { Configuration } from '../../../../types';
 
+import { ExternalConnectorFormFields } from './add_external_connector';
+import { ExternalConnectorDocumentation } from './add_external_connector';
 import { AddSourceLogic } from './add_source_logic';
 import { ConfigDocsLinks } from './config_docs_links';
 import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON, OAUTH_STEP_2 } from './constants';
-import { ExternalConnectorLogic } from './external_connector_logic';
 
 interface SaveConfigProps {
   header: React.ReactNode;
@@ -70,10 +71,6 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const { sourceConfigData, buttonLoading, clientIdValue, clientSecretValue, baseUrlValue } =
     useValues(AddSourceLogic);
-
-  const { externalConnectorUrl, externalConnectorApiKey } = useValues(ExternalConnectorLogic);
-  const { setExternalConnectorUrl, setExternalConnectorApiKey } =
-    useActions(ExternalConnectorLogic);
 
   const {
     accountContextOnly,
@@ -113,45 +110,6 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     </EuiFormRow>
   );
 
-  const externalConnectorFields = (
-    <>
-      <EuiFormRow
-        label={i18n.translate(
-          'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.externalConnectorConfig.urlLabel',
-          {
-            defaultMessage: 'URL',
-          }
-        )}
-      >
-        <EuiFieldText
-          value={externalConnectorUrl}
-          required
-          type="text"
-          autoComplete="off"
-          onChange={(e) => setExternalConnectorUrl(e.target.value)}
-          name="external-connector-url"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate(
-          'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.externalConnectorConfig.apiKeyLabel',
-          {
-            defaultMessage: 'API key',
-          }
-        )}
-      >
-        <EuiFieldText
-          value={externalConnectorApiKey}
-          required
-          type="text"
-          autoComplete="off"
-          onChange={(e) => setExternalConnectorApiKey(e.target.value)}
-          name="external-connector-api-key"
-        />
-      </EuiFormRow>
-    </>
-  );
-
   const publicKeyStep1 = (
     <EuiFlexGroup justifyContent="flexStart" direction="column" responsive={false}>
       <ConfigDocsLinks
@@ -184,7 +142,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const publicKeyStep2 = (
     <>
-      {serviceType === 'external' && externalConnectorFields}
+      {serviceType === 'external' && <ExternalConnectorFormFields />}
       <EuiFormRow label={BASE_URI_LABEL}>
         <EuiFieldText
           value={baseUrlValue}
@@ -204,7 +162,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     <EuiFlexGroup direction="column" responsive={false}>
       <EuiFlexItem>
         <EuiForm>
-          {serviceType === 'external' && externalConnectorFields}
+          {serviceType === 'external' && <ExternalConnectorFormFields />}
           <EuiFormRow label={CLIENT_ID_LABEL}>
             <EuiFieldText
               value={clientIdValue}
@@ -267,6 +225,12 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     <>
       {header}
       <EuiSpacer size="l" />
+      {serviceType === 'external' && (
+        <>
+          <ExternalConnectorDocumentation name={name} documentationUrl={documentationUrl} />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <form onSubmit={handleFormSubmission}>
         <EuiSteps steps={configSteps} className="adding-a-source__config-steps" />
       </form>

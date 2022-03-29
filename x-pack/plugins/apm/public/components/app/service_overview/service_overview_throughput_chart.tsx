@@ -23,10 +23,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import {
-  getComparisonChartTheme,
-  getTimeRangeComparison,
-} from '../../shared/time_comparison/get_time_range_comparison';
+import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
 import {
   ChartType,
   getTimeSeriesColor,
@@ -47,7 +44,7 @@ export function ServiceOverviewThroughputChart({
   transactionName?: string;
 }) {
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, comparisonType },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useApmParams('/services/{serviceName}');
 
   const { environment } = useEnvironmentsContext();
@@ -61,12 +58,6 @@ export function ServiceOverviewThroughputChart({
   const { transactionType, serviceName } = useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -84,8 +75,7 @@ export function ServiceOverviewThroughputChart({
                 start,
                 end,
                 transactionType,
-                comparisonStart,
-                comparisonEnd,
+                offset: comparisonEnabled ? offset : undefined,
                 transactionName,
               },
             },
@@ -100,9 +90,9 @@ export function ServiceOverviewThroughputChart({
       start,
       end,
       transactionType,
-      comparisonStart,
-      comparisonEnd,
+      offset,
       transactionName,
+      comparisonEnabled,
     ]
   );
 
@@ -152,7 +142,7 @@ export function ServiceOverviewThroughputChart({
           <EuiIconTip
             content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
               defaultMessage:
-                'Throughput is measured in transactions per minute (tpm)',
+                'Throughput is measured in transactions per minute (tpm).',
             })}
             position="right"
           />

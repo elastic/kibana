@@ -45,6 +45,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       droppedTransactionSpans: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-spans.html#data-model-dropped-spans`,
       upgrading: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade.html`,
       metaData: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-metadata.html`,
+      overview: `${APM_DOCS}guide/${DOC_LINK_VERSION}/apm-overview.html`,
+      tailSamplingPolicies: `${APM_DOCS}guide/${DOC_LINK_VERSION}/configure-tail-based-sampling.html`,
     },
     canvas: {
       guide: `${KIBANA_DOCS}canvas.html`,
@@ -65,6 +67,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,
       fieldStatistics: `${KIBANA_DOCS}show-field-statistics.html`,
+      documentExplorer: `${KIBANA_DOCS}document-explorer.html`,
     },
     filebeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
@@ -136,6 +139,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       security: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html`,
       serviceNow: `${WORKPLACE_SEARCH_DOCS}workplace-search-servicenow-connector.html`,
       sharePoint: `${WORKPLACE_SEARCH_DOCS}workplace-search-sharepoint-online-connector.html`,
+      sharePointServer: `${WORKPLACE_SEARCH_DOCS}sharepoint-server.html`,
       slack: `${WORKPLACE_SEARCH_DOCS}workplace-search-slack-connector.html`,
       synch: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html`,
       zendesk: `${WORKPLACE_SEARCH_DOCS}workplace-search-zendesk-connector.html`,
@@ -239,6 +243,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
       deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
       frozenIndices: `${ELASTICSEARCH_DOCS}frozen-indices.html`,
+      gettingStarted: `${ELASTICSEARCH_DOCS}getting-started.html`,
       hiddenIndices: `${ELASTICSEARCH_DOCS}multi-index.html#hidden`,
       ilm: `${ELASTICSEARCH_DOCS}index-lifecycle-management.html`,
       ilmForceMerge: `${ELASTICSEARCH_DOCS}ilm-forcemerge.html`,
@@ -396,6 +401,11 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       monitorUptime: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
       tlsCertificate: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/tls-certificate-alert.html`,
       uptimeDurationAnomaly: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/duration-anomaly-alert.html`,
+      monitorLogs: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-logs.html`,
+      analyzeMetrics: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/analyze-metrics.html`,
+      monitorUptimeSynthetics: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime-synthetics.html`,
+      userExperience: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/user-experience.html`,
+      createAlerts: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/create-alerts.html`,
     },
     alerting: {
       guide: `${KIBANA_DOCS}create-and-manage-rules.html`,
@@ -589,18 +599,37 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     clients: {
       /** Changes to these URLs must also be synched in src/plugins/custom_integrations/server/language_clients/index.ts */
       guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/index.html`,
+      goIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/index.html`,
       goOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/go-api/${DOC_LINK_VERSION}/overview.html`,
+      javaBasicAuthentication: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/_basic_authentication.html`,
       javaIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/index.html`,
+      javaInstallation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/installation.html`,
+      javaIntroduction: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/introduction.html`,
+      javaRestLow: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/java-rest-low.html`,
+      jsClientConnecting: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/client-connecting.html`,
       jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/introduction.html`,
       netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
+      netIntroduction: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/introduction.html`,
+      netNest: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/nest.html`,
+      netSingleNode: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/connecting.html#single-node`,
       perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/${DOC_LINK_VERSION}/index.html`,
+      phpConnecting: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/connecting.html`,
+      phpInstallation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/installation.html`,
       phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/index.html`,
+      phpOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/overview.html`,
+      pythonAuthentication: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/python-api/${DOC_LINK_VERSION}/connecting.html#authentication`,
       pythonGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/python-api/${DOC_LINK_VERSION}/index.html`,
+      pythonOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/python-api/${DOC_LINK_VERSION}/overview.html`,
+      rubyAuthentication: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/connecting.html#client-auth`,
       rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
       rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/index.html`,
+      rustOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/overview.html`,
     },
     endpoints: {
       troubleshooting: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/ts-management.html#ts-endpoints`,
+    },
+    legal: {
+      privacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,
     },
   });
 };

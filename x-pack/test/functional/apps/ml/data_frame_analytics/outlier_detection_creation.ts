@@ -119,8 +119,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
 
-          await ml.testExecution.logTestStep('loads the source selection modal');
-
           // Disable anti-aliasing to stabilize canvas image rendering assertions
           await ml.commonUI.disableAntiAliasing();
 

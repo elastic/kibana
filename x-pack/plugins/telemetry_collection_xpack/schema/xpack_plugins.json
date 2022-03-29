@@ -1731,6 +1731,218 @@
               "type": "long"
             }
           }
+        },
+        "avg_es_search_duration_per_day": {
+          "type": "long"
+        },
+        "avg_es_search_duration_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "avg_total_search_duration_per_day": {
+          "type": "long"
+        },
+        "avg_total_search_duration_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
         }
       }
     },
@@ -4848,6 +5060,34 @@
                 }
               }
             },
+            "es_agg_hexagons": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es hexagon layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es hexagon layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es hexagon layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es hexagon layers in cluster"
+                  }
+                }
+              }
+            },
             "es_agg_heatmap": {
               "properties": {
                 "min": {
@@ -5818,7 +6058,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -5859,16 +6099,23 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "csv_rows": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -5885,7 +6132,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -5926,16 +6173,23 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "csv_rows": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -5952,7 +6206,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -5993,16 +6247,39 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
+                "png_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "png_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -6019,7 +6296,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -6060,16 +6337,39 @@
                 }
               }
             },
-            "layout": {
+            "metrics": {
               "properties": {
-                "canvas": {
-                  "type": "long"
+                "png_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
+                "png_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -6086,7 +6386,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -6137,6 +6437,58 @@
                 },
                 "preserve_layout": {
                   "type": "long"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "pdf_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_pages": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -6153,7 +6505,7 @@
             "deprecated": {
               "type": "long"
             },
-            "sizes": {
+            "output_size": {
               "properties": {
                 "1.0": {
                   "type": "long"
@@ -6204,6 +6556,58 @@
                 },
                 "preserve_layout": {
                   "type": "long"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "pdf_cpu": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_memory": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pdf_pages": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -6779,7 +7183,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -6820,16 +7224,23 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "csv_rows": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -6846,7 +7257,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -6887,16 +7298,23 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "csv_rows": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -6913,7 +7331,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -6954,16 +7372,39 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
+                    "png_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "png_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -6980,7 +7421,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -7021,16 +7462,39 @@
                     }
                   }
                 },
-                "layout": {
+                "metrics": {
                   "properties": {
-                    "canvas": {
-                      "type": "long"
+                    "png_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
+                    "png_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -7047,7 +7511,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -7098,6 +7562,58 @@
                     },
                     "preserve_layout": {
                       "type": "long"
+                    }
+                  }
+                },
+                "metrics": {
+                  "properties": {
+                    "pdf_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_pages": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -7114,7 +7630,7 @@
                 "deprecated": {
                   "type": "long"
                 },
-                "sizes": {
+                "output_size": {
                   "properties": {
                     "1.0": {
                       "type": "long"
@@ -7165,6 +7681,58 @@
                     },
                     "preserve_layout": {
                       "type": "long"
+                    }
+                  }
+                },
+                "metrics": {
+                  "properties": {
+                    "pdf_cpu": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_memory": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pdf_pages": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }

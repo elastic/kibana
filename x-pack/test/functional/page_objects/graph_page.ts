@@ -52,7 +52,7 @@ export class GraphPageObject extends FtrService {
   }
 
   async selectField(field: string) {
-    await this.testSubjects.setValue('graph-field-search', field);
+    await this.testSubjects.setValue('graph-field-search', field, { clearWithKeyboard: true });
     await this.find.clickDisplayedByCssSelector(`[title="${field}"]`);
   }
 

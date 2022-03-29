@@ -14,10 +14,10 @@ import {
 
 describe('Output form validation', () => {
   describe('validateESHosts', () => {
-    it('should work without any urls', () => {
+    it('should not work without any urls', () => {
       const res = validateESHosts([]);
 
-      expect(res).toBeUndefined();
+      expect(res).toEqual([{ message: 'URL is required' }]);
     });
 
     it('should work with valid url', () => {
@@ -57,6 +57,12 @@ describe('Output form validation', () => {
   });
 
   describe('validateLogstashHosts', () => {
+    it('should not work without any urls', () => {
+      const res = validateLogstashHosts([]);
+
+      expect(res).toEqual([{ message: 'Host is required' }]);
+    });
+
     it('should work for valid hosts', () => {
       const res = validateLogstashHosts(['test.fr:5044']);
 

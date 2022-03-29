@@ -67,6 +67,8 @@ export function getThrottlingParamNormalizer(key: ThrottlingConfigKey): Normaliz
 
 export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKey.METADATA]: getBrowserJsonToJavascriptNormalizer(ConfigKey.METADATA),
+  [ConfigKey.URLS]: getBrowserNormalizer(ConfigKey.URLS),
+  [ConfigKey.PORT]: getBrowserNormalizer(ConfigKey.PORT),
   [ConfigKey.SOURCE_ZIP_URL]: getBrowserNormalizer(ConfigKey.SOURCE_ZIP_URL),
   [ConfigKey.SOURCE_ZIP_USERNAME]: getBrowserNormalizer(ConfigKey.SOURCE_ZIP_USERNAME),
   [ConfigKey.SOURCE_ZIP_PASSWORD]: getBrowserNormalizer(ConfigKey.SOURCE_ZIP_PASSWORD),

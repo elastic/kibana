@@ -95,11 +95,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('GetDataFrameAnalytics', () => {
       it('should fetch all analytics jobs', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
+
         expect(body.count).to.eql(2);
         expect(body.data_frame_analytics.length).to.eql(2);
         expect(body.data_frame_analytics[0].id).to.eql(`${jobId}_1`);
@@ -107,11 +108,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not allow to retrieve analytics jobs for the user without required permissions', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(403);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
@@ -120,11 +121,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('GetDataFrameAnalyticsById', () => {
       it('should fetch single analytics job by id', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(1);
         expect(body.data_frame_analytics.length).to.eql(1);
@@ -132,11 +133,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch analytics jobs based on provided ids', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1,${jobId}_2`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(2);
         expect(body.data_frame_analytics.length).to.eql(2);
@@ -145,11 +146,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not allow to retrieve a job for the user without required permissions', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(403);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
@@ -158,11 +159,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('GetDataFrameAnalyticsStats', () => {
       it('should fetch analytics jobs stats', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.count).to.eql(2);
         expect(body.data_frame_analytics.length).to.eql(2);
@@ -178,11 +179,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not allow to retrieve jobs stats for the user without required permissions', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(403);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
@@ -191,11 +192,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('GetDataFrameAnalyticsStatsById', () => {
       it('should fetch single analytics job stats by id', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
+
         expect(body.count).to.eql(1);
         expect(body.data_frame_analytics.length).to.eql(1);
         expect(body.data_frame_analytics[0].id).to.eql(`${jobId}_1`);
@@ -209,11 +211,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch multiple analytics jobs stats based on provided ids', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1,${jobId}_2/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
+
         expect(body.count).to.eql(2);
         expect(body.data_frame_analytics.length).to.eql(2);
         expect(body.data_frame_analytics[0].id).to.eql(`${jobId}_1`);
@@ -228,11 +231,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not allow to retrieve a job stats for the user without required permissions', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(403);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
+
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
       });
@@ -240,11 +244,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('GetDataFrameAnalyticsIdMap', () => {
       it('should return a map of objects leading up to analytics job id', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics/map/${jobId}_1`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).to.have.keys('elements', 'details', 'error');
         // Index node, 2 job nodes (with same source index), and 2 edge nodes to connect them
@@ -261,11 +265,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return empty results and an error message if the job does not exist', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics/map/${jobId}_fake`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.elements.length).to.eql(0);
         expect(body.details).to.eql({});
@@ -278,11 +282,11 @@ export default ({ getService }: FtrProviderContext) => {
     describe('GetDataFrameAnalyticsMessages', () => {
       it('should fetch single analytics job messages by id', async () => {
         await retry.tryForTime(5000, async () => {
-          const { body } = await supertest
+          const { body, status } = await supertest
             .get(`/api/ml/data_frame/analytics/${jobId}_1/messages`)
             .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-            .set(COMMON_REQUEST_HEADERS)
-            .expect(200);
+            .set(COMMON_REQUEST_HEADERS);
+          ml.api.assertResponseStatusCode(200, status, body);
 
           expect(body.length).to.eql(1);
           expect(body[0].job_id).to.eql(`${jobId}_1`);
@@ -298,11 +302,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not allow to retrieve job messages without required permissions', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1/messages`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(403);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
+
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
       });

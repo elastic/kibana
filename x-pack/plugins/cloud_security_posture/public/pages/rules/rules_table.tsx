@@ -7,11 +7,13 @@
 import React, { useMemo } from 'react';
 import {
   Criteria,
-  EuiLink,
+  EuiButtonEmpty,
   EuiSwitch,
+  EuiToolTip,
   EuiTableFieldDataColumnType,
   EuiBasicTable,
   EuiBasicTableProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
 import type { RulesState } from './rules_container';
@@ -26,6 +28,8 @@ type RulesTableProps = Pick<
   toggleRule(rule: RuleSavedObject): void;
   setSelectedRules(rules: RuleSavedObject[]): void;
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
+  setSelectedRuleId(id: string | null): void;
+  selectedRuleId: string | null;
   // ForwardRef makes this ref not available in parent callbacks
   tableRef: React.RefObject<EuiBasicTable<RuleSavedObject>>;
 };
@@ -34,6 +38,7 @@ export const RulesTable = ({
   toggleRule,
   setSelectedRules,
   setPagination,
+  setSelectedRuleId,
   perPage: pageSize,
   rules_page: items,
   page,
@@ -41,15 +46,19 @@ export const RulesTable = ({
   total,
   loading,
   error,
+  selectedRuleId,
 }: RulesTableProps) => {
-  const columns = useMemo(() => getColumns({ toggleRule }), [toggleRule]);
+  const { euiTheme } = useEuiTheme();
+  const columns = useMemo(
+    () => getColumns({ toggleRule, setSelectedRuleId }),
+    [setSelectedRuleId, toggleRule]
+  );
 
   const euiPagination: EuiBasicTableProps<RuleSavedObject>['pagination'] = {
     pageIndex: page,
     pageSize,
     totalItemCount: total,
     pageSizeOptions: [1, 5, 10, 25],
-    hidePerPageOptions: false,
   };
 
   const selection: EuiBasicTableProps<RuleSavedObject>['selection'] = {
@@ -61,6 +70,17 @@ export const RulesTable = ({
     if (!pagination) return;
     setPagination({ page: pagination.index, perPage: pagination.size });
   };
+
+  const rowProps = (row: RuleSavedObject) => ({
+    ['data-test-subj']: TEST_SUBJECTS.getCspRulesTableRowItemTestId(row.id),
+    style: { background: row.id === selectedRuleId ? euiTheme.colors.highlight : undefined },
+    onClick: (e: MouseEvent) => {
+      const tag = (e.target as HTMLDivElement).tagName;
+      // Ignore checkbox and switch toggle columns
+      if (tag === 'BUTTON' || tag === 'INPUT') return;
+      setSelectedRuleId(row.id);
+    },
+  });
 
   return (
     <EuiBasicTable
@@ -75,45 +95,37 @@ export const RulesTable = ({
       isSelectable={true}
       selection={selection}
       itemId={(v) => v.id}
+      rowProps={rowProps}
     />
   );
 };
 
-const ruleNameRenderer = (name: string) => (
-  <EuiLink className="eui-textTruncate" title={name}>
-    {name}
-  </EuiLink>
-);
-
-const timestampRenderer = (timestamp: string) =>
-  moment.duration(moment().diff(timestamp)).humanize();
-
-interface GetColumnProps {
+interface GetColumnProps extends Pick<RulesTableProps, 'setSelectedRuleId'> {
   toggleRule: (rule: RuleSavedObject) => void;
 }
 
-const createRuleEnabledSwitchRenderer =
-  ({ toggleRule }: GetColumnProps) =>
-  (value: boolean, rule: RuleSavedObject) =>
-    (
-      <EuiSwitch
-        showLabel={false}
-        label={value ? TEXT.DISABLE : TEXT.ENABLE}
-        checked={value}
-        onChange={() => toggleRule(rule)}
-        data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.attributes.id)}
-      />
-    );
-
 const getColumns = ({
   toggleRule,
+  setSelectedRuleId,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<RuleSavedObject>> => [
   {
     field: 'attributes.name',
     name: TEXT.RULE_NAME,
     width: '60%',
     truncateText: true,
-    render: ruleNameRenderer,
+    render: (name, rule) => (
+      <EuiButtonEmpty
+        className="eui-textTruncate"
+        title={name}
+        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+          e.stopPropagation();
+          setSelectedRuleId(rule.id);
+        }}
+        data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
+      >
+        {name}
+      </EuiButtonEmpty>
+    ),
   },
   {
     field: 'section', // TODO: what field is this?
@@ -122,14 +134,24 @@ const getColumns = ({
   },
   {
     field: 'updatedAt',
-    name: TEXT.UPDATED_AT,
+    name: TEXT.LAST_MODIFIED,
     width: '15%',
-    render: timestampRenderer,
+    render: (timestamp) => moment(timestamp).fromNow(),
   },
   {
     field: 'attributes.enabled',
     name: TEXT.ENABLED,
-    render: createRuleEnabledSwitchRenderer({ toggleRule }),
+    render: (enabled, rule) => (
+      <EuiToolTip content={enabled ? TEXT.DEACTIVATE : TEXT.ACTIVATE}>
+        <EuiSwitch
+          showLabel={false}
+          label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
+          checked={enabled}
+          onChange={() => toggleRule(rule)}
+          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.attributes.id)}
+        />
+      </EuiToolTip>
+    ),
     width: '10%',
   },
 ];

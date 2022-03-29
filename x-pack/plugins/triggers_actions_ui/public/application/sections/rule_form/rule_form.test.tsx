@@ -25,8 +25,9 @@ import { useKibana } from '../../../common/lib/kibana';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
-jest.mock('../../lib/rule_api', () => ({
-  loadRuleTypes: jest.fn(),
+
+jest.mock('../../hooks/use_load_rule_types', () => ({
+  useLoadRuleTypes: jest.fn(),
 }));
 jest.mock('../../../common/lib/kibana');
 
@@ -93,9 +94,9 @@ describe('rule_form', () => {
   describe('rule_form create rule', () => {
     let wrapper: ReactWrapper<any>;
 
-    async function setup() {
+    async function setup(enforceMinimum = false, schedule = '1m') {
       const mocks = coreMock.createSetup();
-      const { loadRuleTypes } = jest.requireMock('../../lib/rule_api');
+      const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
       const ruleTypes: RuleType[] = [
         {
           id: 'my-rule-type',
@@ -144,7 +145,7 @@ describe('rule_form', () => {
           enabledInLicense: false,
         },
       ];
-      loadRuleTypes.mockResolvedValue(ruleTypes);
+      useLoadRuleTypes.mockReturnValue({ ruleTypes });
       const [
         {
           application: { capabilities },
@@ -173,7 +174,7 @@ describe('rule_form', () => {
         params: {},
         consumer: ALERTS_FEATURE_ID,
         schedule: {
-          interval: '1m',
+          interval: schedule,
         },
         actions: [],
         tags: [],
@@ -185,7 +186,7 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: '1m' }}
+          config={{ minimumScheduleInterval: { value: '1m', enforce: enforceMinimum } }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
@@ -213,10 +214,24 @@ describe('rule_form', () => {
       expect(ruleTypeSelectOptions.exists()).toBeTruthy();
     });
 
-    it('renders minimum schedule interval', async () => {
-      await setup();
+    it('renders minimum schedule interval helper text when enforce = true', async () => {
+      await setup(true);
       expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
         `Interval must be at least 1 minute.`
+      );
+    });
+
+    it('renders minimum schedule interval helper suggestion when enforce = false and schedule is less than configuration', async () => {
+      await setup(false, '10s');
+      expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
+        `Intervals less than 1 minute are not recommended due to performance considerations.`
+      );
+    });
+
+    it('does not render minimum schedule interval helper when enforce = false and schedule is greater than configuration', async () => {
+      await setup();
+      expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
+        ``
       );
     });
 
@@ -266,46 +281,48 @@ describe('rule_form', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      const { loadRuleTypes } = jest.requireMock('../../lib/rule_api');
+      const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
 
-      loadRuleTypes.mockResolvedValue([
-        {
-          id: 'other-consumer-producer-rule-type',
-          name: 'Test',
-          actionGroups: [
-            {
-              id: 'testActionGroup',
-              name: 'Test Action Group',
+      useLoadRuleTypes.mockReturnValue({
+        ruleTypes: [
+          {
+            id: 'other-consumer-producer-rule-type',
+            name: 'Test',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            defaultActionGroupId: 'testActionGroup',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: RecoveredActionGroup,
+            producer: ALERTS_FEATURE_ID,
+            authorizedConsumers: {
+              [ALERTS_FEATURE_ID]: { read: true, all: true },
+              test: { read: true, all: true },
             },
-          ],
-          defaultActionGroupId: 'testActionGroup',
-          minimumLicenseRequired: 'basic',
-          recoveryActionGroup: RecoveredActionGroup,
-          producer: ALERTS_FEATURE_ID,
-          authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { read: true, all: true },
-            test: { read: true, all: true },
           },
-        },
-        {
-          id: 'same-consumer-producer-rule-type',
-          name: 'Test',
-          actionGroups: [
-            {
-              id: 'testActionGroup',
-              name: 'Test Action Group',
+          {
+            id: 'same-consumer-producer-rule-type',
+            name: 'Test',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            defaultActionGroupId: 'testActionGroup',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: RecoveredActionGroup,
+            producer: 'test',
+            authorizedConsumers: {
+              [ALERTS_FEATURE_ID]: { read: true, all: true },
+              test: { read: true, all: true },
             },
-          ],
-          defaultActionGroupId: 'testActionGroup',
-          minimumLicenseRequired: 'basic',
-          recoveryActionGroup: RecoveredActionGroup,
-          producer: 'test',
-          authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { read: true, all: true },
-            test: { read: true, all: true },
           },
-        },
-      ]);
+        ],
+      });
       const mocks = coreMock.createSetup();
       const [
         {
@@ -365,7 +382,7 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: '1m' }}
+          config={{ minimumScheduleInterval: { value: '1m', enforce: false } }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
@@ -379,7 +396,7 @@ describe('rule_form', () => {
         wrapper.update();
       });
 
-      expect(loadRuleTypes).toHaveBeenCalled();
+      expect(useLoadRuleTypes).toHaveBeenCalled();
     }
 
     it('renders rule type options which producer correspond to the rule consumer', async () => {
@@ -428,7 +445,7 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: '1m' }}
+          config={{ minimumScheduleInterval: { value: '1m', enforce: false } }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"

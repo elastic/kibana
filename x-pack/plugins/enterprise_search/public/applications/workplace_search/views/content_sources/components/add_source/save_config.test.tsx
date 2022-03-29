@@ -18,6 +18,7 @@ import { EuiSteps, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { ApiKey } from '../../../../components/shared/api_key';
 import { staticSourceData } from '../../source_data';
 
+import { ExternalConnectorFormFields } from './add_external_connector';
 import { ConfigDocsLinks } from './config_docs_links';
 import { SaveConfig } from './save_config';
 
@@ -88,21 +89,10 @@ describe('SaveConfig', () => {
 
   describe('external connector', () => {
     const externalConnectorConfigData = { ...sourceConfigData, serviceType: 'external' };
-    it('handles external url change', () => {
+    it('shows external url fields', () => {
       setMockValues({ sourceConfigData: externalConnectorConfigData });
       const wrapper = shallow(<SaveConfig {...props} />);
-      const steps = wrapper.find(EuiSteps);
-      const input = steps.dive().find('[name="external-connector-url"]');
-      input.simulate('change', { target: { value: 'new-url' } });
-      expect(setExternalConnectorUrl).toHaveBeenCalledWith('new-url');
-    });
-    it('handles external api key change', () => {
-      setMockValues({ sourceConfigData: externalConnectorConfigData });
-      const wrapper = shallow(<SaveConfig {...publicProps} />);
-      const steps = wrapper.find(EuiSteps);
-      const input = steps.dive().find('[name="external-connector-api-key"]');
-      input.simulate('change', { target: { value: 'new-api-key' } });
-      expect(setExternalConnectorApiKey).toHaveBeenCalledWith('new-api-key');
+      expect(wrapper.find(EuiSteps).dive().find(ExternalConnectorFormFields)).toHaveLength(1);
     });
   });
 
