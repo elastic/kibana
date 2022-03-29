@@ -14,7 +14,7 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
-import { GenericBulkCreateResponse } from './bulk_create_factory';
+import { GenericBulkCreateResponse } from '../rule_types/factories';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
 import { BulkCreate, WrapHits } from './types';
