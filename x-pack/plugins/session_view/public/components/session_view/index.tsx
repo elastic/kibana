@@ -8,11 +8,11 @@ import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiEmptyPrompt,
   EuiButton,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiResizableContainer,
   EuiPanel,
   EuiHorizontalRule,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
