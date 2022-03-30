@@ -17,7 +17,9 @@
     "expressions",
     "embeddable",
     "dataViews",
-    "data"
+    "data",
+    "unifiedSearch"
   ],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "requiredBundles": ["unifiedSearch"]
 }

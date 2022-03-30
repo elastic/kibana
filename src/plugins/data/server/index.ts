@@ -123,7 +123,6 @@ export { DataServerPlugin as Plugin };
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   deprecations: autocompleteConfigDeprecationProvider,
   exposeToBrowser: {
-    autocomplete: true,
     search: true,
   },
   schema: configSchema,

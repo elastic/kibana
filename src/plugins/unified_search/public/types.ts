@@ -17,7 +17,7 @@ export interface UnifiedSearchSetupDependencies {
   data: DataPublicPluginStart;
 }
 
-export interface UnifiedSearchPluginSetup {
+export interface UnifiedSearchPublicPluginSetup {
   autocomplete: AutocompleteSetup;
 }
 

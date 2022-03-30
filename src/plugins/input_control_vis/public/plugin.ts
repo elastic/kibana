@@ -9,7 +9,10 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
-import { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
+import {
+  UnifiedSearchPublicPluginStart,
+  UnifiedSearchPublicPluginSetup,
+} from 'src/plugins/unified_search/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
 import { createInputControlVisFn } from './input_control_fn';
@@ -34,6 +37,7 @@ export interface InputControlVisPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
+  unifiedSearch: UnifiedSearchPublicPluginSetup;
 }
 
 /** @internal */
@@ -50,13 +54,13 @@ export class InputControlVisPlugin implements Plugin<void, void> {
 
   public setup(
     core: InputControlVisCoreSetup,
-    { expressions, visualizations, data }: InputControlVisPluginSetupDependencies
+    { expressions, visualizations, data, unifiedSearch }: InputControlVisPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<InputControlVisDependencies> = {
       core,
       data,
       getSettings: async () => {
-        const { timeout, terminateAfter } = data.autocomplete.getAutocompleteSettings();
+        const { timeout, terminateAfter } = unifiedSearch.autocomplete.getAutocompleteSettings();
         return { autocompleteTimeout: timeout, autocompleteTerminateAfter: terminateAfter };
       },
     };

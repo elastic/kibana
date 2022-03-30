@@ -18,18 +18,15 @@ import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
 import { KqlTelemetryService } from './kql_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
-import { AutocompleteService } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 import { getUiSettings } from './ui_settings';
 import { QuerySetup } from './query';
-import { AutocompleteSetup } from './autocomplete/autocomplete_service';
 
 interface DataEnhancements {
   search: SearchEnhancements;
 }
 
 export interface DataPluginSetup {
-  autocomplete: AutocompleteSetup;
   search: ISearchSetup;
   query: QuerySetup;
   /**
@@ -81,7 +78,6 @@ export class DataServerPlugin
   private readonly searchService: SearchService;
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;
-  private readonly autocompleteService: AutocompleteService;
   private readonly queryService = new QueryService();
   private readonly logger: Logger;
 
@@ -90,7 +86,6 @@ export class DataServerPlugin
     this.searchService = new SearchService(initializerContext, this.logger);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
-    this.autocompleteService = new AutocompleteService(initializerContext);
   }
 
   public setup(
@@ -110,7 +105,6 @@ export class DataServerPlugin
     });
 
     return {
-      autocomplete: this.autocompleteService.setup(core),
       __enhance: (enhancements: DataEnhancements) => {
         searchSetup.__enhance(enhancements.search);
       },

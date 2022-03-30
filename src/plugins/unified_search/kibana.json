@@ -11,5 +11,6 @@
   "ui": true,
   "requiredPlugins": ["dataViews", "data", "uiActions"],
   "serviceFolders": ["autocomplete"],
+  "extraPublicDirs": ["common"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "data"]
 }

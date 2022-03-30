@@ -76,7 +76,7 @@ interface EventFiltersFormProps {
 }
 export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
   ({ allowSelectOs = false, policies, arePoliciesLoading }) => {
-    const { http, data } = useKibana().services;
+    const { http, unifiedSearch } = useKibana().services;
 
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const exception = useEventFiltersSelector(getFormEntryStateMutable);
@@ -210,7 +210,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
         getExceptionBuilderComponentLazy({
           allowLargeValueLists: false,
           httpService: http,
-          autocompleteService: data.autocomplete,
+          autocompleteService: unifiedSearch.autocomplete,
           exceptionListItems: [exception as ExceptionListItemSchema],
           listType: EVENT_FILTER_LIST_TYPE,
           listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -228,7 +228,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           operatorsList: EVENT_FILTERS_OPERATORS,
           osTypes: exception?.os_types,
         }),
-      [data, handleOnBuilderChange, http, indexPatterns, exception]
+      [unifiedSearch, handleOnBuilderChange, http, indexPatterns, exception]
     );
 
     const nameInputMemo = useMemo(

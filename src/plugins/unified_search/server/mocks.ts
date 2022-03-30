@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { createSearchSetupMock } from '../../data/server/mocks';
-import { createFieldFormatsSetupMock } from '../../field_formats/server/mocks';
 import { AutocompleteSetup } from './autocomplete';
 
 const autocompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
@@ -16,12 +14,7 @@ const autocompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
 
 function createSetupContract() {
   return {
-    search: createSearchSetupMock(),
     autocomplete: autocompleteSetupMock,
-    /**
-     * @deprecated - use directly from "fieldFormats" plugin instead
-     */
-    fieldFormats: createFieldFormatsSetupMock(),
   };
 }
 

@@ -49,6 +49,7 @@ import {
 import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
 import { Start as InspectorPluginStart } from '../../../../../src/plugins/inspector/public';
 import { CasesUiStart } from '../../../cases/public';
+import { UnifiedSearchPublicPluginStart } from '../../../../../src/plugins/unified_search/public';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -61,6 +62,7 @@ export interface ClientPluginsSetup {
 export interface ClientPluginsStart {
   fleet?: FleetStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;

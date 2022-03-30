@@ -15,7 +15,7 @@ import { setIndexPatterns, setTheme, setOverlays } from './services';
 import type { UsageCollectionSetup } from '../../usage_collection/public';
 import { createSearchBar } from './search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
-import { UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart } from './types';
+import { UnifiedSearchPublicPluginSetup, UnifiedSearchPublicPluginStart } from './types';
 import type { UnifiedSearchStartDependencies, UnifiedSearchSetupDependencies } from './types';
 import { createFilterAction } from './actions/apply_filter_action';
 import { ACTION_GLOBAL_APPLY_FILTER } from './actions';
@@ -23,31 +23,34 @@ import { APPLY_FILTER_TRIGGER } from '../../data/public';
 import { AutocompleteService } from './autocomplete';
 
 export class UnifiedSearchPublicPlugin
-  implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
+  implements Plugin<UnifiedSearchPublicPluginSetup, UnifiedSearchPublicPluginStart>
 {
   private readonly autocomplete: AutocompleteService;
+  private readonly autocompleteService: AutocompleteService;
   private readonly storage: IStorageWrapper;
   private usageCollection: UsageCollectionSetup | undefined;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
+    this.autocompleteService = new AutocompleteService(initializerContext);
   }
 
   public setup(
     core: CoreSetup,
     { uiActions, data }: UnifiedSearchSetupDependencies
-  ): UnifiedSearchPluginSetup {
+  ): UnifiedSearchPublicPluginSetup {
     const { query } = data;
     uiActions.registerAction(
       createFilterAction(query.filterManager, query.timefilter.timefilter, core.theme)
     );
 
     return {
-      autocomplete: this.autocomplete.setup(core, {
-        timefilter: queryService.timefilter,
-        usageCollection,
-      }),
+      autocomplete: this.autocompleteService.setup(core),
+      // autocomplete: this.autocomplete.setup(core, {
+      //   timefilter: queryService.timefilter,
+      //   usageCollection,
+      // }),
     };
   }
 
