@@ -48,7 +48,6 @@ interface DonutCardProps {
   showInspectButton: boolean;
   subtitle?: string;
   title: string;
-  legendField: string;
 }
 
 type PaddingSize = 's' | 'none' | 'm' | 'l';
@@ -76,6 +75,8 @@ const DefaultPanelSettings = {
   paddingSize: 'm' as PaddingSize,
 };
 
+const legendField = 'kibana.alert.severity';
+
 export const AlertsByStatus = ({
   detailsButtonOptions,
   donutData,
@@ -83,7 +84,6 @@ export const AlertsByStatus = ({
   headerChildren,
   id,
   isInitialLoading,
-  legendField,
   loading,
   panelSettings = DefaultPanelSettings,
   showInspectButton,
@@ -109,7 +109,7 @@ export const AlertsByStatus = ({
             value: `${d.key}`,
           }))
         : NO_LEGEND_DATA,
-    [colors, donutData, legendField]
+    [colors, donutData]
   );
   return (
     <>
@@ -177,10 +177,10 @@ export const AlertsByStatus = ({
               {donutData?.map((data) => (
                 <EuiFlexItem key={`alerts-status-${data.key}`}>
                   <DonutChart
-                    height={donutHeight}
                     data={data.buckets}
-                    name={data.label}
+                    height={donutHeight}
                     link={data.link}
+                    name={data.label}
                     showLegend={false}
                   />
                 </EuiFlexItem>

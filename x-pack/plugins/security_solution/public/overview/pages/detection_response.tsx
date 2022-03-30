@@ -80,7 +80,6 @@ const DetectionResponseComponent = () => {
                           donutData={alertsData()} // Todo
                           id="alertByStatus"
                           filterQuery={''} // Todo
-                          legendField="kibana.alert.severity"
                           isInitialLoading={false} // Todo
                           loading={false} // Todo
                           showInspectButton={true} // Todo

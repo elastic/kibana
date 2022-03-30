@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 interface DonutChartEmptyProps {
-  size: number;
+  size?: number;
   donutWidth?: number;
 }
 
@@ -32,10 +32,10 @@ const SmallRing = styled.div<DonutChartEmptyProps>`
     vertical-align: middle;`}
 `;
 
-const EmptyDonutChartComponent: React.FC<DonutChartEmptyProps> = ({ size, donutWidth = 20 }) =>
+const EmptyDonutChartComponent: React.FC<DonutChartEmptyProps> = ({ size = 90, donutWidth = 20 }) =>
   size - donutWidth > 0 ? (
-    <BigRing size={size}>
-      <SmallRing size={size - donutWidth} />
+    <BigRing size={size} data-test-subj="empty-donut">
+      <SmallRing size={size - donutWidth} data-test-subj="empty-donut-small" />
     </BigRing>
   ) : null;
 

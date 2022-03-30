@@ -21,18 +21,13 @@ import { ParsedSeverityBucket } from '../../../overview/components/alerts_by_sta
 
 export const NO_LEGEND_DATA: LegendItem[] = [];
 
-export interface DonutChartData {
-  value: number;
-  label: string;
-  name: string;
-  link?: string | null;
-}
+type DonutChartData = ParsedSeverityBucket;
 
 export interface DonutChartProps {
   showLegend?: boolean;
-  data: ParsedSeverityBucket[];
+  data: DonutChartData[];
   name: string;
-  height: number;
+  height?: number;
   legendField?: string;
   link?: string | null;
 }
@@ -51,12 +46,12 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export const DonutChart = ({
-  showLegend = true,
   data,
-  name,
-  link,
-  height,
+  height = 90,
   legendField,
+  link,
+  name,
+  showLegend = true,
 }: DonutChartProps) => {
   const theme = useTheme();
 
@@ -79,7 +74,13 @@ export const DonutChart = ({
   );
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" responsive={false} gutterSize="l">
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="center"
+      responsive={false}
+      gutterSize="l"
+      data-test-subj="donut-chart"
+    >
       <StyledEuiFlexItem grow={false}>
         {data && data.length > 0 && (
           <StyledEuiFlexGroup

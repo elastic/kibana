@@ -12,7 +12,7 @@ import { useAddToExistingCase } from './use_add_to_existing_case';
 
 jest.mock('../../lib/kibana/kibana_react');
 
-describe('', () => {
+describe('useAddToExistingCase', () => {
   const mockCases = mockCasesContract();
   const mockOnAddToCaseClicked = jest.fn();
   const timeRange = {

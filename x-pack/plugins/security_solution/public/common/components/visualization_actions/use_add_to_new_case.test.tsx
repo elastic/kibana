@@ -12,7 +12,7 @@ import { useAddToNewCase } from './use_add_to_new_case';
 
 jest.mock('../../lib/kibana/kibana_react');
 
-describe('', () => {
+describe('useAddToNewCase', () => {
   const mockCases = mockCasesContract();
   const timeRange = {
     from: '2022-03-06T16:00:00.000Z',

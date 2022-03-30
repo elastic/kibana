@@ -20,11 +20,11 @@ const StyledLinkButton = styled(EuiButton)`
 `;
 
 const ViewDetailsButtonComponent: React.FC<ViewDetailsButtonProps> = ({ onClick, href, name }) => {
-  return (
-    <StyledLinkButton data-test-subj="view-alerts" onClick={onClick} href={href}>
+  return name && (onClick || href) ? (
+    <StyledLinkButton data-test-subj="view-details-button" onClick={onClick} href={href}>
       {name}
     </StyledLinkButton>
-  );
+  ) : null;
 };
 
 export const ViewDetailsButton = React.memo(ViewDetailsButtonComponent);
