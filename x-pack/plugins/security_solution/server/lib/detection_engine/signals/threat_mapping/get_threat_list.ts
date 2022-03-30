@@ -17,22 +17,24 @@ import {
 /**
  * This should not exceed 10000 (10k)
  */
-export const MAX_PER_PAGE = 9000;
+export const INDICATOR_PER_PAGE = 1000;
 
 export const getThreatList = async ({
   esClient,
   query,
   language,
   index,
-  perPage,
   searchAfter,
   exceptionItems,
   threatFilters,
   buildRuleMessage,
   logger,
   threatListConfig,
+  pitId,
+  reassignPitId,
+  perPage,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
-  const calculatedPerPage = perPage ?? MAX_PER_PAGE;
+  const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
@@ -58,15 +60,17 @@ export const getThreatList = async ({
       ...threatListConfig,
       query: queryFilter,
       search_after: searchAfter,
-      sort: ['_doc', { '@timestamp': 'asc' }],
+      sort: ['_shard_doc', { '@timestamp': 'asc' }],
     },
     track_total_hits: false,
-    ignore_unavailable: true,
-    index,
     size: calculatedPerPage,
+    pit: { id: pitId },
   });
 
   logger.debug(buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`));
+
+  reassignPitId(response.pit_id);
+
   return response;
 };
 

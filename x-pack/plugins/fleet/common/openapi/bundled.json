@@ -1157,7 +1157,7 @@
             "schema": {
               "type": "array"
             },
-            "name": "agentsIds",
+            "name": "agentsId",
             "in": "query",
             "required": true
           }
@@ -2302,7 +2302,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/get_enrollment_api_keys_response"
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/enrollment_api_key"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -3586,7 +3594,7 @@
           "lens",
           "ml-module",
           "security-rule",
-          "csp-rule-template"
+          "csp_rule_template"
         ]
       },
       "elasticsearch_asset_type": {
@@ -4150,30 +4158,6 @@
           "api_key",
           "active",
           "created_at"
-        ]
-      },
-      "get_enrollment_api_keys_response": {
-        "title": "Bulk install packages response",
-        "type": "object",
-        "properties": {
-          "list": {
-            "type": "array",
-            "deprecated": true,
-            "properties": {
-              "items": {
-                "$ref": "#/components/schemas/enrollment_api_key"
-              }
-            }
-          },
-          "item": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/enrollment_api_key"
-            }
-          }
-        },
-        "required": [
-          "item"
         ]
       },
       "upgrade_diff": {

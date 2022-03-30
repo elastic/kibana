@@ -7,39 +7,48 @@
 
 import React from 'react';
 import xml2js from 'xml2js';
+import uuid from 'uuid/v4';
 import { Canvg } from 'canvg';
 import calcSDF from 'bitmap-sdf';
+import {
+  CUSTOM_ICON_SIZE,
+  CUSTOM_ICON_PREFIX_SDF,
+  MAKI_ICON_SIZE,
+} from '../../../../common/constants';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
 import { MAKI_ICONS } from './maki_icons';
 
-const MAKI_ICON_SIZE = 16;
-export const HALF_MAKI_ICON_SIZE = MAKI_ICON_SIZE / 2;
+export const CUSTOM_ICON_PIXEL_RATIO = Math.floor(
+  window.devicePixelRatio * (CUSTOM_ICON_SIZE / MAKI_ICON_SIZE) * 0.75
+);
 
-export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
+export const SYMBOL_OPTIONS = Object.entries(MAKI_ICONS).map(([value, { svg, label }]) => {
   return {
-    value: symbolId,
-    label: symbolId,
+    value,
+    label,
+    svg,
   };
 });
 
 /**
- * Converts a SVG icon to a monochrome image using a signed distance function.
+ * Converts a SVG icon to a PNG image using a signed distance function (SDF).
  *
  * @param {string} svgString - SVG icon as string
- * @param {number} [cutoff=0.25] - balance between SDF inside 1 and outside 0 of glyph
+ * @param {number} [renderSize=64] - size of the output PNG (higher provides better resolution but requires more processing)
+ * @param {number} [cutoff=0.25] - balance between SDF inside 1 and outside 0 of icon
  * @param {number} [radius=0.25] - size of SDF around the cutoff as percent of output icon size
- * @return {ImageData} Monochrome image that can be added to a MapLibre map
+ * @return {ImageData} image that can be added to a MapLibre map with option `{ sdf: true }`
  */
-export async function createSdfIcon(svgString, cutoff = 0.25, radius = 0.25) {
+export async function createSdfIcon({ svg, renderSize = 64, cutoff = 0.25, radius = 0.25 }) {
   const buffer = 3;
-  const size = MAKI_ICON_SIZE + buffer * 4;
+  const size = renderSize + buffer * 4;
   const svgCanvas = document.createElement('canvas');
   svgCanvas.width = size;
   svgCanvas.height = size;
   const svgCtx = svgCanvas.getContext('2d');
-  const v = Canvg.fromString(svgCtx, svgString, {
+  const v = Canvg.fromString(svgCtx, svg, {
     ignoreDimensions: true,
     offsetX: buffer / 2,
     offsetY: buffer / 2,
@@ -70,12 +79,8 @@ export async function createSdfIcon(svgString, cutoff = 0.25, radius = 0.25) {
   return imageData;
 }
 
-export function getMakiSymbolSvg(symbolId) {
-  const svg = MAKI_ICONS?.[symbolId]?.svg;
-  if (!svg) {
-    throw new Error(`Unable to find symbol: ${symbolId}`);
-  }
-  return svg;
+export function getMakiSymbol(symbolId) {
+  return MAKI_ICONS?.[symbolId];
 }
 
 export function getMakiSymbolAnchor(symbolId) {
@@ -87,6 +92,10 @@ export function getMakiSymbolAnchor(symbolId) {
     default:
       return 'center';
   }
+}
+
+export function getCustomIconId() {
+  return `${CUSTOM_ICON_PREFIX_SDF}${uuid()}`;
 }
 
 export function buildSrcUrl(svgString) {
@@ -130,9 +139,9 @@ const ICON_PALETTES = [
 // PREFERRED_ICONS is used to provide less random default icon values for forms that need default icon values
 export const PREFERRED_ICONS = [];
 ICON_PALETTES.forEach((iconPalette) => {
-  iconPalette.icons.forEach((iconId) => {
-    if (!PREFERRED_ICONS.includes(iconId)) {
-      PREFERRED_ICONS.push(iconId);
+  iconPalette.icons.forEach((icon) => {
+    if (!PREFERRED_ICONS.includes(icon)) {
+      PREFERRED_ICONS.push(icon);
     }
   });
 });
@@ -154,6 +163,7 @@ export function getIconPaletteOptions() {
             className="mapIcon"
             symbolId={iconId}
             fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+            svg={getMakiSymbol(iconId).svg}
           />
         </div>
       );

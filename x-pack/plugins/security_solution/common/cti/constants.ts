@@ -63,3 +63,5 @@ export const DEFAULT_EVENT_ENRICHMENT_TO = 'now';
 
 export const TI_INTEGRATION_PREFIX = 'ti';
 export const OTHER_TI_DATASET_KEY = '_others_ti_';
+
+export const THREAT_PIT_KEEP_ALIVE = '5m';

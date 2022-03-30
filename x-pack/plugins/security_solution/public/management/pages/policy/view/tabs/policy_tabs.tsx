@@ -123,7 +123,7 @@ export const PolicyTabs = React.memo(() => {
       layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.trustedApps.list.about"
-          defaultMessage="There {count, plural, one {is} other {are}} {count} trusted {count, plural, =1 {app} other {apps}} associated with this policy. Click here to {link}"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} trusted {count, plural, =1 {application} other {applications}} associated with this policy. Click here to {link}"
           values={{ count, link }}
         />
       ),
@@ -156,7 +156,7 @@ export const PolicyTabs = React.memo(() => {
       layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.blocklists.list.about"
-          defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {blocklist} other {blocklists}} associated with this policy. Click here to {link}"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {blocklist} other {blocklist entries}} associated with this policy. Click here to {link}"
           values={{ count, link }}
         />
       ),
@@ -241,7 +241,7 @@ export const PolicyTabs = React.memo(() => {
       [PolicyTabKeys.BLOCKLISTS]: {
         id: PolicyTabKeys.BLOCKLISTS,
         name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.blocklists', {
-          defaultMessage: 'Blocklists',
+          defaultMessage: 'Blocklist',
         }),
         content: (
           <>

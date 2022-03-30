@@ -224,7 +224,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
         ];
-        outputRule.throttle = '1m';
+        outputRule.throttle = '1h';
         const bodyToCompare = removeServerGeneratedProperties(patchResponse.body);
         expect(bodyToCompare).to.eql(outputRule);
       });
