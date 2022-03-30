@@ -5,37 +5,32 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import moment, { Duration } from 'moment';
+import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiBasicTable,
   EuiHealth,
   EuiSpacer,
-  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiStat,
   EuiIconTip,
+  EuiTabbedContent,
 } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { padStart, chunk } from 'lodash';
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
   AlertStatusValues,
 } from '../../../../../../alerting/common';
-import { Rule, RuleSummary, AlertStatus, RuleType, Pagination } from '../../../../types';
+import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
-import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import './rule.scss';
-import { AlertMutedSwitch } from './alert_muted_switch';
 import { getHealthColor } from '../../rules_list/components/rule_status_filter';
 import {
   rulesStatusesTranslationsMapping,
@@ -46,6 +41,14 @@ import {
   shouldShowDurationWarning,
 } from '../../../lib/execution_duration_utils';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
+// import { RuleEventLogListWithApi } from './rule_event_log_list';
+import { AlertListItem } from './types';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
+
+const RuleEventLogListWithApi = lazy(() => import('./rule_event_log_list'));
+
+const RuleAlertList = lazy(() => import('./rule_alert_list'));
 
 type RuleProps = {
   rule: Rule;
@@ -59,95 +62,8 @@ type RuleProps = {
   isLoadingChart?: boolean;
 } & Pick<RuleApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
-export const alertsTableColumns = (
-  onMuteAction: (alert: AlertListItem) => Promise<void>,
-  readOnly: boolean
-) => [
-  {
-    field: 'alert',
-    name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.Alert', {
-      defaultMessage: 'Alert',
-    }),
-    sortable: false,
-    truncateText: true,
-    width: '45%',
-    'data-test-subj': 'alertsTableCell-alert',
-    render: (value: string) => {
-      return (
-        <EuiToolTip anchorClassName={'eui-textTruncate'} content={value}>
-          <span>{value}</span>
-        </EuiToolTip>
-      );
-    },
-  },
-  {
-    field: 'status',
-    name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.status', {
-      defaultMessage: 'Status',
-    }),
-    width: '15%',
-    render: (value: AlertListItemStatus) => {
-      return (
-        <EuiHealth color={value.healthColor} className="alertsList__health">
-          {value.label}
-          {value.actionGroup ? ` (${value.actionGroup})` : ``}
-        </EuiHealth>
-      );
-    },
-    sortable: false,
-    'data-test-subj': 'alertsTableCell-status',
-  },
-  {
-    field: 'start',
-    width: '190px',
-    render: (value: Date | undefined) => {
-      return value ? moment(value).format('D MMM YYYY @ HH:mm:ss') : '';
-    },
-    name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.start', {
-      defaultMessage: 'Start',
-    }),
-    sortable: false,
-    'data-test-subj': 'alertsTableCell-start',
-  },
-  {
-    field: 'duration',
-    render: (value: number) => {
-      return value ? durationAsString(moment.duration(value)) : '';
-    },
-    name: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.duration',
-      { defaultMessage: 'Duration' }
-    ),
-    sortable: false,
-    width: '80px',
-    'data-test-subj': 'alertsTableCell-duration',
-  },
-  {
-    field: '',
-    align: RIGHT_ALIGNMENT,
-    width: '60px',
-    name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.mute', {
-      defaultMessage: 'Mute',
-    }),
-    render: (alert: AlertListItem) => {
-      return (
-        <AlertMutedSwitch
-          disabled={readOnly}
-          onMuteAction={async () => await onMuteAction(alert)}
-          alert={alert}
-        />
-      );
-    },
-    sortable: false,
-    'data-test-subj': 'alertsTableCell-actions',
-  },
-];
-
-function durationAsString(duration: Duration): string {
-  return [duration.hours(), duration.minutes(), duration.seconds()]
-    .map((value) => padStart(`${value}`, 2, '0'))
-    .join(':');
-}
+const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
+const ALERT_LIST_TAB = 'rule_alert_list';
 
 export function RuleComponent({
   rule,
@@ -162,16 +78,9 @@ export function RuleComponent({
   durationEpoch = Date.now(),
   isLoadingChart,
 }: RuleProps) {
-  const [pagination, setPagination] = useState<Pagination>({
-    index: 0,
-    size: DEFAULT_SEARCH_PAGE_SIZE,
-  });
-
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, ruleType, alertId, alert))
     .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
-
-  const pageOfAlerts = getPage(alerts, pagination);
 
   const onMuteAction = async (alert: AlertListItem) => {
     await (alert.isMuted
@@ -191,6 +100,44 @@ export function RuleComponent({
   const statusMessage = isLicenseError
     ? ALERT_STATUS_LICENSE_ERROR
     : rulesStatusesTranslationsMapping[rule.executionStatus.status];
+
+  const renderRuleAlertList = () => {
+    return suspendedComponentWithProps(
+      RuleAlertList,
+      'xl'
+    )({
+      items: alerts,
+      readOnly,
+      onMuteAction,
+    });
+  };
+
+  const tabs = [
+    {
+      id: EVENT_LOG_LIST_TAB,
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.eventLogTabText', {
+        defaultMessage: 'Execution History',
+      }),
+      'data-test-subj': 'eventLogListTab',
+      content: suspendedComponentWithProps(RuleEventLogListWithApi, 'xl')({ rule }),
+    },
+    {
+      id: ALERT_LIST_TAB,
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.alertsTabText', {
+        defaultMessage: 'Alerts',
+      }),
+      'data-test-subj': 'ruleAlertListTab',
+      content: renderRuleAlertList(),
+    },
+  ];
+
+  const renderTabs = () => {
+    const isEnabled = getIsExperimentalFeatureEnabled('rulesDetailLogs');
+    if (isEnabled) {
+      return <EuiTabbedContent data-test-subj="ruleDetailsTabbedContent" tabs={tabs} />;
+    }
+    return renderRuleAlertList();
+  };
 
   return (
     <>
@@ -277,49 +224,11 @@ export function RuleComponent({
         name="alertsDurationEpoch"
         value={durationEpoch}
       />
-      <EuiBasicTable
-        items={pageOfAlerts}
-        pagination={{
-          pageIndex: pagination.index,
-          pageSize: pagination.size,
-          totalItemCount: alerts.length,
-        }}
-        onChange={({ page: changedPage }: { page: Pagination }) => {
-          setPagination(changedPage);
-        }}
-        rowProps={() => ({
-          'data-test-subj': 'alert-row',
-        })}
-        cellProps={() => ({
-          'data-test-subj': 'cell',
-        })}
-        columns={alertsTableColumns(onMuteAction, readOnly)}
-        data-test-subj="alertsList"
-        tableLayout="fixed"
-        className="alertsList"
-      />
+      {renderTabs()}
     </>
   );
 }
 export const RuleWithApi = withBulkRuleOperations(RuleComponent);
-
-function getPage(items: any[], pagination: Pagination) {
-  return chunk(items, pagination.size)[pagination.index] || [];
-}
-
-interface AlertListItemStatus {
-  label: string;
-  healthColor: string;
-  actionGroup?: string;
-}
-export interface AlertListItem {
-  alert: string;
-  status: AlertListItemStatus;
-  start?: Date;
-  duration: number;
-  isMuted: boolean;
-  sortPriority: number;
-}
 
 const ACTIVE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active',

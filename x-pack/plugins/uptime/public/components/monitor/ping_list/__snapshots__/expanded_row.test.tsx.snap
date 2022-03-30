@@ -179,10 +179,11 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
                 >
                   docs
                   <span
-                    aria-label="External link"
                     class="euiLink__externalIcon"
                     data-euiicon-type="popout"
-                  />
+                  >
+                    External link
+                  </span>
                   <span
                     class="euiScreenReaderOnly"
                   >

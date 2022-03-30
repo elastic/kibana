@@ -230,7 +230,7 @@ export const useCasesColumns = ({
                 <EuiBadge
                   color="hollow"
                   key={`${tag}-${i}`}
-                  data-test-subj={`case-table-column-tags-${i}`}
+                  data-test-subj={`case-table-column-tags-${tag}`}
                 >
                   {tag}
                 </EuiBadge>
