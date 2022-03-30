@@ -345,8 +345,8 @@ export const RulesList: React.FunctionComponent = () => {
         disableRule={async () => await disableRule({ http, id: item.id })}
         enableRule={async () => await enableRule({ http, id: item.id })}
         snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
-          setPreviousSnoozeInterval(interval);
           await snoozeRule({ http, id: item.id, snoozeEndTime });
+          setPreviousSnoozeInterval(interval);
         }}
         unsnoozeRule={async () => await unsnoozeRule({ http, id: item.id })}
         item={item}

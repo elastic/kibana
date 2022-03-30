@@ -28,6 +28,7 @@ import {
   EuiText,
   EuiToolTip,
   EuiIcon,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { parseInterval } from '../../../../../common';
 
@@ -79,29 +80,35 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   const onChangeEnabledStatus = useCallback(
     async (enable: boolean) => {
       setIsUpdating(true);
-      if (enable) {
-        await enableRule();
-      } else {
-        await disableRule();
+      try {
+        if (enable) {
+          await enableRule();
+        } else {
+          await disableRule();
+        }
+        setIsEnabled(!isEnabled);
+        onRuleChanged();
+      } finally {
+        setIsUpdating(false);
       }
-      setIsEnabled(!isEnabled);
-      onRuleChanged();
-      setIsUpdating(false);
     },
     [setIsUpdating, isEnabled, setIsEnabled, onRuleChanged, enableRule, disableRule]
   );
   const onChangeSnooze = useCallback(
     async (value: number, unit?: SnoozeUnit) => {
       setIsUpdating(true);
-      if (value === -1) {
-        await snoozeRule(-1, null);
-      } else if (value !== 0) {
-        const snoozeEndTime = moment().add(value, unit).toISOString();
-        await snoozeRule(snoozeEndTime, `${value}${unit}`);
-      } else await unsnoozeRule();
-      setIsSnoozed(value !== 0);
-      onRuleChanged();
-      setIsUpdating(false);
+      try {
+        if (value === -1) {
+          await snoozeRule(-1, null);
+        } else if (value !== 0) {
+          const snoozeEndTime = moment().add(value, unit).toISOString();
+          await snoozeRule(snoozeEndTime, `${value}${unit}`);
+        } else await unsnoozeRule();
+        setIsSnoozed(value !== 0);
+        onRuleChanged();
+      } finally {
+        setIsUpdating(false);
+      }
     },
     [setIsUpdating, setIsSnoozed, onRuleChanged, snoozeRule, unsnoozeRule]
   );
@@ -296,14 +303,15 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
     <>
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiLink
+          <EuiButtonEmpty
+            style={{ height: '1em' }}
+            iconType="refresh"
             onClick={() => applySnooze(parsedPrevSnooze.value, parsedPrevSnooze.unit as SnoozeUnit)}
           >
-            <EuiIcon type="refresh" />{' '}
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.previousSnooze', {
               defaultMessage: 'Previous',
             })}
-          </EuiLink>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="s">
