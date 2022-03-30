@@ -8,9 +8,9 @@
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
 
+import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';
 import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
-import { setupEnvironment } from '../../helpers';
 
 describe('Kibana deprecations - Deprecation details flyout', () => {
   let testBed: KibanaTestBed;

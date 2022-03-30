@@ -36,6 +36,7 @@ export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
     },
   } = useAppContext();
   const { data, error: fetchError, isLoading, resendRequest } = api.useLoadDeprecationLogging();
+
   const [isDeprecationLogIndexingEnabled, setIsDeprecationLogIndexingEnabled] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [onlyDeprecationLogWritingEnabled, setOnlyDeprecationLogWritingEnabled] = useState(false);
