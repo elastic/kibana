@@ -6,12 +6,23 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObject, SavedObjectsUtils } from 'src/core/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { createStubDataView } from 'src/plugins/data_views/common/stubs';
 import { dataViewsService as dataViewsServiceMock } from 'src/plugins/data_views/server/mocks';
-import { LogView, LogViewsStaticConfig } from '../../../common/log_views';
+import {
+  defaultLogViewId,
+  LogView,
+  LogViewAttributes,
+  LogViewsStaticConfig,
+} from '../../../common/log_views';
+import { createLogViewMock } from '../../../common/log_views/log_view.mock';
 import { InfraSource } from '../../lib/sources';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
+import {
+  extractLogViewSavedObjectReferences,
+  logViewSavedObjectName,
+} from '../../saved_objects/log_view';
 import { getAttributesFromSourceConfiguration, LogViewsClient } from './log_views_client';
 
 describe('getAttributesFromSourceConfiguration function', () => {
@@ -44,6 +55,169 @@ describe('getAttributesFromSourceConfiguration function', () => {
 });
 
 describe('LogViewsClient class', () => {
+  it('getLogView resolves the default id to a real saved object id if it exists', async () => {
+    const { logViewsClient, savedObjectsClient } = createLogViewsClient();
+
+    const logViewMock = createLogViewMock('SAVED_OBJECT_ID');
+    const logViewSavedObject: SavedObject<LogViewAttributes> = {
+      ...extractLogViewSavedObjectReferences(logViewMock.attributes),
+      id: logViewMock.id,
+      type: logViewSavedObjectName,
+    };
+
+    savedObjectsClient.get.mockResolvedValue(logViewSavedObject);
+
+    savedObjectsClient.find.mockResolvedValue({
+      total: 1,
+      saved_objects: [
+        {
+          score: 0,
+          ...logViewSavedObject,
+        },
+      ],
+      per_page: 1,
+      page: 1,
+    });
+
+    const logView = await logViewsClient.getLogView(defaultLogViewId);
+
+    expect(savedObjectsClient.get).toHaveBeenCalledWith(logViewSavedObjectName, 'SAVED_OBJECT_ID');
+    expect(logView).toEqual(logViewMock);
+  });
+
+  it('getLogView preserves non-default ids', async () => {
+    const { logViewsClient, savedObjectsClient } = createLogViewsClient();
+
+    const logViewMock = createLogViewMock('SAVED_OBJECT_ID');
+    const logViewSavedObject: SavedObject<LogViewAttributes> = {
+      ...extractLogViewSavedObjectReferences(logViewMock.attributes),
+      id: logViewMock.id,
+      type: logViewSavedObjectName,
+    };
+
+    savedObjectsClient.get.mockResolvedValue(logViewSavedObject);
+
+    savedObjectsClient.find.mockResolvedValue({
+      total: 1,
+      saved_objects: [
+        {
+          score: 0,
+          ...logViewSavedObject,
+        },
+      ],
+      per_page: 1,
+      page: 1,
+    });
+
+    const logView = await logViewsClient.getLogView('SAVED_OBJECT_ID');
+
+    expect(savedObjectsClient.get).toHaveBeenCalledWith(logViewSavedObjectName, 'SAVED_OBJECT_ID');
+    expect(logView).toEqual(logViewMock);
+  });
+
+  it('getLogView preserves the default id for fallback lookups', async () => {
+    const { infraSources, logViewsClient, savedObjectsClient } = createLogViewsClient();
+
+    infraSources.getSourceConfiguration.mockResolvedValue(basicTestSourceConfiguration);
+
+    savedObjectsClient.find.mockResolvedValue({
+      total: 0,
+      saved_objects: [],
+      per_page: 0,
+      page: 1,
+    });
+
+    await logViewsClient.getLogView(defaultLogViewId);
+
+    expect(infraSources.getSourceConfiguration).toHaveBeenCalledWith(
+      savedObjectsClient,
+      defaultLogViewId
+    );
+  });
+
+  it('putLogView resolves the default id to a real saved object id if one exists', async () => {
+    const { logViewsClient, savedObjectsClient } = createLogViewsClient();
+
+    const existingLogViewMock = createLogViewMock('SAVED_OBJECT_ID');
+    const existingLogViewSavedObject: SavedObject<LogViewAttributes> = {
+      ...extractLogViewSavedObjectReferences(existingLogViewMock.attributes),
+      id: existingLogViewMock.id,
+      type: logViewSavedObjectName,
+    };
+
+    const newLogViewMock = createLogViewMock('SAVED_OBJECT_ID', 'stored', { name: 'New Log View' });
+    const newLogViewSavedObject: SavedObject<LogViewAttributes> = {
+      ...extractLogViewSavedObjectReferences(newLogViewMock.attributes),
+      id: newLogViewMock.id,
+      type: logViewSavedObjectName,
+    };
+
+    savedObjectsClient.create.mockResolvedValue(newLogViewSavedObject);
+
+    savedObjectsClient.find.mockResolvedValue({
+      total: 1,
+      saved_objects: [
+        {
+          score: 0,
+          ...existingLogViewSavedObject,
+        },
+      ],
+      per_page: 1,
+      page: 1,
+    });
+
+    const logView = await logViewsClient.putLogView(defaultLogViewId, newLogViewMock.attributes);
+
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      logViewSavedObjectName,
+      newLogViewMock.attributes,
+      expect.objectContaining({ id: 'SAVED_OBJECT_ID' })
+    );
+    expect(logView).toEqual(newLogViewMock);
+  });
+
+  it('putLogView resolves the default id to a new uuid if no default exists', async () => {
+    const { logViewsClient, savedObjectsClient } = createLogViewsClient();
+
+    const newLogViewMock = createLogViewMock('NOT_THE_FINAL_ID', 'stored', {
+      name: 'New Log View',
+    });
+    const newLogViewSavedObject: SavedObject<LogViewAttributes> = {
+      ...extractLogViewSavedObjectReferences(newLogViewMock.attributes),
+      id: newLogViewMock.id,
+      type: logViewSavedObjectName,
+    };
+
+    savedObjectsClient.create.mockImplementation(async (_type, _attributes, { id = '' } = {}) => ({
+      ...newLogViewSavedObject,
+      id,
+    }));
+
+    savedObjectsClient.find.mockResolvedValue({
+      total: 0,
+      saved_objects: [],
+      per_page: 0,
+      page: 1,
+    });
+
+    const logView = await logViewsClient.putLogView(defaultLogViewId, newLogViewMock.attributes);
+
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      logViewSavedObjectName,
+      newLogViewMock.attributes,
+      expect.objectContaining({
+        id: expect.any(String), // the id was generated
+      })
+    );
+    expect(logView).toEqual(
+      expect.objectContaining({
+        ...newLogViewMock,
+        id: expect.any(String), // the id was generated
+      })
+    );
+    expect(SavedObjectsUtils.isRandomId(logView.id)).toBeTruthy();
+  });
+
   it('resolveLogView method resolves given LogViewAttributes with DataView reference', async () => {
     const { logViewsClient, dataViews } = createLogViewsClient();
 

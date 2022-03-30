@@ -8,6 +8,8 @@
 import { defaultSourceConfiguration } from '../source_configuration/defaults';
 import { LogViewAttributes, LogViewsStaticConfig } from './types';
 
+export const defaultLogViewId = 'default';
+
 export const defaultLogViewAttributes: LogViewAttributes = {
   name: 'Log View',
   description: 'A default log view',

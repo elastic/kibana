@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { Logger, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import type { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
 import {
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsUtils,
+} from '../../../../../../src/core/server';
+import {
   defaultLogViewAttributes,
+  defaultLogViewId,
   LogIndexReference,
   LogView,
   LogViewAttributes,
@@ -47,7 +53,7 @@ export class LogViewsClient implements ILogViewsClient {
   public async getLogView(logViewId: string): Promise<LogView> {
     return await this.getSavedLogView(logViewId)
       .catch((err) =>
-        this.savedObjectsClient.errors.isNotFoundError(err)
+        this.savedObjectsClient.errors.isNotFoundError(err) || err instanceof NotFoundError
           ? this.getInternalLogView(logViewId)
           : Promise.reject(err)
       )
@@ -68,7 +74,10 @@ export class LogViewsClient implements ILogViewsClient {
     logViewId: string,
     logViewAttributes: Partial<LogViewAttributes>
   ): Promise<LogView> {
-    this.logger.debug(`Trying to store log view "${logViewId}"...`);
+    const resolvedLogViewId =
+      (await this.resolveLogViewId(logViewId)) ?? SavedObjectsUtils.generateId();
+
+    this.logger.debug(`Trying to store log view "${logViewId}" as "${resolvedLogViewId}"...`);
 
     const logViewAttributesWithDefaults = {
       ...defaultLogViewAttributes,
@@ -80,7 +89,7 @@ export class LogViewsClient implements ILogViewsClient {
     );
 
     const savedObject = await this.savedObjectsClient.create(logViewSavedObjectName, attributes, {
-      id: logViewId,
+      id: resolvedLogViewId,
       overwrite: true,
       references,
     });
@@ -95,7 +104,18 @@ export class LogViewsClient implements ILogViewsClient {
   private async getSavedLogView(logViewId: string): Promise<LogView> {
     this.logger.debug(`Trying to load stored log view "${logViewId}"...`);
 
-    const savedObject = await this.savedObjectsClient.get(logViewSavedObjectName, logViewId);
+    const resolvedLogViewId = await this.resolveLogViewId(logViewId);
+
+    if (!resolvedLogViewId) {
+      throw new NotFoundError(
+        `Failed to load saved log view: the log view id "${logViewId}" could not be resolved.`
+      );
+    }
+
+    const savedObject = await this.savedObjectsClient.get(
+      logViewSavedObjectName,
+      resolvedLogViewId
+    );
 
     return getLogViewFromSavedObject(savedObject);
   }
@@ -129,6 +149,29 @@ export class LogViewsClient implements ILogViewsClient {
       origin: `infra-source-${sourceConfiguration.origin}`,
       attributes: getAttributesFromSourceConfiguration(sourceConfiguration),
     };
+  }
+
+  private async resolveLogViewId(logViewId: string): Promise<string | null> {
+    // only the default id needs to be transformed
+    if (logViewId !== defaultLogViewId) {
+      return logViewId;
+    }
+
+    return await this.getNewestSavedLogViewId();
+  }
+
+  private async getNewestSavedLogViewId(): Promise<string | null> {
+    const response = await this.savedObjectsClient.find({
+      type: logViewSavedObjectName,
+      sortField: 'updated_at',
+      sortOrder: 'desc',
+      perPage: 1,
+      fields: [],
+    });
+
+    const [newestSavedLogView] = response.saved_objects;
+
+    return newestSavedLogView?.id ?? null;
   }
 }
 

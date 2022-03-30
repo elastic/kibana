@@ -12,7 +12,7 @@ export const logViewSavedObjectName = 'infrastructure-monitoring-log-view';
 export const logViewSavedObjectType: SavedObjectsType = {
   name: logViewSavedObjectName,
   hidden: false,
-  namespaceType: 'multiple',
+  namespaceType: 'multiple-isolated',
   management: {
     defaultSearchField: 'name',
     icon: 'logsApp',

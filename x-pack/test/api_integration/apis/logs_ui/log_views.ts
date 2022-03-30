@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { LogViewAttributes } from '../../../../plugins/infra/common/log_views';
+import { defaultLogViewId, LogViewAttributes } from '../../../../plugins/infra/common/log_views';
 import {
   defaultSourceConfiguration,
   infraSourceConfigurationSavedObjectName,
@@ -138,6 +138,52 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         expect(changedStoredLogView.data.attributes).to.eql(changedLogViewAttributes);
+      });
+
+      it('overwrites existing default log view', async () => {
+        const oldestLogViewAttributes: Partial<LogViewAttributes> = {
+          name: 'Oldest Log View 1',
+          description: 'Test Description 1',
+          logIndices: { type: 'data_view', dataViewId: 'NONEXISTENT_DATA_VIEW' },
+          logColumns: [],
+        };
+        const newerLogViewAttributes: Partial<LogViewAttributes> = {
+          name: 'Newer Log View 1',
+          description: 'Test Description 1',
+          logIndices: { type: 'data_view', dataViewId: 'NONEXISTENT_DATA_VIEW' },
+          logColumns: [],
+        };
+        const changedLogViewAttributes: Partial<LogViewAttributes> = {
+          name: 'Test Log View 1A',
+          description: 'Test Description 1A',
+          logIndices: { type: 'data_view', dataViewId: 'NONEXISTENT_DATA_VIEW_A' },
+          logColumns: [{ timestampColumn: { id: 'TIMESTAMP_COLUMN' } }],
+        };
+
+        // initially this is the default view
+        const oldestStoredLogView = await logViewsService.putLogView('OLDEST_LOG_VIEW_ID', {
+          attributes: newerLogViewAttributes,
+        });
+
+        const fetchedOldestLogView = await logViewsService.getLogView(defaultLogViewId);
+
+        expect(oldestStoredLogView).to.eql(fetchedOldestLogView);
+
+        // this becomes the default view now
+        const newerStoredLogView = await logViewsService.putLogView('NEWER_LOG_VIEW_ID', {
+          attributes: newerLogViewAttributes,
+        });
+
+        expect(newerStoredLogView.data.attributes).to.eql(newerLogViewAttributes);
+
+        const changedStoredLogView = await logViewsService.putLogView(defaultLogViewId, {
+          attributes: changedLogViewAttributes,
+        });
+
+        expect(changedStoredLogView.data.attributes).to.eql(changedLogViewAttributes);
+
+        // check that default id translation works
+        expect(newerStoredLogView.data.id).to.eql(changedStoredLogView.data.id);
       });
     });
   });
