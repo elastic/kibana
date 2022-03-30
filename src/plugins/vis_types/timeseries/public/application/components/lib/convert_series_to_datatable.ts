@@ -7,7 +7,7 @@
  */
 import { DataView } from 'src/plugins/data_views/public';
 import { DatatableRow, DatatableColumn, DatatableColumnType } from 'src/plugins/expressions/public';
-import { Query } from 'src/plugins/data/common';
+import { Query, BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES } from 'src/plugins/data/common';
 import { TimeseriesVisParams } from '../../../types';
 import type { PanelData, Metric } from '../../../../common/types';
 import { getMultiFieldLabel, getFieldsForTerms } from '../../../../common/fields_utils';
@@ -43,7 +43,7 @@ export const addMetaToColumns = (
     let params: unknown = {
       field: field?.spec.name,
     };
-    if (column.type === BUCKET_TYPES.MULTI_TERMS) {
+    if (column.type === DATA_PLUGIN_BUCKET_TYPES.MULTI_TERMS) {
       params = {
         fields: column.fields,
         otherBucket: true,
@@ -142,7 +142,8 @@ export const convertSeriesToDataTable = async (
           name: getMultiFieldLabel(fieldsForTerms),
           fields: fieldsForTerms,
           isMetric: false,
-          type: fieldsForTerms.length > 1 ? BUCKET_TYPES.MULTI_TERMS : BUCKET_TYPES.TERMS,
+          type:
+            fieldsForTerms.length > 1 ? DATA_PLUGIN_BUCKET_TYPES.MULTI_TERMS : BUCKET_TYPES.TERMS,
         });
       } else if (isGroupedByFilters) {
         id++;
@@ -161,7 +162,7 @@ export const convertSeriesToDataTable = async (
     for (let j = 0; j < seriesPerLayer.length; j++) {
       const { data, label, isSplitByTerms, termsSplitValue } = seriesPerLayer[j];
       const seriesData = data.map((rowData) => {
-        let rowId = 0;
+        let rowId = X_ACCESSOR_INDEX;
         const rowsData = {
           [rowId++]: rowData[0],
           [rowId++]: rowData[1],

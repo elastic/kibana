@@ -31,6 +31,5 @@ export enum TSVB_METRIC_TYPES {
 // We should probably use BUCKET_TYPES from data plugin in future.
 export enum BUCKET_TYPES {
   TERMS = 'terms',
-  MULTI_TERMS = 'multi_terms',
   FILTERS = 'filters',
 }
