@@ -203,18 +203,18 @@ export const getEmptyFindResult = (): FindHit => ({
   data: [],
 });
 
-export const getFindResultWithSingleHit = (isRuleRegistryEnabled: boolean): FindHit => ({
+export const getFindResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
+  data: [getAlertMock(getQueryRuleParams())],
 });
 
-export const nonRuleFindResult = (isRuleRegistryEnabled: boolean): FindHit => ({
+export const nonRuleFindResult = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [nonRuleAlert(isRuleRegistryEnabled)],
+  data: [nonRuleAlert()],
 });
 
 export const getFindResultWithMultiHits = ({
@@ -380,22 +380,19 @@ export const createActionResult = (): ActionResult => ({
   isPreconfigured: false,
 });
 
-export const nonRuleAlert = (isRuleRegistryEnabled: boolean) => ({
+export const nonRuleAlert = () => ({
   // Defaulting to QueryRuleParams because ts doesn't like empty objects
-  ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+  ...getAlertMock(getQueryRuleParams()),
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
   name: 'Non-Rule Alert',
   alertTypeId: 'something',
 });
 
-export const getAlertMock = <T extends RuleParams>(
-  isRuleRegistryEnabled: boolean,
-  params: T
-): SanitizedAlert<T> => ({
+export const getAlertMock = <T extends RuleParams>(params: T): SanitizedAlert<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
-  alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[params.type] : 'siem.signals',
+  alertTypeId: ruleTypeMappings[params.type],
   consumer: 'siem',
   params,
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
@@ -417,12 +414,9 @@ export const getAlertMock = <T extends RuleParams>(
   },
 });
 
-export const resolveAlertMock = <T extends RuleParams>(
-  isRuleRegistryEnabled: boolean,
-  params: T
-): ResolvedSanitizedRule<T> => ({
+export const resolveAlertMock = <T extends RuleParams>(params: T): ResolvedSanitizedRule<T> => ({
   outcome: 'exactMatch',
-  ...getAlertMock(isRuleRegistryEnabled, params),
+  ...getAlertMock(params),
 });
 
 export const updateActionResult = (): ActionResult => ({

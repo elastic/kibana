@@ -18,7 +18,7 @@ jest.mock('./patch_rules');
 describe.each([
   ['Legacy', false],
   ['RAC', true],
-])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
+])('updatePrepackagedRules - %s', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let ruleExecutionLog: ReturnType<typeof ruleExecutionLogMock.forRoutes.create>;
@@ -40,14 +40,13 @@ describe.each([
     ];
     const outputIndex = 'outputIndex';
     const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     await updatePrepackagedRules(
       rulesClient,
       savedObjectsClient,
       [{ ...prepackagedRule, actions }],
       outputIndex,
-      isRuleRegistryEnabled,
       ruleExecutionLog
     );
 
@@ -71,14 +70,13 @@ describe.each([
       threat_query: 'threat:*',
     };
     const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     await updatePrepackagedRules(
       rulesClient,
       savedObjectsClient,
       [{ ...prepackagedRule, ...updatedThreatParams }],
       'output-index',
-      isRuleRegistryEnabled,
       ruleExecutionLog
     );
 

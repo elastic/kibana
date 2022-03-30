@@ -22,14 +22,13 @@ export const getExportAll = async (
   rulesClient: RulesClient,
   exceptionsClient: ExceptionListClient | undefined,
   savedObjectsClient: AlertServices['savedObjectsClient'],
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
   exceptionLists: string | null;
 }> => {
-  const ruleAlertTypes = await getNonPackagedRules({ rulesClient, isRuleRegistryEnabled });
+  const ruleAlertTypes = await getNonPackagedRules({ rulesClient });
   const alertIds = ruleAlertTypes.map((rule) => rule.id);
 
   // Gather actions

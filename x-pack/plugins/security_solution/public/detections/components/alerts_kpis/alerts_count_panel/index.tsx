@@ -43,11 +43,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuid.v4()}`, []);
     const [selectedStackByOption, setSelectedStackByOption] = useState(DEFAULT_STACK_BY_FIELD);
 
-    // TODO: Once we are past experimental phase this code should be removed
-    // const fetchMethod = useIsExperimentalFeatureEnabled('ruleRegistryEnabled')
-    //   ? fetchQueryRuleRegistryAlerts
-    //   : fetchQueryAlerts;
-
     // Disabling the fecth method in useQueryAlerts since it is defaulted to the old one
     // const fetchMethod = fetchQueryRuleRegistryAlerts;
 

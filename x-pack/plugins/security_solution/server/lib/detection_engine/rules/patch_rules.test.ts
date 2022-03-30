@@ -15,15 +15,15 @@ import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 describe.each([
   ['Legacy', false],
   ['RAC', true],
-])('patchRules - %s', (_, isRuleRegistryEnabled) => {
+])('patchRules - %s', () => {
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
-    const rulesOptionsMock = getPatchRulesOptionsMock(isRuleRegistryEnabled);
+    const rulesOptionsMock = getPatchRulesOptionsMock();
     const ruleOptions: PatchRulesOptions = {
       ...rulesOptionsMock,
       enabled: false,
     };
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      getAlertMock(getQueryRuleParams())
     );
     await patchRules(ruleOptions);
     expect(ruleOptions.rulesClient.disable).toHaveBeenCalledWith(
@@ -34,7 +34,7 @@ describe.each([
   });
 
   it('should call rulesClient.enable if the rule was disabled and enabled is true', async () => {
-    const rulesOptionsMock = getPatchRulesOptionsMock(isRuleRegistryEnabled);
+    const rulesOptionsMock = getPatchRulesOptionsMock();
     const ruleOptions: PatchRulesOptions = {
       ...rulesOptionsMock,
       enabled: true,
@@ -43,7 +43,7 @@ describe.each([
       ruleOptions.rule.enabled = false;
     }
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      getAlertMock(getQueryRuleParams())
     );
     await patchRules(ruleOptions);
     expect(ruleOptions.rulesClient.enable).toHaveBeenCalledWith(
@@ -54,7 +54,7 @@ describe.each([
   });
 
   it('calls the rulesClient with legacy ML params', async () => {
-    const rulesOptionsMock = getPatchMlRulesOptionsMock(isRuleRegistryEnabled);
+    const rulesOptionsMock = getPatchMlRulesOptionsMock();
     const ruleOptions: PatchRulesOptions = {
       ...rulesOptionsMock,
       enabled: true,
@@ -63,7 +63,7 @@ describe.each([
       ruleOptions.rule.enabled = false;
     }
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      getAlertMock(getQueryRuleParams())
     );
     await patchRules(ruleOptions);
     expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(
@@ -79,7 +79,7 @@ describe.each([
   });
 
   it('calls the rulesClient with new ML params', async () => {
-    const rulesOptionsMock = getPatchMlRulesOptionsMock(isRuleRegistryEnabled);
+    const rulesOptionsMock = getPatchMlRulesOptionsMock();
     const ruleOptions: PatchRulesOptions = {
       ...rulesOptionsMock,
       machineLearningJobId: ['new_job_1', 'new_job_2'],
@@ -89,7 +89,7 @@ describe.each([
       ruleOptions.rule.enabled = false;
     }
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      getAlertMock(getQueryRuleParams())
     );
     await patchRules(ruleOptions);
     expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(
@@ -106,7 +106,7 @@ describe.each([
 
   describe('regression tests', () => {
     it("updates the rule's actions if provided", async () => {
-      const rulesOptionsMock = getPatchRulesOptionsMock(isRuleRegistryEnabled);
+      const rulesOptionsMock = getPatchRulesOptionsMock();
       const ruleOptions: PatchRulesOptions = {
         ...rulesOptionsMock,
         actions: [
@@ -121,7 +121,7 @@ describe.each([
         ],
       };
       (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+        getAlertMock(getQueryRuleParams())
       );
       await patchRules(ruleOptions);
       expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(
@@ -143,7 +143,7 @@ describe.each([
     });
 
     it('does not update actions if none are specified', async () => {
-      const ruleOptions = getPatchRulesOptionsMock(isRuleRegistryEnabled);
+      const ruleOptions = getPatchRulesOptionsMock();
       delete ruleOptions.actions;
       if (ruleOptions.rule != null) {
         ruleOptions.rule.actions = [
@@ -158,7 +158,7 @@ describe.each([
         ];
       }
       (ruleOptions.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+        getAlertMock(getQueryRuleParams())
       );
       await patchRules(ruleOptions);
       expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(

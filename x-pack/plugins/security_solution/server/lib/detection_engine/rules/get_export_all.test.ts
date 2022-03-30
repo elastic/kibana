@@ -30,7 +30,7 @@ const exceptionsClient = getExceptionListClientMock();
 describe.each([
   ['Legacy', false],
   ['RAC', true],
-])('getExportAll - %s', (_, isRuleRegistryEnabled) => {
+])('getExportAll - %s', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const { clients } = requestContextMock.createTools();
 
@@ -40,8 +40,8 @@ describe.each([
 
   test('it exports everything from the alerts client', async () => {
     const rulesClient = rulesClientMock.create();
-    const result = getFindResultWithSingleHit(isRuleRegistryEnabled);
-    const alert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+    const result = getFindResultWithSingleHit();
+    const alert = getAlertMock(getQueryRuleParams());
 
     alert.params = {
       ...alert.params,
@@ -58,8 +58,7 @@ describe.each([
       rulesClient,
       exceptionsClient,
       clients.savedObjectsClient,
-      logger,
-      isRuleRegistryEnabled
+      logger
     );
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
@@ -134,8 +133,7 @@ describe.each([
       rulesClient,
       exceptionsClient,
       clients.savedObjectsClient,
-      logger,
-      isRuleRegistryEnabled
+      logger
     );
     expect(exports).toEqual({
       rulesNdjson: '',

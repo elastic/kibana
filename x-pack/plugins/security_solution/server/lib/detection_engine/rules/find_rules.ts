@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import { FindResult } from '../../../../../alerting/server';
 import { RuleParams } from '../schemas/rule_schemas';
 import { FindRuleOptions } from './types';
 
-export const getFilter = (
-  filter: string | null | undefined,
-  isRuleRegistryEnabled: boolean = false
-) => {
-  const alertTypeFilter = isRuleRegistryEnabled
-    ? `(${Object.values(ruleTypeMappings)
-        .map((type) => `alert.attributes.alertTypeId: ${type}`)
-        .filter((type, i, arr) => type != null && arr.indexOf(type) === i)
-        .join(' OR ')})`
-    : `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
+export const getFilter = (filter: string | null | undefined) => {
+  const alertTypeFilter = `(${Object.values(ruleTypeMappings)
+    .map((type) => `alert.attributes.alertTypeId: ${type}`)
+    .filter((type, i, arr) => type != null && arr.indexOf(type) === i)
+    .join(' OR ')})`;
   if (filter == null) {
     return alertTypeFilter;
   } else {
@@ -36,14 +31,13 @@ export const findRules = ({
   filter,
   sortField,
   sortOrder,
-  isRuleRegistryEnabled,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return rulesClient.find({
     options: {
       fields,
       page,
       perPage,
-      filter: getFilter(filter, isRuleRegistryEnabled),
+      filter: getFilter(filter),
       sortOrder,
       sortField,
     },

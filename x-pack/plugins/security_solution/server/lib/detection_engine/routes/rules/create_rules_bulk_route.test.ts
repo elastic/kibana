@@ -26,10 +26,7 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('create_rules_bulk - %s', (_, isRuleRegistryEnabled) => {
+describe('create_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -40,14 +37,12 @@ describe.each([
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
-    clients.rulesClient.create.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    ); // successful creation
+    clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful creation
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
+    createRulesBulkRoute(server.router, ml);
   });
 
   describe('status codes', () => {
@@ -87,23 +82,10 @@ describe.each([
       const response = await server.inject(getReadBulkRequest(), context);
 
       expect(response.status).toEqual(200);
-
-      if (!isRuleRegistryEnabled) {
-        expect(response.body).toEqual([
-          {
-            error: {
-              message:
-                'To create a rule, the index must exist first. Index undefined does not exist',
-              status_code: 400,
-            },
-            rule_id: 'rule-1',
-          },
-        ]);
-      }
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
-      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const response = await server.inject(getReadBulkRequest(), context);
 
       expect(response.status).toEqual(200);

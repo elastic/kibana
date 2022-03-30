@@ -22,10 +22,7 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('patch_rules_bulk - %s', (_, isRuleRegistryEnabled) => {
+describe('patch_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -35,12 +32,10 @@ describe.each([
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
-    clients.rulesClient.update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    ); // update succeeds
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // update succeeds
 
-    patchRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
+    patchRulesBulkRoute(server.router, ml);
   });
 
   describe('status codes', () => {

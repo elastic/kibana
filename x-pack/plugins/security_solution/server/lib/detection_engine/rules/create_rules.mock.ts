@@ -8,8 +8,7 @@
 import { CreateRulesOptions } from './types';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 
-export const getCreateRulesOptionsMock = (isRuleRegistryEnabled: boolean): CreateRulesOptions => ({
-  isRuleRegistryEnabled,
+export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
@@ -62,10 +61,7 @@ export const getCreateRulesOptionsMock = (isRuleRegistryEnabled: boolean): Creat
   actions: [],
 });
 
-export const getCreateMlRulesOptionsMock = (
-  isRuleRegistryEnabled: boolean
-): CreateRulesOptions => ({
-  isRuleRegistryEnabled,
+export const getCreateMlRulesOptionsMock = (): CreateRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
@@ -118,9 +114,7 @@ export const getCreateMlRulesOptionsMock = (
   actions: [],
 });
 
-export const getCreateThreatMatchRulesOptionsMock = (
-  isRuleRegistryEnabled: boolean
-): CreateRulesOptions => ({
+export const getCreateThreatMatchRulesOptionsMock = (): CreateRulesOptions => ({
   actions: [],
   anomalyThreshold: undefined,
   author: ['Elastic'],
@@ -136,7 +130,6 @@ export const getCreateThreatMatchRulesOptionsMock = (
   immutable: false,
   index: ['*'],
   interval: '5m',
-  isRuleRegistryEnabled,
   itemsPerSearch: undefined,
   language: 'kuery',
   license: 'Elastic License',

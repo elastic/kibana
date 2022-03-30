@@ -36,15 +36,15 @@ describe('find_rules', () => {
 
   test.each(fullFilterTestCases)(
     'it returns a full filter with an AND if sent down [rule registry enabled: %p]',
-    (isRuleRegistryEnabled, expected) => {
-      expect(getFilter('alert.attributes.enabled: true', isRuleRegistryEnabled)).toEqual(expected);
+    (expected) => {
+      expect(getFilter('alert.attributes.enabled: true')).toEqual(expected);
     }
   );
 
   test.each(nullFilterTestCases)(
     'it returns existing filter with no AND when not set [rule registry enabled: %p]',
-    (isRuleRegistryEnabled, expected) => {
-      expect(getFilter(null, isRuleRegistryEnabled)).toEqual(expected);
+    (expected) => {
+      expect(getFilter(null)).toEqual(expected);
     }
   );
 });

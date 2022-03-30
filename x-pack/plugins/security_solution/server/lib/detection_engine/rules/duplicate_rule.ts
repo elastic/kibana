@@ -8,7 +8,7 @@
 import uuid from 'uuid';
 
 import { i18n } from '@kbn/i18n';
-import { ruleTypeMappings, SIGNALS_ID } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import { SanitizedAlert } from '../../../../../alerting/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
@@ -22,15 +22,12 @@ const DUPLICATE_TITLE = i18n.translate(
   }
 );
 
-export const duplicateRule = (
-  rule: SanitizedAlert<RuleParams>,
-  isRuleRegistryEnabled: boolean
-): InternalRuleCreate => {
+export const duplicateRule = (rule: SanitizedAlert<RuleParams>): InternalRuleCreate => {
   const newRuleId = uuid.v4();
   return {
     name: `${rule.name} [${DUPLICATE_TITLE}]`,
     tags: addTags(rule.tags, newRuleId, false),
-    alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[rule.params.type] : SIGNALS_ID,
+    alertTypeId: ruleTypeMappings[rule.params.type],
     consumer: SERVER_APP_ID,
     params: {
       ...rule.params,

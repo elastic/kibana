@@ -22,11 +22,7 @@ import { transformFindAlerts } from './utils';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions/legacy_get_bulk_rule_actions_saved_object';
 
-export const findRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
-) => {
+export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.get(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find`,
@@ -54,7 +50,6 @@ export const findRulesRoute = (
         const savedObjectsClient = context.core.savedObjects.client;
 
         const rules = await findRules({
-          isRuleRegistryEnabled,
           rulesClient,
           perPage: query.per_page,
           page: query.page,

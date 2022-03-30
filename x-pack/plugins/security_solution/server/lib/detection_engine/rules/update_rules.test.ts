@@ -14,10 +14,10 @@ import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.moc
 // Failing with rule registry enabled
 describe('updateRules', () => {
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
-    const rulesOptionsMock = getUpdateRulesOptionsMock(true);
+    const rulesOptionsMock = getUpdateRulesOptionsMock();
     rulesOptionsMock.ruleUpdate.enabled = false;
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(true, getQueryRuleParams())
+      getAlertMock(getQueryRuleParams())
     );
 
     await updateRules(rulesOptionsMock);
@@ -30,7 +30,7 @@ describe('updateRules', () => {
   });
 
   it('should call rulesClient.enable if the rule was disabled and enabled is true', async () => {
-    const baseRulesOptionsMock = getUpdateRulesOptionsMock(true);
+    const baseRulesOptionsMock = getUpdateRulesOptionsMock();
     const rulesOptionsMock = {
       ...baseRulesOptionsMock,
       existingRule: {
@@ -41,7 +41,7 @@ describe('updateRules', () => {
     rulesOptionsMock.ruleUpdate.enabled = true;
 
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(true, getQueryRuleParams())
+      getAlertMock(getQueryRuleParams())
     );
 
     await updateRules(rulesOptionsMock);
@@ -54,15 +54,15 @@ describe('updateRules', () => {
   });
 
   it('calls the rulesClient with params', async () => {
-    const rulesOptionsMock = getUpdateMlRulesOptionsMock(true);
+    const rulesOptionsMock = getUpdateMlRulesOptionsMock();
     rulesOptionsMock.ruleUpdate.enabled = true;
 
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(true, getMlRuleParams())
+      getAlertMock(getMlRuleParams())
     );
 
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).resolve.mockResolvedValue(
-      resolveAlertMock(true, getMlRuleParams())
+      resolveAlertMock(getMlRuleParams())
     );
 
     await updateRules(rulesOptionsMock);

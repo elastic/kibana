@@ -29,7 +29,7 @@ jest.mock('../../timelines/import_timelines/helpers');
 describe.each([
   ['Legacy', false],
   ['RAC', true],
-])('installPrepackagedTimelines - %s', (_, isRuleRegistryEnabled) => {
+])('installPrepackagedTimelines - %s', () => {
   let securitySetup: SecurityPluginSetup;
   let frameworkRequest: FrameworkRequest;
   const spyInstallPrepackagedTimelines = jest.spyOn(helpers, 'installPrepackagedTimelines');
@@ -47,7 +47,7 @@ describe.each([
       authz: {},
     } as unknown as SecurityPluginSetup;
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     jest.doMock('./helpers', () => {
       return {

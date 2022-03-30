@@ -10,7 +10,7 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { createPromiseFromStreams } from '@kbn/utils';
 
-import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
@@ -52,8 +52,7 @@ const CHUNK_PARSED_OBJECT_SIZE = 50;
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
+  ml: SetupPlugins['ml']
 ) => {
   router.post(
     {
@@ -78,7 +77,6 @@ export const importRulesRoute = (
       try {
         const rulesClient = context.alerting.getRulesClient();
         const actionsClient = context.actions.getActionsClient();
-        const esClient = context.core.elasticsearch.client;
         const actionSOClient = context.core.savedObjects.getClient({
           includedHiddenTypes: ['action'],
         });
@@ -103,13 +101,6 @@ export const importRulesRoute = (
         }
 
         const signalsIndex = siemClient.getSignalsIndex();
-        const indexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
-        if (!isRuleRegistryEnabled && !indexExists) {
-          return siemResponse.error({
-            statusCode: 400,
-            body: `To create a rule, the index must exist first. Index ${signalsIndex} does not exist`,
-          });
-        }
         const objectLimit = config.maxRuleImportExportSize;
 
         // parse file to separate out exceptions from rules
@@ -171,7 +162,6 @@ export const importRulesRoute = (
           rulesClient,
           savedObjectsClient,
           exceptionsClient,
-          isRuleRegistryEnabled,
           spaceId: context.securitySolution.getSpaceId(),
           signalsIndex,
           existingLists: foundReferencedExceptionLists,

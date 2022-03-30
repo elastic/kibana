@@ -22,10 +22,7 @@ import {
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('read_rules - %s', (_, isRuleRegistryEnabled) => {
+describe('read_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -36,19 +33,19 @@ describe.each([
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
     clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
       getRuleExecutionSummarySucceeded()
     );
 
     clients.rulesClient.resolve.mockResolvedValue({
-      ...resolveAlertMock(isRuleRegistryEnabled, {
+      ...resolveAlertMock({
         ...getQueryRuleParams(),
       }),
       id: myFakeId,
     });
-    readRulesRoute(server.router, logger, isRuleRegistryEnabled);
+    readRulesRoute(server.router, logger);
   });
 
   describe('status codes', () => {
@@ -64,7 +61,7 @@ describe.each([
 
     test('returns 200 when reading a single rule outcome === aliasMatch', async () => {
       clients.rulesClient.resolve.mockResolvedValue({
-        ...resolveAlertMock(isRuleRegistryEnabled, {
+        ...resolveAlertMock({
           ...getQueryRuleParams(),
         }),
         id: myFakeId,
@@ -76,7 +73,7 @@ describe.each([
 
     test('returns 200 when reading a single rule outcome === conflict', async () => {
       clients.rulesClient.resolve.mockResolvedValue({
-        ...resolveAlertMock(isRuleRegistryEnabled, {
+        ...resolveAlertMock({
           ...getQueryRuleParams(),
         }),
         id: myFakeId,
@@ -89,7 +86,7 @@ describe.each([
     });
 
     test('returns error if requesting a non-rule', async () => {
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(isRuleRegistryEnabled));
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(getReadRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({

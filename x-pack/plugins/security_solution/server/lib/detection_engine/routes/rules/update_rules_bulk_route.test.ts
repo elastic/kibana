@@ -23,10 +23,7 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('update_rules_bulk - %s', (_, isRuleRegistryEnabled) => {
+describe('update_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -36,14 +33,12 @@ describe.each([
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    clients.rulesClient.update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
 
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
-    updateRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
+    updateRulesBulkRoute(server.router, ml);
   });
 
   describe('status codes', () => {

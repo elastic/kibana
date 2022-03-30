@@ -41,8 +41,6 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param mlAuthz {object}
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
- * @param isRuleRegistryEnabled {boolean} - feature flag that should be
- * removed as this is now on and no going back
  * @param rulesClient {object}
  * @param savedObjectsClient {object}
  * @param exceptionsClient {object}
@@ -57,7 +55,6 @@ export const importRules = async ({
   rulesResponseAcc,
   mlAuthz,
   overwriteRules,
-  isRuleRegistryEnabled,
   rulesClient,
   savedObjectsClient,
   exceptionsClient,
@@ -69,7 +66,6 @@ export const importRules = async ({
   rulesResponseAcc: ImportRuleResponse[];
   mlAuthz: MlAuthz;
   overwriteRules: boolean;
-  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   exceptionsClient: ExceptionListClient | undefined;
@@ -167,7 +163,6 @@ export const importRules = async ({
                 const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
                 throwAuthzError(await mlAuthz.validateRuleType(type));
                 const rule = await readRules({
-                  isRuleRegistryEnabled,
                   rulesClient,
                   ruleId,
                   id: undefined,
@@ -175,7 +170,6 @@ export const importRules = async ({
 
                 if (rule == null) {
                   await createRules({
-                    isRuleRegistryEnabled,
                     rulesClient,
                     anomalyThreshold,
                     author,

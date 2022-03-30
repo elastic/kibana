@@ -18,10 +18,7 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('delete_rules - %s', (_, isRuleRegistryEnabled) => {
+describe('delete_rules - %s', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -29,11 +26,11 @@ describe.each([
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.delete.mockResolvedValue({}); // successful deletion
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // rule status request
 
-    deleteRulesBulkRoute(server.router, isRuleRegistryEnabled);
+    deleteRulesBulkRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {

@@ -35,7 +35,6 @@ export const updatePrepackagedRules = async (
   savedObjectsClient: SavedObjectsClientContract,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string,
-  isRuleRegistryEnabled: boolean,
   ruleExecutionLog: IRuleExecutionLogForRoutes
 ): Promise<void> => {
   const ruleChunks = chunk(MAX_RULES_TO_UPDATE_IN_PARALLEL, rules);
@@ -45,7 +44,6 @@ export const updatePrepackagedRules = async (
       savedObjectsClient,
       ruleChunk,
       outputIndex,
-      isRuleRegistryEnabled,
       ruleExecutionLog
     );
     await Promise.all(rulePromises);
@@ -65,7 +63,6 @@ export const createPromises = (
   savedObjectsClient: SavedObjectsClientContract,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string,
-  isRuleRegistryEnabled: boolean,
   ruleExecutionLog: IRuleExecutionLogForRoutes
 ): Array<Promise<PartialAlert<RuleParams> | null>> => {
   return rules.map(async (rule) => {
@@ -118,7 +115,6 @@ export const createPromises = (
     } = rule;
 
     const existingRule = await readRules({
-      isRuleRegistryEnabled,
       rulesClient,
       ruleId,
       id: undefined,
@@ -149,7 +145,6 @@ export const createPromises = (
 
       return (await createRules({
         id: migratedRule.id,
-        isRuleRegistryEnabled,
         rulesClient,
         anomalyThreshold,
         author,

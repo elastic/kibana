@@ -123,10 +123,9 @@ export const transformFindAlerts = (
 export const transform = (
   rule: PartialAlert<RuleParams>,
   ruleExecutionSummary?: RuleExecutionSummary | null,
-  isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> | null => {
-  if (isAlertType(isRuleRegistryEnabled ?? false, rule)) {
+  if (isAlertType(rule)) {
     return internalRuleToAPIResponse(rule, ruleExecutionSummary, legacyRuleActions);
   }
 

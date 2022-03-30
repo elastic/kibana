@@ -22,11 +22,7 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { legacyMigrate } from '../../rules/utils';
 import { readRules } from '../../rules/read_rules';
 
-export const updateRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
-) => {
+export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.put(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -57,7 +53,6 @@ export const updateRulesRoute = (
         throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
 
         const existingRule = await readRules({
-          isRuleRegistryEnabled,
           rulesClient,
           ruleId: request.body.rule_id,
           id: request.body.id,
@@ -78,11 +73,7 @@ export const updateRulesRoute = (
         if (rule != null) {
           const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-          const [validated, errors] = transformValidate(
-            rule,
-            ruleExecutionSummary,
-            isRuleRegistryEnabled
-          );
+          const [validated, errors] = transformValidate(rule, ruleExecutionSummary);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

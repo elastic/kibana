@@ -10,7 +10,7 @@ import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
-export const getPatchRulesOptionsMock = (isRuleRegistryEnabled: boolean): PatchRulesOptions => ({
+export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
@@ -59,10 +59,10 @@ export const getPatchRulesOptionsMock = (isRuleRegistryEnabled: boolean): PatchR
   version: 1,
   exceptionsList: [],
   actions: [],
-  rule: getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+  rule: getAlertMock(getQueryRuleParams()),
 });
 
-export const getPatchMlRulesOptionsMock = (isRuleRegistryEnabled: boolean): PatchRulesOptions => ({
+export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
@@ -111,5 +111,5 @@ export const getPatchMlRulesOptionsMock = (isRuleRegistryEnabled: boolean): Patc
   version: 1,
   exceptionsList: [],
   actions: [],
-  rule: getAlertMock(isRuleRegistryEnabled, getMlRuleParams()),
+  rule: getAlertMock(getMlRuleParams()),
 });

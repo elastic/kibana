@@ -28,15 +28,9 @@ import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 export const transformValidate = (
   rule: PartialAlert<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null,
-  isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [RulesSchema | null, string | null] => {
-  const transformed = transform(
-    rule,
-    ruleExecutionSummary,
-    isRuleRegistryEnabled,
-    legacyRuleActions
-  );
+  const transformed = transform(rule, ruleExecutionSummary, legacyRuleActions);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -47,15 +41,9 @@ export const transformValidate = (
 export const newTransformValidate = (
   rule: PartialAlert<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null,
-  isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [FullResponseSchema | null, string | null] => {
-  const transformed = transform(
-    rule,
-    ruleExecutionSummary,
-    isRuleRegistryEnabled,
-    legacyRuleActions
-  );
+  const transformed = transform(rule, ruleExecutionSummary, legacyRuleActions);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -66,10 +54,9 @@ export const newTransformValidate = (
 export const transformValidateBulkError = (
   ruleId: string,
   rule: PartialAlert<RuleParams>,
-  ruleExecutionSummary: RuleExecutionSummary | null,
-  isRuleRegistryEnabled?: boolean
+  ruleExecutionSummary: RuleExecutionSummary | null
 ): RulesSchema | BulkError => {
-  if (isAlertType(isRuleRegistryEnabled ?? false, rule)) {
+  if (isAlertType(rule)) {
     const transformed = internalRuleToAPIResponse(rule, ruleExecutionSummary);
     const [validated, errors] = validateNonExact(transformed, rulesSchema);
     if (errors != null || validated == null) {

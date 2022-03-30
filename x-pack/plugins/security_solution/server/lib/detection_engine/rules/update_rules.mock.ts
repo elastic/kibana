@@ -14,24 +14,22 @@ import {
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
-export const getUpdateRulesOptionsMock = (isRuleRegistryEnabled: boolean) => ({
+export const getUpdateRulesOptionsMock = () => ({
   spaceId: 'default',
   rulesClient: rulesClientMock.create(),
   savedObjectsClient: savedObjectsClientMock.create(),
   defaultOutputIndex: '.siem-signals-default',
-  existingRule: getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
-  migratedRule: getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+  existingRule: getAlertMock(getQueryRuleParams()),
+  migratedRule: getAlertMock(getQueryRuleParams()),
   ruleUpdate: getUpdateRulesSchemaMock(),
-  isRuleRegistryEnabled,
 });
 
-export const getUpdateMlRulesOptionsMock = (isRuleRegistryEnabled: boolean) => ({
+export const getUpdateMlRulesOptionsMock = () => ({
   spaceId: 'default',
   rulesClient: rulesClientMock.create(),
   savedObjectsClient: savedObjectsClientMock.create(),
   defaultOutputIndex: '.siem-signals-default',
-  existingRule: getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
-  migratedRule: getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+  existingRule: getAlertMock(getQueryRuleParams()),
+  migratedRule: getAlertMock(getQueryRuleParams()),
   ruleUpdate: getUpdateMachineLearningSchemaMock(),
-  isRuleRegistryEnabled,
 });

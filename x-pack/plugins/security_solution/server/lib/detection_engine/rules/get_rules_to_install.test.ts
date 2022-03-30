@@ -14,7 +14,7 @@ import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_e
 describe.each([
   ['Legacy', false],
   ['RAC', true],
-])('get_rules_to_install - %s', (_, isRuleRegistryEnabled) => {
+])('get_rules_to_install - %s', () => {
   test('should return empty array if both rule sets are empty', () => {
     const update = getRulesToInstall([], []);
     expect(update).toEqual([]);
@@ -25,7 +25,7 @@ describe.each([
       getAddPrepackagedRulesSchemaDecodedMock() as AddPrepackagedRulesSchemaDecoded;
     ruleFromFileSystem.rule_id = 'rule-1';
 
-    const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+    const installedRule = getAlertMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
     const update = getRulesToInstall([ruleFromFileSystem], [installedRule]);
     expect(update).toEqual([]);
@@ -36,7 +36,7 @@ describe.each([
       getAddPrepackagedRulesSchemaDecodedMock() as AddPrepackagedRulesSchemaDecoded;
     ruleFromFileSystem.rule_id = 'rule-1';
 
-    const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+    const installedRule = getAlertMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-2';
     const update = getRulesToInstall([ruleFromFileSystem], [installedRule]);
     expect(update).toEqual([ruleFromFileSystem]);
@@ -51,7 +51,7 @@ describe.each([
       getAddPrepackagedRulesSchemaDecodedMock() as AddPrepackagedRulesSchemaDecoded;
     ruleFromFileSystem2.rule_id = 'rule-2';
 
-    const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+    const installedRule = getAlertMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-3';
     const update = getRulesToInstall([ruleFromFileSystem1, ruleFromFileSystem2], [installedRule]);
     expect(update).toEqual([ruleFromFileSystem1, ruleFromFileSystem2]);
@@ -70,7 +70,7 @@ describe.each([
       getAddPrepackagedRulesSchemaDecodedMock() as AddPrepackagedRulesSchemaDecoded;
     ruleFromFileSystem3.rule_id = 'rule-3';
 
-    const installedRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+    const installedRule = getAlertMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-3';
     const update = getRulesToInstall(
       [ruleFromFileSystem1, ruleFromFileSystem2, ruleFromFileSystem3],

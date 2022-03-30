@@ -24,8 +24,7 @@ import { readRules } from '../../rules/read_rules';
 
 export const updateRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
+  ml: SetupPlugins['ml']
 ) => {
   router.put(
     {
@@ -68,7 +67,6 @@ export const updateRulesBulkRoute = (
             throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
 
             const existingRule = await readRules({
-              isRuleRegistryEnabled,
               rulesClient,
               ruleId: payloadRule.rule_id,
               id: payloadRule.id,
@@ -88,12 +86,7 @@ export const updateRulesBulkRoute = (
             });
             if (rule != null) {
               const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-              return transformValidateBulkError(
-                rule.id,
-                rule,
-                ruleExecutionSummary,
-                isRuleRegistryEnabled
-              );
+              return transformValidateBulkError(rule.id, rule, ruleExecutionSummary);
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

@@ -45,8 +45,7 @@ export const getExportByObjectIds = async (
   exceptionsClient: ExceptionListClient | undefined,
   savedObjectsClient: AlertServices['savedObjectsClient'],
   objects: Array<{ rule_id: string }>,
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
@@ -56,8 +55,7 @@ export const getExportByObjectIds = async (
     rulesClient,
     savedObjectsClient,
     objects,
-    logger,
-    isRuleRegistryEnabled
+    logger
   );
 
   // Retrieve exceptions
@@ -83,8 +81,7 @@ export const getRulesFromObjects = async (
   rulesClient: RulesClient,
   savedObjectsClient: AlertServices['savedObjectsClient'],
   objects: Array<{ rule_id: string }>,
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ): Promise<RulesErrors> => {
   // If we put more than 1024 ids in one block like "alert.attributes.tags: (id1 OR id2 OR ... OR id1100)"
   // then the KQL -> ES DSL query generator still puts them all in the same "should" array, but ES defaults
@@ -102,7 +99,6 @@ export const getRulesFromObjects = async (
     })
     .join(' OR ');
   const rules = await findRules({
-    isRuleRegistryEnabled,
     rulesClient,
     filter,
     page: 1,
@@ -122,7 +118,7 @@ export const getRulesFromObjects = async (
     const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
     if (
       matchingRule != null &&
-      isAlertType(isRuleRegistryEnabled, matchingRule) &&
+      isAlertType(matchingRule) &&
       matchingRule.params.immutable !== true
     ) {
       return {

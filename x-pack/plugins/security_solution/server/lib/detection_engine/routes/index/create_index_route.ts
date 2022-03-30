@@ -67,7 +67,6 @@ export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
 export const createDetectionIndex = async (
   context: SecuritySolutionApiRequestHandlerContext
 ): Promise<void> => {
-  const config = context.getConfig();
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const siemClient = context.getAppClient();
   const spaceId = context.getSpaceId();
@@ -77,11 +76,10 @@ export const createDetectionIndex = async (
     context.core.elasticsearch.client.asInternalUser,
     index
   );
-  const { ruleRegistryEnabled } = config.experimentalFeatures;
 
-  // If using the rule registry implementation, we don't want to create new .siem-signals indices -
-  // only create/update resources if there are existing indices
-  if (ruleRegistryEnabled && !indexExists) {
+  // We don't want to create new .siem-signals indices - only create/update
+  // resources if there are existing indices
+  if (!indexExists) {
     return;
   }
 

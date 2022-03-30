@@ -52,7 +52,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'riskyHostsEnabled',
           'usersEnabled',
           'riskyUsersEnabled',
-          'ruleRegistryEnabled',
         ])}`,
         `--home.disableWelcomeScreen=true`,
       ],

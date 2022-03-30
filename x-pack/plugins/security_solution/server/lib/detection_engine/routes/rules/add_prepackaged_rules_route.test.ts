@@ -12,7 +12,7 @@ import {
   getAlertMock,
   getBasicEmptySearchResponse,
 } from '../__mocks__/request_responses';
-import { configMock, requestContextMock, serverMock } from '../__mocks__';
+import { requestContextMock, serverMock } from '../__mocks__';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { addPrepackedRulesRoute, createPrepackagedRules } from './add_prepackaged_rules_route';
 import { listMock } from '../../../../../../lists/server/mocks';
@@ -74,19 +74,14 @@ describe('add_prepackaged_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let mockExceptionsClient: ExceptionListClient;
-  const defaultConfig = context.securitySolution.getConfig();
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     mockExceptionsClient = listMock.getExceptionListClient();
 
-    context.securitySolution.getConfig.mockImplementation(() =>
-      configMock.withRuleRegistryEnabled(defaultConfig, true)
-    );
-
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(true));
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(true, getQueryRuleParams()));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({

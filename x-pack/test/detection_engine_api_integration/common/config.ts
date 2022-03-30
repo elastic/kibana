@@ -75,7 +75,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
           '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'ruleRegistryEnabled',
             'previewTelemetryUrlEnabled',
           ])}`,
           ...(ssl

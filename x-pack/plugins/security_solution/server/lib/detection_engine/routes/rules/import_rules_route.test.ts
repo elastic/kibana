@@ -13,7 +13,6 @@ import {
   getAlertMock,
   getFindResultWithSingleHit,
   getBasicEmptySearchResponse,
-  getBasicNoShardsSearchResponse,
 } from '../__mocks__/request_responses';
 import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
@@ -31,10 +30,7 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('import_rules_route - %s', (_, isRuleRegistryEnabled) => {
+describe('import_rules_route', () => {
   let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
@@ -50,14 +46,12 @@ describe.each([
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
-    clients.rulesClient.update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
+    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    importRulesRoute(server.router, config, ml, isRuleRegistryEnabled);
+    importRulesRoute(server.router, config, ml);
   });
 
   describe('status codes', () => {
@@ -121,24 +115,6 @@ describe.each([
       transformMock.mockRestore();
     });
 
-    test('returns an error if the index does not exist when rule registry not enabled', async () => {
-      clients.appClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          getBasicNoShardsSearchResponse()
-        )
-      );
-      const response = await server.inject(request, context);
-      expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);
-      if (!isRuleRegistryEnabled) {
-        expect(response.body).toEqual({
-          message:
-            'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
-          status_code: 400,
-        });
-      }
-    });
-
     test('returns an error when cluster throws error', async () => {
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
         elasticsearchClientMock.createErrorTransportRequestPromise({
@@ -166,9 +142,7 @@ describe.each([
 
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
-      clients.rulesClient.create.mockResolvedValue(
-        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-      );
+      clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams()));
       const response = await server.inject(request, context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -207,9 +181,7 @@ describe.each([
 
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.rulesClient.find.mockResolvedValue(
-          getFindResultWithSingleHit(isRuleRegistryEnabled)
-        ); // extant rule
+        clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         const response = await server.inject(request, context);
 
         expect(response.status).toEqual(200);
@@ -232,9 +204,7 @@ describe.each([
       });
 
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.rulesClient.find.mockResolvedValue(
-          getFindResultWithSingleHit(isRuleRegistryEnabled)
-        ); // extant rule
+        clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         const overwriteRequest = getImportRulesRequestOverwriteTrue(
           buildHapiStream(ruleIdsToNdJsonString(['rule-1']))
         );
@@ -372,9 +342,7 @@ describe.each([
 
     describe('rules with existing rule_id', () => {
       beforeEach(() => {
-        clients.rulesClient.find.mockResolvedValueOnce(
-          getFindResultWithSingleHit(isRuleRegistryEnabled)
-        ); // extant rule
+        clients.rulesClient.find.mockResolvedValueOnce(getFindResultWithSingleHit()); // extant rule
       });
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {

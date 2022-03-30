@@ -87,15 +87,14 @@ export const initRoutes = (
   previewRuleDataClient: IRuleDataClient,
   previewTelemetryReceiver: ITelemetryReceiver
 ) => {
-  const isRuleRegistryEnabled = ruleDataClient != null;
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc
-  createRulesRoute(router, ml, isRuleRegistryEnabled);
-  readRulesRoute(router, logger, isRuleRegistryEnabled);
-  updateRulesRoute(router, ml, isRuleRegistryEnabled);
-  patchRulesRoute(router, ml, isRuleRegistryEnabled);
-  deleteRulesRoute(router, isRuleRegistryEnabled);
-  findRulesRoute(router, logger, isRuleRegistryEnabled);
+  createRulesRoute(router, ml);
+  readRulesRoute(router, logger);
+  updateRulesRoute(router, ml);
+  patchRulesRoute(router, ml);
+  deleteRulesRoute(router);
+  findRulesRoute(router, logger);
   previewRulesRoute(
     router,
     config,
@@ -110,19 +109,19 @@ export const initRoutes = (
   legacyCreateLegacyNotificationRoute(router, logger);
 
   addPrepackedRulesRoute(router);
-  getPrepackagedRulesStatusRoute(router, config, security, isRuleRegistryEnabled);
-  createRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  patchRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  deleteRulesBulkRoute(router, isRuleRegistryEnabled);
-  performBulkActionRoute(router, ml, logger, isRuleRegistryEnabled);
+  getPrepackagedRulesStatusRoute(router, config, security);
+  createRulesBulkRoute(router, ml);
+  updateRulesBulkRoute(router, ml);
+  patchRulesBulkRoute(router, ml);
+  deleteRulesBulkRoute(router);
+  performBulkActionRoute(router, ml, logger);
 
   getRuleExecutionEventsRoute(router);
 
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);
-  importRulesRoute(router, config, ml, isRuleRegistryEnabled);
-  exportRulesRoute(router, config, logger, isRuleRegistryEnabled);
+  importRulesRoute(router, config, ml);
+  exportRulesRoute(router, config, logger);
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
@@ -156,7 +155,7 @@ export const initRoutes = (
   deleteIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
-  readTagsRoute(router, isRuleRegistryEnabled);
+  readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);

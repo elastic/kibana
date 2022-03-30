@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 
-import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import {
   normalizeMachineLearningJobIds,
@@ -127,15 +127,14 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
 
 export const convertCreateAPIToInternalSchema = (
   input: CreateRulesSchema,
-  siemClient: AppClient,
-  isRuleRegistryEnabled: boolean
+  siemClient: AppClient
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuid.v4();
   return {
     name: input.name,
     tags: addTags(input.tags ?? [], newRuleId, false),
-    alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[input.type] : SIGNALS_ID,
+    alertTypeId: ruleTypeMappings[input.type],
     consumer: SERVER_APP_ID,
     params: {
       author: input.author ?? [],
