@@ -100,7 +100,7 @@ There are three types of *Discover* interactions you can add to dashboards:
 
 * *Panel interactions* &mdash; Opens panel data in *Discover*, including the dashboard-level filters, but not the panel-level filters.
 +
-To enable panel interactions, configure <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.`>> in kibana.yml. If you are using 7.13.0 and earlier, panel interactions are enabled by default.
+To enable panel interactions, configure <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>> in kibana.yml. If you are using 7.13.0 and earlier, panel interactions are enabled by default.
 +
 To use panel interactions, open the panel menu, then click *Explore underlying data*.
 
