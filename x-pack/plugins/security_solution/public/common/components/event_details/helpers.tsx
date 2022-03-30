@@ -56,6 +56,7 @@ export interface AlertSummaryRow {
   title: string;
   description: EnrichedFieldInfo & {
     isDraggable?: boolean;
+    isReadOnly?: boolean;
   };
 }
 

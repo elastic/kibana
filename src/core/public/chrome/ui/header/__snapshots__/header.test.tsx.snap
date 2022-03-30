@@ -3109,12 +3109,13 @@ exports[`Header renders 1`] = `
                           type="logoElastic"
                         >
                           <span
-                            aria-label="Elastic Logo"
                             className="chrHeaderLogo__cluster"
                             data-euiicon-type="logoElastic"
                             data-test-subj="globalLoadingIndicator-hidden"
                             size="l"
-                          />
+                          >
+                            Elastic Logo
+                          </span>
                         </EuiIcon>
                       </LoadingIndicator>
                       <ElasticMark

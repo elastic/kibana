@@ -5,33 +5,57 @@
  * 2.0.
  */
 
-import sinon, { SinonFakeServer } from 'sinon';
+import { httpServiceMock } from '../../../../../../../../src/core/public/mocks';
+import { API_BASE_PATH } from '../../../../../common/constants';
 
 type HttpResponse = Record<string, any> | any[];
+type HttpMethod = 'GET' | 'POST';
+export interface ResponseError {
+  statusCode: number;
+  message: string | Error;
+  attributes?: Record<string, any>;
+}
 
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setSimulatePipelineResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+) => {
+  const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
+    ['GET', 'POST'].map(
+      (method) => [method, new Map()] as [HttpMethod, Map<string, Promise<unknown>>]
+    )
+  );
 
-    server.respondWith('POST', '/api/ingest_pipelines/simulate', [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
+  const mockMethodImplementation = (method: HttpMethod, path: string) =>
+    mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+
+  httpSetup.get.mockImplementation((path) =>
+    mockMethodImplementation('GET', path as unknown as string)
+  );
+  httpSetup.post.mockImplementation((path) =>
+    mockMethodImplementation('POST', path as unknown as string)
+  );
+
+  const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
+    const defuse = (promise: Promise<unknown>) => {
+      promise.catch(() => {});
+      return promise;
+    };
+
+    return mockResponses
+      .get(method)!
+      .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
   };
 
-  const setFetchDocumentsResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+  const setSimulatePipelineResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/simulate`, response, error);
 
-    server.respondWith('GET', '/api/ingest_pipelines/documents/:index/:id', [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
-  };
+  const setFetchDocumentsResponse = (
+    index: string,
+    documentId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/documents/${index}/${documentId}`, response, error);
 
   return {
     setSimulatePipelineResponse,
@@ -40,19 +64,11 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 };
 
 export const initHttpRequests = () => {
-  const server = sinon.fakeServer.create();
-
-  server.respondImmediately = true;
-
-  // Define default response for unhandled requests.
-  // We make requests to APIs which don't impact the component under test, e.g. UI metric telemetry,
-  // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, 'DefaultSinonMockServerResponse']);
-
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
+  const httpSetup = httpServiceMock.createSetupContract();
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
 
   return {
-    server,
+    httpSetup,
     httpRequestsMockHelpers,
   };
 };
