@@ -65,7 +65,10 @@ Handlebars.compileAST = function (
   input: string | hbs.AST.Program,
   options?: ExtendedCompileOptions
 ) {
-  const visitor = new ElasticHandlebarsVisitor(input, options, this.helpers);
+  // If `Handlebars.compileAST` is reassigned, `this` will be undefined.
+  const helpers = (this ?? Handlebars).helpers;
+
+  const visitor = new ElasticHandlebarsVisitor(input, options, helpers);
   return (context: any, runtimeOptions?: ExtendedRuntimeOptions) =>
     visitor.render(context, runtimeOptions);
 };

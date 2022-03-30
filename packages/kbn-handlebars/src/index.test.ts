@@ -43,6 +43,13 @@ describe('Handlebars.compileAST', () => {
   it('invalid template', () => {
     expectTemplate('{{value').withInput({ value: 42 }).toThrowErrorMatchingSnapshot();
   });
+
+  if (!process.env.EVAL) {
+    it('reassign', () => {
+      const fn = Handlebars.compileAST;
+      expect(fn('{{value}}')({ value: 42 })).toEqual('42');
+    });
+  }
 });
 
 it('Only provide options.fn/inverse to block helpers', () => {
