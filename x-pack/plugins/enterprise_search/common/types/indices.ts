@@ -19,5 +19,4 @@ export interface ElasticsearchIndex {
       size_in_bytes: string;
     };
   };
-  aliases: string | string[];
 }

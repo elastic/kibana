@@ -58,6 +58,44 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
+const getUsersColumns = (): UsersTableColumns => [
+  {
+    field: 'name',
+    name: i18n.USER_NAME,
+    truncateText: false,
+    sortable: true,
+    mobileOptions: { show: true },
+    render: (name) =>
+      getRowItemDraggables({
+        rowItems: [name],
+        attrName: 'user.name',
+        idPrefix: `users-table-${name}-name`,
+        render: (item) => <UserDetailsLink userName={item} />,
+      }),
+  },
+  {
+    field: 'lastSeen',
+    name: i18n.LAST_SEEN,
+    sortable: true,
+    truncateText: false,
+    mobileOptions: { show: true },
+    render: (lastSeen) => <FormattedRelativePreferenceDate value={lastSeen} />,
+  },
+  {
+    field: 'domain',
+    name: i18n.DOMAIN,
+    sortable: false,
+    truncateText: false,
+    mobileOptions: { show: true },
+    render: (domain) =>
+      getRowItemDraggables({
+        rowItems: [domain],
+        attrName: 'user.domain',
+        idPrefix: `users-table-${domain}-domain`,
+      }),
+  },
+];
+
 const UsersTableComponent: React.FC<UsersTableProps> = ({
   users,
   totalCount,
@@ -146,41 +184,3 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
 UsersTableComponent.displayName = 'UsersTableComponent';
 
 export const UsersTable = React.memo(UsersTableComponent);
-
-const getUsersColumns = (): UsersTableColumns => [
-  {
-    field: 'name',
-    name: i18n.USER_NAME,
-    truncateText: false,
-    sortable: true,
-    mobileOptions: { show: true },
-    render: (name) =>
-      getRowItemDraggables({
-        rowItems: [name],
-        attrName: 'user.name',
-        idPrefix: `users-table-${name}-name`,
-        render: (item) => <UserDetailsLink userName={item} />,
-      }),
-  },
-  {
-    field: 'lastSeen',
-    name: i18n.LAST_SEEN,
-    sortable: true,
-    truncateText: false,
-    mobileOptions: { show: true },
-    render: (lastSeen) => <FormattedRelativePreferenceDate value={lastSeen} />,
-  },
-  {
-    field: 'domain',
-    name: i18n.DOMAIN,
-    sortable: false,
-    truncateText: false,
-    mobileOptions: { show: true },
-    render: (domain) =>
-      getRowItemDraggables({
-        rowItems: [domain],
-        attrName: 'user.domain',
-        idPrefix: `users-table-${domain}-domain`,
-      }),
-  },
-];

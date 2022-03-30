@@ -20,7 +20,9 @@ import {
   RuleTypeModel,
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
+  AlertsTableProps,
 } from './types';
+import { getAlertsTableLazy } from './common/get_alerts_table';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -50,6 +52,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         actionTypeRegistry,
         ruleTypeRegistry,
       });
+    },
+    getAlertsTable: (props: AlertsTableProps) => {
+      return getAlertsTableLazy(props);
     },
   };
 }
