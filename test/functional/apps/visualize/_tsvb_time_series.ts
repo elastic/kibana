@@ -219,7 +219,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await el.scrollIntoViewIfNecessary();
             await browser
               .getActions()
-              .move({ x: 0, y: 96, origin: el._webElement })
+              .move({ x: 0, y: 94, origin: el._webElement })
               .click()
               .perform();
 
