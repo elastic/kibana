@@ -8,12 +8,11 @@
 import { act } from 'react-dom/test-utils';
 import moment from 'moment';
 import { getWatchHistory } from '../../__fixtures__';
-import { ROUTES, WATCH_STATES, ACTION_STATES } from '../../common/constants';
+import { WATCH_STATES, ACTION_STATES } from '../../common/constants';
 import { setupEnvironment, pageHelpers } from './helpers';
 import { WatchStatusTestBed } from './helpers/watch_status.helpers';
-import { WATCH } from './helpers/jest_constants';
-
-const { API_ROOT } = ROUTES;
+import { WATCH, WATCH_ID } from './helpers/jest_constants';
+import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.watchStatus;
 
@@ -40,7 +39,7 @@ const watch = {
 };
 
 describe('<WatchStatus />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchStatusTestBed;
 
   beforeAll(() => {
@@ -49,15 +48,14 @@ describe('<WatchStatus />', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadWatchResponse({ watch });
-      httpRequestsMockHelpers.setLoadWatchHistoryResponse(watchHistoryItems);
+      httpRequestsMockHelpers.setLoadWatchResponse(WATCH_ID, { watch });
+      httpRequestsMockHelpers.setLoadWatchHistoryResponse(WATCH_ID, watchHistoryItems);
 
-      testBed = await setup();
+      testBed = await setup(httpSetup);
       testBed.component.update();
     });
 
@@ -127,14 +125,14 @@ describe('<WatchStatus />', () => {
 
         const formattedStartTime = moment(watchHistoryItem.startTime).format();
 
-        httpRequestsMockHelpers.setLoadWatchHistoryItemResponse({ watchHistoryItem });
+        httpRequestsMockHelpers.setLoadWatchHistoryItemResponse(WATCH_ID, { watchHistoryItem });
 
         await actions.clickWatchExecutionAt(0, formattedStartTime);
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
-        expect(latestRequest.method).toBe('GET');
-        expect(latestRequest.url).toBe(`${API_ROOT}/history/${watchHistoryItem.id}`);
+        expect(httpSetup.get).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/history/${watchHistoryItem.id}`,
+          expect.anything()
+        );
 
         expect(exists('watchHistoryDetailFlyout')).toBe(true);
       });
@@ -179,10 +177,10 @@ describe('<WatchStatus />', () => {
         });
         component.update();
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
-        expect(latestRequest.method).toBe('POST');
-        expect(latestRequest.url).toBe(`${API_ROOT}/watches/delete`);
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/watches/delete`,
+          expect.anything()
+        );
       });
     });
 
@@ -190,7 +188,7 @@ describe('<WatchStatus />', () => {
       test('should send the correct HTTP request to deactivate and activate a watch', async () => {
         const { actions } = testBed;
 
-        httpRequestsMockHelpers.setDeactivateWatchResponse({
+        httpRequestsMockHelpers.setDeactivateWatchResponse(WATCH_ID, {
           watchStatus: {
             state: WATCH_STATES.DISABLED,
             isActive: false,
@@ -199,12 +197,12 @@ describe('<WatchStatus />', () => {
 
         await actions.clickToggleActivationButton();
 
-        const deactivateRequest = server.requests[server.requests.length - 1];
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/watch/${watch.id}/deactivate`,
+          expect.anything()
+        );
 
-        expect(deactivateRequest.method).toBe('PUT');
-        expect(deactivateRequest.url).toBe(`${API_ROOT}/watch/${watch.id}/deactivate`);
-
-        httpRequestsMockHelpers.setActivateWatchResponse({
+        httpRequestsMockHelpers.setActivateWatchResponse(WATCH_ID, {
           watchStatus: {
             state: WATCH_STATES.FIRING,
             isActive: true,
@@ -213,10 +211,10 @@ describe('<WatchStatus />', () => {
 
         await actions.clickToggleActivationButton();
 
-        const activateRequest = server.requests[server.requests.length - 1];
-
-        expect(activateRequest.method).toBe('PUT');
-        expect(activateRequest.url).toBe(`${API_ROOT}/watch/${watch.id}/activate`);
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/watch/${watch.id}/activate`,
+          expect.anything()
+        );
       });
     });
 
@@ -242,7 +240,7 @@ describe('<WatchStatus />', () => {
       test('should allow an action to be acknowledged', async () => {
         const { actions, table } = testBed;
 
-        httpRequestsMockHelpers.setAcknowledgeWatchResponse({
+        httpRequestsMockHelpers.setAcknowledgeWatchResponse(WATCH_ID, ACTION_ID, {
           watchStatus: {
             state: WATCH_STATES.FIRING,
             isActive: true,
@@ -259,11 +257,9 @@ describe('<WatchStatus />', () => {
 
         await actions.clickAcknowledgeButton(0);
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
-        expect(latestRequest.method).toBe('PUT');
-        expect(latestRequest.url).toBe(
-          `${API_ROOT}/watch/${watch.id}/action/${ACTION_ID}/acknowledge`
+        expect(httpSetup.put).toHaveBeenNthCalledWith(
+          3,
+          `${API_BASE_PATH}/watch/${watch.id}/action/${ACTION_ID}/acknowledge`
         );
 
         const { tableCellsValues } = table.getMetaData('watchActionStatusTable');

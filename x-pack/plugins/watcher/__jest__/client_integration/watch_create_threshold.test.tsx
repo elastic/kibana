@@ -7,12 +7,10 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import axios from 'axios';
 
 import { getExecuteDetails } from '../../__fixtures__';
 import { WATCH_TYPES, API_BASE_PATH } from '../../common/constants';
-import { setupEnvironment, pageHelpers, wrapBodyResponse, unwrapBodyResponse } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { WatchCreateThresholdTestBed } from './helpers/watch_create_threshold.helpers';
 
 const WATCH_NAME = 'my_test_watch';
@@ -42,23 +40,14 @@ const SETTINGS = {
 };
 
 const WATCH_VISUALIZE_DATA = {
-  count: [
-    [1559404800000, 14],
-    [1559448000000, 196],
-    [1559491200000, 44],
-  ],
+  visualizeData: {
+    count: [
+      [1559404800000, 14],
+      [1559448000000, 196],
+      [1559491200000, 44],
+    ],
+  },
 };
-
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
-jest.mock('../../public/application/lib/api', () => {
-  const original = jest.requireActual('../../public/application/lib/api');
-
-  return {
-    ...original,
-    getHttpClient: () => mockHttpClient,
-  };
-});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -96,7 +85,10 @@ describe('<ThresholdWatchEdit /> create route', () => {
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
       testBed.component.update();
     });
 
@@ -112,12 +104,6 @@ describe('<ThresholdWatchEdit /> create route', () => {
         httpRequestsMockHelpers.setLoadEsFieldsResponse({ fields: ES_FIELDS });
         httpRequestsMockHelpers.setLoadSettingsResponse(SETTINGS);
         httpRequestsMockHelpers.setLoadWatchVisualizeResponse(WATCH_VISUALIZE_DATA);
-
-        await act(async () => {
-          testBed = await setup(httpSetup);
-        });
-
-        testBed.component.update();
       });
 
       describe('form validation', () => {
@@ -169,6 +155,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
             find('indicesComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
             form.setInputValue('watchTimeFieldSelect', '@timestamp');
           });
+
           component.update();
 
           expect(find('saveWatchButton').props().disabled).toBe(false);
@@ -221,7 +208,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
         });
       });
 
-      describe.skip('actions', () => {
+      describe('actions', () => {
         beforeEach(async () => {
           const { form, find, component } = testBed;
 
@@ -257,11 +244,8 @@ describe('<ThresholdWatchEdit /> create route', () => {
             actions.clickSimulateButton();
           });
 
-          // Verify request
-          const latestRequest = server.requests[server.requests.length - 1];
-
           const thresholdWatch = {
-            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: '12345',
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -290,16 +274,19 @@ describe('<ThresholdWatchEdit /> create route', () => {
             threshold: 1000,
           };
 
-          expect(latestRequest.requestBody).toEqual(
-            wrapBodyResponse({
-              executeDetails: getExecuteDetails({
-                actionModes: {
-                  logging_1: 'force_execute',
-                },
-                ignoreCondition: true,
-                recordExecution: false,
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/watch/execute`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                executeDetails: getExecuteDetails({
+                  actionModes: {
+                    logging_1: 'force_execute',
+                  },
+                  ignoreCondition: true,
+                  recordExecution: false,
+                }),
+                watch: thresholdWatch,
               }),
-              watch: thresholdWatch,
             })
           );
         });
@@ -319,11 +306,8 @@ describe('<ThresholdWatchEdit /> create route', () => {
             actions.clickSimulateButton();
           });
 
-          // Verify request
-          const latestRequest = server.requests[server.requests.length - 1];
-
           const thresholdWatch = {
-            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: '12345',
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -351,16 +335,19 @@ describe('<ThresholdWatchEdit /> create route', () => {
             threshold: 1000,
           };
 
-          expect(latestRequest.requestBody).toEqual(
-            wrapBodyResponse({
-              executeDetails: getExecuteDetails({
-                actionModes: {
-                  index_1: 'force_execute',
-                },
-                ignoreCondition: true,
-                recordExecution: false,
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/watch/execute`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                executeDetails: getExecuteDetails({
+                  actionModes: {
+                    index_1: 'force_execute',
+                  },
+                  ignoreCondition: true,
+                  recordExecution: false,
+                }),
+                watch: thresholdWatch,
               }),
-              watch: thresholdWatch,
             })
           );
         });
@@ -381,11 +368,8 @@ describe('<ThresholdWatchEdit /> create route', () => {
             actions.clickSimulateButton();
           });
 
-          // Verify request
-          const latestRequest = server.requests[server.requests.length - 1];
-
           const thresholdWatch = {
-            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: '12345',
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -416,16 +400,19 @@ describe('<ThresholdWatchEdit /> create route', () => {
             threshold: 1000,
           };
 
-          expect(latestRequest.requestBody).toEqual(
-            wrapBodyResponse({
-              executeDetails: getExecuteDetails({
-                actionModes: {
-                  slack_1: 'force_execute',
-                },
-                ignoreCondition: true,
-                recordExecution: false,
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/watch/execute`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                executeDetails: getExecuteDetails({
+                  actionModes: {
+                    slack_1: 'force_execute',
+                  },
+                  ignoreCondition: true,
+                  recordExecution: false,
+                }),
+                watch: thresholdWatch,
               }),
-              watch: thresholdWatch,
             })
           );
         });
@@ -453,11 +440,8 @@ describe('<ThresholdWatchEdit /> create route', () => {
             actions.clickSimulateButton();
           });
 
-          // Verify request
-          const latestRequest = server.requests[server.requests.length - 1];
-
           const thresholdWatch = {
-            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: '12345',
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -492,16 +476,19 @@ describe('<ThresholdWatchEdit /> create route', () => {
             threshold: 1000,
           };
 
-          expect(latestRequest.requestBody).toEqual(
-            wrapBodyResponse({
-              executeDetails: getExecuteDetails({
-                actionModes: {
-                  email_1: 'force_execute',
-                },
-                ignoreCondition: true,
-                recordExecution: false,
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/watch/execute`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                executeDetails: getExecuteDetails({
+                  actionModes: {
+                    email_1: 'force_execute',
+                  },
+                  ignoreCondition: true,
+                  recordExecution: false,
+                }),
+                watch: thresholdWatch,
               }),
-              watch: thresholdWatch,
             })
           );
         });
@@ -545,11 +532,8 @@ describe('<ThresholdWatchEdit /> create route', () => {
             actions.clickSimulateButton();
           });
 
-          // Verify request
-          const latestRequest = server.requests[server.requests.length - 1];
-
           const thresholdWatch = {
-            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: '12345',
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -586,16 +570,19 @@ describe('<ThresholdWatchEdit /> create route', () => {
             threshold: 1000,
           };
 
-          expect(latestRequest.requestBody).toEqual(
-            wrapBodyResponse({
-              executeDetails: getExecuteDetails({
-                actionModes: {
-                  webhook_1: 'force_execute',
-                },
-                ignoreCondition: true,
-                recordExecution: false,
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/watch/execute`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                executeDetails: getExecuteDetails({
+                  actionModes: {
+                    webhook_1: 'force_execute',
+                  },
+                  ignoreCondition: true,
+                  recordExecution: false,
+                }),
+                watch: thresholdWatch,
               }),
-              watch: thresholdWatch,
             })
           );
         });
@@ -633,11 +620,8 @@ describe('<ThresholdWatchEdit /> create route', () => {
             actions.clickSimulateButton();
           });
 
-          // Verify request
-          const latestRequest = server.requests[server.requests.length - 1];
-
           const thresholdWatch = {
-            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: '12345',
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -676,16 +660,19 @@ describe('<ThresholdWatchEdit /> create route', () => {
             threshold: 1000,
           };
 
-          expect(latestRequest.requestBody).toEqual(
-            wrapBodyResponse({
-              executeDetails: getExecuteDetails({
-                actionModes: {
-                  jira_1: 'force_execute',
-                },
-                ignoreCondition: true,
-                recordExecution: false,
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/watch/execute`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                executeDetails: getExecuteDetails({
+                  actionModes: {
+                    jira_1: 'force_execute',
+                  },
+                  ignoreCondition: true,
+                  recordExecution: false,
+                }),
+                watch: thresholdWatch,
               }),
-              watch: thresholdWatch,
             })
           );
         });
@@ -713,11 +700,8 @@ describe('<ThresholdWatchEdit /> create route', () => {
             actions.clickSimulateButton();
           });
 
-          // Verify request
-          const latestRequest = server.requests[server.requests.length - 1];
-
           const thresholdWatch = {
-            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: '12345',
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -746,22 +730,25 @@ describe('<ThresholdWatchEdit /> create route', () => {
             threshold: 1000,
           };
 
-          expect(latestRequest.requestBody).toEqual(
-            wrapBodyResponse({
-              executeDetails: getExecuteDetails({
-                actionModes: {
-                  pagerduty_1: 'force_execute',
-                },
-                ignoreCondition: true,
-                recordExecution: false,
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/watch/execute`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                executeDetails: getExecuteDetails({
+                  actionModes: {
+                    pagerduty_1: 'force_execute',
+                  },
+                  ignoreCondition: true,
+                  recordExecution: false,
+                }),
+                watch: thresholdWatch,
               }),
-              watch: thresholdWatch,
             })
           );
         });
       });
 
-      describe.skip('watch visualize data payload', () => {
+      describe('watch visualize data payload', () => {
         test('should send the correct payload', async () => {
           const { form, find, component } = testBed;
 
@@ -773,40 +760,31 @@ describe('<ThresholdWatchEdit /> create route', () => {
           });
           component.update();
 
-          // const latestReqToGetVisualizeData = server.requests.find(
-          // (req) => req.method === 'POST' && req.url === '/api/watcher/watch/visualize'
-          // );
-          // if (!latestReqToGetVisualizeData) {
-          // throw new Error(`No request found to fetch visualize data.`);
-          // }
+          const lastReq: any[] = httpSetup.post.mock.calls.pop() || [];
+          // Options contains two dinamically computed timestamps, so its simpler to just ignore those fields.
+          const { options, ...body } = JSON.parse(lastReq[1].body).watch;
 
-          // const requestBody = unwrapBodyResponse(latestReqToGetVisualizeData.requestBody);
-
-          expect(httpSetup.put).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}/watch/12345`,
-            expect.objectContaining({
-              body: JSON.stringify({
-                id: '12345',
-                name: 'my_test_watch',
-                type: 'threshold',
-                isNew: true,
-                isActive: true,
-                actions: [],
-                index: ['index1'],
-                timeField: '@timestamp',
-                triggerIntervalSize: 1,
-                triggerIntervalUnit: 'm',
-                aggType: 'count',
-                termSize: 5,
-                termOrder: 'desc',
-                thresholdComparator: '>',
-                timeWindowSize: 5,
-                timeWindowUnit: 'm',
-                hasTermsAgg: false,
-                threshold: 1000,
-              }),
-            })
-          );
+          expect(lastReq[0]).toBe(`${API_BASE_PATH}/watch/visualize`);
+          expect(body).toEqual({
+            id: '12345',
+            name: 'my_test_watch',
+            type: 'threshold',
+            isNew: true,
+            isActive: true,
+            actions: [],
+            index: ['index1'],
+            timeField: '@timestamp',
+            triggerIntervalSize: 1,
+            triggerIntervalUnit: 'm',
+            aggType: 'count',
+            termSize: 5,
+            termOrder: 'desc',
+            thresholdComparator: '>',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            hasTermsAgg: false,
+            threshold: 1000,
+          });
         });
       });
 

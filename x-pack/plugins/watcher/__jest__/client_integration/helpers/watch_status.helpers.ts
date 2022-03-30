@@ -15,6 +15,7 @@ import {
 } from '@kbn/test-jest-helpers';
 import { HttpSetup } from 'src/core/public';
 
+import { registerRouter } from '../../../public/application/lib/navigation';
 import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './jest_constants';
@@ -22,6 +23,7 @@ import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
+    onRouter: (router) => registerRouter(router),
     initialEntries: [`${ROUTES.API_ROOT}/watches/watch/${WATCH_ID}/status`],
     componentRoutePath: `${ROUTES.API_ROOT}/watches/watch/:id/status`,
   },
