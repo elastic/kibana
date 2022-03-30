@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.2>>
 * <<release-notes-7.17.1>>
 * <<release-notes-7.17.0>>
 //* <<release-notes-7.16.3>>
@@ -72,10 +73,80 @@ Review important information about the {kib} 7.17.x releases.
 
 --
 
+[[release-notes-7.17.2]]
+== {kib} 7.17.2
+
+coming::[7.17.2]
+
+Review the following information about the 7.17.2 release.
+
+[float]
+[[breaking-changes-v7.17.2]]
+=== Breaking changes
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in the 7.17.2 release.
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.17.2]]
+=== Bug Fixes
+Dashboard::
+Use debounce instead of async url update to remove app state from URL {kibana-pull}127083[#127083]
+
+Discover::
+Improves doc viewer source tab performance by limiting height {kibana-pull}127439[#127439]
+
+Elastic Security::
+For the Elastic Security 7.17.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Use validated fields for `default_fields` index setting {kibana-pull}128094[#128094]
+* Fixes links to Agent logs for apm, endpoint, synthetics, osquery {kibana-pull}127480[#127480]
+* Makes input IDs unique in agent policy yaml {kibana-pull}127343[#127343]
+
+Machine Learning::
+Anomaly Detection: Update annotation directly using the index it is stored in {kibana-pull}126573[#126573]
+
+Management::
+* Resolves errors seen when creating a runtime field with a user that has access to a limit set of indices {kibana-pull}127523[#127523]
+* Fixes field format color editor crash on invalid color value {kibana-pull}127292[#127292]
+* Adds deprecation logging as step on overview page of Upgrade Assistant {kibana-pull}126277[#126277]
+* Upgrade Assistant will show a reindex warning if Elasticsearch is low on disk space {kibana-pull}125572[#125572]
+
+Observability::
+* Fixes pings over time histogram when filters are defined {kibana-pull}127757[#127757]
+* Checks for latest Snapshot count document {kibana-pull}127676[#127676]
+* Optimization for Metric Threshold Rule for 7.17 {kibana-pull}126545[#126545]
+
 [[release-notes-7.17.1]]
 == {kib} 7.17.1
 
-The 7.17.1 release includes the following bug fixes.
+Review the following information about the 7.17.1 release.
+
+[float]
+[[breaking-changes-v7.17.1]]
+=== Breaking changes
+
+There are no breaking changes in the 7.17.1 release.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
 
 [float]
 [[fixes-v7.17.1]]
@@ -108,9 +179,7 @@ Review the following information about the 7.17.0 release.
 [[breaking-changes-v7.17.0]]
 === Breaking changes
 
-// tag::notable-breaking-changes[]
 There are no breaking changes in the 7.17.0 release.
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following: 
 
