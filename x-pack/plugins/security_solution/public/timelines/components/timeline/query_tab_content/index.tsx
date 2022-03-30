@@ -202,7 +202,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
-  const ACTION_BUTTON_COUNT = 5;
+  const ACTION_BUTTON_COUNT = 6;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>

@@ -25,6 +25,10 @@ import {
   getMockRuleAlertsResponse,
   getMockAlertCaseCommentsResponse,
   getEmptySavedObjectResponse,
+  getEventLogAllRules,
+  getEventLogElasticRules,
+  getElasticLogCustomRules,
+  getAllEventLogTransform,
 } from './rules/get_metrics.mocks';
 import { getInitialDetectionMetrics } from './get_initial_usage';
 import { getDetectionsMetrics } from './get_metrics';
@@ -45,6 +49,7 @@ describe('Detections Usage and Metrics', () => {
     it('returns zeroed counts if calls are empty', async () => {
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
+        eventLogIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,
@@ -55,13 +60,18 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with rule, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(getEventLogAllRules());
+      esClient.search.mockResponseOnce(getEventLogElasticRules());
+      esClient.search.mockResponseOnce(getElasticLogCustomRules());
       esClient.search.mockResponseOnce(getMockRuleAlertsResponse(3400));
       savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse());
       savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
       // Get empty saved object for legacy notification system.
       savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
+        eventLogIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,
@@ -72,6 +82,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          detection_rule_status: getAllEventLogTransform(),
           detection_rule_detail: [
             {
               alert_count_daily: 3400,
@@ -116,6 +127,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with on non elastic prebuilt rule', async () => {
+      esClient.search.mockResponseOnce(getEventLogAllRules());
+      esClient.search.mockResponseOnce(getEventLogElasticRules());
+      esClient.search.mockResponseOnce(getElasticLogCustomRules());
       esClient.search.mockResponseOnce(getMockRuleAlertsResponse(800));
       savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse('not_immutable'));
       savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
@@ -123,6 +137,7 @@ describe('Detections Usage and Metrics', () => {
       savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
+        eventLogIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,
@@ -133,6 +148,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          detection_rule_status: getAllEventLogTransform(),
           detection_rule_detail: [], // *should not* contain custom detection rule details
           detection_rule_usage: {
             ...getInitialRulesUsage(),
@@ -162,6 +178,9 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with rule, no alerts and no cases', async () => {
+      esClient.search.mockResponseOnce(getEventLogAllRules());
+      esClient.search.mockResponseOnce(getEventLogElasticRules());
+      esClient.search.mockResponseOnce(getElasticLogCustomRules());
       esClient.search.mockResponseOnce(getMockRuleAlertsResponse(0));
       savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse());
       savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
@@ -170,6 +189,7 @@ describe('Detections Usage and Metrics', () => {
 
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
+        eventLogIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,
@@ -180,6 +200,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          detection_rule_status: getAllEventLogTransform(),
           detection_rule_detail: [
             {
               alert_count_daily: 0,
@@ -239,6 +260,7 @@ describe('Detections Usage and Metrics', () => {
       } as unknown as ReturnType<typeof mlClient.anomalyDetectorsProvider>);
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
+        eventLogIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,
@@ -271,6 +293,7 @@ describe('Detections Usage and Metrics', () => {
       } as unknown as ReturnType<typeof mlClient.anomalyDetectorsProvider>);
 
       const result = await getDetectionsMetrics({
+        eventLogIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,
