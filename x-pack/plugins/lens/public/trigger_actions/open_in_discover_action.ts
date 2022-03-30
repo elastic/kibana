@@ -22,7 +22,7 @@ export const createOpenInDiscoverAction = (discover: DiscoverStart, hasDiscoverA
     getIconType: () => 'popout',
     getDisplayName: () =>
       i18n.translate('xpack.lens.actions.exploreRawData', {
-        defaultMessage: 'Explore Raw Data',
+        defaultMessage: 'Explore raw data',
       }),
     isCompatible: async (context: { embeddable: IEmbeddable }) => {
       if (!hasDiscoverAccess) return false;

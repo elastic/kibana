@@ -22,7 +22,7 @@ import { Datasource } from '../types';
 
 export const getShowUnderlyingDataLabel = () =>
   i18n.translate('xpack.lens.app.exploreRawData', {
-    defaultMessage: 'Explore Raw Data',
+    defaultMessage: 'Explore raw data',
   });
 
 /**
