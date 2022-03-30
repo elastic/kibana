@@ -15,15 +15,17 @@ import { Props } from '../components/param_details_form/expression';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
-export const Expression = ({ ruleParams, config, setRuleParams, data }: Props) => {
-  const { derivedIndexPattern } = useDerivedIndexPattern(data, config);
+export const Expression = ({ ruleParams, config, setRuleParams, dataViews }: Props) => {
+  const { derivedIndexPattern } = useDerivedIndexPattern(dataViews, config);
   const onFilterChange = useCallback(
     (filter: string) => {
-      setRuleParams('filterQueryText', filter);
-      setRuleParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      if (derivedIndexPattern) {
+        setRuleParams('filterQueryText', filter);
+        setRuleParams(
+          'filterQuery',
+          convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
+        );
+      }
     },
     [setRuleParams, derivedIndexPattern]
   );
@@ -32,6 +34,18 @@ export const Expression = ({ ruleParams, config, setRuleParams, data }: Props) =
   const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
     onFilterChange,
   ]);
+
+  const kueryBar = derivedIndexPattern ? (
+    <KueryBar
+      value={ruleParams.filterQueryText}
+      derivedIndexPattern={derivedIndexPattern}
+      onSubmit={onFilterChange}
+      onChange={debouncedOnFilterChange}
+    />
+  ) : (
+    <></>
+  );
+
   return (
     <EuiForm component="form">
       <EuiFormRow
@@ -43,12 +57,7 @@ export const Expression = ({ ruleParams, config, setRuleParams, data }: Props) =
           defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
         })}
       >
-        <KueryBar
-          value={ruleParams.filterQueryText}
-          derivedIndexPattern={derivedIndexPattern}
-          onSubmit={onFilterChange}
-          onChange={debouncedOnFilterChange}
-        />
+        {kueryBar}
       </EuiFormRow>
       <EuiSpacer />
     </EuiForm>
