@@ -12,13 +12,13 @@ these APIs:
 * <<cases-api-find-cases>>
 * {security-guide}/cases-api-find-cases-by-alert.html[Find cases by alert]
 * <<cases-api-find-connectors>>
-* {security-guide}/cases-api-get-case-activity.html[Get all case activity]
+* <<cases-api-get-case-activity>>
 * <<cases-api-get-case>>
 * <<cases-api-get-comments>>
 * {security-guide}/cases-get-connector.html[Get current connector]
 * {security-guide}/cases-api-get-reporters.html[Get reporters]
 * {security-guide}/cases-api-get-status.html[Get status]
-* {security-guide}/cases-api-get-tag.html[Get tags]
+* <<cases-api-get-tag>>
 * {security-guide}/cases-api-push.html[Push case]
 * {security-guide}/assign-connector.html[Set default Elastic Security UI connector]
 * {security-guide}/case-api-update-connector.html[Update case configurations]
@@ -36,8 +36,10 @@ include::cases/cases-api-delete-comments.asciidoc[leveloffset=+1]
 include::cases/cases-api-find-cases.asciidoc[leveloffset=+1]
 include::cases/cases-api-find-connectors.asciidoc[leveloffset=+1]
 //GET
+include::cases/cases-api-get-case-activity.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-case.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-comments.asciidoc[leveloffset=+1]
+include::cases/cases-api-get-tags.asciidoc[leveloffset=+1]
 //UPDATE
 include::cases/cases-api-update.asciidoc[leveloffset=+1]
 include::cases/cases-api-update-comment.asciidoc[leveloffset=+1]
