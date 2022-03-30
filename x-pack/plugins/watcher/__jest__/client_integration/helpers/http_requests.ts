@@ -51,22 +51,18 @@ const registerHttpRequestMockHelpers = (
       .set(path, error ? defuse(Promise.reject(error)) : Promise.resolve(response));
   };
 
-  // const defaultResponse = { watches: [] };
   const setLoadWatchesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_ROOT}/watches`, response, error);
 
-  // const defaultResponse = { watch: {} };
   const setLoadWatchResponse = (watchId: string, response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_ROOT}/watch/${watchId}`, response, error);
 
-  // const defaultResponse = { watchHistoryItems: [] };
   const setLoadWatchHistoryResponse = (
     watchId: string,
     response?: HttpResponse,
     error?: ResponseError
   ) => mockResponse('GET', `${API_ROOT}/watch/${watchId}/history`, response, error);
 
-  // const defaultResponse = { watchHistoryItem: {} };
   const setLoadWatchHistoryItemResponse = (
     watchId: string,
     response?: HttpResponse,
@@ -79,41 +75,33 @@ const registerHttpRequestMockHelpers = (
   const setSaveWatchResponse = (watchId: string, response?: HttpResponse, error?: ResponseError) =>
     mockResponse('PUT', `${API_ROOT}/watch/${watchId}`, response, error);
 
-  // const defaultResponse = { watchHistoryItem: {} };
   const setLoadExecutionResultResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('PUT', `${API_ROOT}/watch/execute`, response, error);
 
-  // const defaultResponse = { indices: [] };
   const setLoadMatchingIndicesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('PUT', `${API_ROOT}/indices`, response, error);
 
-  // const defaultResponse = { fields: [] };
   const setLoadEsFieldsResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_ROOT}/fields`, response, error);
 
-  // const defaultResponse = { action_types: {} };
   const setLoadSettingsResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_ROOT}/settings`, response, error);
 
-  // const defaultResponse = { visualizeData: {} };
   const setLoadWatchVisualizeResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_ROOT}/watch/visualize`, response, error);
 
-  // const defaultResponse = { watchStatus: {} };
   const setDeactivateWatchResponse = (
     watchId: string,
     response?: HttpResponse,
     error?: ResponseError
   ) => mockResponse('PUT', `${API_ROOT}/watch/${watchId}/deactivate`, response, error);
 
-  // const defaultResponse = { watchStatus: {} };
   const setActivateWatchResponse = (
     watchId: string,
     response?: HttpResponse,
     error?: ResponseError
   ) => mockResponse('PUT', `${API_ROOT}/watch/${watchId}/activate`, response, error);
 
-  // const defaultResponse = { watchStatus: {} };
   const setAcknowledgeWatchResponse = (
     watchId: string,
     actionId: string,
