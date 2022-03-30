@@ -71,7 +71,12 @@ describe('zeek_row_renderer', () => {
         <span>{children}</span>
       </TestProviders>
     );
-    expect(removeExternalLinkText(wrapper.text())).toContain(
+
+    const extractEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
+      'External link',
+      ''
+    );
+    expect(extractEuiIconText).toContain(
       'C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
     );
   });

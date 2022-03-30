@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { Values } from '@kbn/utility-types';
 import {
-  ALERT_INSTANCE_ID,
-  ALERT_UUID,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
@@ -22,30 +19,11 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { AlertExecutorOptions } from '../../../alerting/server';
-import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-
-const commonAlertFieldNames = [
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_EXECUTION_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_PRODUCER,
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
-  SPACE_IDS,
-  ALERT_RULE_TAGS,
-  TIMESTAMP,
-];
-export type CommonAlertFieldName = Values<typeof commonAlertFieldNames>;
-
-const commonAlertIdFieldNames = [ALERT_INSTANCE_ID, ALERT_UUID];
-export type CommonAlertIdFieldName = Values<typeof commonAlertIdFieldNames>;
-
-export type CommonAlertFields = Pick<ParsedTechnicalFields, CommonAlertFieldName>;
+import { CommonAlertFieldsLatest } from '../../common/schemas';
 
 export const getCommonAlertFields = (
   options: AlertExecutorOptions<any, any, any, any, any>
-): CommonAlertFields => {
+): CommonAlertFieldsLatest => {
   return {
     [ALERT_RULE_CATEGORY]: options.rule.ruleTypeName,
     [ALERT_RULE_CONSUMER]: options.rule.consumer,

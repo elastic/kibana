@@ -49,6 +49,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     loadTestFile(require.resolve('./controls_callout'));
     loadTestFile(require.resolve('./control_group_settings'));
     loadTestFile(require.resolve('./options_list'));
+    loadTestFile(require.resolve('./range_slider'));
     loadTestFile(require.resolve('./control_group_chaining'));
   });
 }

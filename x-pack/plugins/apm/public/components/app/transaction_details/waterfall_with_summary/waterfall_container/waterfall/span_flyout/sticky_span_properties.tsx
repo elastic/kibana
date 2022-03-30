@@ -34,12 +34,8 @@ interface Props {
 
 export function StickySpanProperties({ span, transaction }: Props) {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
-  const {
-    environment,
-    latencyAggregationType,
-    comparisonEnabled,
-    comparisonType,
-  } = query;
+  const { environment, latencyAggregationType, comparisonEnabled, offset } =
+    query;
 
   const trackEvent = useUiTracker();
 
@@ -88,7 +84,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
               environment={nextEnvironment}
               latencyAggregationType={latencyAggregationType}
               comparisonEnabled={comparisonEnabled}
-              comparisonType={comparisonType}
+              offset={offset}
             >
               {transaction.transaction.name}
             </TransactionDetailLink>

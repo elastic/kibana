@@ -18,6 +18,13 @@ export const NAVIGATION_ALL_USERS_TITLE = i18n.translate(
   }
 );
 
+export const NAVIGATION_AUTHENTICATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.users.navigation.authenticationsTitle',
+  {
+    defaultMessage: 'Authentications',
+  }
+);
+
 export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
   'xpack.securitySolution.users.navigation.anomaliesTitle',
   {
