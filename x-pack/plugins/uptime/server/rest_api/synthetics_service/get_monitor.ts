@@ -59,7 +59,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       search: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient }): Promise<any> => {
     const { perPage = 50, page, sortField, sortOrder, search } = request.query;
     // TODO: add query/filtering params
     const {
@@ -78,7 +78,6 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       ...rest,
       perPage: perPageT,
       monitors,
-      syncErrors: server.syntheticsService.syncErrors,
     };
   },
 });
