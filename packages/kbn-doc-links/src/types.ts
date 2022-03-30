@@ -345,6 +345,7 @@ export interface DocLinks {
     troubleshooting: string;
     elasticAgent: string;
     datastreams: string;
+    datastreamsILM: string;
     datastreamsNamingScheme: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
@@ -359,15 +360,31 @@ export interface DocLinks {
   };
   readonly clients: {
     readonly guide: string;
+    readonly goIndex: string;
     readonly goOverview: string;
+    readonly javaBasicAuthentication: string;
     readonly javaIndex: string;
+    readonly javaInstallation: string;
+    readonly javaIntroduction: string;
+    readonly javaRestLow: string;
+    readonly jsClientConnecting: string;
     readonly jsIntro: string;
     readonly netGuide: string;
+    readonly netIntroduction: string;
+    readonly netNest: string;
+    readonly netSingleNode: string;
     readonly perlGuide: string;
     readonly phpGuide: string;
+    readonly phpConnecting: string;
+    readonly phpInstallation: string;
+    readonly phpOverview: string;
+    readonly pythonAuthentication: string;
     readonly pythonGuide: string;
+    readonly pythonOverview: string;
+    readonly rubyAuthentication: string;
     readonly rubyOverview: string;
     readonly rustGuide: string;
+    readonly rustOverview: string;
   };
   readonly endpoints: {
     readonly troubleshooting: string;
