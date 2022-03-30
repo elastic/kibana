@@ -207,7 +207,7 @@ export function ProcessTreeNode({
 
   const showUserEscalation = user.id && user.id !== parent.user?.id;
   const interactiveSession = !!tty;
-  const sessionIcon = interactiveSession ? 'consoleApp' : 'compute';
+  const sessionIcon = interactiveSession ? 'desktop' : 'gear';
   const iconTestSubj = hasExec
     ? 'sessionView:processTreeNodeExecIcon'
     : 'sessionView:processTreeNodeForkIcon';
