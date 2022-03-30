@@ -14,19 +14,21 @@ export const useStyles = () => {
 
   const cached = useMemo(() => {
     const descriptionList: CSSObject = {
-      padding: euiTheme.size.s,
+      padding: `${euiTheme.size.base} ${euiTheme.size.s} `,
     };
 
     const tabListTitle = {
       width: '40%',
       display: 'flex',
       alignItems: 'center',
+      marginTop: '0px',
     };
 
     const tabListDescription = {
       width: '60%',
       display: 'flex',
       alignItems: 'center',
+      marginTop: '0px',
     };
 
     return {

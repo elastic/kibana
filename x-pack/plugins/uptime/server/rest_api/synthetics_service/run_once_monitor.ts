@@ -32,7 +32,7 @@ export const runOnceSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
     const { syntheticsService } = server;
 
-    const errors = await syntheticsService.runOnceConfigs(request, [
+    const errors = await syntheticsService.runOnceConfigs([
       {
         ...monitor,
         id: monitorId,
