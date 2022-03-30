@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.1.2>>
 * <<release-notes-8.1.1>>
 * <<release-notes-8.1.0>>
 //* <<release-notes-8.0.1>>
@@ -21,6 +22,55 @@ Review important information about the {kib} 8.x releases.
 //* <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.1.2]]
+== {kib} 8.1.2
+
+coming::[8.1.2]
+
+Review the following information about the {kib} 8.1.2 release.
+
+[float]
+[[breaking-changes-8.1.2]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking changes, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+
+There are no breaking changes in {kib} 8.1.2.
+
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[enhancement-v8.1.2]]
+=== Enhancement
+Dashboard::
+Improve controls management UX {kibana-pull}127524[#127524]
+
+[float]
+[[fixes-v8.1.2]]
+=== Bug fixes
+Discover::
+* Fixes toggle table column for classic table {kibana-pull}128603[#128603]
+* Fixes selection popover close action without making a selection in Document Explorer {kibana-pull}128124[#128124]
+
+Elastic Security::
+For the Elastic Security 8.1.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Management::
+Handle scenario when user has no indices {kibana-pull}128066[#128066]
+
+Monitoring::
+Rename "APM & Fleet Server" to "Integrations Server" {kibana-pull}128574[#128574]
+
+Platform::
+Fixes KQL typeahead missing description and improve display for long field names {kibana-pull}128480[#128480]
 
 [[release-notes-8.1.1]]
 == {kib} 8.1.1
@@ -34,11 +84,7 @@ Review the following information about the {kib} 8.1.1 release.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.1.1, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 There are no breaking changes in {kib} 8.1.1.
-
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following: 
 
