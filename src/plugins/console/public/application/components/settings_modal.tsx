@@ -177,7 +177,7 @@ export function DevToolsSettingsModal(props: Props) {
             <FormattedMessage
               id="console.settingsPage.refreshingDataDescription"
               defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
-              Less frequent refresh is recommended to reduce bandwith costs."
+              Less frequent refresh is recommended to reduce bandwidth costs."
             />
           }
         >

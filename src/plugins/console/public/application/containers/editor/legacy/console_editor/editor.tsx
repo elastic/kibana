@@ -226,8 +226,8 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     editor!.getCoreEditor().getContainer().focus();
   }, [settings]);
 
-  const { keyboardShortcutsDisabled } = settingsService.toJSON();
   useEffect(() => {
+    const { keyboardShortcutsDisabled } = settings;
     if (!keyboardShortcutsDisabled) {
       registerCommands({
         senseEditor: editorInstanceRef.current!,
@@ -235,7 +235,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
         openDocumentation,
       });
     }
-  }, [sendCurrentRequestToES, openDocumentation, keyboardShortcutsDisabled]);
+  }, [sendCurrentRequestToES, openDocumentation, settings]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
