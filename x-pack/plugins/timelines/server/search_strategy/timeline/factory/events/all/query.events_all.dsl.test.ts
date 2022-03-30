@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import {
-  Direction,
-} from '../../../../../../common/search_strategy';
+import { Direction } from '../../../../../../common/search_strategy';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 
 describe('buildTimelineEventsAllQuery', () => {
@@ -21,24 +19,44 @@ describe('buildTimelineEventsAllQuery', () => {
     ];
 
     const query = buildTimelineEventsAllQuery({
-      fields: [], defaultIndex, docValueFields, filterQuery: '', language: 'eql', pagination: {
+      fields: [],
+      defaultIndex,
+      docValueFields,
+      filterQuery: '',
+      language: 'eql',
+      pagination: {
         activePage: 0,
         querySize: 100,
-      }, runtimeMappings: {}, sort: [{
-        direction: Direction.asc,
-        field: '@timestamp',
-        type: 'datetime'
-      }], timerange: {
+      },
+      runtimeMappings: {},
+      sort: [
+        {
+          direction: Direction.asc,
+          field: '@timestamp',
+          type: 'datetime',
+        },
+      ],
+      timerange: {
         from: '',
         interval: '5m',
         to: '',
-      }
+      },
     });
     expect(query).toMatchInlineSnapshot(`
       Object {
         "allow_no_indices": true,
         "body": Object {
-          "_source": true,
+          "_source": false,
+          "aggregations": Object {
+            "producers": Object {
+              "terms": Object {
+                "exclude": Array [
+                  "alerts",
+                ],
+                "field": "kibana.alert.rule.producer",
+              },
+            },
+          },
           "docvalue_fields": Array [
             Object {
               "field": "@timestamp",
@@ -53,24 +71,33 @@ describe('buildTimelineEventsAllQuery', () => {
               "field": "agent.name",
             },
           ],
-          "fields": Array [
-            Object {
-              "field": "*",
-              "include_unmapped": true,
-            },
-          ],
+          "fields": Array [],
+          "from": 0,
           "query": Object {
-            "terms": Object {
-              "_id": Array [
-                "f0a936d50b5b3a5a193d415459c14587fe633f7e519df7b5dc151d56142680e3",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "match_all": Object {},
+                },
               ],
             },
           },
           "runtime_mappings": Object {},
+          "size": 100,
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+                "unmapped_type": "datetime",
+              },
+            },
+          ],
+          "track_total_hits": true,
         },
         "ignore_unavailable": true,
-        "index": ".siem-signals-default",
-        "size": 1,
+        "index": Array [
+          ".siem-signals-default",
+        ],
       }
     `);
   });

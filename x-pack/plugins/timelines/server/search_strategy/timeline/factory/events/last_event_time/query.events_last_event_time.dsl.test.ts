@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import {
-  LastEventIndexKey,
-} from '../../../../../../common/search_strategy';
+import { LastEventIndexKey } from '../../../../../../common/search_strategy';
 import { buildLastEventTimeQuery } from './query.events_last_event_time.dsl';
 
 describe('buildLastEventTimeQuery', () => {
@@ -20,12 +18,17 @@ describe('buildLastEventTimeQuery', () => {
       { field: 'agent.name' },
     ];
 
-    const query = buildLastEventTimeQuery({ indexKey: LastEventIndexKey.ipDetails, details: { ip: '12345567'}, defaultIndex, docValueFields});
+    const query = buildLastEventTimeQuery({
+      indexKey: LastEventIndexKey.ipDetails,
+      details: { ip: '12345567' },
+      defaultIndex,
+      docValueFields,
+    });
     expect(query).toMatchInlineSnapshot(`
       Object {
         "allow_no_indices": true,
         "body": Object {
-          "_source": true,
+          "_source": false,
           "docvalue_fields": Array [
             Object {
               "field": "@timestamp",
@@ -41,23 +44,42 @@ describe('buildLastEventTimeQuery', () => {
             },
           ],
           "fields": Array [
-            Object {
-              "field": "*",
-              "include_unmapped": true,
-            },
+            "@timestamp",
           ],
           "query": Object {
-            "terms": Object {
-              "_id": Array [
-                "f0a936d50b5b3a5a193d415459c14587fe633f7e519df7b5dc151d56142680e3",
-              ],
+            "bool": Object {
+              "filter": Object {
+                "bool": Object {
+                  "should": Array [
+                    Object {
+                      "term": Object {
+                        "source.ip": "12345567",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "destination.ip": "12345567",
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
-          "runtime_mappings": Object {},
+          "size": 1,
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "desc",
+              },
+            },
+          ],
         },
         "ignore_unavailable": true,
-        "index": ".siem-signals-default",
-        "size": 1,
+        "index": Array [
+          ".siem-signals-default",
+        ],
+        "track_total_hits": false,
       }
     `);
   });
