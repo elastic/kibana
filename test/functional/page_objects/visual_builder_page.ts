@@ -830,9 +830,14 @@ export class VisualBuilderPageObject extends FtrService {
     await filterLabelInput[nth].type(label);
   }
 
-  public async setChartType(type: string, nth: number = 0) {
+  public async setChartType(type: 'Bar' | 'Line', nth: number = 0) {
     const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesChartTypeComboBox');
     return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], type);
+  }
+
+  public async setStackedType(stackedType: string, nth: number = 0) {
+    const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesStackedComboBox');
+    return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], stackedType);
   }
 
   public async setSeriesFilter(query: string) {

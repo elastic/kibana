@@ -201,11 +201,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expect(hasMachineRawFilter).to.be(true);
           });
 
-          it('should create a filter for series with multiple split by terms fields', async () => {
-            const expectedFilterPills = ['0, ios, logstash-2015.09.21'];
+          it('should create a filter for series with multiple split by terms fields one of which has formatting', async () => {
+            const expectedFilterPills = ['0, win xp, logstash-2015.09.20'];
             await visualBuilder.setMetricsGroupByTerms('bytes');
             await visualBuilder.setAnotherGroupByTermsField('machine.os.raw');
             await visualBuilder.setAnotherGroupByTermsField('_index');
+
+            await visualBuilder.clickSeriesOption();
+            await visualBuilder.setChartType('Bar');
+            await visualBuilder.setStackedType('Stacked');
+            await visualBuilder.clickPanelOptions('timeSeries');
+            await visualBuilder.setIntervalValue('1w');
 
             const el = await elasticChart.getCanvas();
             await el.scrollIntoViewIfNecessary();
