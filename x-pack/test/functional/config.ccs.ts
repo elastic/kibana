@@ -18,8 +18,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     testFiles: [require.resolve('./apps/lens')],
 
-    services,
-
     junit: {
       reportName: 'X-Pack CCS Tests',
     },
