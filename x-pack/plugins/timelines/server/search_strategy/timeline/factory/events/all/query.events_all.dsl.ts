@@ -34,16 +34,16 @@ export const buildTimelineEventsAllQuery = ({
       const { to, from } = timerangeOption;
       return !isEmpty(to) && !isEmpty(from)
         ? [
-          {
-            range: {
-              '@timestamp': {
-                gte: from,
-                lte: to,
-                format: 'strict_date_optional_time',
+            {
+              range: {
+                '@timestamp': {
+                  gte: from,
+                  lte: to,
+                  format: 'strict_date_optional_time',
+                },
               },
             },
-          },
-        ]
+          ]
         : [];
     }
     return [];
