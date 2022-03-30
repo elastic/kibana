@@ -8,7 +8,7 @@
 import { Client } from '@elastic/elasticsearch';
 
 import { systemIndicesSuperuser, createRemoteEsClientForFtrConfig } from '@kbn/test';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 /**
  * Kibana-specific @elastic/elasticsearch client instance.
