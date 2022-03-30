@@ -53,6 +53,7 @@ import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ShipperClassConstructor } from '@elastic/analytics';
 import { TelemetryCounter } from '@elastic/analytics';
+import { TelemetryCounterType } from '@elastic/analytics';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { TransitionPromptHook } from 'history';
 import { Type } from '@kbn/config-schema';
@@ -1471,6 +1472,8 @@ export class SimpleSavedObject<T = unknown> {
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 export { TelemetryCounter }
+
+export { TelemetryCounterType }
 
 // @public (undocumented)
 export interface ThemeServiceSetup {

@@ -111,14 +111,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const telemetryCounters = await getTelemetryCounters(3);
       expect(telemetryCounters).to.eql([
         {
-          type: 'succeed',
+          type: 'succeeded',
           event_type: 'test-plugin-lifecycle',
           source: 'FTR-shipper',
           code: '200',
           count: 1,
         },
         {
-          type: 'succeed',
+          type: 'succeeded',
           event_type: 'test-plugin-lifecycle',
           source: 'FTR-shipper',
           code: '200',

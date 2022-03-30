@@ -17,7 +17,6 @@ export type {
   OptInConfig,
   OptInConfigPerType,
   ShipperName,
-  EventType,
   // Types for the registerContextProvider API
   ContextProviderOpts,
   // Types for the registerEventType API

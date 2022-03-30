@@ -21,3 +21,5 @@ export type {
   ContextProviderOpts,
   TelemetryCounter,
 } from '@elastic/analytics';
+
+export { TelemetryCounterType } from '@elastic/analytics';

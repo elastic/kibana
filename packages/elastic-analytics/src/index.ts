@@ -31,13 +31,13 @@ export type {
   OptInConfig,
   OptInConfigPerType,
   ShipperName,
-  EventType,
   // Types for the registerContextProvider API
   ContextProviderOpts,
   // Types for the registerEventType API
   EventTypeOpts,
 } from './analytics_client';
-export type { Event, EventContext, TelemetryCounter } from './events';
+export type { Event, EventContext, EventType, TelemetryCounter } from './events';
+export { TelemetryCounterType } from './events';
 export type {
   RootSchema,
   SchemaObject,

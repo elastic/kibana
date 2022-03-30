@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { Event, EventContext, TelemetryCounter } from './types';
+export type { Event, EventType, EventContext, TelemetryCounter } from './types';
+export { TelemetryCounterType } from './types';

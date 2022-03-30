@@ -86,6 +86,7 @@ export type {
   ContextProviderOpts,
   TelemetryCounter,
 } from './analytics';
+export { TelemetryCounterType } from './analytics';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {

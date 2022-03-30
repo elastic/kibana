@@ -15,6 +15,7 @@ import { AnalyticsClient } from './analytics_client';
 import { take, toArray } from 'rxjs/operators';
 import { shippersMock } from '../shippers/mocks';
 import type { EventContext, TelemetryCounter } from '../events';
+import { TelemetryCounterType } from '../events';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -261,7 +262,7 @@ describe('AnalyticsClient', () => {
       const counterEventPromise = analyticsClient.telemetryCounter$.pipe(take(1)).toPromise();
 
       const counter: TelemetryCounter = {
-        type: 'succeed',
+        type: TelemetryCounterType.succeeded,
         source: 'a random value',
         event_type: 'eventTypeA',
         code: '200',

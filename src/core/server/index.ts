@@ -462,6 +462,7 @@ export type {
   ShipperClassConstructor,
   TelemetryCounter,
 } from './analytics';
+export { TelemetryCounterType } from './analytics';
 
 /**
  * Plugin specific context passed to a route handler.

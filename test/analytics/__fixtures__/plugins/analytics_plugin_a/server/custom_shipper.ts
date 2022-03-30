@@ -8,6 +8,7 @@
 
 import { Subject } from 'rxjs';
 import type { IShipper, Event, EventContext, TelemetryCounter } from 'src/core/server';
+import { TelemetryCounterType } from '../../../../../../src/core/public';
 
 export interface Action {
   action: string;
@@ -25,7 +26,7 @@ export class CustomShipper implements IShipper {
     this.actions$.next({ action: 'reportEvents', meta: events });
     events.forEach((event) => {
       this.telemetryCounter$.next({
-        type: 'succeed',
+        type: TelemetryCounterType.succeeded,
         event_type: event.event_type,
         code: '200',
         count: 1,

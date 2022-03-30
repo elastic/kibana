@@ -13,7 +13,7 @@ import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 
 import type { IShipper } from '../shippers';
-import type { EventContext, TelemetryCounter } from '../events';
+import type { EventContext, EventType, TelemetryCounter } from '../events';
 import type { RootSchema } from '../schema';
 
 /**
@@ -35,13 +35,18 @@ export interface AnalyticsClientInitContext {
 }
 
 /**
+ * Shipper Name used for indexed structures. Only used to improve the readability of the types
+ */
+export type ShipperName = string;
+
+/**
  * Constructor of a {@link IShipper}
  */
 export interface ShipperClassConstructor<Shipper extends IShipper, Config> {
   /**
    * The shipper's unique name
    */
-  shipperName: string;
+  shipperName: ShipperName;
 
   /**
    * The constructor
@@ -61,17 +66,8 @@ export interface RegisterShipperOpts {
    * @internal Set as internal and deprecated until we come up with the best design for this.
    * Not in the scope of the initial MVP.
    */
-  exclusiveEventTypes?: string[];
+  exclusiveEventTypes?: EventType[];
 }
-
-/**
- * Shipper Name used for indexed structures. Only used to improve the readability of the types
- */
-export type ShipperName = string;
-/**
- * Event Type used for indexed structures. Only used to improve the readability of the types
- */
-export type EventType = string;
 
 /**
  * Sets whether a type of event is enabled/disabled globally or per shipper.
@@ -147,7 +143,7 @@ export interface EventTypeOpts<EventTypeData> {
   /**
    * The event type's unique name.
    */
-  eventType: string;
+  eventType: EventType;
   /**
    * Schema declaring and documenting the expected structure of this event type.
    *

@@ -12,13 +12,46 @@ export interface EventContext {
 }
 
 /**
+ * Event Type used for indexed structures. Only used to improve the readability of the types
+ */
+export type EventType = string;
+
+/**
+ * Types of the Telemetry Counter: It allows to differentiate what happened to the events
+ */
+export enum TelemetryCounterType {
+  /**
+   * The event was accepted and will be sent to the shippers when they become available (and opt-in === true).
+   */
+  enqueued = 'enqueued',
+  /**
+   * The event was sent to at least one shipper.
+   */
+  sent_to_shipper = 'sent_to_shipper',
+  /**
+   * The event was successfully sent by the shipper.
+   */
+  succeeded = 'succeeded',
+  /**
+   * There was an error when processing/shipping the event.
+   * Refer to the Telemetry Counter's code for the reason.
+   */
+  failed = 'failed',
+  /**
+   * The event was dropped from the queue.
+   * Refer to the Telemetry Counter's code for the reason.
+   */
+  dropped = 'dropped',
+}
+
+/**
  * Shape of the events emitted by the telemetryCounter$ observable
  */
 export interface TelemetryCounter {
   /**
    * Indicates if the event contains data about succeeded, failed or dropped events.
    */
-  type: 'enqueued' | 'sent_to_shipper' | 'succeed' | 'failed' | 'dropped';
+  type: TelemetryCounterType;
   /**
    * Who emitted the event? It can be "client" or the name of the shipper.
    */
@@ -26,13 +59,13 @@ export interface TelemetryCounter {
   /**
    * The event type the success/failure/drop event refers to.
    */
-  event_type: string;
+  event_type: EventType;
   /**
    * Code to provide additional information about the success or failure. Examples are 200/400/504/ValidationError/UnknownError
    */
   code: string;
   /**
-   * The number of events that met this event.
+   * The number of events that this counter refers to.
    */
   count: number;
 }
@@ -48,7 +81,7 @@ export interface Event {
   /**
    * The event type.
    */
-  event_type: string;
+  event_type: EventType;
   /**
    * The specific properties of the event type.
    */

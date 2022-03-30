@@ -54,7 +54,7 @@ describe('ShippersRegistry', () => {
         `RandomEvent${Date.now()}`
       );
       // eslint-disable-next-line dot-notation
-      expect(shippersForEventType).toBe(shippersRegistry['shippersRegistry'].global);
+      expect(shippersForEventType).toBe(shippersRegistry['globalShippers']);
       expect(shippersForEventType.size).toBe(1);
       expect(shippersForEventType.get(shipperName)).toBe(shipper);
     });
@@ -116,7 +116,7 @@ describe('ShippersRegistry', () => {
         `RandomEvent${Date.now()}`
       );
       // eslint-disable-next-line dot-notation
-      expect(shippersForEventTypeNotFound).toBe(shippersRegistry['shippersRegistry'].global);
+      expect(shippersForEventTypeNotFound).toBe(shippersRegistry['globalShippers']);
       expect(shippersForEventTypeNotFound.size).toBe(0);
     });
   });

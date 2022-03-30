@@ -64,6 +64,7 @@ import { ShallowPromise } from '@kbn/utility-types';
 import { ShipperClassConstructor } from '@elastic/analytics';
 import { Stream } from 'stream';
 import { TelemetryCounter } from '@elastic/analytics';
+import { TelemetryCounterType } from '@elastic/analytics';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -3117,6 +3118,8 @@ export interface StatusServiceSetup {
 }
 
 export { TelemetryCounter }
+
+export { TelemetryCounterType }
 
 // @public
 export interface UiSettingsParams<T = unknown> {
