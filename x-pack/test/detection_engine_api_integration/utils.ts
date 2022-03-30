@@ -26,6 +26,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { ToolingLog } from '@kbn/dev-utils';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SavedObjectReference } from 'kibana/server';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import {
   CreateRulesSchema,
@@ -59,6 +61,7 @@ import {
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '../../plugins/security_solution/common/constants';
 import { DetectionMetrics } from '../../plugins/security_solution/server/usage/detections/types';
+import { LegacyRuleActions } from '../../plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types';
 import { DetectionAlert } from '../../plugins/security_solution/common/detection_engine/schemas/alerts';
 
 /**
@@ -638,7 +641,7 @@ export const createLegacyRuleAction = async (
     .query({ alert_id: alertId })
     .send({
       name: 'Legacy notification with one action',
-      interval: '1m',
+      interval: '1h',
       actions: [
         {
           id: connectorId,
@@ -2100,3 +2103,17 @@ export const getSimpleThreatMatch = (
   ],
   threat_filters: [],
 });
+
+interface LegacyActionSO extends LegacyRuleActions {
+  references: SavedObjectReference[];
+}
+
+/**
+ * Fetch all legacy action sidecar SOs from the .kibana index
+ * @param es The ElasticSearch service
+ */
+export const getLegacyActionSO = async (es: Client): Promise<SearchResponse<LegacyActionSO>> =>
+  es.search({
+    index: '.kibana',
+    q: 'type:siem-detection-engine-rule-actions',
+  });
