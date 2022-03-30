@@ -81,9 +81,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                 color="inherit"
                 data-euiicon-type="vector"
                 size="m"
-              >
-                
-              </span>
+              />
             </button>
           </span>
         </div>
@@ -113,9 +111,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                   color="inherit"
                   data-euiicon-type="sortDown"
                   size="m"
-                >
-                  
-                </span>
+                />
               </button>
             </div>
           </span>
@@ -146,9 +142,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                   color="inherit"
                   data-euiicon-type="copyClipboard"
                   size="m"
-                >
-                  
-                </span>
+                />
               </button>
             </div>
           </span>
@@ -175,9 +169,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                 color="inherit"
                 data-euiicon-type="trash"
                 size="m"
-              >
-                
-              </span>
+              />
             </button>
           </span>
         </div>
@@ -268,9 +260,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                 color="inherit"
                 data-euiicon-type="vector"
                 size="m"
-              >
-                
-              </span>
+              />
             </button>
           </span>
         </div>
@@ -300,9 +290,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                   color="inherit"
                   data-euiicon-type="sortDown"
                   size="m"
-                >
-                  
-                </span>
+                />
               </button>
             </div>
           </span>
@@ -333,9 +321,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                   color="inherit"
                   data-euiicon-type="copyClipboard"
                   size="m"
-                >
-                  
-                </span>
+                />
               </button>
             </div>
           </span>
@@ -362,9 +348,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                 color="inherit"
                 data-euiicon-type="trash"
                 size="m"
-              >
-                
-              </span>
+              />
             </button>
           </span>
         </div>

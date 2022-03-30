@@ -394,9 +394,7 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
           color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        >
-          
-        </span>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -411,9 +409,7 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
           color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
-        >
-          
-        </span>
+        />
       </button>
     </div>
   </div>
@@ -809,9 +805,7 @@ Array [
           color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        >
-          
-        </span>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -826,9 +820,7 @@ Array [
           color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
-        >
-          
-        </span>
+        />
       </button>
     </div>
   </div>,
@@ -894,9 +886,7 @@ Array [
           color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        >
-          
-        </span>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -910,9 +900,7 @@ Array [
           color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
-        >
-          
-        </span>
+        />
       </button>
     </div>
   </div>,
@@ -977,9 +965,7 @@ Array [
           color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        >
-          
-        </span>
+        />
       </button>
       <button
         aria-label="Remove Color"
@@ -993,9 +979,7 @@ Array [
           color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
-        >
-          
-        </span>
+        />
       </button>
     </div>
   </div>,

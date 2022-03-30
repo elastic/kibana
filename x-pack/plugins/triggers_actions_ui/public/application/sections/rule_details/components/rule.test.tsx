@@ -373,12 +373,9 @@ describe('execution duration overview', () => {
     const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
     expect(avgExecutionDurationPanel.exists()).toBeTruthy();
     expect(avgExecutionDurationPanel.first().prop('color')).toEqual('warning');
-
-    const avgExecutionDurationStat = wrapper
-      .find('EuiStat[data-test-subj="avgExecutionDurationStat"]')
-      .text()
-      .replaceAll('Info', '');
-    expect(avgExecutionDurationStat).toEqual('Average duration16:44:44.345');
+    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+      'Average duration16:44:44.345'
+    );
     expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeTruthy();
   });
 

@@ -769,7 +769,7 @@ describe('<SnapshotRestoreHome />', () => {
 
                   const stateMessage = find('snapshotDetail.state.value').text();
                   try {
-                    expect(stateMessage).toContain(expectedMessage); // Messages may include the word "Info" to account for the rendered text coming from EuiIcon
+                    expect(stateMessage).toBe(expectedMessage);
                   } catch {
                     throw new Error(
                       `Expected snapshot state message "${expectedMessage}" for state "${state}, but got "${stateMessage}".`

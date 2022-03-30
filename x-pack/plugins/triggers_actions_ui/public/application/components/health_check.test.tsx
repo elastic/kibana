@@ -107,12 +107,10 @@ describe('health check', () => {
     const [action] = queryAllByText(/Learn more/i);
 
     expect(description.textContent).toMatchInlineSnapshot(
-      `"You must enable API keys to use Alerting. Learn more.External link(opens in a new tab or window)"`
+      `"You must enable API keys to use Alerting. Learn more.(opens in a new tab or window)"`
     );
 
-    expect(action.textContent).toMatchInlineSnapshot(
-      `"Learn more.External link(opens in a new tab or window)"`
-    );
+    expect(action.textContent).toMatchInlineSnapshot(`"Learn more.(opens in a new tab or window)"`);
 
     expect(action.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"`
@@ -143,12 +141,12 @@ describe('health check', () => {
 
     const description = queryByRole(/banner/i);
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"You must configure an encryption key to use Alerting. Learn more.External link(opens in a new tab or window)"`
+      `"You must configure an encryption key to use Alerting. Learn more.(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
     expect(action!.textContent).toMatchInlineSnapshot(
-      `"Learn more.External link(opens in a new tab or window)"`
+      `"Learn more.(opens in a new tab or window)"`
     );
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alert-action-settings-kb.html#general-alert-action-settings"`
@@ -181,12 +179,12 @@ describe('health check', () => {
     const description = queryByText(/You must enable/i);
 
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"You must enable API keys and configure an encryption key to use Alerting. Learn more.External link(opens in a new tab or window)"`
+      `"You must enable API keys and configure an encryption key to use Alerting. Learn more.(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
     expect(action!.textContent).toMatchInlineSnapshot(
-      `"Learn more.External link(opens in a new tab or window)"`
+      `"Learn more.(opens in a new tab or window)"`
     );
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alerting-setup.html#alerting-prerequisites"`

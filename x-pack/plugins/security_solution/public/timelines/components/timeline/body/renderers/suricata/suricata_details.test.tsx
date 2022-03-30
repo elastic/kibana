@@ -53,11 +53,7 @@ describe('SuricataDetails', () => {
           />
         </TestProviders>
       );
-      const removeEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
-        'External link',
-        ''
-      );
-      expect(removeEuiIconText).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
       );
     });

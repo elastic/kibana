@@ -145,9 +145,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    >
-                      
-                    </span>
+                    />
                   </span>
                 </div>
               </div>
@@ -213,9 +211,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    >
-                      
-                    </span>
+                    />
                   </span>
                 </div>
               </div>
@@ -563,9 +559,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  >
-                    
-                  </span>
+                  />
                 </span>
               </div>
             </div>
@@ -631,9 +625,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  >
-                    
-                  </span>
+                  />
                 </span>
               </div>
             </div>
@@ -991,9 +983,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    >
-                      
-                    </span>
+                    />
                   </span>
                 </div>
               </div>
@@ -1059,9 +1049,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    >
-                      
-                    </span>
+                    />
                   </span>
                 </div>
               </div>
