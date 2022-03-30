@@ -61,12 +61,14 @@ export class SyntheticsService {
   private indexTemplateInstalling?: boolean;
 
   public isAllowed: boolean;
+  public signupUrl: string | null;
 
   constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
     this.config = config;
     this.isAllowed = false;
+    this.signupUrl = null;
 
     this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
 
@@ -78,7 +80,9 @@ export class SyntheticsService {
   public async init() {
     await this.registerServiceLocations();
 
-    this.isAllowed = await this.apiClient.checkIfAccountAllowed();
+    const { allowed, signupUrl } = await this.apiClient.checkAccountAccessStatus();
+    this.isAllowed = allowed;
+    this.signupUrl = signupUrl;
   }
 
   private setupIndexTemplates() {
@@ -140,7 +144,9 @@ export class SyntheticsService {
 
               await service.registerServiceLocations();
 
-              service.isAllowed = await service.apiClient.checkIfAccountAllowed();
+              const { allowed, signupUrl } = await service.apiClient.checkAccountAccessStatus();
+              service.isAllowed = allowed;
+              service.signupUrl = signupUrl;
 
               if (service.isAllowed) {
                 service.setupIndexTemplates();
@@ -191,32 +197,25 @@ export class SyntheticsService {
     }
   }
 
-  async getOutput(request?: KibanaRequest) {
-    if (!this.apiKey) {
-      try {
-        this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server, request });
-      } catch (err) {
-        this.logger.error(err);
-        throw err;
-      }
+  async getApiKey() {
+    try {
+      this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server });
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
     }
 
-    if (!this.apiKey) {
-      const error = new APIKeyMissingError();
-      this.logger.error(error);
-      throw error;
-    }
+    return this.apiKey;
+  }
 
-    this.logger.debug('Found api key and esHosts for service.');
-
+  async getOutput(apiKey: SyntheticsServiceApiKey) {
     return {
       hosts: this.esHosts,
-      api_key: `${this.apiKey.id}:${this.apiKey.apiKey}`,
+      api_key: `${apiKey?.id}:${apiKey?.apiKey}`,
     };
   }
 
   async pushConfigs(
-    request?: KibanaRequest,
     configs?: Array<
       SyntheticsMonitorWithId & {
         fields_under_root?: boolean;
@@ -229,9 +228,16 @@ export class SyntheticsService {
       this.logger.debug('No monitor found which can be pushed to service.');
       return;
     }
+
+    this.apiKey = await this.getApiKey();
+
+    if (!this.apiKey) {
+      return null;
+    }
+
     const data = {
       monitors,
-      output: await this.getOutput(request),
+      output: await this.getOutput(this.apiKey),
     };
 
     this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
@@ -245,7 +251,6 @@ export class SyntheticsService {
   }
 
   async runOnceConfigs(
-    request?: KibanaRequest,
     configs?: Array<
       SyntheticsMonitorWithId & {
         fields_under_root?: boolean;
@@ -257,9 +262,15 @@ export class SyntheticsService {
     if (monitors.length === 0) {
       return;
     }
+    this.apiKey = await this.getApiKey();
+
+    if (!this.apiKey) {
+      return null;
+    }
+
     const data = {
       monitors,
-      output: await this.getOutput(request),
+      output: await this.getOutput(this.apiKey),
     };
 
     try {
@@ -283,9 +294,16 @@ export class SyntheticsService {
     if (monitors.length === 0) {
       return;
     }
+
+    this.apiKey = await this.getApiKey();
+
+    if (!this.apiKey) {
+      return null;
+    }
+
     const data = {
       monitors,
-      output: await this.getOutput(request),
+      output: await this.getOutput(this.apiKey),
     };
 
     try {
@@ -296,12 +314,23 @@ export class SyntheticsService {
     }
   }
 
-  async deleteConfigs(request: KibanaRequest, configs: SyntheticsMonitorWithId[]) {
+  async deleteConfigs(configs: SyntheticsMonitorWithId[]) {
+    this.apiKey = await this.getApiKey();
+
+    if (!this.apiKey) {
+      return null;
+    }
+
     const data = {
       monitors: this.formatConfigs(configs),
-      output: await this.getOutput(request),
+      output: await this.getOutput(this.apiKey),
     };
     return await this.apiClient.delete(data);
+  }
+
+  async deleteAllConfigs() {
+    const configs = await this.getMonitorConfigs();
+    return await this.deleteConfigs(configs);
   }
 
   async getMonitorConfigs() {
@@ -359,14 +388,6 @@ export class SyntheticsService {
     return configs.map((config: Partial<MonitorFields>) =>
       formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
     );
-  }
-}
-
-class APIKeyMissingError extends Error {
-  constructor() {
-    super();
-    this.message = 'API key is needed for synthetics service.';
-    this.name = 'APIKeyMissingError';
   }
 }
 

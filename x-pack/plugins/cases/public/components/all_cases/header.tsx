@@ -42,7 +42,7 @@ export const CasesTableHeader: FunctionComponent<Props> = ({
   refresh,
   userCanCrud,
 }) => (
-  <HeaderPage title={i18n.PAGE_TITLE} border>
+  <HeaderPage title={i18n.PAGE_TITLE} border data-test-subj="cases-all-title">
     <EuiFlexGroup alignItems="center" gutterSize="m" wrap={true} data-test-subj="all-cases-header">
       {userCanCrud ? (
         <>

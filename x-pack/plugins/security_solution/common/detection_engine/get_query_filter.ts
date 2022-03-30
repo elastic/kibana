@@ -43,6 +43,7 @@ export const getQueryFilter = (
     lists,
     excludeExceptions,
     chunkSize: 1024,
+    alias: null,
   });
   const initialQuery = { query, language };
   const allFilters = getAllFilters(filters as Filter[], exceptionFilter);

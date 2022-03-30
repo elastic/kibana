@@ -26,6 +26,7 @@ import {
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   Attribution,
+  CustomIcon,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
@@ -92,7 +93,8 @@ export interface ILayer {
   isVisible(): boolean;
   cloneDescriptor(): Promise<LayerDescriptor>;
   renderStyleEditor(
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
@@ -431,13 +433,14 @@ export class AbstractLayer implements ILayer {
   }
 
   renderStyleEditor(
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ): ReactElement<any> | null {
     const style = this.getStyleForEditing();
     if (!style) {
       return null;
     }
-    return style.renderEditor(onStyleDescriptorChange);
+    return style.renderEditor(onStyleDescriptorChange, onCustomIconsChange);
   }
 
   getIndexPatternIds(): string[] {
