@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import yaml from 'js-yaml';
 import { KibanaRequest } from 'kibana/server';
 import { RegistryVarsEntry } from '../../../../fleet/common';
 import {
   POLICY_ELASTIC_AGENT_ON_CLOUD,
   INPUT_VAR_NAME_TO_SCHEMA_PATH,
-  ELASTIC_CLOUD_APM_AGENT_POLICY_ID,
 } from '../../../common/fleet';
 import {
   APMPluginSetupDependencies,
@@ -36,7 +36,6 @@ export async function getApmPackagePolicyDefinition({
   });
 
   return {
-    id: ELASTIC_CLOUD_APM_AGENT_POLICY_ID,
     name: 'Elastic APM',
     namespace: 'default',
     enabled: true,
@@ -73,6 +72,9 @@ function getApmPackageInputVars({
 }): Record<string, { type: string; value: any }> {
   const overrideValues: Record<string, any> = {
     url: cloudPluginSetup?.apm?.url, // overrides 'apm-server.url' to be the cloud APM host
+    rum_allow_origins: ensureValidMultiText(
+      apmServerSchema[INPUT_VAR_NAME_TO_SCHEMA_PATH.rum_allow_origins]
+    ), // fixes issue where "*" needs to be wrapped in quotes to be parsed as a YAML string
   };
 
   return policyTemplateInputVars.reduce((acc, registryVarsEntry) => {
@@ -89,4 +91,21 @@ function getApmPackageInputVars({
       },
     };
   }, {});
+}
+
+function ensureValidMultiText(textMultiValue: string[] | undefined) {
+  if (!textMultiValue) {
+    return undefined;
+  }
+  return textMultiValue.map(escapeInvalidYamlString);
+}
+function escapeInvalidYamlString(yamlString: string) {
+  try {
+    yaml.load(yamlString);
+  } catch (error) {
+    if (error instanceof yaml.YAMLException) {
+      return `"${yamlString}"`;
+    }
+  }
+  return yamlString;
 }

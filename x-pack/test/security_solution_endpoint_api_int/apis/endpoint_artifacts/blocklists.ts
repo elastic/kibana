@@ -124,35 +124,6 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/types that failed validation:/));
           });
 
-          it(`should error on [${blocklistApiCall.method}] if the same hash type is present twice`, async () => {
-            const body = blocklistApiCall.getBody();
-
-            body.entries = [
-              {
-                field: 'file.hash.sha256',
-                value: ['a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3'],
-                type: 'match_any',
-                operator: 'included',
-              },
-              {
-                field: 'file.hash.sha256',
-                value: [
-                  '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
-                  'FCDE2B2EDBA56BF408601FB721FE9B5C338D10EE429EA04FAE5511B68FBF8FB9',
-                ],
-                type: 'match_any',
-                operator: 'included',
-              },
-            ];
-
-            await supertest[blocklistApiCall.method](blocklistApiCall.path)
-              .set('kbn-xsrf', 'true')
-              .send(body)
-              .expect(400)
-              .expect(anEndpointArtifactError)
-              .expect(anErrorMessageWith(/duplicated/));
-          });
-
           it(`should error on [${blocklistApiCall.method}] if an invalid hash is used`, async () => {
             const body = blocklistApiCall.getBody();
 

@@ -128,6 +128,9 @@ const aggregateResults = {
             numTriggeredActions: {
               value: 5.0,
             },
+            numScheduledActions: {
+              value: 5.0,
+            },
             outcomeAndMessage: {
               hits: {
                 total: {
@@ -208,6 +211,9 @@ const aggregateResults = {
             meta: {},
             doc_count: 1,
             numTriggeredActions: {
+              value: 5.0,
+            },
+            numScheduledActions: {
               value: 5.0,
             },
             outcomeAndMessage: {
@@ -625,6 +631,7 @@ describe('getExecutionLogForRule()', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 0,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -643,6 +650,7 @@ describe('getExecutionLogForRule()', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -731,7 +739,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+        filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
@@ -771,7 +779,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+        filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
@@ -811,7 +819,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+        filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: '2019-02-12T20:16:22.479Z',
         start: '2019-02-12T20:01:22.479Z',
@@ -852,7 +860,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+        filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
@@ -917,7 +925,7 @@ describe('getExecutionLogForRule()', () => {
         getExecutionLogByIdParams({ sort: [{ foo: { order: 'desc' } }] })
       )
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Invalid sort field "foo" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions]]`
+      `[Error: Invalid sort field "foo" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]]`
     );
   });
 
