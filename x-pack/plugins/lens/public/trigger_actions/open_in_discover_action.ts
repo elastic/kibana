@@ -21,8 +21,8 @@ export const createOpenInDiscoverAction = (discover: DiscoverStart, hasDiscoverA
     order: 19, // right after Inspect which is 20
     getIconType: () => 'popout',
     getDisplayName: () =>
-      i18n.translate('xpack.lens.actions.openInDiscover', {
-        defaultMessage: 'Open in Discover',
+      i18n.translate('xpack.lens.actions.exploreRawData', {
+        defaultMessage: 'Explore Raw Data',
       }),
     isCompatible: async (context: { embeddable: IEmbeddable }) => {
       if (!hasDiscoverAccess) return false;
