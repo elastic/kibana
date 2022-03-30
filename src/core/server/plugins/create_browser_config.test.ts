@@ -119,4 +119,44 @@ describe('createBrowserConfig', () => {
       },
     });
   });
+
+  it('only includes leaf properties that are `true` when in nested structures', () => {
+    const config = {
+      foo: 'bar',
+      deeply: {
+        str: 'string',
+        nested: {
+          hello: 'dolly',
+          structure: {
+            propA: 'propA',
+            propB: 'propB',
+          },
+        },
+      },
+    };
+
+    const descriptor: ExposedToBrowserDescriptor<typeof config> = {
+      deeply: {
+        nested: {
+          hello: true,
+          structure: {
+            propA: true,
+          },
+        },
+      },
+    };
+
+    const browserConfig = createBrowserConfig(config, descriptor);
+
+    expect(browserConfig).toEqual({
+      deeply: {
+        nested: {
+          hello: 'dolly',
+          structure: {
+            propA: 'propA',
+          },
+        },
+      },
+    });
+  });
 });
