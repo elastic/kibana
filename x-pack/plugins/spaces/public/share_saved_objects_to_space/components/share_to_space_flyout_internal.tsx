@@ -410,7 +410,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {flyoutIcon && (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={flyoutIcon} />
+              <EuiIcon size="l" type={flyoutIcon} />
             </EuiFlexItem>
           )}
           <EuiFlexItem>
