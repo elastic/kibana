@@ -93,6 +93,9 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
     'xpack.securitySolution.blocklist.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add blocklist entry' }
   ),
+  searchPlaceholderInfo: i18n.translate('xpack.securitySolution.blocklist.searchPlaceholderInfo', {
+    defaultMessage: 'Search on the fields below: name, description, value',
+  }),
 };
 
 export const Blocklist = memo(() => {
