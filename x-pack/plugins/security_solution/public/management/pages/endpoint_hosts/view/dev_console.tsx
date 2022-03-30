@@ -126,17 +126,11 @@ const RunningConsole = memo<{ registeredConsole: RegisteredConsoleClient }>(
 );
 RunningConsole.displayName = 'RunningConsole';
 
-// const getId = (() => {
-//   const ids = [Math.random().toString(36), Math.random().toString(36), Math.random().toString(36)];
-//   return () => ids[Math.floor(Math.random() * ids.length)];
-// })();
-
 // ------------------------------------------------------------
 // FOR DEV PURPOSES ONLY
 // FIXME:PT Delete once we have support via row actions menu
 // ------------------------------------------------------------
-export const DevConsole = memo(() => {
-  const isConsoleEnabled = useIsExperimentalFeatureEnabled('responseActionsConsoleEnabled');
+export const ShowDevConsole = memo(() => {
   const consoleManager = useConsoleManager();
   const commandService = useMemo(() => {
     return new DevCommandService();
@@ -159,11 +153,7 @@ export const DevConsole = memo(() => {
       .show();
   }, [commandService, consoleManager]);
 
-  const {
-    urlParams: { showConsole = false },
-  } = useUrlParams();
-
-  return isConsoleEnabled && showConsole ? (
+  return (
     <EuiPanel>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
@@ -187,6 +177,16 @@ export const DevConsole = memo(() => {
         <Console prompt="$$>" commandService={commandService} data-test-subj="dev" />
       </EuiPanel>
     </EuiPanel>
-  ) : null;
+  );
+});
+ShowDevConsole.displayName = 'ShowDevConsole';
+
+export const DevConsole = memo(() => {
+  const isConsoleEnabled = useIsExperimentalFeatureEnabled('responseActionsConsoleEnabled');
+  const {
+    urlParams: { showConsole = false },
+  } = useUrlParams();
+
+  return isConsoleEnabled && showConsole ? <ShowDevConsole /> : null;
 });
 DevConsole.displayName = 'DevConsole';
