@@ -9,7 +9,7 @@ import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function RemoteEsArchiverProvider({ getService }: FtrProviderContext): EsArchiver {
-  const remoteEs = getService('remoteEs');
+  const remoteEs = getService('remoteEs' as 'es');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
 

@@ -43,7 +43,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await browser.setWindowSize(1280, 1200);
       try {
         config.get('esTestCluster.ccs');
-        remoteEsArchiver = getService('remoteEsArchiver');
+        remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
         esNode = remoteEsArchiver;
         fixtureDirs = remoteFixtures;
         indexPatternString = remoteIndexPatternString;
