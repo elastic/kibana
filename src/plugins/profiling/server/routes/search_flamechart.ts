@@ -7,7 +7,6 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, Logger } from 'kibana/server';
-import seedrandom from 'seedrandom';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import { getRemoteRoutePaths } from '../../common';
 import { FlameGraph } from '../../common/flamegraph';
@@ -21,11 +20,7 @@ import {
 } from '../../common/profiling';
 import { logExecutionLatency } from './logger';
 import { newProjectTimeQuery, ProjectTimeQuery } from './mappings';
-
-export interface DownsampledEventsIndex {
-  name: string;
-  sampleRate: number;
-}
+import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 
 // convertFrameIDToFileID extracts the FileID from the FrameID and returns as base64url string.
 export function extractFileIDFromFrameID(frameID: string): string {
@@ -51,91 +46,6 @@ function extractFileIDArrayFromFrameIDArray(frameIDs: string[]): string[] {
     fileIDs[i] = extractFileIDFromFrameID(frameIDs[i]);
   }
   return fileIDs;
-}
-
-// Return the index that has between targetSampleSize..targetSampleSize*samplingFactor entries.
-// The starting point is the number of entries from the profiling-events-5pow<initialExp> index.
-//
-// More details on how the down-sampling works can be found at the write path
-//   https://github.com/elastic/prodfiler/blob/bdcc2711c6cd7e89d63b58a17329fb9fdbabe008/pf-elastic-collector/elastic.go
-export function getSampledTraceEventsIndex(
-  index: string,
-  targetSampleSize: number,
-  sampleCountFromInitialExp: number,
-  initialExp: number
-): DownsampledEventsIndex {
-  const maxExp = 11;
-  const samplingFactor = 5;
-  const fullEventsIndex: DownsampledEventsIndex = { name: index, sampleRate: 1 };
-  const downsampledIndexPrefix =
-    (index.endsWith('-all') ? index.replaceAll('-all', '') : index) + '-5pow';
-  const downsampledIndex = (i: number): string => {
-    return downsampledIndexPrefix + i.toString().padStart(2, '0');
-  };
-
-  if (sampleCountFromInitialExp === 0) {
-    // Take the shortcut to the full events index.
-    return fullEventsIndex;
-  }
-
-  if (sampleCountFromInitialExp >= samplingFactor * targetSampleSize) {
-    // Search in more down-sampled indexes.
-    for (let i = initialExp + 1; i <= maxExp; i++) {
-      sampleCountFromInitialExp /= samplingFactor;
-      if (sampleCountFromInitialExp < samplingFactor * targetSampleSize) {
-        return { name: downsampledIndex(i), sampleRate: 1 / samplingFactor ** i };
-      }
-    }
-    // If we come here, it means that the most sparse index still holds too many items.
-    // The only problem is the query time, the result set is good.
-    return { name: downsampledIndex(11), sampleRate: 1 / samplingFactor ** maxExp };
-  } else if (sampleCountFromInitialExp < targetSampleSize) {
-    // Search in less down-sampled indexes.
-    for (let i = initialExp - 1; i >= 1; i--) {
-      sampleCountFromInitialExp *= samplingFactor;
-      if (sampleCountFromInitialExp >= targetSampleSize) {
-        return {
-          name: downsampledIndex(i),
-          sampleRate: 1 / samplingFactor ** i,
-        };
-      }
-    }
-
-    return fullEventsIndex;
-  }
-
-  return {
-    name: downsampledIndex(initialExp),
-    sampleRate: 1 / samplingFactor ** initialExp,
-  };
-}
-
-function downsampleEventsRandomly(
-  stackTraceEvents: Map<StackTraceID, number>,
-  p: number,
-  seed: string
-): number {
-  let totalCount = 0;
-
-  // Make the RNG predictable to get reproducible results.
-  const random = seedrandom(seed);
-
-  for (const [id, count] of stackTraceEvents) {
-    let newCount = 0;
-    for (let i = 0; i < count; i++) {
-      if (random() < p) {
-        newCount++;
-      }
-    }
-    if (newCount) {
-      stackTraceEvents.set(id, newCount);
-      totalCount += newCount;
-    } else {
-      stackTraceEvents.delete(id);
-    }
-  }
-
-  return totalCount;
 }
 
 function getNumberOfUniqueStacktracesWithoutLeafNode(
@@ -185,35 +95,13 @@ async function queryFlameGraph(
   filter: ProjectTimeQuery,
   sampleSize: number
 ): Promise<FlameGraph> {
-  // Start with counting the results in the index down-sampled by 5^6.
-  // That is in the middle of our down-sampled indexes.
-  const initialExp = 6;
   const testing = index === 'profiling-events2';
-  const downsampledIndexPrefix =
-    (index.endsWith('-all') ? index.replaceAll('-all', '') : index) + '-5pow';
-  const initialDownsampledIndex = downsampledIndexPrefix + initialExp.toString().padStart(2, '0');
 
   const eventsIndex = await logExecutionLatency(
     logger,
     'query to find downsampled index',
     async () => {
-      let sampleCountFromInitialExp = 0;
-      try {
-        const resp = await client.search({
-          index: initialDownsampledIndex,
-          body: {
-            query: filter,
-            size: 0,
-            track_total_hits: true,
-          },
-        });
-        sampleCountFromInitialExp = resp.body.hits.total?.value as number;
-      } catch (e) {
-        logger.info(e.message);
-      }
-
-      logger.info('sampleCountFromPow6 ' + sampleCountFromInitialExp);
-      return getSampledTraceEventsIndex(index, sampleSize, sampleCountFromInitialExp, initialExp);
+      return await findDownsampledIndex(logger, client, index, filter, sampleSize);
     }
   );
 
