@@ -14,7 +14,7 @@ import {
   timeoutWith,
   startWith,
 } from 'rxjs/operators';
-import { sortBy, isEqual } from 'lodash';
+import { sortBy } from 'lodash';
 import { isDeepStrictEqual } from 'util';
 
 import { type PluginName } from '../plugins';
@@ -71,7 +71,12 @@ export class PluginsStatusService {
 
     this.coreSubscription = deps.core$
       .pipe(debounceTime(10))
-      .subscribe((coreStatus: CoreStatus) => this.updateCoreAndPluginStatuses(coreStatus));
+      .subscribe((coreStatus: CoreStatus) => {
+        this.coreStatus = coreStatus;
+        this.updateRootPluginsStatuses();
+        this.updateDependenciesStatuses(this.rootPlugins);
+        this.reportNewStatusToObservers();
+      });
   }
 
   /**
@@ -96,8 +101,19 @@ export class PluginsStatusService {
 
     this.reportedStatusSubscriptions[plugin] = status$
       // Set a timeout for externally-defined status Observables
-      .pipe(timeoutWith(this.statusTimeoutMs, status$.pipe(startWith(defaultStatus))))
-      .subscribe((status) => this.updatePluginReportedStatus(plugin, status));
+      .pipe(
+        timeoutWith(this.statusTimeoutMs, status$.pipe(startWith(defaultStatus))),
+        distinctUntilChanged()
+      )
+      .subscribe((status) => {
+        const levelChanged = this.updatePluginReportedStatus(plugin, status);
+
+        if (levelChanged) {
+          this.updateDependenciesStatuses([plugin]);
+        }
+
+        this.reportNewStatusToObservers();
+      });
   }
 
   /**
@@ -233,16 +249,14 @@ export class PluginsStatusService {
   }
 
   /**
-   * Updates the core services statuses and plugins' statuses
-   * according to the latest status reported by core services.
-   * @param {CoreStatus} coreStatus the latest status of core services
+   * Updates the root plugins statuses according to the current core services status
    */
-  private updateCoreAndPluginStatuses(coreStatus: CoreStatus): void {
-    this.coreStatus = coreStatus!;
+  private updateRootPluginsStatuses(): void {
     const derivedStatus = getSummaryStatus(Object.entries(this.coreStatus), {
       allAvailableSummary: `All dependencies are available`,
     });
 
+    // note that the derived status is the same for all root plugins
     this.rootPlugins.forEach((plugin) => {
       this.pluginData[plugin].derivedStatus = derivedStatus;
       if (!this.isReportingStatus[plugin]) {
@@ -250,18 +264,19 @@ export class PluginsStatusService {
         this.pluginStatus[plugin] = derivedStatus;
       }
     });
-
-    this.updatePluginsStatuses(this.rootPlugins);
   }
 
   /**
-   * Determine the derived statuses of the specified plugins and their dependencies,
+   * Determine the derived statuses of the specified plugins' dependencies,
    * updating them on the pluginData structure
    * Optionally, if the plugins have not registered a custom status Observable, update their "current" status as well.
-   * @param {PluginName[]} plugins The names of the plugins to be updated
+   * @param {PluginName[]} plugins The names of the plugins to be updated, along with their subtrees
    */
-  private updatePluginsStatuses(plugins: PluginName[]): void {
-    const toCheck = new Set<PluginName>(plugins);
+  private updateDependenciesStatuses(plugins: PluginName[]): void {
+    const toCheck = new Set<PluginName>();
+    plugins.forEach((plugin) =>
+      this.pluginData[plugin].reverseDependencies.forEach((revDep) => toCheck.add(revDep))
+    );
 
     // Note that we are updating the plugins in an ordered fashion.
     // This way, when updating plugin X (at depth = N),
@@ -276,9 +291,6 @@ export class PluginsStatusService {
         this.pluginData[current].reverseDependencies.forEach((revDep) => toCheck.add(revDep));
       }
     }
-
-    this.pluginData$.next(this.pluginData);
-    this.pluginStatus$.next({ ...this.pluginStatus });
   }
 
   /**
@@ -328,15 +340,22 @@ export class PluginsStatusService {
    * Updates the reported status for the given plugin, along with the status of its dependencies tree.
    * @param {PluginName} plugin The name of the plugin whose reported status must be updated
    * @param {ServiceStatus} reportedStatus The newly reported status for that plugin
+   * @return {boolean} true if the level of the reported status changed
    */
-  private updatePluginReportedStatus(plugin: PluginName, reportedStatus: ServiceStatus): void {
+  private updatePluginReportedStatus(plugin: PluginName, reportedStatus: ServiceStatus): boolean {
     const previousReportedStatus = this.pluginData[plugin].reportedStatus;
 
     this.pluginData[plugin].reportedStatus = reportedStatus;
     this.pluginStatus[plugin] = reportedStatus;
 
-    if (!isEqual(previousReportedStatus, reportedStatus)) {
-      this.updatePluginsStatuses([plugin]);
-    }
+    return previousReportedStatus?.level !== reportedStatus.level;
+  }
+
+  /**
+   * Emit new status to internal Subjects, propagating it to the output Observables.
+   */
+  private reportNewStatusToObservers(): void {
+    this.pluginData$.next(this.pluginData);
+    this.pluginStatus$.next({ ...this.pluginStatus });
   }
 }
