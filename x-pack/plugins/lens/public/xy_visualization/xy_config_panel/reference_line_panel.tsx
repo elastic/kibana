@@ -23,8 +23,9 @@ import { useDebouncedValue } from '../../shared_components';
 import { idPrefix } from './dimension_editor';
 import { isHorizontalChart } from '../state_helpers';
 import {
+  IconSelectSetting,
   MarkerDecorationPosition,
-  MarkerDecorationSettings,
+  TextDecorationSetting,
 } from './shared/marker_decoration_settings';
 import { LineStyleSettings } from './shared/line_style_settings';
 
@@ -75,7 +76,8 @@ export const ReferenceLinePanel = (
 
   return (
     <>
-      <MarkerDecorationSettings setConfig={setConfig} currentConfig={localConfig} />
+      <TextDecorationSetting setConfig={setConfig} currentConfig={localConfig} />
+      <IconSelectSetting setConfig={setConfig} currentConfig={localConfig} />
       <MarkerDecorationPosition
         isHorizontal={isHorizontal}
         setConfig={setConfig}

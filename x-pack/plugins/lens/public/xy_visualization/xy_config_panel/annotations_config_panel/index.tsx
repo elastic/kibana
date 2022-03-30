@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import './index.scss';
 import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
@@ -15,17 +14,14 @@ import { EventAnnotationConfig } from 'src/plugins/event_annotation/common/types
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYAnnotationLayerConfig } from '../../types';
 import { FormatFactory } from '../../../../common';
-import { ColorPicker } from '../../xy_config_panel/color_picker';
 import { DimensionEditorSection, NameInput, useDebouncedValue } from '../../../shared_components';
 import { isHorizontalChart } from '../../state_helpers';
-import { MarkerDecorationSettings } from '../../xy_config_panel/shared/marker_decoration_settings';
-import { LineStyleSettings } from '../../xy_config_panel/shared/line_style_settings';
-import { updateLayer } from '../../xy_config_panel';
+import { defaultAnnotationLabel } from '../../annotations/helpers';
+import { ColorPicker } from '../color_picker';
+import { IconSelectSetting, TextDecorationSetting } from '../shared/marker_decoration_settings';
+import { LineStyleSettings } from '../shared/line_style_settings';
+import { updateLayer } from '..';
 import { annotationsIconSet } from './icon_set';
-
-export const defaultAnnotationLabel = i18n.translate('xpack.lens.xyChart.defaultAnnotationLabel', {
-  defaultMessage: 'Event',
-});
 
 export const AnnotationsPanel = (
   props: VisualizationDimensionEditorProps<State> & {
@@ -101,13 +97,20 @@ export const AnnotationsPanel = (
             setAnnotations({ label: value });
           }}
         />
-        <MarkerDecorationSettings
+        <IconSelectSetting
           setConfig={setAnnotations}
           currentConfig={{
             axisMode: 'bottom',
             ...currentAnnotations,
           }}
           customIconSet={annotationsIconSet}
+        />
+        <TextDecorationSetting
+          setConfig={setAnnotations}
+          currentConfig={{
+            axisMode: 'bottom',
+            ...currentAnnotations,
+          }}
         />
         <LineStyleSettings
           isHorizontal={isHorizontal}
