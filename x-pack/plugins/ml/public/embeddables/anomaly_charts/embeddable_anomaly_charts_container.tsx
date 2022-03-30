@@ -27,7 +27,6 @@ import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import { MlLocatorParams } from '../../../common/types/locator';
-import type { RenderCompleteDispatcher } from '../../../../../../src/plugins/kibana_utils/public';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -39,7 +38,9 @@ export interface EmbeddableAnomalyChartsContainerProps {
   refresh: Observable<any>;
   onInputChange: (input: Partial<AnomalyChartsEmbeddableInput>) => void;
   onOutputChange: (output: Partial<AnomalyChartsEmbeddableOutput>) => void;
-  renderCompleteDispatcher: RenderCompleteDispatcher;
+  onRenderComplete: () => void;
+  onLoading: () => void;
+  onError: (error: Error) => void;
 }
 
 export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
@@ -50,7 +51,9 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   refresh,
   onInputChange,
   onOutputChange,
-  renderCompleteDispatcher,
+  onRenderComplete,
+  onError,
+  onLoading,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
@@ -98,7 +101,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     services,
     chartWidth,
     severity.val,
-    renderCompleteDispatcher
+    { onRenderComplete, onError, onLoading }
   );
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {

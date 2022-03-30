@@ -26,7 +26,6 @@ import type { ExplorerChartsData } from '../../application/explorer/explorer_cha
 import { processFilters } from '../common/process_filters';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { getJobsObservable } from '../common/get_jobs_observable';
-import type { RenderCompleteDispatcher } from '../../../../../../src/plugins/kibana_utils/public';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
@@ -37,7 +36,11 @@ export function useAnomalyChartsInputResolver(
   services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
   chartWidth: number,
   severity: number,
-  renderCompleteDispatcher: RenderCompleteDispatcher
+  renderCallbacks: {
+    onRenderComplete: () => void;
+    onLoading: () => void;
+    onError: (error: Error) => void;
+  }
 ): {
   chartsData: ExplorerChartsData | undefined;
   isLoading: boolean;
@@ -64,7 +67,7 @@ export function useAnomalyChartsInputResolver(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
         tap(() => {
-          renderCompleteDispatcher.dispatchInProgress();
+          renderCallbacks.onLoading();
         }),
         switchMap(([explorerJobs, input, embeddableContainerWidth, severityValue]) => {
           if (!explorerJobs) {
@@ -124,7 +127,7 @@ export function useAnomalyChartsInputResolver(
           setChartsData(results);
           setIsLoading(false);
 
-          renderCompleteDispatcher.dispatchComplete();
+          renderCallbacks.onRenderComplete();
         }
       });
 
@@ -143,7 +146,7 @@ export function useAnomalyChartsInputResolver(
 
   useEffect(() => {
     if (error) {
-      renderCompleteDispatcher.dispatchError();
+      renderCallbacks.onError(error);
     }
   }, [error]);
 

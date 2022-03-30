@@ -58,14 +58,17 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
 
   public onLoading() {
     this.renderComplete.dispatchInProgress();
+    this.updateOutput({ loading: true, error: undefined });
   }
 
-  public onError() {
+  public onError(error: Error) {
     this.renderComplete.dispatchError();
+    this.updateOutput({ loading: false, error: { name: error.name, message: error.message } });
   }
 
   public onRenderComplete() {
     this.renderComplete.dispatchComplete();
+    this.updateOutput({ loading: false, error: undefined });
   }
 
   public render(node: HTMLElement) {

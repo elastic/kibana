@@ -37,7 +37,7 @@ export interface ExplorerSwimlaneContainerProps {
   onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
   onRenderComplete: () => void;
   onLoading: () => void;
-  onError: () => void;
+  onError: (error: Error) => void;
 }
 
 export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = ({

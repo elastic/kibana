@@ -53,7 +53,7 @@ export function useSwimlaneInputResolver(
   renderCallbacks: {
     onRenderComplete: () => void;
     onLoading: () => void;
-    onError: () => void;
+    onError: (error: Error) => void;
   }
 ): [
   string | undefined,
@@ -237,7 +237,7 @@ export function useSwimlaneInputResolver(
 
   useEffect(() => {
     if (error) {
-      renderCallbacks.onError();
+      renderCallbacks.onError(error);
     }
   }, [error]);
 
