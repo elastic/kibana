@@ -366,6 +366,7 @@ const preconfiguredConnectorActionRefPrefix = 'preconfigured:';
 
 const MAX_RULES_NUMBER_FOR_BULK_EDIT = 10000;
 const API_KEY_GENERATE_CONCURRENCY = 50;
+const RULE_TYPE_CHECKS_CONCURRENCY = 50;
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
@@ -1422,16 +1423,20 @@ export class RulesClient {
       throw Error('Rules not found');
     }
 
-    await pMap(buckets, async ({ key: [ruleType, consumer] }) => {
-      this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
+    await pMap(
+      buckets,
+      async ({ key: [ruleType, consumer] }) => {
+        this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
 
-      await this.authorization.ensureAuthorized({
-        ruleTypeId: ruleType,
-        consumer,
-        operation: WriteOperations.BulkEdit,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    });
+        await this.authorization.ensureAuthorized({
+          ruleTypeId: ruleType,
+          consumer,
+          operation: WriteOperations.BulkEdit,
+          entity: AlertingAuthorizationEntity.Rule,
+        });
+      },
+      { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
+    );
 
     const rulesFinder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser<RawRule>(
@@ -1447,6 +1452,7 @@ export class RulesClient {
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const errors: BulkEditError[] = [];
     const apiKeysToInvalidate: string[] = [];
+    const username = await this.getUserName();
 
     for await (const response of rulesFinder.find()) {
       await pMap(
@@ -1514,7 +1520,6 @@ export class RulesClient {
             );
 
             // create API key
-            const username = await this.getUserName();
             let createdAPIKey = null;
             try {
               createdAPIKey = attributes.enabled
