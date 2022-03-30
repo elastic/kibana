@@ -617,9 +617,7 @@ describe('DatatableComponent', () => {
     wrapper.setProps({ data: newData });
     wrapper.update();
 
-    // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
-    // which can't be seen, but shows in the text content
-    expect(wrapper.find('[data-test-subj="dataGridHeader"]').children().first().text()).toContain(
+    expect(wrapper.find('[data-test-subj="dataGridHeader"]').children().first().text()).toEqual(
       'new a'
     );
   });

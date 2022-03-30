@@ -1280,9 +1280,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                 <span
                   data-euiicon-type="logoElastic"
                   size="l"
-                >
-                  
-                </span>
+                />
               </a>
             </div>
             <div
@@ -1342,9 +1340,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowLeft"
                     size="m"
-                  >
-                    
-                  </span>
+                  />
                 </button>
               </div>
               <div
@@ -1395,9 +1391,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowRight"
                     size="m"
-                  >
-                    
-                  </span>
+                  />
                 </button>
               </div>
             </div>
@@ -1426,9 +1420,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                         color="inherit"
                         data-euiicon-type="gear"
                         size="m"
-                      >
-                        
-                      </span>
+                      />
                     </button>
                   </div>
                 </div>
@@ -1540,9 +1532,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                 <span
                   data-euiicon-type="logoElastic"
                   size="l"
-                >
-                  
-                </span>
+                />
               </a>
             </div>
             <div
@@ -1602,9 +1592,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowLeft"
                     size="m"
-                  >
-                    
-                  </span>
+                  />
                 </button>
               </div>
               <div
@@ -1655,9 +1643,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowRight"
                     size="m"
-                  >
-                    
-                  </span>
+                  />
                 </button>
               </div>
             </div>
@@ -1686,9 +1672,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                         color="inherit"
                         data-euiicon-type="gear"
                         size="m"
-                      >
-                        
-                      </span>
+                      />
                     </button>
                   </div>
                 </div>

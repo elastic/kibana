@@ -39,9 +39,7 @@ exports[`Storyshots shareables/Footer/Settings component 1`] = `
               color="inherit"
               data-euiicon-type="gear"
               size="m"
-            >
-              
-            </span>
+            />
           </button>
         </div>
       </div>
@@ -89,9 +87,7 @@ exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
               color="inherit"
               data-euiicon-type="gear"
               size="m"
-            >
-              
-            </span>
+            />
           </button>
         </div>
       </div>

@@ -105,7 +105,7 @@ describe('Custom Links', () => {
       const wrapper = mountWithIntl(
         <GoogleLink link={'http://example.com/'}>{'Example Link'}</GoogleLink>
       );
-      expect(removeExternalLinkText(wrapper.text())).toContain('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
     });
 
     test('it renders props passed in as link', () => {
@@ -463,7 +463,7 @@ describe('Custom Links', () => {
   describe('WhoisLink', () => {
     test('it renders ip passed in as domain', () => {
       const wrapper = mountWithIntl(<WhoIsLink domain={'192.0.2.0'}>{'Example Link'}</WhoIsLink>);
-      expect(removeExternalLinkText(wrapper.text())).toContain('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
     });
 
     test('it renders correct href', () => {
@@ -488,7 +488,7 @@ describe('Custom Links', () => {
           {'Example Link'}
         </CertificateFingerprintLink>
       );
-      expect(removeExternalLinkText(wrapper.text())).toContain('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
     });
 
     test('it renders correct href', () => {
@@ -519,7 +519,7 @@ describe('Custom Links', () => {
       const wrapper = mountWithIntl(
         <Ja3FingerprintLink ja3Fingerprint={'abcd'}>{'Example Link'}</Ja3FingerprintLink>
       );
-      expect(removeExternalLinkText(wrapper.text())).toContain('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
     });
 
     test('it renders correct href', () => {
@@ -548,7 +548,7 @@ describe('Custom Links', () => {
       const wrapper = mountWithIntl(
         <PortOrServiceNameLink portOrServiceName={443}>{'Example Link'}</PortOrServiceNameLink>
       );
-      expect(removeExternalLinkText(wrapper.text())).toContain('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
     });
 
     test('it renders correct href when port is a number', () => {

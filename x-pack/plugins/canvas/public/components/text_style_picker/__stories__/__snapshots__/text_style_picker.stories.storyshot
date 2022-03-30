@@ -152,9 +152,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   className="euiFormControlLayoutCustomIcon__icon"
                   data-euiicon-type="arrowDown"
                   size="s"
-                >
-                  
-                </span>
+                />
               </span>
             </div>
           </div>
@@ -246,9 +244,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   color="inherit"
                   data-euiicon-type="editorBold"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >
@@ -278,9 +274,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   color="inherit"
                   data-euiicon-type="editorItalic"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >
@@ -310,9 +304,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   color="inherit"
                   data-euiicon-type="editorUnderline"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >
@@ -356,9 +348,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   color="inherit"
                   data-euiicon-type="editorAlignLeft"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >
@@ -394,9 +384,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   color="inherit"
                   data-euiicon-type="editorAlignCenter"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >
@@ -432,9 +420,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                   color="inherit"
                   data-euiicon-type="editorAlignRight"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >
@@ -612,9 +598,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   className="euiFormControlLayoutCustomIcon__icon"
                   data-euiicon-type="arrowDown"
                   size="s"
-                >
-                  
-                </span>
+                />
               </span>
             </div>
           </div>
@@ -706,9 +690,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   color="inherit"
                   data-euiicon-type="editorBold"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >
@@ -738,9 +720,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   color="inherit"
                   data-euiicon-type="editorItalic"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >
@@ -770,9 +750,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   color="inherit"
                   data-euiicon-type="editorUnderline"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >
@@ -816,9 +794,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   color="inherit"
                   data-euiicon-type="editorAlignLeft"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >
@@ -854,9 +830,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   color="inherit"
                   data-euiicon-type="editorAlignCenter"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >
@@ -892,9 +866,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                   color="inherit"
                   data-euiicon-type="editorAlignRight"
                   size="m"
-                >
-                  
-                </span>
+                />
                 <span
                   className="euiButton__text euiScreenReaderOnly"
                 >

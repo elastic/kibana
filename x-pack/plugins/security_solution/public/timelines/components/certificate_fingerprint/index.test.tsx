@@ -51,7 +51,7 @@ describe('CertificateFingerprint', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="certificate-fingerprint-link"]').first().text()
       )
-    ).toContain('3f4c57934e089f02ae7511200aee2d7e7aabd272');
+    ).toEqual('3f4c57934e089f02ae7511200aee2d7e7aabd272');
   });
 
   test('it renders a hyperlink to an external site to compare the fingerprint against a known set of signatures', () => {

@@ -14,12 +14,6 @@ import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { ZeekDetails } from './zeek_details';
 
-// EuiIcons coming from .testenv render the icon's aria-label as a span
-// extractEuiIcon removes the aria-label before checking for equality
-const extractEuiIconText = (str: string) => {
-  return str.replaceAll('External link', '');
-};
-
 jest.mock('../../../../../../common/lib/kibana');
 
 jest.mock('@elastic/eui', () => {
@@ -59,7 +53,7 @@ describe('ZeekDetails', () => {
           />
         </TestProviders>
       );
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
       );
     });
@@ -74,7 +68,7 @@ describe('ZeekDetails', () => {
           />
         </TestProviders>
       );
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'CyIrMA1L1JtLqdIuoldnsudpSource206.189.35.240:57475Destination67.207.67.3:53'
       );
     });
@@ -89,7 +83,7 @@ describe('ZeekDetails', () => {
           />
         </TestProviders>
       );
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'CZLkpC22NquQJOpkwehttp302Source206.189.35.240:36220Destination192.241.164.26:80'
       );
     });
@@ -104,7 +98,7 @@ describe('ZeekDetails', () => {
           />
         </TestProviders>
       );
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'noticeDropped:falseScan::Port_Scan8.42.77.171 scanned at least 15 unique ports of host 207.154.238.205 in 0m0sSource8.42.77.171'
       );
     });
@@ -119,7 +113,7 @@ describe('ZeekDetails', () => {
           />
         </TestProviders>
       );
-      expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'CmTxzt2OVXZLkGDaResslTLSv12TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256Source188.166.66.184:34514Destination91.189.95.15:443'
       );
     });

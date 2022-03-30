@@ -40,7 +40,7 @@ describe('FeatureTableCell', () => {
       <FeatureTableCell feature={new SecuredFeature(feature.toRaw())} />
     );
 
-    expect(wrapper.text()).toMatchInlineSnapshot(`"Test Feature Info"`);
+    expect(wrapper.text()).toMatchInlineSnapshot(`"Test Feature "`);
 
     expect(wrapper.find(EuiIconTip).props().content).toMatchInlineSnapshot(`
       <EuiText>

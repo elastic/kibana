@@ -72,9 +72,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Empty filt
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    >
-                      
-                    </span>
+                    />
                   </span>
                 </div>
               </div>
@@ -159,9 +157,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    >
-                      
-                    </span>
+                    />
                   </span>
                 </div>
               </div>
@@ -198,9 +194,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                 color="inherit"
                 data-euiicon-type="arrowRight"
                 size="m"
-              >
-                
-              </span>
+              />
             </button>
             <button
               aria-controls="canvas-filter-group-0"
@@ -303,9 +297,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    >
-                      
-                    </span>
+                    />
                   </span>
                 </div>
               </div>
@@ -342,9 +334,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                 color="inherit"
                 data-euiicon-type="arrowRight"
                 size="m"
-              >
-                
-              </span>
+              />
             </button>
             <button
               aria-controls="canvas-filter-group-0"
@@ -447,9 +437,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    >
-                      
-                    </span>
+                    />
                   </span>
                 </div>
               </div>
@@ -486,9 +474,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                 color="inherit"
                 data-euiicon-type="arrowRight"
                 size="m"
-              >
-                
-              </span>
+              />
             </button>
             <button
               aria-controls="canvas-filter-group-0"
@@ -591,9 +577,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    >
-                      
-                    </span>
+                    />
                   </span>
                 </div>
               </div>
@@ -630,9 +614,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
                 color="inherit"
                 data-euiicon-type="arrowRight"
                 size="m"
-              >
-                
-              </span>
+              />
             </button>
             <button
               aria-controls="canvas-filter-group-0"
@@ -687,9 +669,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
                 color="inherit"
                 data-euiicon-type="arrowRight"
                 size="m"
-              >
-                
-              </span>
+              />
             </button>
             <button
               aria-controls="canvas-filter-group-1"

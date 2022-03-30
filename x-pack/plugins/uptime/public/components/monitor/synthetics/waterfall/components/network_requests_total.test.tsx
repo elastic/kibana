@@ -11,7 +11,7 @@ import { render } from '../../../../../lib/helper/rtl_helpers';
 
 describe('NetworkRequestsTotal', () => {
   it('message in case total is greater than fetched', () => {
-    const { getByText } = render(
+    const { getByText, getByLabelText } = render(
       <NetworkRequestsTotal
         fetchedNetworkRequests={1000}
         totalNetworkRequests={1100}
@@ -20,7 +20,7 @@ describe('NetworkRequestsTotal', () => {
     );
 
     expect(getByText('First 1000/1100 network requests')).toBeInTheDocument();
-    expect(getByText('Info')).toBeInTheDocument();
+    expect(getByLabelText('Info')).toBeInTheDocument();
   });
 
   it('message in case total is equal to fetched requests', () => {

@@ -63,5 +63,5 @@ test('Can delete drilldowns', () => {
 
 test('Error is displayed', () => {
   const screen = render(<DrilldownTable items={drilldowns} />);
-  expect(screen.getByText('an error')).toBeInTheDocument();
+  expect(screen.getByLabelText('an error')).toBeInTheDocument();
 });
