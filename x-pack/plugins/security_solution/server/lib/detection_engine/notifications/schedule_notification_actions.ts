@@ -10,15 +10,15 @@ import { Alert } from '../../../../../alerting/server';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { RuleParams } from '../schemas/rule_schemas';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
-import { isRACAlert } from '../signals/utils';
-import { RACAlert } from '../rule_types/types';
+import { isDetectionAlert } from '../signals/utils';
+import { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
 
 export type NotificationRuleTypeParams = RuleParams & {
   id: string;
   name: string;
 };
 
-const convertToLegacyAlert = (alert: RACAlert) =>
+const convertToLegacyAlert = (alert: DetectionAlert) =>
   Object.entries(aadFieldConversion).reduce((acc, [legacyField, aadField]) => {
     const val = alert[aadField];
     if (val != null) {
@@ -36,7 +36,7 @@ const convertToLegacyAlert = (alert: RACAlert) =>
  */
 const formatAlertsForNotificationActions = (alerts: unknown[]): unknown[] => {
   return alerts.map((alert) =>
-    isRACAlert(alert)
+    isDetectionAlert(alert)
       ? {
           ...expandDottedObject(convertToLegacyAlert(alert)),
           ...expandDottedObject(alert),

@@ -24,7 +24,12 @@ export type {
   ControlInput,
 } from '../common/types';
 
-export { CONTROL_GROUP_TYPE, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../common';
+export {
+  CONTROL_GROUP_TYPE,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+} from '../common';
 
 export {
   ControlGroupContainer,

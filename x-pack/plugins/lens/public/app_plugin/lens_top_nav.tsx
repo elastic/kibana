@@ -8,6 +8,7 @@
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useStore } from 'react-redux';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import {
   LensAppServices,
@@ -21,6 +22,7 @@ import { tableHasFormulas } from '../../../../../src/plugins/data/common';
 import { exporters } from '../../../../../src/plugins/data/public';
 import type { DataView } from '../../../../../src/plugins/data_views/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { toggleSettingsMenuOpen } from './settings_menu';
 import {
   setState,
   useLensSelector,
@@ -140,6 +142,17 @@ function getLensTopNavConfig(options: {
     tooltip: tooltips.showExportWarning,
   });
 
+  topNavMenu.push({
+    label: i18n.translate('xpack.lens.app.settings', {
+      defaultMessage: 'Settings',
+    }),
+    run: actions.openSettings,
+    testId: 'lnsApp_settingsButton',
+    description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
+      defaultMessage: 'Open the Lens settings menu',
+    }),
+  });
+
   if (showCancel) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.cancel', {
@@ -200,6 +213,7 @@ export const LensTopNavMenu = ({
   initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
+  theme$,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -233,6 +247,7 @@ export const LensTopNavMenu = ({
     visualization,
     filters,
   } = useLensSelector((state) => state.lens);
+
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
   useEffect(() => {
@@ -336,6 +351,8 @@ export const LensTopNavMenu = ({
     discover,
     application.capabilities,
   ]);
+
+  const lensStore = useStore();
 
   const topNavConfig = useMemo(() => {
     const baseMenuEntries = getLensTopNavConfig({
@@ -465,6 +482,12 @@ export const LensTopNavMenu = ({
             columns: meta.columns,
           });
         },
+        openSettings: (anchorElement: HTMLElement) =>
+          toggleSettingsMenuOpen({
+            lensStore,
+            anchorElement,
+            theme$,
+          }),
       },
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
@@ -497,6 +520,8 @@ export const LensTopNavMenu = ({
     filters,
     indexPatterns,
     data.query.timefilter.timefilter,
+    lensStore,
+    theme$,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

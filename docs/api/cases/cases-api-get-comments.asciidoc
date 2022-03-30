@@ -1,0 +1,80 @@
+[[cases-api-get-comments]]
+== Get comments API
+++++
+<titleabbrev>Get comments</titleabbrev>
+++++
+
+Gets a comment or all comments for a case.
+
+=== Request
+
+`GET <kibana host>:<port>/api/cases/<case ID>/comments/<comment ID>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/<case ID>/comments/<comment ID>`
+
+`GET <kibana host>:<port>/api/cases/<case_id>/comments` deprecated:[8.1.0]
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/<case_id>/comments` deprecated:[8.1.0]
+
+=== Prerequisite
+
+You must have `read` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases with the comments you're seeking.
+
+=== Path parameters
+
+`<case_id>`::
+(Required, string) The identifier for the case. To retrieve case IDs, use 
+<<cases-api-find-cases>>.
+
+`<comment_id>`::
+(Optional, string) The identifier for the comment. To retrieve comment IDs, use
+<<cases-api-get-case>>.
++
+If it is not specified, all comments are retrieved.
+deprecated:[8.1.0,The comment identifier will no longer be optional.]
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== Response code
+
+`200`::
+   Indicates a successful call.
+
+=== Example
+
+Retrieves comment ID `71ec1870-725b-11ea-a0b2-c51ea50a58e2` from case ID
+`a18b38a0-71b0-11ea-a0b2-c51ea50a58e2`:
+
+[source,sh]
+--------------------------------------------------
+GET api/cases/a18b38a0-71b0-11ea-a0b2-c51ea50a58e2/comments/71ec1870-725b-11ea-a0b2-c51ea50a58e2
+--------------------------------------------------
+// KIBANA
+
+The API returns the requested comment JSON object. For example:
+
+[source,json]
+--------------------------------------------------
+{
+  "id":"8acb3a80-ab0a-11ec-985f-97e55adae8b9",
+  "version":"Wzc5NzYsM10=",
+  "comment":"Start operation bubblegum immediately! And chew fast!",
+  "type":"user",
+  "owner":"cases",
+  "created_at":"2022-03-24T00:37:10.832Z",
+  "created_by": {
+    "email": "classified@hms.oo.gov.uk",
+    "full_name": "Classified",
+    "username": "M"
+    },
+  "pushed_at": null,
+  "pushed_by": null,
+  "updated_at": null,
+  "updated_by": null
+}
+--------------------------------------------------
