@@ -48,12 +48,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -212,12 +216,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -376,12 +384,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>

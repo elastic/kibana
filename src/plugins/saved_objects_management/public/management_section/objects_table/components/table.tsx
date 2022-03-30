@@ -227,6 +227,12 @@ export class Table extends PureComponent<TableProps, TableState> {
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
       ...columnRegistry.getAll().map((column) => {
+        column.setColumnContext({ capabilities });
+        column.registerOnFinishCallback(() => {
+          const { refreshOnFinish = () => [] } = column;
+          const objectsToRefresh = refreshOnFinish();
+          onActionRefresh(objectsToRefresh);
+        });
         return {
           ...column.euiColumn,
           sortable: false,
