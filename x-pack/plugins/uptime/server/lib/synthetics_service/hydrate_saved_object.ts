@@ -8,14 +8,14 @@
 import moment from 'moment';
 import { UptimeESClient } from '../lib';
 import { UptimeServerSetup } from '../adapters';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { DecryptedSyntheticsMonitorSavedObject } from '../../../common/types';
 import { SyntheticsMonitor, MonitorFields, Ping } from '../../../common/runtime_types';
 
 export const hydrateSavedObjects = async ({
   monitors,
   server,
 }: {
-  monitors: SyntheticsMonitorSavedObject[];
+  monitors: DecryptedSyntheticsMonitorSavedObject[];
   server: UptimeServerSetup;
 }) => {
   try {
@@ -43,7 +43,7 @@ export const hydrateSavedObjects = async ({
         missingInfoIds
       );
 
-      const updatedObjects: SyntheticsMonitorSavedObject[] = [];
+      const updatedObjects: DecryptedSyntheticsMonitorSavedObject[] = [];
       monitors
         .filter((monitor) => missingInfoIds.includes(monitor.id))
         .forEach((monitor) => {
@@ -73,7 +73,7 @@ export const hydrateSavedObjects = async ({
             updatedObjects.push({
               ...monitor,
               attributes: resultAttributes,
-            } as SyntheticsMonitorSavedObject);
+            } as DecryptedSyntheticsMonitorSavedObject);
           }
         });
 
@@ -85,44 +85,48 @@ export const hydrateSavedObjects = async ({
 };
 
 const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: string[]) => {
-  const data = await esClient.search({
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: 'now-15m',
-                  lt: 'now',
+  const data = await esClient.search(
+    {
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-15m',
+                    lt: 'now',
+                  },
                 },
               },
-            },
-            {
-              terms: {
-                config_id: configIds,
+              {
+                terms: {
+                  config_id: configIds,
+                },
               },
-            },
-            {
-              exists: {
-                field: 'summary',
+              {
+                exists: {
+                  field: 'summary',
+                },
               },
-            },
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [{ exists: { field: 'url.full' } }, { exists: { field: 'url.port' } }],
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [{ exists: { field: 'url.full' } }, { exists: { field: 'url.port' } }],
+                },
               },
-            },
-          ],
+            ],
+          },
+        },
+        _source: ['url', 'config_id', '@timestamp'],
+        collapse: {
+          field: 'config_id',
         },
       },
-      _source: ['url', 'config_id', '@timestamp'],
-      collapse: {
-        field: 'config_id',
-      },
     },
-  });
+    'getHydrateQuery',
+    'synthetics-*'
+  );
 
   return data.body.hits.hits.map(
     ({ _source: doc }) => ({ ...(doc as any), timestamp: (doc as any)['@timestamp'] } as Ping)

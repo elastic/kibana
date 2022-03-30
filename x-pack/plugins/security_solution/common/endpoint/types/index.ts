@@ -984,6 +984,7 @@ export interface PolicyConfig {
       file: boolean;
       process: boolean;
       network: boolean;
+      session_data: boolean;
     };
     malware: ProtectionFields & BlocklistFields;
     behavior_protection: ProtectionFields & SupportedFields;

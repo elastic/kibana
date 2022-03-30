@@ -31,8 +31,12 @@ export const useFindRules = (args: UseFindRulesArgs) => {
   // Use this query result when isInMemorySorting = true
   const allRules = useFindRulesQuery(
     ['all'],
-    { pagination: { page: 1, perPage: MAX_RULES_PER_PAGE } },
-    { refetchInterval, enabled: isInMemorySorting }
+    { pagination: { page: 1, perPage: MAX_RULES_PER_PAGE }, filterOptions },
+    {
+      refetchInterval,
+      enabled: isInMemorySorting,
+      keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
+    }
   );
 
   // Use this query result when isInMemorySorting = false

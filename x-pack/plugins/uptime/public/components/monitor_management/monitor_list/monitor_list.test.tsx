@@ -8,7 +8,13 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { ConfigKey, DataStream, HTTPFields, ScheduleUnit } from '../../../../common/runtime_types';
+import {
+  ConfigKey,
+  DataStream,
+  HTTPFields,
+  ScheduleUnit,
+  DEFAULT_THROTTLING,
+} from '../../../../common/runtime_types';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import { MonitorManagementList, MonitorManagementListPageState } from './monitor_list';
@@ -36,6 +42,7 @@ describe('<MonitorManagementList />', () => {
   }
   const state = {
     monitorManagementList: {
+      throttling: DEFAULT_THROTTLING,
       list: {
         perPage: 5,
         page: 1,
@@ -43,13 +50,20 @@ describe('<MonitorManagementList />', () => {
         monitors,
       },
       locations: [],
+      enablement: null,
       error: {
         serviceLocations: null,
         monitorList: null,
+        enablement: null,
       },
       loading: {
         monitorList: true,
         serviceLocations: false,
+        enablement: false,
+      },
+      syntheticsService: {
+        loading: false,
+        signupUrl: null,
       },
     } as MonitorManagementListState,
   };

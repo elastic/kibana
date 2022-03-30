@@ -39,6 +39,8 @@ export const MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE = 'hostIsolati
 export const MANAGEMENT_PAGE_SIZE_OPTIONS: readonly number[] = [10, 20, 50];
 export const MANAGEMENT_DEFAULT_PAGE = 0;
 export const MANAGEMENT_DEFAULT_PAGE_SIZE = 10;
+export const MANAGEMENT_DEFAULT_SORT_ORDER = 'desc';
+export const MANAGEMENT_DEFAULT_SORT_FIELD = 'created_at';
 
 // --[ DEFAULTS ]---------------------------------------------------------------------------
 /** The default polling interval to start all polling pages */
