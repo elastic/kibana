@@ -9,7 +9,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import classNames from 'classnames';
 
 import './controls_callout.scss';
 import { ControlGroupStrings } from '../control_group/control_group_strings';
@@ -33,12 +32,7 @@ export const ControlsCallout = ({ getCreateControlButton }: CalloutProps) => {
   if (controlsCalloutDismissed) return null;
 
   return (
-    <EuiPanel
-      borderRadius="m"
-      color="plain"
-      paddingSize={'s'}
-      className={classNames('controlsWrapper--empty', 'dshDashboardViewport-controls')}
-    >
+    <EuiPanel borderRadius="m" color="plain" paddingSize={'s'} className="controlsWrapper--empty">
       <EuiFlexGroup alignItems="center" gutterSize="xs" data-test-subj="controls-empty">
         <EuiFlexItem grow={1} className="controlsIllustration__container">
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>

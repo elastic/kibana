@@ -8,6 +8,7 @@
   &--empty {
     display: flex;
     overflow: hidden;
+    margin: 0 $euiSizeS 0 $euiSizeS;
 
     .addControlButton {
       text-align: center;
