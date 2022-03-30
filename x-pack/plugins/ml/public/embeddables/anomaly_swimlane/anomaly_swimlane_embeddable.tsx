@@ -56,6 +56,18 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     );
   }
 
+  public onLoading() {
+    this.renderComplete.dispatchInProgress();
+  }
+
+  public onError() {
+    this.renderComplete.dispatchError();
+  }
+
+  public onRenderComplete() {
+    this.renderComplete.dispatchComplete();
+  }
+
   public render(node: HTMLElement) {
     super.render(node);
     this.node = node;
@@ -76,6 +88,9 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
                 refresh={this.reload$.asObservable()}
                 onInputChange={this.updateInput.bind(this)}
                 onOutputChange={this.updateOutput.bind(this)}
+                onRenderComplete={this.onRenderComplete.bind(this)}
+                onLoading={this.onLoading.bind(this)}
+                onError={this.onError.bind(this)}
               />
             </Suspense>
           </KibanaContextProvider>

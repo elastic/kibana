@@ -46,10 +46,15 @@ const FETCH_RESULTS_DEBOUNCE_MS = 500;
 export function useSwimlaneInputResolver(
   embeddableInput$: Observable<AnomalySwimlaneEmbeddableInput>,
   onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void,
-  refresh: Observable<any>,
+  refresh: Observable<void>,
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
   chartWidth: number,
-  fromPage: number
+  fromPage: number,
+  renderCallbacks: {
+    onRenderComplete: () => void;
+    onLoading: () => void;
+    onError: () => void;
+  }
 ): [
   string | undefined,
   OverallSwimlaneData | undefined,
@@ -122,6 +127,9 @@ export function useSwimlaneInputResolver(
       .pipe(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
+        tap(() => {
+          renderCallbacks.onLoading();
+        }),
         switchMap(([explorerJobs, input, bucketInterval, fromPageInput, perPageFromState]) => {
           if (!explorerJobs) {
             // couldn't load the list of jobs
@@ -226,6 +234,18 @@ export function useSwimlaneInputResolver(
   useEffect(() => {
     chartWidth$.next(chartWidth);
   }, [chartWidth]);
+
+  useEffect(() => {
+    if (error) {
+      renderCallbacks.onError();
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (swimlaneData) {
+      renderCallbacks.onRenderComplete();
+    }
+  }, [swimlaneData]);
 
   return [
     swimlaneType,
