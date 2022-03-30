@@ -13,9 +13,10 @@ interface Props {
   isPointsOnly: boolean;
   styles: Array<IStyleProperty<any>>;
   symbolId?: string;
+  svg?: string;
 }
 
-export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId }: Props) {
+export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId, svg }: Props) {
   const legendRows = [];
 
   for (let i = 0; i < styles.length; i++) {
@@ -23,6 +24,7 @@ export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId 
       isLinesOnly,
       isPointsOnly,
       symbolId,
+      svg,
     });
 
     legendRows.push(

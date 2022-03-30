@@ -6,7 +6,7 @@
  */
 
 import { hydrateSavedObjects } from './hydrate_saved_object';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { DecryptedSyntheticsMonitorSavedObject } from '../../../common/types';
 import { UptimeServerSetup } from '../adapters';
 import moment from 'moment';
 
@@ -42,9 +42,9 @@ describe('hydrateSavedObjects', () => {
         ...mockMonitorTemplate,
         attributes: { ...mockMonitorTemplate.attributes, type },
         updated_at: moment(time).subtract(1, 'hour').toISOString(),
-      } as SyntheticsMonitorSavedObject;
+      } as DecryptedSyntheticsMonitorSavedObject;
 
-      const monitors: SyntheticsMonitorSavedObject[] = [monitor];
+      const monitors: DecryptedSyntheticsMonitorSavedObject[] = [monitor];
 
       mockEsClient.search.mockResolvedValue(
         toKibanaResponse([

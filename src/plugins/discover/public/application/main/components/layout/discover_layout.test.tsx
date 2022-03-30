@@ -43,10 +43,6 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
   const searchSourceMock = createSearchSourceMock({});
   const services = {
     ...discoverServiceMock,
-    fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
-      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-    },
     storage: new LocalStorageMock({
       [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
     }) as unknown as Storage,

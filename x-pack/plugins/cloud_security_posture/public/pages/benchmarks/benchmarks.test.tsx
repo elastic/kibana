@@ -21,13 +21,20 @@ import {
   TABLE_COLUMN_HEADERS,
 } from './translations';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
+import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_kubebeat_data_view');
+jest.mock('../../common/api/use_cis_kubernetes_integration');
 
 describe('<Benchmarks />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+
+    // if package installation status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
+      data: { item: { status: 'installed' } },
+    }));
     // Required for the page template to render the benchmarks page
     (useKubebeatDataView as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
