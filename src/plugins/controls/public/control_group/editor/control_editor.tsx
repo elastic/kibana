@@ -121,7 +121,7 @@ export const ControlEditor = ({
       );
 
       return tooltip ? (
-        <EuiToolTip content={tooltip} position="bottom">
+        <EuiToolTip content={tooltip} position="top">
           {menuPadItem}
         </EuiToolTip>
       ) : (
