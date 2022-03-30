@@ -272,6 +272,7 @@ export const sampleAlertDocAADNoSortId = (
         type: 'event',
         index: 'myFakeSignalIndex',
         depth: 0,
+        rule: undefined,
       },
     ],
     [ALERT_BUILDING_BLOCK_TYPE]: undefined,
