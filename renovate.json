@@ -26,7 +26,8 @@
       "matchPackageNames": ["@elastic/charts"],
       "reviewers": ["team:datavis"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "auto-backport", "Team:DataVis", "v8.1.0", "v7.17.0"],
+      "labels": ["release_note:skip", "auto-backport", "Team:DataVis"],
+      "prCreation": "immediate",
       "draftPR": true,
       "enabled": true
     },
