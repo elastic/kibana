@@ -286,6 +286,7 @@ export const PolicyList = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="policyListPage"
+      hideHeader={totalItemCount === 0}
       title={i18n.translate('xpack.securitySolution.policy.list.title', {
         defaultMessage: 'Policy List',
       })}

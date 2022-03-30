@@ -156,8 +156,7 @@ and `open`.
 (Optional, string) A title for the case.
 
 `version`::
-(Required, string) The current version of the case.
-//To determine this value, use <<cases-api-get-case>> or <<cases-api-find-cases>>
+(Required, string) The current version of the case. To determine this value, use <<cases-api-get-case>> or <<cases-api-find-cases>>.
 ====
 
 === Response code
