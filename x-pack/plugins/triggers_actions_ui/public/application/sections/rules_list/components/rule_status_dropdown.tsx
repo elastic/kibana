@@ -303,7 +303,9 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   const onCancelSnooze = useCallback(() => applySnooze(0, 'm'), [applySnooze]);
 
   const parsedPrevSnooze = previousSnoozeInterval ? parseInterval(previousSnoozeInterval) : null;
-  const previousButton = parsedPrevSnooze && (
+  const prevSnoozeEqualsCurrentSnooze =
+    parsedPrevSnooze?.value === intervalValue && parsedPrevSnooze?.unit === intervalUnit;
+  const previousButton = parsedPrevSnooze && !prevSnoozeEqualsCurrentSnooze && (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
         <EuiFlexItem grow={false}>
