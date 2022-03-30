@@ -21,6 +21,9 @@ const MATCH_INDICES = ['index1'];
 
 const ES_FIELDS = [{ name: '@timestamp', type: 'date' }];
 
+// Since watchID's are dynamically created, we have to mock
+// the function that generates them in order to be able to match
+// against it.
 jest.mock('uuid/v4', () => {
   return function () {
     return '12345';
