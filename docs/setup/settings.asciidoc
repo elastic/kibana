@@ -687,29 +687,29 @@ Set this value to false to disable the Cross-Cluster Replication UI.
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 
 | `xpack.ilm.ui.enabled`
-Set this value to false to disable the Index Lifecycle Policies UI.
+|Set this value to false to disable the Index Lifecycle Policies UI.
 *Default: `true`*
 
 | `xpack.index_management.ui.enabled`
-Set this value to false to disable the Index Management UI.
+|Set this value to false to disable the Index Management UI.
 *Default: `true`*
 
 | `xpack.license_management.ui.enabled`
-Set this value to false to disable the License Management UI.
+|Set this value to false to disable the License Management UI.
 *Default: `true`*
 
 | `xpack.remote_clusters.ui.enabled`
-Set this value to false to disable the Remote Clusters UI.
+|Set this value to false to disable the Remote Clusters UI.
 *Default: `true`*
 
 | `xpack.rollup.ui.enabled:`
-Set this value to false to disable the Rollup Jobs UI. *Default: true*
+|Set this value to false to disable the Rollup Jobs UI. *Default: true*
 
 | `xpack.snapshot_restore.ui.enabled:`
-Set this value to false to disable the Snapshot and Restore UI. *Default: true*
+|Set this value to false to disable the Snapshot and Restore UI. *Default: true*
 
 | `xpack.upgrade_assistant.ui.enabled:`
-Set this value to false to disable the Upgrade Assistant UI. *Default: true*
+|Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 | `i18n.locale` {ess-icon}
  | Set this value to change the {kib} interface language.
