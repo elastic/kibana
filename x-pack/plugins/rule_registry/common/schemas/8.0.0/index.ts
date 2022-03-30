@@ -31,20 +31,6 @@ Then, update `../index.ts` to import from the new folder that has the latest sch
 new schemas to the union of all alert schemas, and re-export the new schemas as the `*Latest` schemas.
 */
 
-const commonAlertFieldNames = [
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_EXECUTION_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_PRODUCER,
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
-  SPACE_IDS,
-  ALERT_RULE_TAGS,
-  TIMESTAMP,
-];
-export type CommonAlertFieldName800 = Values<typeof commonAlertFieldNames>;
-
 const commonAlertIdFieldNames = [ALERT_INSTANCE_ID, ALERT_UUID];
 export type CommonAlertIdFieldName800 = Values<typeof commonAlertIdFieldNames>;
 
@@ -60,5 +46,7 @@ export interface CommonAlertFields800 {
   [ALERT_RULE_TAGS]: string[];
   [TIMESTAMP]: string;
 }
+
+export type CommonAlertFieldName800 = keyof CommonAlertFields800;
 
 export type AlertWithCommonFields800<T> = T & CommonAlertFields800;
