@@ -7,7 +7,7 @@
 
 import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../src/plugins/unified_search/public';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { composeStateUpdaters } from '../../lib/typed_react';
 import { SuggestionItem } from './suggestion_item';

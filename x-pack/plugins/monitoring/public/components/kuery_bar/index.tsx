@@ -8,7 +8,8 @@
 import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { IIndexPattern, QuerySuggestion } from '../../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../src/plugins/unified_search/public';
 import { AutocompleteField } from './autocomplete_field';
 import { WithKueryAutocompletion } from './with_kuery_autocompletion';
 

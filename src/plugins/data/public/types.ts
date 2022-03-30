@@ -21,6 +21,7 @@ import { DataViewsContract } from './data_views';
 import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
 import { Setup as InspectorSetup } from '../../inspector/public';
 import { NowProviderPublicContract } from './now_provider';
+import { UnifiedSearchPublicPluginStart } from '../../unified_search/public';
 
 export interface DataSetupDependencies {
   bfetch: BfetchPublicSetup;
@@ -106,5 +107,6 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   http: CoreStart['http'];
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionStart;
 }

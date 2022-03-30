@@ -8,11 +8,8 @@
 
 import { KueryNode } from '@kbn/es-query';
 import { CoreSetup } from 'kibana/public';
-import {
-  DataPublicPluginStart,
-  QuerySuggestionBasic,
-  QuerySuggestionGetFnArgs,
-} from '../../../../../data/public';
+import { DataPublicPluginStart } from '../../../../../data/public';
+import { QuerySuggestionBasic, QuerySuggestionGetFnArgs } from '../../index';
 
 export type KqlQuerySuggestionProvider<T = QuerySuggestionBasic> = (
   core: CoreSetup<object, DataPublicPluginStart>

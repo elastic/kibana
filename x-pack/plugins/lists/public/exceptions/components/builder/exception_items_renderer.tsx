@@ -33,7 +33,7 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase } from '@kbn/es-query';
 
-import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import type { AutocompleteStart } from '../../../../../../../src/plugins/unified_search/public';
 import { AndOrBadge } from '../and_or_badge';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';

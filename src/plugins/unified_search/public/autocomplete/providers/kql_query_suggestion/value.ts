@@ -10,13 +10,8 @@ import { flatten } from 'lodash';
 import { CoreSetup } from 'kibana/public';
 import { escapeQuotes } from './lib/escape_kuery';
 import { KqlQuerySuggestionProvider } from './types';
-import {
-  DataPublicPluginStart,
-  IFieldType,
-  IIndexPattern,
-  QuerySuggestion,
-  QuerySuggestionTypes,
-} from '../../../../../data/public';
+import { DataPublicPluginStart, IFieldType, IIndexPattern } from '../../../../../data/public';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../index';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
   values

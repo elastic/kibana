@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
-import type { AutocompleteStart } from 'src/plugins/data/public';
+import type { AutocompleteStart } from 'src/plugins/unified_search/public';
 import { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   BuilderEntry,

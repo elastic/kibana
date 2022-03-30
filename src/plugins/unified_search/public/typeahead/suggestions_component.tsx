@@ -13,7 +13,7 @@ import classNames from 'classnames';
 import styled from 'styled-components';
 
 import useRafState from 'react-use/lib/useRafState';
-import { QuerySuggestion } from '../../../data/public';
+import { QuerySuggestion } from '../index';
 import { SuggestionComponent } from './suggestion_component';
 import {
   SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE,

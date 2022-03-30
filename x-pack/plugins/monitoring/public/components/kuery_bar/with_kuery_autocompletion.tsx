@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { QuerySuggestion, IIndexPattern } from 'src/plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
+import { QuerySuggestion } from 'src/plugins/unified_search/public';
 import { UnifiedSearchPublicPluginStart } from '../../../../../../src/plugins/unified_search/public';
 import {
   withKibana,

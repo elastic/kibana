@@ -10,7 +10,7 @@ import React from 'react';
 import { $Keys } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KqlQuerySuggestionProvider } from './types';
-import { QuerySuggestion, QuerySuggestionTypes } from '../../../../../data/public';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../index';
 
 const bothArgumentsText = (
   <FormattedMessage

@@ -28,14 +28,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEqual, isFunction } from 'lodash';
 import { Toast } from '../../../../core/public';
-import {
-  IDataPluginServices,
-  IIndexPattern,
-  Query,
-  QuerySuggestion,
-  QuerySuggestionTypes,
-  getQueryLog,
-} from '../../../data/public';
+import { IDataPluginServices, IIndexPattern, Query, getQueryLog } from '../../../data/public';
+import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
@@ -201,7 +195,8 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const hasQuerySuggestions = this.services.data.autocomplete.hasQuerySuggestions(language);
+    const hasQuerySuggestions =
+      this.services.unifiedSearch.autocomplete.hasQuerySuggestions(language);
 
     if (
       !hasQuerySuggestions ||
@@ -222,7 +217,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
       const suggestions =
-        (await this.services.data.autocomplete.getQuerySuggestions({
+        (await this.services.unifiedSearch.autocomplete.getQuerySuggestions({
           language,
           indexPatterns,
           query: queryString,

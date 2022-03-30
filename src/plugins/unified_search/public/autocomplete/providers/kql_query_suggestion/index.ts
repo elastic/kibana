@@ -14,12 +14,8 @@ import { setupGetFieldSuggestions } from './field';
 import { setupGetValueSuggestions } from './value';
 import { setupGetOperatorSuggestions } from './operator';
 import { setupGetConjunctionSuggestions } from './conjunction';
-import {
-  QuerySuggestion,
-  QuerySuggestionGetFnArgs,
-  QuerySuggestionGetFn,
-  DataPublicPluginStart,
-} from '../../../../../data/public';
+import { DataPublicPluginStart } from '../../../../../data/public';
+import { QuerySuggestion, QuerySuggestionGetFnArgs, QuerySuggestionGetFn } from '../../index';
 
 const cursorSymbol = '@kuery-cursor@';
 

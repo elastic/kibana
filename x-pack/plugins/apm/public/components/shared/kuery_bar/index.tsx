@@ -11,10 +11,8 @@ import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { DataView } from '../../../../../../../src/plugins/data/common';
-import {
-  esKuery,
-  QuerySuggestion,
-} from '../../../../../../../src/plugins/data/public';
+import { esKuery } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../../src/plugins/unified_search/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -58,7 +56,7 @@ export function KueryBar(props: {
   });
   const { urlParams } = useLegacyUrlParams();
   const location = useLocation();
-  const { data } = useApmPluginContext().plugins;
+  const { unifiedSearch } = useApmPluginContext().plugins;
 
   let currentRequestCheck;
 
@@ -106,7 +104,7 @@ export function KueryBar(props: {
 
     try {
       const suggestions = (
-        (await data.autocomplete.getQuerySuggestions({
+        (await unifiedSearch.autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [dataView],
           boolFilter:

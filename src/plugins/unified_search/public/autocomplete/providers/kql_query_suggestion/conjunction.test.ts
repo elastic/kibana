@@ -7,7 +7,8 @@
  */
 
 import { setupGetConjunctionSuggestions } from './conjunction';
-import { QuerySuggestionGetFnArgs, KueryNode } from '../../../../../../plugins/data/public';
+import { KueryNode } from '../../../../../../plugins/data/public';
+import { QuerySuggestionGetFnArgs } from '../../../../../../plugins/unified_search/public';
 import { coreMock } from '../../../../../../core/public/mocks';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
