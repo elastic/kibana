@@ -38,6 +38,11 @@ import { editSyntheticsMonitorRoute } from './synthetics_service/edit_monitor';
 import { deleteSyntheticsMonitorRoute } from './synthetics_service/delete_monitor';
 import { runOnceSyntheticsMonitorRoute } from './synthetics_service/run_once_monitor';
 import { testNowMonitorRoute } from './synthetics_service/test_now_monitor';
+import {
+  getSyntheticsEnablementRoute,
+  disableSyntheticsRoute,
+  enableSyntheticsRoute,
+} from './synthetics_service/enablement';
 import { getServiceAllowedRoute } from './synthetics_service/get_service_allowed';
 
 export * from './types';
@@ -45,6 +50,8 @@ export { createRouteWithAuth } from './create_route_with_auth';
 export { uptimeRouteWrapper } from './uptime_route_wrapper';
 
 export const restApiRoutes: UMRestApiRouteFactory[] = [
+  addSyntheticsMonitorRoute,
+  getSyntheticsEnablementRoute,
   createGetPingsRoute,
   createGetIndexStatusRoute,
   createGetDynamicSettingsRoute,
@@ -63,13 +70,14 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createJourneyFailedStepsRoute,
   createLastSuccessfulCheckRoute,
   createJourneyScreenshotBlocksRoute,
-  installIndexTemplatesRoute,
+  deleteSyntheticsMonitorRoute,
+  disableSyntheticsRoute,
+  editSyntheticsMonitorRoute,
+  enableSyntheticsRoute,
   getServiceLocationsRoute,
   getSyntheticsMonitorRoute,
   getAllSyntheticsMonitorRoute,
-  addSyntheticsMonitorRoute,
-  editSyntheticsMonitorRoute,
-  deleteSyntheticsMonitorRoute,
+  installIndexTemplatesRoute,
   runOnceSyntheticsMonitorRoute,
   testNowMonitorRoute,
   getServiceAllowedRoute,
