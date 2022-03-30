@@ -23,6 +23,7 @@ import type {
 } from '../../../../src/plugins/data/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import type { SharePluginSetup } from '../../../../src/plugins/share/public';
 import { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
@@ -55,6 +56,7 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { SecurityPluginStart } from '../../security/public';
 import { SpacesPluginStart } from '../../spaces/public';
 import { enableServiceGroups } from '../../observability/public';
+import { APMLocatorDefinition } from '../common/locator';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -69,6 +71,7 @@ export interface ApmPluginSetupDeps {
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -298,7 +301,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     registerApmAlerts(observabilityRuleTypeRegistry);
 
-    return {};
+    const locator = plugins.share.url.locators.create(
+      new APMLocatorDefinition()
+    );
+
+    return {
+      locator,
+    };
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;

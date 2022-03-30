@@ -16,7 +16,8 @@
     "licensing",
     "observability",
     "ruleRegistry",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "share"
   ],
   "optionalPlugins": [
     "actions",
