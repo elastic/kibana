@@ -217,7 +217,12 @@ export const SelectableSpacesControl = (props: Props) => {
         <></>
       </EuiFormRow>
 
-      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+        style={{ minHeight: 200 }}
+      >
         <EuiFlexItem>
           <Suspense fallback={<EuiLoadingSpinner />}>
             <EuiSelectable
