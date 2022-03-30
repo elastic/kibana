@@ -26,14 +26,15 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export type { BrowserField, BrowserFields, DocValueFields };
 
-export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
-  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
-    (acc, namespace) => [
-      ...acc,
-      ...Object.values(namespace.fields != null ? namespace.fields : {}),
-    ],
-    []
-  );
+export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial<BrowserField>> {
+  const result: Array<Partial<BrowserField>> = [];
+  for (const namespace of Object.values(browserFields)) {
+    if (namespace.fields) {
+      result.push(...Object.values(namespace.fields));
+    }
+  }
+  return result;
+}
 
 export const getAllFieldsByName = (
   browserFields: BrowserFields

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
@@ -83,6 +83,7 @@ describe('Lens App', () => {
       datasourceMap,
       visualizationMap,
       topNavMenuEntryGenerators: [],
+      theme$: new Observable(),
     };
   }
 

@@ -63,7 +63,7 @@ const storybookStubOptionsListRequest = async (
   );
 replaceOptionsListMethod(storybookStubOptionsListRequest);
 
-const ControlGroupStoryComponent: FC<{
+export const ControlGroupStoryComponent: FC<{
   panels?: ControlsPanels;
   edit?: boolean;
 }> = ({ panels, edit }) => {
@@ -161,7 +161,7 @@ export const ConfiguredControlGroupStory = () => (
         } as OptionsListEmbeddableInput,
       },
       optionsList3: {
-        type: OPTIONS_LIST_CONTROL,
+        type: 'TIME_SLIDER',
         order: 3,
         width: 'auto',
         explicitInput: {

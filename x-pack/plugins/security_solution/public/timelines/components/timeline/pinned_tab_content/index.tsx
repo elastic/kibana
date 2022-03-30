@@ -125,7 +125,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-  const ACTION_BUTTON_COUNT = 5;
+  const ACTION_BUTTON_COUNT = 6;
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {

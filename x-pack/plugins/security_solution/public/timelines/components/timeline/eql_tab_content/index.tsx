@@ -181,7 +181,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
-  const ACTION_BUTTON_COUNT = 5;
+  const ACTION_BUTTON_COUNT = 6;
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
