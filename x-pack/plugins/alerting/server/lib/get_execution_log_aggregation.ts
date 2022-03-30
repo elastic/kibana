@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import { flatMap, get } from 'lodash';
 import { parseDuration } from '.';
 import { AggregateEventsBySavedObjectResult } from '../../../event_log/server';
+import { IExecutionLog, IExecutionLogResult } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
 
@@ -19,6 +20,7 @@ const ACTION_FIELD = 'event.action';
 const OUTCOME_FIELD = 'event.outcome';
 const DURATION_FIELD = 'event.duration';
 const MESSAGE_FIELD = 'message';
+const ERROR_MESSAGE_FIELD = 'error.message';
 const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
 const ES_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.es_search_duration_ms';
 const TOTAL_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_search_duration_ms';
@@ -28,28 +30,10 @@ const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 const Millis2Nanos = 1000 * 1000;
 
-export interface IExecutionLog {
-  id: string;
-  timestamp: string;
-  duration_ms: number;
-  status: string;
-  message: string;
-  num_active_alerts: number;
-  num_new_alerts: number;
-  num_recovered_alerts: number;
-  num_triggered_actions: number;
-  num_succeeded_actions: number;
-  num_errored_actions: number;
-  total_search_duration_ms: number;
-  es_search_duration_ms: number;
-  schedule_delay_ms: number;
-  timed_out: boolean;
-}
-
-export interface IExecutionLogResult {
-  total: number;
-  data: IExecutionLog[];
-}
+export const EMPTY_EXECUTION_LOG_RESULT = {
+  total: 0,
+  data: [],
+};
 
 interface IAlertCounts extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: {
@@ -207,7 +191,7 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
               top_hits: {
                 size: 1,
                 _source: {
-                  includes: [OUTCOME_FIELD, MESSAGE_FIELD],
+                  includes: [OUTCOME_FIELD, MESSAGE_FIELD, ERROR_MESSAGE_FIELD],
                 },
               },
             },
@@ -256,12 +240,18 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const actionExecutionError =
     actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
 
+  const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source;
+  const status = outcomeAndMessage ? outcomeAndMessage?.event?.outcome ?? '' : '';
+  const message =
+    status === 'failure'
+      ? `${outcomeAndMessage?.message ?? ''} - ${outcomeAndMessage?.error?.message ?? ''}`
+      : outcomeAndMessage?.message ?? '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
     duration_ms: durationUs / Millis2Nanos,
-    status: bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.event?.outcome,
-    message: bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.message,
+    status,
+    message,
     num_active_alerts: bucket?.alertCounts?.buckets?.activeAlerts?.doc_count ?? 0,
     num_new_alerts: bucket?.alertCounts?.buckets?.newAlerts?.doc_count ?? 0,
     num_recovered_alerts: bucket?.alertCounts?.buckets?.recoveredAlerts?.doc_count ?? 0,
@@ -281,10 +271,7 @@ export function formatExecutionLogResult(
   const { aggregations } = results;
 
   if (!aggregations) {
-    return {
-      total: 0,
-      data: [],
-    };
+    return EMPTY_EXECUTION_LOG_RESULT;
   }
 
   const total = (aggregations.executionUuidCardinality as estypes.AggregationsCardinalityAggregate)

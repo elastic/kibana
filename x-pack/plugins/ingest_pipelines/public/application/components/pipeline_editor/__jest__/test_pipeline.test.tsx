@@ -306,9 +306,8 @@ describe('Test pipeline', () => {
 
         // Dropdown should be visible and processor status should equal "success"
         expect(exists('documentsDropdown')).toBe(true);
-        const initialProcessorStatusLabel = find('processors>0.processorStatusIcon').props()[
-          'aria-label'
-        ];
+        const initialProcessorStatusLabel = find('processors>0.processorStatusIcon').props()
+          .children;
         expect(initialProcessorStatusLabel).toEqual('Success');
 
         // Open flyout and click clear all button
@@ -330,9 +329,8 @@ describe('Test pipeline', () => {
         // Verify documents and processors were reset
         expect(exists('documentsDropdown')).toBe(false);
         expect(exists('addDocumentsButton')).toBe(true);
-        const resetProcessorStatusIconLabel = find('processors>0.processorStatusIcon').props()[
-          'aria-label'
-        ];
+        const resetProcessorStatusIconLabel = find('processors>0.processorStatusIcon').props()
+          .children;
         expect(resetProcessorStatusIconLabel).toEqual('Not run');
       });
     });
@@ -342,7 +340,7 @@ describe('Test pipeline', () => {
     it('should show "inactive" processor status by default', async () => {
       const { find } = testBed;
 
-      const statusIconLabel = find('processors>0.processorStatusIcon').props()['aria-label'];
+      const statusIconLabel = find('processors>0.processorStatusIcon').props().children;
 
       expect(statusIconLabel).toEqual('Not run');
     });
@@ -362,7 +360,7 @@ describe('Test pipeline', () => {
       actions.closeTestPipelineFlyout();
 
       // Verify status
-      const statusIconLabel = find('processors>0.processorStatusIcon').props()['aria-label'];
+      const statusIconLabel = find('processors>0.processorStatusIcon').props().children;
       expect(statusIconLabel).toEqual('Success');
     });
 

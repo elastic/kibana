@@ -216,8 +216,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start: moment(end).subtract(7, 'minutes').toISOString(),
                 end: new Date(end).toISOString(),
-                comparisonStart: new Date(start).toISOString(),
-                comparisonEnd: moment(start).add(7, 'minutes').toISOString(),
+                offset: '7m',
               },
             });
             throughputResponse = response.body;
