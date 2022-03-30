@@ -201,14 +201,14 @@ function ExplorerChartContainer({
       let isCancelled = false;
       if (series && getChartType(series) === CHART_TYPE.GEO_MAP) {
         const generateLink = async () => {
-          if (!isCancelled) {
-            try {
-              const mapsLink = await getMapsLink();
+          try {
+            const mapsLink = await getMapsLink();
+            if (!isCancelled) {
               setMapsLink(mapsLink?.path);
-            } catch (error) {
-              console.error(error);
-              setMapsLink('');
             }
+          } catch (error) {
+            console.error(error);
+            setMapsLink('');
           }
         };
         generateLink().catch(console.error);
