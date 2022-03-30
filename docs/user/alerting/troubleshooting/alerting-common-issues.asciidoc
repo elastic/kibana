@@ -73,7 +73,7 @@ By default, only users with a `superuser` role can query the experimental[] {kib
 
 *Solution*
 
-By default, rules have a `5m` timeout. Rules that run longer than this timeout are automatically cancelled to prevent them from consuming too much of {kib}'s resources. When a rule times out, you will see this error in the {kib} logs:
+By default, rules have a `5m` timeout. Rules that run longer than this timeout are automatically cancelled to prevent them from consuming too much of {kib}'s resources. Alerts and actions that may have been scheduled before the rule timed out are discarded. When a rule times out, you will see this error in the {kib} logs:
 
 [source,sh]
 --------------------------------------------------
