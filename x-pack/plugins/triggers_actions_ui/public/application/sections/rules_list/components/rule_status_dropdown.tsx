@@ -133,7 +133,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   return (
     <EuiFlexGroup
       direction={direction}
-      alignItems="flexStart"
+      alignItems="flexEnd"
       justifyContent="flexStart"
       gutterSize="s"
     >

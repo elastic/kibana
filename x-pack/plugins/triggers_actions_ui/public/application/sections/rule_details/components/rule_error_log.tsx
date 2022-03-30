@@ -38,33 +38,6 @@ const getParsedDate = (date: string) => {
   return date;
 };
 
-const columns: Array<EuiBasicTableColumn<IErrorLog>> = [
-  {
-    field: 'timestamp',
-    name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.errorLogColumn.timestamp', {
-      defaultMessage: 'Timestamp',
-    }),
-    render: (date: string) => <RuleEventLogListCellRenderer columnId="timestamp" value={date} />,
-    sortable: true,
-    width: '250px',
-  },
-  {
-    field: 'type',
-    name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.errorLogColumn.type', {
-      defaultMessage: 'Type',
-    }),
-    sortable: false,
-    width: '100px',
-  },
-  {
-    field: 'message',
-    name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.errorLogColumn.message', {
-      defaultMessage: 'Message',
-    }),
-    sortable: false,
-  },
-];
-
 const API_FAILED_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.errorLogColumn.apiError',
   {
@@ -77,12 +50,14 @@ const updateButtonProps = {
   fill: false,
 };
 
-export type RuleEventLogListProps = {
+export type RuleErrorLogProps = {
+  requestRefresh: () => Promise<void>;
   rule: Rule;
+  refreshToken?: number;
 } & Pick<RuleApis, 'loadExecutionLogAggregations'>;
 
-export const RuleEventLogList = (props: RuleEventLogListProps) => {
-  const { rule, loadExecutionLogAggregations } = props;
+export const RuleErrorLog = (props: RuleErrorLogProps) => {
+  const { rule, loadExecutionLogAggregations, refreshToken } = props;
 
   const { uiSettings, notifications } = useKibana().services;
 
@@ -160,6 +135,44 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     loadEventLogs();
   };
 
+  const columns: Array<EuiBasicTableColumn<IErrorLog>> = useMemo(
+    () => [
+      {
+        field: 'timestamp',
+        name: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.errorLogColumn.timestamp',
+          {
+            defaultMessage: 'Timestamp',
+          }
+        ),
+        render: (date: string) => (
+          <RuleEventLogListCellRenderer columnId="timestamp" value={date} dateFormat={dateFormat} />
+        ),
+        sortable: true,
+        width: '250px',
+      },
+      {
+        field: 'type',
+        name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.errorLogColumn.type', {
+          defaultMessage: 'Type',
+        }),
+        sortable: false,
+        width: '100px',
+      },
+      {
+        field: 'message',
+        name: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.errorLogColumn.message',
+          {
+            defaultMessage: 'Message',
+          }
+        ),
+        sortable: false,
+      },
+    ],
+    [dateFormat]
+  );
+
   useEffect(() => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -185,6 +198,11 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     }));
   }, [sort?.direction]);
 
+  useEffect(() => {
+    loadEventLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshToken]);
+
   return (
     <div>
       <EuiSpacer />
@@ -209,7 +227,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         <EuiProgress size="xs" color="accent" data-test-subj="ruleEventLogListProgressBar" />
       )}
       <EuiBasicTable
-        data-test-subj="ruleErrorLogList"
+        data-test-subj="RuleErrorLog"
         loading={isLoading}
         items={logList ?? []}
         itemId="id"
@@ -246,7 +264,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   );
 };
 
-export const RuleEventLogListWithApi = withBulkRuleOperations(RuleEventLogList);
+export const RuleErrorLogWithApi = withBulkRuleOperations(RuleErrorLog);
 
 // eslint-disable-next-line import/no-default-export
-export { RuleEventLogListWithApi as default };
+export { RuleErrorLogWithApi as default };

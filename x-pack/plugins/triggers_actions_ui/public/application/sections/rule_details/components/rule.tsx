@@ -57,6 +57,7 @@ type RuleProps = {
   readOnly: boolean;
   ruleSummary: RuleSummary;
   requestRefresh: () => Promise<void>;
+  refreshToken?: number;
   numberOfExecutions: number;
   onChangeDuration: (length: number) => void;
   durationEpoch?: number;
@@ -75,6 +76,7 @@ export function RuleComponent({
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
+  refreshToken,
   numberOfExecutions,
   onChangeDuration,
   durationEpoch = Date.now(),
@@ -121,7 +123,10 @@ export function RuleComponent({
         defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: suspendedComponentWithProps(RuleEventLogListWithApi, 'xl')({ rule }),
+      content: suspendedComponentWithProps(
+        RuleEventLogListWithApi,
+        'xl'
+      )({ requestRefresh, rule, refreshToken }),
     },
     {
       id: ALERT_LIST_TAB,
@@ -137,7 +142,10 @@ export function RuleComponent({
         defaultMessage: 'Error log',
       }),
       'data-test-subj': 'errorLogTab',
-      content: suspendedComponentWithProps(RuleErrorLogWithApi, 'xl')({ rule }),
+      content: suspendedComponentWithProps(
+        RuleErrorLogWithApi,
+        'xl'
+      )({ requestRefresh, rule, refreshToken }),
     },
   ];
 

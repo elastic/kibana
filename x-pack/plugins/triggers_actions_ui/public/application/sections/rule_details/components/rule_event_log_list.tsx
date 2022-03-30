@@ -231,8 +231,10 @@ const updateButtonProps = {
 };
 
 export type RuleEventLogListProps = {
+  requestRefresh: () => Promise<void>;
   rule: Rule;
   localStorageKey?: string;
+  refreshToken?: number;
 } & Pick<RuleApis, 'loadExecutionLogAggregations'>;
 
 export const RuleEventLogList = (props: RuleEventLogListProps) => {
@@ -240,6 +242,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     rule,
     localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
     loadExecutionLogAggregations,
+    refreshToken,
   } = props;
 
   const { uiSettings, notifications } = useKibana().services;
@@ -405,6 +408,11 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortingColumns, dateStart, dateEnd, filter, pagination.pageIndex, pagination.pageSize]);
+
+  useEffect(() => {
+    loadEventLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshToken]);
 
   useEffect(() => {
     localStorage.setItem(localStorageKey, JSON.stringify(visibleColumns));
