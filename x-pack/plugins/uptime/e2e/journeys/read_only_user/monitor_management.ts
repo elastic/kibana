@@ -27,7 +27,7 @@ journey(
     });
 
     step('Adding monitor is disabled', async () => {
-      expect(await page.isEnabled(byTestId('addMonitorBtn'))).toBeFalsy();
+      expect(await page.isEnabled(byTestId('syntheticsAddMonitorBtn'))).toBeFalsy();
     });
   }
 );

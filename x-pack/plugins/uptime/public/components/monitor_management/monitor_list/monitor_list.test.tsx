@@ -50,13 +50,16 @@ describe('<MonitorManagementList />', () => {
         monitors,
       },
       locations: [],
+      enablement: null,
       error: {
         serviceLocations: null,
         monitorList: null,
+        enablement: null,
       },
       loading: {
         monitorList: true,
         serviceLocations: false,
+        enablement: false,
       },
       syntheticsService: {
         loading: false,
