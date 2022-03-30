@@ -77,3 +77,7 @@ export interface GetFullAgentPolicyResponse {
 export interface GetFullAgentConfigMapResponse {
   item: string;
 }
+
+export interface GetFullAgentManifestResponse {
+  item: string;
+}

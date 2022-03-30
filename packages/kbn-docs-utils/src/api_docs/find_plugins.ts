@@ -12,7 +12,7 @@ import globby from 'globby';
 import loadJsonFile from 'load-json-file';
 
 import { getPluginSearchPaths } from '@kbn/config';
-import { simpleKibanaPlatformPluginDiscovery } from '@kbn/dev-utils';
+import { simpleKibanaPlatformPluginDiscovery } from '@kbn/plugin-discovery';
 import { REPO_ROOT } from '@kbn/utils';
 import { ApiScope, PluginOrPackage } from './types';
 
