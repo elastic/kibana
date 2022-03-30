@@ -161,7 +161,6 @@ export interface ApplicationStart {
     }): string;
     navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
     navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
-    navigateToUrlSkipUnload(url: string): void;
 }
 
 // @public
@@ -785,6 +784,7 @@ export interface NavigateToAppOptions {
 
 // @public
 export interface NavigateToUrlOptions {
+    forceRedirect?: boolean;
     skipAppLeave?: boolean;
 }
 

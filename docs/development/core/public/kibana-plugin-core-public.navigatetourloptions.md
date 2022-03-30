@@ -16,5 +16,6 @@ export interface NavigateToUrlOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [forceRedirect?](./kibana-plugin-core-public.navigatetourloptions.forceredirect.md) | boolean | <i>(Optional)</i> if true, will redirect directly to the url |
 |  [skipAppLeave?](./kibana-plugin-core-public.navigatetourloptions.skipappleave.md) | boolean | <i>(Optional)</i> if true, will bypass the default onAppLeave behavior |
 
