@@ -492,6 +492,7 @@ export class TaskRunner<
 
     const alertExecutionStore: AlertExecutionStore = {
       numberOfTriggeredActions: 0,
+      numberOfScheduledActions: 0,
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
@@ -811,12 +812,17 @@ export class TaskRunner<
     } else {
       if (executionStatus.warning) {
         set(event, 'event.reason', executionStatus.warning?.reason || 'unknown');
-        set(event, 'message', event?.message || executionStatus.warning.message);
+        set(event, 'message', executionStatus.warning?.message || event?.message);
       }
       set(
         event,
         'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
-        executionStatus.numberOfTriggeredActions ?? 0
+        executionStatus.numberOfTriggeredActions
+      );
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
+        executionStatus.numberOfScheduledActions
       );
     }
 

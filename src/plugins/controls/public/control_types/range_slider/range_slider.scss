@@ -1,0 +1,57 @@
+.rangeSlider__popoverOverride {
+  height: 100%;
+  max-width: 100%;
+  width: 100%;
+}
+
+@include euiBreakpoint('m', 'l', 'xl') {
+  .rangeSlider__panelOverride {
+    min-width: $euiSizeXXL * 12;
+  }
+}
+
+.rangeSlider__anchorOverride {
+  >div {
+    height: 100%;
+  }
+}
+
+.rangeSliderAnchor__button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  justify-content: space-between;
+  background-color: $euiFormBackgroundColor;
+  @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
+
+  .euiToolTipAnchor {
+    width: 100%;
+  }
+
+  .rangeSliderAnchor__delimiter {
+    background-color: unset;
+  }
+  .rangeSliderAnchor__fieldNumber {
+    font-weight: $euiFontWeightBold;
+    box-shadow: none;
+    text-align: center;
+    background-color: unset;
+
+    &::placeholder {
+      font-weight: $euiFontWeightRegular;
+      color: $euiColorMediumShade;
+      text-decoration: none;
+    }
+  }
+
+  .rangeSliderAnchor__fieldNumber--invalid {
+    text-decoration: line-through;
+    font-weight: $euiFontWeightRegular;
+    color: $euiColorMediumShade;
+  }
+
+  .rangeSliderAnchor__spinner {
+    padding-right: $euiSizeS;
+  }
+}

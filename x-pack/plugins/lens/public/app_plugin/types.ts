@@ -8,11 +8,13 @@
 import type { History } from 'history';
 import type { OnSaveProps } from 'src/plugins/saved_objects/public';
 import { DiscoverStart } from 'src/plugins/discover/public';
+import { Observable } from 'rxjs';
 import { SpacesApi } from '../../../spaces/public';
 import type {
   ApplicationStart,
   AppMountParameters,
   ChromeStart,
+  CoreTheme,
   ExecutionContextStart,
   HttpStart,
   IUiSettingsClient,
@@ -73,6 +75,7 @@ export interface LensAppProps {
   initialContext?: VisualizeEditorContext | VisualizeFieldContext;
   contextOriginatingApp?: string;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
+  theme$: Observable<CoreTheme>;
 }
 
 export type RunSave = (
@@ -107,6 +110,7 @@ export interface LensTopNavMenuProps {
   initialContextIsEmbedded?: boolean;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  theme$: Observable<CoreTheme>;
 }
 
 export interface HistoryLocationState {
@@ -157,4 +161,5 @@ export interface LensTopNavActions {
   cancel: () => void;
   exportToCSV: () => void;
   getUnderlyingDataUrl: () => string | undefined;
+  openSettings: (anchorElement: HTMLElement) => void;
 }

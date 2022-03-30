@@ -62,6 +62,10 @@ export const initialHostsState: HostsState = {
         },
         severitySelection: [],
       },
+      [HostsTableType.sessions]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
   details: {
@@ -97,6 +101,10 @@ export const initialHostsState: HostsState = {
           direction: Direction.desc,
         },
         severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
   },
