@@ -160,7 +160,7 @@ export const ReferenceLineAnnotations = ({
             marker: (
               <Marker
                 config={yConfig}
-                label={columnToLabelMap[yConfig.forAccessor]}
+                label={columnToLabelMap[forAccessor]}
                 isHorizontal={isHorizontal}
                 hasReducedPadding={hasReducedPadding}
               />
@@ -169,7 +169,7 @@ export const ReferenceLineAnnotations = ({
               <MarkerBody
                 label={
                   yConfig.textVisibility && !hasReducedPadding
-                    ? columnToLabelMap[yConfig.forAccessor]
+                    ? columnToLabelMap[forAccessor]
                     : undefined
                 }
                 isHorizontal={
