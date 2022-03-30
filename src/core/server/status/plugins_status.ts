@@ -74,8 +74,8 @@ export class PluginsStatusService {
       .subscribe((coreStatus: CoreStatus) => {
         this.coreStatus = coreStatus;
         this.updateRootPluginsStatuses();
-        this.updateDependenciesStatuses(this.rootPlugins);
-        this.reportNewStatusToObservers();
+        this.updateDependantStatuses(this.rootPlugins);
+        this.emitCurrentStatus();
       });
   }
 
@@ -109,10 +109,10 @@ export class PluginsStatusService {
         const levelChanged = this.updatePluginReportedStatus(plugin, status);
 
         if (levelChanged) {
-          this.updateDependenciesStatuses([plugin]);
+          this.updateDependantStatuses([plugin]);
         }
 
-        this.reportNewStatusToObservers();
+        this.emitCurrentStatus();
       });
   }
 
@@ -267,12 +267,11 @@ export class PluginsStatusService {
   }
 
   /**
-   * Determine the derived statuses of the specified plugins' dependencies,
-   * updating them on the pluginData structure
-   * Optionally, if the plugins have not registered a custom status Observable, update their "current" status as well.
-   * @param {PluginName[]} plugins The names of the plugins to be updated, along with their subtrees
+   * Update the derived statuses of the specified plugins' dependant plugins,
+   * If impacted plugins have not registered a custom status Observable, update their "current" status as well.
+   * @param {PluginName[]} plugins The names of the plugins whose dependant plugins must be updated
    */
-  private updateDependenciesStatuses(plugins: PluginName[]): void {
+  private updateDependantStatuses(plugins: PluginName[]): void {
     const toCheck = new Set<PluginName>();
     plugins.forEach((plugin) =>
       this.pluginData[plugin].reverseDependencies.forEach((revDep) => toCheck.add(revDep))
@@ -352,10 +351,11 @@ export class PluginsStatusService {
   }
 
   /**
-   * Emit new status to internal Subjects, propagating it to the output Observables.
+   * Emit the current status to internal Subjects, effectively propagating it to observers.
    */
-  private reportNewStatusToObservers(): void {
+  private emitCurrentStatus(): void {
     this.pluginData$.next(this.pluginData);
+    // we must clone the plugin status to prevent future modifications from updating current emission
     this.pluginStatus$.next({ ...this.pluginStatus });
   }
 }
