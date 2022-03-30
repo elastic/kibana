@@ -207,7 +207,7 @@ export const MonitorManagementList = ({
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={i18n.translate('xpack.uptime.monitorManagement.monitorList.title', {
-          defaultMessage: 'Monitor management list',
+          defaultMessage: 'Monitor Management list',
         })}
         error={error?.message}
         loading={loading}

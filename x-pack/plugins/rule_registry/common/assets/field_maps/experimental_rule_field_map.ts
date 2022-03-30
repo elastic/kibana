@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as Fields from '../../../common/technical_rule_data_field_names';
+import * as Fields from '../../technical_rule_data_field_names';
 
 export const experimentalRuleFieldMap = {
   [Fields.ALERT_INSTANCE_ID]: { type: 'keyword', required: true },
