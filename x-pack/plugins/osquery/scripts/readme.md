@@ -7,5 +7,7 @@ currently manually curated). This assumes the targeted schema files will be in
 
 ```
 node ecs.js --schema_version=4.6.0                  // (filename without .json extension)
+Possibly it's going to be necessary to transform fields' names into lower case, because CSV exports Fields with Capital Letters. 
+
 node osquery.js --schema_version=4.6.0              // (filename without .json extension)
 ```
