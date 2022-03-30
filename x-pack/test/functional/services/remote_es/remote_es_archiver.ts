@@ -6,7 +6,7 @@
  */
 
 import { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function RemoteEsArchiverProvider({ getService }: FtrProviderContext): EsArchiver {
   const remoteEs = getService('remoteEs');
