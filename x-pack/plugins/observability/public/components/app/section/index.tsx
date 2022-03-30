@@ -79,7 +79,7 @@ export function SectionContainer({
       >
         <>
           <EuiSpacer size="s" />
-          <EuiPanel hasShadow={true}>{hasError ? <ErrorPanel /> : <>{children}</>}</EuiPanel>
+          <EuiPanel hasBorder={true}>{hasError ? <ErrorPanel /> : <>{children}</>}</EuiPanel>
         </>
       </EuiAccordion>
     </EuiPanel>
