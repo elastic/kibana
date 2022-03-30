@@ -13,20 +13,17 @@ import { createRemoteClustersStore } from '../../../public/application/store';
 import { AppRouter, registerRouter } from '../../../public/application/services';
 import { createRemoteClustersActions, WithAppDependencies } from '../helpers';
 
-const testBedConfig = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
-  return {
-    store: createRemoteClustersStore,
-    memoryRouter: {
-      onRouter: (router: AppRouter) => registerRouter(router),
-    },
-    defaultProps: { isCloudEnabled },
-  };
+const testBedConfig = {
+  store: createRemoteClustersStore,
+  memoryRouter: {
+    onRouter: (router: AppRouter) => registerRouter(router),
+  },
 };
 
 export const setup = async (httpSetup: HttpSetup, overrides?: Record<string, unknown>) => {
   const initTestBed = registerTestBed(
     WithAppDependencies(RemoteClusterAdd, httpSetup, overrides),
-    testBedConfig({ isCloudEnabled: !!overrides?.isCloudEnabled })
+    testBedConfig
   );
   const testBed = await initTestBed();
 
