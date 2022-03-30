@@ -7,8 +7,11 @@
  */
 
 import OriginalHandlebars from 'handlebars';
-// @ts-expect-error: Could not find a declaration file for module
-import { resultIsAllowed } from 'handlebars/dist/cjs/handlebars/internal/proto-access';
+import {
+  createProtoAccessControl,
+  resultIsAllowed,
+  // @ts-expect-error: Could not find a declaration file for module
+} from 'handlebars/dist/cjs/handlebars/internal/proto-access';
 // @ts-expect-error: Could not find a declaration file for module
 import AST from 'handlebars/dist/cjs/handlebars/compiler/ast';
 // @ts-expect-error: Could not find a declaration file for module
@@ -121,6 +124,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
     this.initialHelpers = Object.assign({}, helpers);
 
+    const protoAccessControl = createProtoAccessControl({});
+
     const container: Container = (this.container = {
       helpers: {},
       strict(obj, name, loc) {
@@ -141,7 +146,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
           return result;
         }
 
-        if (resultIsAllowed(result, {}, propertyName)) {
+        if (resultIsAllowed(result, protoAccessControl, propertyName)) {
           return result;
         }
         return undefined;

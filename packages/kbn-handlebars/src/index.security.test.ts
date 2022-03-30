@@ -11,6 +11,20 @@ import { expectTemplate } from './__jest__/test_bench';
 
 describe('security issues', () => {
   describe('GH-1495: Prevent Remote Code Execution via constructor', () => {
+    it('should not allow constructors to be accessed', () => {
+      expectTemplate('{{lookup (lookup this "constructor") "name"}}').withInput({}).toCompileTo('');
+      expectTemplate('{{constructor.name}}').withInput({}).toCompileTo('');
+    });
+
+    it('GH-1603: should not allow constructors to be accessed (lookup via toString)', () => {
+      expectTemplate('{{lookup (lookup this (list "constructor")) "name"}}')
+        .withInput({})
+        .withHelper('list', function (element) {
+          return [element];
+        })
+        .toCompileTo('');
+    });
+
     it('should allow the "constructor" property to be accessed if it is an "ownProperty"', () => {
       expectTemplate('{{constructor.name}}')
         .withInput({ constructor: { name: 'here we go' } })
@@ -59,6 +73,47 @@ describe('security issues', () => {
             },
           })
           .toThrow(Error);
+      });
+    });
+  });
+
+  describe('GH-1563', () => {
+    it('should not allow to access constructor after overriding via __defineGetter__', () => {
+      // @ts-expect-error
+      if ({}.__defineGetter__ == null || {}.__lookupGetter__ == null) {
+        return; // Browser does not support this exploit anyway
+      }
+      expectTemplate(
+        '{{__defineGetter__ "undefined" valueOf }}' +
+          '{{#with __lookupGetter__ }}' +
+          '{{__defineGetter__ "propertyIsEnumerable" (this.bind (this.bind 1)) }}' +
+          '{{constructor.name}}' +
+          '{{/with}}'
+      )
+        .withInput({})
+        .toThrow(/Missing helper: "__defineGetter__"/);
+    });
+  });
+
+  describe('GH-1595: dangerous properties', () => {
+    const templates = [
+      '{{constructor}}',
+      '{{__defineGetter__}}',
+      '{{__defineSetter__}}',
+      '{{__lookupGetter__}}',
+      '{{__proto__}}',
+      '{{lookup this "constructor"}}',
+      '{{lookup this "__defineGetter__"}}',
+      '{{lookup this "__defineSetter__"}}',
+      '{{lookup this "__lookupGetter__"}}',
+      '{{lookup this "__proto__"}}',
+    ];
+
+    templates.forEach((template) => {
+      describe('access should be denied to ' + template, () => {
+        it('by default', () => {
+          expectTemplate(template).withInput({}).toCompileTo('');
+        });
       });
     });
   });
