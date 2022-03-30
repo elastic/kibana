@@ -37,8 +37,6 @@ export const buildUsersQuery = ({
     },
   ];
 
-  const agg = { user_count: { cardinality: { field: 'user.name' } } };
-
   const dslQuery = {
     allow_no_indices: true,
     index: defaultIndex,
@@ -47,7 +45,7 @@ export const buildUsersQuery = ({
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
-        ...agg,
+        user_count: { cardinality: { field: 'user.name' } },
         user_data: {
           terms: { size: querySize, field: 'user.name', order: getQueryOrder(sort) },
           aggs: {

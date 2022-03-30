@@ -8921,7 +8921,7 @@ const BootstrapCommand = {
           ms: Date.now() - start
         });
       }
-    }; // Force install is set in case a flag `--force-install` is passed into kbn bootstrap
+    }; // Force install is set in case a flag is passed into yarn kbn bootstrap
 
 
     const forceInstall = !!options && options['force-install'] === true; // Install bazel machinery tools if needed
@@ -9304,7 +9304,10 @@ class CiStatsReporter {
           headers,
           data: body,
           params: query,
-          adapter: _http.default
+          adapter: _http.default,
+          // if it can be serialized into a string, send it
+          maxBodyLength: Infinity,
+          maxContentLength: Infinity
         });
         return resp.data;
       } catch (error) {
@@ -52893,6 +52896,7 @@ async function runBazelCommandWithRunner(bazelCommandRunner, bazelArgs, offline 
   try {
     await bazelProc;
   } catch {
+    _log__WEBPACK_IMPORTED_MODULE_5__["log"].error('HINT: If experiencing problems with node_modules try `yarn kbn bootstrap --force-install` or as last resort `yarn kbn reset && yarn kbn bootstrap`');
     throw new _errors__WEBPACK_IMPORTED_MODULE_6__["CliError"](`The bazel command that was running failed to complete.`);
   }
 

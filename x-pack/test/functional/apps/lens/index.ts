@@ -58,6 +58,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./multi_terms'));
       loadTestFile(require.resolve('./epoch_millis'));
       loadTestFile(require.resolve('./show_underlying_data'));
+      loadTestFile(require.resolve('./show_underlying_data_dashboard'));
     });
 
     describe('', function () {
@@ -74,6 +75,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./gauge'));
       loadTestFile(require.resolve('./metrics'));
       loadTestFile(require.resolve('./reference_lines'));
+      loadTestFile(require.resolve('./annotations'));
       loadTestFile(require.resolve('./inspector'));
       loadTestFile(require.resolve('./error_handling'));
       loadTestFile(require.resolve('./lens_tagging'));

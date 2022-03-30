@@ -10,14 +10,14 @@ import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ALERT_ORIGINAL_TIME } from '../../../../../common/field_maps/field_names';
 
 import { SimpleHit, ThresholdSignalHistory } from '../types';
-import { getThresholdTermsHash, isWrappedRACAlert, isWrappedSignalHit } from '../utils';
+import { getThresholdTermsHash, isWrappedDetectionAlert, isWrappedSignalHit } from '../utils';
 
 interface GetThresholdSignalHistoryParams {
   alerts: Array<SearchHit<unknown>>;
 }
 
 const getTerms = (alert: SimpleHit) => {
-  if (isWrappedRACAlert(alert)) {
+  if (isWrappedDetectionAlert(alert)) {
     const parameters = alert._source[ALERT_RULE_PARAMETERS] as unknown as Record<
       string,
       Record<string, string[]>
@@ -35,7 +35,7 @@ const getTerms = (alert: SimpleHit) => {
 };
 
 const getOriginalTime = (alert: SimpleHit) => {
-  if (isWrappedRACAlert(alert)) {
+  if (isWrappedDetectionAlert(alert)) {
     const originalTime = alert._source[ALERT_ORIGINAL_TIME];
     return originalTime != null ? new Date(originalTime as string).getTime() : undefined;
   } else if (isWrappedSignalHit(alert)) {

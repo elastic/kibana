@@ -23,6 +23,7 @@ import {
   HostRiskScoreQueryTabBody,
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
+  SessionsTabBody,
 } from './navigation';
 import { HostAlertsQueryTabBody } from './navigation/alerts_query_tab_body';
 import { TimelineId } from '../../../common/types';
@@ -102,6 +103,9 @@ export const HostsTabs = memo<HostsTabsProps>(
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.alerts})`}>
           <HostAlertsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.sessions})`}>
+          <SessionsTabBody {...tabProps} />
         </Route>
       </Switch>
     );
