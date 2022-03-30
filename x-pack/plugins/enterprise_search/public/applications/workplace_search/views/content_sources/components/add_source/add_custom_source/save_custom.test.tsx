@@ -15,7 +15,7 @@ import { EuiButtonTo } from '../../../../../../shared/react_router_helpers';
 
 import { staticCustomSourceData } from '../../../source_data';
 
-import { SourceIdentifier } from '../../source_identifier';
+import { CustomSourceDeployment } from '../../custom_source_deployment';
 
 import { SaveCustom } from './save_custom';
 
@@ -43,12 +43,8 @@ describe('SaveCustom', () => {
       expect(wrapper.find(EuiButtonTo)).toHaveLength(1);
     });
 
-    it('contains a source identifier', () => {
-      expect(wrapper.find(SourceIdentifier)).toHaveLength(1);
-    });
-
-    it('includes a link to generic documentation', () => {
-      expect(wrapper.find('[data-test-subj="GenericDocumentationLink"]')).toHaveLength(1);
+    it('includes deployment instructions', () => {
+      expect(wrapper.find(CustomSourceDeployment)).toHaveLength(1);
     });
   });
 
@@ -70,14 +66,6 @@ describe('SaveCustom', () => {
       });
 
       wrapper = shallow(<SaveCustom />);
-    });
-
-    it('includes a to the github repository', () => {
-      expect(wrapper.find('[data-test-subj="GithubRepositoryLink"]')).toHaveLength(1);
-    });
-
-    it('includes a link to service-type specific documentation', () => {
-      expect(wrapper.find('[data-test-subj="PreconfiguredDocumentationLink"]')).toHaveLength(1);
     });
 
     it('includes a link to provide feedback', () => {

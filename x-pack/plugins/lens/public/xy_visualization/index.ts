@@ -11,7 +11,6 @@ import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/pu
 import type { EditorFrameSetup } from '../types';
 import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import type { LensPluginStartDependencies } from '../plugin';
-import { getTimeZone } from '../utils';
 import type { FormatFactory } from '../../common';
 import { LEGACY_TIME_AXIS } from '../../../../../src/plugins/charts/common';
 
@@ -26,26 +25,14 @@ export interface XyVisualizationPluginSetupPlugins {
 export class XyVisualization {
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
-    { expressions, formatFactory, editorFrame }: XyVisualizationPluginSetupPlugins
+    { editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { getXyChartRenderer, getXyVisualization } = await import('../async_services');
+      const { getXyVisualization } = await import('../async_services');
       const [, { charts, fieldFormats, eventAnnotation }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
       const eventAnnotationService = await eventAnnotation.getService();
       const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
-      expressions.registerRenderer(
-        getXyChartRenderer({
-          formatFactory,
-          chartsThemeService: charts.theme,
-          chartsActiveCursorService: charts.activeCursor,
-          paletteService: palettes,
-          eventAnnotationService,
-          timeZone: getTimeZone(core.uiSettings),
-          useLegacyTimeAxis,
-          kibanaTheme: core.theme,
-        })
-      );
       return getXyVisualization({
         paletteService: palettes,
         eventAnnotationService,

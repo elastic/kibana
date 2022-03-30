@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
+import { UrlServiceError } from '../../error';
 import { ServerUrlService } from '../../types';
 
 export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
@@ -41,26 +42,35 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
       if (!locator) {
         return res.customError({
           statusCode: 409,
-          headers: {
-            'content-type': 'application/json',
-          },
           body: 'Locator not found.',
         });
       }
 
-      const shortUrl = await shortUrls.create({
-        locator,
-        params,
-        slug,
-        humanReadableSlug,
-      });
+      try {
+        const shortUrl = await shortUrls.create({
+          locator,
+          params,
+          slug,
+          humanReadableSlug,
+        });
 
-      return res.ok({
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: shortUrl.data,
-      });
+        return res.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: shortUrl.data,
+        });
+      } catch (error) {
+        if (error instanceof UrlServiceError) {
+          if (error.code === 'SLUG_EXISTS') {
+            return res.customError({
+              statusCode: 409,
+              body: error.message,
+            });
+          }
+        }
+        throw error;
+      }
     })
   );
 };

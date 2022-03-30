@@ -37,16 +37,13 @@ import {
   TIMESTAMP,
   VERSION,
 } from '../../common/technical_rule_data_field_names';
+import { CommonAlertFieldNameLatest, CommonAlertIdFieldNameLatest } from '../../common/schemas';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
-import {
-  CommonAlertFieldName,
-  CommonAlertIdFieldName,
-  getCommonAlertFields,
-} from './get_common_alert_fields';
+import { getCommonAlertFields } from './get_common_alert_fields';
 
-type ImplicitTechnicalFieldName = CommonAlertFieldName | CommonAlertIdFieldName;
+type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
 
 type ExplicitTechnicalAlertFields = Partial<
   Omit<ParsedTechnicalFields, ImplicitTechnicalFieldName>

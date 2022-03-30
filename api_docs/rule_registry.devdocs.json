@@ -1376,7 +1376,9 @@
           },
           "<TActionGroupIds, never>>) => Promise<void | TState>; id: string; name: string; validate?: { params?: ",
           "AlertTypeParamsValidator",
-          "<TParams> | undefined; } | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; actionGroups: ",
+          "<TParams> | undefined; } | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; config?: ",
+          "RuleTypeConfig",
+          " | undefined; actionGroups: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2484,6 +2486,36 @@
                 "deprecated": false
               }
             ]
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.LifecycleAlertServices.getAlertStartedDate",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlertStartedDate",
+            "description": [],
+            "signature": [
+              "(alertId: string) => string | null"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.LifecycleAlertServices.getAlertStartedDate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "alertId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
