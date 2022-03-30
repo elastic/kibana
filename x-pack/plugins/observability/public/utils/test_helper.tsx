@@ -46,6 +46,7 @@ export const render = (component: React.ReactNode) => {
             config,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
+            kibanaFeatures: [],
           }}
         >
           <EuiThemeProvider>{component}</EuiThemeProvider>

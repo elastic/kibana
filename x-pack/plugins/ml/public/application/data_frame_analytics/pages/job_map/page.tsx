@@ -22,7 +22,7 @@ import { AnalyticsIdSelector, AnalyticsSelectorIds } from '../components/analyti
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 
 export const Page: FC = () => {
-  const [globalState] = useUrlState('_g');
+  const [globalState, setGlobalState] = useUrlState('_g');
   const [isLoading, setIsLoading] = useState(false);
   const [jobsExist, setJobsExist] = useState(true);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
@@ -50,6 +50,20 @@ export const Page: FC = () => {
   useEffect(function checkJobs() {
     checkJobsExist();
   }, []);
+
+  useEffect(
+    function updateUrl() {
+      if (analyticsId !== undefined) {
+        setGlobalState({
+          ml: {
+            ...(analyticsId.job_id && !analyticsId.model_id ? { jobId: analyticsId.job_id } : {}),
+            ...(analyticsId.model_id ? { modelId: analyticsId.model_id } : {}),
+          },
+        });
+      }
+    },
+    [analyticsId?.job_id, analyticsId?.model_id]
+  );
 
   const getEmptyState = () => {
     if (jobsExist === false) {
@@ -111,17 +125,14 @@ export const Page: FC = () => {
 
       <NodeAvailableWarning />
 
-      <SavedObjectsWarning
-        mlSavedObjectType="data-frame-analytics"
-        onCloseFlyout={refresh}
-        forceRefresh={isLoading}
-      />
+      <SavedObjectsWarning onCloseFlyout={refresh} />
       <UpgradeWarning />
 
       {mapJobId || mapModelId || analyticsId ? (
         <JobMap
           analyticsId={mapJobId || analyticsId?.job_id}
           modelId={mapModelId || analyticsId?.model_id}
+          forceRefresh={isLoading}
         />
       ) : (
         getEmptyState()

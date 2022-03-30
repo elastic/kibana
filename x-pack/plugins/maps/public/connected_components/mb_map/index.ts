@@ -21,6 +21,7 @@ import {
   updateMetaFromTiles,
 } from '../../actions';
 import {
+  getCustomIcons,
   getGoto,
   getLayerList,
   getMapReady,
@@ -40,6 +41,7 @@ function mapStateToProps(state: MapStoreState) {
   return {
     isMapReady: getMapReady(state),
     settings: getMapSettings(state),
+    customIcons: getCustomIcons(state),
     layerList: getLayerList(state),
     spatialFiltersLayer: getSpatialFiltersLayer(state),
     goto: getGoto(state),

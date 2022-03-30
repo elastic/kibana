@@ -65,6 +65,7 @@ import { useLicense } from '../../../../../common/hooks/use_license';
 import { isValidHash } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
+import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 
 interface BlocklistEntry {
   field: BlocklistConditionEntryField;
@@ -73,9 +74,15 @@ interface BlocklistEntry {
   value: string[];
 }
 
+type ERROR_KEYS = keyof typeof ERRORS;
+
+type ItemValidationNodes = {
+  [K in ERROR_KEYS]?: React.ReactNode;
+};
+
 interface ItemValidation {
-  name?: React.ReactNode[];
-  value?: React.ReactNode[];
+  name: ItemValidationNodes;
+  value: ItemValidationNodes;
 }
 
 function createValidationMessage(message: string): React.ReactNode {
@@ -94,7 +101,7 @@ function getDropdownDisplay(field: BlocklistConditionEntryField): React.ReactNod
 }
 
 function isValid(itemValidation: ItemValidation): boolean {
-  return !Object.values(itemValidation).some((error) => error.length);
+  return !Object.values(itemValidation).some((errors) => Object.keys(errors).length);
 }
 
 export const BlockListForm = memo(
@@ -103,17 +110,37 @@ export const BlockListForm = memo(
       name: false,
       value: false,
     });
-    const warningsRef = useRef<ItemValidation>({});
-    const errorsRef = useRef<ItemValidation>({});
+    const warningsRef = useRef<ItemValidation>({ name: {}, value: {} });
+    const errorsRef = useRef<ItemValidation>({ name: {}, value: {} });
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const isGlobal = useMemo(() => isArtifactGlobal(item as ExceptionListItemSchema), [item]);
+    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(item.tags));
+    const [hasFormChanged, setHasFormChanged] = useState(false);
+
+    const showAssignmentSection = useMemo(() => {
+      return (
+        isPlatinumPlus ||
+        (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
+      );
+    }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
+
+    // set initial state of `wasByPolicy` that checks if the initial state of the exception was by policy or not
+    useEffect(() => {
+      if (!hasFormChanged && item.tags) {
+        setWasByPolicy(!isGlobalPolicyEffected(item.tags));
+      }
+    }, [item.tags, hasFormChanged]);
 
     // select policies if editing
     useEffect(() => {
+      if (hasFormChanged) return;
       const policyIds = item.tags?.map((tag) => tag.split(':')[1]) ?? [];
       if (!policyIds.length) return;
       const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
+
       setSelectedPolicies(policiesData);
-    }, [item.tags, policies]);
+    }, [hasFormChanged, item.tags, policies]);
 
     const blocklistEntry = useMemo((): BlocklistEntry => {
       if (!item.entries.length) {
@@ -187,30 +214,30 @@ export const BlockListForm = memo(
         value: values = [],
       } = (nextItem.entries[0] ?? {}) as BlocklistEntry;
 
-      const newValueWarnings: React.ReactNode[] = [];
-      const newNameErrors: React.ReactNode[] = [];
-      const newValueErrors: React.ReactNode[] = [];
+      const newValueWarnings: ItemValidationNodes = {};
+      const newNameErrors: ItemValidationNodes = {};
+      const newValueErrors: ItemValidationNodes = {};
 
       // error if name empty
       if (!nextItem.name.trim()) {
-        newNameErrors.push(createValidationMessage(ERRORS.NAME_REQUIRED));
+        newNameErrors.NAME_REQUIRED = createValidationMessage(ERRORS.NAME_REQUIRED);
       }
 
       // error if no values
       if (!values.length) {
-        newValueErrors.push(createValidationMessage(ERRORS.VALUE_REQUIRED));
+        newValueErrors.VALUE_REQUIRED = createValidationMessage(ERRORS.VALUE_REQUIRED);
       }
 
       // error if invalid hash
       if (field === 'file.hash.*' && values.some((value) => !isValidHash(value))) {
-        newValueErrors.push(createValidationMessage(ERRORS.INVALID_HASH));
+        newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
       }
 
       const isInvalidPath = values.some((value) => !isPathValid({ os, field, type, value }));
 
       // warn if invalid path
       if (field !== 'file.hash.*' && isInvalidPath) {
-        newValueWarnings.push(createValidationMessage(ERRORS.INVALID_PATH));
+        newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
       }
 
       // warn if wildcard
@@ -219,10 +246,15 @@ export const BlockListForm = memo(
         !isInvalidPath &&
         values.some((value) => !hasSimpleExecutableName({ os, type, value }))
       ) {
-        newValueWarnings.push(createValidationMessage(ERRORS.WILDCARD_PRESENT));
+        newValueWarnings.WILDCARD_PRESENT = createValidationMessage(ERRORS.WILDCARD_PRESENT);
       }
 
-      warningsRef.current = { ...warningsRef, value: newValueWarnings };
+      // warn if duplicates
+      if (values.length !== uniq(values).length) {
+        newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
+      }
+
+      warningsRef.current = { ...warningsRef.current, value: newValueWarnings };
       errorsRef.current = { name: newNameErrors, value: newValueErrors };
     }, []);
 
@@ -248,6 +280,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item]
     );
@@ -261,6 +294,7 @@ export const BlockListForm = memo(
             description: event.target.value,
           },
         });
+        setHasFormChanged(true);
       },
       [onChange, item]
     );
@@ -286,6 +320,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, blocklistEntry, onChange, item]
     );
@@ -302,8 +337,30 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item, blocklistEntry]
+    );
+
+    const handleOnValueTextChange = useCallback(
+      (value: string) => {
+        const nextWarnings = { ...warningsRef.current.value };
+
+        if (blocklistEntry.value.includes(value)) {
+          nextWarnings.DUPLICATE_VALUE = createValidationMessage(ERRORS.DUPLICATE_VALUE);
+        } else {
+          delete nextWarnings.DUPLICATE_VALUE;
+        }
+
+        warningsRef.current = {
+          ...warningsRef.current,
+          value: nextWarnings,
+        };
+
+        // trigger re-render without modifying item
+        setVisited((prevVisited) => ({ ...prevVisited }));
+      },
+      [blocklistEntry]
     );
 
     // only triggered on remove / clear
@@ -320,6 +377,7 @@ export const BlockListForm = memo(
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item, blocklistEntry]
     );
@@ -327,7 +385,7 @@ export const BlockListForm = memo(
     const handleOnValueAdd = useCallback(
       (option: string) => {
         const splitValues = option.split(',').filter((value) => value.trim());
-        const value = uniq([...blocklistEntry.value, ...splitValues]);
+        const value = [...blocklistEntry.value, ...splitValues];
 
         const nextItem = {
           ...item,
@@ -335,12 +393,14 @@ export const BlockListForm = memo(
         };
 
         validateValues(nextItem);
+        nextItem.entries[0].value = uniq(nextItem.entries[0].value);
 
         setVisited((prevVisited) => ({ ...prevVisited, value: true }));
         onChange({
           isValid: isValid(errorsRef.current),
           item: nextItem,
         });
+        setHasFormChanged(true);
       },
       [validateValues, onChange, item, blocklistEntry]
     );
@@ -351,16 +411,20 @@ export const BlockListForm = memo(
           ? [GLOBAL_ARTIFACT_TAG]
           : change.selected.map((policy) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`);
 
-        setSelectedPolicies(change.selected);
+        const nextItem = { ...item, tags };
+
+        // Preserve old selected policies when switching to global
+        if (!change.isGlobal) {
+          setSelectedPolicies(change.selected);
+        }
+        validateValues(nextItem);
         onChange({
           isValid: isValid(errorsRef.current),
-          item: {
-            ...item,
-            tags,
-          },
+          item: nextItem,
         });
+        setHasFormChanged(true);
       },
-      [onChange, item]
+      [validateValues, onChange, item]
     );
 
     return (
@@ -378,8 +442,8 @@ export const BlockListForm = memo(
 
         <EuiFormRow
           label={NAME_LABEL}
-          isInvalid={visited.name && !!errorsRef.current.name?.length}
-          error={errorsRef.current.name}
+          isInvalid={visited.name && !!Object.keys(errorsRef.current.name).length}
+          error={Object.values(errorsRef.current.name)}
           fullWidth
         >
           <EuiFieldText
@@ -446,14 +510,15 @@ export const BlockListForm = memo(
         </EuiFormRow>
         <EuiFormRow
           label={valueLabel}
-          isInvalid={visited.value && !!errorsRef.current.value?.length}
-          helpText={warningsRef.current.value}
-          error={errorsRef.current.value}
+          isInvalid={visited.value && !!Object.keys(errorsRef.current.value).length}
+          helpText={Object.values(warningsRef.current.value)}
+          error={Object.values(errorsRef.current.value)}
           fullWidth
         >
           <EuiComboBox
             selectedOptions={selectedValues}
             onBlur={handleOnValueBlur}
+            onSearchChange={handleOnValueTextChange}
             onChange={handleOnValueChange}
             onCreateOption={handleOnValueAdd}
             fullWidth
@@ -461,20 +526,22 @@ export const BlockListForm = memo(
           />
         </EuiFormRow>
 
-        <>
-          <EuiHorizontalRule />
-          <EuiFormRow fullWidth>
-            <EffectedPolicySelect
-              isGlobal={isArtifactGlobal(item as ExceptionListItemSchema)}
-              isPlatinumPlus={useLicense().isPlatinumPlus()}
-              selected={selectedPolicies}
-              options={policies}
-              onChange={handleOnPolicyChange}
-              isLoading={policiesIsLoading}
-              description={POLICY_SELECT_DESCRIPTION}
-            />
-          </EuiFormRow>
-        </>
+        {showAssignmentSection && (
+          <>
+            <EuiHorizontalRule />
+            <EuiFormRow fullWidth>
+              <EffectedPolicySelect
+                isGlobal={isGlobal}
+                isPlatinumPlus={isPlatinumPlus}
+                selected={selectedPolicies}
+                options={policies}
+                onChange={handleOnPolicyChange}
+                isLoading={policiesIsLoading}
+                description={POLICY_SELECT_DESCRIPTION}
+              />
+            </EuiFormRow>
+          </>
+        )}
       </EuiForm>
     );
   }

@@ -45,7 +45,8 @@ describe('task_events', () => {
     expect(result.eventLoopBlockMs).toBe(undefined);
   });
 
-  describe('startTaskTimerWithEventLoopMonitoring', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/128441
+  describe.skip('startTaskTimerWithEventLoopMonitoring', () => {
     test('non-blocking', async () => {
       const stopTaskTimer = startTaskTimerWithEventLoopMonitoring({
         monitor: true,
