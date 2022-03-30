@@ -2,7 +2,7 @@
 
 ## Console
 
-A terminal like console component that focuses on the user's interactions with the "terminal" and not with what commands are available. Command are defined on input to the component via a prop. Can be used standalone, and is used with `ConsoleManagement` as well (see below).
+A terminal-like console component that focuses on the user's interactions with the "terminal" and not with what commands are available. Commands are defined on input to the component via a prop. Can be used standalone, and is used with `ConsoleManagement` as well (see below).
 
 
 ## Console Management

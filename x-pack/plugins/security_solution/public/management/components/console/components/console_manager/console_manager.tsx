@@ -98,7 +98,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         return newState;
       });
     },
-    [validateIdOrThrow] // << IMPORTANT: this callback should have immutable dependencies
+    [validateIdOrThrow] // << IMPORTANT: this callback should have only immutable dependencies
   );
 
   const hide = useCallback<ConsoleManagerClient['hide']>(
@@ -115,7 +115,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         };
       });
     },
-    [validateIdOrThrow] // << IMPORTANT: this callback should have immutable dependencies
+    [validateIdOrThrow] // << IMPORTANT: this callback should have only immutable dependencies
   );
 
   const terminate = useCallback<ConsoleManagerClient['terminate']>(
@@ -135,7 +135,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         return newState;
       });
     },
-    [validateIdOrThrow] // << IMPORTANT: this callback should have immutable dependencies
+    [validateIdOrThrow] // << IMPORTANT: this callback should have only immutable dependencies
   );
 
   const getOne = useCallback<ConsoleManagerClient['getOne']>(
@@ -144,7 +144,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         return consoleStorageRef.current[id].client as Readonly<RegisteredConsoleClient<Meta>>;
       }
     },
-    [] // << IMPORTANT: this callback should have dependencies or only immutable dependencies
+    [] // << IMPORTANT: this callback should have no dependencies or only immutable dependencies
   );
 
   const getList = useCallback<ConsoleManagerClient['getList']>(<
