@@ -7,6 +7,8 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
+import { RemoteEsArchiverProvider } from '.services/remote_es/remote_es_archiver';
+import { RemoteEsProvider } from '.services/remote_es/remote_es';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('./config'));
@@ -45,6 +47,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'http://elastic:changeme@localhost:' +
             `${functionalConfig.get('servers.elasticsearch.port') + 1}`,
       },
+    },
+    services: {
+      ...functionalConfig.get('services'),
+      remoteEs: RemoteEsProvider,
+      remoteEsArchiver: RemoteEsArchiverProvider,
     },
   };
 }
