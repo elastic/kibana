@@ -71,46 +71,53 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
     });
 
-    describe('', function () {
-      this.tags(['ciGroup3', 'skipFirefox']);
-      loadTestFile(require.resolve('./smokescreen'));
-      loadTestFile(require.resolve('./persistent_context'));
-    });
+    if (config.get('esTestCluster.ccs')) {
+      describe('', function () {
+        this.tags(['ciGroup3', 'skipFirefox']);
+        loadTestFile(require.resolve('./smokescreen'));
+      });
+    } else {
+      describe('', function () {
+        this.tags(['ciGroup3', 'skipFirefox']);
+        loadTestFile(require.resolve('./smokescreen'));
+        loadTestFile(require.resolve('./persistent_context'));
+      });
 
-    describe('', function () {
-      this.tags(['ciGroup16', 'skipFirefox']);
+      describe('', function () {
+        this.tags(['ciGroup16', 'skipFirefox']);
 
-      loadTestFile(require.resolve('./add_to_dashboard'));
-      loadTestFile(require.resolve('./table_dashboard'));
-      loadTestFile(require.resolve('./table'));
-      loadTestFile(require.resolve('./runtime_fields'));
-      loadTestFile(require.resolve('./dashboard'));
-      loadTestFile(require.resolve('./multi_terms'));
-      loadTestFile(require.resolve('./epoch_millis'));
-      loadTestFile(require.resolve('./show_underlying_data'));
-    });
+        loadTestFile(require.resolve('./add_to_dashboard'));
+        loadTestFile(require.resolve('./table_dashboard'));
+        loadTestFile(require.resolve('./table'));
+        loadTestFile(require.resolve('./runtime_fields'));
+        loadTestFile(require.resolve('./dashboard'));
+        loadTestFile(require.resolve('./multi_terms'));
+        loadTestFile(require.resolve('./epoch_millis'));
+        loadTestFile(require.resolve('./show_underlying_data'));
+      });
 
-    describe('', function () {
-      this.tags(['ciGroup4', 'skipFirefox']);
+      describe('', function () {
+        this.tags(['ciGroup4', 'skipFirefox']);
 
-      loadTestFile(require.resolve('./colors'));
-      loadTestFile(require.resolve('./chart_data'));
-      loadTestFile(require.resolve('./time_shift'));
-      loadTestFile(require.resolve('./drag_and_drop'));
-      loadTestFile(require.resolve('./disable_auto_apply'));
-      loadTestFile(require.resolve('./geo_field'));
-      loadTestFile(require.resolve('./formula'));
-      loadTestFile(require.resolve('./heatmap'));
-      loadTestFile(require.resolve('./gauge'));
-      loadTestFile(require.resolve('./metrics'));
-      loadTestFile(require.resolve('./reference_lines'));
-      loadTestFile(require.resolve('./inspector'));
-      loadTestFile(require.resolve('./error_handling'));
-      loadTestFile(require.resolve('./lens_tagging'));
-      loadTestFile(require.resolve('./lens_reporting'));
-      loadTestFile(require.resolve('./tsvb_open_in_lens'));
-      // has to be last one in the suite because it overrides saved objects
-      loadTestFile(require.resolve('./rollup'));
-    });
+        loadTestFile(require.resolve('./colors'));
+        loadTestFile(require.resolve('./chart_data'));
+        loadTestFile(require.resolve('./time_shift'));
+        loadTestFile(require.resolve('./drag_and_drop'));
+        loadTestFile(require.resolve('./disable_auto_apply'));
+        loadTestFile(require.resolve('./geo_field'));
+        loadTestFile(require.resolve('./formula'));
+        loadTestFile(require.resolve('./heatmap'));
+        loadTestFile(require.resolve('./gauge'));
+        loadTestFile(require.resolve('./metrics'));
+        loadTestFile(require.resolve('./reference_lines'));
+        loadTestFile(require.resolve('./inspector'));
+        loadTestFile(require.resolve('./error_handling'));
+        loadTestFile(require.resolve('./lens_tagging'));
+        loadTestFile(require.resolve('./lens_reporting'));
+        loadTestFile(require.resolve('./tsvb_open_in_lens'));
+        // has to be last one in the suite because it overrides saved objects
+        loadTestFile(require.resolve('./rollup'));
+      });
+    }
   });
 };

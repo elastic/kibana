@@ -75,9 +75,6 @@ export default async function ({ readConfigFile }) {
     servers: kibanaFunctionalConfig.get('servers'),
 
     esTestCluster: {
-      ccs: {
-        remoteClusterUrl: '',
-      },
       license: 'trial',
       from: 'snapshot',
       serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
