@@ -84,11 +84,17 @@ export function preprocessLegacyFields({
 function getApmPackageInputVars(options: GetApmPackagePolicyDefinitionOptions) {
   const { apmServerSchema } = options;
   const apmServerConfigs = Object.entries(apmConfigMapping).map(
-    ([key, { name, type, getValue }]) => ({ key, name, type, getValue })
+    ([key, { name, type, getValue, frozen }]) => ({
+      key,
+      name,
+      type,
+      getValue,
+      frozen,
+    })
   );
 
   const inputVars: Record<string, { type: string; value: any }> =
-    apmServerConfigs.reduce((acc, { key, name, type, getValue }) => {
+    apmServerConfigs.reduce((acc, { key, name, type, getValue, frozen }) => {
       const apmServerSchemaValue = apmServerSchema[key];
       const value =
         (getValue
@@ -96,7 +102,7 @@ function getApmPackageInputVars(options: GetApmPackagePolicyDefinitionOptions) {
           : apmServerSchemaValue) ?? ''; // defaults to an empty string to be edited in Fleet UI
       return {
         ...acc,
-        [name]: { type, value },
+        [name]: { type, value, frozen },
       };
     }, {});
   return inputVars;
@@ -111,16 +117,19 @@ export const apmConfigMapping: Record<
       options: GetApmPackagePolicyDefinitionOptions,
       value?: any
     ) => any;
+    frozen?: boolean;
   }
 > = {
   'apm-server.host': {
     name: 'host',
     type: 'text',
+    frozen: true,
   },
   'apm-server.url': {
     name: 'url',
     type: 'text',
     getValue: ({ cloudPluginSetup }) => cloudPluginSetup?.apm?.url,
+    frozen: true,
   },
   'apm-server.rum.enabled': {
     name: 'enable_rum',
@@ -207,14 +216,17 @@ export const apmConfigMapping: Record<
   'apm-server.ssl.enabled': {
     name: 'tls_enabled',
     type: 'bool',
+    frozen: true,
   },
   'apm-server.ssl.certificate': {
     name: 'tls_certificate',
     type: 'text',
+    frozen: true,
   },
   'apm-server.ssl.key': {
     name: 'tls_key',
     type: 'text',
+    frozen: true,
   },
   'apm-server.ssl.supported_protocols': {
     name: 'tls_supported_protocols',
