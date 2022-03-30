@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
+import { UrlServiceError } from '../../error';
 import { ServerUrlService } from '../../types';
 
 export const registerResolveRoute = (router: IRouter, url: ServerUrlService) => {
@@ -26,15 +27,31 @@ export const registerResolveRoute = (router: IRouter, url: ServerUrlService) => 
     router.handleLegacyErrors(async (ctx, req, res) => {
       const slug = req.params.slug;
       const savedObjects = ctx.core.savedObjects.client;
-      const shortUrls = url.shortUrls.get({ savedObjects });
-      const shortUrl = await shortUrls.resolve(slug);
 
-      return res.ok({
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: shortUrl.data,
-      });
+      try {
+        const shortUrls = url.shortUrls.get({ savedObjects });
+        const shortUrl = await shortUrls.resolve(slug);
+
+        return res.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: shortUrl.data,
+        });
+      } catch (error) {
+        if (error instanceof UrlServiceError) {
+          if (error.code === 'NOT_FOUND') {
+            return res.customError({
+              statusCode: 404,
+              headers: {
+                'content-type': 'application/json',
+              },
+              body: error.message,
+            });
+          }
+        }
+        throw error;
+      }
     })
   );
 };
