@@ -11,26 +11,16 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTourStep,
 } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import * as i18n from '../../translations';
-import { useRulesFeatureTourContext } from '../feature_tour/rules_feature_tour_context';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
-const SearchBarWrapper = styled(EuiFlexItem)`
-  & .euiPopover__anchor {
-    // This is needed to "cancel" styles passed down from EuiTourStep that
-    // interfere with EuiFieldSearch and don't allow it to take the full width
-    display: block;
-  }
 `;
 
 interface RulesTableFiltersProps {
@@ -54,8 +44,6 @@ const RulesTableFiltersComponent = ({
   } = useRulesTableContext();
 
   const { showCustomRules, showElasticRules, tags: selectedTags } = filterOptions;
-
-  const { steps } = useRulesFeatureTourContext();
 
   const handleOnSearch = useCallback(
     (filterString) => setFilterOptions({ filter: filterString.trim() }),
@@ -81,17 +69,15 @@ const RulesTableFiltersComponent = ({
 
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd">
-      <SearchBarWrapper grow>
-        <EuiTourStep {...steps[0]} anchorPosition="downLeft">
-          <EuiFieldSearch
-            aria-label={i18n.SEARCH_RULES}
-            fullWidth
-            incremental={false}
-            placeholder={i18n.SEARCH_PLACEHOLDER}
-            onSearch={handleOnSearch}
-          />
-        </EuiTourStep>
-      </SearchBarWrapper>
+      <EuiFlexItem grow>
+        <EuiFieldSearch
+          aria-label={i18n.SEARCH_RULES}
+          fullWidth
+          incremental={false}
+          placeholder={i18n.SEARCH_PLACEHOLDER}
+          onSearch={handleOnSearch}
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <TagsFilterPopover

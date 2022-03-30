@@ -17,6 +17,7 @@ import { PreviewHistogram } from './preview_histogram';
 
 jest.mock('../../../../common/containers/use_global_time');
 jest.mock('./use_preview_histogram');
+jest.mock('../../../../common/lib/kibana');
 
 describe('PreviewHistogram', () => {
   const mockSetQuery = jest.fn();

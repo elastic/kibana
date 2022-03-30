@@ -671,6 +671,7 @@ export const EndpointList = () => {
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
+      hideHeader={!(endpointsExist || areEndpointsEnrolling)}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"

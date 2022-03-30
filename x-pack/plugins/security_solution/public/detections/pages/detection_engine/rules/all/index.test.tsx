@@ -12,7 +12,6 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 import '../../../../../common/mock/formatted_relative';
 import '../../../../../common/mock/match_media';
-import { RulesFeatureTourContextProvider } from './feature_tour/rules_feature_tour_context';
 import { AllRules } from './index';
 
 jest.mock('../../../../../common/components/link_to');
@@ -68,8 +67,7 @@ describe('AllRules', () => {
             rulesNotInstalled={0}
             rulesNotUpdated={0}
           />
-        </TestProviders>,
-        { wrappingComponent: RulesFeatureTourContextProvider }
+        </TestProviders>
       );
 
       await waitFor(() => {
@@ -92,8 +90,7 @@ describe('AllRules', () => {
           rulesNotInstalled={0}
           rulesNotUpdated={0}
         />
-      </TestProviders>,
-      { wrappingComponent: RulesFeatureTourContextProvider }
+      </TestProviders>
     );
 
     await waitFor(() => {

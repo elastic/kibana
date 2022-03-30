@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-
+import React from 'react';
+import { HttpSetup } from 'src/core/public';
 import {
   notificationServiceMock,
   fatalErrorsServiceMock,
   docLinksServiceMock,
 } from '../../../../../../src/core/public/mocks';
 
+import { AppContextProvider } from '../../../public/application/app_context';
 import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
 
 import { init as initBreadcrumb } from '../../../public/application/services/breadcrumb';
@@ -23,12 +23,22 @@ import { init as initUiMetric } from '../../../public/application/services/ui_me
 import { init as initDocumentation } from '../../../public/application/services/documentation';
 import { init as initHttpRequests } from './http_requests';
 
-export const setupEnvironment = () => {
-  // axios has a similar interface to HttpSetup, but we
-  // flatten out the response.
-  const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-  mockHttpClient.interceptors.response.use(({ data }) => data);
+export const WithAppDependencies =
+  (Comp: any, httpSetup: HttpSetup, overrides: Record<string, unknown> = {}) =>
+  (props: Record<string, unknown>) => {
+    const { isCloudEnabled, ...rest } = props;
+    initHttp(httpSetup);
 
+    return (
+      <AppContextProvider
+        context={{ isCloudEnabled: !!isCloudEnabled, cloudBaseUrl: 'test.com', ...overrides }}
+      >
+        <Comp {...rest} />
+      </AppContextProvider>
+    );
+  };
+
+export const setupEnvironment = () => {
   initBreadcrumb(() => {});
   initDocumentation(docLinksServiceMock.createStartContract());
   initUiMetric(usageCollectionPluginMock.createSetupContract());
@@ -36,14 +46,6 @@ export const setupEnvironment = () => {
     notificationServiceMock.createSetupContract().toasts,
     fatalErrorsServiceMock.createSetupContract()
   );
-  // This expects HttpSetup but we're giving it AxiosInstance.
-  // @ts-ignore
-  initHttp(mockHttpClient);
 
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
-
-  return {
-    server,
-    httpRequestsMockHelpers,
-  };
+  return initHttpRequests();
 };
