@@ -108,7 +108,8 @@ describe.skip('Fleet preconfiguration reset', () => {
     await stopServers();
   });
 
-  describe('Preconfigred cloud policy', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/127077
+  describe.skip('Preconfigred cloud policy', () => {
     it('Works and preconfigure correctly agent policies', async () => {
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()

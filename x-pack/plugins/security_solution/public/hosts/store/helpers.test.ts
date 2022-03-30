@@ -45,6 +45,10 @@ export const mockHostsState: HostsModel = {
         },
         severitySelection: [],
       },
+      [HostsTableType.sessions]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
   details: {
@@ -80,6 +84,10 @@ export const mockHostsState: HostsModel = {
           direction: Direction.desc,
         },
         severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
   },
@@ -121,6 +129,10 @@ describe('Hosts redux store', () => {
             field: 'risk_stats.risk_score',
           },
         },
+        [HostsTableType.sessions]: {
+          activePage: 0,
+          limit: 10,
+        },
       });
     });
 
@@ -157,6 +169,10 @@ describe('Hosts redux store', () => {
             direction: 'desc',
             field: 'risk_stats.risk_score',
           },
+        },
+        [HostsTableType.sessions]: {
+          activePage: 0,
+          limit: 10,
         },
       });
     });

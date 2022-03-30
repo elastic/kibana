@@ -8,14 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { layerTypes } from '../../../common';
-import type {
-  XYDataLayerConfig,
-  XYAnnotationLayerConfig,
-  XYLayerConfig,
-} from '../../../common/expressions';
 import type { FramePublicAPI, Visualization } from '../../types';
 import { isHorizontalChart } from '../state_helpers';
-import type { XYState } from '../types';
+import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
 import {
   checkScaleOperation,
   getAnnotationsLayers,
