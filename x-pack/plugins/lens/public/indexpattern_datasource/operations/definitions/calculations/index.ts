@@ -25,3 +25,5 @@ export {
   overallMaxOperation,
   overallAverageOperation,
 } from './overall_metric';
+export type { TimeScaleIndexPatternColumn } from './time_scale';
+export { timeScaleOperation } from './time_scale';

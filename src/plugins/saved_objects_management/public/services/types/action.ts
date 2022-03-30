@@ -7,7 +7,7 @@
  */
 
 import { ReactNode } from 'react';
-import { Capabilities } from 'src/core/public';
+import type { Capabilities } from 'src/core/public';
 import { SavedObjectsManagementRecord } from '.';
 
 interface ActionContext {

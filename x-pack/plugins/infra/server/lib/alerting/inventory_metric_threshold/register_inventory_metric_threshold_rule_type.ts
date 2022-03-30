@@ -30,6 +30,7 @@ import {
   thresholdActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
+  viewInAppUrlActionVariableDescription,
 } from '../common/messages';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 import {
@@ -99,6 +100,7 @@ export async function registerMetricInventoryThresholdRuleType(
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
+        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
       ],
     },
   });
