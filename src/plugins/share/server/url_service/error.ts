@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './short_urls';
-export { registerUrlServiceRoutes } from './http/register_url_service_routes';
-export { registerUrlServiceSavedObjectType } from './saved_objects/register_url_service_saved_object_type';
-export * from './error';
+export class UrlServiceError extends Error {
+  constructor(message: string, public readonly code: string = '') {
+    super(message);
+  }
+}
