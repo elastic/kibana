@@ -50,7 +50,6 @@ export const initialState: MonitorManagementList = {
     perPage: 10,
     total: null,
     monitors: [],
-    syncErrors: [],
   },
   locations: [],
   enablement: null,

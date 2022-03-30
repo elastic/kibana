@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsManagementAction } from './action';
-export { SavedObjectsManagementColumn } from './column';
-export type { SavedObjectsManagementRecord } from './record';
+import { ControlInput } from '../../types';
+
+export const TIME_SLIDER_CONTROL = 'timeSlider';
+
+export interface TimeSliderControlEmbeddableInput extends ControlInput {
+  fieldName: string;
+  dataViewId: string;
+  value?: [number | null, number | null];
+}

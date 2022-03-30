@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
-import { LocationsCodec, ServiceLocationErrors } from './locations';
+import { LocationsCodec } from './locations';
 import {
   DataStreamCodec,
   ModeCodec,
@@ -306,23 +306,14 @@ export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
   typeof EncryptedSyntheticsMonitorWithIdCodec
 >;
 
-export const MonitorManagementListResultCodec = t.intersection([
-  t.type({
-    monitors: t.array(
-      t.interface({
-        id: t.string,
-        attributes: EncryptedSyntheticsMonitorCodec,
-        updated_at: t.string,
-      })
-    ),
-    page: t.number,
-    perPage: t.number,
-    total: t.union([t.number, t.null]),
-  }),
-  t.partial({
-    syncErrors: ServiceLocationErrors,
-  }),
-]);
+export const MonitorManagementListResultCodec = t.type({
+  monitors: t.array(
+    t.interface({ id: t.string, attributes: EncryptedSyntheticsMonitorCodec, updated_at: t.string })
+  ),
+  page: t.number,
+  perPage: t.number,
+  total: t.union([t.number, t.null]),
+});
 
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
 

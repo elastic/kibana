@@ -31,7 +31,6 @@ import {
   SyntheticsMonitor,
   ThrottlingOptions,
   SyntheticsMonitorWithId,
-  ServiceLocationErrors,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
@@ -63,8 +62,6 @@ export class SyntheticsService {
 
   public isAllowed: boolean;
   public signupUrl: string | null;
-
-  public syncErrors?: ServiceLocationErrors | null = [];
 
   constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
@@ -153,7 +150,7 @@ export class SyntheticsService {
 
               if (service.isAllowed) {
                 service.setupIndexTemplates();
-                service.syncErrors = await service.pushConfigs();
+                await service.pushConfigs();
               }
 
               return { state };
@@ -229,7 +226,7 @@ export class SyntheticsService {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
-      return null;
+      return;
     }
 
     this.apiKey = await this.getApiKey();

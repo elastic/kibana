@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsManagementAction } from './action';
-export { SavedObjectsManagementColumn } from './column';
-export type { SavedObjectsManagementRecord } from './record';
+// Start the services with stubs
+import { pluginServices } from './public/services';
+import { registry } from './public/services/stub';
+
+registry.start({});
+pluginServices.setRegistry(registry);

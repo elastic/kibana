@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsManagementAction } from './action';
-export { SavedObjectsManagementColumn } from './column';
-export type { SavedObjectsManagementRecord } from './record';
+export { TimesliderEmbeddableFactory } from './time_slider_embeddable_factory';
+export { type TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
+export {} from '../../../common';
