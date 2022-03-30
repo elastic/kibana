@@ -7,10 +7,11 @@
  */
 import { DataView } from 'src/plugins/data_views/public';
 import { DatatableRow, DatatableColumn, DatatableColumnType } from 'src/plugins/expressions/public';
-import { Query, BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES } from 'src/plugins/data/common';
+import { Query } from 'src/plugins/data/common';
 import { TimeseriesVisParams } from '../../../types';
 import type { PanelData, Metric } from '../../../../common/types';
 import { getMultiFieldLabel, getFieldsForTerms } from '../../../../common/fields_utils';
+import { BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES } from '../../../../../../data/common';
 import { BUCKET_TYPES, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import { getDataStart, getDataViewsStart } from '../../../services';
