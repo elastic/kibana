@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ReactNode } from 'react';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { AGG_TYPE } from '../../../common/constants';
 import { ITooltipProperty } from './tooltip_property';
@@ -27,7 +28,7 @@ export class ESAggTooltipProperty extends ESTooltipProperty {
     this._aggField = field;
   }
 
-  getHtmlDisplayValue(): string {
+  getHtmlDisplayValue(): ReactNode {
     const rawValue = this.getRawValue();
     return typeof rawValue !== 'undefined' && this._aggField.isCount()
       ? parseInt(rawValue as string, 10).toLocaleString()

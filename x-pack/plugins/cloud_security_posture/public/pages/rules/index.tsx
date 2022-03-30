@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiTextColor, EuiEmptyPrompt } from '@elastic/eui';
 import * as t from 'io-ts';
-import { CspPageTemplate } from '../../components/page_template';
 import { RulesContainer, type PageUrlParams } from './rules_container';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import type { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
-import { CspLoadingState } from '../../components/csp_loading_state';
 import { CspNavigationItem } from '../../common/navigation/types';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { useCspIntegration } from './use_csp_integration';
+import { CspPageTemplate } from '../../components/csp_page_template';
 
 const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
   [allNavigationItems.benchmarks, { ...allNavigationItems.rules, name }].filter(
@@ -35,7 +35,6 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
 
   const pageProps: KibanaPageTemplateProps = useMemo(
     () => ({
-      template: integrationInfo.status !== 'success' ? 'centeredContent' : undefined,
       pageHeader: {
         bottomBorder: false, // TODO: border still shows.
         pageTitle: 'Rules',
@@ -46,16 +45,16 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
         ),
       },
     }),
-    [integrationInfo.data, integrationInfo.status]
+    [integrationInfo.data]
   );
 
   return (
-    <CspPageTemplate {...pageProps}>
+    <CspPageTemplate
+      {...pageProps}
+      query={integrationInfo}
+      errorRender={(error) => <RulesErrorPrompt error={extractErrorBodyMessage(error)} />}
+    >
       {integrationInfo.status === 'success' && <RulesContainer />}
-      {integrationInfo.status === 'error' && (
-        <RulesErrorPrompt error={extractErrorBodyMessage(integrationInfo.error)} />
-      )}
-      {integrationInfo.status === 'loading' && <CspLoadingState />}
     </CspPageTemplate>
   );
 };

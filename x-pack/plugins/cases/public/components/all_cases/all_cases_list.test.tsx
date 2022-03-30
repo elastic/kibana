@@ -189,7 +189,7 @@ describe('AllCasesListGeneric', () => {
         useGetCasesMockState.data.cases[0].title
       );
       expect(
-        wrapper.find(`span[data-test-subj="case-table-column-tags-0"]`).first().prop('title')
+        wrapper.find(`span[data-test-subj="case-table-column-tags-coke"]`).first().prop('title')
       ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
       expect(wrapper.find(`[data-test-subj="case-table-column-createdBy"]`).first().text()).toEqual(
         useGetCasesMockState.data.cases[0].createdBy.username

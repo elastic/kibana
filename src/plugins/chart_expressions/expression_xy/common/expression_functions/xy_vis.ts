@@ -25,8 +25,10 @@ import {
   AXIS_TITLES_VISIBILITY_CONFIG,
   EndValues,
   ANNOTATION_LAYER,
+  LayerTypes,
 } from '../constants';
-import { logDatatables } from '../utils';
+import { Dimension, prepareLogTable } from '../../../../visualizations/common/utils';
+import { getLayerDimensions } from '../utils';
 
 export const xyVisFunction: ExpressionFunctionDefinition<
   typeof XY_VIS,
@@ -203,8 +205,19 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       (layer): layer is XYLayerConfigResult => layer !== undefined
     );
 
-    logDatatables(layers, handlers);
+    if (handlers.inspectorAdapters.tables) {
+      const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {
+        if (layer.layerType === LayerTypes.ANNOTATIONS) {
+          return dimensions;
+        }
 
+        return [...dimensions, ...getLayerDimensions(layer)];
+      }, []);
+
+      const logTable = prepareLogTable(data, layerDimensions, true);
+
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+    }
     return {
       type: 'render',
       as: XY_VIS_RENDERER,

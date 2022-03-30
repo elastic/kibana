@@ -25,7 +25,7 @@ import type {
 import type { CasesUiStart } from '../../cases/public';
 import type { SecurityPluginSetup } from '../../security/public';
 import type { TimelinesUIStart } from '../../timelines/public';
-import type { SessionViewUIStart } from '../../session_view/public';
+import type { SessionViewStart } from '../../session_view/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
@@ -66,12 +66,12 @@ export interface StartPlugins {
   newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
   timelines: TimelinesUIStart;
+  sessionView: SessionViewStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery?: OsqueryPluginStart;
-  sessionView: SessionViewUIStart;
 }
 
 export type StartServices = CoreStart &

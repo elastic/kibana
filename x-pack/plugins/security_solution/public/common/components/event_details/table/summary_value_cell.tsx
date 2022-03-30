@@ -20,6 +20,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   linkValue,
   timelineId,
   values,
+  isReadOnly,
 }) => (
   <>
     <FieldValueCell
@@ -32,7 +33,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
       style={{ flexGrow: 0 }}
       values={values}
     />
-    {timelineId !== TimelineId.active && (
+    {timelineId !== TimelineId.active && !isReadOnly && (
       <ActionCell
         contextId={timelineId}
         data={data}

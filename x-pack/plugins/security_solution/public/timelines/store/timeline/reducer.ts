@@ -44,6 +44,7 @@ import {
   updateTimeline,
   updateTimelineGraphEventId,
   updateTitleAndDescription,
+  updateTimelineSessionViewSessionId,
   toggleModalSaveTimeline,
   updateEqlOptions,
   setTimelineUpdatedAt,
@@ -77,6 +78,7 @@ import {
   updateGraphEventId,
   updateFilters,
   updateTimelineEventType,
+  updateSessionViewSessionId,
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
@@ -145,6 +147,10 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(updateTimelineGraphEventId, (state, { id, graphEventId }) => ({
     ...state,
     timelineById: updateGraphEventId({ id, graphEventId, timelineById: state.timelineById }),
+  }))
+  .case(updateTimelineSessionViewSessionId, (state, { id, eventId }) => ({
+    ...state,
+    timelineById: updateSessionViewSessionId({ id, eventId, timelineById: state.timelineById }),
   }))
   .case(pinEvent, (state, { id, eventId }) => ({
     ...state,
