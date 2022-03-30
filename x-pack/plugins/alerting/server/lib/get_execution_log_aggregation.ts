@@ -34,7 +34,9 @@ const Millis2Nanos = 1000 * 1000;
 
 export const EMPTY_EXECUTION_LOG_RESULT = {
   total: 0,
+  totalErrors: 0,
   data: [],
+  errors: [],
 };
 
 interface IAlertCounts extends estypes.AggregationsMultiBucketAggregateBase {
@@ -277,7 +279,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
 
 export function formatExecutionLogResult(
   results: AggregateEventsBySavedObjectResult
-): IExecutionLogResult {
+): Pick<IExecutionLogResult, 'total' | 'data'> {
   const { aggregations } = results;
 
   if (!aggregations) {
