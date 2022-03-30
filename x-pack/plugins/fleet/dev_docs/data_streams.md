@@ -6,10 +6,13 @@ Packages use [data streams](https://www.elastic.co/guide/en/elasticsearch/refere
 ## Template Structure
 
 ### Index Template 
-The index template is designed to be as empty as possible, with settings, mappings etc being applied in component templates. Only applying settings and mappings in component templates means we can:
+A data stream is an index template with the data stream flag set to true. Each data stream has one index template. For Fleet data streams the index template should remain as empty as possible, with settings, mappings etc being applied in component templates. Only applying settings and mappings in component templates means we can:
 - create more granular index templates in the future (e.g namespace specific) that can use the same component templates (keeping one source of truth)
 - allow users to override any setting by using the component template hierarchy (index template settings and mappings cannot be overridden by a component template)
 
+Other details to note about the index template:
+- we set priority to 200, this is to beat the generic `logs-*-*`, `metrics-*-*`, `synthetics-*-*` index templates. We advise users set their own index template priority below 100 [here](https://www.elastic.co/guide/en/elasticsearch/reference/current/index-templates.html). 
+- Fleet index templates are set to managed to deter users from editing them. However it is not necessarily safe to assume that Fleet index templates (or any managed asset) haven't been modified by the user, but if they have been modified we do not have to preserve these changes.
 ### Component Templates (as of 8.2)
 In order of priority from highest to lowest:
   - `.fleet_agent_id_verification-1` - added when agent id verification is enabled, sets the `.fleet_final_pipeline-1` and agent ID mappings. ([we plan to remove the ability to disable agent ID verification](https://github.com/elastic/kibana/issues/127041) )
@@ -27,13 +30,13 @@ All component and index templates have [_meta](https://www.elastic.co/guide/en/e
 
 example:
 ```JSON
-      "_meta" : {
-        "package" : {
-          "name" : "system"
-        },
-        "managed_by" : "fleet",
-        "managed" : true
-      },
+"_meta" : {
+  "package" : {
+    "name" : "system"
+  },
+  "managed_by" : "fleet",
+  "managed" : true
+},
 ```
 
 ## Making Changes to Template Structure
