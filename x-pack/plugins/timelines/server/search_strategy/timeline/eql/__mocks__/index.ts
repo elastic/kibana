@@ -293,12 +293,13 @@ export const sequenceResponse = {
                     'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTU2OC0xMzI1NTA3ODY2Ny4zMjk3MDY2MDA=',
                     'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTQ2OC0xMzI1NTA3ODY2NS42Mzg5MzY1MDA=',
                   ],
-                  'process.Ext.code_signature': [{
-                    'trusted': true,
-                    'subject_name': 'Microsoft Corporation',
-                    'exists': true,
-                    'status': 'trusted',
-                  }
+                  'process.Ext.code_signature': [
+                    {
+                      trusted: true,
+                      subject_name: 'Microsoft Corporation',
+                      exists: true,
+                      status: 'trusted',
+                    },
                   ],
                   'process.Ext.token.integrity_level_name': ['high'],
                   'process.Ext.token.elevation_level': ['default'],
@@ -313,7 +314,9 @@ export const sequenceResponse = {
                   'process.parent.entity_id': [
                     'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTUyODQtMTMyNTcyOTQ2MjMuOTk2NTkxMDAw',
                   ],
-                  'process.parent.command_line': ['"C:\\Program Files\\OpenSSH-Win64\\sshd.exe" -R'],
+                  'process.parent.command_line': [
+                    '"C:\\Program Files\\OpenSSH-Win64\\sshd.exe" -R',
+                  ],
                   'process.parent.executable': ['C:\\Program Files\\OpenSSH-Win64\\sshd.exe'],
                   'process.code_signature.trusted': [true],
                   'process.code_signature.subject_name': ['Microsoft Corporation'],
@@ -324,7 +327,9 @@ export const sequenceResponse = {
                   'process.args_count': [2],
                   'process.command_line': ['"C:\\Program Files\\OpenSSH-Win64\\sshd.exe" -y'],
                   'process.hash.sha1': ['631244d731f406394c17c7dfd85203e317c74814'],
-                  'process.hash.sha256': ['e6a972f9db27de18be225095b3b3141b945be8aadc4014c8704ae5acafe3e8e0'],
+                  'process.hash.sha256': [
+                    'e6a972f9db27de18be225095b3b3141b945be8aadc4014c8704ae5acafe3e8e0',
+                  ],
                   'process.hash.md5': ['331ba0e529810ef718dd3efbd1242302'],
                   'process.executable': ['C:\\Program Files\\OpenSSH-Win64\\sshd.exe'],
                   'ecs.version': ['1.5.0'],
@@ -634,12 +639,13 @@ export const sequenceResponse = {
                     'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTU2OC0xMzI1NTA3ODY2Ny4zMjk3MDY2MDA=',
                     'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTQ2OC0xMzI1NTA3ODY2NS42Mzg5MzY1MDA=',
                   ],
-                  'process.Ext.code_signature': [{
-                    'trusted': true,
-                    'subject_name': 'Microsoft Corporation',
-                    'exists': true,
-                    'status': 'trusted',
-                  }
+                  'process.Ext.code_signature': [
+                    {
+                      trusted: true,
+                      subject_name: 'Microsoft Corporation',
+                      exists: true,
+                      status: 'trusted',
+                    },
                   ],
                   'process.Ext.token.integrity_level_name': ['high'],
                   'process.Ext.token.elevation_level': ['default'],
@@ -654,7 +660,9 @@ export const sequenceResponse = {
                   'process.parent.entity_id': [
                     'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTUyODQtMTMyNTcyOTQ2MjMuOTk2NTkxMDAw',
                   ],
-                  'process.parent.command_line': ['"C:\\Program Files\\OpenSSH-Win64\\sshd.exe" -R'],
+                  'process.parent.command_line': [
+                    '"C:\\Program Files\\OpenSSH-Win64\\sshd.exe" -R',
+                  ],
                   'process.parent.executable': ['C:\\Program Files\\OpenSSH-Win64\\sshd.exe'],
                   'process.code_signature.trusted': [true],
                   'process.code_signature.subject_name': ['Microsoft Corporation'],
@@ -665,7 +673,9 @@ export const sequenceResponse = {
                   'process.args_count': [2],
                   'process.command_line': ['"C:\\Program Files\\OpenSSH-Win64\\sshd.exe" -y'],
                   'process.hash.sha1': ['631244d731f406394c17c7dfd85203e317c74814'],
-                  'process.hash.sha256': ['e6a972f9db27de18be225095b3b3141b945be8aadc4014c8704ae5acafe3e8e0'],
+                  'process.hash.sha256': [
+                    'e6a972f9db27de18be225095b3b3141b945be8aadc4014c8704ae5acafe3e8e0',
+                  ],
                   'process.hash.md5': ['331ba0e529810ef718dd3efbd1242302'],
                   'process.executable': ['C:\\Program Files\\OpenSSH-Win64\\sshd.exe'],
                   'ecs.version': ['1.5.0'],
@@ -975,12 +985,13 @@ export const sequenceResponse = {
                     'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTU2OC0xMzI1NTA3ODY2Ny4zMjk3MDY2MDA=',
                     'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTQ2OC0xMzI1NTA3ODY2NS42Mzg5MzY1MDA=',
                   ],
-                  'process.Ext.code_signature': [{
-                    'trusted': true,
-                    'subject_name': 'Microsoft Corporation',
-                    'exists': true,
-                    'status': 'trusted',
-                  }
+                  'process.Ext.code_signature': [
+                    {
+                      trusted: true,
+                      subject_name: 'Microsoft Corporation',
+                      exists: true,
+                      status: 'trusted',
+                    },
                   ],
                   'process.Ext.token.integrity_level_name': ['high'],
                   'process.Ext.token.elevation_level': ['default'],
@@ -995,7 +1006,9 @@ export const sequenceResponse = {
                   'process.parent.entity_id': [
                     'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTUyODQtMTMyNTcyOTQ2MjMuOTk2NTkxMDAw',
                   ],
-                  'process.parent.command_line': ['"C:\\Program Files\\OpenSSH-Win64\\sshd.exe" -R'],
+                  'process.parent.command_line': [
+                    '"C:\\Program Files\\OpenSSH-Win64\\sshd.exe" -R',
+                  ],
                   'process.parent.executable': ['C:\\Program Files\\OpenSSH-Win64\\sshd.exe'],
                   'process.code_signature.trusted': [true],
                   'process.code_signature.subject_name': ['Microsoft Corporation'],
@@ -1006,7 +1019,9 @@ export const sequenceResponse = {
                   'process.args_count': [2],
                   'process.command_line': ['"C:\\Program Files\\OpenSSH-Win64\\sshd.exe" -y'],
                   'process.hash.sha1': ['631244d731f406394c17c7dfd85203e317c74814'],
-                  'process.hash.sha256': ['e6a972f9db27de18be225095b3b3141b945be8aadc4014c8704ae5acafe3e8e0'],
+                  'process.hash.sha256': [
+                    'e6a972f9db27de18be225095b3b3141b945be8aadc4014c8704ae5acafe3e8e0',
+                  ],
                   'process.hash.md5': ['331ba0e529810ef718dd3efbd1242302'],
                   'process.executable': ['C:\\Program Files\\OpenSSH-Win64\\sshd.exe'],
                   'ecs.version': ['1.5.0'],
@@ -1336,12 +1351,13 @@ export const eventsResponse = {
                 'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTU2OC0xMzI1NTA3ODY2Ny4zMjk3MDY2MDA=',
                 'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTQ2OC0xMzI1NTA3ODY2NS42Mzg5MzY1MDA=',
               ],
-              'process.Ext.code_signature': [{
-                'trusted': true,
-                'subject_name': 'Microsoft Corporation',
-                'exists': true,
-                'status': 'trusted',
-              }
+              'process.Ext.code_signature': [
+                {
+                  trusted: true,
+                  subject_name: 'Microsoft Corporation',
+                  exists: true,
+                  status: 'trusted',
+                },
               ],
               'process.Ext.token.integrity_level_name': ['high'],
               'process.Ext.token.elevation_level': ['default'],
@@ -1367,7 +1383,9 @@ export const eventsResponse = {
               'process.args_count': [2],
               'process.command_line': ['"C:\\Program Files\\OpenSSH-Win64\\sshd.exe" -y'],
               'process.hash.sha1': ['631244d731f406394c17c7dfd85203e317c74814'],
-              'process.hash.sha256': ['e6a972f9db27de18be225095b3b3141b945be8aadc4014c8704ae5acafe3e8e0'],
+              'process.hash.sha256': [
+                'e6a972f9db27de18be225095b3b3141b945be8aadc4014c8704ae5acafe3e8e0',
+              ],
               'process.hash.md5': ['331ba0e529810ef718dd3efbd1242302'],
               'process.executable': ['C:\\Program Files\\OpenSSH-Win64\\sshd.exe'],
               'ecs.version': ['1.5.0'],
