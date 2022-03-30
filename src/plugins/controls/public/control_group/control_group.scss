@@ -1,4 +1,4 @@
-$smallControl: $euiSize * 16;
+$smallControl: $euiSize * 14;
 $mediumControl: $euiSize * 25;
 $largeControl: $euiSize * 50;
 $controlMinWidth: $euiSize * 14;
@@ -83,7 +83,7 @@ $controlMinWidth: $euiSize * 14;
 }
 
 .controlFrame__labelToolTip {
-  max-width: 50%;
+  max-width: 40%;
 }
 
 .controlFrameWrapper {
