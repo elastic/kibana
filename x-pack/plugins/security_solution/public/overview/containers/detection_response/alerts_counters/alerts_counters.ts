@@ -16,7 +16,7 @@ const ID = 'alertCountersByStatusAndSeverityQuery';
 const ALERT_BY_STATUS_AGG = 'alertsByStatus';
 const STATUS_BY_SEVERITY_AGG = 'statusBySeverity';
 
-interface UseStatusSeverityAlertCountersProps {
+interface TimeRange {
   from: string;
   to: string;
 }
@@ -63,7 +63,7 @@ interface UseStatusSeverityAlertCountersReturnType {
 export const useStatusSeverityAlertCounters = ({
   from,
   to,
-}: UseStatusSeverityAlertCountersProps): UseStatusSeverityAlertCountersReturnType => {
+}: TimeRange): UseStatusSeverityAlertCountersReturnType => {
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
   const {
@@ -98,7 +98,7 @@ export const useStatusSeverityAlertCounters = ({
   return { isLoading, data: transformedResponse, refetch };
 };
 
-export const buildAlertAggregationQuery = ({ from, to }: UseStatusSeverityAlertCountersProps) => ({
+export const buildAlertAggregationQuery = ({ from, to }: TimeRange) => ({
   aggs: {
     [ALERT_BY_STATUS_AGG]: {
       terms: {

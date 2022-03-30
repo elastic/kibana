@@ -12,8 +12,8 @@ import { AlertSearchResponse } from '../../../../detections/containers/detection
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
-const ID = 'vulnerableHostsBySeverityQuery';
-const HOSTS_BY_SEVERITY_AGG = 'hostsBySeverity';
+const ID = 'vulnerableUsersBySeverityQuery';
+const USERS_BY_SEVERITY_AGG = 'usersBySeverity';
 
 interface TimeRange {
   from: string;
@@ -21,7 +21,7 @@ interface TimeRange {
 }
 
 interface AlertSeverityCounts {
-  hostName: string;
+  userName: string;
   count: number;
   low: number;
   medium: number;
@@ -39,8 +39,8 @@ interface AlertBySeverityBucketData extends GenericBuckets {
   critical: SeverityContainer;
 }
 
-interface AlertCountersBySeverityAndSeverityAggregation {
-  [HOSTS_BY_SEVERITY_AGG]: {
+interface AlertCountersBySeverityAggregation {
+  [USERS_BY_SEVERITY_AGG]: {
     buckets: AlertBySeverityBucketData[];
   };
 }
@@ -52,16 +52,16 @@ interface AlertsCounterResult {
   isInspected: boolean;
 }
 
-interface UseVulnerableHostsCountersReturnType {
+interface UseVulnerableUsersCountersReturnType {
   isLoading: boolean;
   data: AlertsCounterResult;
   refetch: (() => Promise<void>) | null;
 }
 
-export const useVulnerableHostsCounters = ({
+export const useVulnerableUsersCounters = ({
   from,
   to,
-}: TimeRange): UseVulnerableHostsCountersReturnType => {
+}: TimeRange): UseVulnerableUsersCountersReturnType => {
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
   const {
@@ -69,7 +69,7 @@ export const useVulnerableHostsCounters = ({
     loading: isLoadingData,
     refetch,
     ...result
-  } = useQueryAlerts<{}, AlertCountersBySeverityAndSeverityAggregation>({
+  } = useQueryAlerts<{}, AlertCountersBySeverityAggregation>({
     query: buildVulnerableHostAggregationQuery({ from, to }),
     indexName: signalIndexName,
   });
@@ -118,9 +118,9 @@ export const buildVulnerableHostAggregationQuery = ({ from, to }: TimeRange) => 
   },
   size: 0,
   aggs: {
-    [HOSTS_BY_SEVERITY_AGG]: {
+    [USERS_BY_SEVERITY_AGG]: {
       terms: {
-        field: 'host.name',
+        field: 'user.name',
         order: [
           {
             'critical.doc_count': 'desc',
@@ -172,20 +172,20 @@ export const buildVulnerableHostAggregationQuery = ({ from, to }: TimeRange) => 
 });
 
 function pickOffCounters(
-  rawAlertResponse: AlertSearchResponse<{}, AlertCountersBySeverityAndSeverityAggregation> | null
+  rawAlertResponse: AlertSearchResponse<{}, AlertCountersBySeverityAggregation> | null
 ): AlertSeverityCounts[] {
-  const buckets = rawAlertResponse?.aggregations?.[HOSTS_BY_SEVERITY_AGG].buckets ?? [];
+  const buckets = rawAlertResponse?.aggregations?.[USERS_BY_SEVERITY_AGG].buckets ?? [];
 
-  return buckets.reduce<AlertSeverityCounts[]>((accumalatedAlertsByHost, currentHost) => {
+  return buckets.reduce<AlertSeverityCounts[]>((accumalatedAlertsByUser, currentUser) => {
     return [
-      ...accumalatedAlertsByHost,
+      ...accumalatedAlertsByUser,
       {
-        hostName: currentHost.key,
-        count: currentHost.doc_count,
-        low: currentHost.low.doc_count,
-        medium: currentHost.medium.doc_count,
-        high: currentHost.high.doc_count,
-        critical: currentHost.critical.doc_count,
+        userName: currentUser.key,
+        count: currentUser.doc_count,
+        low: currentUser.low.doc_count,
+        medium: currentUser.medium.doc_count,
+        high: currentUser.high.doc_count,
+        critical: currentUser.critical.doc_count,
       },
     ];
   }, []);
