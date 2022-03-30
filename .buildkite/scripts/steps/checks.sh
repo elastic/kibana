@@ -12,7 +12,7 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/steps/checks/doc_api_changes.sh
 .buildkite/scripts/steps/checks/kbn_pm_dist.sh
 .buildkite/scripts/steps/checks/plugin_list_docs.sh
-.buildkite/scripts/steps/checks/type_check_plugin_public_api_docs.sh
+.buildkite/scripts/steps/checks/check_types.sh
 .buildkite/scripts/steps/checks/bundle_limits.sh
 .buildkite/scripts/steps/checks/i18n.sh
 .buildkite/scripts/steps/checks/file_casing.sh

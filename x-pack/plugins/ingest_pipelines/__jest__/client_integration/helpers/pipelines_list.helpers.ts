@@ -6,6 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { HttpSetup } from 'src/core/public';
 
 import { registerTestBed, TestBed, AsyncTestBedConfig, findTestSubject } from '@kbn/test/jest';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
@@ -19,8 +20,6 @@ const testBedConfig: AsyncTestBedConfig = {
   },
   doMountAsync: true,
 };
-
-const initTestBed = registerTestBed(WithAppDependencies(PipelinesList), testBedConfig);
 
 export type PipelineListTestBed = TestBed<PipelineListTestSubjects> & {
   actions: ReturnType<typeof createActions>;
@@ -84,7 +83,8 @@ const createActions = (testBed: TestBed) => {
   };
 };
 
-export const setup = async (): Promise<PipelineListTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<PipelineListTestBed> => {
+  const initTestBed = registerTestBed(WithAppDependencies(PipelinesList, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
   return {
