@@ -87,11 +87,10 @@ Array [
         >
           Elasticsearch Service Console
           <span
+            aria-label="External link"
             class="euiLink__externalIcon"
             data-euiicon-type="popout"
-          >
-            External link
-          </span>
+          />
           <span
             class="euiScreenReaderOnly"
           >
@@ -107,11 +106,10 @@ Array [
         >
           Logs and metrics
           <span
+            aria-label="External link"
             class="euiLink__externalIcon"
             data-euiicon-type="popout"
-          >
-            External link
-          </span>
+          />
           <span
             class="euiScreenReaderOnly"
           >
@@ -127,11 +125,10 @@ Array [
         >
           the documentation page.
           <span
+            aria-label="External link"
             class="euiLink__externalIcon"
             data-euiicon-type="popout"
-          >
-            External link
-          </span>
+          />
           <span
             class="euiScreenReaderOnly"
           >

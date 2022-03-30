@@ -73,9 +73,7 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       <span
         color="#333"
         data-euiicon-type="plusInCircle"
-      >
-        
-      </span>
+      />
     </div>
   </div>
   <div
@@ -95,9 +93,7 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       <span
         color="#FFF"
         data-euiicon-type="minusInCircle"
-      >
-        
-      </span>
+      />
     </div>
   </div>
   <div
@@ -117,9 +113,7 @@ exports[`Storyshots components/ItemGrid complex grid 1`] = `
       <span
         color="#FFF"
         data-euiicon-type="check"
-      >
-        
-      </span>
+      />
     </div>
   </div>
 </div>
@@ -131,19 +125,13 @@ exports[`Storyshots components/ItemGrid icon grid 1`] = `
 >
   <span
     data-euiicon-type="plusInCircle"
-  >
-    
-  </span>
+  />
   <span
     data-euiicon-type="minusInCircle"
-  >
-    
-  </span>
+  />
   <span
     data-euiicon-type="check"
-  >
-    
-  </span>
+  />
 </div>
 `;
 

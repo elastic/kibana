@@ -120,10 +120,7 @@ describe('IndexPattern Field Item', () => {
 
   it('should display displayName of a field', () => {
     const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} />);
-
-    // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
-    // which can't be seen, but shows in the text content
-    expect(wrapper.find('[data-test-subj="lnsFieldListPanelField"]').first().text()).toContain(
+    expect(wrapper.find('[data-test-subj="lnsFieldListPanelField"]').first().text()).toEqual(
       'bytesLabel'
     );
   });

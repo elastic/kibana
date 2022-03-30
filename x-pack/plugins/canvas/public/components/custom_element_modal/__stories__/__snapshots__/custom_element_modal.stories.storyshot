@@ -27,9 +27,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      >
-        
-      </span>
+      />
     </button>
     <div
       className="euiModal__flex"
@@ -186,9 +184,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
                           size="l"
-                        >
-                          
-                        </span>
+                        />
                         <div
                           className="euiFilePicker__promptText"
                         >
@@ -228,9 +224,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
-                  >
-                    
-                  </span>
+                  />
                 </div>
                 <div
                   className="euiCard__content"
@@ -344,9 +338,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      >
-        
-      </span>
+      />
     </button>
     <div
       className="euiModal__flex"
@@ -503,9 +495,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
                           size="l"
-                        >
-                          
-                        </span>
+                        />
                         <div
                           className="euiFilePicker__promptText"
                         >
@@ -656,9 +646,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      >
-        
-      </span>
+      />
     </button>
     <div
       className="euiModal__flex"
@@ -815,9 +803,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
                           size="l"
-                        >
-                          
-                        </span>
+                        />
                         <div
                           className="euiFilePicker__promptText"
                         >
@@ -857,9 +843,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
-                  >
-                    
-                  </span>
+                  />
                 </div>
                 <div
                   className="euiCard__content"
@@ -965,9 +949,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      >
-        
-      </span>
+      />
     </button>
     <div
       className="euiModal__flex"
@@ -1124,9 +1106,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
                           size="l"
-                        >
-                          
-                        </span>
+                        />
                         <div
                           className="euiFilePicker__promptText"
                         >
@@ -1166,9 +1146,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
-                  >
-                    
-                  </span>
+                  />
                 </div>
                 <div
                   className="euiCard__content"

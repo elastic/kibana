@@ -28,9 +28,7 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
               color="subdued"
               data-euiicon-type="importAction"
               size="xxl"
-            >
-              
-            </span>
+            />
           </div>
           <div
             className="euiEmptyPrompt__content"

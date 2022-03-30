@@ -16,8 +16,6 @@ const SEARCHABLE_RULE_PARAMS = [
   'alert.attributes.params.threat.tactic.name',
   'alert.attributes.params.threat.technique.id',
   'alert.attributes.params.threat.technique.name',
-  'alert.attributes.params.threat.technique.subtechnique.id',
-  'alert.attributes.params.threat.technique.subtechnique.name',
 ];
 
 /**

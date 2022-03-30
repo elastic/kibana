@@ -205,7 +205,7 @@ describe('SourceDestination', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()
       )
-    ).toContain('10.1.2.3:80');
+    ).toEqual('10.1.2.3:80');
   });
 
   test('it renders destination.packets', () => {
@@ -329,7 +329,7 @@ describe('SourceDestination', () => {
 
     expect(
       removeExternalLinkText(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text())
-    ).toContain('192.168.1.2:9987');
+    ).toEqual('192.168.1.2:9987');
   });
 
   test('it renders source.packets', () => {

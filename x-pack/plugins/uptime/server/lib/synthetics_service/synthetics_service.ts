@@ -31,6 +31,7 @@ import {
   SyntheticsMonitor,
   ThrottlingOptions,
   SyntheticsMonitorWithId,
+  ServiceLocationErrors,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
@@ -61,12 +62,16 @@ export class SyntheticsService {
   private indexTemplateInstalling?: boolean;
 
   public isAllowed: boolean;
+  public signupUrl: string | null;
+
+  public syncErrors?: ServiceLocationErrors | null = [];
 
   constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
     this.config = config;
     this.isAllowed = false;
+    this.signupUrl = null;
 
     this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
 
@@ -78,7 +83,9 @@ export class SyntheticsService {
   public async init() {
     await this.registerServiceLocations();
 
-    this.isAllowed = await this.apiClient.checkIfAccountAllowed();
+    const { allowed, signupUrl } = await this.apiClient.checkAccountAccessStatus();
+    this.isAllowed = allowed;
+    this.signupUrl = signupUrl;
   }
 
   private setupIndexTemplates() {
@@ -140,11 +147,13 @@ export class SyntheticsService {
 
               await service.registerServiceLocations();
 
-              service.isAllowed = await service.apiClient.checkIfAccountAllowed();
+              const { allowed, signupUrl } = await service.apiClient.checkAccountAccessStatus();
+              service.isAllowed = allowed;
+              service.signupUrl = signupUrl;
 
               if (service.isAllowed) {
                 service.setupIndexTemplates();
-                await service.pushConfigs();
+                service.syncErrors = await service.pushConfigs();
               }
 
               return { state };
@@ -220,7 +229,7 @@ export class SyntheticsService {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
-      return;
+      return null;
     }
 
     this.apiKey = await this.getApiKey();
