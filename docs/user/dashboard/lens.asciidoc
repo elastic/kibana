@@ -10,9 +10,11 @@ With *Lens*, you can:
 
 * Create area, line, and bar charts with layers to display multiple indices and chart types.
 * Change the aggregation function to change the data in the visualization.
+* Create custom tables.
 * Perform math on aggregations using *Formula*.
 * Use time shifts to compare the data in two time intervals, such as month over month.
-* Create custom tables.
+* Add annotations and reference lines.
+
 
 ++++
 <script type="text/javascript" async 
@@ -48,13 +50,15 @@ Choose the data you want to visualize.
 
 . If you want to learn more about the data a field contains, click the field.
 
-. To visualize more than one {data-source}, click *Add layer > Add visualization layer*, then select the {data-source}.
+. To visualize more than one {data-source}, click *Add layer > Visualization*, then select the {data-source}.
 
 Edit and delete.
 
 . To change the aggregation *Quick function* and display options, click the field in the layer pane. 
 
 . To delete a field, close the configuration options, then click *X* next to the field.
+
+TIP: You can manually apply the changes you make, which is helpful when creating large and complex visualizations. To manually apply your changes, click *Settings* in the toolbar, then deselect *Auto-apply visualization changes*.
 
 [float]
 [[change-the-fields]]
@@ -179,6 +183,23 @@ Compare your real-time data set to the results that are offset by a time increme
 For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
+[[add-annotations]]
+==== Add annotations
+
+Annotations allow you to call out specific points in your visualizations that are important, such as a major change in the data. You can add text and icons to annotations and customize the appearance, such as the line format and color. 
+
+[role="screenshot"]
+image::images/lens_annotations_8.2.0.png[Lens annotations]
+
+. In the layer pane, click *Add layer > Annotations*.
+
+. To open the annotation options, click *Event*.
+
+. Specify the *Annotation date*, then change the *Appearance* options you want to display.
+
+. Click *Close*.
+
+[float]
 [[add-reference-lines]]
 ==== Add reference lines
 
@@ -189,7 +210,7 @@ For example, to track the number of bytes in the 75th percentile, add a shaded *
 [role="screenshot"]
 image::images/lens_referenceLine_7.16.png[Lens drag and drop focus state]
 
-. In the layer pane, click *Add layer > Add reference layer*.
+. In the layer pane, click *Add layer > Reference lines*.
 
 . Click the reference line value, then specify the reference line you want to use:
 
@@ -260,6 +281,16 @@ The following component menus are available:
 * *Legend* &mdash; Specifies how to display the legend. For example, you can display the legend inside the visualization and truncate the legend values.
 
 * *Left axis*, *Bottom axis*, and *Right axis* &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
+
+[float]
+[[open-lens-data-in-discover]]
+=== Open the data in Discover
+
+When your visualization includes one data view, you can open and explore the visualization data in *Discover*.
+
+To get started, click *Open in Discover* in the toolbar.
+
+For more information about exploring your data with *Discover*, check out <<discover,Discover>>.
 
 [float]
 [[view-data-and-requests]]
@@ -457,6 +488,22 @@ You can display icons with <<managing-data-views, field formatters>> in data tab
 ====
 
 [discrete]
+[[is-it-possible-to-inspect-the-elasticsearch-queries-in-Lens]]
+.*How do I inspect {es} queries in visualizations?*
+[%collapsible]
+====
+You can inspect the requests sent by the visualization to {es} using the Inspector. It can be accessed within the editor or in the dashboard.
+====
+
+[discrete]
+[[how-to-isolate-a-single-series-in-a-chart]]
+.*How do I isolate a single series in a chart?*
+[%collapsible]
+====
+For area, line, and bar charts, press Shift, then click the series in the legend. All other series are automatically unselected.
+====
+
+[discrete]
 [[is-it-possible-to-use-saved-serches-in-lens]]
 .*How do I visualize saved searches?*
 [%collapsible]
@@ -486,20 +533,4 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 [%collapsible]
 ====
 Specifying the color for a single data point, such as a single bar or line, is unsupported.
-====
-
-[discrete]
-[[is-it-possible-to-inspect-the-elasticsearch-queries-in-Lens]]
-.*How do I inspect {es} queries in visualizations?*
-[%collapsible]
-====
-You can inspect the requests sent by the visualization to {es} using the Inspector. It can be accessed within the editor or in the dashboard.
-====
-
-[discrete]
-[[how-to-isolate-a-single-series-in-a-chart]]
-.*How do I isolate a single series in a chart?*
-[%collapsible]
-====
-For area, line, and bar charts, press Shift, then click the series in the legend. All other series are automatically unselected.
 ====
