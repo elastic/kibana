@@ -6,24 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
+import { Subject } from 'rxjs';
 import type { IAnalyticsClient } from './types';
-import { AnalyticsClient } from './analytics_client';
 
 function createMockedAnalyticsClient(): jest.Mocked<IAnalyticsClient> {
-  const analyticsClient = new AnalyticsClient({
-    isDev: true,
-    sendTo: 'production',
-    logger: loggerMock.create(),
-  });
-
   return {
-    optIn: jest.fn().mockImplementation(analyticsClient.optIn),
-    reportEvent: jest.fn().mockImplementation(analyticsClient.reportEvent),
-    registerEventType: jest.fn().mockImplementation(analyticsClient.registerEventType),
-    registerContextProvider: jest.fn().mockImplementation(analyticsClient.registerContextProvider),
-    registerShipper: jest.fn().mockImplementation(analyticsClient.registerShipper),
-    telemetryCounter$: analyticsClient.telemetryCounter$,
+    optIn: jest.fn().mockImplementation(),
+    reportEvent: jest.fn().mockImplementation(),
+    registerEventType: jest.fn().mockImplementation(),
+    registerContextProvider: jest.fn().mockImplementation(),
+    registerShipper: jest.fn().mockImplementation(),
+    telemetryCounter$: new Subject(),
   };
 }
 

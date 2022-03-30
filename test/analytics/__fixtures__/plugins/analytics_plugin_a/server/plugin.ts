@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import type { Plugin, CoreSetup, CoreStart, TelemetryCounter } from 'src/core/server';
@@ -55,20 +55,6 @@ export class AnalyticsPluginAPlugin implements Plugin {
 
     const router = http.createRouter();
 
-    const context$ = new Subject();
-    registerContextProvider({
-      context$,
-      schema: {
-        custom_context: {
-          type: 'pass_through',
-          _meta: {
-            description:
-              'Passing through anything that is reported via the HTTP API below for testing',
-          },
-        },
-      },
-    });
-
     router.get(
       {
         path: '/internal/analytics_plugin_a/stats',
@@ -102,10 +88,8 @@ export class AnalyticsPluginAPlugin implements Plugin {
         return res.ok({ body: actions });
       }
     );
-  }
 
-  public start({ analytics }: CoreStart) {
-    analytics.registerContextProvider({
+    registerContextProvider({
       context$: new BehaviorSubject({ pid: process.pid }),
       schema: {
         pid: {
@@ -116,7 +100,9 @@ export class AnalyticsPluginAPlugin implements Plugin {
         },
       },
     });
+  }
 
+  public start({ analytics }: CoreStart) {
     analytics.reportEvent('test-plugin-lifecycle', {
       plugin: 'analyticsPluginA',
       step: 'start',

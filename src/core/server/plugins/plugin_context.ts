@@ -253,9 +253,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   return {
     analytics: {
       optIn: deps.analytics.optIn,
-      registerContextProvider: deps.analytics.registerContextProvider,
-      registerEventType: deps.analytics.registerEventType,
-      registerShipper: deps.analytics.registerShipper,
       reportEvent: deps.analytics.reportEvent,
       telemetryCounter$: deps.analytics.telemetryCounter$,
     },

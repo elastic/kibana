@@ -75,7 +75,7 @@ export type AnalyticsServiceSetup = AnalyticsClient;
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //
 // @public
-export type AnalyticsServiceStart = AnalyticsClient;
+export type AnalyticsServiceStart = Pick<AnalyticsClient, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
 
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> extends AppNavOptions {

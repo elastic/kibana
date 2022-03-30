@@ -6,41 +6,44 @@
  * Side Public License, v 1.
  */
 
+import { Subject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { AnalyticsClient } from '@elastic/analytics';
-import { createAnalytics } from '@elastic/analytics';
-import { loggerMock } from '@kbn/logging-mocks';
-import type { AnalyticsService } from './analytics_service';
+import type {
+  AnalyticsService,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+} from './analytics_service';
 
 type AnalyticsServiceContract = PublicMethodsOf<AnalyticsService>;
 
-const createAnalyticsClientMock = (): jest.Mocked<AnalyticsClient> => {
-  const analyticsClient = createAnalytics({
-    isDev: true,
-    sendTo: 'staging',
-    logger: loggerMock.create(),
-  });
-
+const createAnalyticsServiceSetup = (): jest.Mocked<AnalyticsServiceSetup> => {
   return {
-    optIn: jest.fn().mockImplementation(analyticsClient.optIn),
-    reportEvent: jest.fn().mockImplementation(analyticsClient.reportEvent),
-    registerEventType: jest.fn().mockImplementation(analyticsClient.registerEventType),
-    registerContextProvider: jest.fn().mockImplementation(analyticsClient.registerContextProvider),
-    registerShipper: jest.fn().mockImplementation(analyticsClient.registerShipper),
-    telemetryCounter$: analyticsClient.telemetryCounter$,
+    optIn: jest.fn(),
+    reportEvent: jest.fn(),
+    registerEventType: jest.fn(),
+    registerContextProvider: jest.fn(),
+    registerShipper: jest.fn(),
+    telemetryCounter$: new Subject(),
+  };
+};
+
+const createAnalyticsServiceStart = (): jest.Mocked<AnalyticsServiceStart> => {
+  return {
+    optIn: jest.fn(),
+    reportEvent: jest.fn(),
+    telemetryCounter$: new Subject(),
   };
 };
 
 const createAnalyticsServiceMock = (): jest.Mocked<AnalyticsServiceContract> => {
   return {
-    setup: jest.fn().mockImplementation(createAnalyticsClientMock),
-    start: jest.fn().mockImplementation(createAnalyticsClientMock),
+    setup: jest.fn().mockImplementation(createAnalyticsServiceSetup),
+    start: jest.fn().mockImplementation(createAnalyticsServiceStart),
   };
 };
 
 export const analyticsServiceMock = {
   create: createAnalyticsServiceMock,
-  createAnalyticsServicePreboot: createAnalyticsClientMock,
-  createAnalyticsServiceSetup: createAnalyticsClientMock,
-  createAnalyticsServiceStart: createAnalyticsClientMock,
+  createAnalyticsServiceSetup,
+  createAnalyticsServiceStart,
 };

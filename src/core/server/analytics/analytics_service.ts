@@ -27,7 +27,10 @@ export type AnalyticsServiceSetup = AnalyticsClient;
  * {@link AnalyticsClient}
  * @public
  */
-export type AnalyticsServiceStart = AnalyticsClient;
+export type AnalyticsServiceStart = Pick<
+  AnalyticsClient,
+  'optIn' | 'reportEvent' | 'telemetryCounter$'
+>;
 
 export class AnalyticsService {
   private readonly analyticsClient: AnalyticsClient;
@@ -65,9 +68,6 @@ export class AnalyticsService {
   public start(): AnalyticsServiceStart {
     return {
       optIn: this.analyticsClient.optIn,
-      registerContextProvider: this.analyticsClient.registerContextProvider,
-      registerEventType: this.analyticsClient.registerEventType,
-      registerShipper: this.analyticsClient.registerShipper,
       reportEvent: this.analyticsClient.reportEvent,
       telemetryCounter$: this.analyticsClient.telemetryCounter$,
     };

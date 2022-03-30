@@ -9,5 +9,5 @@ Exposes the public APIs of the AnalyticsClient during the start phase
 <b>Signature:</b>
 
 ```typescript
-export declare type AnalyticsServiceStart = AnalyticsClient;
+export declare type AnalyticsServiceStart = Pick<AnalyticsClient, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
 ```

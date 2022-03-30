@@ -17,7 +17,13 @@ export class AnalyticsPluginA implements Plugin {
   private readonly actions$ = new ReplaySubject<Action>();
 
   public setup({ analytics }: CoreSetup) {
-    const { registerShipper, registerEventType, reportEvent, telemetryCounter$ } = analytics;
+    const {
+      registerShipper,
+      registerContextProvider,
+      registerEventType,
+      reportEvent,
+      telemetryCounter$,
+    } = analytics;
     registerShipper(CustomShipper, this.actions$);
 
     const stats: TelemetryCounter[] = [];
@@ -55,9 +61,8 @@ export class AnalyticsPluginA implements Plugin {
         analytics.optIn({ global: { enabled: optIn } });
       },
     };
-  }
-  public start({ analytics }: CoreStart) {
-    analytics.registerContextProvider({
+
+    registerContextProvider({
       context$: new BehaviorSubject({ user_agent: navigator.userAgent }).asObservable(),
       schema: {
         user_agent: {
@@ -68,7 +73,8 @@ export class AnalyticsPluginA implements Plugin {
         },
       },
     });
-
+  }
+  public start({ analytics }: CoreStart) {
     analytics.reportEvent('test-plugin-lifecycle', {
       plugin: 'analyticsPluginA',
       step: 'start',

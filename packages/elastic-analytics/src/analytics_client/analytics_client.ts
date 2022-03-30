@@ -72,64 +72,7 @@ export class AnalyticsClient implements IAnalyticsClient {
   );
 
   constructor(private readonly initContext: AnalyticsClientInitContext) {
-    // Observer that will emit when both events occur: the OptInConfig is set + a shipper has been registered
-    const configReceivedAndShipperReceivedObserver$ = combineLatest([
-      this.optInConfigWithReplay$,
-      this.shipperRegistered$,
-    ]);
-
-    // Flush the internal queue when we get any optInConfig and, at least, 1 shipper
-    this.internalEventQueue$
-      .pipe(
-        // Take until will close the observer once we reach the condition below
-        takeUntil(configReceivedAndShipperReceivedObserver$),
-
-        // Accumulate the events until we can send them
-        buffer(configReceivedAndShipperReceivedObserver$),
-
-        // Minimal delay only to make this chain async and let the optIn operation to complete first.
-        delay(0),
-
-        // Re-emit the context to make sure all the shippers got it (only if opted-in)
-        tap(() => {
-          if (this.optInConfig$.value?.global.enabled) {
-            this.context$.next(this.context$.value);
-          }
-        }),
-
-        // Minimal delay only to make this chain async and let
-        // the context update operation to complete first.
-        delay(0),
-
-        // Flatten the array of events
-        concatMap((events) => from(events)),
-
-        // Discard opted-out events
-        filter((event) => {
-          const optInConfig = this.optInConfig$.value;
-          const isGloballyOptedIn = optInConfig?.global.enabled === true;
-          const eventIsNotOptedOut =
-            (optInConfig?.event_types &&
-              // Checking it's not `false` because if a shipper is not explicitly specified, we assume opted-in based on the global state
-              optInConfig.event_types[event.event_type]?.enabled !== false) ??
-            true;
-          return isGloballyOptedIn && eventIsNotOptedOut;
-        }),
-
-        // Let's group the requests per eventType for easier batching
-        groupBy((event) => event.event_type),
-        mergeMap((groupedObservable) =>
-          groupedObservable.pipe(
-            bufferCount(1000), // Batching up-to 1000 events per event type for backpressure reasons
-            map((events) => ({ eventType: groupedObservable.key, events }))
-          )
-        )
-      )
-      .subscribe(({ eventType, events }) => {
-        const eventTypeOptInConfig =
-          this.optInConfig$.value?.event_types && this.optInConfig$.value?.event_types[eventType];
-        this.sendToShipper(eventType, events, eventTypeOptInConfig);
-      });
+    this.reportEnqueuedEventsWhenClientIsReady();
   }
 
   public reportEvent = <EventTypeData extends Record<string, unknown>>(
@@ -343,5 +286,80 @@ export class AnalyticsClient implements IAnalyticsClient {
         };
       }, {} as Partial<EventContext>)
     );
+  }
+
+  /**
+   * Once the client is ready (it has a valid optInConfig and at least one shipper),
+   * flush any early events and ship them or discard them based on the optInConfig.
+   * @private
+   */
+  private reportEnqueuedEventsWhenClientIsReady() {
+    // Observer that will emit when both events occur: the OptInConfig is set + a shipper has been registered
+    const configReceivedAndShipperReceivedObserver$ = combineLatest([
+      this.optInConfigWithReplay$,
+      this.shipperRegistered$,
+    ]);
+
+    // Flush the internal queue when we get any optInConfig and, at least, 1 shipper
+    this.internalEventQueue$
+      .pipe(
+        // Take until will close the observer once we reach the condition below
+        takeUntil(configReceivedAndShipperReceivedObserver$),
+
+        // Accumulate the events until we can send them
+        buffer(configReceivedAndShipperReceivedObserver$),
+
+        // Minimal delay only to make this chain async and let the optIn operation to complete first.
+        delay(0),
+
+        // Re-emit the context to make sure all the shippers got it (only if opted-in)
+        tap(() => {
+          if (this.optInConfig$.value?.global.enabled) {
+            this.context$.next(this.context$.value);
+          }
+        }),
+
+        // Minimal delay only to make this chain async and let
+        // the context update operation to complete first.
+        delay(0),
+
+        // Flatten the array of events
+        concatMap((events) => from(events)),
+
+        // Discard opted-out events
+        filter((event) => this.eventIsOptedIn(event.event_type)),
+
+        // Let's group the requests per eventType for easier batching
+        groupBy((event) => event.event_type),
+        mergeMap((groupedObservable) =>
+          groupedObservable.pipe(
+            bufferCount(1000), // Batching up-to 1000 events per event type for backpressure reasons
+            map((events) => ({ eventType: groupedObservable.key, events }))
+          )
+        )
+      )
+      .subscribe(({ eventType, events }) => {
+        const eventTypeOptInConfig =
+          this.optInConfig$.value?.event_types && this.optInConfig$.value?.event_types[eventType];
+        this.sendToShipper(eventType, events, eventTypeOptInConfig);
+      });
+  }
+
+  /**
+   * Returns whether the event type is opted-in or not.
+   * @remarks It does not check the opt-in state at the shipper's level.
+   *
+   * @param eventType The event type to check
+   * @private
+   */
+  private eventIsOptedIn(eventType: EventType): boolean {
+    const optInConfig = this.optInConfig$.value;
+    const isGloballyOptedIn = optInConfig?.global.enabled === true;
+    const eventIsNotOptedOut =
+      (optInConfig?.event_types &&
+        // Checking it's not `false` because if a shipper is not explicitly specified, we assume opted-in based on the global state
+        optInConfig.event_types[eventType]?.enabled !== false) ??
+      true;
+    return isGloballyOptedIn && eventIsNotOptedOut;
   }
 }
