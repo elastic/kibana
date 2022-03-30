@@ -14,7 +14,7 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import { CloudPostureStats, ResourceType } from '../../../../common/types';
+import { ComplianceDashboardData, ResourceType } from '../../../../common/types';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import * as TEXT from '../translations';
 import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
@@ -59,14 +59,14 @@ const mockData = [
 ];
 
 export interface RisksTableProps {
-  data: CloudPostureStats['resourcesTypes'];
+  data: ComplianceDashboardData['resourcesTypes'];
   maxItems: number;
   onCellClick: (resourceTypeName: string) => void;
   onViewAllClick: () => void;
 }
 
 export const getTopRisks = (
-  resourcesTypes: CloudPostureStats['resourcesTypes'],
+  resourcesTypes: ComplianceDashboardData['resourcesTypes'],
   maxItems: number
 ) => {
   const filtered = resourcesTypes.filter((x) => x.totalFailed > 0);

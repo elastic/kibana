@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Page } from '@elastic/synthetics';
 import { DataStream } from '../../common/runtime_types/monitor_management';
 import { getQuerystring } from '../journeys/utils';
@@ -23,7 +22,7 @@ export function monitorManagementPageProvider({
   const remotePassword = process.env.SYNTHETICS_REMOTE_KIBANA_PASSWORD;
   const isRemote = Boolean(process.env.SYNTHETICS_REMOTE_ENABLED);
   const basePath = isRemote ? remoteKibanaUrl : kibanaUrl;
-  const monitorManagement = `${basePath}/app/uptime/manage-monitors`;
+  const monitorManagement = `${basePath}/app/uptime/manage-monitors/all`;
   const addMonitor = `${basePath}/app/uptime/add-monitor`;
   const overview = `${basePath}/app/uptime`;
   return {
@@ -39,6 +38,60 @@ export function monitorManagementPageProvider({
       await page.goto(monitorManagement, {
         waitUntil: 'networkidle',
       });
+      await this.waitForMonitorManagementLoadingToFinish();
+    },
+
+    async waitForMonitorManagementLoadingToFinish() {
+      while (true) {
+        if ((await page.$(this.byTestId('uptimeLoader'))) === null) break;
+        await page.waitForTimeout(5 * 1000);
+      }
+    },
+
+    async enableMonitorManagement(shouldEnable: boolean = true) {
+      const isEnabled = await this.checkIsEnabled();
+      if (isEnabled === shouldEnable) {
+        return;
+      }
+      const [toggle, button] = await Promise.all([
+        page.$(this.byTestId('syntheticsEnableSwitch')),
+        page.$(this.byTestId('syntheticsEnableButton')),
+      ]);
+
+      if (toggle === null && button === null) {
+        return null;
+      }
+      if (toggle) {
+        if (isEnabled !== shouldEnable) {
+          await toggle.click();
+        }
+      } else {
+        await button?.click();
+      }
+      if (shouldEnable) {
+        await this.findByText('Monitor Management enabled successfully.');
+      } else {
+        await this.findByText('Monitor Management disabled successfully.');
+      }
+    },
+
+    async getEnableToggle() {
+      return await this.findByTestSubj('syntheticsEnableSwitch');
+    },
+
+    async getEnableButton() {
+      return await this.findByTestSubj('syntheticsEnableSwitch');
+    },
+
+    async getAddMonitorButton() {
+      return await this.findByTestSubj('syntheticsAddMonitorBtn');
+    },
+
+    async checkIsEnabled() {
+      await page.waitForTimeout(5 * 1000);
+      const addMonitorBtn = await this.getAddMonitorButton();
+      const isDisabled = await addMonitorBtn.isDisabled();
+      return !isDisabled;
     },
 
     async navigateToAddMonitor() {
@@ -57,10 +110,18 @@ export function monitorManagementPageProvider({
       await page.click('text=Add monitor');
     },
 
-    async deleteMonitor() {
-      await this.clickByTestSubj('monitorManagementDeleteMonitor');
-      await this.clickByTestSubj('confirmModalConfirmButton');
-      return await this.findByTestSubj('uptimeDeleteMonitorSuccess');
+    async deleteMonitors() {
+      let isSuccessful: boolean = false;
+      await page.waitForSelector('[data-test-subj="monitorManagementDeleteMonitor"]');
+      while (true) {
+        if ((await page.$(this.byTestId('monitorManagementDeleteMonitor'))) === null) break;
+        await page.click(this.byTestId('monitorManagementDeleteMonitor'), { delay: 800 });
+        await page.waitForSelector('[data-test-subj="confirmModalTitleText"]');
+        await this.clickByTestSubj('confirmModalConfirmButton');
+        isSuccessful = Boolean(await this.findByTestSubj('uptimeDeleteMonitorSuccess'));
+        await page.waitForTimeout(5 * 1000);
+      }
+      return isSuccessful;
     },
 
     async editMonitor() {

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 import { opbeans } from '../../../fixtures/synthtrace/opbeans';
@@ -104,8 +105,8 @@ describe('When navigating to the service inventory', () => {
       cy.wait(aliasNames);
 
       cy.selectAbsoluteTimeRange(
-        'Oct 10, 2021 @ 01:00:00.000',
-        'Oct 10, 2021 @ 01:30:00.000'
+        moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
+        moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
       );
       cy.contains('Update').click();
       cy.wait(aliasNames);
