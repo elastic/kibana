@@ -50,5 +50,5 @@ Pre 8.2 the template structure was as follows (in order of precedence):
   -  index template - All package mappings (moved to @package component template), plus fleet default dynamic mappings (moved to .fleet_globals-1)
   - `.fleet_component_template-1` -  set agent ID verification if enabled (now moved to `.fleet_agent_id_verification-1`)
   - `@custom` component template - empty, available for user to apply custom settings
-  - `@settings` component template - any custom settings specified by the integration
-  - `@mappings` component template - any custom settings specified by the integration
+  - `@settings` component template - any custom settings specified by the package (e.g by specifying `elasticsearch.index_template.settings.some_setting` in manifest.yml )
+  - `@mappings` component template - any custom mappings specified by the package (e.g by specifying `elasticsearch.index_template.mappings.some_mapping` in manifest.yml )
