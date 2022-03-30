@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import $ from 'jquery';
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import { EuiScreenReaderOnly } from '@elastic/eui';
