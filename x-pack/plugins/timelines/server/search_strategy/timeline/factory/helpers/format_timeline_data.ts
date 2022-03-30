@@ -59,16 +59,16 @@ const getValuesFromFields = async (
   }
 
   let fieldToEval;
-  
-    if (nestedParentFieldName == null) {
-      fieldToEval = {
-        [fieldName]: hit.fields[fieldName],
-      };
-    } else {
-      fieldToEval = {
-        [nestedParentFieldName]: hit.fields[nestedParentFieldName],
-      };
-    }
+
+  if (nestedParentFieldName == null) {
+    fieldToEval = {
+      [fieldName]: hit.fields[fieldName],
+    };
+  } else {
+    fieldToEval = {
+      [nestedParentFieldName]: hit.fields[nestedParentFieldName],
+    };
+  }
   const formattedData = await getDataSafety(getDataFromFieldsHits, fieldToEval);
   return formattedData.reduce(
     (acc: TimelineNonEcsData[], { field, values }) =>

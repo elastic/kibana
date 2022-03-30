@@ -151,10 +151,12 @@ describe('formatTimelineData', () => {
         'kibana.alert.rule.timeline_id': [],
         'kibana.alert.rule.timeline_title': [],
         'kibana.alert.rule.exceptions_list': [],
-        'kibana.alert.threshold_result': [{
-          'count': 10000,
-          'value': '2a990c11-f61b-4c8e-b210-da2574e9f9db'
-        }],
+        'kibana.alert.threshold_result': [
+          {
+            count: 10000,
+            value: '2a990c11-f61b-4c8e-b210-da2574e9f9db',
+          },
+        ],
       },
       sort: ['1610199700517'],
     };
