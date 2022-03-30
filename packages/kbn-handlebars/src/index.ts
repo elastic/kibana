@@ -28,7 +28,7 @@ export type ExtendedRuntimeOptions = Pick<RuntimeOptions, 'helpers' | 'blockPara
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace ExtendedHandlebars {
   export function compileAST(
-    template: string,
+    input: string | hbs.AST.Program,
     options?: ExtendedCompileOptions
   ): (context: any, options?: ExtendedRuntimeOptions) => string;
   export function create(): typeof Handlebars; // eslint-disable-line @typescript-eslint/no-shadow
@@ -61,8 +61,11 @@ export function create(): typeof Handlebars {
 Handlebars.create = create;
 
 // Custom function to compile only the AST so we don't have to use `eval`
-Handlebars.compileAST = function (template: string, options?: ExtendedCompileOptions) {
-  const visitor = new ElasticHandlebarsVisitor(template, options, this.helpers);
+Handlebars.compileAST = function (
+  input: string | hbs.AST.Program,
+  options?: ExtendedCompileOptions
+) {
+  const visitor = new ElasticHandlebarsVisitor(input, options, this.helpers);
   return (context: any, runtimeOptions?: ExtendedRuntimeOptions) =>
     visitor.render(context, runtimeOptions);
 };
@@ -82,7 +85,7 @@ interface Container {
 class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private scopes: any[] = [];
   private output: any[] = [];
-  private template: string;
+  private template?: string;
   private compileOptions: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
   private initialHelpers: { [name: string]: Handlebars.HelperDelegate };
@@ -94,12 +97,18 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private defaultHelperOptions: Handlebars.HelperOptions = {};
 
   constructor(
-    template: string,
+    input: string | hbs.AST.Program,
     options: ExtendedCompileOptions = {},
     helpers: { [name: string]: Handlebars.HelperDelegate }
   ) {
     super();
-    this.template = template;
+
+    if (typeof input !== 'string' && input.type === 'Program') {
+      this.ast = input;
+    } else {
+      this.template = input as string;
+    }
+
     this.compileOptions = Object.assign(
       {
         data: true,
@@ -184,7 +193,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     moveHelperToHooks(this.container, 'blockHelperMissing', keepHelperInHelpers);
 
     if (!this.ast) {
-      this.ast = Handlebars.parse(this.template);
+      this.ast = Handlebars.parse(this.template!);
     }
 
     this.accept(this.ast);
