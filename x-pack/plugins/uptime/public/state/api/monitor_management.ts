@@ -10,20 +10,26 @@ import {
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResultCodec,
   MonitorManagementListResult,
+  MonitorManagementEnablementResultCodec,
+  MonitorManagementEnablementResult,
   ServiceLocations,
   SyntheticsMonitor,
+  EncryptedSyntheticsMonitor,
   ServiceLocationsApiResponseCodec,
   ServiceLocationErrors,
   ThrottlingOptions,
 } from '../../../common/runtime_types';
-import { SyntheticsMonitorSavedObject, SyntheticsServiceAllowed } from '../../../common/types';
+import {
+  DecryptedSyntheticsMonitorSavedObject,
+  SyntheticsServiceAllowed,
+} from '../../../common/types';
 import { apiService } from './utils';
 
 export const setMonitor = async ({
   monitor,
   id,
 }: {
-  monitor: SyntheticsMonitor;
+  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
   id?: string;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
   if (id) {
@@ -33,7 +39,11 @@ export const setMonitor = async ({
   }
 };
 
-export const getMonitor = async ({ id }: { id: string }): Promise<SyntheticsMonitorSavedObject> => {
+export const getMonitor = async ({
+  id,
+}: {
+  id: string;
+}): Promise<DecryptedSyntheticsMonitorSavedObject> => {
   return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
 };
 
@@ -81,6 +91,23 @@ export interface TestNowResponse {
 
 export const testNowMonitor = async (configId: string): Promise<TestNowResponse | undefined> => {
   return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${configId}`);
+};
+
+export const fetchGetSyntheticsEnablement =
+  async (): Promise<MonitorManagementEnablementResult> => {
+    return await apiService.get(
+      API_URLS.SYNTHETICS_ENABLEMENT,
+      undefined,
+      MonitorManagementEnablementResultCodec
+    );
+  };
+
+export const fetchDisableSynthetics = async (): Promise<void> => {
+  return await apiService.delete(API_URLS.SYNTHETICS_ENABLEMENT);
+};
+
+export const fetchEnableSynthetics = async (): Promise<void> => {
+  return await apiService.post(API_URLS.SYNTHETICS_ENABLEMENT);
 };
 
 export const fetchServiceAllowed = async (): Promise<SyntheticsServiceAllowed> => {

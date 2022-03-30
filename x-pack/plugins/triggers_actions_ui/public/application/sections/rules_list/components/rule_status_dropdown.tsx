@@ -27,7 +27,6 @@ import {
   EuiLink,
   EuiText,
   EuiToolTip,
-  EuiIcon,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { parseInterval } from '../../../../../common';
@@ -144,7 +143,12 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   );
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      alignItems="flexStart"
+      justifyContent="flexStart"
+      gutterSize="s"
+    >
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={badge}
