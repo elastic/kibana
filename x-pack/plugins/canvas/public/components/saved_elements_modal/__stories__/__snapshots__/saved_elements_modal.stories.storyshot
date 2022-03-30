@@ -26,9 +26,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      >
-        
-      </span>
+      />
     </button>
     <div
       className="euiModal__flex"
@@ -80,9 +78,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="search"
                     size="m"
-                  >
-                    
-                  </span>
+                  />
                 </span>
               </div>
             </div>
@@ -103,9 +99,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
                   color="subdued"
                   data-euiicon-type="vector"
                   size="xxl"
-                >
-                  
-                </span>
+                />
               </div>
               <div
                 className="euiEmptyPrompt__content"
@@ -196,9 +190,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      >
-        
-      </span>
+      />
     </button>
     <div
       className="euiModal__flex"
@@ -250,9 +242,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="search"
                     size="m"
-                  >
-                    
-                  </span>
+                  />
                 </span>
               </div>
             </div>
@@ -337,9 +327,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
-                      >
-                        
-                      </span>
+                      />
                     </button>
                   </span>
                 </div>
@@ -366,9 +354,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="trash"
                         size="m"
-                      >
-                        
-                      </span>
+                      />
                     </button>
                   </span>
                 </div>
@@ -448,9 +434,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
-                      >
-                        
-                      </span>
+                      />
                     </button>
                   </span>
                 </div>
@@ -477,9 +461,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="trash"
                         size="m"
-                      >
-                        
-                      </span>
+                      />
                     </button>
                   </span>
                 </div>
@@ -559,9 +541,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
-                      >
-                        
-                      </span>
+                      />
                     </button>
                   </span>
                 </div>
@@ -588,9 +568,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="trash"
                         size="m"
-                      >
-                        
-                      </span>
+                      />
                     </button>
                   </span>
                 </div>
@@ -656,9 +634,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      >
-        
-      </span>
+      />
     </button>
     <div
       className="euiModal__flex"
@@ -710,9 +686,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="search"
                     size="m"
-                  >
-                    
-                  </span>
+                  />
                 </span>
               </div>
               <div
@@ -728,9 +702,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                   <span
                     className="euiFormControlLayoutClearButton__icon"
                     data-euiicon-type="cross"
-                  >
-                    
-                  </span>
+                  />
                 </button>
               </div>
             </div>
@@ -815,9 +787,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                         color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
-                      >
-                        
-                      </span>
+                      />
                     </button>
                   </span>
                 </div>
@@ -844,9 +814,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                         color="inherit"
                         data-euiicon-type="trash"
                         size="m"
-                      >
-                        
-                      </span>
+                      />
                     </button>
                   </span>
                 </div>

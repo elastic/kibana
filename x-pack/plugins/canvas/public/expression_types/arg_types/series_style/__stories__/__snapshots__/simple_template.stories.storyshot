@@ -216,14 +216,13 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
           onMouseOver={[Function]}
         >
           <span
+            aria-label="Info"
             color="warning"
             data-euiicon-type="alert"
             onBlur={[Function]}
             onFocus={[Function]}
             tabIndex={0}
-          >
-            Info
-          </span>
+          />
         </span>
       </div>
     </div>

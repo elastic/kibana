@@ -20,9 +20,7 @@ Array [
               "verticalAlign": "top",
             }
           }
-        >
-          
-        </span>
+        />
       </span>
       <span>
         <span
@@ -83,9 +81,7 @@ Array [
                 color="inherit"
                 data-euiicon-type="trash"
                 size="m"
-              >
-                
-              </span>
+              />
               <span
                 className="euiButton__text"
               >

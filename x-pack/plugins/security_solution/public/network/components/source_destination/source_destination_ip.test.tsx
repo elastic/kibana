@@ -984,7 +984,7 @@ describe('SourceDestinationIp', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
       )
-    ).toContain('9987');
+    ).toEqual('9987');
   });
 
   test('it renders the expected destination port when type is `destination`, and both destinationIp and destinationPort are populated', () => {
@@ -1038,7 +1038,7 @@ describe('SourceDestinationIp', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
       )
-    ).toContain('80');
+    ).toEqual('80');
   });
 
   test('it renders the expected source port when type is `source`, but only sourcePort is populated', () => {
@@ -1092,7 +1092,7 @@ describe('SourceDestinationIp', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
       )
-    ).toContain('9987');
+    ).toEqual('9987');
   });
 
   test('it renders the expected destination port when type is `destination`, and only destinationPort is populated', () => {
@@ -1147,7 +1147,7 @@ describe('SourceDestinationIp', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
       )
-    ).toContain('80');
+    ).toEqual('80');
   });
 
   test('it does NOT render the badge when type is `source`, but both sourceIp and sourcePort are undefined', () => {

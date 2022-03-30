@@ -18,18 +18,14 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
         color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
-      >
-        
-      </span>
+      />
       <span
         className="euiButtonEmpty__text"
       >
         <span
           className="canvasDataSource__triggerButtonIcon"
           data-euiicon-type="training"
-        >
-          
-        </span>
+        />
         Test Datasource
       </span>
     </span>
@@ -74,18 +70,14 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
         color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
-      >
-        
-      </span>
+      />
       <span
         className="euiButtonEmpty__text"
       >
         <span
           className="canvasDataSource__triggerButtonIcon"
           data-euiicon-type="training"
-        >
-          
-        </span>
+        />
         Test Datasource
       </span>
     </span>

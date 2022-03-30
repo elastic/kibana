@@ -34,9 +34,7 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
             color="inherit"
             data-euiicon-type="pencil"
             size="m"
-          >
-            
-          </span>
+          />
         </button>
       </span>
     </div>
@@ -63,9 +61,7 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
             color="inherit"
             data-euiicon-type="trash"
             size="m"
-          >
-            
-          </span>
+          />
         </button>
       </span>
     </div>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReporterVersion } from 'axe-core';
+import type { ReporterVersion } from 'axe-core';
 
 export const AXE_CONFIG = {
   rules: [

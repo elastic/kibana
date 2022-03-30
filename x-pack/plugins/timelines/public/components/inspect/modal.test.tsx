@@ -110,7 +110,7 @@ describe('Modal Inspect', () => {
 
       expect(
         wrapper.find('.euiDescriptionList__title span[data-test-subj="index-pattern-title"]').text()
-      ).toContain('Index pattern ');
+      ).toBe('Index pattern ');
       expect(
         wrapper
           .find('.euiDescriptionList__description span[data-test-subj="index-pattern-description"]')
@@ -118,7 +118,7 @@ describe('Modal Inspect', () => {
       ).toBe('auditbeat-*, filebeat-*, packetbeat-*, winlogbeat-*');
       expect(
         wrapper.find('.euiDescriptionList__title span[data-test-subj="query-time-title"]').text()
-      ).toContain('Query time ');
+      ).toBe('Query time ');
       expect(
         wrapper
           .find('.euiDescriptionList__description span[data-test-subj="query-time-description"]')
@@ -128,7 +128,7 @@ describe('Modal Inspect', () => {
         wrapper
           .find('.euiDescriptionList__title span[data-test-subj="request-timestamp-title"]')
           .text()
-      ).toContain('Request timestamp ');
+      ).toBe('Request timestamp ');
     });
 
     test('Click on request Tab', () => {
