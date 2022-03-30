@@ -6,11 +6,12 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
+import React, { ReactNode } from 'react';
 import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { IField, IVectorSource } from '../../../maps/public';
-import { FIELD_ORIGIN } from '../../../maps/common';
+import { FIELD_ORIGIN, DECIMAL_DEGREES_PRECISION } from '../../../maps/common';
 import { TileMetaFeature } from '../../../maps/common/descriptor_types';
 import { AnomalySource } from './anomaly_source';
 import { ITooltipProperty } from '../../../maps/public';
@@ -24,6 +25,8 @@ export const TYPICAL_LABEL = i18n.translate('xpack.ml.maps.anomalyLayerTypicalLa
 export const TYPICAL_TO_ACTUAL = i18n.translate('xpack.ml.maps.anomalyLayerTypicalToActualLabel', {
   defaultMessage: 'Typical to actual',
 });
+
+const INFLUENCER_LIMIT = 3;
 
 export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
   record_score: {
@@ -50,15 +53,11 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
     }),
     type: 'string',
   },
-  // this value is only used to place the point on the map
-  actual: {},
-  actualDisplay: {
+  actual: {
     label: ACTUAL_LABEL,
     type: 'string',
   },
-  // this value is only used to place the point on the map
-  typical: {},
-  typicalDisplay: {
+  typical: {
     label: TYPICAL_LABEL,
     type: 'string',
   },
@@ -106,23 +105,55 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
   },
 };
 
+const ROUND_POWER = Math.pow(10, DECIMAL_DEGREES_PRECISION);
+function roundCoordinate(coordinate: number) {
+  return Math.round(Number(coordinate) * ROUND_POWER) / ROUND_POWER;
+}
+
 export class AnomalySourceTooltipProperty implements ITooltipProperty {
-  constructor(private readonly _label: string, private readonly _value: string) {}
+  constructor(private readonly _field: string, private readonly _value: string) {}
 
   async getESFilters(): Promise<Filter[]> {
     return [];
   }
 
-  getHtmlDisplayValue(): string {
+  getHtmlDisplayValue(): string | ReactNode {
+    if (this._field === 'influencers') {
+      try {
+        const influencers = JSON.parse(this._value) as Array<{
+          influencer_field_name: string;
+          influencer_field_values: string[];
+        }>;
+        return (
+          <ul>
+            {influencers.map(({ influencer_field_name: name, influencer_field_values: values }) => {
+              return <li>{`${name}: ${values.slice(0, INFLUENCER_LIMIT).join(', ')}`}</li>;
+            })}
+          </ul>
+        );
+      } catch (error) {
+        // ignore error and display unformated value
+      }
+    } else if (this._field === 'actual' || this._field === 'typical') {
+      try {
+        const point = JSON.parse(this._value) as number[];
+        return `[${roundCoordinate(point[0])}, ${roundCoordinate(point[1])}]`;
+      } catch (error) {
+        // ignore error and display unformated value
+      }
+    }
+
     return this._value.toString();
   }
 
   getPropertyKey(): string {
-    return this._label;
+    return this._field;
   }
 
   getPropertyName(): string {
-    return this._label;
+    return ANOMALY_SOURCE_FIELDS[this._field] && ANOMALY_SOURCE_FIELDS[this._field].label
+      ? ANOMALY_SOURCE_FIELDS[this._field].label
+      : this._field;
   }
 
   getRawValue(): string | string[] | undefined {
@@ -146,7 +177,7 @@ export class AnomalySourceField implements IField {
 
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     return new AnomalySourceTooltipProperty(
-      await this.getLabel(),
+      this._field,
       escape(Array.isArray(value) ? value.join() : value ? value : '')
     );
   }

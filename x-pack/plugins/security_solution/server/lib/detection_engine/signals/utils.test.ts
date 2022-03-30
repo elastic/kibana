@@ -43,7 +43,7 @@ import {
   getValidDateFromDoc,
   calculateTotal,
   getTotalHitsValue,
-  isRACAlert,
+  isDetectionAlert,
   getField,
 } from './utils';
 import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
@@ -1538,10 +1538,10 @@ describe('utils', () => {
     });
   });
 
-  describe('isRACAlert', () => {
+  describe('isDetectionAlert', () => {
     test('alert with dotted fields returns true', () => {
       expect(
-        isRACAlert({
+        isDetectionAlert({
           [ALERT_UUID]: '123',
         })
       ).toEqual(true);
@@ -1549,7 +1549,7 @@ describe('utils', () => {
 
     test('alert with nested fields returns true', () => {
       expect(
-        isRACAlert({
+        isDetectionAlert({
           kibana: {
             alert: { uuid: '123' },
           },
@@ -1558,31 +1558,31 @@ describe('utils', () => {
     });
 
     test('undefined returns false', () => {
-      expect(isRACAlert(undefined)).toEqual(false);
+      expect(isDetectionAlert(undefined)).toEqual(false);
     });
 
     test('null returns false', () => {
-      expect(isRACAlert(null)).toEqual(false);
+      expect(isDetectionAlert(null)).toEqual(false);
     });
 
     test('number returns false', () => {
-      expect(isRACAlert(5)).toEqual(false);
+      expect(isDetectionAlert(5)).toEqual(false);
     });
 
     test('string returns false', () => {
-      expect(isRACAlert('a')).toEqual(false);
+      expect(isDetectionAlert('a')).toEqual(false);
     });
 
     test('array returns false', () => {
-      expect(isRACAlert([])).toEqual(false);
+      expect(isDetectionAlert([])).toEqual(false);
     });
 
     test('empty object returns false', () => {
-      expect(isRACAlert({})).toEqual(false);
+      expect(isDetectionAlert({})).toEqual(false);
     });
 
     test('alert with null value returns false', () => {
-      expect(isRACAlert({ 'kibana.alert.uuid': null })).toEqual(false);
+      expect(isDetectionAlert({ 'kibana.alert.uuid': null })).toEqual(false);
     });
   });
 
