@@ -34,8 +34,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('set up a query with filters to save');
     await PageObjects.common.setTime({ from, to });
     await PageObjects.common.navigateToApp('discover');
+    await retry.try(async function tryingForTime() {
+      const hitCount = await PageObjects.discover.getHitCount();
+      expect(hitCount).to.be('4,731');
+    });
+
     await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+    await retry.try(async function tryingForTime() {
+      const hitCount = await PageObjects.discover.getHitCount();
+      expect(hitCount).to.be('3,029');
+    });
+
     await queryBar.setQuery('response:200');
+    await queryBar.submitQuery();
+    await retry.try(async function tryingForTime() {
+      const hitCount = await PageObjects.discover.getHitCount();
+      expect(hitCount).to.be('2,792');
+    });
   };
 
   describe('saved queries saved objects', function describeIndexTests() {
@@ -53,7 +68,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
