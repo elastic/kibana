@@ -36,6 +36,7 @@ import {
   RESOLUTION_KEYS,
   SCALING_KEYS,
 } from './types';
+import { MapSettings } from '../../../public/reducers/map';
 
 /*
  * Use MapStatsCollector instance to track map saved object stats.
@@ -54,10 +55,19 @@ export class MapStatsCollector {
   private _emsFileClusterStats: { [key: string]: ClusterCountStats } = {};
   private _layerCountStats: ClusterCountStats | undefined;
   private _layerTypeClusterStats: { [key: string]: ClusterCountStats } = {};
+  private _customIconsCountStats: ClusterCountStats | undefined;
   private _sourceCountStats: ClusterCountStats | undefined;
 
   push(attributes: MapSavedObjectAttributes) {
-    if (!attributes || !attributes.layerListJSON) {
+    if (!attributes || !attributes.mapStateJSON || !attributes.layerListJSON) {
+      return;
+    }
+
+    let mapSettings: MapSettings;
+    try {
+      const mapState = JSON.parse(attributes.mapStateJSON);
+      mapSettings = mapState.settings;
+    } catch (e) {
       return;
     }
 
@@ -69,6 +79,26 @@ export class MapStatsCollector {
     }
 
     this._mapCount++;
+
+    if (mapSettings && mapSettings.customIcons) {
+      const customIconsCount = mapSettings.customIcons.length;
+      if (this._customIconsCountStats) {
+        const customIconsCountTotal = this._customIconsCountStats.total + customIconsCount;
+        this._customIconsCountStats = {
+          min: Math.min(customIconsCount, this._customIconsCountStats.min),
+          max: Math.max(customIconsCount, this._customIconsCountStats.max),
+          total: customIconsCountTotal,
+          avg: customIconsCountTotal / this._mapCount,
+        };
+      } else {
+        this._customIconsCountStats = {
+          min: customIconsCount,
+          max: customIconsCount,
+          total: customIconsCount,
+          avg: customIconsCount,
+        };
+      }
+    }
 
     const layerCount = layerList.length;
     if (this._layerCountStats) {
@@ -164,6 +194,10 @@ export class MapStatsCollector {
         layerTypesCount: this._excludeTotalFromKeyedStats(this._layerTypeClusterStats),
         // Count of layer by EMS region
         emsVectorLayersCount: this._excludeTotalFromKeyedStats(this._emsFileClusterStats),
+        // Count of custom icons per map
+        customIconsCount: this._customIconsCountStats
+          ? this._excludeTotal(this._customIconsCountStats)
+          : { min: 0, max: 0, avg: 0 },
       },
     };
   }

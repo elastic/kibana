@@ -66,5 +66,6 @@ export interface MapStats {
     layersCount: Omit<ClusterCountStats, 'total'>;
     layerTypesCount: { [key: string]: Omit<ClusterCountStats, 'total'> };
     emsVectorLayersCount: { [key: string]: Omit<ClusterCountStats, 'total'> };
+    customIconsCount: Omit<ClusterCountStats, 'total'>;
   };
 }

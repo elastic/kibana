@@ -34,6 +34,11 @@ test('returns zeroed telemetry data when there are no saved objects', () => {
         max: 0,
         min: 0,
       },
+      customIconsCount: {
+        avg: 0,
+        max: 0,
+        min: 0,
+      },
     },
   });
 });
@@ -113,6 +118,11 @@ test('returns expected telemetry data from saved objects', () => {
       },
     },
     attributesPerMap: {
+      customIconsCount: {
+        avg: 0.8,
+        max: 3,
+        min: 1,
+      },
       dataSourcesCount: {
         avg: 2,
         max: 3,
