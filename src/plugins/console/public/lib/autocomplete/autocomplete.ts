@@ -26,7 +26,7 @@ import * as utils from '../utils';
 
 // @ts-ignore
 import { populateContext } from './engine';
-import { AutoCompleteContext, ConditionalTemplateType, ResultTerm } from './types';
+import type { AutoCompleteContext, ConditionalTemplateType, ResultTerm } from './types';
 // @ts-ignore
 import { URL_PATH_END_MARKER } from './components/index';
 
@@ -364,7 +364,7 @@ export default function ({
       if (hasOneOf(value)) {
         const startLine = getStartLineNumber(currentLineNumber, value.__one_of);
         const lines = editor.getLines(startLine, currentLineNumber).join('\n');
-        const match = matchCondition(value.__one_of, lines);
+        const match = matchCondition(lines, value.__one_of);
         if (match && match.__template) {
           return match.__template;
         }
@@ -377,14 +377,14 @@ export default function ({
       return currentLine;
     }
     const value = editor.getLineValue(currentLine);
-    const match = matchCondition(rules, value);
+    const match = matchCondition(value, rules);
     if (match) {
       return currentLine;
     }
     return getStartLineNumber(currentLine - 1, rules);
   }
 
-  function matchCondition(rules: ConditionalTemplateType[], condition: string) {
+  function matchCondition(condition: string, rules: ConditionalTemplateType[]) {
     return rules.find((rule) => {
       if (rule.__condition && rule.__condition.lines_regex) {
         return new RegExp(rule.__condition.lines_regex, 'm').test(condition);
