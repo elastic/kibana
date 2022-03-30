@@ -9,7 +9,7 @@
 import Handlebars from '.';
 import { expectTemplate } from './__jest__/test_bench';
 
-test('Handlebars.create', () => {
+it('Handlebars.create', () => {
   expect(Handlebars.create()).toMatchSnapshot();
 });
 
@@ -25,7 +25,7 @@ describe('Handlebars.compileAST', () => {
   }
 
   describe('compiler options', () => {
-    test('noEscape', () => {
+    it('noEscape', () => {
       expectTemplate('{{value}}').withInput({ value: '<foo>' }).toCompileTo('&lt;foo&gt;');
 
       expectTemplate('{{value}}')
@@ -40,12 +40,12 @@ describe('Handlebars.compileAST', () => {
     });
   });
 
-  test('invalid template', () => {
+  it('invalid template', () => {
     expectTemplate('{{value').withInput({ value: 42 }).toThrowErrorMatchingSnapshot();
   });
 });
 
-test('Only provide options.fn/inverse to block helpers', () => {
+it('Only provide options.fn/inverse to block helpers', () => {
   function toHaveProperties(...args: any[]) {
     toHaveProperties.calls++;
     const options = args[args.length - 1];
@@ -91,7 +91,7 @@ test('Only provide options.fn/inverse to block helpers', () => {
   expect(toHaveProperties.calls).toEqual(blockTemplates.length * 2 * 2);
 });
 
-test('Handlebars.registerHelpers', () => {
+it('Handlebars.registerHelpers', () => {
   expectTemplate(
     'https://elastic.co/{{lookup (split value ",") 0 }}&{{lookup (split value ",") 1 }}'
   )
