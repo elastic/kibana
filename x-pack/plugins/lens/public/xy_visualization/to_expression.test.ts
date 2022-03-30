@@ -13,6 +13,7 @@ import { OperationDescriptor } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { eventAnnotationServiceMock } from '../../../../../src/plugins/event_annotation/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
@@ -22,6 +23,7 @@ describe('#toExpression', () => {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     kibanaTheme: themeServiceMock.createStartContract(),
     useLegacyTimeAxis: false,
+    eventAnnotationService: eventAnnotationServiceMock,
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -54,6 +56,8 @@ describe('#toExpression', () => {
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
+          endValue: 'Nearest',
+          emphasizeFitting: true,
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
           labelsOrientation: {
             x: 0,

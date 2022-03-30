@@ -155,6 +155,7 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       logsRules: this.logsRules.setup(core, plugins),
       metricsRules: this.metricsRules.setup(core, plugins),
       logger: this.logger,
+      basePath: core.http.basePath,
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);

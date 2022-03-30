@@ -25,9 +25,8 @@ import type { InternalCoreUsageDataSetup } from '../core_usage_data';
 import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
-import { PluginsStatusService } from './plugins_status';
+import { PluginsStatusService } from './cached_plugins_status';
 import { getOverallStatusChanges } from './log_overall_status';
-import { getPluginsStatusChanges, getServiceLevelChangeMessage } from './log_plugins_status';
 
 interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
@@ -72,7 +71,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
     this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
-      debounceTime(500),
+      debounceTime(80),
       map(([coreStatus, pluginsStatus]) => {
         const summary = getSummaryStatus([
           ...Object.entries(coreStatus),
@@ -166,12 +165,6 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     getOverallStatusChanges(this.overall$, this.stop$).subscribe((message) => {
       this.logger.info(message);
     });
-
-    getPluginsStatusChanges(this.pluginsStatus.getAll$(), this.stop$).subscribe((statusChanges) => {
-      statusChanges.forEach((statusChange) => {
-        this.logger.info(getServiceLevelChangeMessage(statusChange));
-      });
-    });
   }
 
   public stop() {
@@ -181,6 +174,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     this.subscriptions.forEach((subscription) => {
       subscription.unsubscribe();
     });
+
+    this.pluginsStatus?.stop();
     this.subscriptions = [];
   }
 

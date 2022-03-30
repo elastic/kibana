@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
 
-interface ProcessTreeAlertDeps {
+export interface ProcessTreeAlertDeps {
   alert: ProcessEvent;
   isInvestigated: boolean;
   isSelected: boolean;
   onClick: (alert: ProcessEventAlert | null) => void;
   selectAlert: (alertUuid: string) => void;
+  onShowAlertDetails: (alertUuid: string) => void;
 }
 
 export const ProcessTreeAlert = ({
@@ -25,26 +26,35 @@ export const ProcessTreeAlert = ({
   isSelected,
   onClick,
   selectAlert,
+  onShowAlertDetails,
 }: ProcessTreeAlertDeps) => {
   const styles = useStyles({ isInvestigated, isSelected });
 
   const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
 
   useEffect(() => {
-    if (isInvestigated && isSelected && uuid) {
+    if (isInvestigated && uuid) {
       selectAlert(uuid);
     }
-  }, [isInvestigated, isSelected, uuid, selectAlert]);
+  }, [isInvestigated, uuid, selectAlert]);
+
+  const handleExpandClick = useCallback(() => {
+    if (uuid) {
+      onShowAlertDetails(uuid);
+    }
+  }, [onShowAlertDetails, uuid]);
+
+  const handleClick = useCallback(() => {
+    if (alert.kibana?.alert) {
+      onClick(alert.kibana.alert);
+    }
+  }, [alert.kibana?.alert, onClick]);
 
   if (!(alert.kibana && rule)) {
     return null;
   }
 
   const { name } = rule;
-
-  const handleClick = () => {
-    onClick(alert.kibana?.alert ?? null);
-  };
 
   return (
     <EuiText
@@ -55,7 +65,13 @@ export const ProcessTreeAlert = ({
       data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}`}
       onClick={handleClick}
     >
-      <EuiButtonIcon iconType="expand" aria-label="expand" css={styles.alertRowItem} />
+      <EuiButtonIcon
+        iconType="expand"
+        aria-label="expand"
+        css={styles.alertRowItem}
+        data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
+        onClick={handleExpandClick}
+      />
       <EuiIcon type="alert" css={styles.alertRowItem} />
       <EuiText size="s" css={styles.alertRuleName}>
         {name}

@@ -6,12 +6,12 @@
  */
 
 import { IndexPatternProvider } from '../types';
-import { IndexPattern } from '../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 export function createCachedIndexPatternProvider(
-  indexPatternGetter: (id: string) => Promise<IndexPattern>
+  indexPatternGetter: (id: string) => Promise<DataView>
 ): IndexPatternProvider {
-  const cache = new Map<string, IndexPattern>();
+  const cache = new Map<string, DataView>();
 
   return {
     get: async (id: string) => {

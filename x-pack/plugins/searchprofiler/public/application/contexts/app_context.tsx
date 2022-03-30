@@ -6,6 +6,7 @@
  */
 
 import React, { useContext, createContext, useCallback } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { HttpSetup, ToastsSetup } from 'kibana/public';
 import { LicenseStatus } from '../../../common';
@@ -14,19 +15,21 @@ export interface ContextArgs {
   http: HttpSetup;
   notifications: ToastsSetup;
   initialLicenseStatus: LicenseStatus;
+  location: RouteComponentProps['location'];
 }
 
 export interface ContextValue {
   http: HttpSetup;
   notifications: ToastsSetup;
   getLicenseStatus: () => LicenseStatus;
+  location: RouteComponentProps['location'];
 }
 
 const AppContext = createContext<ContextValue>(null as any);
 
 export const AppContextProvider = ({
   children,
-  args: { http, notifications, initialLicenseStatus },
+  args: { http, notifications, initialLicenseStatus, location },
 }: {
   children: React.ReactNode;
   args: ContextArgs;
@@ -39,6 +42,7 @@ export const AppContextProvider = ({
         http,
         notifications,
         getLicenseStatus,
+        location,
       }}
     >
       {children}

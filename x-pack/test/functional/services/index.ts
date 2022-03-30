@@ -71,6 +71,7 @@ import { ObservabilityProvider } from './observability';
 import { CompareImagesProvider } from './compare_images';
 import { RemoteEsProvider } from './remote_es/remote_es';
 import { RemoteEsArchiverProvider } from './remote_es/remote_es_archiver';
+import { CasesServiceProvider } from './cases';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -132,4 +133,5 @@ export const services = {
   compareImages: CompareImagesProvider,
   remoteEs: RemoteEsProvider,
   remoteEsArchiver: RemoteEsArchiverProvider,
+  cases: CasesServiceProvider,
 };

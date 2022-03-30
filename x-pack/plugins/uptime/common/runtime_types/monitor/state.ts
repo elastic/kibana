@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { PingType } from '../ping/ping';
+import { PingErrorType, PingType } from '../ping/ping';
 
 export const StateType = t.intersection([
   t.type({
@@ -27,6 +27,7 @@ export const StateType = t.intersection([
     monitor: t.intersection([
       t.partial({
         name: t.string,
+        checkGroup: t.string,
         duration: t.type({ us: t.number }),
       }),
       t.type({
@@ -47,6 +48,7 @@ export const StateType = t.intersection([
     service: t.partial({
       name: t.string,
     }),
+    error: PingErrorType,
   }),
 ]);
 

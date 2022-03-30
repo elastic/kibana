@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq, omit } from 'lodash';
+import { uniq, omit, isEqual } from 'lodash';
 import uuid from 'uuid/v4';
 import uuidv5 from 'uuid/v5';
 import { safeDump } from 'js-yaml';
@@ -53,7 +53,10 @@ import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
 import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
 
-import { elasticAgentManifest } from './elastic_agent_manifest';
+import {
+  elasticAgentStandaloneManifest,
+  elasticAgentManagedManifest,
+} from './elastic_agent_manifest';
 
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
@@ -67,6 +70,8 @@ import { getFullAgentPolicy } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
+
+const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
@@ -344,7 +349,7 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     agentPolicy: Partial<AgentPolicy>,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser; force?: boolean }
   ): Promise<AgentPolicy> {
     if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
@@ -352,6 +357,23 @@ class AgentPolicyService {
         name: agentPolicy.name,
       });
     }
+
+    const existingAgentPolicy = await this.get(soClient, id, true);
+
+    if (!existingAgentPolicy) {
+      throw new Error('Agent policy not found');
+    }
+
+    if (existingAgentPolicy.is_managed && !options?.force) {
+      Object.entries(agentPolicy)
+        .filter(([key]) => !KEY_EDITABLE_FOR_MANAGED_POLICIES.includes(key))
+        .forEach(([key, val]) => {
+          if (!isEqual(existingAgentPolicy[key as keyof AgentPolicy], val)) {
+            throw new HostedAgentPolicyRestrictionRelatedError(`Cannot update ${key}`);
+          }
+        });
+    }
+
     return this._update(soClient, esClient, id, agentPolicy, options?.user);
   }
 
@@ -766,7 +788,7 @@ class AgentPolicyService {
       };
 
       const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
-      const updateManifestVersion = elasticAgentManifest.replace(
+      const updateManifestVersion = elasticAgentStandaloneManifest.replace(
         'VERSION',
         appContextService.getKibanaVersion()
       );
@@ -775,6 +797,25 @@ class AgentPolicyService {
     } else {
       return '';
     }
+  }
+
+  public async getFullAgentManifest(
+    fleetServer: string,
+    enrolToken: string
+  ): Promise<string | null> {
+    const updateManifestVersion = elasticAgentManagedManifest.replace(
+      'VERSION',
+      appContextService.getKibanaVersion()
+    );
+    let updateManifest = updateManifestVersion;
+    if (fleetServer !== '') {
+      updateManifest = updateManifest.replace('https://fleet-server:8220', fleetServer);
+    }
+    if (enrolToken !== '') {
+      updateManifest = updateManifest.replace('token-id', enrolToken);
+    }
+
+    return updateManifest;
   }
 
   public async getFullAgentPolicy(
