@@ -45,12 +45,10 @@ export const ConfirmTerminate = memo<ConfirmTerminateProps>(({ onConfirm, onCanc
             }
           >
             <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.console.popup.terminateMessage"
-                  defaultMessage="This will end your console session. Do you wish to continue?"
-                />
-              </p>
+              <FormattedMessage
+                id="xpack.securitySolution.console.popup.terminateMessage"
+                defaultMessage="This will end your console session. Do you wish to continue?"
+              />
             </EuiText>
           </EuiCallOut>
 

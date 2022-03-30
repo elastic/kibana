@@ -263,7 +263,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       {children}
 
       <ConsolePopup
-        title={visibleConsole?.client.title ?? null}
+        title={visibleConsole?.client.title}
         isHidden={!visibleConsole}
         onTerminate={handleOnTerminate}
         onHide={handleOnHide}
@@ -276,7 +276,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
 ConsoleManager.displayName = 'ConsoleManager';
 
 /**
- * Returns the interface for managing consoles withing a `<ConsoleManager/>` constext.
+ * Returns the interface for managing consoles withing a `<ConsoleManager/>` context.
  */
 export const useConsoleManager = (): ConsoleManagerClient => {
   const consoleManagerClients = useContext(ConsoleManagerContext);

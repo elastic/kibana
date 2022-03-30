@@ -47,14 +47,14 @@ const ConsolePopupWrapper = styled.div`
 `;
 
 type ConsolePopupProps = PropsWithChildren<{
-  title: ReactNode;
   isHidden: boolean;
   onTerminate: () => void;
   onHide: () => void;
+  title?: ReactNode;
 }>;
 
 export const ConsolePopup = memo<ConsolePopupProps>(
-  ({ children, isHidden, title, onTerminate, onHide }) => {
+  ({ children, isHidden, title = '', onTerminate, onHide }) => {
     const [showTerminateConfirm, setShowTerminateConfirm] = useState(false);
 
     const cssClassNames = useMemo(() => {

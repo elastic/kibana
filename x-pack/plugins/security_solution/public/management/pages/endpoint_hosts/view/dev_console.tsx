@@ -36,6 +36,17 @@ class DevCommandService implements CommandServiceInterface {
         about: 'Runs cmd1',
       },
       {
+        name: 'get-file',
+        about: 'retrieve a file from the endpoint',
+        args: {
+          file: {
+            required: true,
+            allowMultiples: false,
+            about: 'the file path for the file to be retrieved',
+          },
+        },
+      },
+      {
         name: 'cmd2',
         about: 'runs cmd 2',
         args: {
