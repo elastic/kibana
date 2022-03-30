@@ -30,6 +30,7 @@ interface DetailsPanelProps {
   runtimeMappings: MappingRuntimeFields;
   tabType?: TimelineTabs;
   timelineId: string;
+  isReadOnly?: boolean;
 }
 
 /**
@@ -47,6 +48,7 @@ export const DetailsPanel = React.memo(
     runtimeMappings,
     tabType,
     timelineId,
+    isReadOnly,
   }: DetailsPanelProps) => {
     const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -90,6 +92,7 @@ export const DetailsPanel = React.memo(
           runtimeMappings={runtimeMappings}
           tabType={activeTab}
           timelineId={timelineId}
+          isReadOnly={isReadOnly}
         />
       );
     }

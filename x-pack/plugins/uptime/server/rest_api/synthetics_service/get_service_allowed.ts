@@ -13,6 +13,9 @@ export const getServiceAllowedRoute: UMRestApiRouteFactory = () => ({
   path: API_URLS.SERVICE_ALLOWED,
   validate: {},
   handler: async ({ server }): Promise<any> => {
-    return { serviceAllowed: server.syntheticsService.isAllowed };
+    return {
+      serviceAllowed: server.syntheticsService.isAllowed,
+      signupUrl: server.syntheticsService.signupUrl,
+    };
   },
 });
