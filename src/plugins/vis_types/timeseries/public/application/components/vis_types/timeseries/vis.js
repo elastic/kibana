@@ -85,8 +85,8 @@ class TimeseriesVisualization extends Component {
     const axisMin = get(model, 'axis_min', '').toString();
     const axisMax = get(model, 'axis_max', '').toString();
     const fit = model.series
-      ? model.series.filter(({ hidden }) => !hidden).every(({ fill }) => fill === '0')
-      : model.fill === '0';
+      ? model.series.filter(({ hidden }) => !hidden).every(({ fill }) => Number(fill) === 0)
+      : Number(model.fill) === 0;
 
     return {
       min: axisMin.length ? Number(axisMin) : undefined,

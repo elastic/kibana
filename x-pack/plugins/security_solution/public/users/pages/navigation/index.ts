@@ -6,3 +6,4 @@
  */
 
 export * from './all_users_query_tab_body';
+export * from './authentications_query_tab_body';

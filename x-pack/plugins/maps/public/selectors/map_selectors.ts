@@ -43,6 +43,7 @@ import { MapStoreState } from '../reducers/store';
 import {
   AbstractSourceDescriptor,
   DataRequestDescriptor,
+  CustomIcon,
   DrawState,
   EditState,
   Goto,
@@ -65,6 +66,7 @@ import { getIsReadOnly } from './ui_selectors';
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
+  customIcons: CustomIcon[],
   inspectorAdapters?: Adapters,
   chartsPaletteServiceGetColor?: (value: string) => string | null
 ): ILayer {
@@ -86,6 +88,7 @@ export function createLayerInstance(
         layerDescriptor: vectorLayerDescriptor,
         source: source as IVectorSource,
         joins,
+        customIcons,
         chartsPaletteServiceGetColor,
       });
     case LAYER_TYPE.EMS_VECTOR_TILE:
@@ -99,12 +102,14 @@ export function createLayerInstance(
       return new BlendedVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
+        customIcons,
         chartsPaletteServiceGetColor,
       });
     case LAYER_TYPE.MVT_VECTOR:
       return new MvtVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
+        customIcons,
       });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
@@ -184,6 +189,14 @@ export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
 
 export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
 
+export const getCustomIcons = ({ map }: MapStoreState): CustomIcon[] => {
+  return (
+    map.settings.customIcons.map((icon) => {
+      return { ...icon, svg: Buffer.from(icon.svg, 'base64').toString('utf-8') };
+    }) ?? []
+  );
+};
+
 export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
@@ -261,7 +274,8 @@ export const getDataFilters = createSelector(
 export const getSpatialFiltersLayer = createSelector(
   getFilters,
   getMapSettings,
-  (filters, settings) => {
+  getCustomIcons,
+  (filters, settings, customIcons) => {
     const featureCollection: FeatureCollection = {
       type: 'FeatureCollection',
       features: extractFeaturesFromFilters(filters),
@@ -298,6 +312,7 @@ export const getSpatialFiltersLayer = createSelector(
         }),
       }),
       source: new GeoJsonFileSource(geoJsonSourceDescriptor),
+      customIcons,
     });
   }
 );
@@ -306,9 +321,15 @@ export const getLayerList = createSelector(
   getLayerListRaw,
   getInspectorAdapters,
   getChartsPaletteServiceGetColor,
-  (layerDescriptorList, inspectorAdapters, chartsPaletteServiceGetColor) => {
+  getCustomIcons,
+  (layerDescriptorList, inspectorAdapters, chartsPaletteServiceGetColor, customIcons) => {
     return layerDescriptorList.map((layerDescriptor) =>
-      createLayerInstance(layerDescriptor, inspectorAdapters, chartsPaletteServiceGetColor)
+      createLayerInstance(
+        layerDescriptor,
+        customIcons,
+        inspectorAdapters,
+        chartsPaletteServiceGetColor
+      )
     );
   }
 );
@@ -375,12 +396,13 @@ export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, 
 export const getQueryableUniqueIndexPatternIds = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,
-  (layerList, waitingForMapReadyLayerList) => {
+  getCustomIcons,
+  (layerList, waitingForMapReadyLayerList, customIcons) => {
     const indexPatternIds: string[] = [];
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        const layer = createLayerInstance(layerDescriptor);
+        const layer = createLayerInstance(layerDescriptor, customIcons);
         if (layer.isVisible()) {
           indexPatternIds.push(...layer.getQueryableIndexPatternIds());
         }
@@ -399,12 +421,13 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
 export const getGeoFieldNames = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,
-  (layerList, waitingForMapReadyLayerList) => {
+  getCustomIcons,
+  (layerList, waitingForMapReadyLayerList, customIcons) => {
     const geoFieldNames: string[] = [];
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        const layer = createLayerInstance(layerDescriptor);
+        const layer = createLayerInstance(layerDescriptor, customIcons);
         geoFieldNames.push(...layer.getGeoFieldNames());
       });
     } else {
