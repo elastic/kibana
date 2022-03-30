@@ -164,19 +164,19 @@ class MyVeryOwnShipper implements IShipper {
     // ...
   }
 
-  reportEvents = (events: Event[]): void => {
+  public reportEvents(events: Event[]): void {
     // Send the events to the analytics platform
   }
-  optIn = (isOptedIn: boolean): void => {
+  public optIn(isOptedIn: boolean): void {
     // Start/stop any sending mechanisms
   }
   
-  extendContext = (newContext: EventContext): void => {
+  public extendContext(newContext: EventContext): void {
     // Call any custom APIs to internally set the context
   }
   
   // Emit any success/failed/dropped activity
-  telemetryCounter$: Observable<TelemetryCounter>;
+  public telemetryCounter$: Observable<TelemetryCounter>;
 }
 
 // Register the custom shipper
@@ -191,9 +191,9 @@ The syntax of a schema is a _simplified ES mapping on steroids_: it removes some
 
 **DISCLAIMER:** **The schema is not a direct mapping to ES indices.** The final structure of how the event is stored will depend on many factors like the context providers, shippers and final analytics solution.
 
-#### Schema Specification: First order data types (`string`, `number`, `boolean`)
+#### Schema Specification: Primitive data types (`string`, `number`, `boolean`)
 
-When declaring first-order values like `string` or `number`, the basic schema must contain both: `type` and `_meta`.
+When declaring primitive values like `string` or `number`, the basic schema must contain both: `type` and `_meta`.
 
 The `type` value depends on the type of the content to report in that field. Refer to the table below for the values allowed in the schema `type`:
 
@@ -327,4 +327,4 @@ The `_meta` adds the invaluable information of a `description` and whether a fie
 
 It can be attached to any schema definition as seen in the examples above. For high-order types, like arrays or objects, the `_meta` field is optional. For first-order types, like numbers, strings, booleans or `pass_through`, the `_meta` key is mandatory.
 
-The `optional` field is optional by default, and there are some TS validations to enforce `optional: true` when the matching field is declared as optional in the types. However, it's highly encouraged to be explicit about declaring it even when the field is not optional.
+The field `_meta.optional` is not required unless the schema is describing an optional field. In that case, `_meta.optional: true` is required. However, it's highly encouraged to be explicit about declaring it even when the described field is not optional.
