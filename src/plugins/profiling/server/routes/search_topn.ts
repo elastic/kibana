@@ -16,6 +16,7 @@ import type { DataRequestHandlerContext } from '../../../data/server';
 import { getRemoteRoutePaths } from '../../common';
 import { logExecutionLatency } from './logger';
 import { autoHistogramSumCountOnGroupByField, newProjectTimeQuery } from './mappings';
+import { findDownsampledIndex } from './downsampling';
 
 export async function topNElasticSearchQuery(
   context: DataRequestHandlerContext,
@@ -29,15 +30,25 @@ export async function topNElasticSearchQuery(
   response: KibanaResponseFactory
 ) {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const filter = newProjectTimeQuery(projectID, timeFrom, timeTo);
+  const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
+
+  const eventsIndex = await logExecutionLatency(
+    logger,
+    'query to find downsampled index',
+    async () => {
+      return await findDownsampledIndex(logger, esClient, index, filter, targetSampleSize);
+    }
+  );
 
   const resTopNStackTraces = await logExecutionLatency(
     logger,
-    'query to find TopN stacktraces',
+    'query to fetch events from ' + eventsIndex.name,
     async () => {
       return await esClient.search({
-        index,
+        index: eventsIndex.name,
         body: {
-          query: newProjectTimeQuery(projectID, timeFrom, timeTo),
+          query: filter,
           aggs: {
             histogram: autoHistogramSumCountOnGroupByField(searchField, topNItems),
           },
