@@ -32,6 +32,9 @@ const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
   storage.set(CALLOUT_STATE_KEY, newState);
 };
 
+/**
+ * The callout that's displayed when Document explorer is enabled
+ */
 export const DocumentExplorerUpdateCallout = () => {
   const { euiTheme } = useEuiTheme();
   const { storage, capabilities, docLinks } = useDiscoverServices();
