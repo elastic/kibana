@@ -116,7 +116,11 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       </EuiToolTip>
     ) : null;
 
-  const nonEditableBadge = <EuiBadge color={badgeColor}>{badgeMessage}</EuiBadge>;
+  const nonEditableBadge = (
+    <EuiBadge color={badgeColor} data-test-subj="statusDropdownReadonly">
+      {badgeMessage}
+    </EuiBadge>
+  );
 
   const editableBadge = (
     <EuiBadge
@@ -136,8 +140,6 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     </EuiBadge>
   );
 
-  const badge = isEditable ? editableBadge : nonEditableBadge;
-
   return (
     <EuiFlexGroup
       direction="column"
@@ -146,23 +148,27 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       gutterSize="s"
     >
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={badge}
-          isOpen={isPopoverOpen && isEditable}
-          closePopover={onClosePopover}
-          panelPaddingSize="s"
-          data-test-subj="statusDropdown"
-          title={badgeMessage}
-        >
-          <RuleStatusMenu
-            onClosePopover={onClosePopover}
-            onChangeEnabledStatus={onChangeEnabledStatus}
-            onChangeSnooze={onChangeSnooze}
-            isEnabled={isEnabled}
-            isSnoozed={isSnoozed}
-            snoozeEndTime={item.snoozeEndTime}
-          />
-        </EuiPopover>
+        {isEditable ? (
+          <EuiPopover
+            button={editableBadge}
+            isOpen={isPopoverOpen && isEditable}
+            closePopover={onClosePopover}
+            panelPaddingSize="s"
+            data-test-subj="statusDropdown"
+            title={badgeMessage}
+          >
+            <RuleStatusMenu
+              onClosePopover={onClosePopover}
+              onChangeEnabledStatus={onChangeEnabledStatus}
+              onChangeSnooze={onChangeSnooze}
+              isEnabled={isEnabled}
+              isSnoozed={isSnoozed}
+              snoozeEndTime={item.snoozeEndTime}
+            />
+          </EuiPopover>
+        ) : (
+          nonEditableBadge
+        )}
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="remainingSnoozeTime" grow={false}>
         {remainingSnoozeTime}
