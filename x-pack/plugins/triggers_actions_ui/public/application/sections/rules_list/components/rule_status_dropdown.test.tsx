@@ -22,6 +22,7 @@ describe('RuleStatusDropdown', () => {
     enableRule,
     snoozeRule,
     unsnoozeRule,
+    isEditable: true,
     item: {
       id: '1',
       name: 'test rule',

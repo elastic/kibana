@@ -42,6 +42,7 @@ export interface ComponentOpts {
   disableRule: () => Promise<void>;
   snoozeRule: (snoozeEndTime: string | -1) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
+  isEditable: boolean;
 }
 
 export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
@@ -51,6 +52,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   enableRule,
   snoozeRule,
   unsnoozeRule,
+  isEditable,
 }: ComponentOpts) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
   const [isSnoozed, setIsSnoozed] = useState<boolean>(isItemSnoozed(item));
@@ -69,29 +71,35 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   const onChangeEnabledStatus = useCallback(
     async (enable: boolean) => {
       setIsUpdating(true);
-      if (enable) {
-        await enableRule();
-      } else {
-        await disableRule();
+      try {
+        if (enable) {
+          await enableRule();
+        } else {
+          await disableRule();
+        }
+        setIsEnabled(!isEnabled);
+        onRuleChanged();
+      } finally {
+        setIsUpdating(false);
       }
-      setIsEnabled(!isEnabled);
-      onRuleChanged();
-      setIsUpdating(false);
     },
     [setIsUpdating, isEnabled, setIsEnabled, onRuleChanged, enableRule, disableRule]
   );
   const onChangeSnooze = useCallback(
     async (value: number, unit?: SnoozeUnit) => {
       setIsUpdating(true);
-      if (value === -1) {
-        await snoozeRule(-1);
-      } else if (value !== 0) {
-        const snoozeEndTime = moment().add(value, unit).toISOString();
-        await snoozeRule(snoozeEndTime);
-      } else await unsnoozeRule();
-      setIsSnoozed(value !== 0);
-      onRuleChanged();
-      setIsUpdating(false);
+      try {
+        if (value === -1) {
+          await snoozeRule(-1);
+        } else if (value !== 0) {
+          const snoozeEndTime = moment().add(value, unit).toISOString();
+          await snoozeRule(snoozeEndTime);
+        } else await unsnoozeRule();
+        setIsSnoozed(value !== 0);
+        onRuleChanged();
+      } finally {
+        setIsUpdating(false);
+      }
     },
     [setIsUpdating, setIsSnoozed, onRuleChanged, snoozeRule, unsnoozeRule]
   );
@@ -108,11 +116,13 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       </EuiToolTip>
     ) : null;
 
-  const badge = (
+  const nonEditableBadge = <EuiBadge color={badgeColor}>{badgeMessage}</EuiBadge>;
+
+  const editableBadge = (
     <EuiBadge
       color={badgeColor}
       iconSide="right"
-      iconType={!isUpdating ? 'arrowDown' : undefined}
+      iconType={!isUpdating && isEditable ? 'arrowDown' : undefined}
       onClick={onClickBadge}
       iconOnClick={onClickBadge}
       onClickAriaLabel={OPEN_MENU_ARIA_LABEL}
@@ -126,6 +136,8 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     </EuiBadge>
   );
 
+  const badge = isEditable ? editableBadge : nonEditableBadge;
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -136,7 +148,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={badge}
-          isOpen={isPopoverOpen}
+          isOpen={isPopoverOpen && isEditable}
           closePopover={onClosePopover}
           panelPaddingSize="s"
           data-test-subj="statusDropdown"
