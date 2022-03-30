@@ -10,6 +10,7 @@
 import type { Query } from 'src/plugins/data/common';
 import { Filter } from '@kbn/es-query';
 import {
+  CustomIcon,
   DrawState,
   EditState,
   Goto,
@@ -51,6 +52,7 @@ export type MapContext = Partial<MapViewContext> & {
 export type MapSettings = {
   autoFitToDataBounds: boolean;
   backgroundColor: string;
+  customIcons: CustomIcon[];
   disableInteractive: boolean;
   disableTooltipControl: boolean;
   hideToolbarOverlay: boolean;

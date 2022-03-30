@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import styled from 'styled-components';
 import onboardingLogo from '../images/security_administration_onboarding.svg';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -40,14 +41,19 @@ interface ManagementStep {
   children: JSX.Element;
 }
 
+const StyledDiv = styled.div`
+  padding-left: 20%;
+`;
+
 const PolicyEmptyState = React.memo<{
   loading: boolean;
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled?: boolean;
-}>(({ loading, onActionClick, actionDisabled }) => {
+  policyEntryPoint?: boolean;
+}>(({ loading, onActionClick, actionDisabled, policyEntryPoint = false }) => {
   const docLinks = useKibana().services.docLinks;
   return (
-    <div data-test-subj="emptyPolicyTable">
+    <StyledDiv data-test-subj="emptyPolicyTable">
       {loading ? (
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
@@ -56,14 +62,14 @@ const PolicyEmptyState = React.memo<{
         </EuiFlexGroup>
       ) : (
         <EuiFlexGroup data-test-subj="policyOnboardingInstructions" alignItems="center">
-          <EuiFlexItem>
+          <EuiFlexItem grow={1}>
             <EuiText>
-              <h3>
+              <h1>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingTitle"
                   defaultMessage="Get started with Endpoint Security"
                 />
-              </h3>
+              </h1>
             </EuiText>
             <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
@@ -74,10 +80,17 @@ const PolicyEmptyState = React.memo<{
             </EuiText>
             <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo"
-                defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Endpoint Security."
-              />
+              {policyEntryPoint ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromPolicyPage"
+                  defaultMessage="From this page, you’ll be able to view and manage the Endpoint Security Integration policies in your environment running Endpoint Security."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromEndpointPage"
+                  defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Endpoint Security."
+                />
+              )}
             </EuiText>
             <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
@@ -110,12 +123,12 @@ const PolicyEmptyState = React.memo<{
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={2}>
             <EuiIcon type={onboardingLogo} size="original" style={MAX_SIZE_ONBOARDING_LOGO} />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </div>
+    </StyledDiv>
   );
 });
 
