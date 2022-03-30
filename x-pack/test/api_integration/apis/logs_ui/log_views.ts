@@ -162,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // initially this is the default view
         const oldestStoredLogView = await logViewsService.putLogView('OLDEST_LOG_VIEW_ID', {
-          attributes: newerLogViewAttributes,
+          attributes: oldestLogViewAttributes,
         });
 
         const fetchedOldestLogView = await logViewsService.getLogView(defaultLogViewId);
