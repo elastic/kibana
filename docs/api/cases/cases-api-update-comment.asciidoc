@@ -1,0 +1,178 @@
+[[cases-api-update-comment]]
+== Update case comment API
+++++
+<titleabbrev>Update comment</titleabbrev>
+++++
+
+Updates a comment in a case.
+
+=== Request
+
+`PATCH <kibana host>:<port>/api/cases/<case_id>/comments`
+
+`PATCH <kibana host>:<port>/s/<space_id>/api/cases/<case_id>/comments`
+
+=== Prerequisite
+
+You must have `all` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the case you're updating.
+
+=== Path parameters
+
+`<case_id>`::
+The identifier for the case. To retrieve case IDs, use
+<<cases-api-find-cases>>.
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== Request body
+
+`alertId`::
+(Required*, string) The identifier for the alert. It is required only when
+`type` is `alert`. preview:[]
+
+`comment`::
+(Required*, string) The updated comment. It is required only when `type` is
+`user`.
+
+`id`::
+(Required, string) The identifier for the comment.
+//To retrieve comment IDs, use <<cases-api-get-all-case-comments>>.
+
+`index`::
+(Required*, string) The alert index. It is required only when `type` is `alert`.
+preview:[]
+
+`owner`::
+(Required, string) The application that owns the case. It can be `cases`,
+`observability`, or `securitySolution`.
++
+NOTE: You cannot change the owner of a comment.
+
+`rule`::
+(Required*, object)
+The rule that is associated with the alert. It is required only when `type` is
+`alert`. preview:[]
++
+.Properties of `rule`
+[%collapsible%open]
+====
+`id`::
+(Required, string) The rule identifier. preview:[]
+
+`name`::
+(Required, string) The rule name. preview:[]
+
+====
+
+`type`::
+(Required, string) The comment type, which must be `user` or `alert`.
++
+NOTE: You cannot change the comment type.
+
+`version`::
+(Required, string) The current comment version.
+//To retrieve version values, use <<cases-api-get-all-case-comments>>.
+
+=== Response code
+
+`200`::
+   Indicates a successful call.
+
+=== Example
+
+Update comment ID `8af6ac20-74f6-11ea-b83a-553aecdb28b6` (associated with case
+ID `293f1bc0-74f6-11ea-b83a-553aecdb28b6`):
+
+[source,sh]
+--------------------------------------------------
+PATCH api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/comments
+{
+  "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
+  "version": "Wzk1LDFd",
+  "type": "user",
+  "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives. Even worse, he likes baked beans."
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns details about the case and its comments. For example:
+
+[source,json]
+--------------------------------------------------
+{
+  "comments":[{
+    "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
+    "version": "WzIwNjM3LDFd",
+    "comment":"That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives. Even worse, he likes baked beans.",
+    "type":"user",
+    "owner":"cases",
+    "created_at":"2022-03-24T00:37:10.832Z",
+    "created_by": {
+        "email": "moneypenny@hms.gov.uk",
+        "full_name": "Ms Moneypenny",
+        "username": "moneypenny"
+    },
+    "pushed_at":null,
+    "pushed_by":null,
+    "updated_at":"2022-03-24T01:27:06.210Z",
+    "updated_by": {
+        "email": "jbond@hms.gov.uk",
+        "full_name": "James Bond",
+        "username": "_007"
+      }
+    }
+  ],
+  "totalAlerts":0,
+  "id": "293f1bc0-74f6-11ea-b83a-553aecdb28b6",
+  "version": "WzIwNjM2LDFd",
+  "totalComment": 1,
+  "title": "This case will self-destruct in 5 seconds",
+   "tags": ["phishing","social engineering"],
+  "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants.",
+  "settings": {"syncAlerts":false},
+  "owner": "cases","
+  closed_at": null,
+  "closed_by": null,
+  "created_at": "2022-03-24T00:37:03.906Z",
+  "created_by": {
+    "email": "ahunley@imf.usa.gov",
+    "full_name": "Alan Hunley",
+    "username": "ahunley"
+  },
+  "status": "open",
+  "updated_at": "2022-03-24T01:27:06.210Z",
+  "updated_by": {
+    "email": "jbond@hms.gov.uk",
+    "full_name": "James Bond",
+    "username": "_007"
+  },
+  "connector": {"id":"none","name":"none","type":".none","fields":null},
+  "external_service": null
+}
+--------------------------------------------------
+
+Update an alert in the case:
+
+[source,sh]
+--------------------------------------------------
+PATCH api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/comments
+{
+"id": "73362370-ab1a-11ec-985f-97e55adae8b9",
+"version": "WzMwNDgsMV0=",
+"type": "alert",
+"owner": "cases",
+"alertId": "c8789278659fdf88b7bf7709b90a082be070d0ba4c23c9c4b552e476c2a667c4",
+"index": ".internal.alerts-security.alerts-default-000001",
+"rule":
+{
+  "id":"94d80550-aaf4-11ec-985f-97e55adae8b9",
+  "name":"security_rule"
+  }
+}
+--------------------------------------------------
+// KIBANA

@@ -19,8 +19,8 @@ import { CHART_PANEL_TEST_SUBJECTS } from './constants';
 interface ChartPanelProps {
   title?: string;
   hasBorder?: boolean;
-  isLoading: boolean;
-  isError: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
 }
 
 const Loading = () => (

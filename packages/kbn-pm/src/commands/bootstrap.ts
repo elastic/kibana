@@ -49,7 +49,7 @@ export const BootstrapCommand: ICommand = {
       }
     };
 
-    // Force install is set in case a flag `--force-install` is passed into kbn bootstrap
+    // Force install is set in case a flag is passed into yarn kbn bootstrap
     const forceInstall = !!options && options['force-install'] === true;
 
     // Install bazel machinery tools if needed
