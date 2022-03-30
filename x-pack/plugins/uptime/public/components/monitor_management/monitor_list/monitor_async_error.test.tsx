@@ -77,6 +77,7 @@ describe('<MonitorAsyncError />', () => {
       },
       syntheticsService: {
         loading: false,
+        signupUrl: null,
       },
     } as MonitorManagementListState,
   };
