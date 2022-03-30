@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { IRouter } from 'kibana/server';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
-import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
+import {
+  RewriteRequestCase,
+  RewriteResponseCase,
+  verifyAccessAndContext,
+  rewriteRule,
+} from './lib';
 import {
   AlertTypeParams,
   AlertingRequestHandlerContext,
@@ -70,49 +74,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
   return {
     ...restOfResult,
     per_page: perPage,
-    data: data.map(
-      ({
-        alertTypeId,
-        createdBy,
-        updatedBy,
-        createdAt,
-        updatedAt,
-        apiKeyOwner,
-        notifyWhen,
-        muteAll,
-        mutedInstanceIds,
-        executionStatus,
-        actions,
-        scheduledTaskId,
-        snoozeEndTime,
-        ...rest
-      }) => ({
-        ...rest,
-        rule_type_id: alertTypeId,
-        created_by: createdBy,
-        updated_by: updatedBy,
-        created_at: createdAt,
-        updated_at: updatedAt,
-        api_key_owner: apiKeyOwner,
-        notify_when: notifyWhen,
-        mute_all: muteAll,
-        muted_alert_ids: mutedInstanceIds,
-        scheduled_task_id: scheduledTaskId,
-        // Remove this object spread boolean check after snoozeEndTime is added to the public API
-        ...(snoozeEndTime !== undefined ? { snooze_end_time: snoozeEndTime } : {}),
-        execution_status: executionStatus && {
-          ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
-          last_execution_date: executionStatus.lastExecutionDate,
-          last_duration: executionStatus.lastDuration,
-        },
-        actions: actions.map(({ group, id, actionTypeId, params }) => ({
-          group,
-          id,
-          params,
-          connector_type_id: actionTypeId,
-        })),
-      })
-    ),
+    data: data.map(rewriteRule),
   };
 };
 

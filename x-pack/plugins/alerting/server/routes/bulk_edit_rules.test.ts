@@ -93,7 +93,26 @@ describe('bulkEditInternalRulesRoute', () => {
     );
 
     expect(await handler(context, req, res)).toEqual({
-      body: bulkEditResult,
+      body: {
+        errors: [],
+        rules: [
+          expect.objectContaining({
+            id: '1',
+            name: 'abc',
+            tags: ['foo'],
+            actions: [
+              {
+                group: 'default',
+                id: '2',
+                connector_type_id: 'test',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          }),
+        ],
+      },
     });
 
     expect(rulesClient.bulkEdit).toHaveBeenCalledTimes(1);
@@ -105,6 +124,7 @@ describe('bulkEditInternalRulesRoute', () => {
   it('ensures the license allows bulk editing rules', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
+    rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
 
     bulkEditInternalRulesRoute(router, licenseState);
 

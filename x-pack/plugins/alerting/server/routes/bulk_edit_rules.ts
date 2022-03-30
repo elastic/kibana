@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 
 import { ILicenseState } from '../lib';
-import { verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext, rewriteRule } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 const ruleActionSchema = schema.object({
@@ -68,7 +68,7 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
           editActions,
         });
         return res.ok({
-          body: bulkEditResults,
+          body: { ...bulkEditResults, rules: bulkEditResults.rules.map(rewriteRule) },
         });
       })
     )
