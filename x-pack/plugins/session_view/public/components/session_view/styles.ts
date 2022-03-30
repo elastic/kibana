@@ -11,17 +11,17 @@ import { CSSObject } from '@emotion/react';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 
 interface StylesDeps {
-  height: number | undefined;
+  height: string | undefined;
 }
 
-export const useStyles = ({ height = 500 }: StylesDeps) => {
+export const useStyles = ({ height = '500px' }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { border } = euiTheme;
 
     const processTree: CSSObject = {
-      height: `${height}px`,
+      height: `${height}`,
       position: 'relative',
     };
 
@@ -34,6 +34,11 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       zIndex: 2,
     };
 
+    const nonGrowGroup: CSSObject = {
+      display: 'flex',
+      flexGrow: 0,
+      alignItems: 'stretch',
+    };
     const searchBar: CSSObject = {
       position: 'relative',
       margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
@@ -55,6 +60,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
     return {
       processTree,
       detailPanel,
+      nonGrowGroup,
       resizeHandle,
       searchBar,
       buttonsEyeDetail,

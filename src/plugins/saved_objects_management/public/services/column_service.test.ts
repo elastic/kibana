@@ -14,8 +14,10 @@ import {
 } from './column_service';
 import { SavedObjectsManagementColumn } from './types';
 
-class DummyColumn implements SavedObjectsManagementColumn<unknown> {
-  constructor(public id: string) {}
+class DummyColumn extends SavedObjectsManagementColumn {
+  constructor(public id: string) {
+    super();
+  }
 
   public euiColumn = {
     field: 'id',
@@ -29,7 +31,7 @@ describe('SavedObjectsManagementColumnRegistry', () => {
   let service: SavedObjectsManagementColumnService;
   let setup: SavedObjectsManagementColumnServiceSetup;
 
-  const createColumn = (id: string): SavedObjectsManagementColumn<unknown> => {
+  const createColumn = (id: string): SavedObjectsManagementColumn => {
     return new DummyColumn(id);
   };
 
