@@ -589,7 +589,9 @@ describe('AnalyticsClient', () => {
 
       analyticsClient.optIn({ global: { enabled: true } });
       // eslint-disable-next-line dot-notation
-      expect(analyticsClient['optInConfig$'].value).toEqual({ global: { enabled: true } });
+      expect(analyticsClient['optInConfig$'].value!['optInConfig']).toEqual({
+        global: { enabled: true },
+      });
     });
 
     test('Updates each shipper optIn config for global opt-in: true', () => {

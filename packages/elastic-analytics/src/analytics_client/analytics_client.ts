@@ -35,8 +35,8 @@ import type {
 } from './types';
 import type { Event, EventContext, EventType, TelemetryCounter } from '../events';
 import { TelemetryCounterType } from '../events';
-import type { OptInConfigPerType } from './types';
 import { ShippersRegistry } from './shippers_registry';
+import { OptInConfigService } from './opt_in_config';
 
 export class AnalyticsClient implements IAnalyticsClient {
   private readonly internalTelemetryCounter$ = new Subject<TelemetryCounter>();
@@ -61,9 +61,9 @@ export class AnalyticsClient implements IAnalyticsClient {
     Observable<Partial<EventContext>>,
     Partial<EventContext>
   >();
-  private readonly optInConfig$ = new BehaviorSubject<OptInConfig | undefined>(undefined);
+  private readonly optInConfig$ = new BehaviorSubject<OptInConfigService | undefined>(undefined);
   private readonly optInConfigWithReplay$ = this.optInConfig$.pipe(
-    filter((optInConfig): optInConfig is OptInConfig => typeof optInConfig !== 'undefined'),
+    filter((optInConfig): optInConfig is OptInConfigService => typeof optInConfig !== 'undefined'),
     shareReplay(1)
   );
   private readonly contextWithReplay$ = this.context$.pipe(
@@ -108,9 +108,8 @@ export class AnalyticsClient implements IAnalyticsClient {
     }
 
     const optInConfig = this.optInConfig$.value;
-    const eventTypeOptInConfig = optInConfig?.event_types && optInConfig?.event_types[eventType];
 
-    if (optInConfig?.global.enabled === false || eventTypeOptInConfig?.enabled === false) {
+    if (optInConfig?.isEventTypeOptedIn(eventType) === false) {
       // If opted out, skip early
       return;
     }
@@ -126,7 +125,7 @@ export class AnalyticsClient implements IAnalyticsClient {
       // If the opt-in config is not provided yet, we need to enqueue the event to an internal queue
       this.internalEventQueue$.next(event);
     } else {
-      this.sendToShipper(eventType, [event], eventTypeOptInConfig);
+      this.sendToShipper(eventType, [event]);
     }
   };
 
@@ -138,7 +137,8 @@ export class AnalyticsClient implements IAnalyticsClient {
   };
 
   public optIn = (optInConfig: OptInConfig) => {
-    this.optInConfig$.next(optInConfig);
+    const optInConfigInstance = new OptInConfigService(optInConfig);
+    this.optInConfig$.next(optInConfigInstance);
   };
 
   public registerContextProvider = <Context>(contextProviderOpts: ContextProviderOpts<Context>) => {
@@ -198,9 +198,7 @@ export class AnalyticsClient implements IAnalyticsClient {
 
     // Spread the optIn configuration updates
     this.optInConfigWithReplay$.subscribe((optInConfig) => {
-      const isShipperExplicitlyOptedIn =
-        (optInConfig.global.shippers && optInConfig.global.shippers[shipperName]) ?? true;
-      const isOptedIn = optInConfig.global.enabled && isShipperExplicitlyOptedIn;
+      const isOptedIn = optInConfig.isShipperOptedIn(shipperName);
       try {
         shipper.optIn(isOptedIn);
       } catch (err) {
@@ -233,21 +231,12 @@ export class AnalyticsClient implements IAnalyticsClient {
    * Forwards the `events` to the registered shippers, bearing in mind if the shipper is opted-in for that eventType.
    * @param eventType The event type's name
    * @param events A bulk array of events matching the eventType.
-   * @param eventTypeOptInConfig The optIn config for the sepecific eventType.
    * @private
    */
-  private sendToShipper(
-    eventType: EventType,
-    events: Event[],
-    eventTypeOptInConfig?: OptInConfigPerType
-  ) {
+  private sendToShipper(eventType: EventType, events: Event[]) {
     let sentToShipper = false;
     this.shippersRegistry.getShippersForEventType(eventType).forEach((shipper, shipperName) => {
-      const isShipperOptedIn =
-        ((this.optInConfig$.value?.global.shippers &&
-          this.optInConfig$.value.global.shippers[shipperName]) ??
-          true) &&
-        ((eventTypeOptInConfig?.shippers && eventTypeOptInConfig.shippers[shipperName]) ?? true);
+      const isShipperOptedIn = this.optInConfig$.value?.isShipperOptedIn(shipperName, eventType);
 
       // Only send it to the non-explicitly opted-out shippers
       if (isShipperOptedIn) {
@@ -314,7 +303,7 @@ export class AnalyticsClient implements IAnalyticsClient {
 
         // Re-emit the context to make sure all the shippers got it (only if opted-in)
         tap(() => {
-          if (this.optInConfig$.value?.global.enabled) {
+          if (this.optInConfig$.value?.isOptedIn()) {
             this.context$.next(this.context$.value);
           }
         }),
@@ -327,7 +316,7 @@ export class AnalyticsClient implements IAnalyticsClient {
         concatMap((events) => from(events)),
 
         // Discard opted-out events
-        filter((event) => this.eventIsOptedIn(event.event_type)),
+        filter((event) => this.optInConfig$.value?.isEventTypeOptedIn(event.event_type) === true),
 
         // Let's group the requests per eventType for easier batching
         groupBy((event) => event.event_type),
@@ -339,27 +328,7 @@ export class AnalyticsClient implements IAnalyticsClient {
         )
       )
       .subscribe(({ eventType, events }) => {
-        const eventTypeOptInConfig =
-          this.optInConfig$.value?.event_types && this.optInConfig$.value?.event_types[eventType];
-        this.sendToShipper(eventType, events, eventTypeOptInConfig);
+        this.sendToShipper(eventType, events);
       });
-  }
-
-  /**
-   * Returns whether the event type is opted-in or not.
-   * @remarks It does not check the opt-in state at the shipper's level.
-   *
-   * @param eventType The event type to check
-   * @private
-   */
-  private eventIsOptedIn(eventType: EventType): boolean {
-    const optInConfig = this.optInConfig$.value;
-    const isGloballyOptedIn = optInConfig?.global.enabled === true;
-    const eventIsNotOptedOut =
-      (optInConfig?.event_types &&
-        // Checking it's not `false` because if a shipper is not explicitly specified, we assume opted-in based on the global state
-        optInConfig.event_types[eventType]?.enabled !== false) ??
-      true;
-    return isGloballyOptedIn && eventIsNotOptedOut;
   }
 }
