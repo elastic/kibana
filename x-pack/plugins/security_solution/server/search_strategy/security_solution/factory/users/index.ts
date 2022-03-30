@@ -10,6 +10,7 @@ import { UsersQueries } from '../../../../../common/search_strategy/security_sol
 
 import { SecuritySolutionFactory } from '../types';
 import { allUsers } from './all';
+import { authentications, authenticationsEntities } from './authentications';
 import { userDetails } from './details';
 import { totalUsersKpi } from './kpi/total_users';
 
@@ -17,4 +18,6 @@ export const usersFactory: Record<UsersQueries, SecuritySolutionFactory<FactoryQ
   [UsersQueries.details]: userDetails,
   [UsersQueries.kpiTotalUsers]: totalUsersKpi,
   [UsersQueries.users]: allUsers,
+  [UsersQueries.authentications]: authentications,
+  [UsersQueries.authenticationsEntities]: authenticationsEntities,
 };

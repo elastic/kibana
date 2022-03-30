@@ -7,7 +7,6 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import { HostAuthenticationsRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts/authentications';
 import * as buildQuery from './dsl/query.dsl';
 import { authentications } from '.';
 import {
@@ -15,6 +14,7 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
+import { UserAuthenticationsRequestOptions } from '../../../../../../common/search_strategy';
 
 describe('authentications search strategy', () => {
   const buildAuthenticationQuery = jest.spyOn(buildQuery, 'buildQuery');
@@ -36,7 +36,7 @@ describe('authentications search strategy', () => {
           ...mockOptions.pagination,
           querySize: DEFAULT_MAX_TABLE_QUERY_SIZE,
         },
-      } as HostAuthenticationsRequestOptions;
+      } as UserAuthenticationsRequestOptions;
 
       expect(() => {
         authentications.buildDsl(overSizeOptions);

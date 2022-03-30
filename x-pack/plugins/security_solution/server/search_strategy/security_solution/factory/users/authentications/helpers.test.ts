@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticationsEdges } from '../../../../../../common/search_strategy/security_solution/hosts/authentications';
+import { AuthenticationsEdges } from '../../../../../../common/search_strategy';
 import { auditdFieldsMap } from './dsl/query.dsl';
 
 import { formatAuthenticationData } from './helpers';
@@ -24,9 +24,7 @@ describe('#formatAuthenticationsData', () => {
         _id: 'id-123',
         failures: 10,
         successes: 20,
-        user: {
-          name: ['Evan'],
-        },
+        stackedValue: ['Evan'],
       },
     };
 
@@ -45,9 +43,7 @@ describe('#formatAuthenticationsData', () => {
         _id: 'id-123',
         failures: 10,
         successes: 20,
-        user: {
-          name: ['Evan'],
-        },
+        stackedValue: ['Evan'],
       },
     };
 
@@ -66,9 +62,7 @@ describe('#formatAuthenticationsData', () => {
         _id: 'id-123',
         failures: 10,
         successes: 20,
-        user: {
-          name: ['Evan'],
-        },
+        stackedValue: ['Evan'],
       },
     };
 
@@ -87,9 +81,7 @@ describe('#formatAuthenticationsData', () => {
         _id: 'id-123',
         failures: 10,
         successes: 20,
-        user: {
-          name: ['Evan'],
-        },
+        stackedValue: ['Evan'],
       },
     };
 
@@ -108,9 +100,7 @@ describe('#formatAuthenticationsData', () => {
         _id: 'id-123',
         failures: 10,
         successes: 20,
-        user: {
-          name: ['Evan'],
-        },
+        stackedValue: ['Evan'],
       },
     };
 

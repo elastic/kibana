@@ -19,17 +19,23 @@ import {
   Hit,
   TotalHit,
 } from '../../../common';
-import { RequestOptionsPaginated } from '../../';
+import { RequestOptionsPaginated } from '../..';
 
-export interface HostAuthenticationsStrategyResponse extends IEsSearchResponse {
+export interface UserAuthenticationsStrategyResponse extends IEsSearchResponse {
   edges: AuthenticationsEdges[];
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }
 
-export interface HostAuthenticationsRequestOptions extends RequestOptionsPaginated {
+export interface UserAuthenticationsRequestOptions extends RequestOptionsPaginated {
   defaultIndex: string[];
+  stackByField: AuthStackByField;
+}
+
+export enum AuthStackByField {
+  userName = 'user.name',
+  hostName = 'host.name',
 }
 
 export interface AuthenticationsEdges {
@@ -41,7 +47,7 @@ export interface AuthenticationItem {
   _id: string;
   failures: number;
   successes: number;
-  user: UserEcs;
+  stackedValue: UserEcs['name'] | HostEcs['name'];
   lastSuccess?: Maybe<LastSourceHost>;
   lastFailure?: Maybe<LastSourceHost>;
 }
@@ -58,7 +64,7 @@ export interface AuthenticationHit extends Hit {
     lastSuccess?: LastSourceHost;
     lastFailure?: LastSourceHost;
   };
-  user: string;
+  stackedValue: string;
   failures: number;
   successes: number;
   cursor?: string;
@@ -66,9 +72,7 @@ export interface AuthenticationHit extends Hit {
 }
 
 export interface AuthenticationBucket {
-  key: {
-    user_uid: string;
-  };
+  key: string;
   doc_count: number;
   failures: {
     doc_count: number;

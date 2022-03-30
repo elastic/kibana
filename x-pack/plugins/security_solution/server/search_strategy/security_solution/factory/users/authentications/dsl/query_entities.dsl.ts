@@ -8,9 +8,8 @@
 import { isEmpty } from 'lodash/fp';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { HostAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts/authentications';
-
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
+import { UserAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy';
 
 export const buildQueryEntities = ({
   filterQuery,
@@ -18,7 +17,8 @@ export const buildQueryEntities = ({
   pagination: { querySize },
   defaultIndex,
   docValueFields,
-}: HostAuthenticationsRequestOptions) => {
+  stackByField,
+}: UserAuthenticationsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -32,14 +32,6 @@ export const buildQueryEntities = ({
     },
   ];
 
-  const agg = {
-    user_count: {
-      cardinality: {
-        field: 'user.name',
-      },
-    },
-  };
-
   const dslQuery = {
     allow_no_indices: true,
     index: defaultIndex,
@@ -47,11 +39,15 @@ export const buildQueryEntities = ({
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
-        ...agg,
-        group_by_users: {
+        stack_by_count: {
+          cardinality: {
+            field: stackByField,
+          },
+        },
+        stack_by: {
           terms: {
             size: querySize,
-            field: 'user.name',
+            field: stackByField,
             order: [
               { successes: 'desc' },
               { failures: 'desc' },

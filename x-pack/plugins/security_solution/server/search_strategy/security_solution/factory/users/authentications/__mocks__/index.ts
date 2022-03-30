@@ -6,15 +6,15 @@
  */
 
 import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
-
 import {
+  UserAuthenticationsRequestOptions,
   AuthenticationHit,
   Direction,
-  HostAuthenticationsRequestOptions,
-  HostsQueries,
+  UsersQueries,
+  AuthStackByField,
 } from '../../../../../../../common/search_strategy';
 
-export const mockOptions: HostAuthenticationsRequestOptions = {
+export const mockOptions: UserAuthenticationsRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -25,6 +25,7 @@ export const mockOptions: HostAuthenticationsRequestOptions = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
+  stackByField: AuthStackByField.userName,
   docValueFields: [
     {
       field: '@timestamp',
@@ -427,7 +428,7 @@ export const mockOptions: HostAuthenticationsRequestOptions = {
       format: 'date_time',
     },
   ],
-  factoryQueryType: HostsQueries.authentications,
+  factoryQueryType: UsersQueries.authentications,
   filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
   pagination: {
     activePage: 0,
@@ -456,7 +457,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
     _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
     hits: { total: -1, max_score: 0, hits: [] },
     aggregations: {
-      group_by_users: {
+      stack_by: {
         doc_count_error_upper_bound: -1,
         sum_other_doc_count: 408,
         buckets: [
@@ -1290,7 +1291,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
           },
         ],
       },
-      user_count: { value: 188 },
+      stack_by_count: { value: 188 },
     },
   },
   total: 21,
@@ -1306,7 +1307,7 @@ export const formattedSearchStrategyResponse = {
     _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
     hits: { total: -1, max_score: 0, hits: [] },
     aggregations: {
-      group_by_users: {
+      stack_by: {
         doc_count_error_upper_bound: -1,
         sum_other_doc_count: 408,
         buckets: [
@@ -2140,7 +2141,7 @@ export const formattedSearchStrategyResponse = {
           },
         ],
       },
-      user_count: { value: 188 },
+      stack_by_count: { value: 188 },
     },
   },
   total: 21,
@@ -2164,8 +2165,8 @@ export const formattedSearchStrategyResponse = {
           body: {
             docvalue_fields: mockOptions.docValueFields,
             aggregations: {
-              user_count: { cardinality: { field: 'user.name' } },
-              group_by_users: {
+              stack_by_count: { cardinality: { field: 'user.name' } },
+              stack_by: {
                 terms: {
                   size: 10,
                   field: 'user.name',
@@ -2231,7 +2232,7 @@ export const formattedSearchStrategyResponse = {
         failures: 0,
         successes: 4,
         _id: 'SYSTEM+281',
-        user: { name: ['SYSTEM'] },
+        stackedValue: ['SYSTEM'],
         lastSuccess: {
           timestamp: ['2020-09-04T13:08:02.532Z'],
           host: { id: ['ce1d3c9b-a815-4643-9641-ada0f2c00609'], name: ['siem-windows'] },
@@ -2244,7 +2245,7 @@ export const formattedSearchStrategyResponse = {
         failures: 0,
         successes: 1,
         _id: 'tsg+1',
-        user: { name: ['tsg'] },
+        stackedValue: ['tsg'],
         lastSuccess: {
           timestamp: ['2020-09-04T11:49:21.000Z'],
           source: { ip: ['77.183.42.188'] },
@@ -2258,7 +2259,7 @@ export const formattedSearchStrategyResponse = {
         failures: 23,
         successes: 0,
         _id: 'admin+23',
-        user: { name: ['admin'] },
+        stackedValue: ['admin'],
         lastFailure: {
           timestamp: ['2020-09-04T13:40:46.000Z'],
           source: { ip: ['59.15.3.197'] },
@@ -2272,7 +2273,7 @@ export const formattedSearchStrategyResponse = {
         failures: 21,
         successes: 0,
         _id: 'user+21',
-        user: { name: ['user'] },
+        stackedValue: ['user'],
         lastFailure: {
           timestamp: ['2020-09-04T13:25:43.000Z'],
           source: { ip: ['64.227.88.245'] },
@@ -2286,7 +2287,7 @@ export const formattedSearchStrategyResponse = {
         failures: 18,
         successes: 0,
         _id: 'ubuntu+18',
-        user: { name: ['ubuntu'] },
+        stackedValue: ['ubuntu'],
         lastFailure: {
           timestamp: ['2020-09-04T13:25:07.000Z'],
           source: { ip: ['64.227.88.245'] },
@@ -2300,7 +2301,7 @@ export const formattedSearchStrategyResponse = {
         failures: 17,
         successes: 0,
         _id: 'odoo+17',
-        user: { name: ['odoo'] },
+        stackedValue: ['odoo'],
         lastFailure: {
           timestamp: ['2020-09-04T12:26:36.000Z'],
           source: { ip: ['180.151.228.166'] },
@@ -2314,7 +2315,7 @@ export const formattedSearchStrategyResponse = {
         failures: 17,
         successes: 0,
         _id: 'pi+17',
-        user: { name: ['pi'] },
+        stackedValue: ['pi'],
         lastFailure: {
           timestamp: ['2020-09-04T11:37:22.000Z'],
           source: { ip: ['178.174.148.58'] },
@@ -2328,7 +2329,7 @@ export const formattedSearchStrategyResponse = {
         failures: 14,
         successes: 0,
         _id: 'demo+14',
-        user: { name: ['demo'] },
+        stackedValue: ['demo'],
         lastFailure: {
           timestamp: ['2020-09-04T07:23:22.000Z'],
           source: { ip: ['45.95.168.157'] },
@@ -2342,7 +2343,7 @@ export const formattedSearchStrategyResponse = {
         failures: 13,
         successes: 0,
         _id: 'git+13',
-        user: { name: ['git'] },
+        stackedValue: ['git'],
         lastFailure: {
           timestamp: ['2020-09-04T11:20:26.000Z'],
           source: { ip: ['123.206.30.76'] },
@@ -2356,7 +2357,7 @@ export const formattedSearchStrategyResponse = {
         failures: 13,
         successes: 0,
         _id: 'webadmin+13',
-        user: { name: ['webadmin'] },
+        stackedValue: ['webadmin'],
         lastFailure: {
           timestamp: ['2020-09-04T07:25:28.000Z'],
           source: { ip: ['45.95.168.157'] },
@@ -2386,8 +2387,8 @@ export const expectedDsl = {
   body: {
     docvalue_fields: mockOptions.docValueFields,
     aggregations: {
-      user_count: { cardinality: { field: 'user.name' } },
-      group_by_users: {
+      stack_by_count: { cardinality: { field: 'user.name' } },
+      stack_by: {
         terms: {
           size: 10,
           field: 'user.name',
@@ -2445,7 +2446,7 @@ export const mockHit: AuthenticationHit = {
   },
   cursor: 'cursor-1',
   sort: [0],
-  user: 'Evan',
+  stackedValue: 'Evan',
   failures: 10,
   successes: 20,
 };
