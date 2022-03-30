@@ -362,10 +362,9 @@ export default function ({
       const value = autocompleteRules[name];
 
       if (hasOneOf(value)) {
-        const rules = value.__one_of ?? [];
-        const startLine = getStartLineNumber(currentLineNumber, rules);
+        const startLine = getStartLineNumber(currentLineNumber, value.__one_of);
         const lines = editor.getLines(startLine, currentLineNumber).join('\n');
-        const match = matchCondition(rules, lines);
+        const match = matchCondition(value.__one_of, lines);
         if (match && match.__template) {
           return match.__template;
         }
