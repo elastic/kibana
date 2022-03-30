@@ -163,16 +163,13 @@ export const convertSeriesToDataTable = async (
       const { data, label, isSplitByTerms, termsSplitValue } = seriesPerLayer[j];
       const seriesData = data.map((rowData) => {
         let rowId = X_ACCESSOR_INDEX;
-        const rowsData = {
+        return {
           [rowId++]: rowData[0],
           [rowId++]: rowData[1],
+          ...(isGroupedByTerms || filtersColumn
+            ? { [rowId]: isSplitByTerms && termsSplitValue ? termsSplitValue : [label].flat()[0] }
+            : {}),
         };
-        return isGroupedByTerms || filtersColumn
-          ? {
-              ...rowsData,
-              [rowId]: isSplitByTerms && termsSplitValue ? termsSplitValue : [label].flat()[0],
-            }
-          : rowsData;
       });
       rows = [...rows, ...seriesData];
     }
