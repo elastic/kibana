@@ -40,9 +40,9 @@ export function registerRoutes(router: IRouter<DataRequestHandlerContext>, logge
 
   registerFlameChartElasticSearchRoute(router, logger!);
   registerFlameChartPixiSearchRoute(router, logger!);
-  registerTraceEventsTopNContainersSearchRoute(router);
-  registerTraceEventsTopNDeploymentsSearchRoute(router);
-  registerTraceEventsTopNHostsSearchRoute(router);
-  registerTraceEventsTopNStackTracesSearchRoute(router);
-  registerTraceEventsTopNThreadsSearchRoute(router);
+  registerTraceEventsTopNContainersSearchRoute(router, logger!);
+  registerTraceEventsTopNDeploymentsSearchRoute(router, logger!);
+  registerTraceEventsTopNHostsSearchRoute(router, logger!);
+  registerTraceEventsTopNStackTracesSearchRoute(router, logger!);
+  registerTraceEventsTopNThreadsSearchRoute(router, logger!);
 }

@@ -19,23 +19,12 @@ import {
   StackTrace,
   StackTraceID,
 } from '../../common/profiling';
+import { logExecutionLatency } from './logger';
 import { newProjectTimeQuery, ProjectTimeQuery } from './mappings';
 
 export interface DownsampledEventsIndex {
   name: string;
   sampleRate: number;
-}
-
-async function logExecutionLatency<T>(
-  logger: Logger,
-  activity: string,
-  func: () => Promise<T>
-): Promise<T> {
-  const start = new Date().getTime();
-  return await func().then((res) => {
-    logger.info(activity + ' took ' + (new Date().getTime() - start) + 'ms');
-    return res;
-  });
 }
 
 // convertFrameIDToFileID extracts the FileID from the FrameID and returns as base64url string.
