@@ -16,15 +16,13 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { DOC_TABLE_LEGACY } from '../../../../../common';
 import { Storage } from '../../../../../../kibana_utils/public';
 
-export const CALLOUT_STATE_KEY = 'discover:docExplorerCalloutClosed';
+export const CALLOUT_STATE_KEY = 'discover:docExplorerUpdateCalloutClosed';
 
 const getStoredCalloutState = (storage: Storage): boolean => {
   const calloutClosed = storage.get(CALLOUT_STATE_KEY);
@@ -35,17 +33,12 @@ const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
 };
 
 /**
- * The callout that's displayed when Document explorer is disabled
+ * The callout that's displayed when Document explorer is enabled
  */
-export const DocumentExplorerCallout = () => {
+export const DocumentExplorerUpdateCallout = () => {
   const { euiTheme } = useEuiTheme();
-  const { storage, capabilities, docLinks, addBasePath } = useDiscoverServices();
+  const { storage, capabilities, docLinks } = useDiscoverServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
-
-  const onCloseCallout = useCallback(() => {
-    updateStoredCalloutState(true, storage);
-    setCalloutClosed(true);
-  }, [storage]);
 
   const semiBoldStyle = useMemo(
     () => css`
@@ -53,6 +46,11 @@ export const DocumentExplorerCallout = () => {
     `,
     [euiTheme.font.weight.semiBold]
   );
+
+  const onCloseCallout = useCallback(() => {
+    updateStoredCalloutState(true, storage);
+    setCalloutClosed(true);
+  }, [storage]);
 
   if (calloutClosed || !capabilities.advancedSettings.save) {
     return null;
@@ -66,13 +64,21 @@ export const DocumentExplorerCallout = () => {
     >
       <p>
         <FormattedMessage
-          id="discover.docExplorerCallout.bodyMessage"
-          defaultMessage="Quickly sort, select, and compare data, resize columns, and view documents in fullscreen with the {documentExplorer}."
+          id="discover.docExplorerUpdateCallout.bodyMessage"
+          defaultMessage="Experience the new {documentExplorer}. Understand the shape of your data with {fieldStatistics}."
           values={{
+            fieldStatistics: (
+              <span css={semiBoldStyle}>
+                <FormattedMessage
+                  id="discover.docExplorerUpdateCallout.fieldStatistics"
+                  defaultMessage="Field Statistics"
+                />
+              </span>
+            ),
             documentExplorer: (
               <span css={semiBoldStyle}>
                 <FormattedMessage
-                  id="discover.docExplorerCallout.documentExplorer"
+                  id="discover.docExplorerUpdateCallout.documentExplorer"
                   defaultMessage="Document Explorer"
                 />
               </span>
@@ -80,33 +86,16 @@ export const DocumentExplorerCallout = () => {
           }}
         />
       </p>
-      <EuiFlexGroup
-        justifyContent="flexStart"
-        alignItems="center"
-        responsive={false}
-        gutterSize="s"
+      <EuiButton
+        iconType="tableDensityNormal"
+        size="s"
+        href={docLinks.links.discover.documentExplorer}
       >
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            iconType="tableDensityNormal"
-            size="s"
-            href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
-          >
-            <FormattedMessage
-              id="discover.docExplorerCallout.tryDocumentExplorer"
-              defaultMessage="Try Document Explorer"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink href={docLinks.links.discover.documentExplorer}>
-            <FormattedMessage
-              id="discover.docExplorerCallout.learnMore"
-              defaultMessage="Learn more"
-            />
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <FormattedMessage
+          id="discover.docExplorerUpdateCallout.learnMore"
+          defaultMessage="Learn more"
+        />
+      </EuiButton>
     </EuiCallOut>
   );
 };
@@ -116,13 +105,13 @@ function CalloutTitle({ onCloseCallout }: { onCloseCallout: () => void }) {
     <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
         <FormattedMessage
-          id="discover.docExplorerCallout.headerMessage"
+          id="discover.docExplorerUpdateCallout.headerMessage"
           defaultMessage="A better way to explore"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          aria-label={i18n.translate('discover.docExplorerCallout.closeButtonAriaLabel', {
+          aria-label={i18n.translate('discover.docExplorerUpdateCallout.closeButtonAriaLabel', {
             defaultMessage: 'Close',
           })}
           onClick={onCloseCallout}
