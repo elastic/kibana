@@ -7,7 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
-import { RemoteEsArchiverProvider } from '.services/remote_es/remote_es_archiver';
+import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
 import { RemoteEsProvider } from '.services/remote_es/remote_es';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
