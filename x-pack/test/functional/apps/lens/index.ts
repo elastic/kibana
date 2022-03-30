@@ -111,6 +111,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
         loadTestFile(require.resolve('./gauge'));
         loadTestFile(require.resolve('./metrics'));
         loadTestFile(require.resolve('./reference_lines'));
+        loadTestFile(require.resolve('./annotations'));
         loadTestFile(require.resolve('./inspector'));
         loadTestFile(require.resolve('./error_handling'));
         loadTestFile(require.resolve('./lens_tagging'));
