@@ -342,6 +342,8 @@ export const visitTimeline = (timelineId: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, route) : route, {
     onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
+  cy.get('[data-test-subj="headerGlobalNav"]');
+  cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };
 
 export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
