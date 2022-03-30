@@ -36,9 +36,16 @@ const getRenamedLog = (data: IExecutionLog) => {
   };
 };
 
-const rewriteBodyRes: RewriteRequestCase<IExecutionLogResult> = ({ data, total }: any) => ({
-  data: data.map((log: IExecutionLog) => getRenamedLog(log)),
+const rewriteBodyRes: RewriteRequestCase<IExecutionLogResult> = ({
+  data,
+  errors,
   total,
+  totalErrors,
+}: any) => ({
+  data: data.map((log: IExecutionLog) => getRenamedLog(log)),
+  errors,
+  total,
+  totalErrors,
 });
 
 const getFilter = (filter: string[] | undefined) => {

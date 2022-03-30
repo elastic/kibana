@@ -42,6 +42,7 @@ export interface ComponentOpts {
   disableRule: () => Promise<void>;
   snoozeRule: (snoozeEndTime: string | -1) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
+  direction?: 'column' | 'row';
 }
 
 export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
@@ -51,6 +52,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   enableRule,
   snoozeRule,
   unsnoozeRule,
+  direction = 'column',
 }: ComponentOpts) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
   const [isSnoozed, setIsSnoozed] = useState<boolean>(isItemSnoozed(item));
@@ -68,17 +70,19 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
 
   const onChangeEnabledStatus = useCallback(
     async (enable: boolean) => {
-      setIsUpdating(true);
-      if (enable) {
-        await enableRule();
-      } else {
-        await disableRule();
+      if (item.enabled !== enable) {
+        setIsUpdating(true);
+        if (enable) {
+          await enableRule();
+        } else {
+          await disableRule();
+        }
+        setIsEnabled(!isEnabled);
+        onRuleChanged();
+        setIsUpdating(false);
       }
-      setIsEnabled(!isEnabled);
-      onRuleChanged();
-      setIsUpdating(false);
     },
-    [setIsUpdating, isEnabled, setIsEnabled, onRuleChanged, enableRule, disableRule]
+    [item.enabled, isEnabled, onRuleChanged, enableRule, disableRule]
   );
   const onChangeSnooze = useCallback(
     async (value: number, unit?: SnoozeUnit) => {
@@ -127,7 +131,12 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   );
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+    <EuiFlexGroup
+      direction={direction}
+      alignItems="center"
+      justifyContent="flexStart"
+      gutterSize="s"
+    >
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={badge}

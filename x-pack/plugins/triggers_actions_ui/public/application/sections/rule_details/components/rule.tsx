@@ -47,6 +47,7 @@ import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experime
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
 
 const RuleEventLogListWithApi = lazy(() => import('./rule_event_log_list'));
+const RuleErrorLogWithApi = lazy(() => import('./rule_error_log'));
 
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 
@@ -64,6 +65,7 @@ type RuleProps = {
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
+const EVENT_ERROR_LOG_TAB = 'rule_error_log_list';
 
 export function RuleComponent({
   rule,
@@ -116,7 +118,7 @@ export function RuleComponent({
     {
       id: EVENT_LOG_LIST_TAB,
       name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.eventLogTabText', {
-        defaultMessage: 'Execution History',
+        defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
       content: suspendedComponentWithProps(RuleEventLogListWithApi, 'xl')({ rule }),
@@ -128,6 +130,14 @@ export function RuleComponent({
       }),
       'data-test-subj': 'ruleAlertListTab',
       content: renderRuleAlertList(),
+    },
+    {
+      id: EVENT_ERROR_LOG_TAB,
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.errorLogTabText', {
+        defaultMessage: 'Error log',
+      }),
+      'data-test-subj': 'errorLogTab',
+      content: suspendedComponentWithProps(RuleErrorLogWithApi, 'xl')({ rule }),
     },
   ];
 

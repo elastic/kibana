@@ -35,6 +35,8 @@ import {
   resolveRule,
   loadExecutionLogAggregations,
   LoadExecutionLogAggregationsProps,
+  snoozeRule,
+  unsnoozeRule,
 } from '../../../lib/rule_api';
 import { IExecutionLogResult } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -67,6 +69,8 @@ export interface ComponentOpts {
   ) => Promise<IExecutionLogResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
+  snoozeRule: (rule: Rule, snoozeEndTime: string | -1) => Promise<void>;
+  unsnoozeRule: (rule: Rule) => Promise<void>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -145,6 +149,12 @@ export function withBulkRuleOperations<T>(
         }
         resolveRule={async (ruleId: Rule['id']) => resolveRule({ http, ruleId })}
         getHealth={async () => alertingFrameworkHealth({ http })}
+        snoozeRule={async (rule: Rule, snoozeEndTime: string | -1) => {
+          return await snoozeRule({ http, id: rule.id, snoozeEndTime });
+        }}
+        unsnoozeRule={async (rule: Rule) => {
+          return await unsnoozeRule({ http, id: rule.id });
+        }}
       />
     );
   };
