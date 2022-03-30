@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { ShipperName } from '../analytics_client';
+
 export interface EventContext {
   // TODO: Extend with known keys
   [key: string]: unknown;
@@ -55,7 +57,7 @@ export interface TelemetryCounter {
   /**
    * Who emitted the event? It can be "client" or the name of the shipper.
    */
-  source: 'client' | string;
+  source: 'client' | ShipperName;
   /**
    * The event type the success/failure/drop event refers to.
    */
