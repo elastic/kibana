@@ -133,9 +133,13 @@ ${BAZEL_PACKAGE_DIRS.map((rel) => `                         ${rel}\n`).join('')}
       : [packageJson.dependencies, packageJson.devDependencies];
 
     addDeps[name] = `link:bazel-bin/${normalizedRepoRelativeDir}`;
-    addDeps[typePkgName] = `link:bazel-bin/${normalizedRepoRelativeDir}/npm_module_types`;
     delete removeDeps[name];
-    delete removeDeps[typePkgName];
+
+    // for @types packages always remove from deps and add to devDeps
+    packageJson.devDependencies[
+      typePkgName
+    ] = `link:bazel-bin/${normalizedRepoRelativeDir}/npm_module_types`;
+    delete packageJson.dependencies[typePkgName];
 
     await Fsp.writeFile(packageJsonPath, sortPackageJson(JSON.stringify(packageJson)));
     log.info('Updated package.json file');

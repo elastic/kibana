@@ -53,7 +53,6 @@ export const useDataVisualizerGridData = (
   const { services } = useDataVisualizerKibana();
   const { uiSettings, data } = services;
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
-  const dataVisualizerListStateRef = useRef(dataVisualizerListState);
 
   const [lastRefresh, setLastRefresh] = useState(0);
   const searchSessionId = input.sessionId;
@@ -227,11 +226,11 @@ export const useDataVisualizerGridData = (
     if (overallStatsProgress.loaded < 100) return;
     const existMetricFields = metricConfigs
       .map((config) => {
-        if (config.existsInDocs === false) return;
         return {
           fieldName: config.fieldName,
           type: config.type,
           cardinality: config.stats?.cardinality ?? 0,
+          existsInDocs: config.existsInDocs,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
@@ -240,11 +239,11 @@ export const useDataVisualizerGridData = (
     // Top values will be obtained on a sample if cardinality > 100000.
     const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs
       .map((config) => {
-        if (config.existsInDocs === false) return;
         return {
           fieldName: config.fieldName,
           type: config.type,
           cardinality: config.stats?.cardinality ?? 0,
+          existsInDocs: config.existsInDocs,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
@@ -255,7 +254,7 @@ export const useDataVisualizerGridData = (
   const strategyResponse = useFieldStatsSearchStrategy(
     fieldStatsRequest,
     configsWithoutStats,
-    dataVisualizerListStateRef.current
+    dataVisualizerListState
   );
 
   const combinedProgress = useMemo(
@@ -325,7 +324,7 @@ export const useDataVisualizerGridData = (
         ...fieldData,
         fieldFormat: currentDataView.getFormatterForField(field),
         type: JOB_FIELD_TYPES.NUMBER,
-        loading: true,
+        loading: fieldData?.existsInDocs ?? true,
         aggregatable: true,
         deletable: field.runtimeField !== undefined,
       };
@@ -436,41 +435,46 @@ export const useDataVisualizerGridData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overallStats, showEmptyFields]);
 
-  const configs = useMemo(() => {
-    const fieldStats = strategyResponse.fieldStats;
-    let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
-    if (visibleFieldTypes && visibleFieldTypes.length > 0) {
-      combinedConfigs = combinedConfigs.filter(
-        (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
-      );
-    }
-    if (visibleFieldNames && visibleFieldNames.length > 0) {
-      combinedConfigs = combinedConfigs.filter(
-        (config) => visibleFieldNames.findIndex((field) => field === config.fieldName) > -1
-      );
-    }
+  const configs = useMemo(
+    () => {
+      const fieldStats = strategyResponse.fieldStats;
+      let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
+      if (visibleFieldTypes && visibleFieldTypes.length > 0) {
+        combinedConfigs = combinedConfigs.filter(
+          (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
+        );
+      }
+      if (visibleFieldNames && visibleFieldNames.length > 0) {
+        combinedConfigs = combinedConfigs.filter(
+          (config) => visibleFieldNames.findIndex((field) => field === config.fieldName) > -1
+        );
+      }
 
-    if (fieldStats) {
-      combinedConfigs = combinedConfigs.map((c) => {
-        const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
-        return loadedFullStats
-          ? {
-              ...c,
-              loading: false,
-              stats: { ...c.stats, ...loadedFullStats },
-            }
-          : c;
-      });
-    }
-
-    return combinedConfigs;
-  }, [
-    nonMetricConfigs,
-    metricConfigs,
-    visibleFieldTypes,
-    visibleFieldNames,
-    strategyResponse.fieldStats,
-  ]);
+      if (fieldStats) {
+        combinedConfigs = combinedConfigs.map((c) => {
+          const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
+          return loadedFullStats
+            ? {
+                ...c,
+                loading: false,
+                stats: { ...c.stats, ...loadedFullStats },
+              }
+            : c;
+        });
+      }
+      return combinedConfigs;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      nonMetricConfigs,
+      metricConfigs,
+      visibleFieldTypes,
+      visibleFieldNames,
+      strategyResponse.progress.loaded,
+      dataVisualizerListState.pageIndex,
+      dataVisualizerListState.pageSize,
+    ]
+  );
 
   // Some actions open up fly-out or popup
   // This variable is used to keep track of them and clean up when unmounting

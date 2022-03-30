@@ -9,10 +9,12 @@ import { FactoryQueryTypes } from '../../../../../common/search_strategy/securit
 import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
 
 import { SecuritySolutionFactory } from '../types';
+import { allUsers } from './all';
 import { userDetails } from './details';
 import { totalUsersKpi } from './kpi/total_users';
 
 export const usersFactory: Record<UsersQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
   [UsersQueries.details]: userDetails,
   [UsersQueries.kpiTotalUsers]: totalUsersKpi,
+  [UsersQueries.users]: allUsers,
 };

@@ -965,6 +965,7 @@
             ],
             "path": "src/core/public/index.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "visTypeVega",
@@ -1322,6 +1323,7 @@
             ],
             "path": "src/core/public/index.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "monitoring",
@@ -1334,6 +1336,10 @@
               {
                 "plugin": "visTypeVega",
                 "path": "src/plugins/vis_types/vega/public/plugin.ts"
+              },
+              {
+                "plugin": "visTypeVega",
+                "path": "src/plugins/vis_types/vega/target/types/public/data_model/search_api.d.ts"
               }
             ]
           }
@@ -5997,7 +6003,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"conflict\" | \"aliasMatch\" | \"exactMatch\""
+              "\"exactMatch\" | \"aliasMatch\" | \"conflict\""
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
@@ -6009,10 +6015,25 @@
             "tags": [],
             "label": "alias_target_id",
             "description": [
-              "\nThe ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`."
+              "\nThe ID of the object that the legacy URL alias points to.\n\n**Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`)."
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsResolveResponse.alias_purpose",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alias_purpose",
+            "description": [
+              "\nThe reason this alias was created.\n\nCurrently this is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if the alias\nwas created because of saved object conversion, then we will display a toast telling the user that the object has a new URL.\n\n**Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`)."
+            ],
+            "signature": [
+              "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
@@ -7566,6 +7587,18 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.ElasticsearchConfig.maxSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxSockets",
+            "description": [
+              "\nThe maximum number of sockets that can be used for communications with elasticsearch."
+            ],
+            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.ElasticsearchConfig.compression",
             "type": "boolean",
             "tags": [],
@@ -7786,7 +7819,7 @@
                 "label": "rawConfig",
                 "description": [],
                 "signature": [
-                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; healthCheck: Readonly<{} & { delay: moment.Duration; }>; hosts: string | string[]; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; compression: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
+                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; healthCheck: Readonly<{} & { delay: moment.Duration; }>; hosts: string | string[]; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; maxSockets: number; compression: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
                 ],
                 "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
                 "deprecated": false,
@@ -8052,7 +8085,17 @@
         ],
         "path": "src/core/server/plugins/types.ts",
         "deprecated": true,
-        "references": [],
+        "removeBy": "8.8.0",
+        "references": [
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/target/types/server/plugin.d.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/target/types/server/plugin.d.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "core",
@@ -17533,6 +17576,7 @@
             ],
             "path": "src/core/server/metrics/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "monitoring",
@@ -23284,7 +23328,7 @@
             "section": "def-server.ElasticsearchConfig",
             "text": "ElasticsearchConfig"
           },
-          ", \"username\" | \"hosts\" | \"password\" | \"sniffOnStart\" | \"sniffInterval\" | \"sniffOnConnectionFault\" | \"compression\" | \"serviceAccountToken\" | \"requestHeadersWhitelist\" | \"customHeaders\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"verificationMode\" | \"certificate\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; keepAlive?: boolean | undefined; caFingerprint?: string | undefined; }"
+          ", \"username\" | \"hosts\" | \"password\" | \"sniffOnStart\" | \"sniffInterval\" | \"sniffOnConnectionFault\" | \"maxSockets\" | \"compression\" | \"serviceAccountToken\" | \"requestHeadersWhitelist\" | \"customHeaders\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"verificationMode\" | \"certificate\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; keepAlive?: boolean | undefined; caFingerprint?: string | undefined; }"
         ],
         "path": "src/core/server/elasticsearch/client/client_config.ts",
         "deprecated": false,
