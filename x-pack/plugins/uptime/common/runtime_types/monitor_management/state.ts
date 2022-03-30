@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const FetchMonitorManagementListQueryArgsType = t.partial({
+export const FetchMonitorManagementListQueryArgsCodec = t.partial({
   page: t.number,
   perPage: t.number,
   sortField: t.string,
@@ -17,5 +17,15 @@ export const FetchMonitorManagementListQueryArgsType = t.partial({
 });
 
 export type FetchMonitorManagementListQueryArgs = t.TypeOf<
-  typeof FetchMonitorManagementListQueryArgsType
+  typeof FetchMonitorManagementListQueryArgsCodec
+>;
+
+export const MonitorManagementEnablementResultCodec = t.type({
+  isEnabled: t.boolean,
+  canEnable: t.boolean,
+  areApiKeysEnabled: t.boolean,
+});
+
+export type MonitorManagementEnablementResult = t.TypeOf<
+  typeof MonitorManagementEnablementResultCodec
 >;
