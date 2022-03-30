@@ -144,7 +144,7 @@
             "label": "apm",
             "description": [],
             "signature": [
-              "{ readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; }"
+              "{ readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; readonly overview: string; readonly tailSamplingPolicies: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false
@@ -274,7 +274,7 @@
             "label": "enterpriseSearch",
             "description": [],
             "signature": [
-              "{ readonly configuration: string; readonly licenseManagement: string; readonly mailService: string; readonly usersAccess: string; }"
+              "{ readonly configuration: string; readonly licenseManagement: string; readonly mailService: string; readonly troubleshootSetup: string; readonly usersAccess: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false
@@ -287,7 +287,7 @@
             "label": "workplaceSearch",
             "description": [],
             "signature": [
-              "{ readonly apiKeys: string; readonly box: string; readonly confluenceCloud: string; readonly confluenceServer: string; readonly customSources: string; readonly customSourcePermissions: string; readonly documentPermissions: string; readonly dropbox: string; readonly externalIdentities: string; readonly gitHub: string; readonly gettingStarted: string; readonly gmail: string; readonly googleDrive: string; readonly indexingSchedule: string; readonly jiraCloud: string; readonly jiraServer: string; readonly oneDrive: string; readonly permissions: string; readonly salesforce: string; readonly security: string; readonly serviceNow: string; readonly sharePoint: string; readonly slack: string; readonly synch: string; readonly zendesk: string; }"
+              "{ readonly apiKeys: string; readonly box: string; readonly confluenceCloud: string; readonly confluenceServer: string; readonly customSources: string; readonly customSourcePermissions: string; readonly documentPermissions: string; readonly dropbox: string; readonly externalSharePointOnline: string; readonly externalIdentities: string; readonly gitHub: string; readonly gettingStarted: string; readonly gmail: string; readonly googleDrive: string; readonly indexingSchedule: string; readonly jiraCloud: string; readonly jiraServer: string; readonly oneDrive: string; readonly permissions: string; readonly salesforce: string; readonly security: string; readonly serviceNow: string; readonly sharePoint: string; readonly sharePointServer: string; readonly slack: string; readonly synch: string; readonly zendesk: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false
@@ -606,7 +606,7 @@
             "label": "observability",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; }"
+              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false
@@ -789,6 +789,19 @@
             "description": [],
             "signature": [
               "{ readonly troubleshooting: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.legal",
+            "type": "Object",
+            "tags": [],
+            "label": "legal",
+            "description": [],
+            "signature": [
+              "{ readonly privacyStatement: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false

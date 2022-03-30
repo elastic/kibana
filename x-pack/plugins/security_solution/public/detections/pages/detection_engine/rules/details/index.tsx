@@ -104,10 +104,10 @@ import {
   RuleStatusFailedCallOut,
   ruleStatusI18n,
 } from '../../../../components/rules/rule_execution_status';
-import { FailureHistory } from './failure_history';
 
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
+import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
@@ -133,7 +133,7 @@ const StyledFullHeightContainer = styled.div`
 
 enum RuleDetailTabs {
   alerts = 'alerts',
-  failures = 'failures',
+  executionLogs = 'executionLogs',
   exceptions = 'exceptions',
 }
 
@@ -151,10 +151,10 @@ const ruleDetailTabs = [
     dataTestSubj: 'exceptionsTab',
   },
   {
-    id: RuleDetailTabs.failures,
-    name: i18n.FAILURE_HISTORY_TAB,
+    id: RuleDetailTabs.executionLogs,
+    name: i18n.RULE_EXECUTION_LOGS,
     disabled: false,
-    dataTestSubj: 'failureHistoryTab',
+    dataTestSubj: 'executionLogsTab',
   },
 ];
 
@@ -431,7 +431,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <EuiTab
             onClick={() => setRuleDetailTab(tab.id)}
             isSelected={tab.id === ruleDetailTab}
-            disabled={tab.disabled}
+            disabled={tab.disabled || (tab.id === RuleDetailTabs.executionLogs && !isExistingRule)}
             key={tab.id}
             data-test-subj={tab.dataTestSubj}
           >
@@ -440,7 +440,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         ))}
       </EuiTabs>
     ),
-    [ruleDetailTab, setRuleDetailTab, pageTabs]
+    [isExistingRule, ruleDetailTab, setRuleDetailTab, pageTabs]
   );
   const ruleIndices = useMemo(() => rule?.index ?? DEFAULT_INDEX_PATTERN, [rule?.index]);
 
@@ -604,6 +604,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
+
+  const selectAlertsTabCallback = useCallback(() => {
+    setRuleDetailTab(RuleDetailTabs.alerts);
+  }, []);
 
   if (
     redirectToDetections(
@@ -806,7 +810,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               onRuleChange={refreshRule}
             />
           )}
-          {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory ruleId={ruleId} />}
+          {ruleDetailTab === RuleDetailTabs.executionLogs && (
+            <ExecutionLogTable ruleId={ruleId} selectAlertsTab={selectAlertsTabCallback} />
+          )}
         </SecuritySolutionPageWrapper>
       </StyledFullHeightContainer>
 
