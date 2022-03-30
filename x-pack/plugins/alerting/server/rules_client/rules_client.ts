@@ -212,20 +212,17 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
-type BulkEditActionRuleFields = keyof Pick<
-  Rule,
-  'actions' | 'schedule' | 'tags' | 'throttle' | 'notifyWhen'
->;
+type BulkEditFields = keyof Pick<Rule, 'actions' | 'schedule' | 'tags' | 'throttle' | 'notifyWhen'>;
 
 export type BulkEditActionRule =
   | {
       action: 'add' | 'delete' | 'set';
-      field: Extract<BulkEditActionRuleFields, 'tags'>;
+      field: Extract<BulkEditFields, 'tags'>;
       value: string[];
     }
   | {
       action: 'add' | 'set';
-      field: Extract<BulkEditActionRuleFields, 'actions'>;
+      field: Extract<BulkEditFields, 'actions'>;
       value: NormalizedAlertAction[];
     };
 
