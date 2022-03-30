@@ -12,10 +12,10 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const remoteEsArchiver = getService('remoteEsArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['timePicker']);
   const config = getService('config');
+  let remoteEsArchiver;
 
   describe('lens app', () => {
     const localIndexPatternString = 'logstash-*';
@@ -43,6 +43,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await browser.setWindowSize(1280, 1200);
       try {
         config.get('esTestCluster.ccs');
+        remoteEsArchiver = getService('remoteEsArchiver');
         esNode = remoteEsArchiver;
         fixtureDirs = remoteFixtures;
         indexPatternString = remoteIndexPatternString;
