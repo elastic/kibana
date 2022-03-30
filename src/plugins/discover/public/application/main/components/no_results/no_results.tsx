@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../data/public';
-import { NoResultsSuggestions } from './no_results_suggestions/no_results_suggestions';
+import { NoResultsSuggestions } from './no_results_suggestions';
 import './_no_results.scss';
 import { NoResultsIllustration } from './assets/no_results_illustration';
 
