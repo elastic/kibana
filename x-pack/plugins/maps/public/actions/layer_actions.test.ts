@@ -40,6 +40,11 @@ describe('layer_actions', () => {
       };
 
       // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../selectors/map_selectors').getCustomIcons = () => {
+        return [];
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('../selectors/map_selectors').createLayerInstance = () => {
         return {
           getLicensedFeatures() {

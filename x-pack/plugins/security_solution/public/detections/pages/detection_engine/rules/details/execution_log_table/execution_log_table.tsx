@@ -223,7 +223,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             icon: 'filter',
             type: 'icon',
             onClick: (value: object) => {
-              const executionId = get(value, EXECUTION_UUID_FIELD_NAME);
+              const executionId = get(value, 'execution_uuid');
               if (executionId) {
                 onFilterByExecutionIdCallback(executionId);
               }
