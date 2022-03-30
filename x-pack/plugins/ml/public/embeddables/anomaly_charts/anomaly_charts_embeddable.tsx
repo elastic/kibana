@@ -113,6 +113,9 @@ export class AnomalyChartsEmbeddable extends Embeddable<
     super.render(node);
     this.node = node;
 
+    // required for the export feature to work
+    this.node.setAttribute('data-shared-item', '');
+
     const I18nContext = this.services[0].i18n.Context;
     const theme$ = this.services[0].theme.theme$;
 
