@@ -168,6 +168,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         // otherwise the filter has been already migrated into the formula text
         filter:
           previousColumn?.operationType === 'formula' ? getFilter(previousColumn, {}) : undefined,
+        timeScale: previousColumn?.timeScale,
       };
     },
     isTransferable: () => {
@@ -181,6 +182,6 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         operations: operationDefinitionMap,
       }).layer;
     },
-
+    timeScalingMode: 'optional',
     paramEditor: WrappedFormulaEditor,
   };

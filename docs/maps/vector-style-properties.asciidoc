@@ -61,7 +61,6 @@ Available icons
 [role="screenshot"]
 image::maps/images/maki-icons.png[]
 
-
 [float]
 [[polygon-style-properties]]
 ==== Polygon style properties

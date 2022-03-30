@@ -82,7 +82,6 @@ export const buildProcessTree = (
   events.forEach((event) => {
     const process = processMap[event.process.entity_id];
     const parentProcess = processMap[event.process.parent?.entity_id];
-
     // if session leader, or process already has a parent, return
     if (process.id === sessionEntityId || process.parent) {
       return;
@@ -110,12 +109,14 @@ export const buildProcessTree = (
 
   // with this new page of events processed, lets try re-parent any orphans
   orphans?.forEach((process) => {
-    const parentProcess = processMap[process.getDetails().process.parent.entity_id];
+    const parentProcessId = process.getDetails().process.parent?.entity_id;
 
-    if (parentProcess) {
+    if (parentProcessId) {
+      const parentProcess = processMap[parentProcessId];
       process.parent = parentProcess; // handy for recursive operations (like auto expand)
-
-      parentProcess.children.push(process);
+      if (parentProcess !== undefined) {
+        parentProcess.children.push(process);
+      }
     } else {
       newOrphans.push(process);
     }
