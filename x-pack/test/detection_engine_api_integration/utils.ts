@@ -58,8 +58,8 @@ import {
   SECURITY_TELEMETRY_URL,
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '../../plugins/security_solution/common/constants';
-import { RACAlert } from '../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 import { DetectionMetrics } from '../../plugins/security_solution/server/usage/detections/types';
+import { DetectionAlert } from '../../plugins/security_solution/common/detection_engine/schemas/alerts';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -1593,7 +1593,7 @@ export const getSignalsByRuleIds = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   ruleIds: string[]
-): Promise<estypes.SearchResponse<RACAlert>> => {
+): Promise<estypes.SearchResponse<DetectionAlert>> => {
   const response = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
@@ -1607,7 +1607,7 @@ export const getSignalsByRuleIds = async (
     );
   }
 
-  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = response;
+  const { body: signalsOpen }: { body: estypes.SearchResponse<DetectionAlert> } = response;
   return signalsOpen;
 };
 
@@ -1622,7 +1622,7 @@ export const getSignalsByIds = async (
   log: ToolingLog,
   ids: string[],
   size?: number
-): Promise<estypes.SearchResponse<RACAlert>> => {
+): Promise<estypes.SearchResponse<DetectionAlert>> => {
   const response = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
@@ -1635,7 +1635,7 @@ export const getSignalsByIds = async (
       )}, status: ${JSON.stringify(response.status)}`
     );
   }
-  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = response;
+  const { body: signalsOpen }: { body: estypes.SearchResponse<DetectionAlert> } = response;
   return signalsOpen;
 };
 
@@ -1648,7 +1648,7 @@ export const getSignalsById = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   id: string
-): Promise<estypes.SearchResponse<RACAlert>> => {
+): Promise<estypes.SearchResponse<DetectionAlert>> => {
   const response = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
@@ -1661,7 +1661,7 @@ export const getSignalsById = async (
       )}, status: ${JSON.stringify(response.status)}`
     );
   }
-  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = response;
+  const { body: signalsOpen }: { body: estypes.SearchResponse<DetectionAlert> } = response;
   return signalsOpen;
 };
 
