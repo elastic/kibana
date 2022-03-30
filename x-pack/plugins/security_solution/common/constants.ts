@@ -79,7 +79,6 @@ export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
-  authentications = 'authentications',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
@@ -92,7 +91,6 @@ export enum SecurityPageName {
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
-  events = 'events',
   exceptions = 'exceptions',
   explore = 'explore',
   hostIsolationExceptions = 'host_isolation_exceptions',
@@ -100,6 +98,8 @@ export enum SecurityPageName {
   hostsAnomalies = 'hosts-anomalies',
   hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
+  hostsEvents = 'hosts-events',
+  hostsAuthentications = 'hosts-authentications',
   investigate = 'investigate',
   landing = 'get_started',
   network = 'network',
@@ -109,15 +109,19 @@ export enum SecurityPageName {
   networkHttp = 'network-http',
   networkTls = 'network-tls',
   overview = 'overview',
-  policies = 'policies',
+  policies = 'policy',
   rules = 'rules',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
   uncommonProcesses = 'uncommon_processes',
   users = 'users',
+  usersAuthentications = 'users-authentications',
   usersAnomalies = 'users-anomalies',
   usersRisk = 'users-risk',
+  sessions = 'sessions',
+  usersEvents = 'users-events',
+  usersExternalAlerts = 'users-external_alerts',
 }
 
 export const TIMELINES_PATH = '/timelines' as const;
@@ -440,3 +444,6 @@ export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAG
  */
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
   'securitySolution.rulesManagementPage.newFeaturesTour.v8.1';
+
+export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
+  'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
