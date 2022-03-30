@@ -117,7 +117,7 @@ describe('Kuery field suggestions', () => {
     expect(keywordIndex).toBeLessThan(analyzedIndex);
   });
 
-  test('should have descriptions', async () => {
+  test('should not have descriptions', async () => {
     const prefix = '';
     const suffix = '';
     const suggestions = await getSuggestions(
@@ -126,7 +126,7 @@ describe('Kuery field suggestions', () => {
     );
     expect(suggestions.length).toBeGreaterThan(0);
     suggestions.forEach((suggestion) => {
-      expect(suggestion).toHaveProperty('description');
+      expect(suggestion).not.toHaveProperty('description');
     });
   });
 

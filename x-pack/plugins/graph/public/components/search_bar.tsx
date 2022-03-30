@@ -11,6 +11,7 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { connect } from 'react-redux';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
@@ -24,18 +25,18 @@ import {
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
-  IndexPattern,
   QueryStringInput,
   IDataPluginServices,
   Query,
 } from '../../../../../src/plugins/data/public';
 import { TooltipWrapper } from './tooltip_wrapper';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 export interface SearchBarProps {
   isLoading: boolean;
   urlQuery: string | null;
-  currentIndexPattern?: IndexPattern;
-  onIndexPatternChange: (indexPattern?: IndexPattern) => void;
+  currentIndexPattern?: DataView;
+  onIndexPatternChange: (indexPattern?: DataView) => void;
   confirmWipeWorkspace: (
     onConfirm: () => void,
     text?: string,
@@ -51,7 +52,7 @@ export interface SearchBarStateProps {
   submit: (searchTerm: string) => void;
 }
 
-function queryToString(query: Query, indexPattern: IndexPattern) {
+function queryToString(query: Query, indexPattern: DataView) {
   if (query.language === 'kuery' && typeof query.query === 'string') {
     const dsl = toElasticsearchQuery(fromKueryExpression(query.query as string), indexPattern);
     // JSON representation of query will be handled by existing logic.

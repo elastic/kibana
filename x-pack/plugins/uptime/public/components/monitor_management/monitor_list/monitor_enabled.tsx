@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
-import { ConfigKey, SyntheticsMonitor } from '../../../../common/runtime_types';
+import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../common/runtime_types';
 import { setMonitor } from '../../../state/api';
 
 interface Props {
   id: string;
-  monitor: SyntheticsMonitor;
+  monitor: EncryptedSyntheticsMonitor;
   onUpdate: () => void;
   isDisabled?: boolean;
 }

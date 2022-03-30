@@ -15,13 +15,13 @@ import {
   nodeTypes as kqlNodeTypes,
   KqlNode,
 } from '@kbn/es-query';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { TimelineType } from '../../../../common/types/timeline';
 import {
   DataProvider,
   DataProviderType,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineType } from '../../../../common/types/timeline';
 
 interface FindValueToChangeInQuery {
   field: string;
