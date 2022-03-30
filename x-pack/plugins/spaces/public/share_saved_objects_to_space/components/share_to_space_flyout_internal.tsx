@@ -424,7 +424,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        className="spcShareToSpace__flyoutBodyWrapper"
+        className="spcShareToSpace__flyoutBodyWrapper eui-yScroll"
         responsive={false}
       >
         <EuiFlexItem grow={false}>
