@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep, uniq } from 'lodash';
 import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -127,23 +128,13 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[]) => {
   }
 
   const hashesCount: { [key: string]: boolean } = {};
-  const duplicatedHashes: string[] = [];
   const invalidHash: string[] = [];
 
   // Check hash entries individually
   currentHashes.forEach((hash) => {
     if (!allowedHashes.includes(hash)) invalidHash.push(hash);
-    if (hashesCount[hash]) {
-      duplicatedHashes.push(hash);
-    } else {
-      hashesCount[hash] = true;
-    }
+    hashesCount[hash] = true;
   });
-
-  // There is more than one entry with the same hash type
-  if (duplicatedHashes.length) {
-    return `There are some duplicated hashes: ${duplicatedHashes.join(',')}`;
-  }
 
   // There is an entry with an invalid hash type
   if (invalidHash.length) {
@@ -159,7 +150,7 @@ const entriesSchemaOptions = {
       return hashEntriesValidation(entries);
     } else {
       if (entries.length > 1) {
-        return 'Only one entry is allowed when no using hash field type';
+        return 'Only one entry is allowed when not using hash field type';
       }
     }
   },
@@ -202,6 +193,20 @@ const BlocklistDataSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
+function removeDuplicateEntryValues(entries: BlocklistConditionEntry[]): BlocklistConditionEntry[] {
+  return entries.map((entry) => {
+    const nextEntry = cloneDeep(entry);
+
+    if (nextEntry.type === 'match_any') {
+      nextEntry.value = uniq(nextEntry.value);
+    } else if (nextEntry.type === 'nested') {
+      removeDuplicateEntryValues(nextEntry.entries);
+    }
+
+    return nextEntry;
+  });
+}
+
 export class BlocklistValidator extends BaseValidator {
   static isBlocklist(item: { listId: string }): boolean {
     return item.listId === ENDPOINT_BLOCKLISTS_LIST_ID;
@@ -211,6 +216,9 @@ export class BlocklistValidator extends BaseValidator {
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
     await this.validateCanManageEndpointArtifacts();
+
+    item.entries = removeDuplicateEntryValues(item.entries as BlocklistConditionEntry[]);
+
     await this.validateBlocklistData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
@@ -249,6 +257,11 @@ export class BlocklistValidator extends BaseValidator {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
     await this.validateCanManageEndpointArtifacts();
+
+    _updatedItem.entries = removeDuplicateEntryValues(
+      _updatedItem.entries as BlocklistConditionEntry[]
+    );
+
     await this.validateBlocklistData(updatedItem);
 
     try {

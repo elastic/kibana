@@ -12,7 +12,11 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { policyConfig } from '../../../store/policy_details/selectors';
 import { setIn } from '../../../models/policy_details_config';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { EventFormOption, EventsForm } from '../../components/events_form';
+import {
+  EventFormOption,
+  EventsForm,
+  SupplementalEventFormOption,
+} from '../../components/events_form';
 
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
   {
@@ -23,6 +27,15 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
   },
   {
     name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.network',
+      {
+        defaultMessage: 'Network',
+      }
+    ),
+    protectionField: 'network',
+  },
+  {
+    name: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.process',
       {
         defaultMessage: 'Process',
@@ -30,14 +43,25 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
     ),
     protectionField: 'process',
   },
+];
+
+const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingSystem.LINUX>> = [
   {
     name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.network',
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data',
       {
-        defaultMessage: 'Network',
+        defaultMessage: 'Include session data',
       }
     ),
-    protectionField: 'network',
+    protectionField: 'session_data',
+    tooltipText: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data.tooltip',
+      {
+        defaultMessage:
+          'Capture the extended process event data required for Session View. Session View helps you investigate process, user, and service activity on your Linux infrastructure by displaying session and process execution data organized in a tree according to the Linux process model. NOTE: Capturing extended process events substantially increases data usage.',
+      }
+    ),
+    beta: true,
   },
 ];
 
@@ -50,6 +74,7 @@ export const LinuxEvents = memo(() => {
       os={OperatingSystem.LINUX}
       selection={policyDetailsConfig.linux.events}
       options={OPTIONS}
+      supplementalOptions={SUPPLEMENTAL_OPTIONS}
       onValueSelection={(value, selected) =>
         dispatch({
           type: 'userChangedPolicyConfig',
