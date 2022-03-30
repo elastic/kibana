@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { HttpSetup } from 'kibana/public';
 import { extractWarningMessages } from '../../../lib/utils';
 import { XJson } from '../../../../../es_ui_shared/public';
 // @ts-ignore
@@ -15,6 +16,7 @@ import { BaseResponseType } from '../../../types';
 const { collapseLiteralStrings } = XJson;
 
 export interface EsRequestArgs {
+  http: HttpSetup;
   requests: Array<{ url: string; method: string; data: string[] }>;
 }
 
@@ -68,6 +70,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
       try {
         const { response, body } = await es.send({
+          http: args.http,
           method: esMethod,
           path: esPath,
           data: esData,

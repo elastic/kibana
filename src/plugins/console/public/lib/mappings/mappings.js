@@ -277,7 +277,7 @@ export function clear() {
   componentTemplates = [];
 }
 
-function retrieveSettings(settingsKey, settingsToRetrieve) {
+function retrieveSettings(http, settingsKey, settingsToRetrieve) {
   const settingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
@@ -294,7 +294,7 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
     const asSystemRequest = true;
     const withProductOrigin = true;
 
-    return es.send({ method, path, asSystemRequest, withProductOrigin });
+    return es.send({ http, method, path, asSystemRequest, withProductOrigin });
   } else {
     if (settingsToRetrieve[settingsKey] === false) {
       // If the user doesn't want autocomplete suggestions, then clear any that exist
@@ -324,8 +324,8 @@ export function clearSubscriptions() {
   }
 }
 
-const retrieveMappings = async (settingsToRetrieve) => {
-  const mappings = await retrieveSettings('fields', settingsToRetrieve);
+const retrieveMappings = async (http, settingsToRetrieve) => {
+  const mappings = await retrieveSettings(http, 'fields', settingsToRetrieve);
 
   if (mappings) {
     const maxMappingSize = Object.keys(mappings).length > 10 * 1024 * 1024;
@@ -344,18 +344,18 @@ const retrieveMappings = async (settingsToRetrieve) => {
   }
 };
 
-const retrieveAliases = async (settingsToRetrieve) => {
-  const aliases = await retrieveSettings('indices', settingsToRetrieve);
+const retrieveAliases = async (http, settingsToRetrieve) => {
+  const aliases = await retrieveSettings(http, 'indices', settingsToRetrieve);
 
   if (aliases) {
     loadAliases(aliases);
   }
 };
 
-const retrieveTemplates = async (settingsToRetrieve) => {
-  const legacyTemplates = await retrieveSettings('legacyTemplates', settingsToRetrieve);
-  const indexTemplates = await retrieveSettings('indexTemplates', settingsToRetrieve);
-  const componentTemplates = await retrieveSettings('componentTemplates', settingsToRetrieve);
+const retrieveTemplates = async (http, settingsToRetrieve) => {
+  const legacyTemplates = await retrieveSettings(http, 'legacyTemplates', settingsToRetrieve);
+  const indexTemplates = await retrieveSettings(http, 'indexTemplates', settingsToRetrieve);
+  const componentTemplates = await retrieveSettings(http, 'componentTemplates', settingsToRetrieve);
 
   if (legacyTemplates) {
     loadLegacyTemplates(legacyTemplates);
@@ -370,8 +370,8 @@ const retrieveTemplates = async (settingsToRetrieve) => {
   }
 };
 
-const retrieveDataStreams = async (settingsToRetrieve) => {
-  const dataStreams = await retrieveSettings('dataStreams', settingsToRetrieve);
+const retrieveDataStreams = async (http, settingsToRetrieve) => {
+  const dataStreams = await retrieveSettings(http, 'dataStreams', settingsToRetrieve);
 
   if (dataStreams) {
     loadDataStreams(dataStreams);
@@ -382,7 +382,7 @@ const retrieveDataStreams = async (settingsToRetrieve) => {
  * @param settings Settings A way to retrieve the current settings
  * @param settingsToRetrieve any
  */
-export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
+export function retrieveAutoCompleteInfo(http, settings, settingsToRetrieve) {
   clearSubscriptions();
 
   const templatesSettingToRetrieve = {
@@ -393,17 +393,17 @@ export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
   };
 
   Promise.allSettled([
-    retrieveMappings(settingsToRetrieve),
-    retrieveAliases(settingsToRetrieve),
-    retrieveTemplates(templatesSettingToRetrieve),
-    retrieveDataStreams(settingsToRetrieve),
+    retrieveMappings(http, settingsToRetrieve),
+    retrieveAliases(http, settingsToRetrieve),
+    retrieveTemplates(http, templatesSettingToRetrieve),
+    retrieveDataStreams(http, settingsToRetrieve),
   ]).then(() => {
     // Schedule next request.
     pollTimeoutId = setTimeout(() => {
       // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
       // a scheduled request if the user turns off polling.
       if (settings.getPolling()) {
-        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+        retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete());
       }
     }, settings.getPollInterval());
   });

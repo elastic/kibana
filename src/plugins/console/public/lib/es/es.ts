@@ -19,13 +19,8 @@ export function getContentType(body: unknown) {
   return 'application/json';
 }
 
-let _http: HttpSetup;
-
-export const initHttp = (http: HttpSetup) => {
-  _http = http;
-};
-
 interface SendProps {
+  http: HttpSetup;
   method: string;
   path: string;
   data?: string;
@@ -35,6 +30,7 @@ interface SendProps {
 }
 
 export async function send({
+  http,
   method,
   path,
   data,
@@ -43,13 +39,12 @@ export async function send({
   asResponse = false,
 }: SendProps) {
   const options: HttpFetchOptions = {
-    headers: { Accept: 'text/plain', 'Content-Type': getContentType(data) },
     query: { path, method, ...(withProductOrigin && { withProductOrigin }) },
     body: data,
     asResponse,
     asSystemRequest,
   };
-  return await _http.post<HttpResponse<unknown>>('../api/console/proxy', options);
+  return await http.post<HttpResponse>('../api/console/proxy', options);
 }
 
 export function constructESUrl(baseUri: string, path: string) {
