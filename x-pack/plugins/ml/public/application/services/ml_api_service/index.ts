@@ -17,6 +17,7 @@ import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
 import { savedObjectsApiProvider } from './saved_objects';
+import { trainedModelsApiProvider } from './trained_models';
 import type {
   MlServerDefaults,
   MlServerLimits,
@@ -719,5 +720,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     jobs: jobsApiProvider(httpService),
     fileDatavisualizer,
     savedObjects: savedObjectsApiProvider(httpService),
+    trainedModels: trainedModelsApiProvider(httpService),
   };
 }

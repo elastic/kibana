@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { CspPageTemplate } from './page_template';
+import { CspPageTemplate } from './csp_page_template';
 import * as TEXT from './translations';
 
 export const UnknownRoute = React.memo(() => (

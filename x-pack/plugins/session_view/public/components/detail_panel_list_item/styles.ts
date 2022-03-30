@@ -20,11 +20,13 @@ export const useStyles = ({ display }: StylesDeps) => {
     const item: CSSObject = {
       display,
       alignItems: 'center',
-      padding: euiTheme.size.s,
+      padding: `0px ${euiTheme.size.s} `,
       width: '100%',
-      fontSize: 'inherit',
       fontWeight: 'inherit',
-      minHeight: '36px',
+      height: euiTheme.size.xl,
+      lineHeight: euiTheme.size.l,
+      letterSpacing: '0px',
+      textAlign: 'left',
     };
 
     const copiableItem: CSSObject = {
@@ -34,6 +36,7 @@ export const useStyles = ({ display }: StylesDeps) => {
       '&:hover': {
         background: transparentize(euiTheme.colors.primary, 0.1),
       },
+      height: '100%',
     };
 
     return {
