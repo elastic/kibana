@@ -139,14 +139,16 @@ export const SelectableSpacesControl = (props: Props) => {
       return null;
     }
 
+    const hiddenCount = selectedSpaceIds.filter((id) => id === UNKNOWN_SPACE).length;
     const docLink = docLinks?.links.security.kibanaPrivileges;
     return (
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.spaces.shareToSpace.unknownSpacesLabel.text"
-            defaultMessage="To view hidden spaces, you need {additionalPrivilegesLink}."
+            defaultMessage="To view {hiddenCount} hidden spaces, you need {additionalPrivilegesLink}."
             values={{
+              hiddenCount,
               additionalPrivilegesLink: (
                 <EuiLink href={docLink} target="_blank">
                   <FormattedMessage
@@ -178,7 +180,6 @@ export const SelectableSpacesControl = (props: Props) => {
     ? filteredSpaces.length
     : selectedSpaceIds.filter((id) => id !== ALL_SPACES_ID && id !== UNKNOWN_SPACE).length +
       selectedCountPad;
-  const hiddenCount = selectedSpaceIds.filter((id) => id === UNKNOWN_SPACE).length;
   const selectSpacesLabel = i18n.translate(
     'xpack.spaces.shareToSpace.shareModeControl.selectSpacesLabel',
     { defaultMessage: 'Select spaces' }
@@ -190,28 +191,11 @@ export const SelectableSpacesControl = (props: Props) => {
       values: { selectedCount, totalCount: filteredSpaces.length },
     }
   );
-  const hiddenSpacesLabel = i18n.translate(
-    'xpack.spaces.shareToSpace.shareModeControl.hiddenCountLabel',
-    { defaultMessage: '+{hiddenCount} hidden', values: { hiddenCount } }
-  );
-  const hiddenSpaces = hiddenCount ? <EuiText size="xs">{hiddenSpacesLabel}</EuiText> : null;
   return (
     <>
       <EuiFormRow
         label={selectSpacesLabel}
-        labelAppend={
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="none"
-            alignItems="flexEnd"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">{selectedSpacesLabel}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{hiddenSpaces}</EuiFlexItem>
-          </EuiFlexGroup>
-        }
+        labelAppend={<EuiText size="xs">{selectedSpacesLabel}</EuiText>}
         fullWidth
       >
         <></>
