@@ -14,9 +14,8 @@ import {
   SavedObjectEmbeddableInput,
 } from '../../../../../src/plugins/embeddable/public';
 import { Query, TimeRange } from '../../../../../src/plugins/data/common';
-import { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
+import { MapCenterAndZoom, MapExtent, MapSettings } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
-import { MapSettings } from '../reducers/map';
 
 export interface MapEmbeddableConfig {
   editable: boolean;

@@ -21,11 +21,11 @@ import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { IVectorSource } from '../../classes/sources/vector_source';
-import { MapSettings } from '../../reducers/map';
 import {
   CustomIcon,
   Goto,
   MapCenterAndZoom,
+  MapSettings,
   TileMetaFeature,
   Timeslice,
 } from '../../../common/descriptor_types';

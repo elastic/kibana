@@ -51,10 +51,10 @@ import {
   LayerDescriptor,
   MapCenter,
   MapExtent,
+  MapSettings,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { MapSettings } from '../reducers/map';
 import { TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
