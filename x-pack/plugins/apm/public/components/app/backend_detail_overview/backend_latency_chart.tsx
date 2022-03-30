@@ -20,10 +20,7 @@ import {
   ChartType,
   getTimeSeriesColor,
 } from '../../shared/charts/helper/get_timeseries_color';
-import {
-  getComparisonChartTheme,
-  getTimeRangeComparison,
-} from '../../shared/time_comparison/get_time_range_comparison';
+import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
 
 export function BackendLatencyChart({ height }: { height: number }) {
   const {
@@ -33,20 +30,14 @@ export function BackendLatencyChart({ height }: { height: number }) {
       rangeTo,
       kuery,
       environment,
+      offset,
       comparisonEnabled,
-      comparisonType,
     },
   } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const comparisonChartTheme = getComparisonChartTheme();
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -60,14 +51,14 @@ export function BackendLatencyChart({ height }: { height: number }) {
             backendName,
             start,
             end,
-            offset,
+            offset: comparisonEnabled ? offset : undefined,
             kuery,
             environment,
           },
         },
       });
     },
-    [backendName, start, end, offset, kuery, environment]
+    [backendName, start, end, offset, kuery, environment, comparisonEnabled]
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
