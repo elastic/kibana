@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './vulnerable_hostss';
+export * from './vulnerable_hosts';

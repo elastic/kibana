@@ -98,7 +98,7 @@ export const useStatusSeverityAlertCounters = ({
   return { isLoading, data: transformedResponse, refetch };
 };
 
-const buildAlertAggregationQuery = ({ from, to }: UseStatusSeverityAlertCountersProps) => ({
+export const buildAlertAggregationQuery = ({ from, to }: UseStatusSeverityAlertCountersProps) => ({
   aggs: {
     [ALERT_BY_STATUS_AGG]: {
       terms: {

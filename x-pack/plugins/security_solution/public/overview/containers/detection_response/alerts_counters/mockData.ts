@@ -69,35 +69,3 @@ export const mockStatusSeverityAlertCountersResult = {
     },
   },
 };
-
-export const mockStatusSeverityAlertCountersRequest = {
-  aggs: {
-    alertsByStatus: {
-      terms: {
-        field: 'kibana.alert.workflow_status',
-      },
-      aggs: {
-        statusBySeverity: {
-          terms: {
-            field: 'kibana.alert.severity',
-          },
-        },
-      },
-    },
-  },
-  query: {
-    bool: {
-      filter: [
-        {
-          range: {
-            '@timestamp': {
-              gte: '2022-03-02T10:13:37.853Z',
-              lte: '2022-03-29T10:13:37.853Z',
-            },
-          },
-        },
-      ],
-    },
-  },
-  size: 0,
-};

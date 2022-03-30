@@ -5,121 +5,75 @@
  * 2.0.
  */
 
-export const mockStatusSeverityAlertCountersResult = {
+export const mockVulnerableHostsBySeverityResult = {
   aggregations: {
-    alertsByHost: {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 304,
+    hostsBySeverity: {
       buckets: [
         {
           key: 'Host-342m5gl1g2',
-          doc_count: 291,
-          hostBySeverity: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'medium',
-                doc_count: 163,
-              },
-              {
-                key: 'low',
-                doc_count: 128,
-              },
-            ],
+          doc_count: 100,
+          high: {
+            doc_count: 50,
           },
-        },
-        {
-          key: 'Host-4dbzugdlqd',
-          doc_count: 139,
-          hostBySeverity: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'low',
-                doc_count: 81,
-              },
-              {
-                key: 'medium',
-                doc_count: 58,
-              },
-            ],
+          critical: {
+            doc_count: 5,
+          },
+          low: {
+            doc_count: 40,
+          },
+          medium: {
+            doc_count: 5,
           },
         },
         {
           key: 'Host-vns3hyykhu',
-          doc_count: 129,
-          hostBySeverity: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'medium',
-                doc_count: 69,
-              },
-              {
-                key: 'low',
-                doc_count: 60,
-              },
-            ],
+          doc_count: 104,
+          high: {
+            doc_count: 100,
+          },
+          critical: {
+            doc_count: 4,
+          },
+          low: {
+            doc_count: 0,
+          },
+          medium: {
+            doc_count: 0,
+          },
+        },
+        {
+          key: 'Host-awafztonav',
+          doc_count: 108,
+          high: {
+            doc_count: 50,
+          },
+          critical: {
+            doc_count: 4,
+          },
+          low: {
+            doc_count: 50,
+          },
+          medium: {
+            doc_count: 4,
           },
         },
         {
           key: 'Host-56k7zf5kne',
-          doc_count: 119,
-          hostBySeverity: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'medium',
-                doc_count: 61,
-              },
-              {
-                key: 'low',
-                doc_count: 58,
-              },
-            ],
+          doc_count: 128,
+          high: {
+            doc_count: 6,
+          },
+          critical: {
+            doc_count: 1,
+          },
+          low: {
+            doc_count: 59,
+          },
+          medium: {
+            doc_count: 62,
           },
         },
       ],
     },
   },
-};
-
-export const mockStatusSeverityAlertCountersRequest = {
-  aggs: {
-    alertsByHost: {
-      terms: {
-        field: 'host.name',
-        order: {
-          _count: 'desc',
-        },
-        size: 4,
-      },
-      aggs: {
-        hostBySeverity: {
-          terms: {
-            field: 'kibana.alert.severity',
-          },
-        },
-      },
-    },
-  },
-  query: {
-    bool: {
-      filter: [
-        {
-          range: {
-            '@timestamp': {
-              gte: '2022-03-02T10:13:37.853Z',
-              lte: '2022-03-29T10:13:37.853Z',
-            },
-          },
-        },
-      ],
-    },
-  },
-  size: 0,
 };

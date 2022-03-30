@@ -6,12 +6,9 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import {
-  mockStatusSeverityAlertCountersRequest,
-  mockStatusSeverityAlertCountersResult,
-} from './mockData';
+import { mockStatusSeverityAlertCountersResult } from './mockData';
 
-import { useStatusSeverityAlertCounters } from './alerts_counters';
+import { buildAlertAggregationQuery, useStatusSeverityAlertCounters } from './alerts_counters';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/api', () => ({
   fetchQueryAlerts: () => mockStatusSeverityAlertCountersResult,
@@ -23,6 +20,9 @@ jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_
     signalIndexName: 'detections',
   }),
 }));
+
+const from = '2022-03-02T10:13:37.853Z';
+const to = '2022-03-29T10:13:37.853Z';
 
 describe('useStatusSeverityAlertCounters', () => {
   beforeEach(() => {
@@ -54,8 +54,8 @@ describe('useStatusSeverityAlertCounters', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
         useStatusSeverityAlertCounters({
-          from: '2022-03-02T10:13:37.853Z',
-          to: '2022-03-29T10:13:37.853Z',
+          from,
+          to,
         })
       );
       await waitForNextUpdate();
@@ -70,7 +70,7 @@ describe('useStatusSeverityAlertCounters', () => {
           id: 'alertCountersByStatusAndSeverityQuery',
           inspect: {
             dsl: JSON.stringify(
-              { index: ['detections'] ?? [''], body: mockStatusSeverityAlertCountersRequest },
+              { index: ['detections'], body: buildAlertAggregationQuery({ from, to }) },
               null,
               2
             ),

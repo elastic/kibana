@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './alerts_counters';
+export { useStatusSeverityAlertCounters } from './alerts_counters';
+export { useVulnerableHostsCounters } from './vulnerable_hosts';

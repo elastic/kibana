@@ -12,16 +12,16 @@ import { AlertSearchResponse } from '../../../../detections/containers/detection
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
-const ID = 'alertCountersByStatusAndSeverityQuery';
-const ALERT_BY_HOST_AGG = 'alertsByHost';
-const HOST_BY_SEVERITY_AGG = 'hostBySeverity';
+const ID = 'vulnerableHostsBySeverityQuery';
+const HOST_BY_SEVERITY_AGG = 'hostsBySeverity';
 
 interface UseStatusSeverityAlertCountersProps {
   from: string;
   to: string;
 }
 
-interface AlertSeverityCount {
+interface AlertSeverityCounts {
+  hostName: string;
   count: number;
   low: number;
   medium: number;
@@ -29,26 +29,24 @@ interface AlertSeverityCount {
   critical: number;
 }
 
-interface AlertCountersStatusBySeverity {
-  open: AlertSeverityCount;
-  acknowledged: AlertSeverityCount;
-  closed: AlertSeverityCount;
+interface SeverityContainer {
+  doc_count: number;
+}
+interface AlertBySeverityBucketData extends GenericBuckets {
+  low: SeverityContainer;
+  medium: SeverityContainer;
+  high: SeverityContainer;
+  critical: SeverityContainer;
 }
 
-interface AlertByStatusBucketData extends GenericBuckets {
-  [STATUS_BY_SEVERITY_AGG]: {
-    buckets: GenericBuckets[];
-  };
-}
-
-interface AlertCountersByStatusAndSeverityAggregation {
-  [ALERT_BY_STATUS_AGG]: {
-    buckets: AlertByStatusBucketData[];
+interface AlertCountersBySeverityAndSeverityAggregation {
+  [HOST_BY_SEVERITY_AGG]: {
+    buckets: AlertBySeverityBucketData[];
   };
 }
 
 interface AlertsCounterResult {
-  counters: Partial<AlertCountersStatusBySeverity>;
+  counters: AlertSeverityCounts[];
   id: string;
   inspect: { dsl: string; response: string };
   isInspected: boolean;
@@ -60,7 +58,7 @@ interface UseStatusSeverityAlertCountersReturnType {
   refetch: (() => Promise<void>) | null;
 }
 
-export const useStatusSeverityAlertCounters = ({
+export const useVulnerableHostsCounters = ({
   from,
   to,
 }: UseStatusSeverityAlertCountersProps): UseStatusSeverityAlertCountersReturnType => {
@@ -71,8 +69,8 @@ export const useStatusSeverityAlertCounters = ({
     loading: isLoadingData,
     refetch,
     ...result
-  } = useQueryAlerts<{}, AlertCountersByStatusAndSeverityAggregation>({
-    query: buildAlertAggregationQuery({ from, to }),
+  } = useQueryAlerts<{}, AlertCountersBySeverityAndSeverityAggregation>({
+    query: buildVulnerableHostAggregationQuery({ from, to }),
     indexName: signalIndexName,
   });
 
@@ -90,7 +88,7 @@ export const useStatusSeverityAlertCounters = ({
   );
 
   useEffect(() => {
-    setQuery(buildAlertAggregationQuery({ from, to }));
+    setQuery(buildVulnerableHostAggregationQuery({ from, to }));
   }, [setQuery, from, to]);
 
   const isLoading = isLoadingData && isSignalIndexLoading;
@@ -98,28 +96,18 @@ export const useStatusSeverityAlertCounters = ({
   return { isLoading, data: transformedResponse, refetch };
 };
 
-const buildAlertAggregationQuery = ({ from, to }: UseStatusSeverityAlertCountersProps) => ({
-  aggs: {
-    [ALERT_BY_HOST_AGG]: {
-      terms: {
-        field: 'host.name',
-        order: {
-          _count: 'desc',
-        },
-        size: 4,
-      },
-      aggs: {
-        [HOST_BY_SEVERITY_AGG]: {
-          terms: {
-            field: 'kibana.alert.severity',
-          },
-        },
-      },
-    },
-  },
+export const buildVulnerableHostAggregationQuery = ({
+  from,
+  to,
+}: UseStatusSeverityAlertCountersProps) => ({
   query: {
     bool: {
       filter: [
+        {
+          term: {
+            'kibana.alert.workflow_status': 'open',
+          },
+        },
         {
           range: {
             '@timestamp': {
@@ -132,30 +120,76 @@ const buildAlertAggregationQuery = ({ from, to }: UseStatusSeverityAlertCounters
     },
   },
   size: 0,
+  aggs: {
+    [HOST_BY_SEVERITY_AGG]: {
+      terms: {
+        field: 'host.name',
+        order: [
+          {
+            'critical.doc_count': 'desc',
+          },
+          {
+            'high.doc_count': 'desc',
+          },
+          {
+            'medium.doc_count': 'desc',
+          },
+          {
+            'low.doc_count': 'desc',
+          },
+        ],
+        size: 4,
+      },
+      aggs: {
+        critical: {
+          filter: {
+            term: {
+              'kibana.alert.severity': 'critical',
+            },
+          },
+        },
+        high: {
+          filter: {
+            term: {
+              'kibana.alert.severity': 'high',
+            },
+          },
+        },
+        medium: {
+          filter: {
+            term: {
+              'kibana.alert.severity': 'medium',
+            },
+          },
+        },
+        low: {
+          filter: {
+            term: {
+              'kibana.alert.severity': 'low',
+            },
+          },
+        },
+      },
+    },
+  },
 });
 
-type AlertStatus = 'open' | 'closed' | 'acknowledged';
 function pickOffCounters(
-  rawAlertResponse: AlertSearchResponse<{}, AlertCountersByStatusAndSeverityAggregation> | null
-): Partial<AlertCountersStatusBySeverity> {
-  const buckets = rawAlertResponse?.aggregations?.[ALERT_BY_STATUS_AGG].buckets ?? [];
+  rawAlertResponse: AlertSearchResponse<{}, AlertCountersBySeverityAndSeverityAggregation> | null
+): AlertSeverityCounts[] {
+  const buckets = rawAlertResponse?.aggregations?.[HOST_BY_SEVERITY_AGG].buckets ?? [];
 
-  return buckets.reduce<Partial<AlertCountersStatusBySeverity>>(
-    (accumalatedAlertsByStatus, currentStatus) => {
-      return {
-        ...accumalatedAlertsByStatus,
-        [currentStatus.key]: {
-          ...accumalatedAlertsByStatus[currentStatus.key as AlertStatus],
-          count: currentStatus.doc_count,
-          ...currentStatus[STATUS_BY_SEVERITY_AGG].buckets.reduce((acc, severity) => {
-            return {
-              ...acc,
-              [severity.key]: severity.doc_count,
-            };
-          }, {}),
-        },
-      };
-    },
-    {}
-  );
+  return buckets.reduce<AlertSeverityCounts[]>((accumalatedAlertsByHost, currentHost) => {
+    return [
+      ...accumalatedAlertsByHost,
+      {
+        hostName: currentHost.key,
+        count: currentHost.doc_count,
+        low: currentHost.low.doc_count,
+        medium: currentHost.medium.doc_count,
+        high: currentHost.high.doc_count,
+        critical: currentHost.critical.doc_count,
+      },
+    ];
+  }, []);
 }
