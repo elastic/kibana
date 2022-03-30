@@ -97,6 +97,7 @@ Context is important! For that reason, the client internally appends the timesta
 
 ```typescript
 analytics.registerContextProvider({
+  name: 'my_context_provider',
   // RxJS Observable that emits every time the context changes. For example: a License changes from `basic` to `trial`.
   context$,
   // Similar to the `reportEvent` API, schema defining the structure of the expected output of the context$ observable.

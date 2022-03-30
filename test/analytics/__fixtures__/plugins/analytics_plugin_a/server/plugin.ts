@@ -90,6 +90,7 @@ export class AnalyticsPluginAPlugin implements Plugin {
     );
 
     registerContextProvider({
+      name: 'analyticsPluginA',
       context$: new BehaviorSubject({ pid: process.pid }),
       schema: {
         pid: {

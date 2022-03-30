@@ -63,6 +63,7 @@ export class AnalyticsPluginA implements Plugin {
     };
 
     registerContextProvider({
+      name: 'analyticsPluginA',
       context$: new BehaviorSubject({ user_agent: navigator.userAgent }).asObservable(),
       schema: {
         user_agent: {

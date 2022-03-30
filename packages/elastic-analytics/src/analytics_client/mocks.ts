@@ -11,11 +11,12 @@ import type { IAnalyticsClient } from './types';
 
 function createMockedAnalyticsClient(): jest.Mocked<IAnalyticsClient> {
   return {
-    optIn: jest.fn().mockImplementation(),
-    reportEvent: jest.fn().mockImplementation(),
-    registerEventType: jest.fn().mockImplementation(),
-    registerContextProvider: jest.fn().mockImplementation(),
-    registerShipper: jest.fn().mockImplementation(),
+    optIn: jest.fn(),
+    reportEvent: jest.fn(),
+    registerEventType: jest.fn(),
+    registerContextProvider: jest.fn(),
+    removeContextProvider: jest.fn(),
+    registerShipper: jest.fn(),
     telemetryCounter$: new Subject(),
   };
 }

@@ -49,6 +49,7 @@ export class AnalyticsService {
     return {
       optIn: this.analyticsClient.optIn,
       registerContextProvider: this.analyticsClient.registerContextProvider,
+      removeContextProvider: this.analyticsClient.removeContextProvider,
       registerEventType: this.analyticsClient.registerEventType,
       registerShipper: this.analyticsClient.registerShipper,
       reportEvent: this.analyticsClient.reportEvent,
@@ -59,6 +60,7 @@ export class AnalyticsService {
     return {
       optIn: this.analyticsClient.optIn,
       registerContextProvider: this.analyticsClient.registerContextProvider,
+      removeContextProvider: this.analyticsClient.removeContextProvider,
       registerEventType: this.analyticsClient.registerEventType,
       registerShipper: this.analyticsClient.registerShipper,
       reportEvent: this.analyticsClient.reportEvent,

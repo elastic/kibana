@@ -121,9 +121,18 @@ export interface OptInConfig {
 }
 
 /**
+ * ContextProviderName used for indexed structures. Only used to improve the readability of the types
+ */
+export type ContextProviderName = string;
+
+/**
  * Definition of a context provider
  */
 export interface ContextProviderOpts<Context extends Partial<EventContext>> {
+  /**
+   * The name of the provider.
+   */
+  name: ContextProviderName;
   /**
    * Observable that emits the custom context.
    */
@@ -193,6 +202,11 @@ export interface IAnalyticsClient {
    * @param contextProviderOpts {@link ContextProviderOpts}
    */
   registerContextProvider: <Context>(contextProviderOpts: ContextProviderOpts<Context>) => void;
+  /**
+   * Removes the context provider and stop enriching the events from its context.
+   * @param contextProviderName The name of the context provider to remove.
+   */
+  removeContextProvider: (contextProviderName: ContextProviderName) => void;
   /**
    * Observable to emit the stats of the processed events.
    */

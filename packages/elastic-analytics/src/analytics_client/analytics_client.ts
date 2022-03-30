@@ -26,6 +26,7 @@ import {
 import type { IShipper } from '../shippers';
 import type {
   AnalyticsClientInitContext,
+  ContextProviderName,
   ContextProviderOpts,
   EventTypeOpts,
   IAnalyticsClient,
@@ -37,6 +38,7 @@ import type { Event, EventContext, EventType, TelemetryCounter } from '../events
 import { TelemetryCounterType } from '../events';
 import { ShippersRegistry } from './shippers_registry';
 import { OptInConfigService } from './opt_in_config';
+import { ContextService } from './context_service';
 
 export class AnalyticsClient implements IAnalyticsClient {
   private readonly internalTelemetryCounter$ = new Subject<TelemetryCounter>();
@@ -56,11 +58,8 @@ export class AnalyticsClient implements IAnalyticsClient {
    */
   private readonly shipperRegistered$ = new Subject<void>();
   private readonly eventTypeRegistry = new Map<EventType, EventTypeOpts<unknown>>();
+  private readonly contextService: ContextService;
   private readonly context$ = new BehaviorSubject<Partial<EventContext>>({});
-  private readonly contextProvidersRegistry = new Map<
-    Observable<Partial<EventContext>>,
-    Partial<EventContext>
-  >();
   private readonly optInConfig$ = new BehaviorSubject<OptInConfigService | undefined>(undefined);
   private readonly optInConfigWithReplay$ = this.optInConfig$.pipe(
     filter((optInConfig): optInConfig is OptInConfigService => typeof optInConfig !== 'undefined'),
@@ -72,6 +71,7 @@ export class AnalyticsClient implements IAnalyticsClient {
   );
 
   constructor(private readonly initContext: AnalyticsClientInitContext) {
+    this.contextService = new ContextService(this.context$, this.initContext.isDev);
     this.reportEnqueuedEventsWhenClientIsReady();
   }
 
@@ -142,30 +142,11 @@ export class AnalyticsClient implements IAnalyticsClient {
   };
 
   public registerContextProvider = <Context>(contextProviderOpts: ContextProviderOpts<Context>) => {
-    contextProviderOpts.context$
-      .pipe(
-        tap((ctx) => {
-          if (this.initContext.isDev) {
-            // TODO: In the future we may need to validate the input of the context based on the schema (only if isDev)
-          }
-        })
-      )
-      .subscribe({
-        next: (ctx) => {
-          // We store each context linked to the context provider so they can increase and reduce
-          // the number of fields they report without having left-overs in the global context.
-          this.contextProvidersRegistry.set(contextProviderOpts.context$, ctx);
+    this.contextService.registerContextProvider(contextProviderOpts);
+  };
 
-          // For every context change, we rebuild the global context.
-          // It's better to do it here than to rebuild it for every reportEvent.
-          this.updateGlobalContext();
-        },
-        complete: () => {
-          // Delete the context provider from the registry when the observable completes
-          this.contextProvidersRegistry.delete(contextProviderOpts.context$);
-          this.updateGlobalContext();
-        },
-      });
+  public removeContextProvider = (name: ContextProviderName) => {
+    this.contextService.removeContextProvider(name);
   };
 
   public registerShipper = <Shipper extends IShipper, ShipperConfig>(
@@ -260,21 +241,6 @@ export class AnalyticsClient implements IAnalyticsClient {
         count: events.length,
       });
     }
-  }
-
-  /**
-   * Loops through all the context providers and sets the global context
-   * @private
-   */
-  private updateGlobalContext() {
-    this.context$.next(
-      [...this.contextProvidersRegistry.values()].reduce((acc, context) => {
-        return {
-          ...acc,
-          ...context,
-        };
-      }, {} as Partial<EventContext>)
-    );
   }
 
   /**

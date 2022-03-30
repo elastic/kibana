@@ -23,6 +23,7 @@ const createAnalyticsServicePreboot = (): jest.Mocked<AnalyticsServicePreboot> =
     reportEvent: jest.fn(),
     registerEventType: jest.fn(),
     registerContextProvider: jest.fn(),
+    removeContextProvider: jest.fn(),
     registerShipper: jest.fn(),
     telemetryCounter$: new Subject(),
   };
@@ -34,6 +35,7 @@ const createAnalyticsServiceSetup = (): jest.Mocked<AnalyticsServiceSetup> => {
     reportEvent: jest.fn(),
     registerEventType: jest.fn(),
     registerContextProvider: jest.fn(),
+    removeContextProvider: jest.fn(),
     registerShipper: jest.fn(),
     telemetryCounter$: new Subject(),
   };

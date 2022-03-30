@@ -320,6 +320,7 @@ describe('AnalyticsClient', () => {
 
       const context$ = new Subject<{ a_field: boolean }>();
       analyticsClient.registerContextProvider({
+        name: 'contextProviderA',
         schema: {
           a_field: {
             type: 'boolean',
@@ -370,6 +371,7 @@ describe('AnalyticsClient', () => {
     test('Registers a context provider', async () => {
       const context$ = new Subject<{ a_field: boolean }>();
       analyticsClient.registerContextProvider({
+        name: 'contextProviderA',
         schema: {
           a_field: {
             type: 'boolean',
@@ -392,6 +394,7 @@ describe('AnalyticsClient', () => {
     test('It does not break if context emits `undefined`', async () => {
       const context$ = new Subject<{ a_field: boolean }>();
       analyticsClient.registerContextProvider({
+        name: 'contextProviderA',
         schema: {
           a_field: {
             type: 'boolean',
@@ -416,6 +419,7 @@ describe('AnalyticsClient', () => {
     test('It does not break for BehaviourSubjects (emitting as soon as they connect)', async () => {
       const context$ = new BehaviorSubject<{ a_field: boolean }>({ a_field: true });
       analyticsClient.registerContextProvider({
+        name: 'contextProviderA',
         schema: {
           a_field: {
             type: 'boolean',
@@ -436,6 +440,7 @@ describe('AnalyticsClient', () => {
     test('Merges all the contexts together', async () => {
       const contextA$ = new Subject<{ a_field: boolean }>();
       analyticsClient.registerContextProvider({
+        name: 'contextProviderA',
         schema: {
           a_field: {
             type: 'boolean',
@@ -449,6 +454,7 @@ describe('AnalyticsClient', () => {
 
       const contextB$ = new Subject<{ a_field?: boolean; b_field: number }>();
       analyticsClient.registerContextProvider({
+        name: 'contextProviderB',
         schema: {
           a_field: {
             type: 'boolean',
@@ -487,6 +493,7 @@ describe('AnalyticsClient', () => {
     test('The global context is not polluted by context providers removing reported fields', async () => {
       const context$ = new Subject<{ a_field?: boolean; b_field: number }>();
       analyticsClient.registerContextProvider({
+        name: 'contextProviderA',
         schema: {
           a_field: {
             type: 'boolean',
@@ -521,16 +528,49 @@ describe('AnalyticsClient', () => {
       ]);
     });
 
-    test('Removes the context provider after it completes', async () => {
+    test('Fails to register 2 context providers with the same name', () => {
+      analyticsClient.registerContextProvider({
+        name: 'contextProviderA',
+        schema: {
+          a_field: {
+            type: 'boolean',
+            _meta: {
+              description: 'a_field description',
+            },
+          },
+        },
+        context$: new Subject<{ a_field: boolean }>(),
+      });
+      expect(() => {
+        analyticsClient.registerContextProvider({
+          name: 'contextProviderA',
+          schema: {
+            a_field: {
+              type: 'boolean',
+              _meta: {
+                description: 'a_field description',
+              },
+            },
+          },
+          context$: new Subject<{ a_field: boolean }>(),
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Context provider with name 'contextProviderA' already registered"`
+      );
+    });
+
+    test('Does not remove the context provider after it completes', async () => {
       const context$ = new Subject<{ a_field: boolean }>();
 
-      // eslint-disable-next-line dot-notation
-      const contextProvidersRegistry = analyticsClient['contextProvidersRegistry'];
+      const contextProvidersRegistry =
+        // eslint-disable-next-line dot-notation
+        analyticsClient['contextService']['contextProvidersRegistry'];
 
       // The context registry is empty
       expect(contextProvidersRegistry.size).toBe(0);
 
       analyticsClient.registerContextProvider({
+        name: 'contextProviderA',
         schema: {
           a_field: {
             type: 'boolean',
@@ -551,6 +591,9 @@ describe('AnalyticsClient', () => {
       // Still in the registry
       expect(contextProvidersRegistry.size).toBe(1);
       context$.complete();
+      // Still in the registry
+      expect(contextProvidersRegistry.size).toBe(1);
+      analyticsClient.removeContextProvider('contextProviderA');
       // The context provider is removed from the registry
       expect(contextProvidersRegistry.size).toBe(0);
       await expect(globalContextPromise).resolves.toEqual([

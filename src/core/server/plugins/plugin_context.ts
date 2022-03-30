@@ -111,6 +111,7 @@ export function createPluginPrebootSetupContext(
     analytics: {
       optIn: deps.analytics.optIn,
       registerContextProvider: deps.analytics.registerContextProvider,
+      removeContextProvider: deps.analytics.removeContextProvider,
       registerEventType: deps.analytics.registerEventType,
       registerShipper: deps.analytics.registerShipper,
       reportEvent: deps.analytics.reportEvent,
@@ -158,6 +159,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     analytics: {
       optIn: deps.analytics.optIn,
       registerContextProvider: deps.analytics.registerContextProvider,
+      removeContextProvider: deps.analytics.removeContextProvider,
       registerEventType: deps.analytics.registerEventType,
       registerShipper: deps.analytics.registerShipper,
       reportEvent: deps.analytics.reportEvent,
