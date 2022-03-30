@@ -31,7 +31,7 @@ jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
 });
 
 describe('<RemoteClusterList />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -39,7 +39,6 @@ describe('<RemoteClusterList />', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
@@ -47,8 +46,8 @@ describe('<RemoteClusterList />', () => {
   describe('on component mount', () => {
     let exists;
 
-    beforeEach(() => {
-      ({ exists } = setup());
+    beforeEach(async () => {
+      ({ exists } = await setup(httpSetup));
     });
 
     test('should show a "loading remote clusters" indicator', () => {
@@ -62,7 +61,7 @@ describe('<RemoteClusterList />', () => {
 
     beforeEach(async () => {
       await act(async () => {
-        ({ exists, component } = setup());
+        ({ exists, component } = await setup(httpSetup));
       });
 
       component.update();
@@ -98,7 +97,7 @@ describe('<RemoteClusterList />', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       await act(async () => {
-        ({ table, component, form } = setup());
+        ({ table, component, form } = await setup(httpSetup));
       });
 
       component.update();
@@ -154,7 +153,7 @@ describe('<RemoteClusterList />', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       await act(async () => {
-        ({ table, actions, component, form } = setup());
+        ({ table, actions, component, form } = await setup(httpSetup));
       });
 
       component.update();
@@ -217,7 +216,7 @@ describe('<RemoteClusterList />', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       await act(async () => {
-        ({ component, find, exists, table, actions } = setup());
+        ({ component, find, exists, table, actions } = await setup(httpSetup));
       });
 
       component.update();
@@ -339,7 +338,7 @@ describe('<RemoteClusterList />', () => {
     describe('confirmation modal (delete remote cluster)', () => {
       test('should remove the remote cluster from the table after delete is successful', async () => {
         // Mock HTTP DELETE request
-        httpRequestsMockHelpers.setDeleteRemoteClusterResponse({
+        httpRequestsMockHelpers.setDeleteRemoteClusterResponse(remoteCluster1.name, {
           itemsDeleted: [remoteCluster1.name],
           errors: [],
         });
