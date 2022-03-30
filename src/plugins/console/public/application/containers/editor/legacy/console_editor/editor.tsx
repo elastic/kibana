@@ -34,11 +34,13 @@ import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
+import type { SenseEditor } from '../../../../models/sense_editor';
 
 const { useUIAceKeyboardMode } = ace;
 
 export interface EditorProps {
   initialTextValue: string;
+  setEditorInstance: (instance: SenseEditor) => void;
 }
 
 interface QueryParams {
@@ -62,7 +64,7 @@ const DEFAULT_INPUT_VALUE = `GET _search
 
 const inputId = 'ConAppInputTextarea';
 
-function EditorUI({ initialTextValue }: EditorProps) {
+function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const {
     services: { history, notifications, settings: settingsService, esHostService, http },
     docLinkVersion,
@@ -91,6 +93,8 @@ function EditorUI({ initialTextValue }: EditorProps) {
     editorInstanceRef.current = senseEditor.create(editorRef.current!);
     const editor = editorInstanceRef.current;
     const textareaElement = editorRef.current!.querySelector('textarea');
+
+    setEditorInstance(editor);
 
     if (textareaElement) {
       textareaElement.setAttribute('id', inputId);

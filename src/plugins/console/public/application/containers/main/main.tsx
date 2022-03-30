@@ -25,6 +25,7 @@ import { useServicesContext, useEditorReadContext, useRequestReadContext } from 
 import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
+import type { SenseEditor } from '../../models/sense_editor';
 
 export function Main() {
   const {
@@ -45,6 +46,8 @@ export function Main() {
   const [showingHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+
+  const [editorInstance, setEditorInstance] = useState<SenseEditor | null>(null);
 
   const renderConsoleHistory = () => {
     return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
@@ -108,7 +111,7 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <Editor loading={!done} />
+          <Editor loading={!done} setEditorInstance={(instance) => setEditorInstance(instance)} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -121,7 +124,9 @@ export function Main() {
         />
       ) : null}
 
-      {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
+      {showSettings ? (
+        <Settings onClose={() => setShowSettings(false)} editorInstance={editorInstance} />
+      ) : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
     </div>
