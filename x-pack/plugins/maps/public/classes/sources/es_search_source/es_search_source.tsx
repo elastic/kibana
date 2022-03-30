@@ -597,10 +597,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     searchSource.setField('query', query);
     searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
 
-    const resp = await searchSource.fetch({
-      legacyHitsTotal: false,
-      executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
-    });
+    const { rawResponse: resp } = await searchSource
+      .fetch$({
+        legacyHitsTotal: false,
+        executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
+      })
+      .toPromise();
 
     const hit = _.get(resp, 'hits.hits[0]');
     if (!hit) {
