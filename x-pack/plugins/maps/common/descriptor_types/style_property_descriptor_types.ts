@@ -10,6 +10,7 @@
 import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
+  ICON_SOURCE,
   LABEL_BORDER_SIZES,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
@@ -60,6 +61,7 @@ export type CategoryColorStop = {
 export type IconStop = {
   stop: string | null;
   icon: string;
+  iconSource?: ICON_SOURCE;
 };
 
 export type ColorDynamicOptions = {
@@ -108,6 +110,9 @@ export type IconDynamicOptions = {
 
 export type IconStaticOptions = {
   value: string; // icon id
+  label?: string;
+  svg?: string;
+  iconSource?: ICON_SOURCE;
 };
 
 export type IconStylePropertyDescriptor =
@@ -177,6 +182,14 @@ export type SizeStylePropertyDescriptor =
       type: STYLE_TYPE.DYNAMIC;
       options: SizeDynamicOptions;
     };
+
+export type CustomIcon = {
+  symbolId: string;
+  svg: string; // svg string
+  label: string; // user given label
+  cutoff: number;
+  radius: number;
+};
 
 export type VectorStylePropertiesDescriptor = {
   [VECTOR_STYLES.SYMBOLIZE_AS]: SymbolizeAsStylePropertyDescriptor;

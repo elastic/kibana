@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 
 import { useSelector } from 'react-redux';
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
@@ -32,6 +31,7 @@ import { TestRun } from '../test_now_mode/test_now_mode';
 import { monitorManagementListSelector } from '../../../state/selectors';
 
 import { kibanaService } from '../../../state/kibana_service';
+import { showSyncErrors } from '../show_sync_errors';
 
 export interface ActionBarProps {
   monitor: SyntheticsMonitor;
@@ -103,43 +103,7 @@ export const ActionBar = ({
       });
       setIsSuccessful(true);
     } else if (hasErrors && !loading) {
-      Object.values(data.attributes.errors!).forEach((location) => {
-        const { status: responseStatus, reason } = location.error || {};
-        kibanaService.toasts.addWarning({
-          title: i18n.translate('xpack.uptime.monitorManagement.service.error.title', {
-            defaultMessage: `Unable to sync monitor config`,
-          }),
-          text: toMountPoint(
-            <>
-              <p>
-                {i18n.translate('xpack.uptime.monitorManagement.service.error.message', {
-                  defaultMessage: `Your monitor was saved, but there was a problem syncing the configuration for {location}. We will automatically try again later. If this problem continues, your monitors will stop running in {location}. Please contact Support for assistance.`,
-                  values: {
-                    location: locations?.find((loc) => loc?.id === location.locationId)?.label,
-                  },
-                })}
-              </p>
-              {responseStatus || reason ? (
-                <p>
-                  {responseStatus
-                    ? i18n.translate('xpack.uptime.monitorManagement.service.error.status', {
-                        defaultMessage: 'Status: {status}. ',
-                        values: { status: responseStatus },
-                      })
-                    : null}
-                  {reason
-                    ? i18n.translate('xpack.uptime.monitorManagement.service.error.reason', {
-                        defaultMessage: 'Reason: {reason}.',
-                        values: { reason },
-                      })
-                    : null}
-                </p>
-              ) : null}
-            </>
-          ),
-          toastLifeTimeMs: 30000,
-        });
-      });
+      showSyncErrors(data.attributes.errors, locations);
       setIsSuccessful(true);
     }
   }, [data, status, isSaving, isValid, monitorId, hasErrors, locations, loading]);

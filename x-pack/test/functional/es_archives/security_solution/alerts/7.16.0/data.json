@@ -1,0 +1,3590 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "0bb0c0d5488d757907f6be6e4c27ff698666948e2cf01d53e8fa43958b36c6a8",
+    "source": {
+      "agent": {
+        "name": "security-linux-1.example.dev",
+        "id": "d8f66724-3cf2-437c-b124-6ac9fb0e2311",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-1",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.194",
+        "name": "security-linux-1",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:32.045Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:51.493Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "threat": {
+        "enrichments": [
+          {
+            "indicator": {},
+            "matched": {
+              "atomic": "security-linux-1",
+              "field": "host.name",
+              "id": "M2yvt38BIyEvspK01XQt",
+              "index": "threat-index-000001",
+              "type": "indicator_match_rule"
+            }
+          }
+        ]
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "P2yvt38BIyEvspK05HSe",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "P2yvt38BIyEvspK05HSe",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "62f9a8c0-aac9-11ec-aa31-c9ea2cb79db7",
+          "actions": [],
+          "interval": "1m",
+          "name": "threat-match-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:47.264Z",
+          "updated_at": "2022-03-23T16:50:48.396Z",
+          "description": "a simple threat match rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "bef9b0da-8c2f-4b82-930f-37ffa1b57fc1",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threat_match",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threat_query": "*",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "host.name"
+                }
+              ]
+            }
+          ],
+          "threat_language": "kuery",
+          "threat_index": [
+            "threat-index-*"
+          ],
+          "threat_indicator_path": "threat.indicator"
+        },
+        "reason": "event on security-linux-1 created low alert threat-match-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "P2yvt38BIyEvspK05HSe",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:32.045Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:32.045Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "0dd11069ba6c63ec60ac902d6fb0a8a52c4f5ab20f03babe7b861c6d34431bad",
+    "source": {
+      "agent": {
+        "name": "security-linux-3.example.dev",
+        "id": "06851da1-73e7-41e3-97d6-ff1d62c98dc5",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-3",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.196",
+        "name": "security-linux-3",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:31.654Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:51.495Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "threat": {
+        "enrichments": [
+          {
+            "indicator": {},
+            "matched": {
+              "atomic": "security-linux-3",
+              "field": "host.name",
+              "id": "NWyvt38BIyEvspK013R3",
+              "index": "threat-index-000001",
+              "type": "indicator_match_rule"
+            }
+          }
+        ]
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "Pmyvt38BIyEvspK043Ri",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "Pmyvt38BIyEvspK043Ri",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "62f9a8c0-aac9-11ec-aa31-c9ea2cb79db7",
+          "actions": [],
+          "interval": "1m",
+          "name": "threat-match-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:47.264Z",
+          "updated_at": "2022-03-23T16:50:48.396Z",
+          "description": "a simple threat match rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "bef9b0da-8c2f-4b82-930f-37ffa1b57fc1",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threat_match",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threat_query": "*",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "host.name"
+                }
+              ]
+            }
+          ],
+          "threat_language": "kuery",
+          "threat_index": [
+            "threat-index-*"
+          ],
+          "threat_indicator_path": "threat.indicator"
+        },
+        "reason": "event on security-linux-3 created low alert threat-match-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "Pmyvt38BIyEvspK043Ri",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:31.654Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:31.654Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "999fef09ceb58f30dcbbe2a5fd410f8a22dda6179fa5f1041c7a759a31932ef9",
+    "source": {
+      "agent": {
+        "name": "security-linux-2.example.dev",
+        "id": "87c417dd-08d6-4e24-ad69-285cb8de84e9",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-2",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.195",
+        "name": "security-linux-2",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:31.330Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:51.496Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "threat": {
+        "enrichments": [
+          {
+            "indicator": {},
+            "matched": {
+              "atomic": "security-linux-2",
+              "field": "host.name",
+              "id": "NGyvt38BIyEvspK01nQn",
+              "index": "threat-index-000001",
+              "type": "indicator_match_rule"
+            }
+          }
+        ]
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "PWyvt38BIyEvspK04XTd",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "PWyvt38BIyEvspK04XTd",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "62f9a8c0-aac9-11ec-aa31-c9ea2cb79db7",
+          "actions": [],
+          "interval": "1m",
+          "name": "threat-match-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:47.264Z",
+          "updated_at": "2022-03-23T16:50:48.396Z",
+          "description": "a simple threat match rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "bef9b0da-8c2f-4b82-930f-37ffa1b57fc1",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threat_match",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threat_query": "*",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "host.name"
+                }
+              ]
+            }
+          ],
+          "threat_language": "kuery",
+          "threat_index": [
+            "threat-index-*"
+          ],
+          "threat_indicator_path": "threat.indicator"
+        },
+        "reason": "event on security-linux-2 created low alert threat-match-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "PWyvt38BIyEvspK04XTd",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:31.330Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:31.330Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "f75bc411e6b0c30c26aa310c1e65ff8430cc0a98ddf74c335941dd7456858e85",
+    "source": {
+      "agent": {
+        "name": "security-linux-1.example.dev",
+        "id": "d8f66724-3cf2-437c-b124-6ac9fb0e2311",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-1",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.194",
+        "name": "security-linux-1",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:31.001Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:51.497Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "threat": {
+        "enrichments": [
+          {
+            "indicator": {},
+            "matched": {
+              "atomic": "security-linux-1",
+              "field": "host.name",
+              "id": "M2yvt38BIyEvspK01XQt",
+              "index": "threat-index-000001",
+              "type": "indicator_match_rule"
+            }
+          }
+        ]
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "PGyvt38BIyEvspK04HSX",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "PGyvt38BIyEvspK04HSX",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "62f9a8c0-aac9-11ec-aa31-c9ea2cb79db7",
+          "actions": [],
+          "interval": "1m",
+          "name": "threat-match-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:47.264Z",
+          "updated_at": "2022-03-23T16:50:48.396Z",
+          "description": "a simple threat match rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "bef9b0da-8c2f-4b82-930f-37ffa1b57fc1",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threat_match",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threat_query": "*",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "host.name"
+                }
+              ]
+            }
+          ],
+          "threat_language": "kuery",
+          "threat_index": [
+            "threat-index-*"
+          ],
+          "threat_indicator_path": "threat.indicator"
+        },
+        "reason": "event on security-linux-1 created low alert threat-match-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "PGyvt38BIyEvspK04HSX",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:31.001Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:31.001Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "b46b35ce011486304a3a1e1b1dc2b772e2b80684a3a8663e9cd101691cff7429",
+    "source": {
+      "agent": {
+        "name": "security-linux-3.example.dev",
+        "id": "06851da1-73e7-41e3-97d6-ff1d62c98dc5",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-3",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.196",
+        "name": "security-linux-3",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:30.665Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:51.498Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "threat": {
+        "enrichments": [
+          {
+            "indicator": {},
+            "matched": {
+              "atomic": "security-linux-3",
+              "field": "host.name",
+              "id": "NWyvt38BIyEvspK013R3",
+              "index": "threat-index-000001",
+              "type": "indicator_match_rule"
+            }
+          }
+        ]
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "O2yvt38BIyEvspK033RN",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "O2yvt38BIyEvspK033RN",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "62f9a8c0-aac9-11ec-aa31-c9ea2cb79db7",
+          "actions": [],
+          "interval": "1m",
+          "name": "threat-match-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:47.264Z",
+          "updated_at": "2022-03-23T16:50:48.396Z",
+          "description": "a simple threat match rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "bef9b0da-8c2f-4b82-930f-37ffa1b57fc1",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threat_match",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threat_query": "*",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "host.name"
+                }
+              ]
+            }
+          ],
+          "threat_language": "kuery",
+          "threat_index": [
+            "threat-index-*"
+          ],
+          "threat_indicator_path": "threat.indicator"
+        },
+        "reason": "event on security-linux-3 created low alert threat-match-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "O2yvt38BIyEvspK033RN",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:30.665Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:30.665Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "570caf7637457b9721fd46ec22166adb57916298bf68ef31df07bd0bbac95d7c",
+    "source": {
+      "agent": {
+        "name": "security-linux-2.example.dev",
+        "id": "87c417dd-08d6-4e24-ad69-285cb8de84e9",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-2",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.195",
+        "name": "security-linux-2",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:30.353Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:51.499Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "threat": {
+        "enrichments": [
+          {
+            "indicator": {},
+            "matched": {
+              "atomic": "security-linux-2",
+              "field": "host.name",
+              "id": "NGyvt38BIyEvspK01nQn",
+              "index": "threat-index-000001",
+              "type": "indicator_match_rule"
+            }
+          }
+        ]
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "Omyvt38BIyEvspK03nQB",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "Omyvt38BIyEvspK03nQB",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "62f9a8c0-aac9-11ec-aa31-c9ea2cb79db7",
+          "actions": [],
+          "interval": "1m",
+          "name": "threat-match-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:47.264Z",
+          "updated_at": "2022-03-23T16:50:48.396Z",
+          "description": "a simple threat match rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "bef9b0da-8c2f-4b82-930f-37ffa1b57fc1",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threat_match",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threat_query": "*",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "host.name"
+                }
+              ]
+            }
+          ],
+          "threat_language": "kuery",
+          "threat_index": [
+            "threat-index-*"
+          ],
+          "threat_indicator_path": "threat.indicator"
+        },
+        "reason": "event on security-linux-2 created low alert threat-match-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "Omyvt38BIyEvspK03nQB",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:30.353Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:30.353Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "0c7bfb7198c9db281b639b1044c74db2b881e3152ee863e6c9304a6fb5d0e5bb",
+    "source": {
+      "agent": {
+        "name": "security-linux-1.example.dev",
+        "id": "d8f66724-3cf2-437c-b124-6ac9fb0e2311",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-1",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.194",
+        "name": "security-linux-1",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:30.031Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:51.501Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "threat": {
+        "enrichments": [
+          {
+            "indicator": {},
+            "matched": {
+              "atomic": "security-linux-1",
+              "field": "host.name",
+              "id": "M2yvt38BIyEvspK01XQt",
+              "index": "threat-index-000001",
+              "type": "indicator_match_rule"
+            }
+          }
+        ]
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "OWyvt38BIyEvspK03HTF",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "OWyvt38BIyEvspK03HTF",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "62f9a8c0-aac9-11ec-aa31-c9ea2cb79db7",
+          "actions": [],
+          "interval": "1m",
+          "name": "threat-match-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:47.264Z",
+          "updated_at": "2022-03-23T16:50:48.396Z",
+          "description": "a simple threat match rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "bef9b0da-8c2f-4b82-930f-37ffa1b57fc1",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threat_match",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threat_query": "*",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "host.name"
+                }
+              ]
+            }
+          ],
+          "threat_language": "kuery",
+          "threat_index": [
+            "threat-index-*"
+          ],
+          "threat_indicator_path": "threat.indicator"
+        },
+        "reason": "event on security-linux-1 created low alert threat-match-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "OWyvt38BIyEvspK03HTF",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:30.031Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:30.031Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "ae1c6e5c7680cdc986ff52b1913e93ba2a010ea207364d4782550adf180e49ee",
+    "source": {
+      "agent": {
+        "name": "security-linux-3.example.dev",
+        "id": "06851da1-73e7-41e3-97d6-ff1d62c98dc5",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-3",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.196",
+        "name": "security-linux-3",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:29.715Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:51.502Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "threat": {
+        "enrichments": [
+          {
+            "indicator": {},
+            "matched": {
+              "atomic": "security-linux-3",
+              "field": "host.name",
+              "id": "NWyvt38BIyEvspK013R3",
+              "index": "threat-index-000001",
+              "type": "indicator_match_rule"
+            }
+          }
+        ]
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "OGyvt38BIyEvspK023SI",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "OGyvt38BIyEvspK023SI",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "62f9a8c0-aac9-11ec-aa31-c9ea2cb79db7",
+          "actions": [],
+          "interval": "1m",
+          "name": "threat-match-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:47.264Z",
+          "updated_at": "2022-03-23T16:50:48.396Z",
+          "description": "a simple threat match rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "bef9b0da-8c2f-4b82-930f-37ffa1b57fc1",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threat_match",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threat_query": "*",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "host.name"
+                }
+              ]
+            }
+          ],
+          "threat_language": "kuery",
+          "threat_index": [
+            "threat-index-*"
+          ],
+          "threat_indicator_path": "threat.indicator"
+        },
+        "reason": "event on security-linux-3 created low alert threat-match-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "OGyvt38BIyEvspK023SI",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:29.715Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:29.715Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "a73fda6bdb25425c8597f63e2b87b662798ad46f195c47ac4243d9d0b9705dd8",
+    "source": {
+      "agent": {
+        "name": "security-linux-2.example.dev",
+        "id": "87c417dd-08d6-4e24-ad69-285cb8de84e9",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-2",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.195",
+        "name": "security-linux-2",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:29.387Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:51.503Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "threat": {
+        "enrichments": [
+          {
+            "indicator": {},
+            "matched": {
+              "atomic": "security-linux-2",
+              "field": "host.name",
+              "id": "NGyvt38BIyEvspK01nQn",
+              "index": "threat-index-000001",
+              "type": "indicator_match_rule"
+            }
+          }
+        ]
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "N2yvt38BIyEvspK02nRK",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "N2yvt38BIyEvspK02nRK",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "62f9a8c0-aac9-11ec-aa31-c9ea2cb79db7",
+          "actions": [],
+          "interval": "1m",
+          "name": "threat-match-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:47.264Z",
+          "updated_at": "2022-03-23T16:50:48.396Z",
+          "description": "a simple threat match rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "bef9b0da-8c2f-4b82-930f-37ffa1b57fc1",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threat_match",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threat_query": "*",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "host.name"
+                }
+              ]
+            }
+          ],
+          "threat_language": "kuery",
+          "threat_index": [
+            "threat-index-*"
+          ],
+          "threat_indicator_path": "threat.indicator"
+        },
+        "reason": "event on security-linux-2 created low alert threat-match-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "N2yvt38BIyEvspK02nRK",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:29.387Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:29.387Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "77038fe81327ce7b578e69896fdd1869fab16d13633b5fb0cb7743bae9120ca5",
+    "source": {
+      "agent": {
+        "name": "security-linux-1.example.dev",
+        "id": "d8f66724-3cf2-437c-b124-6ac9fb0e2311",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-1",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.194",
+        "name": "security-linux-1",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:28.994Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:51.504Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "threat": {
+        "enrichments": [
+          {
+            "indicator": {},
+            "matched": {
+              "atomic": "security-linux-1",
+              "field": "host.name",
+              "id": "M2yvt38BIyEvspK01XQt",
+              "index": "threat-index-000001",
+              "type": "indicator_match_rule"
+            }
+          }
+        ]
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "Nmyvt38BIyEvspK02HTJ",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "Nmyvt38BIyEvspK02HTJ",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "62f9a8c0-aac9-11ec-aa31-c9ea2cb79db7",
+          "actions": [],
+          "interval": "1m",
+          "name": "threat-match-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:47.264Z",
+          "updated_at": "2022-03-23T16:50:48.396Z",
+          "description": "a simple threat match rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "bef9b0da-8c2f-4b82-930f-37ffa1b57fc1",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threat_match",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threat_query": "*",
+          "threat_mapping": [
+            {
+              "entries": [
+                {
+                  "field": "host.name",
+                  "type": "mapping",
+                  "value": "host.name"
+                }
+              ]
+            }
+          ],
+          "threat_language": "kuery",
+          "threat_index": [
+            "threat-index-*"
+          ],
+          "threat_indicator_path": "threat.indicator"
+        },
+        "reason": "event on security-linux-1 created low alert threat-match-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "Nmyvt38BIyEvspK02HTJ",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:28.994Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:28.994Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "21d26a1ad7b01b28667638d5f8db96f6e94957394efe7a16057948095a445ac4",
+    "source": {
+      "@timestamp": "2022-03-23T16:50:48.441Z",
+      "host.name": "security-linux-1",
+      "event": {
+        "kind": "signal"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "8e75aa13-6b35-5d96-b52b-1d62909a9d75",
+            "type": "event",
+            "index": "events-index-*",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "8e75aa13-6b35-5d96-b52b-1d62909a9d75",
+            "type": "event",
+            "index": "events-index-*",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "60b8b970-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "threshold-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:44.260Z",
+          "updated_at": "2022-03-23T16:50:45.341Z",
+          "description": "a simple threshold rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "b97ae2a4-f188-43b2-b082-69667b563152",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threshold",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threshold": {
+            "field": [
+              "host.name"
+            ],
+            "value": 1
+          }
+        },
+        "reason": "event created low alert threshold-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "8e75aa13-6b35-5d96-b52b-1d62909a9d75",
+          "type": "event",
+          "index": "events-index-*",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:32.045Z",
+        "threshold_result": {
+          "terms": [
+            {
+              "field": "host.name",
+              "value": "security-linux-1"
+            }
+          ],
+          "count": 4,
+          "from": "2022-03-23T06:50:48.395Z"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "4c2a3865ca7df72e4cc17b5114feb2535b2459fd52f6fbd0669d4884f5956dc2",
+    "source": {
+      "@timestamp": "2022-03-23T16:50:48.442Z",
+      "host.name": "security-linux-2",
+      "event": {
+        "kind": "signal"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "9c957c24-8ce5-516b-ba8e-44b582da6579",
+            "type": "event",
+            "index": "events-index-*",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "9c957c24-8ce5-516b-ba8e-44b582da6579",
+            "type": "event",
+            "index": "events-index-*",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "60b8b970-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "threshold-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:44.260Z",
+          "updated_at": "2022-03-23T16:50:45.341Z",
+          "description": "a simple threshold rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "b97ae2a4-f188-43b2-b082-69667b563152",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threshold",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threshold": {
+            "field": [
+              "host.name"
+            ],
+            "value": 1
+          }
+        },
+        "reason": "event created low alert threshold-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "9c957c24-8ce5-516b-ba8e-44b582da6579",
+          "type": "event",
+          "index": "events-index-*",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:31.330Z",
+        "threshold_result": {
+          "terms": [
+            {
+              "field": "host.name",
+              "value": "security-linux-2"
+            }
+          ],
+          "count": 3,
+          "from": "2022-03-23T06:50:48.395Z"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "3754896311b1d9f9dee45ecf06aa5160f8cd3d4504ef5c856ba285edd61d059d",
+    "source": {
+      "@timestamp": "2022-03-23T16:50:48.442Z",
+      "host.name": "security-linux-3",
+      "event": {
+        "kind": "signal"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "326cc81c-b55f-5b69-8222-e930bcb24692",
+            "type": "event",
+            "index": "events-index-*",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "326cc81c-b55f-5b69-8222-e930bcb24692",
+            "type": "event",
+            "index": "events-index-*",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "60b8b970-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "threshold-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:44.260Z",
+          "updated_at": "2022-03-23T16:50:45.341Z",
+          "description": "a simple threshold rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "b97ae2a4-f188-43b2-b082-69667b563152",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "threshold",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": [],
+          "threshold": {
+            "field": [
+              "host.name"
+            ],
+            "value": 1
+          }
+        },
+        "reason": "event created low alert threshold-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "326cc81c-b55f-5b69-8222-e930bcb24692",
+          "type": "event",
+          "index": "events-index-*",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:31.654Z",
+        "threshold_result": {
+          "terms": [
+            {
+              "field": "host.name",
+              "value": "security-linux-3"
+            }
+          ],
+          "count": 3,
+          "from": "2022-03-23T06:50:48.395Z"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "5cddda6852c5f8b6c32d4bfa5e876aa51884e0c7a2d4faaababf91ec9cb68de7",
+    "source": {
+      "agent": {
+        "name": "security-linux-1.example.dev",
+        "id": "d8f66724-3cf2-437c-b124-6ac9fb0e2311",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-1",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.194",
+        "name": "security-linux-1",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:28.994Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:40.440Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "Nmyvt38BIyEvspK02HTJ",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "Nmyvt38BIyEvspK02HTJ",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "5b7cd9a0-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "query-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:34.234Z",
+          "updated_at": "2022-03-23T16:50:36.214Z",
+          "description": "a simple query rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "1fcc46ae-7e1e-4002-a4e1-e456029cb7ec",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": []
+        },
+        "reason": "event on security-linux-1 created low alert query-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "Nmyvt38BIyEvspK02HTJ",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:28.994Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:28.994Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "5050902fa762858249c32b1d228dd71ca9217ace612b65f9669fb3a5f371ab63",
+    "source": {
+      "agent": {
+        "name": "security-linux-2.example.dev",
+        "id": "87c417dd-08d6-4e24-ad69-285cb8de84e9",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-2",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.195",
+        "name": "security-linux-2",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:29.387Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:40.477Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "N2yvt38BIyEvspK02nRK",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "N2yvt38BIyEvspK02nRK",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "5b7cd9a0-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "query-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:34.234Z",
+          "updated_at": "2022-03-23T16:50:36.214Z",
+          "description": "a simple query rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "1fcc46ae-7e1e-4002-a4e1-e456029cb7ec",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": []
+        },
+        "reason": "event on security-linux-2 created low alert query-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "N2yvt38BIyEvspK02nRK",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:29.387Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:29.387Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "525833fe5aa3cabce849adf9291b4d4009c25edbe528d5d2add1dc749c00513b",
+    "source": {
+      "agent": {
+        "name": "security-linux-3.example.dev",
+        "id": "06851da1-73e7-41e3-97d6-ff1d62c98dc5",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-3",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.196",
+        "name": "security-linux-3",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:29.715Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:40.499Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "OGyvt38BIyEvspK023SI",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "OGyvt38BIyEvspK023SI",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "5b7cd9a0-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "query-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:34.234Z",
+          "updated_at": "2022-03-23T16:50:36.214Z",
+          "description": "a simple query rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "1fcc46ae-7e1e-4002-a4e1-e456029cb7ec",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": []
+        },
+        "reason": "event on security-linux-3 created low alert query-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "OGyvt38BIyEvspK023SI",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:29.715Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:29.715Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "4f9c5a7581544f9dc1fa4c9f541c7e7573d7460ddeeda1875bee081e6615035b",
+    "source": {
+      "agent": {
+        "name": "security-linux-1.example.dev",
+        "id": "d8f66724-3cf2-437c-b124-6ac9fb0e2311",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-1",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.194",
+        "name": "security-linux-1",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:30.031Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:40.510Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "OWyvt38BIyEvspK03HTF",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "OWyvt38BIyEvspK03HTF",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "5b7cd9a0-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "query-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:34.234Z",
+          "updated_at": "2022-03-23T16:50:36.214Z",
+          "description": "a simple query rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "1fcc46ae-7e1e-4002-a4e1-e456029cb7ec",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": []
+        },
+        "reason": "event on security-linux-1 created low alert query-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "OWyvt38BIyEvspK03HTF",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:30.031Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:30.031Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "d791d45b87a37e3b8a8388d7d6237728aa14ab6ec81bfa84f96457bd42b39e4a",
+    "source": {
+      "agent": {
+        "name": "security-linux-2.example.dev",
+        "id": "87c417dd-08d6-4e24-ad69-285cb8de84e9",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-2",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.195",
+        "name": "security-linux-2",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:30.353Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:40.533Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "Omyvt38BIyEvspK03nQB",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "Omyvt38BIyEvspK03nQB",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "5b7cd9a0-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "query-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:34.234Z",
+          "updated_at": "2022-03-23T16:50:36.214Z",
+          "description": "a simple query rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "1fcc46ae-7e1e-4002-a4e1-e456029cb7ec",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": []
+        },
+        "reason": "event on security-linux-2 created low alert query-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "Omyvt38BIyEvspK03nQB",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:30.353Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:30.353Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "747a4cfd4dbc1dd3924b341b0d3d94098252579354bf140e1621cb4b8681e911",
+    "source": {
+      "agent": {
+        "name": "security-linux-3.example.dev",
+        "id": "06851da1-73e7-41e3-97d6-ff1d62c98dc5",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-3",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.196",
+        "name": "security-linux-3",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:30.665Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:40.547Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "O2yvt38BIyEvspK033RN",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "O2yvt38BIyEvspK033RN",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "5b7cd9a0-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "query-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:34.234Z",
+          "updated_at": "2022-03-23T16:50:36.214Z",
+          "description": "a simple query rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "1fcc46ae-7e1e-4002-a4e1-e456029cb7ec",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": []
+        },
+        "reason": "event on security-linux-3 created low alert query-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "O2yvt38BIyEvspK033RN",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:30.665Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:30.665Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "5a217bc36610a820dbbb20f7b189065d631038a9dbb33bde1511f0f6a63183d2",
+    "source": {
+      "agent": {
+        "name": "security-linux-1.example.dev",
+        "id": "d8f66724-3cf2-437c-b124-6ac9fb0e2311",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-1",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.194",
+        "name": "security-linux-1",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:31.001Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:40.561Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "PGyvt38BIyEvspK04HSX",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "PGyvt38BIyEvspK04HSX",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "5b7cd9a0-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "query-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:34.234Z",
+          "updated_at": "2022-03-23T16:50:36.214Z",
+          "description": "a simple query rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "1fcc46ae-7e1e-4002-a4e1-e456029cb7ec",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": []
+        },
+        "reason": "event on security-linux-1 created low alert query-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "PGyvt38BIyEvspK04HSX",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:31.001Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:31.001Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "fde1f09c4420ce5747f04ca051bcdc90762394ea019a7cc2cfee8de3bd575a59",
+    "source": {
+      "agent": {
+        "name": "security-linux-2.example.dev",
+        "id": "87c417dd-08d6-4e24-ad69-285cb8de84e9",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-2",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.195",
+        "name": "security-linux-2",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:31.330Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:40.593Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "PWyvt38BIyEvspK04XTd",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "PWyvt38BIyEvspK04XTd",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "5b7cd9a0-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "query-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:34.234Z",
+          "updated_at": "2022-03-23T16:50:36.214Z",
+          "description": "a simple query rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "1fcc46ae-7e1e-4002-a4e1-e456029cb7ec",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": []
+        },
+        "reason": "event on security-linux-2 created low alert query-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "PWyvt38BIyEvspK04XTd",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:31.330Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:31.330Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "337f39b1fb862a4c6910605b16e6b5b59623219e99dcb7d442cd334229ad3a7e",
+    "source": {
+      "agent": {
+        "name": "security-linux-3.example.dev",
+        "id": "06851da1-73e7-41e3-97d6-ff1d62c98dc5",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-3",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.196",
+        "name": "security-linux-3",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:31.654Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:40.606Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "Pmyvt38BIyEvspK043Ri",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "Pmyvt38BIyEvspK043Ri",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "5b7cd9a0-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "query-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:34.234Z",
+          "updated_at": "2022-03-23T16:50:36.214Z",
+          "description": "a simple query rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "1fcc46ae-7e1e-4002-a4e1-e456029cb7ec",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": []
+        },
+        "reason": "event on security-linux-3 created low alert query-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "Pmyvt38BIyEvspK043Ri",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:31.654Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:31.654Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".siem-signals-default-000001-7.16.0",
+    "id": "44f8d6e34631ced611f6588e7f0cdf52ac5647eff09cfbd36a38ad2a7d4bf32f",
+    "source": {
+      "agent": {
+        "name": "security-linux-1.example.dev",
+        "id": "d8f66724-3cf2-437c-b124-6ac9fb0e2311",
+        "type": "filebeat",
+        "version": "7.16.0"
+      },
+      "log": {
+        "file": {
+          "path": "/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson"
+        },
+        "offset": 148938
+      },
+      "cloud": {
+        "availability_zone": "us-central1-c",
+        "instance": {
+          "name": "security-linux-1",
+          "id": "8995531128842994872"
+        },
+        "provider": "gcp",
+        "service": {
+          "name": "GCE"
+        },
+        "machine": {
+          "type": "g1-small"
+        },
+        "project": {
+          "id": "elastic-siem"
+        },
+        "account": {
+          "id": "elastic-siem"
+        }
+      },
+      "ecs": {
+        "version": "7.16.0"
+      },
+      "host": {
+        "hostname": "security-linux-1",
+        "os": {
+          "kernel": "4.19.0-18-cloud-amd64",
+          "codename": "buster",
+          "name": "Debian GNU/Linux",
+          "type": "linux",
+          "family": "debian",
+          "version": "10 (buster)",
+          "platform": "debian"
+        },
+        "containerized": false,
+        "ip": "11.200.0.194",
+        "name": "security-linux-1",
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "ingested": "2022-03-23T16:50:32.045Z",
+        "dataset": "elastic_agent.filebeat",
+        "kind": "signal"
+      },
+      "service.name": "filebeat",
+      "message": "Status message.",
+      "@timestamp": "2022-03-23T16:50:40.624Z",
+      "data_stream": {
+        "namespace": "default",
+        "type": "logs",
+        "dataset": "elastic_agent.filebeat"
+      },
+      "signal": {
+        "_meta": {
+          "version": 57
+        },
+        "parents": [
+          {
+            "id": "P2yvt38BIyEvspK05HSe",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "ancestors": [
+          {
+            "id": "P2yvt38BIyEvspK05HSe",
+            "type": "event",
+            "index": "events-index-000001",
+            "depth": 0
+          }
+        ],
+        "status": "open",
+        "rule": {
+          "id": "5b7cd9a0-aac9-11ec-bb53-fd375b7a173a",
+          "actions": [],
+          "interval": "1m",
+          "name": "query-rule",
+          "tags": [],
+          "enabled": true,
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "throttle": null,
+          "created_at": "2022-03-23T16:50:34.234Z",
+          "updated_at": "2022-03-23T16:50:36.214Z",
+          "description": "a simple query rule",
+          "risk_score": 21,
+          "severity": "low",
+          "license": "",
+          "output_index": ".siem-signals-default-000001",
+          "author": [],
+          "false_positives": [],
+          "from": "now-36000s",
+          "rule_id": "1fcc46ae-7e1e-4002-a4e1-e456029cb7ec",
+          "max_signals": 100,
+          "risk_score_mapping": [],
+          "severity_mapping": [],
+          "threat": [],
+          "to": "now",
+          "references": [],
+          "version": 1,
+          "exceptions_list": [],
+          "immutable": false,
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "events-index-*"
+          ],
+          "query": "*",
+          "filters": []
+        },
+        "reason": "event on security-linux-1 created low alert query-rule.",
+        "depth": 1,
+        "parent": {
+          "id": "P2yvt38BIyEvspK05HSe",
+          "type": "event",
+          "index": "events-index-000001",
+          "depth": 0
+        },
+        "original_time": "2022-03-23T16:50:32.045Z",
+        "original_event": {
+          "agent_id_status": "verified",
+          "ingested": "2022-03-23T16:50:32.045Z",
+          "dataset": "elastic_agent.filebeat"
+        }
+      }
+    }
+  }
+}
+

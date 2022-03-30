@@ -6,8 +6,8 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
-import { forkJoin, of, Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { from, of, Subscription, Observable } from 'rxjs';
+import { mergeMap, last, map, toArray } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from 'kibana/public';
 import { chunk } from 'lodash';
@@ -16,6 +16,7 @@ import {
   AggregatableFieldOverallStats,
   checkAggregatableFieldsExistRequest,
   checkNonAggregatableFieldExistsRequest,
+  isAggregatableFieldOverallStats,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
@@ -36,6 +37,31 @@ import {
   processDocumentCountStats,
 } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
+import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+
+/**
+ * Helper function to run forkJoin
+ * with restrictions on how many input observables can be subscribed to concurrently
+ */
+export function rateLimitingForkJoin<T>(
+  observables: Array<Observable<T>>,
+  maxConcurrentRequests = MAX_CONCURRENT_REQUESTS
+): Observable<T[]> {
+  return from(observables).pipe(
+    mergeMap(
+      (observable, index) =>
+        observable.pipe(
+          last(),
+          map((value) => ({ index, value }))
+        ),
+      maxConcurrentRequests
+    ),
+    toArray(),
+    map((indexedObservables) =>
+      indexedObservables.sort((l, r) => l.index - r.index).map((obs) => obs.value)
+    )
+  );
+}
 
 function displayError(toastNotifications: ToastsStart, index: string, err: any) {
   if (err.statusCode === 500) {
@@ -116,72 +142,63 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       abortSignal: abortCtrl.current.signal,
       sessionId: searchStrategyParams?.sessionId,
     };
-    const nonAggregatableOverallStats$ =
-      nonAggregatableFields.length > 0
-        ? forkJoin(
-            nonAggregatableFields.map((fieldName: string) =>
-              data.search
-                .search<IKibanaSearchRequest, IKibanaSearchResponse>(
-                  {
-                    params: checkNonAggregatableFieldExistsRequest(
-                      index,
-                      searchQuery,
-                      fieldName,
-                      timeFieldName,
-                      earliest,
-                      latest,
-                      runtimeFieldMap
-                    ),
-                  },
-                  searchOptions
-                )
-                .pipe(
-                  switchMap((resp) => {
-                    return of({
-                      ...resp,
-                      rawResponse: { ...resp.rawResponse, fieldName },
-                    } as IKibanaSearchResponse);
-                  })
-                )
-            )
-          )
-        : of(undefined);
+
+    const nonAggregatableFieldsObs = nonAggregatableFields.map((fieldName: string) =>
+      data.search
+        .search<IKibanaSearchRequest, IKibanaSearchResponse>(
+          {
+            params: checkNonAggregatableFieldExistsRequest(
+              index,
+              searchQuery,
+              fieldName,
+              timeFieldName,
+              earliest,
+              latest,
+              runtimeFieldMap
+            ),
+          },
+          searchOptions
+        )
+        .pipe(
+          map((resp) => {
+            return {
+              ...resp,
+              rawResponse: { ...resp.rawResponse, fieldName },
+            } as IKibanaSearchResponse;
+          })
+        )
+    );
 
     // Have to divide into smaller requests to avoid 413 payload too large
     const aggregatableFieldsChunks = chunk(aggregatableFields, 30);
 
-    const aggregatableOverallStats$ = forkJoin(
-      aggregatableFields.length > 0
-        ? aggregatableFieldsChunks.map((aggregatableFieldsChunk) =>
-            data.search
-              .search(
-                {
-                  params: checkAggregatableFieldsExistRequest(
-                    index,
-                    searchQuery,
-                    aggregatableFieldsChunk,
-                    samplerShardSize,
-                    timeFieldName,
-                    earliest,
-                    latest,
-                    undefined,
-                    runtimeFieldMap
-                  ),
-                },
-                searchOptions
-              )
-              .pipe(
-                switchMap((resp) => {
-                  return of({
-                    ...resp,
-                    aggregatableFields: aggregatableFieldsChunk,
-                  } as AggregatableFieldOverallStats);
-                })
-              )
-          )
-        : of(undefined)
+    const aggregatableOverallStatsObs = aggregatableFieldsChunks.map((aggregatableFieldsChunk) =>
+      data.search
+        .search(
+          {
+            params: checkAggregatableFieldsExistRequest(
+              index,
+              searchQuery,
+              aggregatableFieldsChunk,
+              samplerShardSize,
+              timeFieldName,
+              earliest,
+              latest,
+              undefined,
+              runtimeFieldMap
+            ),
+          },
+          searchOptions
+        )
+        .pipe(
+          map((resp) => {
+            return {
+              ...resp,
+              aggregatableFields: aggregatableFieldsChunk,
+            } as AggregatableFieldOverallStats;
+          })
+        )
     );
-
     const documentCountStats$ =
       !fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
         ? data.search.search(
@@ -191,28 +208,42 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             searchOptions
           )
         : of(undefined);
-    const sub = forkJoin({
-      documentCountStatsResp: documentCountStats$,
-      nonAggregatableOverallStatsResp: nonAggregatableOverallStats$,
-      aggregatableOverallStatsResp: aggregatableOverallStats$,
-    }).pipe(
-      switchMap(
-        ({
-          documentCountStatsResp,
-          nonAggregatableOverallStatsResp,
-          aggregatableOverallStatsResp,
-        }) => {
+
+    const sub = rateLimitingForkJoin<
+      AggregatableFieldOverallStats | IKibanaSearchResponse | undefined
+    >(
+      [documentCountStats$, ...aggregatableOverallStatsObs, ...nonAggregatableFieldsObs],
+      MAX_CONCURRENT_REQUESTS
+    );
+
+    searchSubscription$.current = sub.subscribe({
+      next: (value) => {
+        {
+          const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
+          const nonAggregatableOverallStatsResp: IKibanaSearchResponse[] = [];
+          const documentCountStatsResp = value[0];
+
+          value.forEach((resp, idx) => {
+            if (!resp) return;
+            if (isAggregatableFieldOverallStats(resp)) {
+              aggregatableOverallStatsResp.push(resp);
+            } else {
+              nonAggregatableOverallStatsResp.push(resp);
+            }
+          });
+
           const aggregatableOverallStats = processAggregatableFieldsExistResponse(
             aggregatableOverallStatsResp,
             aggregatableFields,
             samplerShardSize
           );
+
           const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
             nonAggregatableOverallStatsResp,
             nonAggregatableFields
           );
 
-          return of({
+          setOverallStats({
             documentCountStats: processDocumentCountStats(
               documentCountStatsResp?.rawResponse,
               searchStrategyParams
@@ -220,14 +251,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             ...nonAggregatableOverallStats,
             ...aggregatableOverallStats,
           });
-        }
-      )
-    );
-
-    searchSubscription$.current = sub.subscribe({
-      next: (overallStats) => {
-        if (overallStats) {
-          setOverallStats(overallStats);
         }
       },
       error: (error) => {

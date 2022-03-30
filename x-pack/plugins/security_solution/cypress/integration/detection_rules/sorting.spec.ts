@@ -13,7 +13,7 @@ import {
   FOURTH_RULE,
   RULES_TABLE,
   pageSelector,
-  RULES_TABLE_REFRESH_INDICATOR,
+  RULES_ROW,
 } from '../../screens/alerts_detection_rules';
 
 import { goToManageAlertsDetectionRules, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
@@ -90,14 +90,10 @@ describe('Alerts detection rules', () => {
       .invoke('text')
       .then((ruleNameFirstPage) => {
         goToPage(2);
-        cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
-        cy.get(RULES_TABLE)
-          .find(RULE_NAME)
-          .first()
-          .invoke('text')
-          .should((ruleNameSecondPage) => {
-            expect(ruleNameFirstPage).not.to.eq(ruleNameSecondPage);
-          });
+        // Check that the rules table shows at least one row
+        cy.get(RULES_TABLE).find(RULES_ROW).should('have.length.gte', 1);
+        // Check that the rules table doesn't show the rule from the first page
+        cy.get(RULES_TABLE).should('not.contain', ruleNameFirstPage);
       });
 
     cy.get(RULES_TABLE)
