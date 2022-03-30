@@ -548,6 +548,7 @@ export async function getExecutionsPerDayCount(
       {}
     ),
     scheduledActionsPercentiles: aggsScheduledActionsPercentiles,
+    scheduledActionsPercentilesByType: {},
   };
 }
 
