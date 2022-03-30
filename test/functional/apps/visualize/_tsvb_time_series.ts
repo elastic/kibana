@@ -201,37 +201,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expect(hasMachineRawFilter).to.be(true);
           });
 
-          it('should create a filter for series split by a field with formatting', async () => {
-            const expectedFilterPills = [
-              'bytes: 2.569KB',
-              'bytes: 2.376KB',
-              'bytes: 1.573KB',
-              'bytes: 8.393KB',
-              'bytes: 7.966KB',
-              'bytes: 6.345KB',
-              'bytes: 3.861KB',
-              'bytes: 2.117KB',
-              'bytes: 1.768KB',
-            ];
-            await visualBuilder.setMetricsGroupByTerms('bytes');
-
-            const el = await elasticChart.getCanvas();
-            await el.scrollIntoViewIfNecessary();
-            await browser
-              .getActions()
-              .move({ x: 0, y: 94, origin: el._webElement })
-              .click()
-              .perform();
-
-            await retry.try(async () => {
-              await testSubjects.click('applyFiltersPopoverButton');
-              await testSubjects.missingOrFail('applyFiltersPopoverButton');
-            });
-
-            const filterPills = await filterBar.getFiltersLabel();
-            expect(filterPills).to.eql(expectedFilterPills);
-          });
-
           it('should create a filter for series with multiple split by terms fields', async () => {
             const expectedFilterPills = ['0, ios, logstash-2015.09.21'];
             await visualBuilder.setMetricsGroupByTerms('bytes');
