@@ -21,9 +21,6 @@ export const getApplication = () => {
     navigateToApp: async (app: string) => {
       action(`Navigate to: ${app}`);
     },
-    navigateToUrlSkipUnload: async (url: string) => {
-      action(`Navigate to: ${url} skip unload`);
-    },
     getUrlForApp: (url: string) => url,
     capabilities: {
       catalogue: {},

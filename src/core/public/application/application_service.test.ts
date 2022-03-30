@@ -1136,34 +1136,6 @@ describe('#start()', () => {
       expect(setupDeps.redirectTo).not.toHaveBeenCalled();
     });
   });
-
-  describe('navigateToUrlSkipUnload', () => {
-    let addListenerSpy: jest.SpyInstance;
-    let removeListenerSpy: jest.SpyInstance;
-    beforeEach(() => {
-      addListenerSpy = jest.spyOn(window, 'addEventListener');
-      removeListenerSpy = jest.spyOn(window, 'removeEventListener');
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('removes the beforeunload listener and calls `redirectTo` with the given url', async () => {
-      service.setup(setupDeps);
-
-      const { navigateToUrlSkipUnload } = await service.start(startDeps);
-      expect(addListenerSpy).toHaveBeenCalledTimes(1);
-      expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
-      const handler = addListenerSpy.mock.calls[0][1];
-
-      await navigateToUrlSkipUnload('test-url');
-      expect(removeListenerSpy).toHaveBeenCalledTimes(1);
-      expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
-      expect(MockHistory.push).not.toHaveBeenCalled();
-      expect(setupDeps.redirectTo).toHaveBeenCalledWith('test-url');
-    });
-  });
 });
 
 describe('#stop()', () => {

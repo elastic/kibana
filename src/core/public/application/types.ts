@@ -824,12 +824,6 @@ export interface ApplicationStart {
    */
   navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
   /**
-   * Navigate to a given url
-   *
-   * The method removes the beforeunload eventListener and assigns the window location to the url provided
-   */
-  navigateToUrlSkipUnload(url: string): void;
-  /**
    * Returns the absolute path (or URL) to a given app, including the global base path.
    *
    * By default, it returns the absolute path of the application (e.g `/basePath/app/my-app`).

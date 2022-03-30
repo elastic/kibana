@@ -316,15 +316,14 @@ export class ApplicationService {
         { skipAppLeave = false, forceRedirect = false }: NavigateToUrlOptions = {}
       ) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);
-        if (appInfo && forceRedirect === false) {
+        if (forceRedirect === true) {
+          window.removeEventListener('beforeunload', this.onBeforeUnload);
+          return this.redirectTo!(url);
+        } else if (appInfo) {
           return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave });
         } else {
           return this.redirectTo!(url);
         }
-      },
-      navigateToUrlSkipUnload: (url: string) => {
-        window.removeEventListener('beforeunload', this.onBeforeUnload);
-        return this.redirectTo!(url);
       },
       getComponent: () => {
         if (!this.history) {

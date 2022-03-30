@@ -41,7 +41,6 @@ exports[`InspectorPanel should render as expected 1`] = `
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
         "navigateToUrl": [MockFunction],
-        "navigateToUrlSkipUnload": [MockFunction],
       },
       "http": Object {},
       "share": Object {
@@ -227,7 +226,6 @@ exports[`InspectorPanel should render as expected 1`] = `
           "getUrlForApp": [MockFunction],
           "navigateToApp": [MockFunction],
           "navigateToUrl": [MockFunction],
-          "navigateToUrlSkipUnload": [MockFunction],
         },
         "http": Object {},
         "share": Object {
