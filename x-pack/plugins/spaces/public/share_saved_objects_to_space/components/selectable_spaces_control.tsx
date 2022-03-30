@@ -200,7 +200,12 @@ export const SelectableSpacesControl = (props: Props) => {
       <EuiFormRow
         label={selectSpacesLabel}
         labelAppend={
-          <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexEnd">
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            alignItems="flexEnd"
+            responsive={false}
+          >
             <EuiFlexItem grow={false}>
               <EuiText size="xs">{selectedSpacesLabel}</EuiText>
             </EuiFlexItem>
@@ -212,7 +217,7 @@ export const SelectableSpacesControl = (props: Props) => {
         <></>
       </EuiFormRow>
 
-      <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <Suspense fallback={<EuiLoadingSpinner />}>
             <EuiSelectable
