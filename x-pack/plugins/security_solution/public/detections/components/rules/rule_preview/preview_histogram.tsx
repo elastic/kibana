@@ -11,6 +11,7 @@ import { Unit } from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
 import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { useDispatch } from 'react-redux';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -35,6 +36,7 @@ import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
+import { timelineActions } from '../../../../timelines/store/timeline';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -71,6 +73,7 @@ export const PreviewHistogram = ({
   ruleType,
   index,
 }: PreviewHistogramProps) => {
+  const dispatch = useDispatch();
   const { setQuery, isInitializing } = useGlobalTime();
   const { timelines: timelinesUi, cases } = useKibana().services;
   const from = useMemo(() => `now-1${timeFrame}`, [timeFrame]);
@@ -99,6 +102,7 @@ export const PreviewHistogram = ({
     itemsPerPageOptions,
     graphEventId,
     sort,
+    defaultColumns,
   } = alertsDefaultModel;
 
   const {
@@ -106,6 +110,7 @@ export const PreviewHistogram = ({
     docValueFields,
     indexPattern,
     runtimeMappings,
+    dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
@@ -128,6 +133,21 @@ export const PreviewHistogram = ({
       setQuery({ id: `${ID}-${previewId}`, inspect, loading: isLoading, refetch });
     }
   }, [setQuery, inspect, isLoading, isInitializing, refetch, previewId]);
+
+  useEffect(() => {
+    dispatch(
+      timelineActions.createTimeline({
+        columns,
+        dataViewId: selectedDataViewId,
+        defaultColumns,
+        id: TimelineId.rulePreview,
+        indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
+        itemsPerPage,
+        sort,
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const barConfig = useMemo(
     (): ChartSeriesConfigs => getHistogramConfig(endDate, startDate, !isEqlRule),
@@ -219,7 +239,7 @@ export const PreviewHistogram = ({
               globalFullScreen,
               graphEventId,
               hasAlertsCrud: false,
-              id: TimelineId.detectionsPage,
+              id: TimelineId.rulePreview,
               indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
               indexPattern,
               isLive: false,
@@ -246,7 +266,7 @@ export const PreviewHistogram = ({
           docValueFields={docValueFields}
           isFlyoutView
           runtimeMappings={runtimeMappings}
-          timelineId={TimelineId.detectionsPage}
+          timelineId={TimelineId.rulePreview}
           isReadOnly
         />
       </CasesContext>
