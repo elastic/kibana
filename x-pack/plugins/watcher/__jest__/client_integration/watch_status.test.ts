@@ -257,8 +257,11 @@ describe('<WatchStatus />', () => {
 
         await actions.clickAcknowledgeButton(0);
 
+        // In previous tests we make calls to activate and deactivate using the put method,
+        // so we need to expect that the acknowledge api call will be the third.
+        const indexOfAcknowledgeApiCall = 3;
         expect(httpSetup.put).toHaveBeenNthCalledWith(
-          3,
+          indexOfAcknowledgeApiCall,
           `${API_BASE_PATH}/watch/${watch.id}/action/${ACTION_ID}/acknowledge`
         );
 

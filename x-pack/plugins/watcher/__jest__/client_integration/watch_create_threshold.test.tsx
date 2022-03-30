@@ -8,6 +8,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { HttpFetchOptionsWithPath } from 'kibana/public';
+import { WATCH_ID } from './helpers/jest_constants';
 import { getExecuteDetails } from '../../__fixtures__';
 import { WATCH_TYPES, API_BASE_PATH } from '../../common/constants';
 import { setupEnvironment, pageHelpers } from './helpers';
@@ -25,8 +27,11 @@ const ES_FIELDS = [{ name: '@timestamp', type: 'date' }];
 // the function that generates them in order to be able to match
 // against it.
 jest.mock('uuid/v4', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { WATCH_ID: watchId } = require('./helpers/jest_constants');
+
   return function () {
-    return '12345';
+    return watchId;
   };
 });
 
@@ -248,7 +253,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
           });
 
           const thresholdWatch = {
-            id: '12345',
+            id: WATCH_ID,
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -310,7 +315,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
           });
 
           const thresholdWatch = {
-            id: '12345',
+            id: WATCH_ID,
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -372,7 +377,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
           });
 
           const thresholdWatch = {
-            id: '12345',
+            id: WATCH_ID,
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -444,7 +449,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
           });
 
           const thresholdWatch = {
-            id: '12345',
+            id: WATCH_ID,
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -536,7 +541,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
           });
 
           const thresholdWatch = {
-            id: '12345',
+            id: WATCH_ID,
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -624,7 +629,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
           });
 
           const thresholdWatch = {
-            id: '12345',
+            id: WATCH_ID,
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -704,7 +709,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
           });
 
           const thresholdWatch = {
-            id: '12345',
+            id: WATCH_ID,
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -763,13 +768,14 @@ describe('<ThresholdWatchEdit /> create route', () => {
           });
           component.update();
 
-          const lastReq: any[] = httpSetup.post.mock.calls.pop() || [];
-          // Options contains two dinamically computed timestamps, so its simpler to just ignore those fields.
-          const { options, ...body } = JSON.parse(lastReq[1].body).watch;
+          const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+          const [requestUrl, watchBody] = lastReq;
+          // Options contains two dinamically computed timestamps, so it's simpler to just ignore those fields.
+          const { options, ...body } = JSON.parse((watchBody as Record<string, any>).body).watch;
 
-          expect(lastReq[0]).toBe(`${API_BASE_PATH}/watch/visualize`);
+          expect(requestUrl).toBe(`${API_BASE_PATH}/watch/visualize`);
           expect(body).toEqual({
-            id: '12345',
+            id: WATCH_ID,
             name: 'my_test_watch',
             type: 'threshold',
             isNew: true,
@@ -808,10 +814,10 @@ describe('<ThresholdWatchEdit /> create route', () => {
           });
 
           expect(httpSetup.put).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}/watch/12345`,
+            `${API_BASE_PATH}/watch/${WATCH_ID}`,
             expect.objectContaining({
               body: JSON.stringify({
-                id: '12345',
+                id: WATCH_ID,
                 name: WATCH_NAME,
                 type: WATCH_TYPES.THRESHOLD,
                 isNew: true,
