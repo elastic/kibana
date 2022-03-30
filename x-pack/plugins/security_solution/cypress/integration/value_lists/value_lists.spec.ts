@@ -35,8 +35,8 @@ describe('value lists', () => {
     });
     beforeEach(() => {
       visitWithoutDateRange(ALERTS_URL);
-      waitForListsIndexToBeCreated();
       goToManageAlertsDetectionRules();
+      waitForListsIndexToBeCreated();
       waitForValueListsModalToBeLoaded();
     });
 
