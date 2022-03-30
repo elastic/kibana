@@ -61,7 +61,7 @@ expressionFunction(
     ...args: SetMapViewArgs
   ) {
     const view = this.context.dataflow;
-    if (!('setMapViewHandler' in view)) {
+    if (!('setMapViewHandler' in view._kibanaView)) {
       // not a map view, don't do anything
       return;
     }
