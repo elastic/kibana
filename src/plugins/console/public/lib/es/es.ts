@@ -49,6 +49,13 @@ export function send(
     dataType: 'text', // disable automatic guessing
   };
 
+  if (path.includes('geo.coordinates')) {
+    delete options.dataType;
+    options.xhrFields = {
+      responseType: 'arraybuffer',
+    };
+  }
+
   $.ajax(options).then(
     (responseData, textStatus: string, jqXHR: unknown) => {
       wrappedDfd.resolveWith({}, [responseData, textStatus, jqXHR]);

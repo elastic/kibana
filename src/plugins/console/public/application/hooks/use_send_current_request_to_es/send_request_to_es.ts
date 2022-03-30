@@ -70,7 +70,6 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
           if (reqId !== CURRENT_REQ_ID) {
             return;
           }
-
           const xhr = dataOrjqXHR.promise ? dataOrjqXHR : jqXhrORerrorThrown;
 
           const isSuccess =
@@ -80,6 +79,9 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
           if (isSuccess) {
             let value = xhr.responseText;
+            if (dataOrjqXHR.byteLength > 0) {
+              value = dataOrjqXHR;
+            }
 
             const warnings = xhr.getResponseHeader('warning');
             if (warnings) {

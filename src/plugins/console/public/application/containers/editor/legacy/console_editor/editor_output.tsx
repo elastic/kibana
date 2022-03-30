@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import $ from 'jquery';
+import { VectorTile } from '@mapbox/vector-tile';
+import Protobuf from 'pbf';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
@@ -86,15 +88,17 @@ function EditorOutputUI() {
         data
           .map((result) => {
             const { value, contentType } = result.response;
+
+            let editorOutput;
             if (readOnlySettings.tripleQuotes && isJSONContentType(contentType)) {
-              return safeExpandLiteralStrings(value as string);
+              editorOutput = safeExpandLiteralStrings(value as string);
             }
+
             if (isMapboxVectorTile(contentType)) {
-              return i18n.translate('console.outputCannotPreviewBinaryData', {
-                defaultMessage: 'Cannot preview binary data.',
-              });
+              const output = new VectorTile(new Protobuf(value));
+              editorOutput = JSON.stringify(output, null, '\t');
             }
-            return value;
+            return editorOutput;
           })
           .join('\n'),
         mode
