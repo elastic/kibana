@@ -311,9 +311,12 @@ export class ApplicationService {
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
       navigateToApp,
-      navigateToUrl: async (url: string, { skipAppLeave }: NavigateToUrlOptions = {}) => {
+      navigateToUrl: async (
+        url: string,
+        { skipAppLeave = false, forceRedirect = false }: NavigateToUrlOptions = {}
+      ) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);
-        if (appInfo) {
+        if (appInfo && forceRedirect === false) {
           return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave });
         } else {
           return this.redirectTo!(url);

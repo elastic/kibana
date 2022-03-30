@@ -756,6 +756,10 @@ export interface NavigateToUrlOptions {
    * if true, will bypass the default onAppLeave behavior
    */
   skipAppLeave?: boolean;
+  /**
+   * if true, will redirect directly to the url
+   */
+  forceRedirect?: boolean;
 }
 
 /** @public */
