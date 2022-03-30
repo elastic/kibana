@@ -142,7 +142,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitForWithTimeout('the right hit count', 65000, async () => {
           const hitCount = await PageObjects.discover.getHitCount();
           log.debug(`Found hit count is ${hitCount}. Looking for 2,792.`);
-          await PageObjects.common.sleep(5000);
           return hitCount === '2,792';
         });
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
@@ -175,17 +174,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('does not allow saving a query with a non-unique name', async () => {
-        // this check allows this test to run stand alone, also should fix occacional flakiness
-        // const savedQueryExists = await savedQueryManagementComponent.savedQueryExist('OkResponse');
-        // if (!savedQueryExists) {
-        //   await savedQueryManagementComponent.saveNewQuery(
-        //     'OkResponse',
-        //     '200 responses for .jpg over 24 hours',
-        //     true,
-        //     true
-        //   );
-        //   await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        // }
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
       });
 
