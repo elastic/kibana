@@ -1125,39 +1125,65 @@ describe('#start()', () => {
       expect(setupDeps.redirectTo).not.toHaveBeenCalled();
     });
 
-    it('calls `navigateToApp` with `skipAppLeave` option', async () => {
-      parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
-      service.setup(setupDeps);
-      const { navigateToUrl } = await service.start(startDeps);
+    describe('navigateToUrl with options', () => {
+      let addListenerSpy: jest.SpyInstance;
+      let removeListenerSpy: jest.SpyInstance;
+      beforeEach(() => {
+        addListenerSpy = jest.spyOn(window, 'addEventListener');
+        removeListenerSpy = jest.spyOn(window, 'removeEventListener');
+      });
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
 
-      await navigateToUrl('/an-app-path', { skipAppLeave: true });
+      it('calls `navigateToApp` with `skipAppLeave` option', async () => {
+        parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
+        service.setup(setupDeps);
+        const { navigateToUrl } = await service.start(startDeps);
 
-      expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', undefined);
-      expect(setupDeps.redirectTo).not.toHaveBeenCalled();
-    });
+        await navigateToUrl('/an-app-path', { skipAppLeave: true });
 
-    it('calls `redirectTo` when `forceRedirect` option is true', async () => {
-      const addListenerSpy: jest.SpyInstance = jest.spyOn(window, 'addEventListener');
-      const removeListenerSpy: jest.SpyInstance = jest.spyOn(window, 'removeEventListener');
+        expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', undefined);
+        expect(setupDeps.redirectTo).not.toHaveBeenCalled();
+      });
 
-      parseAppUrlMock.mockReturnValue(undefined);
-      service.setup(setupDeps);
+      it('calls `redirectTo` when `forceRedirect` option is true', async () => {
+        parseAppUrlMock.mockReturnValue(undefined);
+        service.setup(setupDeps);
 
-      const { navigateToUrl } = await service.start(startDeps);
+        const { navigateToUrl } = await service.start(startDeps);
 
-      await navigateToUrl('/not-an-app-path', { forceRedirect: true });
+        await navigateToUrl('/not-an-app-path', { forceRedirect: true });
 
-      expect(addListenerSpy).toHaveBeenCalledTimes(1);
-      expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
-      const handler = addListenerSpy.mock.calls[0][1];
+        expect(addListenerSpy).toHaveBeenCalledTimes(1);
+        expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+        const handler = addListenerSpy.mock.calls[0][1];
 
-      expect(MockHistory.push).not.toHaveBeenCalled();
-      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/not-an-app-path');
+        expect(MockHistory.push).not.toHaveBeenCalled();
+        expect(setupDeps.redirectTo).toHaveBeenCalledWith('/not-an-app-path');
 
-      expect(removeListenerSpy).toHaveBeenCalledTimes(1);
-      expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
+        expect(removeListenerSpy).toHaveBeenCalledTimes(1);
+        expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
+      });
 
-      jest.restoreAllMocks();
+      it('calls `redirectTo` when `forceRedirect` and `skipAppLeave` option are both true', async () => {
+        parseAppUrlMock.mockReturnValue(undefined);
+        service.setup(setupDeps);
+
+        const { navigateToUrl } = await service.start(startDeps);
+
+        await navigateToUrl('/not-an-app-path', { skipAppLeave: true, forceRedirect: true });
+
+        expect(addListenerSpy).toHaveBeenCalledTimes(1);
+        expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+        const handler = addListenerSpy.mock.calls[0][1];
+
+        expect(MockHistory.push).not.toHaveBeenCalled();
+        expect(setupDeps.redirectTo).toHaveBeenCalledWith('/not-an-app-path');
+
+        expect(removeListenerSpy).toHaveBeenCalledTimes(1);
+        expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
+      });
     });
   });
 });
