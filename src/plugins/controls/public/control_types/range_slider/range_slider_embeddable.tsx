@@ -296,12 +296,14 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     if (selectedMin) {
       params.gte = Math.max(parseFloat(selectedMin), parseFloat(availableMin));
     }
+
     if (selectedMax) {
       params.lte = Math.min(parseFloat(selectedMax), parseFloat(availableMax));
     }
 
     const rangeFilter = buildRangeFilter(field, params, dataView);
 
+    rangeFilter.meta.key = field?.name;
     rangeFilter.meta.type = 'range';
     rangeFilter.meta.params = params;
 
