@@ -437,7 +437,8 @@ function getJsonPayload() {
     '      "lat": 33.2343132435,' +
     '      "lon": 73.2342343434' +
     '    },' +
-    '    "url": "https://example-url.com"' +
+    '    "url": "https://example-url.com",' +
+    '    "isServiceManaged": true' +
     '  }]' +
     '}';
 
