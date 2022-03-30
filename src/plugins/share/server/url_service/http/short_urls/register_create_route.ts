@@ -42,9 +42,6 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
       if (!locator) {
         return res.customError({
           statusCode: 409,
-          headers: {
-            'content-type': 'application/json',
-          },
           body: 'Locator not found.',
         });
       }
@@ -68,9 +65,6 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
           if (error.code === 'SLUG_EXISTS') {
             return res.customError({
               statusCode: 409,
-              headers: {
-                'content-type': 'application/json',
-              },
               body: error.message,
             });
           }

@@ -43,9 +43,6 @@ export const registerResolveRoute = (router: IRouter, url: ServerUrlService) => 
           if (error.code === 'NOT_FOUND') {
             return res.customError({
               statusCode: 404,
-              headers: {
-                'content-type': 'application/json',
-              },
               body: error.message,
             });
           }
