@@ -4,7 +4,7 @@
 <titleabbrev>Get case status</titleabbrev>
 ++++
 
-Returns the number of open and closed cases.
+Returns the number of cases that are open, closed, and in progress.
 
 deprecated::[8.1.0]
 
