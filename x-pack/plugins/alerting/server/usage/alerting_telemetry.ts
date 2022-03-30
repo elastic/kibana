@@ -766,7 +766,7 @@ export function parsePercentileAggsByRuleType(
             ...(percentileFieldNameMapping[pcurr]
               ? {
                   [percentileFieldNameMapping[pcurr]]: {
-                    [replaceDotSymbols(curr.key)]: percentiles[pcurr],
+                    [replaceDotSymbols(curr.key)]: percentiles[pcurr] ?? 0,
                   },
                 }
               : {}),

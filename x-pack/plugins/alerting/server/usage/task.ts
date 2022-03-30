@@ -149,7 +149,7 @@ export function telemetryTaskRunner(
                   percentile_num_scheduled_actions_by_type_per_day:
                     dailyExecutionCounts.scheduledActionsPercentilesByType,
                 },
-                runAt: new Date(), // getNextMidnight(),
+                runAt: getNextMidnight(),
               };
             }
           )
@@ -157,7 +157,7 @@ export function telemetryTaskRunner(
             logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {
               state: {},
-              runAt: new Date(), // getNextMidnight(),
+              runAt: getNextMidnight(),
             };
           });
       },

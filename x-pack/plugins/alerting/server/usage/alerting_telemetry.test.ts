@@ -399,6 +399,17 @@ Object {
             },
           },
         },
+        {
+          key: 'document.test.',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': null,
+              '90.0': null,
+              '99.0': null,
+            },
+          },
+        },
       ],
     };
     expect(
@@ -406,14 +417,17 @@ Object {
     ).toEqual({
       p50: {
         '__index-threshold': 4,
+        document__test__: 0,
         logs__alert__document__count: 10,
       },
       p90: {
         '__index-threshold': 26,
+        document__test__: 0,
         logs__alert__document__count: 10,
       },
       p99: {
         '__index-threshold': 26,
+        document__test__: 0,
         logs__alert__document__count: 10,
       },
     });
