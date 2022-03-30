@@ -32,6 +32,7 @@ import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import type { SharePluginSetup } from '../../../../src/plugins/share/public';
 import {
   FetchDataParams,
   METRIC_TYPE,
@@ -55,6 +56,7 @@ import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { ConfigSchema } from '.';
+import { APMLocatorDefinition } from '../common/locator';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -69,6 +71,7 @@ export interface ApmPluginSetupDeps {
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -298,7 +301,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     registerApmAlerts(observabilityRuleTypeRegistry);
 
-    return {};
+    const locator = plugins.share.url.locators.create(
+      new APMLocatorDefinition()
+    );
+
+    return {
+      locator,
+    };
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
