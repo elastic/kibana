@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { QuerySuggestion, IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
+import { QuerySuggestion, DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 import {
   withKibana,
   KibanaReactContextValue,
@@ -21,7 +22,7 @@ interface WithKueryAutocompletionLifecycleProps {
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
     suggestions: QuerySuggestion[];
   }>;
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
 }
 
 interface WithKueryAutocompletionLifecycleState {
