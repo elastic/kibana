@@ -13,14 +13,17 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const defaultSelectionColor = euiTheme.colors.primary;
+    const { colors, font, size } = euiTheme;
+    const defaultSelectionColor = colors.primary;
 
     const scroller: CSSObject = {
       position: 'relative',
-      fontFamily: euiTheme.font.familyCode,
+      fontFamily: font.familyCode,
       overflow: 'auto',
       height: '100%',
-      backgroundColor: euiTheme.colors.lightestShade,
+      backgroundColor: colors.lightestShade,
+      paddingTop: size.base,
+      paddingLeft: size.s,
     };
 
     const selectionArea: CSSObject = {
@@ -32,10 +35,11 @@ export const useStyles = () => {
       backgroundColor: defaultSelectionColor,
       pointerEvents: 'none',
       opacity: 0.1,
+      transform: `translateY(-${size.xs})`,
     };
 
-    const defaultSelected = transparentize(euiTheme.colors.primary, 0.008);
-    const alertSelected = transparentize(euiTheme.colors.danger, 0.008);
+    const defaultSelected = transparentize(colors.primary, 0.008);
+    const alertSelected = transparentize(colors.danger, 0.008);
 
     return {
       scroller,

@@ -41,12 +41,12 @@ describe('Infrastracture feature flag', () => {
 
       cy.get(infraToggle)
         .should('have.attr', 'aria-checked')
-        .and('equal', 'true');
+        .and('equal', 'false');
     });
 
-    it('shows infrastructure tab in service overview page', () => {
+    it('hides infrastructure tab in service overview page', () => {
       cy.visit(serviceOverviewPath);
-      cy.contains('a[role="tab"]', 'Infrastructure').click();
+      cy.contains('a[role="tab"]', 'Infrastructure').should('not.exist');
     });
   });
 
@@ -59,12 +59,12 @@ describe('Infrastracture feature flag', () => {
 
       cy.get(infraToggle)
         .should('have.attr', 'aria-checked')
-        .and('equal', 'false');
+        .and('equal', 'true');
     });
 
-    it('hides infrastructure tab in service overview page', () => {
+    it('shows infrastructure tab in service overview page', () => {
       cy.visit(serviceOverviewPath);
-      cy.contains('a[role="tab"]', 'Infrastructure').should('not.exist');
+      cy.contains('a[role="tab"]', 'Infrastructure').click();
     });
   });
 });

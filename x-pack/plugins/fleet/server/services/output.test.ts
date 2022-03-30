@@ -65,12 +65,29 @@ function getMockedSoClient(
         return mockOutputSO('existing-default-output');
       }
       case outputIdToUuid('existing-default-monitoring-output'): {
-        return mockOutputSO('existing-default-monitoring-output', { is_default: true });
+        return mockOutputSO('existing-default-monitoring-output', {
+          is_default: true,
+          type: 'elasticsearch',
+        });
       }
       case outputIdToUuid('existing-preconfigured-default-output'): {
         return mockOutputSO('existing-preconfigured-default-output', {
           is_default: true,
           is_preconfigured: true,
+        });
+      }
+
+      case outputIdToUuid('existing-logstash-output'): {
+        return mockOutputSO('existing-logstash-output', {
+          type: 'logstash',
+          is_default: false,
+        });
+      }
+
+      case outputIdToUuid('existing-es-output'): {
+        return mockOutputSO('existing-es-output', {
+          type: 'elasticsearch',
+          is_default: false,
         });
       }
 
@@ -149,6 +166,8 @@ function getMockedSoClient(
 
 describe('Output Service', () => {
   beforeEach(() => {
+    mockedAgentPolicyService.list.mockClear();
+    mockedAgentPolicyService.hasAPMIntegration.mockClear();
     mockedAgentPolicyService.removeOutputFromAll.mockReset();
   });
   describe('create', () => {
@@ -431,6 +450,73 @@ describe('Output Service', () => {
         outputIdToUuid('existing-default-output'),
         { is_default: false }
       );
+    });
+
+    // With ES output
+    it('Should delete Logstash specific fields if the output type change to ES', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, 'existing-logstash-output', {
+        type: 'elasticsearch',
+        hosts: ['http://test:4343'],
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'elasticsearch',
+        hosts: ['http://test:4343'],
+        ssl: null,
+      });
+    });
+
+    // With logstash output
+    it('Should work if you try to make that output the default output and no policies using default output has APM integration', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, 'existing-logstash-output', {
+        is_default: true,
+      });
+
+      expect(soClient.update).toBeCalled();
+    });
+    it('Should throw if you try to make that output the default output and somne policies using default output has APM integration', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(true);
+
+      await expect(
+        outputService.update(soClient, 'existing-logstash-output', {
+          is_default: true,
+        })
+      ).rejects.toThrow(`Logstash output cannot be used with APM integration.`);
+    });
+    it('Should delete ES specific fields if the output type change to logstash', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, 'existing-es-output', {
+        type: 'logstash',
+        hosts: ['test:4343'],
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'logstash',
+        hosts: ['test:4343'],
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+      });
     });
   });
 

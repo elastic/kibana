@@ -93,6 +93,7 @@ export async function getLensServices(
         ? stateTransfer?.getAppNameFromId(embeddableEditorIncomingState.originatingApp)
         : undefined;
     },
+    dataViews: startDependencies.dataViews,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
     spaces,
@@ -248,6 +249,7 @@ export async function mountApp(
             initialContext={initialContext}
             contextOriginatingApp={historyLocationState?.originatingApp}
             topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+            theme$={core.theme.theme$}
           />
         </Provider>
       );

@@ -8,18 +8,22 @@
 import React, { FC, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { JobType, TrainedModelType } from '../../../../common/types/saved_objects';
+import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
 import { JobSpacesSyncFlyout } from '../../components/job_spaces_sync';
 import { checkPermission } from '../../capabilities/check_capabilities';
 
 interface Props {
-  jobType?: JobType | TrainedModelType;
+  mlSavedObjectType?: MlSavedObjectType;
   onCloseFlyout?: () => void;
   forceRefresh?: boolean;
 }
 
-export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRefresh }) => {
+export const SavedObjectsWarning: FC<Props> = ({
+  mlSavedObjectType,
+  onCloseFlyout,
+  forceRefresh,
+}) => {
   const {
     savedObjects: { syncCheck },
   } = useMlApiContext();
@@ -35,7 +39,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
         return;
       }
 
-      const { result } = await syncCheck(jobType);
+      const { result } = await syncCheck(mlSavedObjectType);
 
       if (mounted.current === true) {
         setShowWarning(showSyncFlyout || result);
@@ -104,7 +108,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
                   <EuiLink onClick={setShowSyncFlyout.bind(null, true)}>
                     <FormattedMessage
                       id="xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link"
-                      defaultMessage="Synchronize your jobs."
+                      defaultMessage="Synchronize your jobs and trained models."
                     />
                   </EuiLink>
                 ),
@@ -113,7 +117,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType, onCloseFlyout, forceRe
           ) : (
             <FormattedMessage
               id="xpack.ml.jobsList.missingSavedObjectWarning.noPermission"
-              defaultMessage="An Administrator can synchronize the jobs in Stack Management."
+              defaultMessage="An Administrator can synchronize the jobs and trained models in Stack Management."
             />
           )}
           {showSyncFlyout && <JobSpacesSyncFlyout onClose={onClose} />}

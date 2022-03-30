@@ -16,8 +16,7 @@ export const useStyles = () => {
     const { size, colors, border } = euiTheme;
 
     const container: CSSObject = {
-      marginTop: size.s,
-      marginRight: size.s,
+      margin: `${size.xs} ${size.s} 0 ${size.xs}`,
       color: colors.text,
       padding: `${size.s} 0`,
       borderStyle: 'solid',
@@ -27,7 +26,7 @@ export const useStyles = () => {
       maxWidth: 800,
       maxHeight: 378,
       overflowY: 'auto',
-      backgroundColor: 'white',
+      backgroundColor: colors.emptyShade,
     };
 
     return {

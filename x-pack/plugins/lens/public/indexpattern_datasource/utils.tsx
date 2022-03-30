@@ -352,16 +352,15 @@ function collectFiltersFromMetrics(layer: IndexPatternLayer, columnIds: string[]
     layer.columns[colId]?.filter ? 'filtered' : 'unfiltered'
   );
 
-  // extract filters from filtered metrics
-  // consider all the columns, included referenced ones to cover also the formula case
-  return (
-    filtered
-      // if there are metric columns not filtered, then ignore filtered columns completely
-      .filter(() => !unfiltered.length)
-      .map((colId) => layer.columns[colId]?.filter)
-      // filter out empty filters as well
-      .filter((filter) => filter?.query?.trim()) as Query[]
-  );
+  const filteredMetrics = filtered
+    .map((colId) => layer.columns[colId]?.filter)
+    // filter out empty filters as well
+    .filter((filter) => filter?.query?.trim()) as Query[];
+
+  return {
+    enabled: unfiltered.length ? [] : filteredMetrics,
+    disabled: unfiltered.length ? filteredMetrics : [],
+  };
 }
 
 interface GroupedQueries {
@@ -385,10 +384,10 @@ export function getFiltersInLayer(
   columnIds: string[],
   layerData: NonNullable<FramePublicAPI['activeData']>[string] | undefined
 ) {
-  const filtersFromMetricsByLanguage = groupBy(
-    collectFiltersFromMetrics(layer, columnIds),
-    'language'
-  ) as unknown as GroupedQueries;
+  const filtersGroupedByState = collectFiltersFromMetrics(layer, columnIds);
+  const [enabledFiltersFromMetricsByLanguage, disabledFitleredFromMetricsByLanguage] = (
+    ['enabled', 'disabled'] as const
+  ).map((state) => groupBy(filtersGroupedByState[state], 'language') as unknown as GroupedQueries);
 
   const filterOperation = columnIds
     .map((colId) => {
@@ -433,7 +432,19 @@ export function getFiltersInLayer(
     })
     .filter(Boolean) as GroupedQueries[];
   return {
-    kuery: collectOnlyValidQueries(filtersFromMetricsByLanguage, filterOperation, 'kuery'),
-    lucene: collectOnlyValidQueries(filtersFromMetricsByLanguage, filterOperation, 'lucene'),
+    enabled: {
+      kuery: collectOnlyValidQueries(enabledFiltersFromMetricsByLanguage, filterOperation, 'kuery'),
+      lucene: collectOnlyValidQueries(
+        enabledFiltersFromMetricsByLanguage,
+        filterOperation,
+        'lucene'
+      ),
+    },
+    disabled: {
+      kuery: [disabledFitleredFromMetricsByLanguage.kuery || []].filter((filter) => filter.length),
+      lucene: [disabledFitleredFromMetricsByLanguage.lucene || []].filter(
+        (filter) => filter.length
+      ),
+    },
   };
 }

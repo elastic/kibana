@@ -13,7 +13,7 @@ import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
 import { XYState } from '../../types';
 import { hasHistogramSeries } from '../../state_helpers';
-import { ValidLayer } from '../../../../common/expressions';
+import { ValidLayer } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import type { FramePublicAPI } from '../../../types';
 import { getDataLayers } from '../../visualization_helpers';
 
@@ -115,8 +115,16 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         <MissingValuesOptions
           isFittingEnabled={isFittingEnabled}
           fittingFunction={state?.fittingFunction}
+          emphasizeFitting={state?.emphasizeFitting}
+          endValue={state?.endValue}
           onFittingFnChange={(newVal) => {
             setState({ ...state, fittingFunction: newVal });
+          }}
+          onEmphasizeFittingChange={(newVal) => {
+            setState({ ...state, emphasizeFitting: newVal });
+          }}
+          onEndValueChange={(newVal) => {
+            setState({ ...state, endValue: newVal });
           }}
         />
 

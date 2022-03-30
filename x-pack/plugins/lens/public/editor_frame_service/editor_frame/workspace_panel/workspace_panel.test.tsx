@@ -29,7 +29,7 @@ import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter';
 import { buildExistsFilter } from '@kbn/es-query';
 import { coreMock } from 'src/core/public/mocks';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
@@ -71,6 +71,12 @@ const defaultProps = {
   getSuggestionForField: () => undefined,
   lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
+};
+
+const SELECTORS = {
+  applyChangesButton: 'button[data-test-subj="lnsApplyChanges__toolbar"]',
+  dragDropPrompt: '[data-test-subj="workspace-drag-drop-prompt"]',
+  applyChangesPrompt: '[data-test-subj="workspace-apply-changes-prompt"]',
 };
 
 describe('workspace_panel', () => {
@@ -115,7 +121,7 @@ describe('workspace_panel', () => {
     instance = mounted.instance;
     instance.update();
 
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
+    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -133,7 +139,7 @@ describe('workspace_panel', () => {
     instance = mounted.instance;
     instance.update();
 
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
+    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -151,7 +157,7 @@ describe('workspace_panel', () => {
     instance = mounted.instance;
     instance.update();
 
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
+    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -218,8 +224,10 @@ describe('workspace_panel', () => {
     instance = mounted.instance;
     instance.update();
 
+    const getExpression = () => instance.find(expressionRendererMock).prop('expression');
+
     // allows initial render
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+    expect(getExpression()).toMatchInlineSnapshot(`
     "kibana
     | lens_merge_tables layerIds=\\"first\\" tables={datasource}
     | testVis"
@@ -233,9 +241,9 @@ describe('workspace_panel', () => {
         },
       });
     });
+    instance.update();
 
-    // nothing should change
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+    expect(getExpression()).toMatchInlineSnapshot(`
     "kibana
     | lens_merge_tables layerIds=\\"first\\" tables={datasource}
     | testVis"
@@ -247,7 +255,7 @@ describe('workspace_panel', () => {
     instance.update();
 
     // should update
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+    expect(getExpression()).toMatchInlineSnapshot(`
     "kibana
     | lens_merge_tables layerIds=\\"first\\" tables={new-datasource}
     | new-vis"
@@ -260,22 +268,12 @@ describe('workspace_panel', () => {
           testVis: { ...mockVisualization, toExpression: () => 'other-new-vis' },
         },
       });
-    });
-
-    // should not update
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-      "kibana
-      | lens_merge_tables layerIds=\\"first\\" tables={new-datasource}
-      | new-vis"
-    `);
-
-    act(() => {
       mounted.lensStore.dispatch(enableAutoApply());
     });
     instance.update();
 
     // reenabling auto-apply triggers an update as well
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+    expect(getExpression()).toMatchInlineSnapshot(`
     "kibana
     | lens_merge_tables layerIds=\\"first\\" tables={other-new-datasource}
     | other-new-vis"
@@ -339,12 +337,40 @@ describe('workspace_panel', () => {
     expect(isSaveable()).toBe(false);
   });
 
-  it('should allow empty workspace as initial render when auto-apply disabled', async () => {
-    mockVisualization.toExpression.mockReturnValue('testVis');
+  it('should show proper workspace prompts when auto-apply disabled', async () => {
     const framePublicAPI = createMockFramePublicAPI();
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
     };
+
+    const configureValidVisualization = () => {
+      mockVisualization.toExpression.mockReturnValue('testVis');
+      mockDatasource.toExpression.mockReturnValue('datasource');
+      mockDatasource.getLayers.mockReturnValue(['first']);
+      act(() => {
+        instance.setProps({
+          visualizationMap: {
+            testVis: { ...mockVisualization, toExpression: () => 'new-vis' },
+          },
+        });
+      });
+    };
+
+    const deleteVisualization = () => {
+      act(() => {
+        instance.setProps({
+          visualizationMap: {
+            testVis: { ...mockVisualization, toExpression: () => null },
+          },
+        });
+      });
+    };
+
+    const dragDropPromptShowing = () => instance.exists(SELECTORS.dragDropPrompt);
+
+    const applyChangesPromptShowing = () => instance.exists(SELECTORS.applyChangesPrompt);
+
+    const visualizationShowing = () => instance.exists(expressionRendererMock);
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
@@ -356,6 +382,7 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: mockVisualization,
         }}
+        ExpressionRenderer={expressionRendererMock}
       />,
       {
         preloadedState: {
@@ -367,7 +394,37 @@ describe('workspace_panel', () => {
     instance = mounted.instance;
     instance.update();
 
-    expect(instance.exists('[data-test-subj="empty-workspace"]')).toBeTruthy();
+    expect(dragDropPromptShowing()).toBeTruthy();
+
+    configureValidVisualization();
+    instance.update();
+
+    expect(dragDropPromptShowing()).toBeFalsy();
+    expect(applyChangesPromptShowing()).toBeTruthy();
+
+    instance.find(SELECTORS.applyChangesButton).simulate('click');
+    instance.update();
+
+    expect(visualizationShowing()).toBeTruthy();
+
+    deleteVisualization();
+    instance.update();
+
+    expect(visualizationShowing()).toBeTruthy();
+
+    act(() => {
+      mounted.lensStore.dispatch(applyChanges());
+    });
+    instance.update();
+
+    expect(visualizationShowing()).toBeFalsy();
+    expect(dragDropPromptShowing()).toBeTruthy();
+
+    configureValidVisualization();
+    instance.update();
+
+    expect(dragDropPromptShowing()).toBeFalsy();
+    expect(applyChangesPromptShowing()).toBeTruthy();
   });
 
   it('should execute a trigger on expression event', async () => {
@@ -430,12 +487,15 @@ describe('workspace_panel', () => {
 
     const onData = expressionRendererMock.mock.calls[0][0].onData$!;
 
-    const tableData = { table1: { columns: [], rows: [] } };
-    onData(undefined, { tables: { tables: tableData } });
+    const tablesData = {
+      table1: { columns: [], rows: [] },
+      table2: { columns: [], rows: [] },
+    };
+    onData(undefined, { tables: { tables: tablesData } });
 
     expect(mounted.lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/onActiveDataChange',
-      payload: tableData,
+      payload: tablesData,
     });
   });
 
@@ -599,7 +659,7 @@ describe('workspace_panel', () => {
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(2);
 
-    const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+    const indexPattern = { id: 'index1' } as unknown as DataView;
     const field = { name: 'myfield' } as unknown as FieldSpec;
 
     act(() => {
@@ -918,9 +978,7 @@ describe('workspace_panel', () => {
     expect(showingErrors()).toBeFalsy();
 
     // errors should appear when problem changes are applied
-    act(() => {
-      lensStore.dispatch(applyChanges());
-    });
+    instance.find(SELECTORS.applyChangesButton).simulate('click');
     instance.update();
 
     expect(showingErrors()).toBeTruthy();

@@ -6,9 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
+import { SharedUxApplicationService } from '@kbn/shared-ux-services';
 
-export interface SharedUXApplicationService {
-  navigateToUrl: (url: string) => Promise<void>;
-  currentAppId$: Observable<string | undefined>;
-}
+import { KibanaPluginServiceFactory } from './types';
+import { SharedUXPluginStartDeps } from '../types';
+
+export type ApplicationServiceFactory = KibanaPluginServiceFactory<
+  SharedUxApplicationService,
+  SharedUXPluginStartDeps
+>;
+
+/**
+ * A factory function for creating a Kibana-based implementation of `SharedUXEditorsService`.
+ */
+export const applicationServiceFactory: ApplicationServiceFactory = ({ coreStart }) => ({
+  navigateToUrl: coreStart.application.navigateToUrl,
+  currentAppId$: coreStart.application.currentAppId$,
+});

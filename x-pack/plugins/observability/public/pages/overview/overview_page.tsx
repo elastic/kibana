@@ -17,6 +17,9 @@ import { RouteParams } from '../../routes';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { LoadingObservability } from './loading_observability';
 import { ObservabilityStatus } from '../../components/app/observability_status';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityAppServices } from '../../application/types';
+
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -34,7 +37,8 @@ export function OverviewPage({ routeParams }: Props) {
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-  const { core, ObservabilityPageTemplate } = usePluginContext();
+  const { docLinks, http } = useKibana<ObservabilityAppServices>().services;
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   const { relativeStart, relativeEnd } = useDatePickerContext();
 
@@ -50,8 +54,8 @@ export function OverviewPage({ routeParams }: Props) {
 
   const noDataConfig = getNoDataConfig({
     hasData,
-    basePath: core.http.basePath,
-    docsLink: core.docLinks.links.observability.guide,
+    basePath: http.basePath,
+    docsLink: docLinks.links.observability.guide,
   });
 
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;

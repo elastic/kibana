@@ -39,7 +39,7 @@ const createActions = (testBed: TestBed) => {
       component.update();
     },
     clickDeprecationRowAt: async (
-      deprecationType: 'mlSnapshot' | 'indexSetting' | 'reindex' | 'default',
+      deprecationType: 'mlSnapshot' | 'indexSetting' | 'reindex' | 'default' | 'clusterSetting',
       index: number
     ) => {
       await act(async () => {
@@ -126,6 +126,16 @@ const createActions = (testBed: TestBed) => {
     },
   };
 
+  const clusterSettingsDeprecationFlyout = {
+    clickDeleteSettingsButton: async () => {
+      await act(async () => {
+        find('deleteClusterSettingsButton').simulate('click');
+      });
+
+      component.update();
+    },
+  };
+
   const reindexDeprecationFlyout = {
     clickReindexButton: async () => {
       await act(async () => {
@@ -143,6 +153,7 @@ const createActions = (testBed: TestBed) => {
     mlDeprecationFlyout,
     reindexDeprecationFlyout,
     indexSettingsDeprecationFlyout,
+    clusterSettingsDeprecationFlyout,
   };
 };
 

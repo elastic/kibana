@@ -121,3 +121,15 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
   alerts: { sync: true, enabled: true },
   metrics: [],
 });
+
+/**
+ * Task manager
+ */
+
+export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
+
+/**
+ * Telemetry
+ */
+export const CASE_TELEMETRY_SAVED_OBJECT = 'cases-telemetry';
+export const CASE_TELEMETRY_SAVED_OBJECT_ID = 'cases-telemetry';

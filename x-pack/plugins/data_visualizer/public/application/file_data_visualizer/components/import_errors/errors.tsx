@@ -70,7 +70,7 @@ function title(statuses: Statuses) {
           defaultMessage="Error uploading data"
         />
       );
-    case statuses.indexPatternCreatedStatus:
+    case statuses.dataViewCreatedStatus:
       return (
         <FormattedMessage
           id="xpack.dataVisualizer.file.importErrors.creatingDataViewErrorMessage"

@@ -18,7 +18,7 @@ import {
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
 import { ITelemetryReceiver } from './receiver';
-import { allowlistEventFields, copyAllowlistedFields } from './filters';
+import { copyAllowlistedFields, endpointAllowlistFields } from './filterlists/index';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import type { TelemetryEvent } from './types';
@@ -217,7 +217,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
   public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
     return events.map(function (obj: TelemetryEvent): TelemetryEvent {
-      return copyAllowlistedFields(allowlistEventFields, obj);
+      return copyAllowlistedFields(endpointAllowlistFields, obj);
     });
   }
 
