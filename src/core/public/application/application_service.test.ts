@@ -1135,6 +1135,30 @@ describe('#start()', () => {
       expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', undefined);
       expect(setupDeps.redirectTo).not.toHaveBeenCalled();
     });
+
+    it('calls `redirectTo` when `forceRedirect` option is true', async () => {
+      const addListenerSpy: jest.SpyInstance = jest.spyOn(window, 'addEventListener');
+      const removeListenerSpy: jest.SpyInstance = jest.spyOn(window, 'removeEventListener');
+
+      parseAppUrlMock.mockReturnValue(undefined);
+      service.setup(setupDeps);
+
+      const { navigateToUrl } = await service.start(startDeps);
+
+      await navigateToUrl('/not-an-app-path', { forceRedirect: true });
+
+      expect(addListenerSpy).toHaveBeenCalledTimes(1);
+      expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+      const handler = addListenerSpy.mock.calls[0][1];
+
+      expect(MockHistory.push).not.toHaveBeenCalled();
+      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/not-an-app-path');
+
+      expect(removeListenerSpy).toHaveBeenCalledTimes(1);
+      expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
+
+      jest.restoreAllMocks();
+    });
   });
 });
 
