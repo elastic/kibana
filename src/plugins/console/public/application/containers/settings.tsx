@@ -74,7 +74,7 @@ export interface Props {
   editorInstance: SenseEditor | null;
 }
 
-export function Settings({ onClose }: Props) {
+export function Settings({ onClose, editorInstance }: Props) {
   const {
     services: { settings, http },
   } = useServicesContext();
@@ -104,6 +104,7 @@ export function Settings({ onClose }: Props) {
         refreshAutocompleteSettings(http, settings, selectedSettings)
       }
       settings={settings.toJSON()}
+      editorInstance={editorInstance}
     />
   );
 }

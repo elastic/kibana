@@ -257,6 +257,11 @@ export interface CoreEditor {
   }): void;
 
   /**
+   * Unregister a keyboard shortcut
+   */
+  unregisterKeyboardShortcuts(): void;
+
+  /**
    * Register a completions function that will be called when the editor
    * detects a change
    */

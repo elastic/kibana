@@ -16,6 +16,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   wrapMode: true,
   autocomplete: Object.freeze({ fields: true, indices: true, templates: true, dataStreams: true }),
   historyDisabled: false,
+  keyboardShortcutsDisabled: false,
 });
 
 export interface DevToolsSettings {
@@ -31,6 +32,7 @@ export interface DevToolsSettings {
   pollInterval: number;
   tripleQuotes: boolean;
   historyDisabled: boolean;
+  keyboardShortcutsDisabled: boolean;
 }
 
 export class Settings {
@@ -98,6 +100,18 @@ export class Settings {
     return this.storage.get('poll_interval', DEFAULT_SETTINGS.pollInterval);
   }
 
+  setKeyboardShortcutsDisabled(disable: boolean) {
+    this.storage.set('keyboard_shortcuts_disabled', disable);
+    return true;
+  }
+
+  getKeyboardShortcutsDisabled() {
+    return this.storage.get(
+      'keyboard_shortcuts_disabled',
+      DEFAULT_SETTINGS.keyboardShortcutsDisabled
+    );
+  }
+
   toJSON(): DevToolsSettings {
     return {
       autocomplete: this.getAutocomplete(),
@@ -107,6 +121,7 @@ export class Settings {
       polling: Boolean(this.getPolling()),
       pollInterval: this.getPollInterval(),
       historyDisabled: Boolean(this.getHistoryDisabled()),
+      keyboardShortcutsDisabled: Boolean(this.getKeyboardShortcutsDisabled()),
     };
   }
 
@@ -118,6 +133,7 @@ export class Settings {
     polling,
     pollInterval,
     historyDisabled,
+    keyboardShortcutsDisabled,
   }: DevToolsSettings) {
     this.setFontSize(fontSize);
     this.setWrapMode(wrapMode);
@@ -126,6 +142,7 @@ export class Settings {
     this.setPolling(polling);
     this.setPollInterval(pollInterval);
     this.setHistoryDisabled(historyDisabled);
+    this.setKeyboardShortcutsDisabled(keyboardShortcutsDisabled);
   }
 }
 

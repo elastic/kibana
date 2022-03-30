@@ -27,6 +27,8 @@ import {
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
+import { unregisterCommands } from '../containers/editor/legacy/console_editor/keyboard_shortcuts';
+import type { SenseEditor } from '../models';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
@@ -62,6 +64,7 @@ interface Props {
   onClose: () => void;
   refreshAutocompleteSettings: (selectedSettings: DevToolsSettings['autocomplete']) => void;
   settings: DevToolsSettings;
+  editorInstance: SenseEditor | null;
 }
 
 export function DevToolsSettingsModal(props: Props) {
@@ -75,6 +78,9 @@ export function DevToolsSettingsModal(props: Props) {
   const [pollInterval, setPollInterval] = useState(props.settings.pollInterval);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
   const [historyDisabled, setHistoryDisabled] = useState(props.settings.historyDisabled);
+  const [keyboardShortcutsDisabled, setKeyboardShortcutsDisabled] = useState(
+    props.settings.keyboardShortcutsDisabled
+  );
 
   const autoCompleteCheckboxes = [
     {
@@ -135,6 +141,7 @@ export function DevToolsSettingsModal(props: Props) {
       pollInterval,
       tripleQuotes,
       historyDisabled,
+      keyboardShortcutsDisabled,
     });
   }
 
@@ -144,6 +151,16 @@ export function DevToolsSettingsModal(props: Props) {
     setPolling(!!sanitizedValue);
     setPollInterval(sanitizedValue);
   }, []);
+
+  const toggleKeyboardShortcuts = useCallback(
+    (disable: boolean) => {
+      if (props.editorInstance) {
+        unregisterCommands(props.editorInstance);
+        setKeyboardShortcutsDisabled(disable);
+      }
+    },
+    [props.editorInstance]
+  );
 
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
@@ -276,6 +293,27 @@ export function DevToolsSettingsModal(props: Props) {
               />
             }
             onChange={(e) => setHistoryDisabled(e.target.checked)}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="console.settingsPage.keyboardShortcutsLabel"
+              defaultMessage="Keyboard shortcuts"
+            />
+          }
+        >
+          <EuiSwitch
+            checked={keyboardShortcutsDisabled}
+            id="keyboardShortcuts"
+            label={
+              <FormattedMessage
+                defaultMessage="Disable keyboard shortcuts"
+                id="console.settingsPage.disableKeyboardShortcutsMessage"
+              />
+            }
+            onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
           />
         </EuiFormRow>
 

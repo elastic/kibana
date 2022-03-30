@@ -28,12 +28,12 @@ export function registerCommands({
 
   coreEditor.registerKeyboardShortcut({
     keys: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-    name: 'send to Elasticsearch',
+    name: '__console_send_to_Elasticsearch',
     fn: () => sendCurrentRequestToES(),
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: 'open documentation',
+    name: '__console_open_documentation',
     keys: { win: 'Ctrl-/', mac: 'Command-/' },
     fn: () => {
       openDocumentation();
@@ -41,7 +41,7 @@ export function registerCommands({
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: 'auto indent request',
+    name: '__console_auto_indent_request',
     keys: { win: 'Ctrl-I', mac: 'Command-I' },
     fn: () => {
       throttledAutoIndent();
@@ -49,7 +49,7 @@ export function registerCommands({
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: 'move to previous request start or end',
+    name: '__console_move_to_previous_request_start_or_end',
     keys: { win: 'Ctrl-Up', mac: 'Command-Up' },
     fn: () => {
       senseEditor.moveToPreviousRequestEdge();
@@ -57,10 +57,15 @@ export function registerCommands({
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: 'move to next request start or end',
+    name: '__console_move_to_next_request_start_or_end',
     keys: { win: 'Ctrl-Down', mac: 'Command-Down' },
     fn: () => {
       senseEditor.moveToNextRequestEdge(false);
     },
   });
+}
+
+export function unregisterCommands(senseEditor: SenseEditor) {
+  const coreEditor = senseEditor.getCoreEditor();
+  coreEditor.unregisterKeyboardShortcuts();
 }

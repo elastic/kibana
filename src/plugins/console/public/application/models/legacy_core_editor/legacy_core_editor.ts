@@ -297,6 +297,17 @@ export class LegacyCoreEditor implements CoreEditor {
     });
   }
 
+  unregisterKeyboardShortcuts() {
+    const commands = this.editor.commands.byName;
+
+    Object.keys(commands).forEach((command) => {
+      if (command.includes('__console')) {
+        // @ts-ignore
+        this.editor.commands.removeCommand(commands[command]);
+      }
+    });
+  }
+
   legacyUpdateUI(range: Range) {
     if (!this.$actions) {
       return;

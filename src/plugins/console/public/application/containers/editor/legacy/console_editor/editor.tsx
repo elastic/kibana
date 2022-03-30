@@ -94,8 +94,6 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     const editor = editorInstanceRef.current;
     const textareaElement = editorRef.current!.querySelector('textarea');
 
-    setEditorInstance(editor);
-
     if (textareaElement) {
       textareaElement.setAttribute('id', inputId);
       textareaElement.setAttribute('data-test-subj', 'console-textarea');
@@ -228,13 +226,24 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     editor!.getCoreEditor().getContainer().focus();
   }, [settings]);
 
+  const { keyboardShortcutsDisabled } = settingsService.toJSON();
   useEffect(() => {
-    registerCommands({
-      senseEditor: editorInstanceRef.current!,
-      sendCurrentRequestToES,
-      openDocumentation,
-    });
-  }, [sendCurrentRequestToES, openDocumentation]);
+    if (!keyboardShortcutsDisabled) {
+      registerCommands({
+        senseEditor: editorInstanceRef.current!,
+        sendCurrentRequestToES,
+        openDocumentation,
+      });
+    }
+  }, [sendCurrentRequestToES, openDocumentation, keyboardShortcutsDisabled]);
+
+  useEffect(() => {
+    const { current: editor } = editorInstanceRef;
+
+    if (editor) {
+      setEditorInstance(editor);
+    }
+  });
 
   return (
     <div style={abs} data-test-subj="console-application" className="conApp">
