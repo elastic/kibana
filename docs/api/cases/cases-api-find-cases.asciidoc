@@ -35,7 +35,7 @@ Defaults to `OR`.
 (Optional, array of strings) The fields in the entity to return in the response.
 
 `from`::
-(Optional, string) **experimental** A KQL date to limit the retrieved cases to after a specific date. It supports date math expressions.
+(Optional, string) Returns only cases that were created after a specific date. The date must be specified as a <<kuery-query,KQL>> data range or date match expression.  preview:[]
 
 `owner`::
 (Optional, string or array of strings) A filter to limit the retrieved cases to
@@ -82,7 +82,7 @@ Defaults to `desc`.
 (Optional, string or array of strings) Filters the returned cases by tags.
 
 `to`::
-(Optional, string) **experimental** A KQL date to limit the retrieved cases to before a specific date. It supports date math expressions.
+(Optional, string) Returns only cases that were created before a specific date. The date must be specified as a <<kuery-query,KQL>> data range or date match expression.  preview:[]
 
 === Response code
 
