@@ -19,7 +19,7 @@ import {
 } from '../kb/kb';
 
 import { createTokenIterator } from '../../application/factories';
-import { CoreEditor, Position, Range, Token } from '../../types';
+import type { CoreEditor, Position, Range, Token } from '../../types';
 import type RowParser from '../row_parser';
 
 import * as utils from '../utils';
