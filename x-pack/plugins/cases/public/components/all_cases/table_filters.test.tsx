@@ -218,7 +218,7 @@ describe('CasesTableFilters ', () => {
   });
 
   describe('create case button', () => {
-    it('should not render the create case button when displayCreateCaseButton and onCreateCasePressed are passed', () => {
+    it('should not render the create case button when displayCreateCaseButton and onCreateCasePressed are not passed', () => {
       const wrapper = mount(
         <TestProviders>
           <CasesTableFilters {...props} />
