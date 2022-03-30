@@ -120,8 +120,8 @@ Anomaly Detection: Update annotation directly using the index it is stored in {k
 Management::
 * Resolves errors seen when creating a runtime field with a user that has access to a limit set of indices {kibana-pull}127523[#127523]
 * Fixes field format color editor crash on invalid color value {kibana-pull}127292[#127292]
-* Adds deprecation logging as step on overview page {kibana-pull}126277[#126277]
-* Shows reindex warning if low disk space {kibana-pull}125572[#125572]
+* Adds deprecation logging as step on overview page of Upgrade Assistant {kibana-pull}126277[#126277]
+* Upgrade Assistant will show a reindex warning if Elasticsearch is low on disk space {kibana-pull}125572[#125572]
 
 Observability::
 * Fixes pings over time histogram when filters are defined {kibana-pull}127757[#127757]
