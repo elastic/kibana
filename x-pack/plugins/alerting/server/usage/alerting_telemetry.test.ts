@@ -15,6 +15,7 @@ import {
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
   getFailedAndUnrecognizedTasksPerDay,
+  parsePercentileAggsByRuleType,
 } from './alerting_telemetry';
 
 describe('alerting telemetry', () => {
@@ -181,6 +182,41 @@ Object {
           avgTotalSearchDuration: {
             value: 30.642857142857142,
           },
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+          aggsByType: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: '.index-threshold',
+                doc_count: 149,
+                percentileScheduledActions: {
+                  values: {
+                    '50.0': 4.0,
+                    '90.0': 26.0,
+                    '99.0': 26.0,
+                  },
+                },
+              },
+              {
+                key: 'logs.alert.document.count',
+                doc_count: 1,
+                percentileScheduledActions: {
+                  values: {
+                    '50.0': 10.0,
+                    '90.0': 10.0,
+                    '99.0': 10.0,
+                  },
+                },
+              },
+            ],
+          },
         },
         hits: {
           hits: [],
@@ -228,6 +264,25 @@ Object {
       },
       countTotal: 4,
       countTotalFailures: 4,
+      scheduledActionsPercentiles: {
+        p50: 4,
+        p90: 26,
+        p99: 26,
+      },
+      scheduledActionsPercentilesByType: {
+        p50: {
+          '__index-threshold': 4,
+          logs__alert__document__count: 10,
+        },
+        p90: {
+          '__index-threshold': 26,
+          logs__alert__document__count: 10,
+        },
+        p99: {
+          '__index-threshold': 26,
+          logs__alert__document__count: 10,
+        },
+      },
     });
   });
 
@@ -314,6 +369,138 @@ Object {
         },
       },
       countTotal: 5,
+    });
+  });
+
+  test('parsePercentileAggsByRuleType', () => {
+    const aggsByType = {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '.index-threshold',
+          doc_count: 149,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+        },
+        {
+          key: 'logs.alert.document.count',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 10.0,
+              '90.0': 10.0,
+              '99.0': 10.0,
+            },
+          },
+        },
+      ],
+    };
+    expect(
+      parsePercentileAggsByRuleType(aggsByType.buckets, 'percentileScheduledActions.values')
+    ).toEqual({
+      p50: {
+        '__index-threshold': 4,
+        logs__alert__document__count: 10,
+      },
+      p90: {
+        '__index-threshold': 26,
+        logs__alert__document__count: 10,
+      },
+      p99: {
+        '__index-threshold': 26,
+        logs__alert__document__count: 10,
+      },
+    });
+  });
+
+  test('parsePercentileAggsByRuleType handles unknown path', () => {
+    const aggsByType = {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '.index-threshold',
+          doc_count: 149,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+        },
+        {
+          key: 'logs.alert.document.count',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 10.0,
+              '90.0': 10.0,
+              '99.0': 10.0,
+            },
+          },
+        },
+      ],
+    };
+    expect(parsePercentileAggsByRuleType(aggsByType.buckets, 'foo.values')).toEqual({
+      p50: {},
+      p90: {},
+      p99: {},
+    });
+  });
+
+  test('parsePercentileAggsByRuleType handles unrecognized percentiles', () => {
+    const aggsByType = {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '.index-threshold',
+          doc_count: 149,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '75.0': 8.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+        },
+        {
+          key: 'logs.alert.document.count',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 10.0,
+              '75.0': 10.0,
+              '90.0': 10.0,
+              '99.0': 10.0,
+            },
+          },
+        },
+      ],
+    };
+    expect(
+      parsePercentileAggsByRuleType(aggsByType.buckets, 'percentileScheduledActions.values')
+    ).toEqual({
+      p50: {
+        '__index-threshold': 4,
+        logs__alert__document__count: 10,
+      },
+      p90: {
+        '__index-threshold': 26,
+        logs__alert__document__count: 10,
+      },
+      p99: {
+        '__index-threshold': 26,
+        logs__alert__document__count: 10,
+      },
     });
   });
 });

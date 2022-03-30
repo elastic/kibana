@@ -5,8 +5,17 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
+import { get, merge } from 'lodash';
 import { AlertingUsage } from './types';
+import { NUM_ALERTING_RULE_TYPES } from './alerting_usage_collector';
+
+const percentileFieldNameMapping: Record<string, string> = {
+  '50.0': 'p50',
+  '90.0': 'p90',
+  '99.0': 'p99',
+};
 
 const ruleTypeMetric = {
   scripted_metric: {
@@ -35,6 +44,13 @@ const ruleTypeMetric = {
       }
       return result;
     `,
+  },
+};
+
+const scheduledActionsPercentilesAgg = {
+  percentiles: {
+    field: 'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
+    percents: [50, 90, 99],
   },
 };
 
@@ -409,10 +425,14 @@ export async function getExecutionsPerDayCount(
         avgTotalSearchDuration: {
           avg: { field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms' },
         },
-        percentileScheduledActions: {
-          percentiles: {
-            field: 'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
-            percents: [50, 90, 99],
+        percentileScheduledActions: scheduledActionsPercentilesAgg,
+        aggsByType: {
+          terms: {
+            field: 'rule.category',
+            size: NUM_ALERTING_RULE_TYPES,
+          },
+          aggs: {
+            percentileScheduledActions: scheduledActionsPercentilesAgg,
           },
         },
       },
@@ -448,6 +468,10 @@ export async function getExecutionsPerDayCount(
   const aggsScheduledActionsPercentiles =
     // @ts-expect-error aggegation type is not specified
     searchResult.aggregations.percentileScheduledActions.values;
+
+  const aggsByTypeBuckets =
+    // @ts-expect-error aggegation type is not specified
+    searchResult.aggregations.aggsByType.buckets;
 
   const executionFailuresAggregations = searchResult.aggregations as {
     failuresByReason: { value: { reasons: Record<string, Record<string, string>> } };
@@ -547,8 +571,21 @@ export async function getExecutionsPerDayCount(
       }),
       {}
     ),
-    scheduledActionsPercentiles: aggsScheduledActionsPercentiles,
-    scheduledActionsPercentilesByType: {},
+    scheduledActionsPercentiles: Object.keys(aggsScheduledActionsPercentiles).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (acc: any, curr: string) => ({
+        ...acc,
+        ...(percentileFieldNameMapping[curr]
+          ? { [percentileFieldNameMapping[curr]]: aggsScheduledActionsPercentiles[curr] }
+          : {}),
+      }),
+      {}
+    ),
+    scheduledActionsPercentilesByType: parsePercentileAggsByRuleType(
+      aggsByTypeBuckets,
+      'percentileScheduledActions.values'
+    ),
   };
 }
 
@@ -711,5 +748,32 @@ function replaceDotSymbolsInRuleTypeIds(ruleTypeIdObj: Record<string, string>) {
   return Object.keys(ruleTypeIdObj).reduce(
     (obj, key) => ({ ...obj, [replaceDotSymbols(key)]: ruleTypeIdObj[key] }),
     {}
+  );
+}
+
+export function parsePercentileAggsByRuleType(
+  aggsByType: estypes.AggregationsStringTermsBucketKeys[],
+  path: string
+) {
+  return (aggsByType ?? []).reduce(
+    (acc, curr) => {
+      const percentiles = get(curr, path, {});
+      return merge(
+        acc,
+        Object.keys(percentiles).reduce((pacc, pcurr) => {
+          return {
+            ...pacc,
+            ...(percentileFieldNameMapping[pcurr]
+              ? {
+                  [percentileFieldNameMapping[pcurr]]: {
+                    [replaceDotSymbols(curr.key)]: percentiles[pcurr],
+                  },
+                }
+              : {}),
+          };
+        }, {})
+      );
+    },
+    { p50: {}, p90: {}, p99: {} }
   );
 }

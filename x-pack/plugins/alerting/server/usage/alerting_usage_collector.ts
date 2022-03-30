@@ -56,6 +56,8 @@ const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
   xpack__ml__anomaly_detection_jobs_health: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
 };
 
+export const NUM_ALERTING_RULE_TYPES = Object.keys(byTypeSchema).length;
+
 const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_failured_by_reason_per_day'] =
   {
     // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
