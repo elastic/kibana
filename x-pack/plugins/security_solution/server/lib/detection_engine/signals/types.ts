@@ -34,7 +34,11 @@ import { GenericBulkCreateResponse } from '../rule_types/factories';
 import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
 import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
 import { BuildReasonMessage } from './reason_formatters';
-import { RACAlert } from '../rule_types/types';
+import {
+  BaseFieldsLatest,
+  DetectionAlert,
+  WrappedFieldsLatest,
+} from '../../../../common/detection_engine/schemas/alerts';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -179,10 +183,9 @@ export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
 };
 export type WrappedEventHit = BaseHit<EventHit>;
 
-export type AlertSearchResponse = estypes.SearchResponse<RACAlert>;
 export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
-export type AlertSourceHit = estypes.SearchHit<RACAlert>;
+export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
@@ -276,8 +279,8 @@ export type BulkResponseErrorAggregation = Record<string, { count: number; statu
 
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
-export type BulkCreate = <T extends Record<string, unknown>>(
-  docs: Array<BaseHit<T>>
+export type BulkCreate = <T extends BaseFieldsLatest>(
+  docs: Array<WrappedFieldsLatest<T>>
 ) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
@@ -285,12 +288,12 @@ export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 export type WrapHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => SimpleHit[];
+) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
 
 export type WrapSequences = (
   sequences: Array<EqlSequence<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => SimpleHit[];
+) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
 
 export interface SearchAfterAndBulkCreateParams {
   tuple: {

@@ -42,7 +42,7 @@ export const login = ({
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'cypress-axe';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/test';
+import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 
 const axeConfig = {
   ...AXE_CONFIG,

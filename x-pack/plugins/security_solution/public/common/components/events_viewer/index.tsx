@@ -24,7 +24,6 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import type { EntityType } from '../../../../../timelines/common';
 import { TGridCellAction } from '../../../../../timelines/common/types';
-import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import { useGetUserCasesPermissions, useKibana } from '../../lib/kibana';
@@ -33,6 +32,7 @@ import {
   useFieldBrowserOptions,
   FieldEditorActions,
 } from '../../../timelines/components/fields_browser';
+import { useSessionView } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -105,6 +105,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
+      sessionViewId,
       showCheckboxes,
       sort,
     } = defaultModel,
@@ -155,11 +156,19 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
-  const graphOverlay = useMemo(
-    () =>
-      graphEventId != null && graphEventId.length > 0 ? <GraphOverlay timelineId={id} /> : null,
-    [graphEventId, id]
-  );
+
+  const { DetailsPanel, SessionView, Navigation } = useSessionView({
+    entityType,
+    timelineId: id,
+  });
+
+  const graphOverlay = useMemo(() => {
+    const shouldShowOverlay =
+      (graphEventId != null && graphEventId.length > 0) || sessionViewId !== null;
+    return shouldShowOverlay ? (
+      <GraphOverlay timelineId={id} SessionView={SessionView} Navigation={Navigation} />
+    ) : null;
+  }, [graphEventId, id, sessionViewId, SessionView, Navigation]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
@@ -239,14 +248,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             })}
           </InspectButtonContainer>
         </FullScreenContainer>
-        <DetailsPanel
-          browserFields={browserFields}
-          entityType={entityType}
-          docValueFields={docValueFields}
-          isFlyoutView
-          runtimeMappings={runtimeMappings}
-          timelineId={id}
-        />
+        {DetailsPanel}
       </CasesContext>
     </>
   );

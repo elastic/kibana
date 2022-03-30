@@ -13,6 +13,7 @@ import { ConfigKey } from '../../../../common/runtime_types';
 import { getMonitors } from '../../../state/actions';
 import { monitorManagementListSelector } from '../../../state/selectors';
 import { MonitorManagementListPageState } from './monitor_list';
+import { MonitorAsyncError } from './monitor_async_error';
 import { useInlineErrors } from '../hooks/use_inline_errors';
 import { MonitorListTabs } from './list_tabs';
 import { AllMonitors } from './all_monitors';
@@ -66,6 +67,7 @@ export const MonitorListContainer: React.FC = () => {
 
   return (
     <>
+      <MonitorAsyncError />
       <MonitorListTabs
         invalidTotal={monitorSavedObjects?.length ?? 0}
         onUpdate={onUpdate}
