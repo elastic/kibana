@@ -65,6 +65,12 @@ Handlebars.compileAST = function (
   input: string | hbs.AST.Program,
   options?: ExtendedCompileOptions
 ) {
+  if (input == null || (typeof input !== 'string' && input.type !== 'Program')) {
+    throw new Handlebars.Exception(
+      `You must pass a string or Handlebars AST to Handlebars.compileAST. You passed ${input}`
+    );
+  }
+
   // If `Handlebars.compileAST` is reassigned, `this` will be undefined.
   const helpers = (this ?? Handlebars).helpers;
 
