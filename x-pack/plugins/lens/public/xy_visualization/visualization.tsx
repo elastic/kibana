@@ -34,6 +34,7 @@ import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expr
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
 import {
+  convertActiveDataFromIndexesToLayers,
   getGroupsAvailableInData,
   getReferenceConfiguration,
   getReferenceSupportedLayer,
@@ -180,6 +181,7 @@ export const getXyVisualization = ({
   },
 
   getConfiguration({ state, frame, layerId }) {
+    const activeData = convertActiveDataFromIndexesToLayers(frame.activeData, state.layers);
     const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {
       return { groups: [] };
@@ -214,7 +216,7 @@ export const getXyVisualization = ({
 
     const dataLayers = getDataLayers(state.layers);
     const isHorizontal = isHorizontalChart(state.layers);
-    const { left, right } = groupAxesByType([layer], frame.activeData);
+    const { left, right } = groupAxesByType([layer], activeData);
     // Check locally if it has one accessor OR one accessor per axis
     const layerHasOnlyOneAccessor = Boolean(
       dataLayer.accessors.length < 2 ||
@@ -234,7 +236,7 @@ export const getXyVisualization = ({
             Boolean(l.xAccessor) === Boolean(dataLayer.xAccessor) &&
             Boolean(l.splitAccessor) === Boolean(dataLayer.splitAccessor)
           ) {
-            const { left: localLeft, right: localRight } = groupAxesByType([l], frame.activeData);
+            const { left: localLeft, right: localRight } = groupAxesByType([l], activeData);
             // return true only if matching axis are found
             return (
               l.accessors.length &&
@@ -410,6 +412,8 @@ export const getXyVisualization = ({
   },
 
   removeDimension({ prevState, layerId, columnId, frame }) {
+    const activeData = convertActiveDataFromIndexesToLayers(frame.activeData, prevState.layers);
+
     const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
       return prevState;
@@ -448,7 +452,7 @@ export const getXyVisualization = ({
     const groupsAvailable = getGroupsAvailableInData(
       getDataLayers(prevState.layers),
       frame.datasourceLayers,
-      frame?.activeData
+      activeData
     );
 
     if (
@@ -607,6 +611,7 @@ export const getXyVisualization = ({
     if (state?.layers.length === 0 || !frame.activeData) {
       return;
     }
+    const activeData = convertActiveDataFromIndexesToLayers(frame.activeData, state.layers);
 
     const filteredLayers = [
       ...getDataLayers(state.layers),
@@ -615,7 +620,7 @@ export const getXyVisualization = ({
     const accessorsWithArrayValues = [];
     for (const layer of filteredLayers) {
       const { layerId, accessors } = layer;
-      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      const rows = activeData[layerId] && activeData[layerId].rows;
       if (!rows) {
         break;
       }
@@ -689,9 +694,11 @@ const getMappedAccessors = ({
   }));
 
   if (frame.activeData) {
+    const activeData = convertActiveDataFromIndexesToLayers(frame.activeData, state.layers);
+
     const colorAssignments = getColorAssignments(
       getDataLayers(state.layers),
-      { tables: frame.activeData },
+      { tables: activeData },
       fieldFormats.deserialize
     );
     mappedAccessors = getAccessorColorConfig(

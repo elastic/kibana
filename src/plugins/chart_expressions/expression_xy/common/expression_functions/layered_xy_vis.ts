@@ -7,11 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  ExpressionFunctionDefinition,
-  TablesAdapter,
-  Datatable,
-} from '../../../../expressions';
+import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions';
 import { LayeredXYArgs, XYExtendedLayerConfigResult, XYRender } from '../types';
 import {
   XYCurveTypes,
@@ -29,10 +25,7 @@ import {
   LAYERED_XY_VIS,
   EndValues,
 } from '../constants';
-
-const logDataTable = (tableAdapter: TablesAdapter, datatables: Record<string, Datatable> = {}) => {
-  Object.entries(datatables).forEach(([key, table]) => tableAdapter.logDatatable(key, table));
-};
+import { logDatatables } from '../utils';
 
 export const layeredXyVisFunction: ExpressionFunctionDefinition<
   typeof LAYERED_XY_VIS,
@@ -188,14 +181,7 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
       (layer): layer is XYExtendedLayerConfigResult => layer !== undefined
     );
 
-    const tables = layers.reduce<Record<string, Datatable>>((t, layer, index) => {
-      t[index] = data;
-      return t;
-    }, {});
-
-    if (handlers?.inspectorAdapters?.tables) {
-      logDataTable(handlers.inspectorAdapters.tables, tables);
-    }
+    logDatatables(layers, handlers);
 
     return {
       type: 'render',

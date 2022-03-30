@@ -185,8 +185,9 @@ export interface XYArgs {
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
-  dataLayer?: DataLayerConfigResult;
-  referenceLineLayer?: ReferenceLineLayerConfigResult;
+  dataLayers: DataLayerConfigResult[];
+  referenceLineLayers: ReferenceLineLayerConfigResult[];
+  annotationLayers: AnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;

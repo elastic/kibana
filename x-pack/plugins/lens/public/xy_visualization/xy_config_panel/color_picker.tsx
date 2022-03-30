@@ -22,6 +22,7 @@ import {
 import { getSortedAccessors } from '../to_expression';
 import { TooltipWrapper } from '../../shared_components';
 import { isReferenceLayer, isAnnotationsLayer, getDataLayers } from '../visualization_helpers';
+import { convertActiveDataFromIndexesToLayers } from '../reference_line_helpers';
 
 const tooltipContent = {
   auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
@@ -59,6 +60,7 @@ export const ColorPicker = ({
   const layer = state.layers[index];
 
   const overwriteColor = getSeriesColor(layer, accessor);
+  const activeData = convertActiveDataFromIndexesToLayers(frame.activeData, state.layers);
   const currentColor = useMemo(() => {
     if (overwriteColor || !frame.activeData) return overwriteColor;
     if (isReferenceLayer(layer)) {
@@ -75,7 +77,7 @@ export const ColorPicker = ({
 
     const colorAssignments = getColorAssignments(
       getDataLayers(state.layers),
-      { tables: frame.activeData },
+      { tables: activeData },
       formatFactory
     );
     const mappedAccessors = getAccessorColorConfig(
@@ -89,7 +91,16 @@ export const ColorPicker = ({
     );
 
     return mappedAccessors.find((a) => a.columnId === accessor)?.color || null;
-  }, [overwriteColor, frame, paletteService, state.layers, accessor, formatFactory, layer]);
+  }, [
+    overwriteColor,
+    frame,
+    layer,
+    state.layers,
+    activeData,
+    formatFactory,
+    paletteService,
+    accessor,
+  ]);
 
   const [color, setColor] = useState(currentColor);
 

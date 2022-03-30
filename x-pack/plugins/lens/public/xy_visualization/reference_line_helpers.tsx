@@ -107,6 +107,7 @@ export function getStaticValue(
     untouchedDataLayers,
     accessors,
   } = getAccessorCriteriaForGroup(groupId, dataLayers, activeData);
+
   if (
     groupId === 'x' &&
     filteredLayers.length &&
@@ -114,6 +115,7 @@ export function getStaticValue(
   ) {
     return fallbackValue;
   }
+
   const computedValue = computeStaticValueForGroup(
     filteredLayers,
     accessors,
@@ -121,6 +123,7 @@ export function getStaticValue(
     groupId !== 'x', // histogram axis should compute the min based on the current data
     groupId !== 'x'
   );
+
   return computedValue ?? fallbackValue;
 }
 
@@ -168,6 +171,7 @@ export function computeOverallDataDomain(
   const accessorMap = new Set(accessorIds);
   let min: number | undefined;
   let max: number | undefined;
+
   const [stacked, unstacked] = partition(
     dataLayers,
     ({ seriesType }) => isStackedChart(seriesType) && allowStacking
@@ -253,6 +257,24 @@ function computeStaticValueForGroup(
   }
 }
 
+export const convertActiveDataFromIndexesToLayers = (
+  activeData: Record<string, Datatable> | undefined = {},
+  layers: XYState['layers'] = []
+) => {
+  const layersIdsToIndexes = layers.reduce<Record<string, string>>(
+    (layersWithIndexes, { layerId }, index) => ({ ...layersWithIndexes, [index]: layerId }),
+    {}
+  );
+
+  return Object.entries<Datatable>(activeData ?? {}).reduce<Record<string, Datatable>>(
+    (dataByLayerIds, [layerIndex, dataPerLayer]) => ({
+      ...dataByLayerIds,
+      [layersIdsToIndexes[layerIndex]]: dataPerLayer,
+    }),
+    {}
+  );
+};
+
 export const getReferenceSupportedLayer = (
   state?: XYState,
   frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
@@ -271,13 +293,19 @@ export const getReferenceSupportedLayer = (
       label: 'x' as const,
     },
   ];
+
+  const layers = state?.layers || [];
+  const activeData = convertActiveDataFromIndexesToLayers(frame?.activeData, layers);
+
   const referenceLineGroups = getGroupsRelatedToData(
     referenceLineGroupIds,
     state,
     frame?.datasourceLayers || {},
-    frame?.activeData
+    activeData
   );
-  const dataLayers = getDataLayers(state?.layers || []);
+
+  const dataLayers = getDataLayers(layers);
+
   const filledDataLayers = dataLayers.filter(
     ({ accessors, xAccessor }) => accessors.length || xAccessor
   );
@@ -293,12 +321,7 @@ export const getReferenceSupportedLayer = (
         columnId: generateId(),
         dataType: 'number',
         label: getAxisName(label, { isHorizontal: isHorizontalChart(state?.layers || []) }),
-        staticValue: getStaticValue(
-          dataLayers,
-          label,
-          { activeData: frame?.activeData },
-          layerHasNumberHistogram
-        ),
+        staticValue: getStaticValue(dataLayers, label, { activeData }, layerHasNumberHistogram),
       }))
     : undefined;
 
@@ -320,6 +343,7 @@ export const getReferenceSupportedLayer = (
     initialDimensions,
   };
 };
+
 export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   prevState,
   layerId,
@@ -400,6 +424,8 @@ export const getReferenceConfiguration = ({
       return axisMode;
     }
   );
+
+  const activeData = convertActiveDataFromIndexesToLayers(frame?.activeData, state.layers);
   const groupsToShow = getGroupsToShow(
     [
       // When a reference layer panel is added, a static reference line should automatically be included by default
@@ -425,7 +451,7 @@ export const getReferenceConfiguration = ({
     ],
     state,
     frame.datasourceLayers,
-    frame?.activeData
+    activeData
   );
   const isHorizontal = isHorizontalChart(state.layers);
   return {
