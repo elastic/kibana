@@ -16,12 +16,7 @@ import {
   FilterOptions,
   SortFieldCase,
 } from '../../../common/ui/types';
-import {
-  CaseStatuses,
-  CommentRequestAlertType,
-  caseStatuses,
-  CommentType,
-} from '../../../common/api';
+import { CaseStatuses, caseStatuses } from '../../../common/api';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
 
@@ -55,7 +50,6 @@ export interface AllCasesListProps {
   /**
    * @deprecated Use the attachments prop instead
    */
-  alertData?: Omit<CommentRequestAlertType, 'type'>;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case) => void;
@@ -66,7 +60,6 @@ export interface AllCasesListProps {
 
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({
-    alertData,
     attachments,
     hiddenStatuses = [],
     isSelectorView = false,
@@ -181,18 +174,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const showActions = userCanCrud && !isSelectorView;
 
-    // TODO remove the deprecated alertData field when cleaning up
-    // code https://github.com/elastic/kibana/issues/123183
-    // This code is to support the deprecated alertData prop
-    const toAttach = useMemo((): CaseAttachments | undefined => {
-      if (attachments !== undefined || alertData !== undefined) {
-        const _toAttach = attachments ?? [];
-        if (alertData !== undefined) {
-          _toAttach.push({ ...alertData, type: CommentType.alert });
-        }
-        return _toAttach;
-      }
-    }, [alertData, attachments]);
+    const toAttach = attachments ?? [];
 
     const columns = useCasesColumns({
       dispatchUpdateCaseProperty,
