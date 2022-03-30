@@ -39,8 +39,9 @@ import type { OptInConfigPerType } from './types';
 import { ShippersRegistry } from './shippers_registry';
 
 export class AnalyticsClient implements IAnalyticsClient {
-  public readonly telemetryCounter$: Observable<TelemetryCounter>;
   private readonly internalTelemetryCounter$ = new Subject<TelemetryCounter>();
+  public readonly telemetryCounter$: Observable<TelemetryCounter> =
+    this.internalTelemetryCounter$.pipe(share()); // Using `share` so we can have multiple subscribers
   /**
    * This queue holds all the events until both conditions occur:
    * 1. We know the user's optIn decision.
@@ -71,8 +72,6 @@ export class AnalyticsClient implements IAnalyticsClient {
   );
 
   constructor(private readonly initContext: AnalyticsClientInitContext) {
-    this.telemetryCounter$ = this.internalTelemetryCounter$.pipe(share()); // Using `share` so we can have multiple subscribers
-
     // Observer that will emit when both events occur: the OptInConfig is set + a shipper has been registered
     const configReceivedAndShipperReceivedObserver$ = combineLatest([
       this.optInConfigWithReplay$,
