@@ -309,7 +309,6 @@ export const waitForPage = (url: string) => {
   cy.visit(
     `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
   );
-  cy.get('[data-test-subj="headerGlobalNav"]');
 };
 
 export const visit = (url: string, onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void) => {
@@ -324,21 +323,18 @@ export const visit = (url: string, onBeforeLoadCallback?: (win: Cypress.AUTWindo
       },
     }
   );
-  cy.get('[data-test-subj="headerGlobalNav"]');
 };
 
 export const visitWithoutDateRange = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url, {
     onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
 export const visitWithUser = (url: string, user: User) => {
   cy.visit(constructUrlWithUser(user, url), {
     onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
 export const visitTimeline = (timelineId: string, role?: ROLES) => {
@@ -346,8 +342,6 @@ export const visitTimeline = (timelineId: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, route) : route, {
     onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
-  cy.get('[data-test-subj="headerGlobalNav"]');
-  cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };
 
 export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
@@ -360,7 +354,6 @@ export const visitUserDetailsPage = (userName = 'bob') => {
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url);
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
 export const logout = () => {
