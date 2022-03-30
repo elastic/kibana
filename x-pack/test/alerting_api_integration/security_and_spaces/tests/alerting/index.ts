@@ -54,6 +54,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./health'));
       loadTestFile(require.resolve('./excluded'));
       loadTestFile(require.resolve('./snooze'));
+      loadTestFile(require.resolve('./bulk_edit'));
     });
   });
 }
