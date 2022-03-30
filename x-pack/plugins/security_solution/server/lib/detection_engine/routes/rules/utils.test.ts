@@ -64,7 +64,7 @@ const createMockImportRule = async (rule: ReturnType<typeof getCreateRulesSchema
   return rules;
 };
 
-describe('utils - %s', () => {
+describe('utils', () => {
   const { clients } = requestContextMock.createTools();
 
   describe('internalRuleToAPIResponse', () => {

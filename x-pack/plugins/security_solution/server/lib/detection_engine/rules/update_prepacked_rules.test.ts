@@ -15,10 +15,7 @@ import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
 
 jest.mock('./patch_rules');
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('updatePrepackagedRules - %s', () => {
+describe('updatePrepackagedRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let ruleExecutionLog: ReturnType<typeof ruleExecutionLogMock.forRoutes.create>;

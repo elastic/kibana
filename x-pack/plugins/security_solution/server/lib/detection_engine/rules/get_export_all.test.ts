@@ -27,10 +27,7 @@ import { requestContextMock } from '../routes/__mocks__/request_context';
 
 const exceptionsClient = getExceptionListClientMock();
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('getExportAll - %s', () => {
+describe('getExportAll', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const { clients } = requestContextMock.createTools();
 

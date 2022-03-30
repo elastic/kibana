@@ -11,10 +11,7 @@ import { INTERNAL_RULE_ID_KEY, INTERNAL_IDENTIFIER } from '../../../../common/co
 import { readRawTags, readTags, convertTagsToSet, convertToTags, isTags } from './read_tags';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('read_tags - %s', () => {
+describe('read_tags', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });

@@ -12,10 +12,7 @@ import {
 } from './create_rules.mock';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../common/constants';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('createRules - %s', () => {
+describe('createRules', () => {
   it('calls the rulesClient with legacy ML params', async () => {
     const ruleOptions = getCreateMlRulesOptionsMock();
     await createRules(ruleOptions);

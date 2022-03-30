@@ -26,10 +26,7 @@ import { ImportTimelineResultSchema } from '../../../../../../common/types/timel
 
 jest.mock('../../timelines/import_timelines/helpers');
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('installPrepackagedTimelines - %s', () => {
+describe('installPrepackagedTimelines', () => {
   let securitySetup: SecurityPluginSetup;
   let frameworkRequest: FrameworkRequest;
   const spyInstallPrepackagedTimelines = jest.spyOn(helpers, 'installPrepackagedTimelines');

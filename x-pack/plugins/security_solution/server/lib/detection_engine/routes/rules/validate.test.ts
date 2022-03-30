@@ -65,10 +65,7 @@ export const ruleOutput = (): RulesSchema => ({
   timeline_id: 'some-timeline-id',
 });
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('validate - %s', () => {
+describe('validate', () => {
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getAlertMock(getQueryRuleParams());

@@ -25,10 +25,7 @@ export class TestError extends Error {
   public output: { statusCode: number };
 }
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('read_rules - %s', () => {
+describe('read_rules', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.restoreAllMocks();

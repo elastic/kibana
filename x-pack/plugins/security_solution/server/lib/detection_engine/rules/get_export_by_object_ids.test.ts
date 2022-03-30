@@ -26,10 +26,7 @@ const exceptionsClient = getExceptionListClientMock();
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { requestContextMock } from '../routes/__mocks__/request_context';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('get_export_by_object_ids - %s', () => {
+describe('get_export_by_object_ids', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const { clients } = requestContextMock.createTools();
 

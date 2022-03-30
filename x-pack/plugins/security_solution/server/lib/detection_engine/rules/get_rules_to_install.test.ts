@@ -11,10 +11,7 @@ import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/dete
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('get_rules_to_install - %s', () => {
+describe('get_rules_to_install', () => {
   test('should return empty array if both rule sets are empty', () => {
     const update = getRulesToInstall([], []);
     expect(update).toEqual([]);

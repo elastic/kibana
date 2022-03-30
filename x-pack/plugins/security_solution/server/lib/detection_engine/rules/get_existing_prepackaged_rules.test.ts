@@ -20,10 +20,7 @@ import {
   getNonPackagedRulesCount,
 } from './get_existing_prepackaged_rules';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('get_existing_prepackaged_rules - %s', () => {
+describe('get_existing_prepackaged_rules', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });

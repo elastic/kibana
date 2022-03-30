@@ -12,10 +12,7 @@ import { RulesClientMock } from '../../../../../alerting/server/rules_client.moc
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('patchRules - %s', () => {
+describe('patchRules', () => {
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
     const rulesOptionsMock = getPatchRulesOptionsMock();
     const ruleOptions: PatchRulesOptions = {
