@@ -14,6 +14,7 @@ export type CollectorDependencies = {
   signalsIndex: string;
   core: CoreSetup;
   logger: Logger;
+  eventLogIndex: string;
 } & Pick<SetupPlugins, 'ml' | 'usageCollection'>;
 
 export interface AlertBucket {
@@ -51,3 +52,91 @@ export type RuleSearchResult = Omit<
   createdAt: string;
   updatedAt: string;
 };
+
+export type RuleStatus = 'running' | 'succeeded' | 'partial failure' | 'failed';
+
+export interface CountCardinality {
+  doc_count: number;
+  cardinality: {
+    value: number | null;
+  };
+}
+
+export interface Categories {
+  buckets: Array<{ doc_count: number; key: string }>;
+}
+export interface CountCardinalityWithCategories extends CountCardinality {
+  categories: Categories;
+}
+
+export interface SingleEVentLogTypeStatusAgg {
+  doc_count: number;
+  'siem.queryRule': CountCardinality;
+  'siem.savedQueryRule': CountCardinality;
+  'siem.eqlRule': CountCardinality;
+  'siem.thresholdRule': CountCardinality;
+  'siem.mlRule': CountCardinality;
+  'siem.indicatorRule': CountCardinality;
+}
+
+export interface SingleEVentLogTypeStatusAggWithCategories {
+  doc_count: number;
+  'siem.queryRule': CountCardinalityWithCategories;
+  'siem.savedQueryRule': CountCardinalityWithCategories;
+  'siem.eqlRule': CountCardinalityWithCategories;
+  'siem.thresholdRule': CountCardinalityWithCategories;
+  'siem.mlRule': CountCardinalityWithCategories;
+  'siem.indicatorRule': CountCardinalityWithCategories;
+}
+
+export interface SingleExecutionMetricAgg {
+  doc_count: number;
+  maxTotalIndexDuration: {
+    value: number | null;
+  };
+  avgTotalIndexDuration: {
+    value: number | null;
+  };
+  minTotalIndexDuration: {
+    value: number | null;
+  };
+  gapCount: {
+    value: number | null;
+  };
+  maxGapDuration: {
+    value: number | null;
+  };
+  avgGapDuration: {
+    value: number | null;
+  };
+  minGapDuration: {
+    value: number | null;
+  };
+  maxTotalSearchDuration: {
+    value: number | null;
+  };
+  avgTotalSearchDuration: {
+    value: number | null;
+  };
+  minTotalSearchDuration: {
+    value: number | null;
+  };
+}
+
+export interface EventLogTypeStatusAggs {
+  eventActionStatusChange: {
+    doc_count: number;
+    'partial failure': SingleEVentLogTypeStatusAggWithCategories;
+    failed: SingleEVentLogTypeStatusAggWithCategories;
+    succeeded: SingleEVentLogTypeStatusAgg;
+  };
+  eventActionExecutionMetrics: {
+    doc_count: number;
+    'siem.queryRule': SingleExecutionMetricAgg;
+    'siem.savedQueryRule': SingleExecutionMetricAgg;
+    'siem.eqlRule': SingleExecutionMetricAgg;
+    'siem.thresholdRule': SingleExecutionMetricAgg;
+    'siem.mlRule': SingleExecutionMetricAgg;
+    'siem.indicatorRule': SingleExecutionMetricAgg;
+  };
+}

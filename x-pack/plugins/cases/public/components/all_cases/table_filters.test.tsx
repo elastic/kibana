@@ -64,7 +64,7 @@ describe('CasesTableFilters ', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="options-filter-popover-button-Tags"]`).last().simulate('click');
-    wrapper.find(`[data-test-subj="options-filter-popover-item-0"]`).last().simulate('click');
+    wrapper.find(`[data-test-subj="options-filter-popover-item-coke"]`).last().simulate('click');
 
     expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
   });
@@ -80,7 +80,10 @@ describe('CasesTableFilters ', () => {
       .last()
       .simulate('click');
 
-    wrapper.find(`[data-test-subj="options-filter-popover-item-0"]`).last().simulate('click');
+    wrapper
+      .find(`[data-test-subj="options-filter-popover-item-casetester"]`)
+      .last()
+      .simulate('click');
 
     expect(onFilterChanged).toBeCalledWith({ reporters: [{ username: 'casetester' }] });
   });
@@ -212,7 +215,10 @@ describe('CasesTableFilters ', () => {
       .last()
       .simulate('click');
 
-    wrapper.find(`[data-test-subj="options-filter-popover-item-0"]`).last().simulate('click');
+    wrapper
+      .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
+      .last()
+      .simulate('click');
 
     expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
   });
