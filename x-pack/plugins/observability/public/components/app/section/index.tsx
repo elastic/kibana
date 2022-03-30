@@ -42,7 +42,7 @@ export function SectionContainer({
 }: Props) {
   const { http } = useKibana<ObservabilityAppServices>().services;
   return (
-    <EuiPanel hasShadow={true} color="subdued">
+    <EuiPanel color="subdued">
       <EuiAccordion
         initialIsOpen
         id={title}
