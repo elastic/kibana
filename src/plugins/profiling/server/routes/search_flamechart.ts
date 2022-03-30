@@ -304,8 +304,6 @@ async function queryFlameGraph(
       const chunkSize = Math.floor(stackTraceEvents.size / nQueries);
       const stackTraceIDs = [...stackTraceEvents.keys()];
 
-      logger.info('A');
-
       for (let i = 0; i < nQueries; i++) {
         const func = async () => {
           const chunk = stackTraceIDs.slice(chunkSize * i, chunkSize * (i + 1));
@@ -314,8 +312,6 @@ async function queryFlameGraph(
             ids: [...chunk],
             _source_includes: ['FrameID', 'Type'],
           });
-
-          logger.info('res ' + i);
 
           if (testing) {
             for (const trace of res.body.hits.hits) {
@@ -349,45 +345,11 @@ async function queryFlameGraph(
         promises[i] = func();
       }
 
-      logger.info('B');
       await Promise.all(promises).catch((err) => {
         logger.error('Failed to get stacktraces from _mget: ' + err.message);
       });
     }
   );
-  /*
-  logger.info('results len ' + results.length);
-
-  // Create a lookup map StackTraceID -> StackTrace.
-  for (let i = 0; i < nQueries; i++) {
-    if (testing) {
-      for (const trace of results[i].body.hits.hits) {
-        const frameIDs = trace.fields.FrameID as string[];
-        const fileIDs = extractFileIDArrayFromFrameIDArray(frameIDs);
-        stackTraces.set(trace._id, {
-          FileID: fileIDs,
-          FrameID: frameIDs,
-          Type: trace.fields.Type,
-        });
-      }
-    } else {
-      for (const trace of results[i].body.docs) {
-        // Sometimes we don't find the trace.
-        // This is due to ES delays writing (data is not immediately seen after write).
-        // Also, ES doesn't know about transactions.
-        if (trace.found) {
-          const frameIDs = trace._source.FrameID as string[];
-          const fileIDs = extractFileIDArrayFromFrameIDArray(frameIDs);
-          stackTraces.set(trace._id, {
-            FileID: fileIDs,
-            FrameID: frameIDs,
-            Type: trace._source.Type,
-          });
-        }
-      }
-    }
-  }
-*/
 
   if (stackTraces.size < stackTraceEvents.size) {
     logger.info(
@@ -397,7 +359,8 @@ async function queryFlameGraph(
     );
   }
 
-  /*  logger.info(
+  /*
+    logger.info(
     '* unique stacktraces without leaf frame: ' +
       getNumberOfUniqueStacktracesWithoutLeafNode(stackTraces, 1)
   );
