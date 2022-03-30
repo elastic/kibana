@@ -118,11 +118,13 @@ describe('Test pipeline', () => {
       await actions.clickRefreshOutputButton();
       // There will be two requests made to the simulate API
       // the second request will have verbose enabled to update the processor results
-      expect(httpSetup.post).toHaveBeenLastCalledWith(
+      expect(httpSetup.post).toHaveBeenNthCalledWith(
+        1,
         `${API_BASE_PATH}/simulate`,
         expect.anything()
       );
-      expect(httpSetup.post).toHaveBeenLastCalledWith(
+      expect(httpSetup.post).toHaveBeenNthCalledWith(
+        2,
         `${API_BASE_PATH}/simulate`,
         expect.anything()
       );
