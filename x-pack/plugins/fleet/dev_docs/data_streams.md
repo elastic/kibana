@@ -1,6 +1,6 @@
 # Data Streams
 
-Packages use [data streams](https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams.html) to ingest data into elasticsearch. These data streams follow the [data stream naming format](https://www.elastic.co/blog/an-introduction-to-the-elastic-data-stream-naming-scheme). Data streams are defined in the package and constructed by Fleet during package install. Mappings are generally derived from `/data_Stream/<my_stream>/fields/*.yml` in the package, there is also the ability for packages to set custom mappings or settings directly, e.g APM sets dynamic mapping [here](https://github.com/elastic/package-storage/blob/production/packages/apm/0.4.0/data_stream/app_metrics/manifest.yml#L8) 
+Packages use [data streams](https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams.html) to ingest data into elasticsearch. These data streams follow the [data stream naming format](https://www.elastic.co/blog/an-introduction-to-the-elastic-data-stream-naming-scheme). Data streams are defined in the package and constructed by Fleet during package install. Mappings are generally derived from `/data_stream/<my_stream>/fields/*.yml` in the package, there is also the ability for packages to set custom mappings or settings directly, e.g APM sets dynamic mapping [here](https://github.com/elastic/package-storage/blob/production/packages/apm/0.4.0/data_stream/app_metrics/manifest.yml#L8) 
 
 
 ## Template Structure
