@@ -462,6 +462,7 @@ x-pack/plugins/session_view @elastic/awp-platform
 
 # Reporting
 /x-pack/examples/reporting_example/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/examples/screenshotting_example/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/plugins/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/test/functional/apps/dashboard/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/test/functional/apps/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
