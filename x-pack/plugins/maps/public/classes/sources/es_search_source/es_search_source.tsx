@@ -901,12 +901,14 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('trackTotalHits', maxResultWindow + 1);
-    const resp = await searchSource.fetch({
-      abortSignal: abortController.signal,
-      sessionId: searchFilters.searchSessionId,
-      legacyHitsTotal: false,
-      executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
-    });
+    const { rawResponse: resp } = await searchSource
+      .fetch$({
+        abortSignal: abortController.signal,
+        sessionId: searchFilters.searchSessionId,
+        legacyHitsTotal: false,
+        executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
+      })
+      .toPromise();
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }
 }
