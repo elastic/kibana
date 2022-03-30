@@ -26,6 +26,7 @@ import type { ExplorerChartsData } from '../../application/explorer/explorer_cha
 import { processFilters } from '../common/process_filters';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { getJobsObservable } from '../common/get_jobs_observable';
+import type { RenderCompleteDispatcher } from '../../../../../../src/plugins/kibana_utils/public';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
@@ -35,7 +36,8 @@ export function useAnomalyChartsInputResolver(
   refresh: Observable<any>,
   services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
   chartWidth: number,
-  severity: number
+  severity: number,
+  renderCompleteDispatcher: RenderCompleteDispatcher
 ): {
   chartsData: ExplorerChartsData | undefined;
   isLoading: boolean;
@@ -61,6 +63,9 @@ export function useAnomalyChartsInputResolver(
       .pipe(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
+        tap(() => {
+          renderCompleteDispatcher.dispatchInProgress();
+        }),
         switchMap(([explorerJobs, input, embeddableContainerWidth, severityValue]) => {
           if (!explorerJobs) {
             // couldn't load the list of jobs
@@ -118,6 +123,8 @@ export function useAnomalyChartsInputResolver(
           setError(null);
           setChartsData(results);
           setIsLoading(false);
+
+          renderCompleteDispatcher.dispatchComplete();
         }
       });
 
@@ -133,6 +140,12 @@ export function useAnomalyChartsInputResolver(
   useEffect(() => {
     severity$.next(severity);
   }, [severity]);
+
+  useEffect(() => {
+    if (error) {
+      renderCompleteDispatcher.dispatchError();
+    }
+  }, [error]);
 
   return { chartsData, isLoading, error };
 }

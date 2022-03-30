@@ -114,6 +114,7 @@ export class AnomalyChartsEmbeddable extends Embeddable<
                 refresh={this.reload$.asObservable()}
                 onInputChange={this.updateInput.bind(this)}
                 onOutputChange={this.updateOutput.bind(this)}
+                renderCompleteDispatcher={this.renderComplete}
               />
             </Suspense>
           </KibanaContextProvider>

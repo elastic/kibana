@@ -18,6 +18,7 @@ import { createCoreStartMock } from '../../__mocks__/core_start';
 import { createMlStartDepsMock } from '../../__mocks__/ml_start_deps';
 import { createAnomalyExplorerChartsServiceMock } from '../../application/services/__mocks__/anomaly_explorer_charts_service';
 import { createAnomalyDetectorServiceMock } from '../../application/services/__mocks__/anomaly_detector_service';
+import type { RenderCompleteDispatcher } from '../../../../../../src/plugins/kibana_utils/public';
 
 jest.mock('../common/process_filters', () => ({
   processFilters: jest.fn(),
@@ -39,6 +40,12 @@ describe('useAnomalyChartsInputResolver', () => {
 
   const start = moment().subtract(1, 'years');
   const end = moment();
+
+  const renderCompleteDispatcher = {
+    dispatchComplete: jest.fn(),
+    dispatchError: jest.fn(),
+    dispatchInProgress: jest.fn(),
+  } as unknown as jest.Mocked<RenderCompleteDispatcher>;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -116,20 +123,26 @@ describe('useAnomalyChartsInputResolver', () => {
         refresh,
         services,
         1000,
-        0
+        0,
+        renderCompleteDispatcher
       )
     );
 
     expect(result.current.chartsData).toBe(undefined);
     expect(result.current.error).toBe(undefined);
     expect(result.current.isLoading).toBe(true);
+    expect(renderCompleteDispatcher.dispatchInProgress).toHaveBeenCalledTimes(0);
 
     jest.advanceTimersByTime(501);
+
+    expect(renderCompleteDispatcher.dispatchInProgress).toHaveBeenCalledTimes(1);
 
     const explorerServices = services[2];
 
     expect(explorerServices.anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
     expect(explorerServices.anomalyExplorerService.getAnomalyData$).toHaveBeenCalledTimes(1);
+
+    expect(renderCompleteDispatcher.dispatchComplete).toHaveBeenCalledTimes(1);
 
     embeddableInput.next({
       id: 'test-explorer-charts-embeddable',
@@ -144,8 +157,14 @@ describe('useAnomalyChartsInputResolver', () => {
     });
     jest.advanceTimersByTime(501);
 
+    expect(renderCompleteDispatcher.dispatchInProgress).toHaveBeenCalledTimes(2);
+
     expect(explorerServices.anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
     expect(explorerServices.anomalyExplorerService.getAnomalyData$).toHaveBeenCalledTimes(2);
+
+    expect(renderCompleteDispatcher.dispatchComplete).toHaveBeenCalledTimes(2);
+
+    expect(renderCompleteDispatcher.dispatchError).toHaveBeenCalledTimes(0);
   });
 
   test.skip('should not complete the observable on error', async () => {
@@ -156,7 +175,8 @@ describe('useAnomalyChartsInputResolver', () => {
         refresh,
         services,
         1000,
-        1
+        1,
+        renderCompleteDispatcher
       )
     );
 
@@ -168,5 +188,6 @@ describe('useAnomalyChartsInputResolver', () => {
     } as Partial<AnomalyChartsEmbeddableInput>);
 
     expect(result.current.error).toBeDefined();
+    expect(renderCompleteDispatcher.dispatchError).toHaveBeenCalledTimes(1);
   });
 });
