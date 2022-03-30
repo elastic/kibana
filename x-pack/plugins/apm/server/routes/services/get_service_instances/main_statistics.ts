@@ -23,6 +23,7 @@ interface ServiceInstanceMainStatisticsParams {
   size: number;
   start: number;
   end: number;
+  offset?: string;
 }
 
 export async function getServiceInstancesMainStatistics(

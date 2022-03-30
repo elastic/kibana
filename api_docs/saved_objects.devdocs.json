@@ -577,6 +577,7 @@
         ],
         "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
         "deprecated": true,
+        "removeBy": "8.8.0",
         "references": [
           {
             "plugin": "embeddable",
@@ -1242,7 +1243,7 @@
                     "section": "def-public.SavedObjectsBatchResponse",
                     "text": "SavedObjectsBatchResponse"
                   },
-                  "<unknown>>; }"
+                  "<T>>; }"
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false
@@ -1600,6 +1601,7 @@
         "description": [],
         "path": "src/plugins/saved_objects/public/types.ts",
         "deprecated": true,
+        "removeBy": "8.8.0",
         "references": [
           {
             "plugin": "savedObjectsTaggingOss",
@@ -3182,6 +3184,7 @@
           ],
           "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "dashboard",
@@ -3203,6 +3206,7 @@
           ],
           "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "visualizations",

@@ -7,7 +7,14 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiText, EuiSpacer, EuiLink, EuiCodeBlock, EuiButtonGroup } from '@elastic/eui';
+import {
+  EuiText,
+  EuiSpacer,
+  EuiLink,
+  EuiCodeBlock,
+  EuiButtonGroup,
+  EuiCallOut,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -15,9 +22,11 @@ import type { PLATFORM_TYPE } from '../../../hooks';
 import { PLATFORM_OPTIONS, usePlatform } from '../../../hooks';
 
 interface Props {
-  linuxMacCommand: string;
+  linuxCommand: string;
+  macCommand: string;
   windowsCommand: string;
-  installAgentLink: string;
+  linuxDebCommand: string;
+  linuxRpmCommand: string;
   troubleshootLink: string;
   isK8s: boolean;
 }
@@ -27,14 +36,29 @@ const CommandCode = styled.pre({
   overflow: 'auto',
 });
 
+const K8S_COMMAND = `kubectl apply -f elastic-agent-managed-kubernetes.yaml`;
+
 export const PlatformSelector: React.FunctionComponent<Props> = ({
-  linuxMacCommand,
+  linuxCommand,
+  macCommand,
   windowsCommand,
-  installAgentLink,
+  linuxDebCommand,
+  linuxRpmCommand,
   troubleshootLink,
   isK8s,
 }) => {
   const { platform, setPlatform } = usePlatform();
+
+  const systemPackageCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.callout', {
+        defaultMessage:
+          'We recommend using the installers (TAR/ZIP) over system packages (RPM/DEB) because they provide the ability to upgrade your agent with Fleet.',
+      })}
+      color="warning"
+      iconType="alert"
+    />
+  );
 
   return (
     <>
@@ -52,9 +76,10 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
         )}
       </EuiText>
       <EuiSpacer size="l" />
+
       {isK8s ? (
         <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-          <CommandCode>{linuxMacCommand}</CommandCode>
+          <CommandCode>{K8S_COMMAND}</CommandCode>
         </EuiCodeBlock>
       ) : (
         <>
@@ -67,9 +92,14 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             })}
           />
           <EuiSpacer size="s" />
-          {platform === 'linux-mac' && (
+          {platform === 'linux' && (
             <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{linuxMacCommand}</CommandCode>
+              <CommandCode>{linuxCommand}</CommandCode>
+            </EuiCodeBlock>
+          )}
+          {platform === 'mac' && (
+            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+              <CommandCode>{macCommand}</CommandCode>
             </EuiCodeBlock>
           )}
           {platform === 'windows' && (
@@ -77,23 +107,23 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               <CommandCode>{windowsCommand}</CommandCode>
             </EuiCodeBlock>
           )}
-          {platform === 'rpm-deb' && (
-            <EuiText>
-              <FormattedMessage
-                id="xpack.fleet.enrollmentInstructions.moreInstructionsText"
-                defaultMessage="See the {link} for RPM / DEB deploy instructions."
-                values={{
-                  link: (
-                    <EuiLink target="_blank" external href={installAgentLink}>
-                      <FormattedMessage
-                        id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
-                        defaultMessage="Elastic Agent docs"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </EuiText>
+          {platform === 'deb' && (
+            <>
+              {systemPackageCallout}
+              <EuiSpacer size="m" />
+              <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+                <CommandCode>{linuxDebCommand}</CommandCode>
+              </EuiCodeBlock>
+            </>
+          )}
+          {platform === 'rpm' && (
+            <>
+              {systemPackageCallout}
+              <EuiSpacer size="m" />
+              <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+                <CommandCode>{linuxRpmCommand}</CommandCode>
+              </EuiCodeBlock>
+            </>
           )}
         </>
       )}

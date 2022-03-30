@@ -9,7 +9,6 @@
 import { Position } from '@elastic/charts';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
-import { validateOptions } from '../../../../charts/common';
 import { ChartTypes, TreemapVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -55,12 +54,14 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       help: strings.getLegendDisplayArgHelp(),
       options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
       default: LegendDisplay.HIDE,
+      strict: true,
     },
     legendPosition: {
       types: ['string'],
       default: Position.Right,
       help: strings.getLegendPositionArgHelp(),
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      strict: true,
     },
     legendSize: {
       types: ['number'],
@@ -117,9 +118,6 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
 
-    validateOptions(args.legendDisplay, LegendDisplay, errors.invalidLegendDisplayError);
-    validateOptions(args.legendPosition, Position, errors.invalidLegendPositionError);
-
     const visConfig: PartitionVisParams = {
       ...args,
       ariaLabel:
@@ -136,12 +134,16 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
     };
 
     if (handlers?.inspectorAdapters?.tables) {
-      const logTable = prepareLogTable(context, [
-        [[args.metric], strings.getSliceSizeHelp()],
-        [args.buckets, strings.getSliceHelp()],
-        [args.splitColumn, strings.getColumnSplitHelp()],
-        [args.splitRow, strings.getRowSplitHelp()],
-      ]);
+      const logTable = prepareLogTable(
+        context,
+        [
+          [[args.metric], strings.getSliceSizeHelp()],
+          [args.buckets, strings.getSliceHelp()],
+          [args.splitColumn, strings.getColumnSplitHelp()],
+          [args.splitRow, strings.getRowSplitHelp()],
+        ],
+        true
+      );
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 

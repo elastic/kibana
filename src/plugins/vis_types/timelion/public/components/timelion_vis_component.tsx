@@ -34,12 +34,11 @@ import {
 } from '../helpers/panel_utils';
 
 import { colors } from '../helpers/chart_constants';
-import { getCharts } from '../helpers/plugin_services';
+import { getCharts, getFieldFormats } from '../helpers/plugin_services';
 
-import type { Sheet } from '../helpers/timelion_request_handler';
+import type { Series, Sheet } from '../helpers/timelion_request_handler';
 import type { IInterpreterRenderHandlers } from '../../../../expressions';
 import type { TimelionVisDependencies } from '../plugin';
-import type { Series } from '../helpers/timelion_request_handler';
 
 import './timelion_vis.scss';
 
@@ -75,7 +74,9 @@ const DefaultYAxis = () => (
 
 const renderYAxis = (series: Series[]) => {
   const yAxisOptions = extractAllYAxis(series);
-
+  const defaultFormatter = (x: unknown) => {
+    return getFieldFormats().getInstance('number').convert(x);
+  };
   const yAxis = yAxisOptions.map((option, index) => (
     <Axis
       groupId={option.groupId}
@@ -83,7 +84,7 @@ const renderYAxis = (series: Series[]) => {
       id={option.id!}
       title={option.title}
       position={option.position}
-      tickFormat={option.tickFormat}
+      tickFormat={option.tickFormat || defaultFormatter}
       gridLine={{
         visible: !index,
       }}

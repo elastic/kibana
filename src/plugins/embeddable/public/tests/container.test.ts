@@ -40,10 +40,12 @@ import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
 import { createEmbeddablePanelMock } from '../mocks';
+import { EmbeddableContainerSettings } from '../lib/containers/i_container';
 
 async function creatHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
-  embeddableInput = {}
+  embeddableInput = {},
+  settings?: EmbeddableContainerSettings
 ) {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
@@ -69,10 +71,14 @@ async function creatHelloWorldContainerAndEmbeddable(
     application: coreStart.application,
   });
 
-  const container = new HelloWorldContainer(containerInput, {
-    getEmbeddableFactory: start.getEmbeddableFactory,
-    panelComponent: testPanel,
-  });
+  const container = new HelloWorldContainer(
+    containerInput,
+    {
+      getEmbeddableFactory: start.getEmbeddableFactory,
+      panelComponent: testPanel,
+    },
+    settings
+  );
 
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -87,23 +93,123 @@ async function creatHelloWorldContainerAndEmbeddable(
   return { container, embeddable, coreSetup, coreStart, setup, start, uiActions, testPanel };
 }
 
-test('Container initializes embeddables', async (done) => {
-  const { container } = await creatHelloWorldContainerAndEmbeddable({
-    id: 'hello',
-    panels: {
-      '123': {
-        explicitInput: { id: '123' },
-        type: CONTACT_CARD_EMBEDDABLE,
-      },
+describe('container initialization', () => {
+  const panels = {
+    '123': {
+      explicitInput: { id: '123' },
+      type: CONTACT_CARD_EMBEDDABLE,
     },
-  });
+    '456': {
+      explicitInput: { id: '456' },
+      type: CONTACT_CARD_EMBEDDABLE,
+    },
+    '789': {
+      explicitInput: { id: '789' },
+      type: CONTACT_CARD_EMBEDDABLE,
+    },
+  };
 
-  if (container.getOutput().embeddableLoaded['123']) {
+  const expectEmbeddableLoaded = (container: HelloWorldContainer, id: string) => {
+    expect(container.getOutput().embeddableLoaded['123']).toBe(true);
     const embeddable = container.getChild<ContactCardEmbeddable>('123');
     expect(embeddable).toBeDefined();
     expect(embeddable.id).toBe('123');
+  };
+
+  it('initializes embeddables', async (done) => {
+    const { container } = await creatHelloWorldContainerAndEmbeddable({
+      id: 'hello',
+      panels,
+    });
+
+    expectEmbeddableLoaded(container, '123');
+    expectEmbeddableLoaded(container, '456');
+    expectEmbeddableLoaded(container, '789');
     done();
-  }
+  });
+
+  it('initializes embeddables in order', async (done) => {
+    const childIdInitializeOrder = ['456', '123', '789'];
+    const { container } = await creatHelloWorldContainerAndEmbeddable(
+      {
+        id: 'hello',
+        panels,
+      },
+      {},
+      { childIdInitializeOrder }
+    );
+
+    const onPanelAddedMock = jest.spyOn(
+      container as unknown as { onPanelAdded: () => {} },
+      'onPanelAdded'
+    );
+
+    await new Promise((r) => setTimeout(r, 1));
+    for (const [index, orderedId] of childIdInitializeOrder.entries()) {
+      expect(onPanelAddedMock).toHaveBeenNthCalledWith(index + 1, {
+        explicitInput: { id: orderedId },
+        type: 'CONTACT_CARD_EMBEDDABLE',
+      });
+    }
+    done();
+  });
+
+  it('initializes embeddables in order with partial order arg', async (done) => {
+    const childIdInitializeOrder = ['789', 'idontexist'];
+    const { container } = await creatHelloWorldContainerAndEmbeddable(
+      {
+        id: 'hello',
+        panels,
+      },
+      {},
+      { childIdInitializeOrder }
+    );
+    const expectedInitializeOrder = ['789', '123', '456'];
+
+    const onPanelAddedMock = jest.spyOn(
+      container as unknown as { onPanelAdded: () => {} },
+      'onPanelAdded'
+    );
+
+    await new Promise((r) => setTimeout(r, 1));
+    for (const [index, orderedId] of expectedInitializeOrder.entries()) {
+      expect(onPanelAddedMock).toHaveBeenNthCalledWith(index + 1, {
+        explicitInput: { id: orderedId },
+        type: 'CONTACT_CARD_EMBEDDABLE',
+      });
+    }
+    done();
+  });
+
+  it('initializes embeddables in order, awaiting each', async (done) => {
+    const childIdInitializeOrder = ['456', '123', '789'];
+    const { container } = await creatHelloWorldContainerAndEmbeddable(
+      {
+        id: 'hello',
+        panels,
+      },
+      {},
+      { childIdInitializeOrder, initializeSequentially: true }
+    );
+    const onPanelAddedMock = jest.spyOn(
+      container as unknown as { onPanelAdded: () => {} },
+      'onPanelAdded'
+    );
+
+    const untilEmbeddableLoadedMock = jest.spyOn(container, 'untilEmbeddableLoaded');
+
+    await new Promise((r) => setTimeout(r, 10));
+
+    for (const [index, orderedId] of childIdInitializeOrder.entries()) {
+      await container.untilEmbeddableLoaded(orderedId);
+      expect(onPanelAddedMock).toHaveBeenNthCalledWith(index + 1, {
+        explicitInput: { id: orderedId },
+        type: 'CONTACT_CARD_EMBEDDABLE',
+      });
+      expect(untilEmbeddableLoadedMock).toHaveBeenCalledWith(orderedId);
+    }
+    done();
+  });
 });
 
 test('Container.addNewEmbeddable', async () => {

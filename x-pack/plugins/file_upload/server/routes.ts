@@ -50,7 +50,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       validate: {
         query: schema.object({
           indexName: schema.maybe(schema.string()),
-          checkCreateIndexPattern: schema.boolean(),
+          checkCreateDataView: schema.boolean(),
           checkHasManagePipeline: schema.boolean(),
         }),
       },
@@ -58,13 +58,13 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     async (context, request, response) => {
       try {
         const [, pluginsStart] = await coreSetup.getStartServices();
-        const { indexName, checkCreateIndexPattern, checkHasManagePipeline } = request.query;
+        const { indexName, checkCreateDataView, checkHasManagePipeline } = request.query;
 
         const { hasImportPermission } = await checkFileUploadPrivileges({
           authorization: pluginsStart.security?.authz,
           request,
           indexName,
-          checkCreateIndexPattern,
+          checkCreateDataView,
           checkHasManagePipeline,
         });
 

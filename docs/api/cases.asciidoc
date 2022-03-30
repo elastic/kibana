@@ -1,0 +1,44 @@
+[[cases-api]]
+== Cases APIs
+
+You can create, manage, configure, and send cases to external systems with
+these APIs:
+
+* <<cases-api-add-comment>>
+* <<cases-api-create>>
+* <<cases-api-delete-cases>>
+* <<cases-api-delete-comments>>
+* {security-guide}/cases-api-find-alert.html[Find all alerts attached to a case]
+* <<cases-api-find-cases>>
+* {security-guide}/cases-api-find-cases-by-alert.html[Find cases by alert]
+* <<cases-api-find-connectors>>
+* {security-guide}/cases-api-get-case-activity.html[Get all case activity]
+* <<cases-api-get-case>>
+* <<cases-api-get-status>>
+* <<cases-api-get-comments>>
+* {security-guide}/cases-get-connector.html[Get current connector]
+* {security-guide}/cases-api-get-reporters.html[Get reporters]
+* {security-guide}/cases-api-get-tag.html[Get tags]
+* {security-guide}/cases-api-push.html[Push case]
+* {security-guide}/assign-connector.html[Set default Elastic Security UI connector]
+* {security-guide}/case-api-update-connector.html[Update case configurations]
+* <<cases-api-update>>
+* <<cases-api-update-comment>>
+
+//ADD
+include::cases/cases-api-add-comment.asciidoc[leveloffset=+1]
+//CREATE
+include::cases/cases-api-create.asciidoc[leveloffset=+1]
+//DELETE
+include::cases/cases-api-delete-cases.asciidoc[leveloffset=+1]
+include::cases/cases-api-delete-comments.asciidoc[leveloffset=+1]
+//FIND
+include::cases/cases-api-find-cases.asciidoc[leveloffset=+1]
+include::cases/cases-api-find-connectors.asciidoc[leveloffset=+1]
+//GET
+include::cases/cases-api-get-case.asciidoc[leveloffset=+1]
+include::cases/cases-api-get-status.asciidoc[leveloffset=+1]
+include::cases/cases-api-get-comments.asciidoc[leveloffset=+1]
+//UPDATE
+include::cases/cases-api-update.asciidoc[leveloffset=+1]
+include::cases/cases-api-update-comment.asciidoc[leveloffset=+1]

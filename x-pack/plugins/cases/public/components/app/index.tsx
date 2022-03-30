@@ -19,13 +19,13 @@ const CasesAppComponent: React.FC = () => {
   const userCapabilities = useApplicationCapabilities();
 
   return (
-    <Wrapper>
+    <Wrapper data-test-subj="cases-app">
       {getCasesLazy({
         owner: [APP_OWNER],
         useFetchAlertData: () => [false, {}],
-        userCanCrud: userCapabilities.crud,
+        userCanCrud: userCapabilities.generalCases.crud,
         basePath: '/',
-        features: { alerts: { sync: false } },
+        features: { alerts: { enabled: false } },
         releasePhase: 'experimental',
       })}
     </Wrapper>

@@ -27,6 +27,23 @@ type Maybe<T> = T | undefined;
 export type PluginConfigSchema<T> = Type<T>;
 
 /**
+ * Type defining the list of configuration properties that will be exposed on the client-side
+ * Object properties can either be fully exposed
+ *
+ * @public
+ */
+export type ExposedToBrowserDescriptor<T> = {
+  [Key in keyof T]?: T[Key] extends Maybe<any[]>
+    ? // handles arrays as primitive values
+      boolean
+    : T[Key] extends Maybe<object>
+    ? // can be nested for objects
+      ExposedToBrowserDescriptor<T[Key]> | boolean
+    : // primitives
+      boolean;
+};
+
+/**
  * Describes a plugin configuration properties.
  *
  * @example
@@ -64,7 +81,7 @@ export interface PluginConfigDescriptor<T = any> {
   /**
    * List of configuration properties that will be available on the client-side plugin.
    */
-  exposeToBrowser?: { [P in keyof T]?: boolean };
+  exposeToBrowser?: ExposedToBrowserDescriptor<T>;
   /**
    * Schema to use to validate the plugin configuration.
    *
@@ -215,7 +232,7 @@ export interface PluginManifest {
    * Specifies directory names that can be imported by other ui-plugins built
    * using the same instance of the @kbn/optimizer. A temporary measure we plan
    * to replace with better mechanisms for sharing static code between plugins
-   * @deprecated
+   * @deprecated To be deleted when https://github.com/elastic/kibana/issues/101948 is done.
    */
   readonly extraPublicDirs?: string[];
 
@@ -346,6 +363,7 @@ export interface Plugin<
  * A plugin with asynchronous lifecycle methods.
  *
  * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync {@link Plugin | plugin}
+ * @removeBy 8.8.0
  * @public
  */
 export interface AsyncPlugin<
@@ -417,7 +435,8 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
      * Provide access to Kibana legacy configuration values.
      *
      * @remarks Naming not final here, it may be renamed in a near future
-     * @deprecated Accessing configuration values outside of the plugin's config scope is highly discouraged
+     * @deprecated Accessing configuration values outside of the plugin's config scope is highly discouraged.
+     * Can be removed when https://github.com/elastic/kibana/issues/119862 is done.
      */
     legacy: {
       globalConfig$: Observable<SharedGlobalConfig>;

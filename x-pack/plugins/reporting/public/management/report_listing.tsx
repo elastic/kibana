@@ -449,7 +449,7 @@ class ReportListingUi extends Component<Props, State> {
       pageIndex: this.state.page,
       pageSize: 10,
       totalItemCount: this.state.total,
-      hidePerPageOptions: true,
+      showPerPageOptions: false,
     };
 
     const selection = {

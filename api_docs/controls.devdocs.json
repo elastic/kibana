@@ -63,18 +63,80 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupContainer.untilReady",
+            "id": "def-public.ControlGroupContainer.getCreateControlButton",
             "type": "Function",
-            "tags": [],
-            "label": "untilReady",
-            "description": [],
+            "tags": [
+              "return"
+            ],
+            "label": "getCreateControlButton",
+            "description": [
+              "\nReturns a button that allows controls to be created externally using the embeddable"
+            ],
             "signature": [
-              "() => Promise<void>"
+              "(buttonType: ",
+              "CreateControlButtonTypes",
+              ", closePopover?: (() => void) | undefined) => JSX.Element"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.getCreateControlButton.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "buttonType",
+                "description": [
+                  "Controls the button styling"
+                ],
+                "signature": [
+                  "CreateControlButtonTypes"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.getCreateControlButton.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "closePopover",
+                "description": [
+                  "Closes the create control menu popover when flyout opens - only necessary if `buttonType === 'toolbar'`"
+                ],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "If `buttonType == 'toolbar'`, returns `EuiContextMenuPanel` with input control types as items.\nOtherwise, if `buttonType == 'callout'` returns `EuiButton` with popover containing input control types."
+            ]
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.getToolbarButtons",
+            "type": "Function",
+            "tags": [
+              "return"
+            ],
+            "label": "getToolbarButtons",
+            "description": [
+              "\nReturns the toolbar button that is used for creating controls and managing control settings"
+            ],
+            "signature": [
+              "() => JSX.Element"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "`SolutionToolbarPopover` button for input controls"
+            ]
           },
           {
             "parentPluginId": "controls",
@@ -147,6 +209,21 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.getPanelCount",
+            "type": "Function",
+            "tags": [],
+            "label": "getPanelCount",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -313,13 +390,13 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupContainer.destroy",
+            "id": "def-public.ControlGroupContainer.untilReady",
             "type": "Function",
             "tags": [],
-            "label": "destroy",
+            "label": "untilReady",
             "description": [],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
@@ -354,6 +431,21 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -1436,6 +1528,36 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableFactory.getIconType",
+            "type": "Function",
+            "tags": [],
+            "label": "getIconType",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableFactory.getDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "getDescription",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable_factory.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.OptionsListEmbeddableFactory.inject",
             "type": "Function",
             "tags": [],
@@ -1545,8 +1667,83 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.LazyControlsCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyControlsCallout",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.CalloutProps",
+            "text": "CalloutProps"
+          },
+          "> & { readonly _result: ({ getCreateControlButton }: ",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.CalloutProps",
+            "text": "CalloutProps"
+          },
+          ") => JSX.Element | null; }"
+        ],
+        "path": "src/plugins/controls/public/controls_callout/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.LazyControlsCallout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.CalloutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CalloutProps",
+        "description": [],
+        "path": "src/plugins/controls/public/controls_callout/controls_callout.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.CalloutProps.getCreateControlButton",
+            "type": "Function",
+            "tags": [],
+            "label": "getCreateControlButton",
+            "description": [],
+            "signature": [
+              "(() => JSX.Element) | undefined"
+            ],
+            "path": "src/plugins/controls/public/controls_callout/controls_callout.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "controls",
         "id": "def-public.CommonControlOutput",
@@ -1749,6 +1946,19 @@
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupInput.chainingSystem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chainingSystem",
+            "description": [],
+            "signature": [
+              "\"HIERARCHICAL\" | \"NONE\""
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "controls",
             "id": "def-public.ControlGroupInput.defaultControlWidth",
@@ -2080,6 +2290,19 @@
             ],
             "path": "src/plugins/controls/common/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ParentIgnoreSettings.ignoreValidations",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreValidations",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2321,7 +2544,32 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.getDefaultControlGroupInput",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultControlGroupInput",
+        "description": [],
+        "signature": [
+          "() => Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", \"id\">"
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_constants.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "controls",
@@ -2352,6 +2600,19 @@
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.ControlGroupInput.chainingSystem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chainingSystem",
+            "description": [],
+            "signature": [
+              "\"HIERARCHICAL\" | \"NONE\""
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "controls",
             "id": "def-common.ControlGroupInput.defaultControlWidth",

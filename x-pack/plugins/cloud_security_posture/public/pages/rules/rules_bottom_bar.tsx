@@ -16,7 +16,12 @@ interface RulesBottomBarProps {
 }
 
 export const RulesBottomBar = ({ onSave, onCancel, isLoading }: RulesBottomBarProps) => (
-  <EuiBottomBar>
+  <EuiBottomBar
+    style={{
+      // .euiFlyout + 1
+      zIndex: 1001,
+    }}
+  >
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiButton size="m" iconType="cross" isLoading={isLoading} onClick={onCancel} color="ghost">

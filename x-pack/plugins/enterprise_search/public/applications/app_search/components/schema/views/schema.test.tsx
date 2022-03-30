@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 
 import { SchemaAddFieldModal } from '../../../../shared/schema';
-import { getPageHeaderActions } from '../../../../test_helpers';
+import { getPageHeaderActions, getPageTitle, getPageDescription } from '../../../../test_helpers';
 
 import { SchemaCallouts, SchemaTable } from '../components';
 
@@ -128,5 +128,14 @@ describe('Schema', () => {
     const wrapper = shallow(<Schema />);
 
     expect(wrapper.find(SchemaAddFieldModal)).toHaveLength(1);
+  });
+
+  it('renders a read-only header for elasticsearch engines', () => {
+    setMockValues({ ...values, isElasticsearchEngine: true });
+    const title = getPageTitle(shallow(<Schema />));
+    const description = getPageDescription(shallow(<Schema />));
+
+    expect(title).toBe('Engine schema');
+    expect(description).toBe('View schema field types.');
   });
 });

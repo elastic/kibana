@@ -9,13 +9,22 @@
 import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { getUiSettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
-import { searchSavedObjectType } from './saved_objects';
+import { getSavedSearchObjectType } from './saved_objects';
+import type { PluginSetup as DataPluginSetup } from '../../data/server';
 
 export class DiscoverServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup) {
+  public setup(
+    core: CoreSetup,
+    plugins: {
+      data: DataPluginSetup;
+    }
+  ) {
+    const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
+      plugins.data.search.searchSource
+    );
     core.capabilities.registerProvider(capabilitiesProvider);
     core.uiSettings.register(getUiSettings(core.docLinks));
-    core.savedObjects.registerType(searchSavedObjectType);
+    core.savedObjects.registerType(getSavedSearchObjectType(getSearchSourceMigrations));
 
     return {};
   }

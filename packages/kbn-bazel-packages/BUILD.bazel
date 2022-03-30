@@ -40,6 +40,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-utils",
   "//packages/kbn-std",
   "@npm//globby",
+  "@npm//normalize-path",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -55,7 +56,9 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-utils:npm_module_types",
   "//packages/kbn-std:npm_module_types",
+  "@npm//@types/normalize-path",
   "@npm//globby",
+  "@npm//normalize-path",
 ]
 
 jsts_transpiler(

@@ -6,7 +6,12 @@
  */
 
 import { outputRoutesService } from '../../services';
-import type { PutOutputRequest, GetOutputsResponse, PostOutputRequest } from '../../types';
+import type {
+  PutOutputRequest,
+  GetOutputsResponse,
+  PostOutputRequest,
+  PostLogstashApiKeyResponse,
+} from '../../types';
 
 import { sendRequest, useRequest } from './use_request';
 
@@ -29,6 +34,13 @@ export function sendPutOutput(outputId: string, body: PutOutputRequest['body']) 
     method: 'put',
     path: outputRoutesService.getUpdatePath(outputId),
     body,
+  });
+}
+
+export function sendPostLogstashApiKeys() {
+  return sendRequest<PostLogstashApiKeyResponse>({
+    method: 'post',
+    path: outputRoutesService.getCreateLogstashApiKeyPath(),
   });
 }
 
