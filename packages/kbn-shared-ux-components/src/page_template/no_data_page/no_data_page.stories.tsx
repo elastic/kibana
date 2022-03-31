@@ -20,7 +20,7 @@ export default {
 const action = {
   elasticAgent: {},
 };
-type Params = Pick<NoDataPageProps, 'solution'>;
+type Params = Pick<NoDataPageProps, 'solution' | 'logo'>;
 
 export const PureComponent = (params: Params) => {
   return <NoDataPage docsLink={services.docLinks.dataViewsDocLink} action={action} {...params} />;
@@ -30,5 +30,10 @@ PureComponent.argTypes = {
   solution: {
     control: 'text',
     defaultValue: 'Observability',
+  },
+  logo: {
+    control: { type: 'radio' },
+    options: ['logoElastic', 'logoKibana', 'logoCloud', undefined],
+    defaultValue: undefined,
   },
 };
