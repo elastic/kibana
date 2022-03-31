@@ -313,6 +313,7 @@ export function DashboardTopNav({
   ]);
 
   const runQuickSave = useCallback(async () => {
+    dashboardAppState.dashboardContainer.controlGroup?.closeAllFlyouts();
     setState((s) => ({ ...s, isSaveInProgress: true }));
     const currentState = dashboardAppState.getLatestDashboardState();
     const saveResult = await saveDashboard({
