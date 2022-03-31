@@ -12,6 +12,7 @@ import { ArtifactListPage } from '../../../components/artifact_list_page';
 import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions_api_client';
 import { SEARCHABLE_FIELDS } from '../constants';
+import { HostIsolationExceptionsForm } from './components/form';
 
 const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object.freeze({
   pageTitle: i18n.translate('xpack.securitySolution.hostIsolationExceptions.pageTitle', {
@@ -107,8 +108,6 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object
   ),
 });
 
-const TempForm = () => <div>{'FORM GOES HERE'}</div>;
-
 export const HostIsolationExceptionsList = memo(() => {
   const http = useHttp();
   const hostIsolationExceptionsApiClient = HostIsolationExceptionsApiClient.getInstance(http);
@@ -116,7 +115,7 @@ export const HostIsolationExceptionsList = memo(() => {
   return (
     <ArtifactListPage
       apiClient={hostIsolationExceptionsApiClient}
-      ArtifactFormComponent={TempForm}
+      ArtifactFormComponent={HostIsolationExceptionsForm}
       labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
       data-test-subj="hostIsolationExceptionsListPage"
       searchableFields={SEARCHABLE_FIELDS}
