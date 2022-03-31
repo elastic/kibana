@@ -51,7 +51,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
       ) as IIndexPattern[];
 
       const objectPatternsFromStrings = (await fetchIndexPatterns(
-        data.indexPatterns,
+        data.dataViews,
         stringPatterns
       )) as IIndexPattern[];
       setDataviews([...objectPatterns, ...objectPatternsFromStrings]);
@@ -59,7 +59,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
     if (indexPatterns) {
       fetchDataViews();
     }
-  }, [data.indexPatterns, indexPatterns]);
+  }, [data.dataViews, indexPatterns]);
 
   function onAdd(filter: Filter) {
     reportUiCounter?.(METRIC_TYPE.CLICK, `filter:added`);
