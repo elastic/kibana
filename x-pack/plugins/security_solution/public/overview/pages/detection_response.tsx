@@ -9,7 +9,6 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-// import { useGlobalTime } from '../../common/containers/use_global_time';
 
 import { OverviewEmpty } from '../components/overview_empty';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -20,13 +19,14 @@ import { HeaderPage } from '../../common/components/header_page';
 import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING } from './translations';
 import { inputsSelectors } from '../../common/store/selectors';
+import { useUserInfo } from '../../detections/components/user_info';
+import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
 
 const DetectionResponseComponent = () => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
+  const { loading: loadingSignalIndex, signalIndexName } = useUserInfo();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
-  // TODO: link queries with global time queries
-  // const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
 
   const queriesLoading: boolean = useShallowEqualSelector(
     (state) => !!getGlobalQuery(state).find((query) => query.loading)
@@ -39,8 +39,8 @@ const DetectionResponseComponent = () => {
   }, [queriesLoading]);
 
   const showUpdating = useMemo(
-    () => queriesLoading || isSourcererLoading,
-    [queriesLoading, isSourcererLoading]
+    () => queriesLoading || isSourcererLoading || loadingSignalIndex,
+    [queriesLoading, isSourcererLoading, loadingSignalIndex]
   );
 
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
@@ -78,7 +78,9 @@ const DetectionResponseComponent = () => {
                 </EuiFlexGroup>
               </EuiFlexItem>
 
-              <EuiFlexItem>{'[rules table]'}</EuiFlexItem>
+              <EuiFlexItem>
+                <RuleAlertsTable signalIndexName={signalIndexName} />
+              </EuiFlexItem>
               <EuiFlexItem>{'[cases table]'}</EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup>
