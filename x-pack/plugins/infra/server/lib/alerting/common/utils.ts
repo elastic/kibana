@@ -8,7 +8,14 @@
 import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
-import { AlertExecutionDetails } from '../../../../common/alerting/metrics/types';
+import type { IBasePath } from 'kibana/server';
+import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
+import { parseTechnicalFields } from '../../../../../rule_registry/common/parse_technical_fields';
+import {
+  AlertExecutionDetails,
+  InventoryMetricConditions,
+} from '../../../../common/alerting/metrics/types';
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
@@ -74,4 +81,29 @@ export const createScopedLogger = (
       }
     },
   };
+};
+
+export const getViewInAppUrl = (basePath: IBasePath, relativeViewInAppUrl: string) =>
+  basePath.publicBaseUrl
+    ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
+    : relativeViewInAppUrl;
+
+export const getViewInAppUrlInventory = (
+  criteria: InventoryMetricConditions[],
+  nodeType: string,
+  timestamp: string,
+  basePath: IBasePath
+) => {
+  const { metric, customMetric } = criteria[0];
+  const fields = {
+    [`${ALERT_RULE_PARAMETERS}.criteria.metric`]: [metric],
+    [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`]: [customMetric?.id],
+    [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`]: [customMetric?.aggregation],
+    [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`]: [customMetric?.field],
+    [`${ALERT_RULE_PARAMETERS}.nodeType`]: [nodeType],
+    [TIMESTAMP]: timestamp,
+  };
+
+  const relativeViewInAppUrl = getInventoryViewInAppUrl(parseTechnicalFields(fields, true));
+  return getViewInAppUrl(basePath, relativeViewInAppUrl);
 };

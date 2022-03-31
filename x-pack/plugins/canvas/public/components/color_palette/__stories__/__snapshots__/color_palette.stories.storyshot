@@ -393,7 +393,9 @@ Array [
               className="selected-color"
               color="#333"
               data-euiicon-type="check"
-            />
+            >
+              
+            </span>
           </div>
         </div>
       </button>
@@ -758,7 +760,9 @@ exports[`Storyshots components/Color/ColorPalette six colors, wrap at 4 1`] = `
             className="selected-color"
             color="#333"
             data-euiicon-type="check"
-          />
+          >
+            
+          </span>
         </div>
       </div>
     </button>
@@ -1040,7 +1044,9 @@ Array [
               className="selected-color"
               color="#333"
               data-euiicon-type="check"
-            />
+            >
+              
+            </span>
           </div>
         </div>
       </button>

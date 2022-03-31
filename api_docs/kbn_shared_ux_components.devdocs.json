@@ -1,0 +1,513 @@
+{
+  "id": "@kbn/shared-ux-components",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.AddFromLibraryButton",
+        "type": "Function",
+        "tags": [],
+        "label": "AddFromLibraryButton",
+        "description": [],
+        "signature": [
+          "({ onClick, ...rest }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/add_from_library/add_from_library.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.AddFromLibraryButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ onClick, ...rest }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/add_from_library/add_from_library.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.ExitFullScreenButton",
+        "type": "Function",
+        "tags": [],
+        "label": "ExitFullScreenButton",
+        "description": [
+          "\nA `ExitFullScreenButton` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `LazyExitFullScreenButton` component lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "Props",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.ExitFullScreenButton.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.IconButtonGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "IconButtonGroup",
+        "description": [
+          "\nThe IconButtonGroup component that is wrapped by the `withSuspence` HOC."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "Props",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.IconButtonGroup.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.KibanaSolutionAvatar",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaSolutionAvatar",
+        "description": [
+          "\nA `KibanaSolutionAvatar` component that is wrapped by the `withSuspense` HOC. This component can\nbe used directly by consumers and will load the `KibanaPageTemplateSolutionNavAvatarLazy` component lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "KibanaSolutionAvatarProps",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.KibanaSolutionAvatar.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.KibanaSolutionAvatarLazy",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaSolutionAvatarLazy",
+        "description": [
+          "\nThe Lazily-loaded `KibanaSolutionAvatar` component.  Consumers should use `React.Suspense` or\nthe withSuspense` HOC to load this component."
+        ],
+        "signature": [
+          "React.ExoticComponent<",
+          "KibanaSolutionAvatarProps",
+          "> & { readonly _result: ({ className, size, ...rest }: ",
+          "KibanaSolutionAvatarProps",
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.KibanaSolutionAvatarLazy.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.LazyExitFullScreenButton",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyExitFullScreenButton",
+        "description": [
+          "\nThe Lazily-loaded `ExitFullScreenButton` component.  Consumers should use `React.Suspennse` or the\n`withSuspense` HOC to load this component."
+        ],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: ({ onExit, toggleChrome }: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.LazyExitFullScreenButton.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.LazyIconButtonGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyIconButtonGroup",
+        "description": [
+          "\nThe Lazily-loaded `IconButtonGroup` component.  Consumers should use `React.Suspennse` or the\n`withSuspense` HOC to load this component."
+        ],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: ({ buttons, legend }: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.LazyIconButtonGroup.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.LazyNoDataViews",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyNoDataViews",
+        "description": [
+          "\nThe Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the\n`withSuspense` HOC to load this component."
+        ],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: ({ onDataViewCreated }: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.LazyNoDataViews.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.LazyNoDataViewsComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyNoDataViewsComponent",
+        "description": [
+          "\nA pure `NoDataViews` component, with no services hooks. Consumers should use `React.Suspennse` or the\n`withSuspense` HOC to load this component."
+        ],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: ({ onClickCreate, canCreateNewDataView, dataViewsDocLink, emptyPromptColor, }: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.LazyNoDataViewsComponent.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.LazyToolbarButton",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyToolbarButton",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: ({ label, ...rest }: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.LazyToolbarButton.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.NoDataViews",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataViews",
+        "description": [
+          "\nA `NoDataViews` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `LazyNoDataViews` component lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "Props",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.NoDataViews.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.NoDataViewsComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataViewsComponent",
+        "description": [
+          "\nA pure `NoDataViews` component, with no services hooks. The component is wrapped by the `withSuspense` HOC.\nThis component can be used directly by consumers and will load the `LazyNoDataViewsComponent` lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "Props",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.NoDataViewsComponent.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.RedirectAppLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "RedirectAppLinks",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<Pick<",
+          "RedirectAppLinksProps",
+          " & { children?: React.ReactNode; }, \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"key\" | \"title\" | \"id\" | \"css\" | \"security\" | \"className\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"currentAppId$\" | \"navigateToUrl\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }> & { readonly _result: React.FC<",
+          "RedirectAppLinksProps",
+          ">; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.RedirectAppLinks.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.ToolbarButton",
+        "type": "Function",
+        "tags": [],
+        "label": "ToolbarButton",
+        "description": [
+          "\nA `ToolbarButton` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `LazyToolbarButton` component lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "Props",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.ToolbarButton.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
