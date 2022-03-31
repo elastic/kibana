@@ -154,7 +154,7 @@ export function reportingEventLoggerFactory(logger: Logger) {
         {
           message,
           kibana: { reporting: { actionType: ActionType.CLAIM_TASK } },
-          event: { duration: queueDurationNs }, // this field is always assumed to be nanoseconds
+          event: { duration: queueDurationNs }, // this field is nanoseconds by ECS definition
         } as Partial<ClaimedTask>,
         this.eventObj
       );
