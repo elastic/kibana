@@ -12,7 +12,7 @@ import { LandingPageComponent } from './index';
 
 describe('LandingPageComponent component', () => {
   it('renders page properly', () => {
-    const EmptyComponent = shallow(<LandingPageComponent/>);
+    const EmptyComponent = shallow(<LandingPageComponent />);
     expect(EmptyComponent).toMatchSnapshot();
   });
 });

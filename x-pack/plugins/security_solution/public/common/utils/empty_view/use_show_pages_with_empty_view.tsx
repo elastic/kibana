@@ -25,7 +25,8 @@ export const useShowPagesWithEmptyView = () => {
   const [{ pageName }] = useRouteSpy();
   const { indicesExist } = useSourcererDataView();
 
-  const shouldShowEmptyState = (isPageNameWithEmptyView(pageName) && !indicesExist) || pageName === SecurityPageName.landing;
+  const shouldShowEmptyState =
+    (isPageNameWithEmptyView(pageName) && !indicesExist) || pageName === SecurityPageName.landing;
 
   const [showEmptyState, setShowEmptyState] = useState(shouldShowEmptyState);
 
