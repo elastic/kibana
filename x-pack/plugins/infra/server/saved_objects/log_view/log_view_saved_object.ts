@@ -5,9 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { SavedObject, SavedObjectsType } from 'src/core/server';
+import { logViewSavedObjectRT } from './types';
 
 export const logViewSavedObjectName = 'infrastructure-monitoring-log-view';
+
+const getLogViewTitle = (savedObject: SavedObject<unknown>) =>
+  pipe(
+    logViewSavedObjectRT.decode(savedObject),
+    fold(
+      (errors) => `Log view [id=${savedObject.id}]`,
+      ({ attributes: { name } }) => name
+    )
+  );
 
 export const logViewSavedObjectType: SavedObjectsType = {
   name: logViewSavedObjectName,
@@ -15,6 +27,8 @@ export const logViewSavedObjectType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   management: {
     defaultSearchField: 'name',
+    displayName: 'log view',
+    getTitle: getLogViewTitle,
     icon: 'logsApp',
     importableAndExportable: true,
   },
