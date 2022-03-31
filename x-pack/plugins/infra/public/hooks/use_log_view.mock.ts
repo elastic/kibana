@@ -25,7 +25,6 @@ export const createUninitializedUseLogViewMock =
     hasFailedLoadingLogView: false,
     hasFailedLoadingLogViewStatus: false,
     hasFailedResolvingLogView: false,
-    initialize: jest.fn(),
     isLoading: false,
     isLoadingLogView: false,
     isLoadingLogViewStatus: false,
