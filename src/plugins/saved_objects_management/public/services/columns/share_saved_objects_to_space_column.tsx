@@ -10,7 +10,7 @@ import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { SavedObjectsNamespaceType } from 'src/core/public';
+import type { Capabilities, SavedObjectsNamespaceType } from 'src/core/public';
 import { EuiIconTip, EuiToolTip } from '@elastic/eui';
 
 import type {
@@ -26,6 +26,7 @@ interface WrapperProps {
   objectType: string;
   objectNamespaceType: SavedObjectsNamespaceType;
   spacesApiUi: SpacesApiUi;
+  capabilities: Capabilities | undefined;
   spaceListProps: SpaceListProps;
   flyoutProps: ShareToSpaceFlyoutProps;
 }
@@ -71,6 +72,7 @@ const Wrapper = ({
   objectType,
   objectNamespaceType,
   spacesApiUi,
+  capabilities,
   spaceListProps,
   flyoutProps,
 }: WrapperProps) => {
@@ -114,9 +116,13 @@ const Wrapper = ({
     );
   }
 
+  const canAssignSpaces = !capabilities || !!capabilities.savedObjectsManagement.shareIntoSpace;
+  const clickProperties = canAssignSpaces
+    ? { cursorStyle: 'pointer', listOnClick }
+    : { cursorStyle: 'not-allowed' };
   return (
     <>
-      <LazySpaceList {...spaceListProps} listOnClick={listOnClick} />
+      <LazySpaceList {...spaceListProps} {...clickProperties} />
       {showFlyout && <LazyShareToSpaceFlyout {...flyoutProps} onClose={onClose} />}
     </>
   );
@@ -155,6 +161,7 @@ export class ShareToSpaceSavedObjectsManagementColumn extends SavedObjectsManage
           objectType={record.type}
           objectNamespaceType={record.meta.namespaceType}
           spacesApiUi={this.spacesApiUi}
+          capabilities={this.columnContext?.capabilities}
           spaceListProps={spaceListProps}
           flyoutProps={flyoutProps}
         />
