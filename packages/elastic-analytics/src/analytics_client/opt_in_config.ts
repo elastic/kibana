@@ -24,12 +24,14 @@ export class OptInConfigService {
    * @param eventType the event type to check
    */
   public isEventTypeOptedIn(eventType: EventType): boolean {
-    const isGlobalOptedIn = this.isOptedIn();
+    if (!this.isOptedIn()) {
+      return false;
+    }
     // In case of not provided a specific eventType consent, we assume opted-in
     const isEventTypeOptedIn =
       (this.optInConfig.event_types && this.optInConfig.event_types[eventType]?.enabled) ?? true;
 
-    return isGlobalOptedIn && isEventTypeOptedIn;
+    return isEventTypeOptedIn;
   }
 
   /**
@@ -38,14 +40,22 @@ export class OptInConfigService {
    * @param eventType the event type to check for the shipper
    */
   public isShipperOptedIn(shipperName: ShipperName, eventType?: EventType): boolean {
-    const isGlobalOptedIn = this.isOptedIn();
+    if (!this.isOptedIn()) {
+      return false;
+    }
 
     // In case of not provided a specific shipper consent, we assume opted-in
     const isShipperGloballyOptedIn: boolean =
       (this.optInConfig.global.shippers && this.optInConfig.global.shippers[shipperName]) ?? true;
 
+    if (!isShipperGloballyOptedIn) {
+      return false;
+    }
+
     if (eventType) {
-      const isEventTypeOptedIn = this.isEventTypeOptedIn(eventType);
+      if (!this.isEventTypeOptedIn(eventType)) {
+        return false;
+      }
 
       const eventTypeOptInConfig =
         this.optInConfig.event_types && this.optInConfig.event_types[eventType];
@@ -53,14 +63,9 @@ export class OptInConfigService {
       const isEventTypeShipperOptedIn: boolean =
         (eventTypeOptInConfig?.shippers && eventTypeOptInConfig.shippers[shipperName]) ?? true;
 
-      return (
-        isGlobalOptedIn &&
-        isShipperGloballyOptedIn &&
-        isEventTypeOptedIn &&
-        isEventTypeShipperOptedIn
-      );
+      return isEventTypeShipperOptedIn;
     } else {
-      return isGlobalOptedIn && isShipperGloballyOptedIn;
+      return isShipperGloballyOptedIn;
     }
   }
 }
