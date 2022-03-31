@@ -41,10 +41,6 @@ interface ManagementStep {
   children: JSX.Element;
 }
 
-const StyledDiv = styled.div`
-  padding-left: 20%;
-`;
-
 const PolicyEmptyState = React.memo<{
   loading: boolean;
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
@@ -53,7 +49,7 @@ const PolicyEmptyState = React.memo<{
 }>(({ loading, onActionClick, actionDisabled, policyEntryPoint = false }) => {
   const docLinks = useKibana().services.docLinks;
   return (
-    <StyledDiv data-test-subj="emptyPolicyTable">
+    <div data-test-subj="emptyPolicyTable">
       {loading ? (
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
@@ -128,7 +124,7 @@ const PolicyEmptyState = React.memo<{
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </StyledDiv>
+    </div>
   );
 });
 

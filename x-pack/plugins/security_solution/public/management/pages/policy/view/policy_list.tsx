@@ -37,6 +37,7 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import { getPoliciesPath } from '../../../common/routing';
 import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
 import { PolicyEndpointCount } from './components/policy_endpoint_count';
+import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -316,11 +317,13 @@ export const PolicyList = memo(() => {
           />
         </>
       ) : (
-        <PolicyEmptyState
-          loading={packageIsFetching}
-          onActionClick={handleCreatePolicyClick}
-          policyEntryPoint
-        />
+        <ManagementEmptyStateWrapper>
+          <PolicyEmptyState
+            loading={packageIsFetching}
+            onActionClick={handleCreatePolicyClick}
+            policyEntryPoint
+          />
+        </ManagementEmptyStateWrapper>
       )}
     </AdministrationListPage>
   );
