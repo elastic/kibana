@@ -17,7 +17,8 @@ import {
   SavedObjectsStart,
 } from 'kibana/public';
 import { act } from 'react-dom/test-utils';
-import { IndexPattern, QueryStringInput } from '../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
@@ -87,12 +88,12 @@ describe('search_bar', () => {
   const defaultProps = {
     isLoading: false,
     indexPatternProvider: {
-      get: jest.fn(() => Promise.resolve({ fields: [] } as unknown as IndexPattern)),
+      get: jest.fn(() => Promise.resolve({ fields: [] } as unknown as DataView)),
     },
     confirmWipeWorkspace: (callback: () => void) => {
       callback();
     },
-    onIndexPatternChange: (indexPattern?: IndexPattern) => {
+    onIndexPatternChange: (indexPattern?: DataView) => {
       instance.setProps({
         ...defaultProps,
         currentIndexPattern: indexPattern,

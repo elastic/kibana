@@ -8,14 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { layerTypes } from '../../../common';
-import type {
-  XYDataLayerConfig,
-  XYAnnotationLayerConfig,
-  XYLayerConfig,
-} from '../../../common/expressions';
 import type { FramePublicAPI, Visualization } from '../../types';
 import { isHorizontalChart } from '../state_helpers';
-import type { XYState } from '../types';
+import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
 import {
   checkScaleOperation,
   getAnnotationsLayers,
@@ -26,10 +21,13 @@ import {
 import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
 import { generateId } from '../../id_generator';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
-import { defaultAnnotationLabel } from './config_panel';
 
 const MAX_DATE = 8640000000000000;
 const MIN_DATE = -8640000000000000;
+
+export const defaultAnnotationLabel = i18n.translate('xpack.lens.xyChart.defaultAnnotationLabel', {
+  defaultMessage: 'Event',
+});
 
 export function getStaticDate(
   dataLayers: XYDataLayerConfig[],

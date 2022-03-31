@@ -685,6 +685,10 @@
               {
                 "plugin": "embeddable",
                 "path": "src/plugins/embeddable/public/tests/explicit_input.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/target/types/public/embeddable/search_embeddable_factory.d.ts"
               }
             ],
             "children": [

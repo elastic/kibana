@@ -193,6 +193,13 @@ export const BULK_ACTION_DELETE_TAGS = i18n.translate(
   }
 );
 
+export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle',
+  {
+    defaultMessage: 'Apply timeline template',
+  }
+);
+
 export const BULK_ACTION_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle',
   {
@@ -391,13 +398,6 @@ export const EXPORT_FILENAME = i18n.translate(
   }
 );
 
-export const ALL_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tableTitle',
-  {
-    defaultMessage: 'All rules',
-  }
-);
-
 export const SEARCH_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchAriaLabel',
   {
@@ -408,7 +408,7 @@ export const SEARCH_RULES = i18n.translate(
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchPlaceholder',
   {
-    defaultMessage: 'e.g. rule name',
+    defaultMessage: 'Search by rule name, index pattern, or MITRE ATT&CK tactic or technique',
   }
 );
 
@@ -581,6 +581,13 @@ export const COLUMN_GAP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
   {
     defaultMessage: 'Last Gap (if any)',
+  }
+);
+
+export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltipSeeDocsDescription',
+  {
+    defaultMessage: 'see documentation',
   }
 );
 

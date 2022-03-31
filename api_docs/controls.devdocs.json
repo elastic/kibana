@@ -1948,6 +1948,19 @@
         "children": [
           {
             "parentPluginId": "controls",
+            "id": "def-public.ControlGroupInput.chainingSystem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chainingSystem",
+            "description": [],
+            "signature": [
+              "\"HIERARCHICAL\" | \"NONE\""
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.ControlGroupInput.defaultControlWidth",
             "type": "CompoundType",
             "tags": [],
@@ -2531,7 +2544,32 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.getDefaultControlGroupInput",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultControlGroupInput",
+        "description": [],
+        "signature": [
+          "() => Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", \"id\">"
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_constants.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "controls",
@@ -2562,6 +2600,19 @@
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.ControlGroupInput.chainingSystem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chainingSystem",
+            "description": [],
+            "signature": [
+              "\"HIERARCHICAL\" | \"NONE\""
+            ],
+            "path": "src/plugins/controls/common/control_group/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "controls",
             "id": "def-common.ControlGroupInput.defaultControlWidth",

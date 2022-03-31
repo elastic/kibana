@@ -577,6 +577,7 @@
         ],
         "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
         "deprecated": true,
+        "removeBy": "8.8.0",
         "references": [
           {
             "plugin": "embeddable",
@@ -1600,6 +1601,7 @@
         "description": [],
         "path": "src/plugins/saved_objects/public/types.ts",
         "deprecated": true,
+        "removeBy": "8.8.0",
         "references": [
           {
             "plugin": "savedObjectsTaggingOss",
@@ -1696,6 +1698,22 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/check_for_duplicate_title.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/check_for_duplicate_title.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.d.ts"
           }
         ],
         "children": [
@@ -3166,6 +3184,7 @@
           ],
           "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "dashboard",
@@ -3187,6 +3206,7 @@
           ],
           "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "visualizations",
