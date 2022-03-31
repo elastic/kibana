@@ -94,7 +94,7 @@ function EditorOutputUI() {
             }
 
             if (isMapboxVectorTile(contentType)) {
-              const output = new VectorTile(new Protobuf(value));
+              const output = new VectorTile(new Protobuf(value as ArrayBuffer));
               editorOutput = JSON.stringify(output, null, '\t');
             }
             return editorOutput;
