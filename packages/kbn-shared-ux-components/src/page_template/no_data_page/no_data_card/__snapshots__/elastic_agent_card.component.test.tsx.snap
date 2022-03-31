@@ -19,7 +19,6 @@ exports[`ElasticAgentCardComponent props button 1`] = `
 >
   <NoDataCard
     button="Button"
-    css="css-1wfcu61"
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     image="test-file-stub"
     title="Add Elastic Agent"
@@ -45,7 +44,6 @@ exports[`ElasticAgentCardComponent props href 1`] = `
   navigateToUrl={[MockFunction]}
 >
   <NoDataCard
-    css="css-1wfcu61"
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     href="some path"
     image="test-file-stub"
@@ -72,7 +70,6 @@ exports[`ElasticAgentCardComponent renders 1`] = `
   navigateToUrl={[MockFunction]}
 >
   <NoDataCard
-    css="css-1wfcu61"
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     image="test-file-stub"
     title="Add Elastic Agent"
@@ -98,7 +95,6 @@ exports[`ElasticAgentCardComponent renders with canAccessFleet false 1`] = `
   navigateToUrl={[MockFunction]}
 >
   <NoDataCard
-    css="css-1wfcu61"
     description={
       <EuiTextColor
         color="default"
