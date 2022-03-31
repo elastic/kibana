@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getVectorStyleLabel, getDisabledByMessage } from './get_vector_style_label';
 import { STYLE_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
+import { CustomIcon } from '../../../../../common/descriptor_types';
 import { IStyleProperty } from '../properties/style_property';
 import { StyleField } from '../style_fields_helper';
 
@@ -27,9 +28,11 @@ export interface Props<StaticOptions, DynamicOptions> {
   defaultDynamicStyleOptions: DynamicOptions;
   disabled?: boolean;
   disabledBy?: VECTOR_STYLES;
+  customIcons?: CustomIcon[];
   fields: StyleField[];
   onDynamicStyleChange: (propertyName: VECTOR_STYLES, options: DynamicOptions) => void;
   onStaticStyleChange: (propertyName: VECTOR_STYLES, options: StaticOptions) => void;
+  onCustomIconsChange?: (customIcons: CustomIcon[]) => void;
   styleProperty: IStyleProperty<StaticOptions | DynamicOptions>;
 }
 

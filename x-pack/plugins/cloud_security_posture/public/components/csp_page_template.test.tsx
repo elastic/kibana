@@ -102,7 +102,7 @@ describe('<CspPageTemplate />', () => {
     renderCspPageTemplate({ children });
 
     Object.values(PACKAGE_NOT_INSTALLED_TEXT).forEach((text) =>
-      expect(screen.getByText(text)).toBeInTheDocument()
+      expect(screen.getAllByText(text)[0]).toBeInTheDocument()
     );
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
@@ -247,7 +247,7 @@ describe('<CspPageTemplate />', () => {
     });
 
     expect(screen.getByText(pageTitle)).toBeInTheDocument();
-    expect(screen.getByText(solution, { exact: false })).toBeInTheDocument();
+    expect(screen.getAllByText(solution, { exact: false })[0]).toBeInTheDocument();
     expect(screen.queryByText(LOADING)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByText(ERROR_LOADING_DATA_DEFAULT_MESSAGE)).not.toBeInTheDocument();

@@ -35,7 +35,7 @@ export const renderApp = (
     return () => undefined;
   }
 
-  const { i18n, docLinks, notifications, application } = core;
+  const { i18n, docLinks, notifications, application, executionContext } = core;
   const { Context: I18nContext } = i18n;
   const { services, history, setBreadcrumbs, uiSettings, kibanaVersion, theme$ } = dependencies;
 
@@ -56,6 +56,7 @@ export const renderApp = (
     toasts: notifications.toasts,
     setBreadcrumbs,
     getUrlForApp: application.getUrlForApp,
+    executionContext,
   };
 
   render(
