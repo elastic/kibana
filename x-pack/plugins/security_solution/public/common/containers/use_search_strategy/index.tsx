@@ -33,6 +33,7 @@ import { getInspectResponse } from '../../../helpers';
 import { inputsModel } from '../../store';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 type UseSearchStrategyRequestArgs = RequestBasicOptions & {
   data: DataPublicPluginStart;
@@ -96,6 +97,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   factoryQueryType,
   initialResult,
   errorMessage,
+  abort = false,
 }: {
   factoryQueryType: QueryType;
   /**
@@ -106,6 +108,10 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
    * Message displayed to the user on a Toast when an erro happens.
    */
   errorMessage?: string;
+  /**
+   * When the flag switches from `false` to `true`, it will abort any ongoing request.
+   */
+  abort?: boolean;
 }) => {
   const abortCtrl = useRef(new AbortController());
   const { getTransformChangesIfTheyExist } = useTransforms();
@@ -120,7 +126,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   >(searchComplete);
 
   useEffect(() => {
-    if (error != null) {
+    if (error != null && !(error instanceof AbortError)) {
       addError(error, {
         title: errorMessage ?? i18n.DEFAULT_ERROR_SEARCH_STRATEGY(factoryQueryType),
       });
@@ -153,6 +159,12 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
       abortCtrl.current.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (abort) {
+      abortCtrl.current.abort();
+    }
+  }, [abort]);
 
   const [formatedResult, inspect] = useMemo(
     () => [

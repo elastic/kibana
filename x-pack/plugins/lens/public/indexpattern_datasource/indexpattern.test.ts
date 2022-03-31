@@ -435,7 +435,7 @@ describe('IndexPattern Data Source', () => {
                             "1d",
                           ],
                           "min_doc_count": Array [
-                            0,
+                            1,
                           ],
                           "schema": Array [
                             "segment",
@@ -2626,9 +2626,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.initializeDimension!(state, 'first', {
           columnId: 'newStatic',
-          label: 'MyNewColumn',
           groupId: 'a',
-          dataType: 'number',
         })
       ).toBe(state);
     });
@@ -2655,9 +2653,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.initializeDimension!(state, 'first', {
           columnId: 'newStatic',
-          label: 'MyNewColumn',
           groupId: 'a',
-          dataType: 'number',
           staticValue: 0, // use a falsy value to check also this corner case
         })
       ).toEqual({

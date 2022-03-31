@@ -139,6 +139,7 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   params: Record<string, any>;
   apiKey?: string;
   executionId?: string;
+  consumer?: string;
 }
 
 interface PersistedActionTaskExecutorParams {

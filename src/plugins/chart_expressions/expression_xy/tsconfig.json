@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "isolatedModules": true
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+  ],
+  "references": [
+    { "path": "../../charts/tsconfig.json" },
+    { "path": "../../../core/tsconfig.json" },
+    { "path": "../../expressions/tsconfig.json" },
+    { "path": "../../data/tsconfig.json"},
+    { "path": "../../ui_actions/tsconfig.json" },
+    { "path": "../../field_formats/tsconfig.json"},
+    { "path": "../../kibana_utils/tsconfig.json" },
+    { "path": "../../event_annotation/tsconfig.json" },
+    { "path": "../../visualizations/tsconfig.json" },
+  ]
+}

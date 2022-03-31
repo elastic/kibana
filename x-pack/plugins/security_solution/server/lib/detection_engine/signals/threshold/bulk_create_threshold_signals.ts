@@ -9,10 +9,7 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
 import set from 'set-value';
-import {
-  ThresholdNormalized,
-  TimestampOverrideOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { Logger } from '../../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
@@ -21,7 +18,7 @@ import {
 } from '../../../../../../alerting/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
-import { GenericBulkCreateResponse } from '../bulk_create_factory';
+import { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
 import { calculateThresholdSignalUuid, getThresholdAggregationParts } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type {
@@ -33,6 +30,7 @@ import type {
   WrapHits,
 } from '../types';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 
 interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
@@ -54,12 +52,8 @@ const getTransformedHits = (
   inputIndex: string,
   startedAt: Date,
   from: Date,
-  logger: Logger,
   threshold: ThresholdNormalized,
-  ruleId: string,
-  filter: unknown,
-  timestampOverride: TimestampOverrideOrUndefined,
-  signalHistory: ThresholdSignalHistory
+  ruleId: string
 ) => {
   if (results.aggregations == null) {
     return [];
@@ -184,24 +178,16 @@ export const transformThresholdResultsToEcs = (
   inputIndex: string,
   startedAt: Date,
   from: Date,
-  filter: unknown,
-  logger: Logger,
   threshold: ThresholdNormalized,
-  ruleId: string,
-  timestampOverride: TimestampOverrideOrUndefined,
-  signalHistory: ThresholdSignalHistory
+  ruleId: string
 ): SignalSearchResponse => {
   const transformedHits = getTransformedHits(
     results,
     inputIndex,
     startedAt,
     from,
-    logger,
     threshold,
-    ruleId,
-    filter,
-    timestampOverride,
-    signalHistory
+    ruleId
   );
   const thresholdResults = {
     ...results,
@@ -220,7 +206,7 @@ export const transformThresholdResultsToEcs = (
 
 export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
-): Promise<GenericBulkCreateResponse<{}>> => {
+): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
   const ruleParams = params.completeRule.ruleParams;
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(
@@ -228,12 +214,8 @@ export const bulkCreateThresholdSignals = async (
     params.inputIndexPattern.join(','),
     params.startedAt,
     params.from,
-    params.filter,
-    params.logger,
     ruleParams.threshold,
-    ruleParams.ruleId,
-    ruleParams.timestampOverride,
-    params.signalHistory
+    ruleParams.ruleId
   );
 
   return params.bulkCreate(

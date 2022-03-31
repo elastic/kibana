@@ -97,7 +97,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // test starts with deleting space b so we can get the space selection page instead of logging out in the test
     it('a11y test for space selection page', async () => {
       await PageObjects.spaceSelector.confirmDeletingSpace();
-      await a11y.testAppSnapshot();
+      await retry.try(async () => {
+        await a11y.testAppSnapshot();
+      });
       await PageObjects.spaceSelector.clickSpaceCard('default');
     });
   });

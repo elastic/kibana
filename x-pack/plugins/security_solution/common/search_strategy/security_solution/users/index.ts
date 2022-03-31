@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { TotalUsersKpiStrategyResponse } from './kpi/total_users';
+
 export enum UsersQueries {
   details = 'userDetails',
+  kpiTotalUsers = 'usersKpiTotalUsers',
+  users = 'allUsers',
 }
+
+export type UserskKpiStrategyResponse = Omit<TotalUsersKpiStrategyResponse, 'rawResponse'>;
