@@ -85,6 +85,7 @@ export interface AppState {
    * Document explorer row height option
    */
   rowHeight?: number;
+  samplingProbability?: number;
 }
 
 interface GetStateParams {

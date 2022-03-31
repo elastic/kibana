@@ -39,7 +39,8 @@ export function getChartAggConfigs(
 export function getChartAggWithRandomSamplerConfigs(
   searchSource: ISearchSource,
   histogramInterval: string,
-  data: DataPublicPluginStart
+  data: DataPublicPluginStart,
+  samplingProbability: number
 ) {
   const indexPattern = searchSource.getField('index')!;
   const visStateAggs = [
@@ -51,7 +52,7 @@ export function getChartAggWithRandomSamplerConfigs(
       type: 'random_sampler',
       schema: 'bucket',
       params: {
-        probability: 0.1,
+        probability: samplingProbability,
       },
     },
     {

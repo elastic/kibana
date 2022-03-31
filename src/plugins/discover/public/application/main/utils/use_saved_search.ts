@@ -81,6 +81,7 @@ export interface DataTotalHitsMsg extends DataMsg {
 export interface DataChartsMessage extends DataMsg {
   bucketInterval?: TimechartBucketInterval;
   chartData?: Chart;
+  duration?: number;
 }
 
 export interface DataAvailableFieldsMsg extends DataMsg {

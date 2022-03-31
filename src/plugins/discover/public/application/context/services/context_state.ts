@@ -44,6 +44,7 @@ export interface AppState {
    * but it's used in the DocTable component
    */
   sort?: string[][];
+  samplingProbability?: number;
 }
 
 interface GlobalState {

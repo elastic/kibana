@@ -226,6 +226,10 @@ export function useDiscoverState({
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
+  useEffect(() => {
+    refetch$.next();
+  }, [stateContainer.appStateContainer.getState().samplingProbability]);
+
   return {
     data$,
     indexPattern,

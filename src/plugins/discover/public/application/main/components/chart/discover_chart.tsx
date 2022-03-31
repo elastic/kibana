@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiToolTip,
   EuiSpacer,
+  EuiRange,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '../../../../../../data_views/public';
@@ -67,6 +68,18 @@ export function DiscoverChart({
   const isTimeBased = indexPattern.isTimeBased();
   const { uiSettings, data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
+  const [samplingProbability, setSamplingProbability] = useState(
+    stateContainer.appStateContainer.getState().samplingProbability ?? 0.1
+  );
+
+  const onSamplingProbabilityChanged = useCallback(
+    (value) => {
+      setSamplingProbability(value);
+      stateContainer.setAppState({ samplingProbability: value });
+    },
+    [stateContainer]
+  );
+
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
@@ -236,24 +249,42 @@ export function DiscoverChart({
           <EuiSpacer size="s" />
         </EuiFlexItem>
       )}
+
       {isTimeBased && !hideChart && (
-        <EuiFlexItem grow={false}>
-          <section
-            ref={(element) => (chartRefRandom.current.element = element)}
-            tabIndex={-1}
-            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
-              defaultMessage: '[Random sampler] Histogram of found documents',
-            })}
-            className="dscTimechart"
-          >
-            <DiscoverHistogramMemoized
-              savedSearchData$={savedSearchRandomSamplingCharts$}
-              timefilterUpdateHandler={timefilterUpdateHandler}
-              random={true}
+        <>
+          <EuiSpacer />
+          <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
+            <div style={{ paddingRight: 20 }}>
+              Probability: <b>{samplingProbability}</b>
+            </div>
+            <EuiRange
+              min={0.1}
+              max={0.5}
+              step={0.05}
+              value={samplingProbability}
+              onChange={(e) => onSamplingProbabilityChanged(e.target.value)}
+              showLabels
             />
-          </section>
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiFlexItem grow={false}>
+            <section
+              ref={(element) => (chartRefRandom.current.element = element)}
+              tabIndex={-1}
+              aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
+                defaultMessage: '[Random sampler] Histogram of found documents',
+              })}
+              className="dscTimechart"
+            >
+              <DiscoverHistogramMemoized
+                savedSearchData$={savedSearchRandomSamplingCharts$}
+                timefilterUpdateHandler={timefilterUpdateHandler}
+                random={true}
+              />
+            </section>
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+        </>
       )}
     </EuiFlexGroup>
   );

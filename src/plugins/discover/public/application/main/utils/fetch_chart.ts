@@ -116,7 +116,13 @@ export function fetchChartWithRandomSampling(
   }: FetchDeps
 ): Promise<Result> {
   const interval = appStateContainer.getState().interval ?? 'auto';
-  const chartAggConfigs = updateRandomSamplingSearchSource(searchSource, interval, data);
+
+  const chartAggConfigs = updateRandomSamplingSearchSource(
+    searchSource,
+    interval,
+    data,
+    appStateContainer.getState().samplingProbability ?? 0.1
+  );
 
   const executionContext = {
     description: 'fetch chart data and total hits',
@@ -163,13 +169,19 @@ export function fetchChartWithRandomSampling(
 export function updateRandomSamplingSearchSource(
   searchSource: ISearchSource,
   interval: string,
-  data: DataPublicPluginStart
+  data: DataPublicPluginStart,
+  samplingProbability: number
 ) {
   const indexPattern = searchSource.getField('index')!;
   searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern));
   searchSource.setField('size', 0);
   searchSource.setField('trackTotalHits', true);
-  const chartAggConfigs = getChartAggWithRandomSamplerConfigs(searchSource, interval, data);
+  const chartAggConfigs = getChartAggWithRandomSamplerConfigs(
+    searchSource,
+    interval,
+    data,
+    samplingProbability
+  );
   searchSource.setField('aggs', chartAggConfigs.toDsl());
   searchSource.removeField('sort');
   searchSource.removeField('fields');

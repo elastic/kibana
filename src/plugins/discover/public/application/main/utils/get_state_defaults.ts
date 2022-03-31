@@ -64,6 +64,7 @@ export function getStateDefaults({
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
     rowHeight: undefined,
+    samplingProbability: undefined,
   } as AppState;
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
@@ -80,6 +81,10 @@ export function getStateDefaults({
 
   if (savedSearch.hideAggregatedPreview) {
     defaultState.hideAggregatedPreview = savedSearch.hideAggregatedPreview;
+  }
+
+  if (savedSearch.samplingProbability) {
+    defaultState.samplingProbability = savedSearch.samplingProbability;
   }
 
   return defaultState;

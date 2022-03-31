@@ -76,7 +76,6 @@ export function DiscoverHistogram({
   const timeZone = getTimezone(uiSettings);
   const { chartData, bucketInterval, fetchStatus, error, duration } = dataState;
 
-  console.log('dataState', dataState);
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
       if (!x) {
