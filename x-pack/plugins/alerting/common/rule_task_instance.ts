@@ -10,29 +10,58 @@ import { rawAlertInstance } from './alert_instance';
 import { DateFromString } from './date_from_string';
 import { IntervalSchedule, RuleMonitoring } from './alert';
 
+export enum ActionsCompletion {
+  COMPLETE = 'complete',
+  PARTIAL = 'partial',
+}
+
 export const ruleStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
   alertInstances: t.record(t.string, rawAlertInstance),
   previousStartedAt: t.union([t.null, DateFromString]),
 });
 
-const ruleExecutionMetricsSchema = t.partial({
+const ruleExecutionActionsCompletion = t.union([
+  t.literal(ActionsCompletion.COMPLETE),
+  t.literal(ActionsCompletion.PARTIAL),
+]);
+
+const ruleExecutionMetricsSchema = t.type({
   numSearches: t.number,
   totalSearchDurationMs: t.number,
   esSearchDurationMs: t.number,
-});
-
-const alertExecutionStore = t.partial({
   numberOfTriggeredActions: t.number,
   numberOfScheduledActions: t.number,
-  triggeredActionsStatus: t.string,
+  numberOfActiveAlerts: t.number,
+  numberOfRecoveredAlerts: t.number,
+  numberOfNewAlerts: t.number,
+  triggeredActionsStatus: ruleExecutionActionsCompletion,
 });
 
 export type RuleExecutionMetrics = t.TypeOf<typeof ruleExecutionMetricsSchema>;
+
+// This is serialized in the rule task document
 export type RuleTaskState = t.TypeOf<typeof ruleStateSchema>;
+
+// This is the task state plus additional metrics gathered during rule execution
 export type RuleExecutionState = RuleTaskState & {
   metrics: RuleExecutionMetrics;
-  alertExecutionStore: t.TypeOf<typeof alertExecutionStore>;
+};
+
+export const EMPTY_RULE_EXECUTION_METRICS: RuleExecutionMetrics = {
+  numSearches: 0,
+  totalSearchDurationMs: 0,
+  esSearchDurationMs: 0,
+  numberOfTriggeredActions: 0,
+  numberOfScheduledActions: 0,
+  numberOfActiveAlerts: 0,
+  numberOfRecoveredAlerts: 0,
+  numberOfNewAlerts: 0,
+  triggeredActionsStatus: ActionsCompletion.COMPLETE,
+};
+
+export const EMPTY_RULE_EXECUTION_STATE: RuleExecutionState = {
+  metrics: EMPTY_RULE_EXECUTION_METRICS,
 };
 
 export const ruleParamsSchema = t.intersection([

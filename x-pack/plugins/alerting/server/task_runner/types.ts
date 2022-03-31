@@ -16,6 +16,7 @@ import {
   AlertTypeState,
   IntervalSchedule,
   RuleExecutionState,
+  RuleExecutionMetrics,
   RuleMonitoring,
   RuleTaskState,
   SanitizedAlert,
@@ -80,6 +81,7 @@ export interface GenerateNewAndRecoveredAlertEventsParams<
   >;
   rule: SanitizedAlert<AlertTypeParams>;
   spaceId: string;
+  ruleExecutionMetrics: RuleExecutionMetrics;
 }
 
 export interface ScheduleActionsForRecoveredAlertsParams<
@@ -93,7 +95,7 @@ export interface ScheduleActionsForRecoveredAlertsParams<
   executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
-  alertExecutionStore: AlertExecutionStore;
+  ruleExecutionMetrics: RuleExecutionMetrics;
 }
 
 export interface LogActiveAndRecoveredAlertsParams<
@@ -153,16 +155,5 @@ export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
   alertId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
-  alertExecutionStore: AlertExecutionStore;
-}
-
-export enum ActionsCompletion {
-  COMPLETE = 'complete',
-  PARTIAL = 'partial',
-}
-
-export interface AlertExecutionStore {
-  numberOfTriggeredActions: number;
-  numberOfScheduledActions: number;
-  triggeredActionsStatus: ActionsCompletion;
+  ruleExecutionMetrics: RuleExecutionMetrics;
 }

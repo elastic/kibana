@@ -15,15 +15,24 @@ import {
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { AlertExecutionStatuses } from '../../common';
+import {
+  ActionsCompletion,
+  AlertExecutionStatuses,
+  EMPTY_RULE_EXECUTION_METRICS,
+  RuleExecutionMetrics,
+} from '../../common';
 import { translations } from '../constants/translations';
-import { ActionsCompletion } from '../task_runner/types';
 
-export function executionStatusFromState(state: RuleExecutionState): AlertExecutionStatus {
+export interface IExecutionStatusAndMetrics {
+  status: AlertExecutionStatus;
+  metrics: RuleExecutionMetrics;
+}
+
+export function executionStatusFromState(state: RuleExecutionState): IExecutionStatusAndMetrics {
   const alertIds = Object.keys(state.alertInstances ?? {});
 
   const hasIncompleteAlertExecution =
-    state.alertExecutionStore.triggeredActionsStatus === ActionsCompletion.PARTIAL;
+    state.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL;
 
   let status: AlertExecutionStatuses =
     alertIds.length === 0 ? AlertExecutionStatusValues[0] : AlertExecutionStatusValues[1];
@@ -33,28 +42,31 @@ export function executionStatusFromState(state: RuleExecutionState): AlertExecut
   }
 
   return {
+    status: {
+      lastExecutionDate: new Date(),
+      status,
+      ...(hasIncompleteAlertExecution && {
+        warning: {
+          reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          message: translations.taskRunner.warning.maxExecutableActions,
+        },
+      }),
+    },
     metrics: state.metrics,
-    numberOfTriggeredActions: state.alertExecutionStore.numberOfTriggeredActions,
-    numberOfScheduledActions: state.alertExecutionStore.numberOfScheduledActions,
-    lastExecutionDate: new Date(),
-    status,
-    ...(hasIncompleteAlertExecution && {
-      warning: {
-        reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
-        message: translations.taskRunner.warning.maxExecutableActions,
-      },
-    }),
   };
 }
 
-export function executionStatusFromError(error: Error): AlertExecutionStatus {
+export function executionStatusFromError(error: Error): IExecutionStatusAndMetrics {
   return {
-    lastExecutionDate: new Date(),
-    status: 'error',
-    error: {
-      reason: getReasonFromError(error),
-      message: getEsErrorMessage(error),
+    status: {
+      lastExecutionDate: new Date(),
+      status: 'error',
+      error: {
+        reason: getReasonFromError(error),
+        message: getEsErrorMessage(error),
+      },
     },
+    metrics: EMPTY_RULE_EXECUTION_METRICS,
   };
 }
 

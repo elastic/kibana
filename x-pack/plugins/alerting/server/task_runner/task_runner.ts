@@ -53,6 +53,8 @@ import {
   AlertInstanceState,
   AlertTypeParams,
   AlertTypeState,
+  RuleExecutionMetrics,
+  EMPTY_RULE_EXECUTION_METRICS,
   MONITORING_HISTORY_LIMIT,
   parseDuration,
   WithoutReservedActionGroups,
@@ -65,8 +67,6 @@ import {
 } from '../lib/create_alert_event_log_record_object';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 import {
-  ActionsCompletion,
-  AlertExecutionStore,
   GenerateNewAndRecoveredAlertEventsParams,
   LogActiveAndRecoveredAlertsParams,
   RuleTaskInstance,
@@ -74,6 +74,7 @@ import {
   ScheduleActionsForRecoveredAlertsParams,
   TrackAlertDurationsParams,
 } from './types';
+import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -290,7 +291,7 @@ export class TaskRunner<
     alertId: string,
     alert: CreatedAlert<InstanceState, InstanceContext>,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
-    alertExecutionStore: AlertExecutionStore
+    ruleExecutionMetrics: RuleExecutionMetrics
   ) {
     const {
       actionGroup,
@@ -306,11 +307,11 @@ export class TaskRunner<
       context,
       state,
       alertId,
-      alertExecutionStore,
+      ruleExecutionMetrics,
     });
   }
 
-  private async executeAlerts(
+  private async executeRule(
     fakeRequest: KibanaRequest,
     rule: SanitizedAlert<Params>,
     params: Params,
@@ -474,6 +475,8 @@ export class TaskRunner<
       recoveredAlerts,
     });
 
+    const ruleExecutionMetrics: RuleExecutionMetrics = EMPTY_RULE_EXECUTION_METRICS;
+
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       generateNewAndRecoveredAlertEvents({
         eventLogger,
@@ -487,14 +490,9 @@ export class TaskRunner<
         ruleType,
         rule,
         spaceId,
+        ruleExecutionMetrics,
       });
     }
-
-    const alertExecutionStore: AlertExecutionStore = {
-      numberOfTriggeredActions: 0,
-      numberOfScheduledActions: 0,
-      triggeredActionsStatus: ActionsCompletion.COMPLETE,
-    };
 
     const ruleIsSnoozed = this.isRuleSnoozed(rule);
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
@@ -530,7 +528,7 @@ export class TaskRunner<
       await Promise.all(
         alertsWithExecutableActions.map(
           ([alertId, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) =>
-            this.executeAlert(alertId, alert, executionHandler, alertExecutionStore)
+            this.executeAlert(alertId, alert, executionHandler, ruleExecutionMetrics)
         )
       );
 
@@ -545,7 +543,7 @@ export class TaskRunner<
         mutedAlertIdsSet,
         logger: this.logger,
         ruleLabel,
-        alertExecutionStore,
+        ruleExecutionMetrics,
       });
     } else {
       if (ruleIsSnoozed) {
@@ -565,8 +563,10 @@ export class TaskRunner<
     }
 
     return {
-      metrics: searchMetrics,
-      alertExecutionStore,
+      metrics: {
+        ...ruleExecutionMetrics,
+        ...searchMetrics,
+      },
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
         Record<string, CreatedAlert<InstanceState, InstanceContext>>,
@@ -598,7 +598,7 @@ export class TaskRunner<
       rule.params,
       fakeRequest
     );
-    return this.executeAlerts(fakeRequest, rule, validatedParams, executionHandler, spaceId, event);
+    return this.executeRule(fakeRequest, rule, validatedParams, executionHandler, spaceId, event);
   }
 
   private async loadRuleAttributesAndRun(
@@ -759,7 +759,11 @@ export class TaskRunner<
         return getDefaultRuleMonitoring();
       }) ?? getDefaultRuleMonitoring();
 
-    const executionStatus = map<RuleExecutionState, ElasticsearchError, AlertExecutionStatus>(
+    const { status: executionStatus, metrics: executionMetrics } = map<
+      RuleExecutionState,
+      ElasticsearchError,
+      IExecutionStatusAndMetrics
+    >(
       state,
       (ruleExecutionState) => executionStatusFromState(ruleExecutionState),
       (err: ElasticsearchError) => executionStatusFromError(err)
@@ -817,31 +821,46 @@ export class TaskRunner<
       set(
         event,
         'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
-        executionStatus.numberOfTriggeredActions
+        executionMetrics.numberOfTriggeredActions
       );
       set(
         event,
         'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
-        executionStatus.numberOfScheduledActions
+        executionMetrics.numberOfScheduledActions
+      );
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.number_of_active_alerts',
+        executionMetrics.numberOfActiveAlerts
+      );
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.number_of_new_alerts',
+        executionMetrics.numberOfNewAlerts
+      );
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.number_of_recovered_alerts',
+        executionMetrics.numberOfRecoveredAlerts
       );
     }
 
     // Copy search stats into event log
-    if (executionStatus.metrics) {
+    if (executionMetrics) {
       set(
         event,
         'kibana.alert.rule.execution.metrics.number_of_searches',
-        executionStatus.metrics.numSearches ?? 0
+        executionMetrics.numSearches ?? 0
       );
       set(
         event,
         'kibana.alert.rule.execution.metrics.es_search_duration_ms',
-        executionStatus.metrics.esSearchDurationMs ?? 0
+        executionMetrics.esSearchDurationMs ?? 0
       );
       set(
         event,
         'kibana.alert.rule.execution.metrics.total_search_duration_ms',
-        executionStatus.metrics.totalSearchDurationMs ?? 0
+        executionMetrics.totalSearchDurationMs ?? 0
       );
     }
 
@@ -873,7 +892,7 @@ export class TaskRunner<
       executionState: RuleExecutionState
     ): RuleTaskState => {
       return {
-        ...omit(executionState, ['alertExecutionStore', 'metrics']),
+        ...omit(executionState, ['metrics']),
         previousStartedAt: startedAt,
       };
     };
@@ -1069,6 +1088,7 @@ function generateNewAndRecoveredAlertEvents<
     rule,
     ruleType,
     spaceId,
+    ruleExecutionMetrics,
   } = params;
   const originalAlertIds = Object.keys(originalAlerts);
   const currentAlertIds = Object.keys(currentAlerts);
@@ -1080,6 +1100,10 @@ function generateNewAndRecoveredAlertEvents<
       alerting_new_alerts: newIds.length,
     });
   }
+
+  ruleExecutionMetrics.numberOfActiveAlerts = currentAlertIds.length;
+  ruleExecutionMetrics.numberOfNewAlerts = newIds.length;
+  ruleExecutionMetrics.numberOfRecoveredAlerts = recoveredAlertIds.length;
 
   for (const id of recoveredAlertIds) {
     const { group: actionGroup, subgroup: actionSubgroup } =
@@ -1197,7 +1221,7 @@ async function scheduleActionsForRecoveredAlerts<
     executionHandler,
     mutedAlertIdsSet,
     ruleLabel,
-    alertExecutionStore,
+    ruleExecutionMetrics,
   } = params;
   const recoveredIds = Object.keys(recoveredAlerts);
 
@@ -1215,7 +1239,7 @@ async function scheduleActionsForRecoveredAlerts<
         context: alert.getContext(),
         state: {},
         alertId: id,
-        alertExecutionStore,
+        ruleExecutionMetrics,
       });
       alert.scheduleActions(recoveryActionGroup.id);
     }

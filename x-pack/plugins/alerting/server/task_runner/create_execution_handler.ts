@@ -10,6 +10,7 @@ import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
 import {
+  ActionsCompletion,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
@@ -19,7 +20,7 @@ import {
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
-import { ActionsCompletion, CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
+import { CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
   options: ExecutionHandlerOptions<ActionGroupIds>
@@ -68,7 +69,7 @@ export function createExecutionHandler<
     actionSubgroup,
     context,
     state,
-    alertExecutionStore,
+    ruleExecutionMetrics,
     alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
     if (!ruleTypeActionGroups.has(actionGroup)) {
@@ -112,7 +113,7 @@ export function createExecutionHandler<
         }),
       }));
 
-    alertExecutionStore.numberOfScheduledActions += actions.length;
+    ruleExecutionMetrics.numberOfScheduledActions += actions.length;
 
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
@@ -120,8 +121,8 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (alertExecutionStore.numberOfTriggeredActions >= ruleType.config!.execution.actions.max) {
-        alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
+      if (ruleExecutionMetrics.numberOfTriggeredActions >= ruleType.config!.execution.actions.max) {
+        ruleExecutionMetrics.triggeredActionsStatus = ActionsCompletion.PARTIAL;
         break;
       }
 
@@ -134,7 +135,7 @@ export function createExecutionHandler<
         continue;
       }
 
-      alertExecutionStore.numberOfTriggeredActions++;
+      ruleExecutionMetrics.numberOfTriggeredActions++;
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 

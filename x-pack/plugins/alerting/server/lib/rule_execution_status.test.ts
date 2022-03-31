@@ -7,9 +7,12 @@
 
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import {
+  ActionsCompletion,
   AlertExecutionStatusErrorReasons,
   AlertExecutionStatusWarningReasons,
-  RuleExecutionState,
+  EMPTY_RULE_EXECUTION_METRICS,
+  EMPTY_RULE_EXECUTION_STATE,
+  RuleExecutionMetrics,
 } from '../types';
 import {
   executionStatusFromState,
@@ -19,98 +22,78 @@ import {
 } from './rule_execution_status';
 import { ErrorWithReason } from './error_with_reason';
 import { translations } from '../constants/translations';
-import { ActionsCompletion } from '../task_runner/types';
 
 const MockLogger = loggingSystemMock.create().get();
-const metrics = { numSearches: 1, esSearchDurationMs: 10, totalSearchDurationMs: 20 };
+const executionMetrics = {
+  numSearches: 1,
+  esSearchDurationMs: 10,
+  totalSearchDurationMs: 20,
+  numberOfTriggeredActions: 32,
+  numberOfScheduledActions: 11,
+  numberOfActiveAlerts: 2,
+  numberOfNewAlerts: 3,
+  numberOfRecoveredAlerts: 13,
+  triggeredActionsStatus: ActionsCompletion.COMPLETE,
+};
 
 describe('RuleExecutionStatus', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
+  function testExpectedMetrics(received: RuleExecutionMetrics, expected: RuleExecutionMetrics) {
+    expect(received.numSearches).toEqual(expected.numSearches);
+    expect(received.totalSearchDurationMs).toEqual(expected.totalSearchDurationMs);
+    expect(received.esSearchDurationMs).toEqual(expected.esSearchDurationMs);
+    expect(received.numberOfTriggeredActions).toEqual(expected.numberOfTriggeredActions);
+    expect(received.numberOfScheduledActions).toEqual(expected.numberOfScheduledActions);
+    expect(received.numberOfActiveAlerts).toEqual(expected.numberOfActiveAlerts);
+    expect(received.numberOfRecoveredAlerts).toEqual(expected.numberOfRecoveredAlerts);
+    expect(received.numberOfNewAlerts).toEqual(expected.numberOfNewAlerts);
+    expect(received.triggeredActionsStatus).toEqual(expected.triggeredActionsStatus);
+  }
+
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
-      const status = executionStatusFromState({
-        alertExecutionStore: {
-          numberOfTriggeredActions: 0,
-          numberOfScheduledActions: 0,
-          triggeredActionsStatus: ActionsCompletion.COMPLETE,
-        },
-      } as RuleExecutionState);
+      const { status, metrics } = executionStatusFromState(EMPTY_RULE_EXECUTION_STATE);
       checkDateIsNearNow(status.lastExecutionDate);
-      expect(status.numberOfTriggeredActions).toBe(0);
-      expect(status.numberOfScheduledActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
+
+      testExpectedMetrics(metrics, EMPTY_RULE_EXECUTION_METRICS);
     });
 
     test('task state with no instances', () => {
-      const status = executionStatusFromState({
+      const { status, metrics } = executionStatusFromState({
         alertInstances: {},
-        alertExecutionStore: {
-          numberOfTriggeredActions: 0,
-          numberOfScheduledActions: 0,
-          triggeredActionsStatus: ActionsCompletion.COMPLETE,
-        },
-        metrics,
+        metrics: executionMetrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
-      expect(status.numberOfTriggeredActions).toBe(0);
-      expect(status.numberOfScheduledActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
-      expect(status.metrics).toBe(metrics);
+
+      testExpectedMetrics(metrics, executionMetrics);
     });
 
     test('task state with one instance', () => {
-      const status = executionStatusFromState({
+      const { status, metrics } = executionStatusFromState({
         alertInstances: { a: {} },
-        alertExecutionStore: {
-          numberOfTriggeredActions: 0,
-          numberOfScheduledActions: 0,
-          triggeredActionsStatus: ActionsCompletion.COMPLETE,
-        },
-        metrics,
+        metrics: executionMetrics,
       });
       checkDateIsNearNow(status.lastExecutionDate);
-      expect(status.numberOfTriggeredActions).toBe(0);
-      expect(status.numberOfScheduledActions).toBe(0);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
-      expect(status.metrics).toBe(metrics);
-    });
 
-    test('task state with numberOfTriggeredActions', () => {
-      const status = executionStatusFromState({
-        alertExecutionStore: {
-          numberOfTriggeredActions: 1,
-          numberOfScheduledActions: 2,
-          triggeredActionsStatus: ActionsCompletion.COMPLETE,
-        },
-        alertInstances: { a: {} },
-        metrics,
-      });
-      checkDateIsNearNow(status.lastExecutionDate);
-      expect(status.numberOfTriggeredActions).toBe(1);
-      expect(status.numberOfScheduledActions).toBe(2);
-      expect(status.status).toBe('active');
-      expect(status.error).toBe(undefined);
-      expect(status.warning).toBe(undefined);
-      expect(status.metrics).toBe(metrics);
+      testExpectedMetrics(metrics, executionMetrics);
     });
 
     test('task state with warning', () => {
-      const status = executionStatusFromState({
+      const { status, metrics } = executionStatusFromState({
         alertInstances: { a: {} },
-        alertExecutionStore: {
-          numberOfTriggeredActions: 3,
-          triggeredActionsStatus: ActionsCompletion.PARTIAL,
-        },
-        metrics,
+        metrics: { ...executionMetrics, triggeredActionsStatus: ActionsCompletion.PARTIAL },
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.warning).toEqual({
@@ -119,12 +102,17 @@ describe('RuleExecutionStatus', () => {
       });
       expect(status.status).toBe('warning');
       expect(status.error).toBe(undefined);
+
+      testExpectedMetrics(metrics, {
+        ...executionMetrics,
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+      });
     });
   });
 
   describe('executionStatusFromError()', () => {
     test('error with no reason', () => {
-      const status = executionStatusFromError(new Error('boo!'));
+      const { status, metrics } = executionStatusFromError(new Error('boo!'));
       expect(status.status).toBe('error');
       expect(status.error).toMatchInlineSnapshot(`
         Object {
@@ -132,10 +120,12 @@ describe('RuleExecutionStatus', () => {
           "reason": "unknown",
         }
       `);
+
+      testExpectedMetrics(metrics, EMPTY_RULE_EXECUTION_METRICS);
     });
 
     test('error with a reason', () => {
-      const status = executionStatusFromError(
+      const { status, metrics } = executionStatusFromError(
         new ErrorWithReason(AlertExecutionStatusErrorReasons.Execute, new Error('hoo!'))
       );
       expect(status.status).toBe('error');
@@ -145,6 +135,8 @@ describe('RuleExecutionStatus', () => {
           "reason": "execute",
         }
       `);
+
+      testExpectedMetrics(metrics, EMPTY_RULE_EXECUTION_METRICS);
     });
   });
 
@@ -195,9 +187,12 @@ describe('RuleExecutionStatus', () => {
     `);
     });
 
-    test('status with a numberOfTriggeredActions', () => {
+    test('status with a alerts and actions counts', () => {
       expect(
-        ruleExecutionStatusToRaw({ lastExecutionDate: date, status, numberOfTriggeredActions: 5 })
+        ruleExecutionStatusToRaw({
+          lastExecutionDate: date,
+          status,
+        })
       ).toMatchInlineSnapshot(`
       Object {
         "error": null,
