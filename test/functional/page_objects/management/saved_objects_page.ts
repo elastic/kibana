@@ -57,7 +57,6 @@ export class SavedObjectsPageObject extends FtrService {
       shouldUseHashForSubUrl: false,
     });
     await this.waitTableIsLoaded();
-    const initialObjectCount = await this.getExportCount();
 
     await this.importFile(path);
 
