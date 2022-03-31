@@ -10,11 +10,13 @@
 import './jest.mocks';
 
 import React, { FunctionComponent } from 'react';
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { merge } from 'lodash';
 
-import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import {
+  notificationServiceMock,
+  uiSettingsServiceMock,
+  httpServiceMock,
+} from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
@@ -23,7 +25,7 @@ import { init as initHttpRequests } from './http_requests';
 import { fieldFormatsMock as fieldFormats } from '../../../../field_formats/common/mocks';
 import { FieldFormat } from '../../../../field_formats/common';
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
+const mockHttpClient = httpServiceMock.createStartContract();
 const dataStart = dataPluginMock.createStartContract();
 const { search } = dataStart;
 
@@ -61,7 +63,6 @@ search.search = spySearchQuery;
 let apiService: ApiService;
 
 export const setupEnvironment = () => {
-  // @ts-expect-error Axios does not fullfill HttpSetupn from core but enough for our tests
   apiService = initApi(mockHttpClient);
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

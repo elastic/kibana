@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import sinon, { SinonFakeServer } from 'sinon';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { API_BASE_PATH } from '../../../common/constants';
 
 type HttpResponse = Record<string, any> | any[];
 
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+) => {
   const setFieldPreviewResponse = (response?: HttpResponse, error?: any) => {
     const status = error ? error.body.status || 400 : 200;
     const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
