@@ -32,6 +32,41 @@ export class SavedObjectsPageObject extends FtrService {
     return await searchBox.getAttribute('value');
   }
 
+  async getExportCount() {
+    return await this.retry.tryForTime(10000, async () => {
+      const exportText = await this.testSubjects.getVisibleText('exportAllObjects');
+      const parts = exportText.trim().split(' ');
+      if (parts.length !== 3) {
+        throw new Error('text not loaded yet');
+      }
+      const count = Number.parseInt(parts[1], 10);
+      if (count === 0) {
+        throw new Error('text not loaded yet');
+      }
+      return count;
+    });
+  }
+
+  getSpacePrefix(spaceId: string) {
+    return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
+  }
+
+  async importIntoSpace(path: string, spaceId = 'default') {
+    await this.common.navigateToUrl('settings', 'kibana/objects', {
+      basePath: this.getSpacePrefix(spaceId),
+      shouldUseHashForSubUrl: false,
+    });
+    await this.waitTableIsLoaded();
+    const initialObjectCount = await this.getExportCount();
+
+    await this.importFile(path);
+
+    await this.checkImportSucceeded();
+    await this.clickImportDone();
+    await this.waitTableIsLoaded();
+    return await this.getExportCount();
+  }
+
   async importFile(path: string, overwriteAll = true) {
     this.log.debug(`importFile(${path})`);
 

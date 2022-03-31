@@ -29,43 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const renderService = getService('renderable');
   const kibanaServer = getService('kibanaServer');
 
-  const getExportCount = async () => {
-    return await retry.tryForTime(10000, async () => {
-      const exportText = await testSubjects.getVisibleText('exportAllObjects');
-      const parts = exportText.trim().split(' ');
-      if (parts.length !== 3) {
-        throw new Error('text not loaded yet');
-      }
-      const count = Number.parseInt(parts[1], 10);
-      if (count === 0) {
-        throw new Error('text not loaded yet');
-      }
-      return count;
-    });
-  };
-
   const getSpacePrefix = (spaceId: string) => {
     return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
-  };
-
-  const importIntoSpace = async (spaceId: string) => {
-    await PageObjects.common.navigateToUrl('settings', 'kibana/objects', {
-      basePath: getSpacePrefix(spaceId),
-      shouldUseHashForSubUrl: false,
-    });
-    await PageObjects.savedObjects.waitTableIsLoaded();
-    const initialObjectCount = await getExportCount();
-
-    await PageObjects.savedObjects.importFile(
-      path.join(__dirname, 'exports', '_8.0.0_multispace_import.ndjson')
-    );
-    await PageObjects.savedObjects.checkImportSucceeded();
-    await PageObjects.savedObjects.clickImportDone();
-    await PageObjects.savedObjects.waitTableIsLoaded();
-
-    const newObjectCount = await getExportCount();
-
-    expect(newObjectCount - initialObjectCount).to.eql(6);
   };
 
   const checkIfDashboardRendered = async (spaceId: string) => {
@@ -81,8 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await renderService.waitForRender(8);
 
     // There should be 0 error embeddables on the dashboard
-    const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
-    expect(errorEmbeddables.length).to.be(0);
+    await PageObjects.dashboard.verifyNoRenderErrors();
   };
 
   describe('should be able to handle multi-space imports correctly', function () {
@@ -109,14 +73,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('imported dashboard into default space should render correctly', async () => {
+      await PageObjects.settings.navigateTo();
+
+      await PageObjects.settings.clickKibanaSavedObjects();
+
+      const initialObjectCount = await PageObjects.savedObjects.getExportCount();
+
       const spaceId = 'default';
-      await importIntoSpace(spaceId);
+      const importFileName = '_8.0.0_multispace_import.ndjson';
+      const importFilePath = path.join(__dirname, 'exports', importFileName);
+
+      const newObjectCount = await PageObjects.savedObjects.importIntoSpace(
+        importFilePath,
+        spaceId
+      );
+
+      expect(newObjectCount - initialObjectCount).to.eql(6);
+
       await checkIfDashboardRendered(spaceId);
     });
 
     it('imported dashboard into another space should render correctly', async () => {
       const spaceId = 'another_space';
-      await importIntoSpace(spaceId);
+      await PageObjects.common.navigateToUrl('settings', 'kibana/objects', {
+        basePath: getSpacePrefix(spaceId),
+        shouldUseHashForSubUrl: false,
+      });
+
+      const initialObjectCount = await PageObjects.savedObjects.getExportCount();
+
+      const importFileName = '_8.0.0_multispace_import.ndjson';
+      const importFilePath = path.join(__dirname, 'exports', importFileName);
+
+      const newObjectCount = await PageObjects.savedObjects.importIntoSpace(
+        importFilePath,
+        spaceId
+      );
+      expect(newObjectCount - initialObjectCount).to.eql(6);
       await checkIfDashboardRendered(spaceId);
     });
 
@@ -127,15 +120,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         basePath: getSpacePrefix(spaceId),
         shouldUseHashForSubUrl: false,
       });
+
       await PageObjects.savedObjects.waitTableIsLoaded();
+
       await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject(
         'multi_space_import_8.0.0_export'
       );
+
       await PageObjects.copySavedObjectsToSpace.setupForm({
         createNewCopies: true,
         overwrite: false,
         destinationSpaceId,
       });
+
       await PageObjects.copySavedObjectsToSpace.startCopy();
       // Wait for successful copy
       await testSubjects.waitForDeleted(`cts-summary-indicator-loading-${destinationSpaceId}`);
