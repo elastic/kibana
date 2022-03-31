@@ -9,6 +9,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
+import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -128,6 +129,7 @@ export interface AlertingPluginsSetup {
   eventLog: IEventLogService;
   statusService: StatusServiceSetup;
   monitoringCollection: MonitoringCollectionSetup;
+  data: DataPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -235,12 +237,16 @@ export class AlertingPlugin {
     // Usage counter for telemetry
     this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
 
+    const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
+      plugins.data.search.searchSource
+    );
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.ruleTypeRegistry,
       this.logger,
-      plugins.actions.isPreconfiguredConnector
+      plugins.actions.isPreconfiguredConnector,
+      getSearchSourceMigrations
     );
 
     initializeApiKeyInvalidator(
