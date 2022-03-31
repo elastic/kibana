@@ -757,7 +757,7 @@ export interface NavigateToUrlOptions {
    */
   skipAppLeave?: boolean;
   /**
-   * if true, will redirect directly to the url
+   * if true will force a full page reload/refresh/assign, (effectively using `window.location.assign` instead of `push`)
    */
   forceRedirect?: boolean;
 }
@@ -801,7 +801,7 @@ export interface ApplicationStart {
    * - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
    *
    * Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.
-   * Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`
+   * Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`.
    *
    * @example
    * ```ts

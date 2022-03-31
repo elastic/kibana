@@ -1148,38 +1148,34 @@ describe('#start()', () => {
       });
 
       it('calls `redirectTo` when `forceRedirect` option is true', async () => {
-        parseAppUrlMock.mockReturnValue(undefined);
+        parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
         service.setup(setupDeps);
 
         const { navigateToUrl } = await service.start(startDeps);
 
-        await navigateToUrl('/not-an-app-path', { forceRedirect: true });
+        await navigateToUrl('/an-app-path', { forceRedirect: true });
 
         expect(addListenerSpy).toHaveBeenCalledTimes(1);
         expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
-        const handler = addListenerSpy.mock.calls[0][1];
 
+        expect(setupDeps.redirectTo).toHaveBeenCalledWith('/an-app-path');
         expect(MockHistory.push).not.toHaveBeenCalled();
-        expect(setupDeps.redirectTo).toHaveBeenCalledWith('/not-an-app-path');
-
-        expect(removeListenerSpy).toHaveBeenCalledTimes(1);
-        expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
       });
 
-      it('calls `redirectTo` when `forceRedirect` and `skipAppLeave` option are both true', async () => {
-        parseAppUrlMock.mockReturnValue(undefined);
+      it('removes the beforeunload listener and calls `redirectTo` when `forceRedirect` and `skipAppLeave` option are both true', async () => {
+        parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
         service.setup(setupDeps);
 
         const { navigateToUrl } = await service.start(startDeps);
 
-        await navigateToUrl('/not-an-app-path', { skipAppLeave: true, forceRedirect: true });
+        await navigateToUrl('/an-app-path', { skipAppLeave: true, forceRedirect: true });
 
         expect(addListenerSpy).toHaveBeenCalledTimes(1);
         expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
         const handler = addListenerSpy.mock.calls[0][1];
 
-        expect(MockHistory.push).not.toHaveBeenCalled();
-        expect(setupDeps.redirectTo).toHaveBeenCalledWith('/not-an-app-path');
+        expect(MockHistory.push).toHaveBeenCalledTimes(0);
+        expect(setupDeps.redirectTo).toHaveBeenCalledWith('/an-app-path');
 
         expect(removeListenerSpy).toHaveBeenCalledTimes(1);
         expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
