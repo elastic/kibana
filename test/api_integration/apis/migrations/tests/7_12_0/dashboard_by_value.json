@@ -1,0 +1,41 @@
+{
+  "doc": {
+    "attributes": {
+      "description": "",
+      "hits": 0,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+      },
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+      "panelsJSON": "[{\"version\":\"7.12.1\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"2d9004c0-e09f-4137-97b5-d8c34206b5c8\"},\"panelIndex\":\"2d9004c0-e09f-4137-97b5-d8c34206b5c8\",\"embeddableConfig\":{\"attributes\":{\"title\":\"\",\"type\":\"lens\",\"visualizationType\":\"lnsPie\",\"state\":{\"datasourceStates\":{\"indexpattern\":{\"layers\":{\"1226320c-075b-4249-919e-5ba9ad8484f7\":{\"columns\":{\"522121ad-fa5a-4cf8-ab74-13300cd9f028\":{\"label\":\"Top values of host.raw\",\"dataType\":\"string\",\"operationType\":\"terms\",\"scale\":\"ordinal\",\"sourceField\":\"host.raw\",\"isBucketed\":true,\"params\":{\"size\":5,\"orderBy\":{\"type\":\"column\",\"columnId\":\"899b68e1-21af-4ae3-b24d-ce73f80d9a85\"},\"orderDirection\":\"desc\",\"otherBucket\":true,\"missingBucket\":false}},\"899b68e1-21af-4ae3-b24d-ce73f80d9a85\":{\"label\":\"Count of records\",\"dataType\":\"number\",\"operationType\":\"count\",\"isBucketed\":false,\"scale\":\"ratio\",\"sourceField\":\"Records\"}},\"columnOrder\":[\"522121ad-fa5a-4cf8-ab74-13300cd9f028\",\"899b68e1-21af-4ae3-b24d-ce73f80d9a85\"],\"incompleteColumns\":{}}}}},\"visualization\":{\"shape\":\"donut\",\"layers\":[{\"layerId\":\"1226320c-075b-4249-919e-5ba9ad8484f7\",\"groups\":[\"522121ad-fa5a-4cf8-ab74-13300cd9f028\"],\"metric\":\"899b68e1-21af-4ae3-b24d-ce73f80d9a85\",\"numberDisplay\":\"percent\",\"categoryDisplay\":\"default\",\"legendDisplay\":\"default\",\"nestedLegend\":false}]},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[]},\"references\":[{\"type\":\"index-pattern\",\"id\":\"85c11c30-d289-11eb-8352-c92efb719a1a\",\"name\":\"indexpattern-datasource-current-indexpattern\"},{\"type\":\"index-pattern\",\"id\":\"85c11c30-d289-11eb-8352-c92efb719a1a\",\"name\":\"indexpattern-datasource-layer-1226320c-075b-4249-919e-5ba9ad8484f7\"}]},\"enhancements\":{\"dynamicActions\":{\"events\":[{\"eventId\":\"643b9946-352c-4350-9158-44b76f36231e\",\"triggers\":[\"FILTER_TRIGGER\"],\"action\":{\"name\":\"test\",\"config\":{\"useCurrentFilters\":true,\"useCurrentDateRange\":true},\"factoryId\":\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\"}}]}}}}]",
+      "timeRestore": false,
+      "title": "Dashboard 2 - Lens by value and drilldown",
+      "version": 1
+    },
+    "coreMigrationVersion": "7.12.1",
+    "id": "daf53e70-d289-11eb-8352-c92efb719a1a",
+    "migrationVersion": {
+      "dashboard": "7.11.0"
+    },
+    "references": [
+      {
+        "id": "85c11c30-d289-11eb-8352-c92efb719a1a",
+        "name": "indexpattern-datasource-current-indexpattern",
+        "type": "index-pattern"
+      },
+      {
+        "id": "85c11c30-d289-11eb-8352-c92efb719a1a",
+        "name": "indexpattern-datasource-layer-1226320c-075b-4249-919e-5ba9ad8484f7",
+        "type": "index-pattern"
+      },
+      {
+        "id": "bb402db0-d289-11eb-8352-c92efb719a1a",
+        "name": "drilldown:DASHBOARD_TO_DASHBOARD_DRILLDOWN:643b9946-352c-4350-9158-44b76f36231e:dashboardId",
+        "type": "dashboard"
+      }
+    ],
+    "type": "dashboard",
+    "updated_at": "2021-06-21T12:11:49.079Z",
+    "version": "WzEzNiwxXQ=="
+  }
+}
