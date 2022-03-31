@@ -6,23 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CommonProps, EuiCardProps } from '@elastic/eui';
-import { MouseEventHandler, ReactNode } from 'react';
+import { CommonProps } from '@elastic/eui';
+import { ElasticAgentCardProps } from './no_data_card';
 
-export type NoDataPageActions = Partial<EuiCardProps> & {
-  /**
-   * Provide just a string for the button's label, or a whole component
-   */
-  button?: string | ReactNode;
-  /**
-   * Remapping `onClick` to any element
-   */
-  onClick?: MouseEventHandler<HTMLElement>;
-  /**
-   * Category to auto-select within Fleet
-   */
-  category?: string;
-};
+export type NoDataPageActions = Omit<ElasticAgentCardProps, 'description'>;
 
 export interface NoDataPageProps extends CommonProps {
   /**

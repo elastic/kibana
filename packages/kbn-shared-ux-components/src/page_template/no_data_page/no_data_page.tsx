@@ -9,9 +9,12 @@
 import React, { useMemo, FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import classNames from 'classnames';
 import { ElasticAgentCard } from './no_data_card';
-import { NoDataPageBody } from './no_data_page_body';
 import { NoDataPageProps } from './types';
+import { KibanaSolutionAvatar } from '../../solution_avatar';
 
 export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   solution,
@@ -41,14 +44,33 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     });
 
   return (
-    <div {...rest}>
-      <NoDataPageBody
-        pageTitle={title}
-        actionCard={actionCard}
-        logo={logo}
-        solution={solution}
-        docsLink={docsLink}
-      />
+    <div className={classNames('kbnNoDataPageContents', rest.className)}>
+      <EuiText textAlign="center">
+        <KibanaSolutionAvatar name={solution} iconType={logo || `logo${solution}`} size="xxl" />
+        <EuiSpacer size="l" />
+        <h1>{title}</h1>
+        <EuiTextColor color="subdued">
+          <p>
+            <FormattedMessage
+              id="sharedUXComponents.noDataPage.intro"
+              defaultMessage="Add your data to get started, or {link} about {solution}."
+              values={{
+                solution,
+                link: (
+                  <EuiLink href={docsLink}>
+                    <FormattedMessage
+                      id="sharedUXComponents.noDataPage.intro.link"
+                      defaultMessage="learn more"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiTextColor>
+      </EuiText>
+      <EuiSpacer size="xxl" />
+      {actionCard}
     </div>
   );
 };
