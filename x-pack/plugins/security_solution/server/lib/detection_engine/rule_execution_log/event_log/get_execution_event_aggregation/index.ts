@@ -114,7 +114,7 @@ export const getExecutionEventAggregation = ({
         executionUuidSorted: {
           bucket_sort: {
             sort: formatSortForBucketSort(sort),
-            from: page * perPage,
+            from: (page - 1) * perPage,
             size: perPage,
             gap_policy: 'insert_zeros',
           },

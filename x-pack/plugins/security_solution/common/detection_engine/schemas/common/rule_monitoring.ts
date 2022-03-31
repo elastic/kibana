@@ -134,3 +134,15 @@ export const aggregateRuleExecutionEvent = t.type({
 });
 
 export type AggregateRuleExecutionEvent = t.TypeOf<typeof aggregateRuleExecutionEvent>;
+
+// TODO: Is there an io-ts variant of 'Pick', or corollary? Doesn't seem so? https://github.com/gcanti/io-ts/issues/300
+export const executionLogTableSortColumns = t.type({
+  timestamp: IsoDateString,
+  duration_ms: t.number,
+  gap_duration_ms: t.number,
+  indexing_duration_ms: t.number,
+  search_duration_ms: t.number,
+  schedule_delay_ms: t.number,
+});
+
+export type ExecutionLogTableSortColumns = t.TypeOf<typeof executionLogTableSortColumns>;

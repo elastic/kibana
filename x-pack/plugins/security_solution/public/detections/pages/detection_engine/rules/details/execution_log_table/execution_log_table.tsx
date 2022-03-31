@@ -7,7 +7,6 @@
 
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import { get } from 'lodash';
 import styled from 'styled-components';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
@@ -48,6 +47,10 @@ const UtilitySwitch = styled(EuiSwitch)`
   margin-left: 17px;
 `;
 
+const DatePickerEuiFlexItem = styled(EuiFlexItem)`
+  max-width: 582px;
+`;
+
 interface ExecutionLogTableProps {
   ruleId: string;
   selectAlertsTab: () => void;
@@ -74,13 +77,13 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   // Searchbar/Filter/Settings state
   const [queryText, setQueryText] = useState('');
-  const [statusFilters, setStatusFilters] = useState('');
+  const [statusFilters, setStatusFilters] = useState<string | undefined>(undefined);
   const [showMetricColumns, setShowMetricColumns] = useState<boolean>(
     storage.get(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY) ?? false
   );
 
   // Pagination state
-  const [pageIndex, setPageIndex] = useState(0);
+  const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState<keyof AggregateRuleExecutionEvent>('timestamp');
   const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
@@ -114,7 +117,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     const { index, size } = page;
     const { field, direction } = sort;
 
-    setPageIndex(index);
+    setPageIndex(index + 1);
     setPageSize(size);
     setSortField(field);
     setSortDirection(direction);
@@ -153,7 +156,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   }, []);
 
   const onStatusFilterChangeCallback = useCallback((updatedStatusFilters: string[]) => {
-    setStatusFilters(updatedStatusFilters.sort().join(','));
+    setStatusFilters(
+      updatedStatusFilters.length ? updatedStatusFilters.sort().join(',') : undefined
+    );
   }, []);
 
   const onFilterByExecutionIdCallback = useCallback(
@@ -222,10 +227,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             description: i18n.COLUMN_ACTIONS_TOOLTIP,
             icon: 'filter',
             type: 'icon',
-            onClick: (value: object) => {
-              const executionId = get(value, 'execution_uuid');
-              if (executionId) {
-                onFilterByExecutionIdCallback(executionId);
+            onClick: (executionEvent: AggregateRuleExecutionEvent) => {
+              if (executionEvent?.execution_uuid) {
+                onFilterByExecutionIdCallback(executionEvent.execution_uuid);
               }
             },
             'data-test-subj': 'action-filter-by-execution-id',
@@ -254,7 +258,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             onlyShowFilters={true}
           />
         </EuiFlexItem>
-        <EuiFlexItem style={{ maxWidth: '582px' }}>
+        <DatePickerEuiFlexItem>
           <EuiSuperDatePicker
             start={start}
             end={end}
@@ -267,7 +271,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             recentlyUsedRanges={recentlyUsedRanges}
             width="full"
           />
-        </EuiFlexItem>
+        </DatePickerEuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <UtilityBar>
@@ -282,8 +286,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             </UtilityBarText>
           </UtilityBarGroup>
           {maxEvents > MAX_EXECUTION_EVENTS_DISPLAYED && (
-            <UtilityBarGroup>
-              <UtilityBarText dataTestSubj="exceptionsShowing">
+            <UtilityBarGroup grow={true}>
+              <UtilityBarText dataTestSubj="exceptionsShowing" shouldWrap={true}>
                 <EuiTextColor color="danger">
                   {i18n.RULE_EXECUTION_LOG_SEARCH_LIMIT_EXCEEDED(
                     maxEvents,
