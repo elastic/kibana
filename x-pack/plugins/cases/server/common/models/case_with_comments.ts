@@ -188,17 +188,9 @@ export class CaseCommentModel {
     id: string;
   }): Promise<CaseCommentModel> {
     try {
-      this.validateCreateCommentRequest(commentReq);
+      this.validateCreateCommentRequest([commentReq]);
 
-      let references = this.buildRefsToCase();
-
-      if (commentReq.type === CommentType.user && commentReq?.comment) {
-        const commentStringReferences = getOrUpdateLensReferences(
-          this.params.lensEmbeddableFactory,
-          commentReq.comment
-        );
-        references = [...references, ...commentStringReferences];
-      }
+      const references = [...this.buildRefsToCase(), ...this.getCommentReferences(commentReq)];
 
       const [comment, commentableCase] = await Promise.all([
         this.params.attachmentService.create({
@@ -215,7 +207,7 @@ export class CaseCommentModel {
       ]);
 
       await Promise.all([
-        commentableCase.handleAlertComments(comment, commentReq),
+        commentableCase.handleAlertComments([comment]),
         this.createCommentUserAction(comment, commentReq),
       ]);
 
@@ -229,12 +221,15 @@ export class CaseCommentModel {
     }
   }
 
-  private validateCreateCommentRequest(req: CommentRequest) {
-    if (req.type === CommentType.alert && this.caseInfo.attributes.status === CaseStatuses.closed) {
+  private validateCreateCommentRequest(req: CommentRequest[]) {
+    if (
+      req.some((attachment) => attachment.type === CommentType.alert) &&
+      this.caseInfo.attributes.status === CaseStatuses.closed
+    ) {
       throw Boom.badRequest('Alert cannot be attached to a closed case');
     }
 
-    if (req.owner !== this.caseInfo.attributes.owner) {
+    if (req.some((attachment) => attachment.owner !== this.caseInfo.attributes.owner)) {
       throw Boom.badRequest('The owner field of the comment must match the case');
     }
   }
@@ -249,20 +244,39 @@ export class CaseCommentModel {
     ];
   }
 
-  private async handleAlertComments(comment: SavedObject<CommentAttributes>, req: CommentRequest) {
-    if (
-      comment.attributes.type === CommentType.alert &&
-      this.caseInfo.attributes.settings.syncAlerts
-    ) {
-      await this.updateAlertsStatus(req);
+  private getCommentReferences(commentReq: CommentRequest) {
+    let references: SavedObjectReference[] = [];
+
+    if (commentReq.type === CommentType.user && commentReq?.comment) {
+      const commentStringReferences = getOrUpdateLensReferences(
+        this.params.lensEmbeddableFactory,
+        commentReq.comment
+      );
+      references = [...references, ...commentStringReferences];
     }
+
+    return references;
   }
 
-  private async updateAlertsStatus(req: CommentRequest) {
-    const alertsToUpdate = createAlertUpdateRequest({
-      comment: req,
-      status: this.caseInfo.attributes.status,
-    });
+  private async handleAlertComments(attachments: Array<SavedObject<CommentAttributes>>) {
+    const alerts = attachments.filter(
+      (attachment) =>
+        attachment.attributes.type === CommentType.alert &&
+        this.caseInfo.attributes.settings.syncAlerts
+    );
+
+    await this.updateAlertsStatus(alerts);
+  }
+
+  private async updateAlertsStatus(alerts: Array<SavedObject<CommentAttributes>>) {
+    const alertsToUpdate = alerts
+      .map((alert) =>
+        createAlertUpdateRequest({
+          comment: alert.attributes,
+          status: this.caseInfo.attributes.status,
+        })
+      )
+      .flat();
 
     await this.params.alertsService.updateAlertsStatus(alertsToUpdate);
   }
@@ -282,6 +296,19 @@ export class CaseCommentModel {
       },
       user: this.params.user,
       owner: comment.attributes.owner,
+    });
+  }
+
+  private async bulkCreateCommentUserAction(attachments: Array<SavedObject<CommentAttributes>>) {
+    await this.params.userActionService.bulkCreateAttachmentCreation({
+      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
+      caseId: this.caseInfo.id,
+      attachments: attachments.map((attachment) => ({
+        id: attachment.id,
+        owner: attachment.attributes.owner,
+        attachment: attachment.attributes,
+      })),
+      user: this.params.user,
     });
   }
 
@@ -317,6 +344,54 @@ export class CaseCommentModel {
     } catch (error) {
       throw createCaseError({
         message: `Failed encoding the commentable case, case id: ${this.caseInfo.id}: ${error}`,
+        error,
+        logger: this.params.logger,
+      });
+    }
+  }
+  public async bulkCreate({
+    createdDate,
+    attachments,
+  }: {
+    createdDate: string;
+    attachments: Array<{ id: string } & CommentRequest>;
+  }): Promise<CaseCommentModel> {
+    try {
+      this.validateCreateCommentRequest([...attachments.values()]);
+
+      const caseReference = this.buildRefsToCase();
+
+      const [newlyCreatedAttachments, commentableCase] = await Promise.all([
+        this.params.attachmentService.bulkCreate({
+          unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
+          attachments: attachments.map(({ id, ...attachment }) => {
+            return {
+              attributes: transformNewComment({
+                createdDate,
+                ...attachment,
+                ...this.params.user,
+              }),
+              references: [...caseReference, ...this.getCommentReferences(attachment)],
+              id,
+            };
+          }),
+        }),
+        this.updateCaseUserAndDate(createdDate),
+      ]);
+
+      const attachmentsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(
+        (attachment) => attachment.error == null
+      );
+
+      await Promise.all([
+        commentableCase.handleAlertComments(attachmentsWithoutErrors),
+        this.bulkCreateCommentUserAction(attachmentsWithoutErrors),
+      ]);
+
+      return commentableCase;
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed bulk creating attachments on a commentable case, case id: ${this.caseInfo.id}: ${error}`,
         error,
         logger: this.params.logger,
       });

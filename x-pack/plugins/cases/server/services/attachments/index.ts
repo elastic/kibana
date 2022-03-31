@@ -52,7 +52,11 @@ interface CreateAttachmentArgs extends ClientArgs {
 }
 
 interface BulkCreateAttachments extends ClientArgs {
-  attachments: Array<{ attributes: AttachmentAttributes; references: SavedObjectReference[] }>;
+  attachments: Array<{
+    attributes: AttachmentAttributes;
+    references: SavedObjectReference[];
+    id: string;
+  }>;
 }
 
 interface UpdateArgs {
