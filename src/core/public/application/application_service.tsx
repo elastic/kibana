@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, Subject, Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
@@ -97,7 +97,7 @@ export class ApplicationService {
   private currentActionMenu$ = new BehaviorSubject<MountPoint | undefined>(undefined);
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
   private readonly subscriptions: Subscription[] = [];
-  private stop$ = new Subject();
+  private stop$ = new Subject<void>();
   private registrationClosed = false;
   private history?: History<any>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
@@ -118,7 +118,7 @@ export class ApplicationService {
       createBrowserHistory({
         basename,
         getUserConfirmation: getUserConfirmationHandler({
-          overlayPromise: this.overlayStart$.pipe(take(1)).toPromise(),
+          overlayPromise: firstValueFrom(this.overlayStart$.pipe(take(1))),
         }),
       });
 

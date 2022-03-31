@@ -13,8 +13,8 @@ import {
 } from './application_service.test.mocks';
 
 import { createElement } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { bufferCount, take, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
+import { bufferCount, takeUntil } from 'rxjs/operators';
 import { mount, shallow } from 'enzyme';
 
 import { httpServiceMock } from '../http/http_service.mock';
@@ -86,7 +86,7 @@ describe('#setup()', () => {
       );
       const { applications$ } = await service.start(startDeps);
 
-      let applications = await applications$.pipe(take(1)).toPromise();
+      let applications = await firstValueFrom(applications$);
       expect(applications.size).toEqual(2);
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
@@ -115,7 +115,7 @@ describe('#setup()', () => {
         deepLinks: [{ id: 'subapp2', title: 'Subapp 2', path: '/subapp2' }],
       }));
 
-      applications = await applications$.pipe(take(1)).toPromise();
+      applications = await firstValueFrom(applications$);
       expect(applications.size).toEqual(2);
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
@@ -195,7 +195,7 @@ describe('#setup()', () => {
         })
       );
       const start = await service.start(startDeps);
-      const applications = await start.applications$.pipe(take(1)).toPromise();
+      const applications = await firstValueFrom(start.applications$);
 
       expect(applications.size).toEqual(2);
       expect(applications.get('app1')).toEqual(
@@ -242,7 +242,7 @@ describe('#setup()', () => {
       );
 
       const { applications$ } = await service.start(startDeps);
-      const applications = await applications$.pipe(take(1)).toPromise();
+      const applications = await firstValueFrom(applications$);
 
       expect(applications.size).toEqual(2);
       expect(applications.get('app1')).toEqual(
@@ -285,7 +285,7 @@ describe('#setup()', () => {
       );
 
       const start = await service.start(startDeps);
-      const applications = await start.applications$.pipe(take(1)).toPromise();
+      const applications = await firstValueFrom(start.applications$);
 
       expect(applications.size).toEqual(1);
       expect(applications.get('app1')).toEqual(
@@ -400,7 +400,7 @@ describe('#setup()', () => {
 
       updater$.next((app) => ({ defaultPath: '/foo' }));
 
-      let appInfos = await applications$.pipe(take(1)).toPromise();
+      let appInfos = await firstValueFrom(applications$);
 
       expect(appInfos.get('app1')!.deepLinks).toEqual([
         {
@@ -435,7 +435,7 @@ describe('#setup()', () => {
         ],
       }));
 
-      appInfos = await applications$.pipe(take(1)).toPromise();
+      appInfos = await firstValueFrom(applications$);
 
       expect(appInfos.get('app1')!.deepLinks).toEqual([
         {
@@ -486,7 +486,7 @@ describe('#start()', () => {
     register(Symbol(), createApp({ id: 'app2' }));
 
     const { applications$ } = await service.start(startDeps);
-    const availableApps = await applications$.pipe(take(1)).toPromise();
+    const availableApps = await firstValueFrom(applications$);
 
     expect(availableApps.size).toEqual(2);
     expect([...availableApps.keys()]).toEqual(['app1', 'app2']);
@@ -538,7 +538,7 @@ describe('#start()', () => {
     register(Symbol(), createApp({ id: 'app2' }));
 
     const { applications$ } = await service.start(startDeps);
-    const availableApps = await applications$.pipe(take(1)).toPromise();
+    const availableApps = await firstValueFrom(applications$);
 
     expect([...availableApps.keys()]).toEqual(['app1']);
   });
@@ -792,7 +792,7 @@ describe('#start()', () => {
       service.setup(setupDeps);
 
       const { currentAppId$, navigateToApp } = await service.start(startDeps);
-      const stop$ = new Subject();
+      const stop$ = new Subject<void>();
       const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
 
       await navigateToApp('alpha');
@@ -817,7 +817,7 @@ describe('#start()', () => {
       service.setup(setupDeps);
 
       const { currentAppId$, navigateToApp } = await service.start(startDeps);
-      const stop$ = new Subject();
+      const stop$ = new Subject<void>();
       const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
 
       await navigateToApp('delta', { openInNewTab: true });
@@ -861,7 +861,7 @@ describe('#start()', () => {
 
       const { navigateToApp, getComponent } = await service.start(startDeps);
       const httpLoadingCount$ = startDeps.http.addLoadingCountSource.mock.calls[0][0];
-      const stop$ = new Subject();
+      const stop$ = new Subject<void>();
       const currentLoadingCount$ = new BehaviorSubject(0);
       httpLoadingCount$.pipe(takeUntil(stop$)).subscribe(currentLoadingCount$);
       const loadingPromise = httpLoadingCount$.pipe(bufferCount(5), takeUntil(stop$)).toPromise();
