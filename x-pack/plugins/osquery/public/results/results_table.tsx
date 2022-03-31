@@ -371,6 +371,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         // @ts-expect-error update types
         <DataContext.Provider value={allResultsData?.edges}>
           <EuiDataGrid
+            data-test-subj="osqueryResultsTable"
             aria-label="Osquery results"
             columns={columns}
             columnVisibility={columnVisibility}

@@ -17,6 +17,7 @@ import {
 import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
+import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
 describe('Alert Event Details', () => {
   before(() => {
@@ -61,6 +62,9 @@ describe('Alert Event Details', () => {
     inputQuery('select * from uptime;');
     submitQuery();
     checkResults();
+    cy.getBySel(RESULTS_TABLE).within(() => {
+      cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
+    });
     cy.contains('Save for later').click();
     cy.contains('Save query');
     cy.contains(/^Save$/);
