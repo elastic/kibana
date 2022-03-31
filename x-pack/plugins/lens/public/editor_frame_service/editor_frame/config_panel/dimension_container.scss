@@ -46,3 +46,15 @@
 .lnsBody--overflowHidden {
   overflow: hidden;
 }
+
+.lnsLayerAddButton:hover {
+  text-decoration: none;
+
+  .lnsLayerAddButtonLabel {
+    text-decoration: underline;
+  }
+}
+
+.lnsLayerAddButtonTechBadge {
+  cursor: pointer;
+}
