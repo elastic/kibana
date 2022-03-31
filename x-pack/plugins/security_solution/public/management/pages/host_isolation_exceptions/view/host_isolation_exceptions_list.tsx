@@ -11,6 +11,7 @@ import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions_api_client';
+import { SEARCHABLE_FIELDS } from '../constants';
 
 const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object.freeze({
   pageTitle: i18n.translate('xpack.securitySolution.hostIsolationExceptions.pageTitle', {
@@ -118,6 +119,7 @@ export const HostIsolationExceptionsList = memo(() => {
       ArtifactFormComponent={TempForm}
       labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
       data-test-subj="hostIsolationExceptionsListPage"
+      searchableFields={SEARCHABLE_FIELDS}
     />
   );
 });
