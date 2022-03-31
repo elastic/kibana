@@ -14,9 +14,11 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import { getRemoteRoutePaths } from '../../common';
+import { StackTraceID } from '../../common/profiling';
+import { findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
 import { autoHistogramSumCountOnGroupByField, newProjectTimeQuery } from './mappings';
-import { findDownsampledIndex } from './downsampling';
+
 
 export async function topNElasticSearchQuery(
   context: DataRequestHandlerContext,
@@ -41,7 +43,7 @@ export async function topNElasticSearchQuery(
     }
   );
 
-  const resTopNStackTraces = await logExecutionLatency(
+  const resEvents = await logExecutionLatency(
     logger,
     'query to fetch events from ' + eventsIndex.name,
     async () => {
@@ -57,38 +59,43 @@ export async function topNElasticSearchQuery(
     }
   );
 
+  let totalCount = 0;
+  const stackTraceEvents = new Set<StackTraceID>();
+
+  (
+    resEvents.body.aggregations?.histogram as AggregationsHistogramAggregate
+  ).buckets.forEach((timeInterval: AggregationsHistogramBucket) => {
+    totalCount += timeInterval.doc_count;
+    timeInterval.group_by.buckets.forEach((stackTraceItem: AggregationsStringTermsBucket) => {
+      stackTraceEvents.add(stackTraceItem.key);
+    });
+  });
+
+  logger.info('events total count: ' + totalCount);
+  logger.info('unique stacktraces: ' + stackTraceEvents.size);
+
   if (searchField !== 'StackTraceID') {
     return response.ok({
       body: {
-        topN: resTopNStackTraces.body.aggregations,
+        topN: resEvents.body.aggregations,
       },
     });
   }
 
-  const docIDs: string[] = [];
-
-  (
-    resTopNStackTraces.body.aggregations?.histogram as AggregationsHistogramAggregate
-  ).buckets.forEach((timeInterval: AggregationsHistogramBucket) => {
-    timeInterval.group_by.buckets.forEach((stackTraceItem: AggregationsStringTermsBucket) => {
-      docIDs.push(stackTraceItem.key);
-    });
-  });
-
   const resTraceMetadata = await logExecutionLatency(
     logger,
-    'query for ' + docIDs.length + ' stacktraces',
+    'query for ' + stackTraceEvents.size + ' stacktraces',
     async () => {
       return await esClient.mget({
         index: 'profiling-stacktraces',
-        body: { ids: docIDs },
+        body: { ids: [...stackTraceEvents] },
       });
     }
   );
 
   return response.ok({
     body: {
-      topN: resTopNStackTraces.body.aggregations,
+      topN: resEvents.body.aggregations,
       traceMetadata: resTraceMetadata.body.docs,
     },
   });
