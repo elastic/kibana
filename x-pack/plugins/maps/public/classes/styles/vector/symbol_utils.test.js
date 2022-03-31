@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { getMakiSymbolSvg, styleSvg } from './symbol_utils';
+import { getMakiSymbol, styleSvg } from './symbol_utils';
 
-describe('getMakiSymbolSvg', () => {
-  it('Should load symbol svg', () => {
-    const svgString = getMakiSymbolSvg('aerialway');
-    expect(svgString.length).toBe(624);
+describe('getMakiSymbol', () => {
+  it('Should load symbol', () => {
+    const symbol = getMakiSymbol('aerialway');
+    expect(symbol.svg.length).toBe(624);
+    expect(symbol.label).toBe('Aerialway');
   });
 });
 

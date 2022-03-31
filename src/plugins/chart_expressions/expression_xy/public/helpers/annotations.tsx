@@ -76,7 +76,11 @@ export function MarkerBody({
   }
   if (isHorizontal) {
     return (
-      <div className="eui-textTruncate" style={{ maxWidth: LINES_MARKER_SIZE * 3 }}>
+      <div
+        className="eui-textTruncate"
+        style={{ maxWidth: LINES_MARKER_SIZE * 3 }}
+        data-test-subj="xyVisAnnotationText"
+      >
         {label}
       </div>
     );
@@ -84,6 +88,7 @@ export function MarkerBody({
   return (
     <div
       className="xyDecorationRotatedWrapper"
+      data-test-subj="xyVisAnnotationText"
       style={{
         width: LINES_MARKER_SIZE,
       }}
@@ -105,6 +110,7 @@ function NumberIcon({ number }: { number: number }) {
     <EuiFlexGroup
       justifyContent="spaceAround"
       className="xyAnnotationNumberIcon"
+      data-test-subj="xyVisGroupedAnnotationIcon"
       gutterSize="none"
       alignItems="center"
     >
@@ -139,6 +145,7 @@ export const AnnotationIcon = ({
   return (
     <EuiIcon
       {...rest}
+      data-test-subj="xyVisAnnotationIcon"
       type={iconConfig.icon || type}
       className={classnames(
         { [rotateClassName]: iconConfig.shouldRotate },
