@@ -12,7 +12,8 @@ export default async function clearAllApiKeys(esClient: Client, logger: ToolingL
   const existingKeys = await esClient.security.queryApiKeys();
   if (existingKeys.count > 0) {
     await Promise.all(
-      existingKeys.api_keys.map(async (key) => {
+      // The type for key is not available yet. Using any for the time being.
+      existingKeys.api_keys.map(async (key: any) => {
         esClient.security.invalidateApiKey({ ids: [key.id] });
       })
     );
