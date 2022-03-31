@@ -18,16 +18,15 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   let remoteEsArchiver;
 
   describe('lens app', () => {
+    const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
     const localFixtures = {
-      esArchive: 'x-pack/test/functional/es_archives/logstash_functional',
       lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json',
       lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/default',
     };
 
     const remoteFixtures = {
-      esArchive: 'x-pack/test/functional/es_archives/logstash_functional',
       lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/lens_basic.json',
       lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/default',
     };
@@ -52,9 +51,8 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
         fixtureDirs = localFixtures;
         indexPatternString = localIndexPatternString;
       }
-      await log.debug(fixtureDirs);
-      await log.debug(esNode);
-      await esNode.load(fixtureDirs.esArchive);
+
+      await esNode.load(esArchive);
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
