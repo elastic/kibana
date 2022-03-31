@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
+import React from 'react';
+import { HttpSetup } from 'src/core/public';
 
 import { init as initHttpRequests } from './http_requests';
+import { mockContextValue } from './app_context.mock';
+import { AppContextProvider } from '../../../public/application/app_context';
 import { setHttpClient, setSavedObjectsClient } from '../../../public/application/lib/api';
-
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-mockHttpClient.interceptors.response.use(
-  (res) => {
-    return res.data;
-  },
-  (rej) => {
-    return Promise.reject(rej);
-  }
-);
 
 const mockSavedObjectsClient = () => {
   return {
@@ -27,16 +19,19 @@ const mockSavedObjectsClient = () => {
   };
 };
 
+export const WithAppDependencies =
+  (Component: any, httpSetup: HttpSetup) => (props: Record<string, unknown>) => {
+    setHttpClient(httpSetup);
+
+    return (
+      <AppContextProvider value={mockContextValue}>
+        <Component {...props} />
+      </AppContextProvider>
+    );
+  };
+
 export const setupEnvironment = () => {
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
-
-  // @ts-ignore
-  setHttpClient(mockHttpClient);
-
   setSavedObjectsClient(mockSavedObjectsClient() as any);
 
-  return {
-    server,
-    httpRequestsMockHelpers,
-  };
+  return initHttpRequests();
 };
