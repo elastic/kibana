@@ -143,19 +143,19 @@ export default function ({ getService }: FtrProviderContext) {
       it('overwrites existing default log view', async () => {
         const oldestLogViewAttributes: Partial<LogViewAttributes> = {
           name: 'Oldest Log View 1',
-          description: 'Test Description 1',
+          description: 'Oldest Description 1',
           logIndices: { type: 'data_view', dataViewId: 'NONEXISTENT_DATA_VIEW' },
           logColumns: [],
         };
         const newerLogViewAttributes: Partial<LogViewAttributes> = {
           name: 'Newer Log View 1',
-          description: 'Test Description 1',
+          description: 'Newer Description 1',
           logIndices: { type: 'data_view', dataViewId: 'NONEXISTENT_DATA_VIEW' },
           logColumns: [],
         };
-        const changedLogViewAttributes: Partial<LogViewAttributes> = {
-          name: 'Test Log View 1A',
-          description: 'Test Description 1A',
+        const newestLogViewAttributes: Partial<LogViewAttributes> = {
+          name: 'Newest Log View 1A',
+          description: 'Newest Description 1A',
           logIndices: { type: 'data_view', dataViewId: 'NONEXISTENT_DATA_VIEW_A' },
           logColumns: [{ timestampColumn: { id: 'TIMESTAMP_COLUMN' } }],
         };
@@ -165,6 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
           attributes: oldestLogViewAttributes,
         });
 
+        // check that it's interpreted as the default view
         const fetchedOldestLogView = await logViewsService.getLogView(defaultLogViewId);
 
         expect(oldestStoredLogView).to.eql(fetchedOldestLogView);
@@ -176,14 +177,23 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(newerStoredLogView.data.attributes).to.eql(newerLogViewAttributes);
 
-        const changedStoredLogView = await logViewsService.putLogView(defaultLogViewId, {
-          attributes: changedLogViewAttributes,
+        // this update should change the newer view
+        const newestStoredLogView = await logViewsService.putLogView(defaultLogViewId, {
+          attributes: newestLogViewAttributes,
         });
 
-        expect(changedStoredLogView.data.attributes).to.eql(changedLogViewAttributes);
+        expect(newestStoredLogView.data.attributes).to.eql(newestLogViewAttributes);
 
         // check that default id translation works
-        expect(newerStoredLogView.data.id).to.eql(changedStoredLogView.data.id);
+        expect(newerStoredLogView.data.id).to.eql(newestStoredLogView.data.id);
+
+        // check that the oldest view is unchanged
+        const refetchedOldestLogView = await logViewsService.getLogView('OLDEST_LOG_VIEW_ID');
+        expect(refetchedOldestLogView).to.eql(fetchedOldestLogView);
+
+        // check that the newer view has been changed
+        const refetchedNewerLogView = await logViewsService.getLogView('NEWER_LOG_VIEW_ID');
+        expect(refetchedNewerLogView).to.eql(newestStoredLogView);
       });
     });
   });
