@@ -268,6 +268,7 @@ export type {
   PluginName,
   SharedGlobalConfig,
   MakeUsageFromSchema,
+  ExposedToBrowserDescriptor,
 } from './plugins';
 
 export {
