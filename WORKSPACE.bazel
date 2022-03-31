@@ -58,7 +58,6 @@ yarn_install(
   data = [
     "//:.yarnrc",
     "//:preinstall_check.js",
-    "//:node_modules/.yarn-integrity",
   ],
   exports_directories_only = True,
   symlink_node_modules = True,

@@ -12,7 +12,7 @@ import loadJsonFile from 'load-json-file';
 export interface KibanaPlatformPlugin {
   readonly directory: string;
   readonly manifestPath: string;
-  readonly manifest: Manifest;
+  readonly manifest: KibanaPlatformPluginManifest;
 }
 
 function isValidDepsDeclaration(input: unknown, type: string): string[] {
@@ -23,7 +23,7 @@ function isValidDepsDeclaration(input: unknown, type: string): string[] {
   throw new TypeError(`The "${type}" in plugin manifest should be an array of strings.`);
 }
 
-interface Manifest {
+export interface KibanaPlatformPluginManifest {
   id: string;
   ui: boolean;
   server: boolean;
@@ -50,7 +50,7 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
     throw new TypeError('expected new platform manifest path to be absolute');
   }
 
-  const manifest: Partial<Manifest> = loadJsonFile.sync(manifestPath);
+  const manifest: Partial<KibanaPlatformPluginManifest> = loadJsonFile.sync(manifestPath);
   if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
     throw new TypeError('expected new platform plugin manifest to be a JSON encoded object');
   }

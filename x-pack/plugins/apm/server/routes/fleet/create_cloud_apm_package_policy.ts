@@ -22,6 +22,7 @@ import {
 import { getApmPackagePolicyDefinition } from './get_apm_package_policy_definition';
 import { Setup } from '../../lib/helpers/setup_request';
 import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
+import { ELASTIC_CLOUD_APM_AGENT_POLICY_ID } from '../../../common/fleet';
 
 export async function createCloudApmPackgePolicy({
   cloudPluginSetup,
@@ -64,7 +65,7 @@ export async function createCloudApmPackgePolicy({
     savedObjectsClient,
     esClient,
     mergedAPMPackagePolicy,
-    { force: true, bumpRevision: true }
+    { id: ELASTIC_CLOUD_APM_AGENT_POLICY_ID, force: true, bumpRevision: true }
   );
   logger.info(`Fleet migration on Cloud - apmPackagePolicy create end`);
   return apmPackagePolicy;

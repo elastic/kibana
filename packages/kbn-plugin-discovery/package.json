@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/plugin-discovery",
+  "private": true,
+  "version": "1.0.0",
+  "main": "./target_node/index.js",
+  "license": "SSPL-1.0 OR Elastic License 2.0"
+}

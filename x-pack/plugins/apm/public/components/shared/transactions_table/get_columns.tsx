@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
@@ -17,16 +22,15 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { ImpactBar } from '../impact_bar';
-import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
-import { ListMetric } from '../list_metric';
-import { ITableColumn } from '../managed_table';
-import { TruncateWithTooltip } from '../truncate_with_tooltip';
-import { getLatencyColumnLabel } from './get_latency_column_label';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../charts/helper/get_timeseries_color';
+import { ImpactBar } from '../impact_bar';
+import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
+import { ListMetric } from '../list_metric';
+import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { getLatencyColumnLabel } from './get_latency_column_label';
 
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -51,7 +55,7 @@ export function getColumns({
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
   comparisonType?: TimeRangeComparisonType;
-}): Array<ITableColumn<ServiceTransactionGroupItem>> {
+}): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
       field: 'name',
