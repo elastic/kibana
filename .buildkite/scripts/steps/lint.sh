@@ -9,7 +9,19 @@ source .buildkite/scripts/common/util.sh
 echo '--- Lint: stylelint'
 checks-reporter-with-killswitch "Lint: stylelint" \
   node scripts/stylelint
+echo "stylelint ✅"
 
 echo '--- Lint: eslint'
-checks-reporter-with-killswitch "Lint: eslint" \
-  node scripts/eslint --no-cache
+# run eslint in a subshell so that we can record it's exit value and react accordingly after possibly
+# commiting changes caused by --fix
+(checks-reporter-with-killswitch "Lint: eslint" \
+  node scripts/eslint --no-cache --fix)
+
+eslint_exit=$?
+
+check_for_changed_files 'node scripts/eslint --no-cache --fix' true
+
+if [[ "${eslint_exit}" != "0" ]]; then
+  exit 1
+fi
+echo "eslint ✅"
