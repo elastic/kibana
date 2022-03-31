@@ -12,15 +12,15 @@ import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_coll
 
 describe('KibanaPageTemplateSolutionNavCollapseButton', () => {
   test('renders', () => {
-    const component = shallow(<KibanaPageTemplateSolutionNavCollapseButton collapsed={false} />);
+    const component = shallow(<KibanaPageTemplateSolutionNavCollapseButton isCollapsed={false} />);
     expect(component).toMatchSnapshot();
     expect(component.find('.kbnPageTemplateSolutionNavCollapseButton').prop('title')).toBe(
       'Collapse side navigation'
     );
   });
 
-  test('collapsed', () => {
-    const component = shallow(<KibanaPageTemplateSolutionNavCollapseButton collapsed={true} />);
+  test('isCollapsed', () => {
+    const component = shallow(<KibanaPageTemplateSolutionNavCollapseButton isCollapsed={true} />);
     expect(component).toMatchSnapshot();
     expect(component.find('.kbnPageTemplateSolutionNavCollapseButton').prop('title')).toBe(
       'Open side navigation'

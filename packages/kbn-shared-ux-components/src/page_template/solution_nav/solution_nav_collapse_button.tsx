@@ -18,7 +18,7 @@ export type KibanaPageTemplateSolutionNavCollapseButtonProps =
     /**
      * Boolean state of current collapsed status
      */
-    collapsed: boolean;
+    isCollapsed: boolean;
   };
 
 const collapseLabel = i18n.translate('sharedUXComponents.solutionNav.collapsibleLabel', {
@@ -34,13 +34,13 @@ const openLabel = i18n.translate('sharedUXComponents.solutionNav.openLabel', {
  */
 export const KibanaPageTemplateSolutionNavCollapseButton = ({
   className,
-  collapsed,
+  isCollapsed,
   ...rest
 }: KibanaPageTemplateSolutionNavCollapseButtonProps) => {
   const classes = classNames(
     'kbnPageTemplateSolutionNavCollapseButton',
     {
-      'kbnPageTemplateSolutionNavCollapseButton-isCollapsed': collapsed,
+      'kbnPageTemplateSolutionNavCollapseButton-isCollapsed': isCollapsed,
     },
     className
   );
@@ -50,9 +50,9 @@ export const KibanaPageTemplateSolutionNavCollapseButton = ({
       className={classes}
       size="s"
       color="text"
-      iconType={collapsed ? 'menuRight' : 'menuLeft'}
-      aria-label={collapsed ? openLabel : collapseLabel}
-      title={collapsed ? openLabel : collapseLabel}
+      iconType={isCollapsed ? 'menuRight' : 'menuLeft'}
+      aria-label={isCollapsed ? openLabel : collapseLabel}
+      title={isCollapsed ? openLabel : collapseLabel}
       {...rest}
     />
   );

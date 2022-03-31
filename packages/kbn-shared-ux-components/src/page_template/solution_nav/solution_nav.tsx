@@ -150,7 +150,7 @@ export const KibanaPageTemplateSolutionNav = ({
             </EuiFlyout>
           )}
           <KibanaPageTemplateSolutionNavCollapseButton
-            collapsed={true}
+            isCollapsed={true}
             onClick={toggleOpenOnMobile}
           />
         </>
@@ -159,7 +159,7 @@ export const KibanaPageTemplateSolutionNav = ({
         <>
           {sideNav()}
           <KibanaPageTemplateSolutionNavCollapseButton
-            collapsed={!isOpenOnDesktop}
+            isCollapsed={!isOpenOnDesktop}
             onClick={onCollapse}
           />
         </>

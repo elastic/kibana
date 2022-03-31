@@ -11,6 +11,17 @@ exports[`KibanaPageTemplateSolutionNavCollapseButton collapsed 1`] = `
 />
 `;
 
+exports[`KibanaPageTemplateSolutionNavCollapseButton isCollapsed 1`] = `
+<EuiButtonIcon
+  aria-label="Open side navigation"
+  className="kbnPageTemplateSolutionNavCollapseButton kbnPageTemplateSolutionNavCollapseButton-isCollapsed"
+  color="text"
+  iconType="menuRight"
+  size="s"
+  title="Open side navigation"
+/>
+`;
+
 exports[`KibanaPageTemplateSolutionNavCollapseButton renders 1`] = `
 <EuiButtonIcon
   aria-label="Collapse side navigation"
