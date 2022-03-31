@@ -110,11 +110,11 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object
 
 export const HostIsolationExceptionsList = memo(() => {
   const http = useHttp();
-  const hostIsolationExceptionsApiClient = HostIsolationExceptionsApiClient.getInstance(http);
+  const apiClient = HostIsolationExceptionsApiClient.getInstance(http);
 
   return (
     <ArtifactListPage
-      apiClient={hostIsolationExceptionsApiClient}
+      apiClient={apiClient}
       ArtifactFormComponent={HostIsolationExceptionsForm}
       labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
       data-test-subj="hostIsolationExceptionsListPage"

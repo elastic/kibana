@@ -51,7 +51,7 @@ interface ExceptionIpEntry {
 }
 
 export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
-  ({ item: exception, onChange, policies, mode, error }) => {
+  ({ item: exception, onChange, policies, disabled, mode, error }) => {
     const ipEntry = useMemo(() => {
       return (
         (exception.entries[0] as ExceptionIpEntry) || createEmptyHostIsolationException().entries[0]
@@ -155,6 +155,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           fullWidth
           isInvalid={hasNameError && hasBeenInputNameVisited}
           error={NAME_ERROR}
+          isDisabled={disabled}
         >
           <EuiFieldText
             id="eventFiltersFormInputName"
@@ -167,10 +168,11 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
             maxLength={256}
             data-test-subj="hostIsolationExceptions-form-name-input"
             onBlur={() => !hasBeenInputNameVisited && setHasBeenInputNameVisited(true)}
+            disabled={disabled}
           />
         </EuiFormRow>
       ),
-      [exception.name, handleOnChangeName, hasBeenInputNameVisited, hasNameError]
+      [disabled, exception.name, handleOnChangeName, hasBeenInputNameVisited, hasNameError]
     );
 
     const ipInput = useMemo(
@@ -180,6 +182,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           fullWidth
           isInvalid={hasIpError && hasBeenInputIpVisited}
           error={IP_ERROR}
+          isDisabled={disabled}
         >
           <EuiFieldText
             id="eventFiltersFormInputName"
@@ -192,15 +195,16 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
             maxLength={256}
             data-test-subj="hostIsolationExceptions-form-ip-input"
             onBlur={() => !hasBeenInputIpVisited && setHasBeenInputIpVisited(true)}
+            disabled={disabled}
           />
         </EuiFormRow>
       ),
-      [exception.entries, handleOnIpChange, hasBeenInputIpVisited, hasIpError]
+      [disabled, exception.entries, handleOnIpChange, hasBeenInputIpVisited, hasIpError]
     );
 
     const descriptionInput = useMemo(
       () => (
-        <EuiFormRow label={DESCRIPTION_LABEL} fullWidth>
+        <EuiFormRow label={DESCRIPTION_LABEL} fullWidth isDisabled={disabled}>
           <EuiTextArea
             id="eventFiltersFormInputName"
             placeholder={DESCRIPTION_PLACEHOLDER}
@@ -210,10 +214,11 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
             data-test-subj="hostIsolationExceptions-form-description-input"
             aria-label={DESCRIPTION_PLACEHOLDER}
             maxLength={256}
+            disabled={disabled}
           />
         </EuiFormRow>
       ),
-      [exception.description, handleOnDescriptionChange]
+      [disabled, exception.description, handleOnDescriptionChange]
     );
 
     // set current policies if not previously selected
@@ -278,7 +283,11 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
         <EuiSpacer size="m" />
         {ipInput}
         <EuiHorizontalRule />
-        <EuiFormRow fullWidth={true} data-test-subj={'effectedPolicies-container'}>
+        <EuiFormRow
+          fullWidth={true}
+          data-test-subj={'effectedPolicies-container'}
+          isDisabled={disabled}
+        >
           <EffectedPolicySelect
             isGlobal={selectedPolicies.isGlobal}
             isPlatinumPlus={true}
@@ -286,6 +295,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
             options={policies}
             onChange={handlePolicySelectChange}
             data-test-subj={'effectedPolicies-select'}
+            disabled={disabled}
           />
         </EuiFormRow>
       </EuiForm>
