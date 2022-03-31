@@ -40,6 +40,9 @@ export const DetailPanelAlertActions = ({
   }, [isPopoverOpen]);
 
   const onJumpToAlert = useCallback(() => {
+    if (!event.process?.entity_id) {
+      return;
+    }
     const process = new ProcessImpl(event.process.entity_id);
     process.addEvent(event);
 
@@ -48,7 +51,7 @@ export const DetailPanelAlertActions = ({
   }, [event, onProcessSelected]);
 
   const onShowDetails = useCallback(() => {
-    if (event.kibana) {
+    if (event.kibana?.alert?.uuid) {
       onShowAlertDetails(event.kibana.alert.uuid);
       setPopover(false);
     }
@@ -58,7 +61,7 @@ export const DetailPanelAlertActions = ({
     return null;
   }
 
-  const { uuid } = event.kibana.alert;
+  const { uuid } = event.kibana?.alert ?? {};
 
   const menuItems = [
     <EuiContextMenuItem key="details" data-test-subj={SHOW_DETAILS_TEST_ID} onClick={onShowDetails}>

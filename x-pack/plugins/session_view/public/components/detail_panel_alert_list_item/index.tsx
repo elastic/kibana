@@ -19,6 +19,7 @@ import {
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
+import { dataOrDash } from '../../utils/data_or_dash';
 
 export const ALERT_LIST_ITEM_TEST_ID = 'sessionView:detailPanelAlertListItem';
 export const ALERT_LIST_ITEM_ARGS_TEST_ID = 'sessionView:detailPanelAlertListItemArgs';
@@ -49,8 +50,8 @@ export const DetailPanelAlertListItem = ({
   }
 
   const timestamp = event['@timestamp'];
-  const { uuid, name } = event.kibana.alert.rule;
-  const { args } = event.process;
+  const { uuid, name } = event.kibana?.alert?.rule ?? {};
+  const { args } = event.process ?? {};
 
   const forceState = !isInvestigated ? 'open' : undefined;
 
@@ -60,7 +61,7 @@ export const DetailPanelAlertListItem = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
-            {timestamp}
+            {dataOrDash(timestamp)}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -79,20 +80,20 @@ export const DetailPanelAlertListItem = ({
         hasShadow={false}
         borderRadius="m"
       >
-        <EuiText size="xs">{args.join(' ')}</EuiText>
+        <EuiText size="xs">{dataOrDash(args?.join(' '))}</EuiText>
       </EuiPanel>
       <EuiHorizontalRule css={styles.minimalHR} margin="m" size="full" />
     </div>
   ) : (
     <EuiAccordion
-      id={uuid}
+      id={uuid ?? ''}
       data-test-subj={ALERT_LIST_ITEM_TEST_ID}
       arrowDisplay={isInvestigated ? 'right' : 'none'}
       buttonContent={
         <EuiText css={styles.alertTitle} size="s">
           <p>
             <EuiIcon color="danger" type="alert" css={styles.alertIcon} />
-            {name}
+            {dataOrDash(name)}
           </p>
         </EuiText>
       }
@@ -109,7 +110,7 @@ export const DetailPanelAlertListItem = ({
     >
       <EuiSpacer size="xs" />
       <EuiText data-test-subj={ALERT_LIST_ITEM_TIMESTAMP_TEST_ID} color="subdued" size="s">
-        {timestamp}
+        {dataOrDash(timestamp)}
       </EuiText>
       <EuiPanel
         css={styles.processPanel}
@@ -119,7 +120,7 @@ export const DetailPanelAlertListItem = ({
         borderRadius="m"
       >
         <EuiText data-test-subj={ALERT_LIST_ITEM_ARGS_TEST_ID} size="xs">
-          {args.join(' ')}
+          {dataOrDash(args?.join(' '))}
         </EuiText>
       </EuiPanel>
       {isInvestigated && (

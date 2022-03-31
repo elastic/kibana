@@ -80,7 +80,7 @@ export class ProcessImpl implements Process {
     if (!verboseMode) {
       return children.filter((child) => {
         const { group_leader: groupLeader, session_leader: sessionLeader } =
-          child.getDetails().process;
+          child.getDetails().process ?? {};
 
         // search matches or processes with alerts will never be filtered out
         if (child.autoExpand || child.searchMatched || child.hasAlerts()) {
@@ -90,7 +90,7 @@ export class ProcessImpl implements Process {
         // Hide processes that have their session leader as their process group leader.
         // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
         // other shell startup activities (e.g bashrc .profile etc)
-        if (groupLeader.pid === sessionLeader.pid) {
+        if (!groupLeader || !sessionLeader || groupLeader.pid === sessionLeader.pid) {
           return false;
         }
 
@@ -150,7 +150,7 @@ export class ProcessImpl implements Process {
       parent,
       session_leader: sessionLeader,
       group_leader: groupLeader,
-    } = event.process;
+    } = event.process ?? {};
 
     const parentIsASessionLeader = parent && sessionLeader && parent.pid === sessionLeader.pid;
     const processIsAGroupLeader = groupLeader && pid === groupLeader.pid;
@@ -165,19 +165,19 @@ export class ProcessImpl implements Process {
   }
 
   findEventByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
-    return events.find(({ event }) => event.action === action);
+    return events.find(({ event }) => event?.action === action);
   });
 
   findEventByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
-    return events.find(({ event }) => event.kind === kind);
+    return events.find(({ event }) => event?.kind === kind);
   });
 
   filterEventsByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
-    return events.filter(({ event }) => event.action === action);
+    return events.filter(({ event }) => event?.action === action);
   });
 
   filterEventsByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
-    return events.filter(({ event }) => event.kind === kind);
+    return events.filter(({ event }) => event?.kind === kind);
   });
 
   // returns the most recent fork, exec, or end event
@@ -185,9 +185,13 @@ export class ProcessImpl implements Process {
   // on the processes lifecycle.
   getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {
     // TODO: add these to generator
-    const actionsToFind = [EventAction.fork, EventAction.exec, EventAction.end];
+    const actionsToFind: Array<EventAction | undefined> = [
+      EventAction.fork,
+      EventAction.exec,
+      EventAction.end,
+    ];
     const filtered = events.filter((processEvent) => {
-      return actionsToFind.includes(processEvent.event.action);
+      return actionsToFind.includes(processEvent.event?.action);
     });
 
     // because events is already ordered by @timestamp we take the last event
@@ -208,14 +212,14 @@ export const useProcessTree = ({
   // we add a fake session leader event, sourced from wide event data.
   // this is because we might not always have a session leader event
   // especially if we are paging in reverse from deep within a large session
-  const fakeLeaderEvent = data[0].events.find((event) => event.event.kind === EventKind.event);
+  const fakeLeaderEvent = data[0].events?.find?.((event) => event.event?.kind === EventKind.event);
   const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
 
   if (fakeLeaderEvent) {
     fakeLeaderEvent.process = {
       ...fakeLeaderEvent.process,
-      ...fakeLeaderEvent.process.entry_leader,
-      parent: fakeLeaderEvent.process.parent,
+      ...fakeLeaderEvent.process?.entry_leader,
+      parent: fakeLeaderEvent.process?.parent,
     };
     sessionLeaderProcess.events.push(fakeLeaderEvent);
   }
