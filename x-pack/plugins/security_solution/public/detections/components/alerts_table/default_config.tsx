@@ -176,4 +176,5 @@ export const requiredFieldsForActions = [
   'file.hash.sha256',
   'host.os.family',
   'event.code',
+  'process.entry_leader.entity_id',
 ];

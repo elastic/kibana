@@ -10,6 +10,7 @@ import { IHttpFetchError } from 'src/core/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
@@ -54,6 +55,7 @@ export interface InfraClientSetupDeps {
   usageCollection: UsageCollectionSetup;
   ml: MlPluginSetup;
   embeddable: EmbeddableSetup;
+  share: SharePluginSetup;
 }
 
 export interface InfraClientStartDeps {
@@ -66,6 +68,7 @@ export interface InfraClientStartDeps {
   ml: MlPluginStart;
   embeddable?: EmbeddableStart;
   osquery?: unknown; // OsqueryPluginStart;
+  share: SharePluginStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;
