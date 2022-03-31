@@ -30,6 +30,22 @@ export const getServiceLocationsSuccess = createAction<{
 }>('GET_SERVICE_LOCATIONS_LIST_SUCCESS');
 export const getServiceLocationsFailure = createAction<Error>('GET_SERVICE_LOCATIONS_LIST_FAILURE');
 
+export const getSyntheticsEnablement = createAction('GET_SYNTHETICS_ENABLEMENT');
+export const getSyntheticsEnablementSuccess = createAction<any>(
+  'GET_SYNTHETICS_ENABLEMENT_SUCCESS'
+);
+export const getSyntheticsEnablementFailure = createAction<Error>(
+  'GET_SYNTHETICS_ENABLEMENT_FAILURE'
+);
+
+export const disableSynthetics = createAction('DISABLE_SYNTHETICS');
+export const disableSyntheticsSuccess = createAction<any>('DISABLE_SYNTEHTICS_SUCCESS');
+export const disableSyntheticsFailure = createAction<Error>('DISABLE_SYNTHETICS_FAILURE');
+
+export const enableSynthetics = createAction('ENABLE_SYNTHETICS');
+export const enableSyntheticsSuccess = createAction<any>('ENABLE_SYNTEHTICS_SUCCESS');
+export const enableSyntheticsFailure = createAction<Error>('ENABLE_SYNTHETICS_FAILURE');
+
 export const getSyntheticsServiceAllowed = createAsyncAction<void, SyntheticsServiceAllowed>(
   'GET_SYNTHETICS_SERVICE_ALLOWED'
 );
