@@ -7,6 +7,12 @@
 
 export { isAggName } from './aggregations';
 export {
+  DEFAULT_CONTINUOUS_MODE_DELAY,
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+} from './constants';
+export {
   getIndexDevConsoleStatement,
   getPivotPreviewDevConsoleStatement,
   INIT_MAX_COLUMNS,
