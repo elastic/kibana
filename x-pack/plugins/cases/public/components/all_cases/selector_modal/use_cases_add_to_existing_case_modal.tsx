@@ -14,6 +14,7 @@ import { CasesContextStoreActionsList } from '../../cases_context/cases_context_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import { CaseAttachments } from '../../../types';
+import { usePostComment } from '../../../containers/use_post_comment';
 
 type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
   toastTitle?: string;
@@ -35,8 +36,10 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
     toastTitle: props.toastTitle,
     toastContent: props.toastContent,
   });
+
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
+  const { postComment } = usePostComment();
 
   const closeModal = useCallback(() => {
     dispatch({
@@ -49,30 +52,54 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
     });
   }, [dispatch]);
 
+  const handleOnRowClick = useCallback(
+    async (theCase?: Case) => {
+      // when the case is undefined in the modal
+      // the user clicked "create new case"
+      if (theCase === undefined) {
+        closeModal();
+        createNewCaseFlyout.open();
+        return;
+      }
+
+      try {
+        // add attachments to the case
+        const attachments = props.attachments;
+        if (attachments !== undefined && attachments.length > 0) {
+          for (const attachment of attachments) {
+            await postComment({
+              caseId: theCase.id,
+              data: attachment,
+              throwOnError: true,
+            });
+          }
+        }
+
+        casesToasts.showSuccessAttach({
+          theCase,
+          attachments: props.attachments,
+          title: props.toastTitle,
+          content: props.toastContent,
+        });
+      } catch (error) {
+        // error toast is handled
+        // inside the postComment method
+      }
+
+      if (props.onRowClick) {
+        props.onRowClick(theCase);
+      }
+    },
+    [casesToasts, closeModal, createNewCaseFlyout, postComment, props]
+  );
+
   const openModal = useCallback(() => {
     dispatch({
       type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
       payload: {
         ...props,
         hiddenStatuses: [CaseStatuses.closed, StatusAll],
-        onRowClick: (theCase?: Case) => {
-          // when the case is undefined in the modal
-          // the user clicked "create new case"
-          if (theCase === undefined) {
-            closeModal();
-            createNewCaseFlyout.open();
-          } else {
-            casesToasts.showSuccessAttach({
-              theCase,
-              attachments: props.attachments,
-              title: props.toastTitle,
-              content: props.toastContent,
-            });
-            if (props.onRowClick) {
-              props.onRowClick(theCase);
-            }
-          }
-        },
+        onRowClick: handleOnRowClick,
         onClose: () => {
           closeModal();
           if (props.onClose) {
@@ -81,7 +108,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
         },
       },
     });
-  }, [casesToasts, closeModal, createNewCaseFlyout, dispatch, props]);
+  }, [closeModal, dispatch, handleOnRowClick, props]);
   return {
     open: openModal,
     close: closeModal,
