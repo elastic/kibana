@@ -187,6 +187,7 @@
     "xpack.lens.datatypes.histogram": "直方图",
     "xpack.lens.datatypes.ipAddress": "IP",
     "xpack.lens.datatypes.number": "数字",
+    "xpack.lens.datatypes.murmur3": "murmur3",
     "xpack.lens.datatypes.record": "记录",
     "xpack.lens.datatypes.string": "字符串",
     "xpack.lens.deleteLayerAriaLabel": "删除图层 {index}",
