@@ -172,6 +172,7 @@ async function queryFlameGraph(
   // profiling-stacktraces is configured with 16 shards
   const nQueries = 8;
   const stackTraces = new Map<StackTraceID, StackTrace>();
+  const stackFrameDocIDs = new Set<string>(); // Set of unique FrameIDs
 
   await logExecutionLatency(
     logger,
@@ -199,6 +200,9 @@ async function queryFlameGraph(
                 FrameID: frameIDs,
                 Type: trace.fields.Type,
               });
+              for (const frameID of frameIDs) {
+                stackFrameDocIDs.add(frameID);
+              }
             }
           } else {
             for (const trace of res.body.docs) {
@@ -213,6 +217,9 @@ async function queryFlameGraph(
                   FrameID: frameIDs,
                   Type: trace._source.Type,
                 });
+                for (const frameID of frameIDs) {
+                  stackFrameDocIDs.add(frameID);
+                }
               }
             }
           }
@@ -247,14 +254,6 @@ async function queryFlameGraph(
       getNumberOfUniqueStacktracesWithoutLeafNode(stackTraces, 2)
   );
 */
-
-  // Create the set of unique FrameIDs.
-  const stackFrameDocIDs = new Set<string>();
-  for (const trace of stackTraces.values()) {
-    for (const frameID of trace.FrameID) {
-      stackFrameDocIDs.add(frameID);
-    }
-  }
 
   const resStackFrames = await logExecutionLatency(
     logger,
