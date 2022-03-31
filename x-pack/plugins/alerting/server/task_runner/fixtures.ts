@@ -6,7 +6,12 @@
  */
 
 import { isNil } from 'lodash';
-import { Alert, AlertTypeParams, RecoveredActionGroup } from '../../common';
+import {
+  Alert,
+  AlertExecutionStatusWarningReasons,
+  AlertTypeParams,
+  RecoveredActionGroup,
+} from '../../common';
 import { getDefaultRuleMonitoring } from './task_runner';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { TaskStatus } from '../../../task_manager/server';
@@ -327,6 +332,12 @@ const generateMessage = ({
     }
     if (actionGroupId === 'recovered') {
       return `rule-name' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${actionId}`;
+    }
+    if (
+      status === 'warning' &&
+      reason === AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS
+    ) {
+      return `The maximum number of actions for this rule type was reached; excess actions were not triggered.`;
     }
     return `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
   }

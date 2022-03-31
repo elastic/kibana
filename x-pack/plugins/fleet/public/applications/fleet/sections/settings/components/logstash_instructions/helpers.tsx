@@ -17,7 +17,7 @@ export function getLogstashPipeline(apiKey?: string) {
     ssl_certificate_authorities => ["<ca_path>"]
     ssl_certificate => "<server_cert_path>"
     ssl_key => "<server_cert_key>"
-    ssl_verification_mode => "force-peer"
+    ssl_verify_mode => "force_peer"
   }
 }
 

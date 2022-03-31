@@ -35,7 +35,12 @@ export function useAnomalyChartsInputResolver(
   refresh: Observable<any>,
   services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
   chartWidth: number,
-  severity: number
+  severity: number,
+  renderCallbacks: {
+    onRenderComplete: () => void;
+    onLoading: () => void;
+    onError: (error: Error) => void;
+  }
 ): {
   chartsData: ExplorerChartsData | undefined;
   isLoading: boolean;
@@ -61,6 +66,9 @@ export function useAnomalyChartsInputResolver(
       .pipe(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
+        tap(() => {
+          renderCallbacks.onLoading();
+        }),
         switchMap(([explorerJobs, input, embeddableContainerWidth, severityValue]) => {
           if (!explorerJobs) {
             // couldn't load the list of jobs
@@ -118,6 +126,8 @@ export function useAnomalyChartsInputResolver(
           setError(null);
           setChartsData(results);
           setIsLoading(false);
+
+          renderCallbacks.onRenderComplete();
         }
       });
 
@@ -133,6 +143,12 @@ export function useAnomalyChartsInputResolver(
   useEffect(() => {
     severity$.next(severity);
   }, [severity]);
+
+  useEffect(() => {
+    if (error) {
+      renderCallbacks.onError(error);
+    }
+  }, [error]);
 
   return { chartsData, isLoading, error };
 }
