@@ -2609,7 +2609,6 @@
     "discover.doc.loadingDescription": "正在加载……",
     "discover.doc.somethingWentWrongDescription": "{indexName} 缺失。",
     "discover.doc.somethingWentWrongDescriptionAddon": "请确保索引存在。",
-    "discover.docExplorerCallout.bodyMessage": "使用 Document Explorer 快速排序、选择和比较数据，调整列大小并以全屏方式查看文档。",
     "discover.docExplorerCallout.closeButtonAriaLabel": "关闭",
     "discover.docExplorerCallout.headerMessage": "更好的浏览方式",
     "discover.docExplorerCallout.tryDocumentExplorer": "试用 Document Explorer",
