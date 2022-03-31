@@ -296,6 +296,19 @@ export class ControlGroupContainer extends Container<
     } as ControlPanelState<TEmbeddableInput>;
   }
 
+  protected onRemoveEmbeddable(idToRemove: string) {
+    const newPanels = super.onRemoveEmbeddable(idToRemove) as ControlsPanels;
+    const removedOrder = this.childOrderCache.IdsToOrder[idToRemove];
+    for (let i = removedOrder + 1; i < this.childOrderCache.idsInOrder.length; i++) {
+      const currentOrder = newPanels[this.childOrderCache.idsInOrder[i]].order;
+      newPanels[this.childOrderCache.idsInOrder[i]] = {
+        ...newPanels[this.childOrderCache.idsInOrder[i]],
+        order: currentOrder - 1,
+      };
+    }
+    return newPanels;
+  }
+
   protected getInheritedInput(id: string): ControlInput {
     const { filters, query, ignoreParentSettings, timeRange, chainingSystem } = this.getInput();
 

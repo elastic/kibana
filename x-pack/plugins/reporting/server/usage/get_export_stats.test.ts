@@ -8,7 +8,7 @@
 import { getExportTypesRegistry } from '../lib';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
-import { FeatureAvailabilityMap, MetricsStats } from './types';
+import { ErrorCodeStats, FeatureAvailabilityMap, MetricsStats } from './types';
 
 let featureMap: FeatureAvailabilityMap;
 const sizesAggResponse = {
@@ -82,6 +82,7 @@ test('Model of jobTypes', () => {
         output_size: sizesAggResponse,
         app: { dashboard: 0, visualization: 3, 'canvas workpad': 0 },
         metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
+        error_codes: {} as ErrorCodeStats,
       },
       printable_pdf: {
         available: true,
@@ -90,6 +91,7 @@ test('Model of jobTypes', () => {
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
         layout: { preserve_layout: 3, print: 0, canvas: 0 },
         metrics: { pdf_cpu: {}, pdf_memory: {}, pdf_pages: {} } as MetricsStats,
+        error_codes: {} as ErrorCodeStats,
       },
       csv_searchsource: {
         available: true,
@@ -97,6 +99,7 @@ test('Model of jobTypes', () => {
         app: { search: 3 },
         output_size: sizesAggResponse,
         metrics: { csv_rows: {} } as MetricsStats,
+        error_codes: {} as ErrorCodeStats,
       },
     },
     featureMap,
@@ -113,6 +116,7 @@ test('Model of jobTypes', () => {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": Object {},
       "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {},
@@ -140,6 +144,7 @@ test('Model of jobTypes', () => {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": Object {},
       "layout": undefined,
       "metrics": Object {
         "csv_rows": Object {},
@@ -166,6 +171,7 @@ test('Model of jobTypes', () => {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": Object {},
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 3,
@@ -200,6 +206,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         output_size: sizesAggResponse,
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 0 },
         metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
+        error_codes: {} as ErrorCodeStats,
       },
     },
     featureMap,
@@ -215,6 +222,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
       },
       "available": true,
       "deprecated": 5,
+      "error_codes": Object {},
       "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {},
@@ -246,6 +254,7 @@ test('Incorporate metric stats', () => {
           png_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
           png_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
         },
+        error_codes: {} as ErrorCodeStats,
       },
       printable_pdf_v2: {
         available: true,
@@ -258,93 +267,138 @@ test('Incorporate metric stats', () => {
         },
         app: { dashboard: 3, visualization: 0, 'canvas workpad': 0 },
         layout: { preserve_layout: 3, print: 0, canvas: 0 },
+        error_codes: {} as ErrorCodeStats,
       },
     },
     featureMap,
     exportTypesHandler
   );
-  expect(result.PNGV2).toMatchInlineSnapshot(`
+
+  expect(result.PNGV2.metrics).toMatchInlineSnapshot(`
     Object {
-      "app": Object {
-        "canvas workpad": 3,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
+      "png_cpu": Object {
+        "50.0": 0.01,
+        "75.0": 0.01,
+        "95.0": 0.01,
+        "99.0": 0.01,
       },
-      "available": false,
-      "deprecated": 0,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {
-          "50.0": 0.01,
-          "75.0": 0.01,
-          "95.0": 0.01,
-          "99.0": 0.01,
-        },
-        "png_memory": Object {
-          "50.0": 3485,
-          "75.0": 3496,
-          "95.0": 3678,
-          "99.0": 3782,
-        },
+      "png_memory": Object {
+        "50.0": 3485,
+        "75.0": 3496,
+        "95.0": 3678,
+        "99.0": 3782,
       },
-      "output_size": Object {
-        "1.0": 5093470,
-        "25.0": 5093470,
-        "5.0": 5093470,
-        "50.0": 8514532,
-        "75.0": 11935594,
-        "95.0": 11935594,
-        "99.0": 11935594,
-      },
-      "total": 3,
     }
   `);
-  expect(result.printable_pdf_v2).toMatchInlineSnapshot(`
+  expect(result.printable_pdf_v2.metrics).toMatchInlineSnapshot(`
     Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 3,
-        "search": 0,
-        "visualization": 0,
+      "pdf_cpu": Object {
+        "50.0": 0.01,
+        "75.0": 0.01,
+        "95.0": 0.01,
+        "99.0": 0.01,
       },
-      "available": false,
-      "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 3,
-        "print": 0,
+      "pdf_memory": Object {
+        "50.0": 3485,
+        "75.0": 3496,
+        "95.0": 3678,
+        "99.0": 3782,
       },
-      "metrics": Object {
-        "pdf_cpu": Object {
-          "50.0": 0.01,
-          "75.0": 0.01,
-          "95.0": 0.01,
-          "99.0": 0.01,
+      "pdf_pages": Object {
+        "50.0": 4,
+        "75.0": 4,
+        "95.0": 4,
+        "99.0": 4,
+      },
+    }
+  `);
+});
+
+test('Incorporate error code stats', () => {
+  const result = getExportStats(
+    {
+      PNGV2: {
+        available: true,
+        total: 3,
+        output_size: sizesAggResponse,
+        app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
+        metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
+        error_codes: {
+          authentication_expired_error: 5,
+          queue_timeout_error: 1,
+          unknown_error: 0,
+          kibana_shutting_down_error: 1,
+          browser_could_not_launch_error: 2,
+          browser_unexpectedly_closed_error: 8,
+          browser_screenshot_error: 27,
         },
-        "pdf_memory": Object {
-          "50.0": 3485,
-          "75.0": 3496,
-          "95.0": 3678,
-          "99.0": 3782,
-        },
-        "pdf_pages": Object {
-          "50.0": 4,
-          "75.0": 4,
-          "95.0": 4,
-          "99.0": 4,
+      },
+      printable_pdf_v2: {
+        available: true,
+        total: 3,
+        output_size: sizesAggResponse,
+        metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
+        app: { dashboard: 3, visualization: 0, 'canvas workpad': 0 },
+        layout: { preserve_layout: 3, print: 0, canvas: 0 },
+        error_codes: {
+          pdf_worker_out_of_memory_error: 99,
+          authentication_expired_error: 5,
+          queue_timeout_error: 1,
+          unknown_error: 0,
+          kibana_shutting_down_error: 1,
+          browser_could_not_launch_error: 2,
+          browser_unexpectedly_closed_error: 8,
+          browser_screenshot_error: 27,
         },
       },
-      "output_size": Object {
-        "1.0": 5093470,
-        "25.0": 5093470,
-        "5.0": 5093470,
-        "50.0": 8514532,
-        "75.0": 11935594,
-        "95.0": 11935594,
-        "99.0": 11935594,
+      csv_searchsource_immediate: {
+        available: true,
+        total: 3,
+        output_size: sizesAggResponse,
+        metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
+        app: { dashboard: 3, visualization: 0, 'canvas workpad': 0 },
+        error_codes: {
+          authentication_expired_error: 5,
+          queue_timeout_error: 1,
+          unknown_error: 0,
+          kibana_shutting_down_error: 1,
+        },
       },
-      "total": 3,
+    },
+    featureMap,
+    exportTypesHandler
+  );
+
+  expect(result.PNGV2.error_codes).toMatchInlineSnapshot(`
+    Object {
+      "authentication_expired_error": 5,
+      "browser_could_not_launch_error": 2,
+      "browser_screenshot_error": 27,
+      "browser_unexpectedly_closed_error": 8,
+      "kibana_shutting_down_error": 1,
+      "queue_timeout_error": 1,
+      "unknown_error": 0,
+    }
+  `);
+  expect(result.printable_pdf_v2.error_codes).toMatchInlineSnapshot(`
+    Object {
+      "authentication_expired_error": 5,
+      "browser_could_not_launch_error": 2,
+      "browser_screenshot_error": 27,
+      "browser_unexpectedly_closed_error": 8,
+      "kibana_shutting_down_error": 1,
+      "pdf_worker_out_of_memory_error": 99,
+      "queue_timeout_error": 1,
+      "unknown_error": 0,
+    }
+  `);
+
+  expect(result.csv_searchsource_immediate.error_codes).toMatchInlineSnapshot(`
+    Object {
+      "authentication_expired_error": 5,
+      "kibana_shutting_down_error": 1,
+      "queue_timeout_error": 1,
+      "unknown_error": 0,
     }
   `);
 });
