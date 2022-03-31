@@ -4,55 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  CreateExceptionListItemSchema,
-  FoundExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { useCallback, useEffect, useState } from 'react';
+import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useEffect, useState } from 'react';
 import { QueryObserverResult, useQuery } from 'react-query';
-import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import { useHttp } from '../../../../common/lib/kibana/hooks';
-import { State } from '../../../../common/store';
 import { ServerApiError } from '../../../../common/types';
-import {
-  MANAGEMENT_STORE_GLOBAL_NAMESPACE,
-  MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE,
-} from '../../../common/constants';
-import { getHostIsolationExceptionsListPath } from '../../../common/routing';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../constants';
-import {
-  getHostIsolationExceptionItems,
-  getHostIsolationExceptionSummary,
-  getOneHostIsolationExceptionItem,
-} from '../service';
-import { getCurrentLocation } from '../store/selector';
-import { HostIsolationExceptionsPageLocation, HostIsolationExceptionsPageState } from '../types';
-import { createEmptyHostIsolationException } from '../utils';
-
-export function useHostIsolationExceptionsSelector<R>(
-  selector: (state: HostIsolationExceptionsPageState) => R
-): R {
-  return useSelector((state: State) =>
-    selector(
-      state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE]
-    )
-  );
-}
-
-export function useHostIsolationExceptionsNavigateCallback() {
-  const location = useHostIsolationExceptionsSelector(getCurrentLocation);
-  const history = useHistory();
-
-  return useCallback(
-    (args: Partial<HostIsolationExceptionsPageLocation>) =>
-      history.push(getHostIsolationExceptionsListPath({ ...location, ...args })),
-    [history, location]
-  );
-}
+import { getHostIsolationExceptionItems, getHostIsolationExceptionSummary } from '../service';
 
 /**
  * Checks if the current user should be able to see the host isolation exceptions
@@ -120,34 +80,5 @@ export function useFetchHostIsolationExceptionsList({
       });
     },
     { enabled, keepPreviousData: true }
-  );
-}
-
-export function useGetHostIsolationExceptionFormEntry({
-  id,
-  onSuccess,
-  onError,
-}: {
-  id?: string;
-  onSuccess: (data: CreateExceptionListItemSchema | UpdateExceptionListItemSchema) => void;
-  onError?: (error: ServerApiError) => void;
-}): QueryObserverResult {
-  const http = useHttp();
-  return useQuery<UpdateExceptionListItemSchema | CreateExceptionListItemSchema, ServerApiError>(
-    ['hostIsolationExceptions', 'form', id],
-    async () => {
-      // for editing, fetch from the API
-      if (id !== undefined) {
-        return getOneHostIsolationExceptionItem(http, id);
-      }
-      // for adding, return a new empty object
-      return createEmptyHostIsolationException();
-    },
-    {
-      refetchIntervalInBackground: false,
-      refetchOnWindowFocus: false,
-      onSuccess,
-      onError,
-    }
   );
 }
