@@ -90,15 +90,14 @@ const eventFiltersCreate: MiddlewareActionHandler = async (store, eventFiltersSe
     const exception = await eventFiltersService.addEventFilters(updatedCommentsEntry);
 
     store.dispatch({
-      type: 'eventFiltersCreateSuccess',
-    });
-
-    store.dispatch({
       type: 'eventFiltersFormStateChanged',
       payload: {
         type: 'LoadedResourceState',
         data: exception,
       },
+    });
+    store.dispatch({
+      type: 'eventFiltersCreateSuccess',
     });
   } catch (error) {
     store.dispatch({

@@ -12,7 +12,7 @@ import { Logger } from '@kbn/logging';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { InfraTimerangeInput } from '../../../../common/http_api';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
-import { LogQueryFields } from '../../../services/log_queries/get_log_query_fields';
+import { LogQueryFields } from '../../metrics/types';
 import { InfraSource } from '../../sources';
 import { calcualteFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';

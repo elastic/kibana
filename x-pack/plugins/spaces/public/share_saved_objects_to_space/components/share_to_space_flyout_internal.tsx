@@ -346,7 +346,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
           referenceGraph={referenceGraph}
           isDisabled={isStartShareButtonDisabled}
         />
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={() => onClose()}
@@ -407,10 +407,10 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   return (
     <EuiFlyout onClose={onClose} maxWidth={500} data-test-subj="share-to-space-flyout">
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           {flyoutIcon && (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={flyoutIcon} />
+              <EuiIcon size="l" type={flyoutIcon} />
             </EuiFlexItem>
           )}
           <EuiFlexItem>
@@ -424,10 +424,11 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        className="spcShareToSpace__flyoutBodyWrapper"
+        className="spcShareToSpace__flyoutBodyWrapper eui-yScroll"
+        responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
             {savedObjectTarget.icon && (
               <EuiFlexItem grow={false}>
                 <EuiIcon type={savedObjectTarget.icon} />

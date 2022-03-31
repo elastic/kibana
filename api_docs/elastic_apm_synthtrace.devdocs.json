@@ -205,6 +205,179 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/apm-synthtrace",
+        "id": "def-server.SpanArrayIterable",
+        "type": "Class",
+        "tags": [],
+        "label": "SpanArrayIterable",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@elastic/apm-synthtrace",
+            "scope": "server",
+            "docId": "kibElasticApmSynthtracePluginApi",
+            "section": "def-server.SpanArrayIterable",
+            "text": "SpanArrayIterable"
+          },
+          " implements ",
+          {
+            "pluginId": "@elastic/apm-synthtrace",
+            "scope": "server",
+            "docId": "kibElasticApmSynthtracePluginApi",
+            "section": "def-server.SpanIterable",
+            "text": "SpanIterable"
+          }
+        ],
+        "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/apm-synthtrace",
+                "id": "def-server.SpanArrayIterable.Unnamed.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "fields",
+                "description": [],
+                "signature": [
+                  "ApmFields",
+                  "[]"
+                ],
+                "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.order",
+            "type": "Function",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "() => \"asc\" | \"desc\""
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.Symbol.asyncIterator",
+            "type": "Function",
+            "tags": [],
+            "label": "[Symbol.asyncIterator]",
+            "description": [],
+            "signature": [
+              "() => AsyncIterator<",
+              "ApmFields",
+              ", any, undefined>"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.Symbol.iterator",
+            "type": "Function",
+            "tags": [],
+            "label": "[Symbol.iterator]",
+            "description": [],
+            "signature": [
+              "() => Iterator<",
+              "ApmFields",
+              ", any, undefined>"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.concat",
+            "type": "Function",
+            "tags": [],
+            "label": "concat",
+            "description": [],
+            "signature": [
+              "(...iterables: ",
+              {
+                "pluginId": "@elastic/apm-synthtrace",
+                "scope": "server",
+                "docId": "kibElasticApmSynthtracePluginApi",
+                "section": "def-server.SpanIterable",
+                "text": "SpanIterable"
+              },
+              "[]) => ",
+              "SpanGeneratorsUnion"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/apm-synthtrace",
+                "id": "def-server.SpanArrayIterable.concat.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "iterables",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@elastic/apm-synthtrace",
+                    "scope": "server",
+                    "docId": "kibElasticApmSynthtracePluginApi",
+                    "section": "def-server.SpanIterable",
+                    "text": "SpanIterable"
+                  },
+                  "[]"
+                ],
+                "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.toArray",
+            "type": "Function",
+            "tags": [],
+            "label": "toArray",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ApmFields",
+              "[]"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [

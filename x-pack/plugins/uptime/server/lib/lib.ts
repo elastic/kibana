@@ -49,7 +49,9 @@ export function createUptimeESClient({
   esClient,
   request,
   savedObjectsClient,
+  isInspectorEnabled,
 }: {
+  isInspectorEnabled?: boolean;
   esClient: ElasticsearchClient;
   request?: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
@@ -58,7 +60,8 @@ export function createUptimeESClient({
     baseESClient: esClient,
     async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
       params: TParams,
-      operationName?: string
+      operationName?: string,
+      index?: string
     ): Promise<{ body: ESSearchResponse<DocumentSource, TParams> }> {
       let res: any;
       let esError: any;
@@ -66,7 +69,7 @@ export function createUptimeESClient({
         savedObjectsClient!
       );
 
-      const esParams = { index: dynamicSettings!.heartbeatIndices, ...params };
+      const esParams = { index: index ?? dynamicSettings!.heartbeatIndices, ...params };
       const startTime = process.hrtime();
 
       const startTimeNow = Date.now();
@@ -82,6 +85,7 @@ export function createUptimeESClient({
       }
 
       const inspectableEsQueries = inspectableEsQueriesMap.get(request!);
+
       if (inspectableEsQueries) {
         inspectableEsQueries.push(
           getInspectResponse({
@@ -94,7 +98,7 @@ export function createUptimeESClient({
             startTime: startTimeNow,
           })
         );
-        if (request) {
+        if (request && isInspectorEnabled) {
           debugESCall({ startTime, request, esError, operationName: 'search', params: esParams });
         }
       }
@@ -123,7 +127,7 @@ export function createUptimeESClient({
       }
       const inspectableEsQueries = inspectableEsQueriesMap.get(request!);
 
-      if (inspectableEsQueries && request) {
+      if (inspectableEsQueries && request && isInspectorEnabled) {
         debugESCall({ startTime, request, esError, operationName: 'count', params: esParams });
       }
 

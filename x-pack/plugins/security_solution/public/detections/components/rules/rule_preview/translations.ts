@@ -174,3 +174,30 @@ export const QUERY_PREVIEW_SEE_ALL_WARNINGS = i18n.translate(
     defaultMessage: 'See all warnings',
   }
 );
+
+export const ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.actions',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const VIEW_DETAILS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.viewDetailsAriaLabel',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
+export const VIEW_DETAILS_FOR_ROW = ({
+  ariaRowindex,
+  columnValues,
+}: {
+  ariaRowindex: number;
+  columnValues: string;
+}) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.queryPreview.viewDetailsForRowAriaLabel', {
+    values: { ariaRowindex, columnValues },
+    defaultMessage:
+      'View details for the alert or event in row {ariaRowindex}, with columns {columnValues}',
+  });

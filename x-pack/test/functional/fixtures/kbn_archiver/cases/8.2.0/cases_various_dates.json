@@ -1,0 +1,125 @@
+{
+	"attributes": {
+	  "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": null,
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2022-03-15T10:16:56.252Z",
+    "created_by": {
+      "email": "",
+      "full_name": "",
+      "username": "cnasikas"
+    },
+    "description": "test",
+    "external_service": null,
+    "owner": "securitySolutionFixture",
+    "settings": {
+      "syncAlerts": false
+    },
+    "status": "open",
+    "tags": [],
+    "title": "stack",
+    "updated_at": "2022-03-29T10:33:09.754Z",
+    "updated_by": {
+      "email": "",
+      "full_name": "",
+      "username": "cnasikas"
+    }
+  },
+  "coreMigrationVersion": "8.2.0",
+  "id": "1537b380-a512-11ec-b94f-85999e89e434",
+  "migrationVersion": {
+    "cases": "8.1.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2022-03-29T10:33:09.754Z",
+  "version": "WzE2OTYyNCwxNF0="
+}
+
+{
+  "attributes": {
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": null,
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2022-03-20T10:16:56.252Z",
+    "created_by": {
+      "email": "",
+      "full_name": "",
+      "username": "cnasikas"
+    },
+    "description": "test 2",
+    "external_service": null,
+    "owner": "observabilityFixture",
+    "settings": {
+      "syncAlerts": false
+    },
+    "status": "open",
+    "tags": [],
+    "title": "stack",
+    "updated_at": "2022-03-29T10:33:09.754Z",
+    "updated_by": {
+      "email": "",
+      "full_name": "",
+      "username": "cnasikas"
+    }
+  },
+  "coreMigrationVersion": "8.2.0",
+  "id": "3537b580-a512-11ec-b94f-85979e89e434",
+  "migrationVersion": {
+    "cases": "8.1.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2022-03-29T10:33:09.754Z",
+  "version": "WzE2OTYyNCwxNF0="
+}
+
+{
+  "attributes": {
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": null,
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2022-03-25T10:16:56.252Z",
+    "created_by": {
+      "email": "",
+      "full_name": "",
+      "username": "cnasikas"
+    },
+    "description": "test 2",
+    "external_service": null,
+    "owner": "securitySolutionFixture",
+    "settings": {
+      "syncAlerts": false
+    },
+    "status": "open",
+    "tags": [],
+    "title": "stack",
+    "updated_at": "2022-03-29T10:33:09.754Z",
+    "updated_by": {
+      "email": "",
+      "full_name": "",
+      "username": "cnasikas"
+    }
+  },
+  "coreMigrationVersion": "8.2.0",
+  "id": "4537b380-a512-11ec-b92f-859b9e89e434",
+  "migrationVersion": {
+    "cases": "8.1.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2022-03-29T10:33:09.754Z",
+  "version": "WzE2OTYyNCwxNF0="
+}
