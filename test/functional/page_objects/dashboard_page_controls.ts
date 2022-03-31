@@ -8,7 +8,11 @@
 
 import expect from '@kbn/expect';
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-import { OPTIONS_LIST_CONTROL, ControlWidth } from '../../../src/plugins/controls/common';
+import {
+  OPTIONS_LIST_CONTROL,
+  ControlWidth,
+  RANGE_SLIDER_CONTROL,
+} from '../../../src/plugins/controls/common';
 import { ControlGroupChainingSystem } from '../../../src/plugins/controls/common/control_group/types';
 
 import { FtrService } from '../ftr_provider_context';
@@ -238,6 +242,14 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
+  public async clickExistingControl(controlId: string) {
+    const elementToClick = await this.getControlElementById(controlId);
+    await this.retry.try(async () => {
+      await elementToClick.click();
+      await this.testSubjects.existOrFail(`control-action-${controlId}-edit`);
+    });
+  }
+
   public async editExistingControl(controlId: string) {
     this.log.debug(`Opening control editor for control: ${controlId}`);
     await this.hoverOverExistingControl(controlId);
@@ -344,6 +356,26 @@ export class DashboardPageControls extends FtrService {
     }
   }
 
+  public async controlsEditorSetDataView(dataViewTitle: string) {
+    this.log.debug(`Setting control data view to ${dataViewTitle}`);
+    await this.testSubjects.click('open-data-view-picker');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('data-view-picker-title');
+    });
+    await this.testSubjects.click(`data-view-picker-${dataViewTitle}`);
+  }
+
+  public async controlsEditorSetfield(fieldName: string, shouldSearch: boolean = false) {
+    this.log.debug(`Setting control field to ${fieldName}`);
+    if (shouldSearch) {
+      await this.testSubjects.setValue('field-search-input', fieldName);
+    }
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(`field-picker-select-${fieldName}`);
+    });
+    await this.testSubjects.click(`field-picker-select-${fieldName}`);
+  }
+
   // Options List editor functions
   public async createOptionsListControl({
     dataViewTitle,
@@ -359,8 +391,8 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Creating options list control ${title ?? fieldName}`);
     await this.openCreateControlFlyout(OPTIONS_LIST_CONTROL);
 
-    if (dataViewTitle) await this.optionsListEditorSetDataView(dataViewTitle);
-    if (fieldName) await this.optionsListEditorSetfield(fieldName);
+    if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
+    if (fieldName) await this.controlsEditorSetfield(fieldName);
     if (title) await this.controlEditorSetTitle(title);
     if (width) await this.controlEditorSetWidth(width);
 
@@ -378,23 +410,93 @@ export class DashboardPageControls extends FtrService {
     return dataViewName;
   }
 
-  public async optionsListEditorSetDataView(dataViewTitle: string) {
-    this.log.debug(`Setting options list data view to ${dataViewTitle}`);
-    await this.testSubjects.click('open-data-view-picker');
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('data-view-picker-title');
-    });
-    await this.testSubjects.click(`data-view-picker-${dataViewTitle}`);
+  // Range slider functions
+  public async rangeSliderGetLowerBoundAttribute(controlId: string, attribute: string) {
+    this.log.debug(`Getting range slider lower bound ${attribute} for ${controlId}`);
+    return await this.testSubjects.getAttribute(
+      `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
+      attribute
+    );
+  }
+  public async rangeSliderGetUpperBoundAttribute(controlId: string, attribute: string) {
+    this.log.debug(`Getting range slider upper bound ${attribute} for ${controlId}`);
+    return await this.testSubjects.getAttribute(
+      `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
+      attribute
+    );
+  }
+  public async rangeSliderGetDualRangeAttribute(controlId: string, attribute: string) {
+    this.log.debug(`Getting range slider dual range ${attribute} for ${controlId}`);
+    return await this.testSubjects.getAttribute(`rangeSlider__slider`, attribute);
+  }
+  public async rangeSliderSetLowerBound(controlId: string, value: string) {
+    this.log.debug(`Setting range slider lower bound to ${value}`);
+    await this.testSubjects.setValue(
+      `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
+      value
+    );
+  }
+  public async rangeSliderSetUpperBound(controlId: string, value: string) {
+    this.log.debug(`Setting range slider lower bound to ${value}`);
+    await this.testSubjects.setValue(
+      `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
+      value
+    );
   }
 
-  public async optionsListEditorSetfield(fieldName: string, shouldSearch: boolean = false) {
-    this.log.debug(`Setting options list field to ${fieldName}`);
-    if (shouldSearch) {
-      await this.testSubjects.setValue('field-search-input', fieldName);
-    }
+  public async rangeSliderOpenPopover(controlId: string) {
+    this.log.debug(`Opening popover for Range Slider: ${controlId}`);
+    await this.testSubjects.click(`range-slider-control-${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`field-picker-select-${fieldName}`);
+      await this.testSubjects.existOrFail(`rangeSlider-control-actions`);
     });
-    await this.testSubjects.click(`field-picker-select-${fieldName}`);
+  }
+
+  public async rangeSliderEnsurePopoverIsClosed(controlId: string) {
+    this.log.debug(`Opening popover for Range Slider: ${controlId}`);
+    await this.testSubjects.click(`range-slider-control-${controlId}`);
+    await this.testSubjects.waitForDeleted(`rangeSlider-control-actions`);
+  }
+
+  public async rangeSliderPopoverAssertOpen() {
+    await this.retry.try(async () => {
+      if (!(await this.testSubjects.exists(`rangeSlider-control-actions`))) {
+        throw new Error('options list popover must be open before calling selectOption');
+      }
+    });
+  }
+
+  public async rangeSliderWaitForLoading() {
+    await this.testSubjects.waitForDeleted('range-slider-loading-spinner');
+  }
+
+  public async rangeSliderClearSelection(controlId: string) {
+    this.log.debug(`Clearing range slider selection from control: ${controlId}`);
+    await this.rangeSliderOpenPopover(controlId);
+    await this.rangeSliderPopoverAssertOpen();
+    await this.testSubjects.click('rangeSlider__clearRangeButton');
+  }
+
+  // Range slider editor functions
+  public async createRangeSliderControl({
+    dataViewTitle,
+    fieldName,
+    width,
+    title,
+  }: {
+    title?: string;
+    fieldName: string;
+    width?: ControlWidth;
+    dataViewTitle?: string;
+  }) {
+    this.log.debug(`Creating range slider control ${title ?? fieldName}`);
+    await this.openCreateControlFlyout(RANGE_SLIDER_CONTROL);
+
+    if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
+    if (fieldName) await this.controlsEditorSetfield(fieldName);
+    if (title) await this.controlEditorSetTitle(title);
+    if (width) await this.controlEditorSetWidth(width);
+
+    await this.controlEditorSave();
   }
 }
