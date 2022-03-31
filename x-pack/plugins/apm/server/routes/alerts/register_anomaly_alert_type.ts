@@ -134,8 +134,8 @@ export function registerAnomalyAlertType({
           return {};
         }
 
-        // Window size must be at least 30, does like this to support rules created before this change where default was 15
-        const windowSize = Math.min(
+        // start time must be at least 30, does like this to support rules created before this change where default was 15
+        const startTime = Math.min(
           datemath.parse('now-30m')!.valueOf(),
           datemath
             .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)
@@ -155,7 +155,7 @@ export function registerAnomalyAlertType({
                   {
                     range: {
                       timestamp: {
-                        gte: windowSize,
+                        gte: startTime,
                         format: 'epoch_millis',
                       },
                     },

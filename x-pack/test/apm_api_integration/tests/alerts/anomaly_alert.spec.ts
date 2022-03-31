@@ -11,16 +11,18 @@ import { range } from 'lodash';
 import { AlertType } from '../../../../plugins/apm/common/alert_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
+import { waitForRuleStatus } from './wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const synthtraceEsClient = getService('synthtraceEsClient');
   const ml = getService('ml');
   const supertest = getService('supertest');
+  const log = getService('log');
 
   registry.when(
     'fetching service anomalies with a trial license',
-    { config: 'rules', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       const spikeStart = datemath.parse('now-2h')!.valueOf();
       const spikeEnd = datemath.parse('now')!.valueOf();
@@ -90,52 +92,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
       });
 
-      const WaitForStatusIncrement = 500;
-
-      async function waitForStatus({
-        id,
-        statuses,
-        waitMillis = 10000,
-      }: {
-        statuses: Set<string>;
-        waitMillis?: number;
-        id?: string;
-      }): Promise<Record<string, any>> {
-        if (waitMillis < 0 || !id) {
-          expect().fail(`waiting for alert ${id} statuses ${Array.from(statuses)} timed out`);
-        }
-
-        const response = await supertest.get(`/api/alerting/rule/${id}`);
-        expect(response.status).to.eql(200);
-
-        const { execution_status: executionStatus } = response.body || {};
-        const { status } = executionStatus || {};
-
-        const message = `waitForStatus(${Array.from(statuses)}): got ${JSON.stringify(
-          executionStatus
-        )}`;
-
-        if (statuses.has(status)) {
-          return executionStatus;
-        }
-
-        // eslint-disable-next-line no-console
-        console.log(`${message}, retrying`);
-
-        await delay(WaitForStatusIncrement);
-        return await waitForStatus({
-          id,
-          statuses,
-          waitMillis: waitMillis - WaitForStatusIncrement,
-        });
-      }
-
-      async function delay(millis: number): Promise<void> {
-        await new Promise((resolve) => setTimeout(resolve, millis));
-      }
-
       it('checks if alert is active', async () => {
-        const executionStatus = await waitForStatus({ id: ruleId, statuses: new Set(['active']) });
+        const executionStatus = await waitForRuleStatus({
+          id: ruleId,
+          expectedStatus: 'active',
+          supertest,
+          log,
+        });
         expect(executionStatus.status).to.be('active');
       });
     }

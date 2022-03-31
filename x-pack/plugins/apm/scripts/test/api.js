@@ -22,11 +22,6 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Run tests with trial license',
   })
-  .option('rules', {
-    default: false,
-    type: 'boolean',
-    description: 'Run tests with rules license',
-  })
   .option('server', {
     default: false,
     type: 'boolean',
@@ -59,14 +54,10 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const { trial, server, runner, grep, inspect, rules } = argv;
+const { trial, server, runner, grep, inspect } = argv;
 
-let license = 'basic';
-if (trial) {
-  license = 'trial';
-} else if (rules) {
-  license = 'rules';
-}
+const license = trial ? 'trial' : 'basic';
+
 console.log(`License: ${license}`);
 
 let ftrScript = 'functional_tests';

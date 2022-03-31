@@ -19,7 +19,6 @@ const apmFtrConfigs = {
     license: 'trial' as const,
     kibanaConfig: {
       'xpack.ruleRegistry.write.enabled': 'true',
-      'xpack.actions.enabledActionTypes': JSON.stringify(['.index']),
     },
   },
 };
