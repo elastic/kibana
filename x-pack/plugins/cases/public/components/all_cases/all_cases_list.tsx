@@ -76,7 +76,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       setSelectedCases,
     } = useGetCases({ initialFilterOptions });
 
-    // Post Comment to Case
     const { connectors } = useConnectors();
 
     const sorting = useMemo(
