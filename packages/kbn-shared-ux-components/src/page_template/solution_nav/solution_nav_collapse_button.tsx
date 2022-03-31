@@ -21,6 +21,14 @@ export type KibanaPageTemplateSolutionNavCollapseButtonProps =
     collapsed: boolean;
   };
 
+const collapseLabel = i18n.translate('sharedUXComponents.solutionNav.collapsibleLabel', {
+  defaultMessage: 'Collapse side navigation',
+});
+
+const openLabel = i18n.translate('sharedUXComponents.solutionNav.openLabel', {
+  defaultMessage: 'Open side navigation',
+});
+
 /**
  * Creates the styled icon button for showing/hiding solution nav
  */
@@ -36,14 +44,6 @@ export const KibanaPageTemplateSolutionNavCollapseButton = ({
     },
     className
   );
-
-  const collapseLabel = i18n.translate('sharedUXComponents.solutionNav.collapsibleLabel', {
-    defaultMessage: 'Collapse side navigation',
-  });
-
-  const openLabel = i18n.translate('sharedUXComponents.solutionNav.openLabel', {
-    defaultMessage: 'Open side navigation',
-  });
 
   return (
     <EuiButtonIcon
