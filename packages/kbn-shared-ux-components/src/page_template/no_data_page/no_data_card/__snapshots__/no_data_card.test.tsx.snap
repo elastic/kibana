@@ -3,6 +3,7 @@
 exports[`NoDataCard props button 1`] = `
 .emotion-0 {
   max-width: 400px;
+  margin-inline: auto;
 }
 
 <div
@@ -50,6 +51,7 @@ exports[`NoDataCard props button 1`] = `
 exports[`NoDataCard props extends EuiCardProps 1`] = `
 .emotion-0 {
   max-width: 400px;
+  margin-inline: auto;
 }
 
 <div
@@ -97,6 +99,7 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
 exports[`NoDataCard props href 1`] = `
 .emotion-0 {
   max-width: 400px;
+  margin-inline: auto;
 }
 
 <div
@@ -151,6 +154,7 @@ exports[`NoDataCard props href 1`] = `
 exports[`NoDataCard props isDisabled 1`] = `
 .emotion-0 {
   max-width: 400px;
+  margin-inline: auto;
 }
 
 <div
@@ -186,6 +190,7 @@ exports[`NoDataCard props isDisabled 1`] = `
 exports[`NoDataCard renders 1`] = `
 .emotion-0 {
   max-width: 400px;
+  margin-inline: auto;
 }
 
 <div
