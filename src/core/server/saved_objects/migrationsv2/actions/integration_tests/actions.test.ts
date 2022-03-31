@@ -796,7 +796,8 @@ describe('migration actions', () => {
               `);
     });
 
-    it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
+    // Failing 7.latest ES 8.2 forward compatibility: https://github.com/elastic/kibana/issues/129078
+    it.skip('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       await waitForIndexStatusYellow({
         client,
         index: '.kibana_1',
