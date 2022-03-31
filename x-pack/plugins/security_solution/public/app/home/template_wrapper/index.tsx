@@ -78,8 +78,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     );
 
     const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
-    const showEmptyState = useShowPagesWithEmptyView();
-    const emptyStateProps = showEmptyState ? NO_DATA_PAGE_TEMPLATE_PROPS : {};
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -99,11 +97,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         solutionNav={solutionNav}
         restrictWidth={false}
         template="default"
-        {...emptyStateProps}
       >
-        {showEmptyState ? (
-          children
-        ) : (
+        
           <>
             <GlobalKQLHeader />
             <EuiPanel
@@ -115,7 +110,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
               {children}
             </EuiPanel>
           </>
-        )}
       </StyledKibanaPageTemplate>
     );
   });

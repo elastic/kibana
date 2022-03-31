@@ -17,7 +17,6 @@ const isPageNameWithEmptyView = (currentName: string) => {
     SecurityPageName.network,
     SecurityPageName.timelines,
     SecurityPageName.overview,
-    SecurityPageName.landing,
   ];
   return pageNamesWithEmptyView.includes(currentName);
 };
