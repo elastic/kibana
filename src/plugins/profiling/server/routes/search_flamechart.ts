@@ -173,6 +173,7 @@ async function queryFlameGraph(
   const nQueries = 8;
   const stackTraces = new Map<StackTraceID, StackTrace>();
   const stackFrameDocIDs = new Set<string>(); // Set of unique FrameIDs
+  const executableDocIDs = new Set<string>(); // Set of unique executable FileIDs.
 
   await logExecutionLatency(
     logger,
@@ -203,6 +204,9 @@ async function queryFlameGraph(
               for (const frameID of frameIDs) {
                 stackFrameDocIDs.add(frameID);
               }
+              for (const fileID of fileIDs) {
+                executableDocIDs.add(fileID);
+              }
             }
           } else {
             for (const trace of res.body.docs) {
@@ -219,6 +223,9 @@ async function queryFlameGraph(
                 });
                 for (const frameID of frameIDs) {
                   stackFrameDocIDs.add(frameID);
+                }
+                for (const fileID of fileIDs) {
+                  executableDocIDs.add(fileID);
                 }
               }
             }
@@ -284,14 +291,6 @@ async function queryFlameGraph(
     }
   }
   logger.info('found ' + framesFound + ' / ' + stackFrameDocIDs.size + ' frames');
-
-  // Create the set of unique executable FileIDs.
-  const executableDocIDs = new Set<string>();
-  for (const trace of stackTraces.values()) {
-    for (const fileID of trace.FileID) {
-      executableDocIDs.add(fileID);
-    }
-  }
 
   const resExecutables = await logExecutionLatency(
     logger,
