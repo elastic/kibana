@@ -1313,9 +1313,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async toggleFullscreen() {
-      await retry.try(async () => {
-        await testSubjects.click('lnsFormula-fullscreen');
-      });
+      await testSubjects.click('lnsFormula-fullscreen');
     },
 
     async goToListingPageViaBreadcrumbs() {
@@ -1365,9 +1363,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async closeSettingsMenu() {
-      if (!(await this.settingsMenuOpen())) return;
-
-      await testSubjects.click('lnsApp_settingsButton');
+      if (await this.settingsMenuOpen()) {
+        await testSubjects.click('lnsApp_settingsButton');
+      }
     },
 
     async enableAutoApply() {
