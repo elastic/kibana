@@ -238,7 +238,7 @@ describe('alertType', () => {
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: customAlertServices as unknown as AlertServices<
+      services: customAlertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
         typeof ActionGroupId
@@ -304,7 +304,7 @@ describe('alertType', () => {
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: customAlertServices as unknown as AlertServices<
+      services: customAlertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
         typeof ActionGroupId

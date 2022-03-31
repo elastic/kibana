@@ -17,7 +17,7 @@ import {
   AlertInstanceContext,
   RuleExecutorOptions,
 } from '../../../../../alerting/server';
-import { Alert, RuleAction } from '../../../../../alerting/common';
+import { Rule, RuleAction } from '../../../../../alerting/common';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 
 /**
@@ -30,7 +30,7 @@ export interface LegacyRuleNotificationAlertTypeParams extends RuleTypeParams {
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export type LegacyRuleNotificationAlertType = Alert<LegacyRuleNotificationAlertTypeParams>;
+export type LegacyRuleNotificationAlertType = Rule<LegacyRuleNotificationAlertTypeParams>;
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

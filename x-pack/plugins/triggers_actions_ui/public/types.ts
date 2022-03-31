@@ -29,10 +29,10 @@ import { TypeRegistry } from './application/type_registry';
 import {
   ActionGroup,
   RuleActionParam,
-  SanitizedRule,
+  SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
   RuleAction,
-  RuleAggregations,
+  RuleAggregations as AlertingRuleAggregations,
   RuleTaskState,
   AlertSummary as RuleSummary,
   ExecutionDuration,
@@ -49,17 +49,17 @@ import { RuleRegistrySearchRequestPagination } from '../../rule_registry/common'
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
-  SanitizedRule<Params>,
+  AlertingSanitizedRule<Params>,
   'alertTypeId'
 > & {
-  ruleTypeId: SanitizedRule['alertTypeId'];
+  ruleTypeId: AlertingSanitizedRule['alertTypeId'];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
 type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
 };
-type RuleAggregations = Omit<RuleAggregations, 'alertExecutionStatus'> & {
-  ruleExecutionStatus: RuleAggregations['alertExecutionStatus'];
+type RuleAggregations = Omit<AlertingRuleAggregations, 'alertExecutionStatus'> & {
+  ruleExecutionStatus: AlertingRuleAggregations['alertExecutionStatus'];
 };
 
 export type {

@@ -247,7 +247,7 @@ export const getListsClient = ({
   lists: ListPluginSetup | undefined;
   spaceId: string;
   updatedByUser: string | null;
-  services: AlertSeRuleExecutorServicesrvices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   savedObjectClient: SavedObjectsClientContract;
 }): {
   listClient: ListClient;
