@@ -33,6 +33,7 @@ describe('AlertsByStatus', () => {
     showInspectButton: true,
     title: 'Alerts',
     visualizationActionsOptions: undefined,
+    signalIndexName: 'mock-signal-index',
   };
 
   beforeEach(() => {

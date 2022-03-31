@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   STATUS_ACKNOWLEDGED,
   STATUS_CLOSED,
@@ -17,13 +19,11 @@ import {
 } from './translations';
 import {
   AlertsByStatusAgg,
-  AlertsResponse,
+  AlertsByStatusResponse,
   ParsedSeverityBucket,
   ParsedStatusBucket,
   SeverityBucket,
-  SeveritySequence,
   StatusBucket,
-  StatusSequence,
 } from './types';
 
 const label = {
@@ -47,15 +47,12 @@ const links = {
   'in-progress': null,
 };
 
-const statusSequence: StatusSequence[] = ['open', 'acknowledged', 'closed'];
-const severitySequence: SeveritySequence[] = ['critical', 'high', 'medium', 'low'];
+const statusSequence: Status[] = ['open', 'acknowledged', 'closed'];
+const severitySequence: Severity[] = ['critical', 'high', 'medium', 'low'];
 
-type SortSeverityBuckets = (
-  buckets: SeverityBucket[],
-  sequence?: SeveritySequence[]
-) => SeverityBucket[];
+type SortSeverityBuckets = (buckets: SeverityBucket[], sequence?: Severity[]) => SeverityBucket[];
 
-type SortStatusBuckets = (buckets: StatusBucket[], sequence?: StatusSequence[]) => StatusBucket[];
+type SortStatusBuckets = (buckets: StatusBucket[], sequence?: Status[]) => StatusBucket[];
 
 export const sortSeverityBuckets: SortSeverityBuckets = (buckets, sequence = severitySequence) => {
   const result: SeverityBucket[] = [];
@@ -94,7 +91,7 @@ export const sortStatusBuckets: SortStatusBuckets = (buckets, sequence = statusS
 };
 
 export const parseAlertsData = (
-  response: AlertsResponse<[], AlertsByStatusAgg>
+  response: AlertsByStatusResponse<{}, AlertsByStatusAgg>
 ): ParsedStatusBucket[] => {
   const statusBuckets = sortStatusBuckets(response?.aggregations?.alertsByStatus?.buckets ?? []);
 

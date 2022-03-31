@@ -20,12 +20,13 @@ import { HeaderPage } from '../../common/components/header_page';
 import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING } from './translations';
 import { inputsSelectors } from '../../common/store/selectors';
-import { alertsData } from '../components/detection_response/alerts_by_status/mock_data';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
+import { useUserInfo } from '../../detections/components/user_info';
 
 const DetectionResponseComponent = () => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
+  const { loading: loadingSignalIndex, signalIndexName } = useUserInfo();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   // TODO: link queries with global time queries
   // const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
@@ -41,8 +42,8 @@ const DetectionResponseComponent = () => {
   }, [queriesLoading]);
 
   const showUpdating = useMemo(
-    () => queriesLoading || isSourcererLoading,
-    [queriesLoading, isSourcererLoading]
+    () => queriesLoading || isSourcererLoading || loadingSignalIndex,
+    [queriesLoading, isSourcererLoading, loadingSignalIndex]
   );
 
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
@@ -77,12 +78,10 @@ const DetectionResponseComponent = () => {
                       <EuiFlexGroup>
                         <AlertsByStatus
                           title="Alerts"
-                          donutData={alertsData()} // Todo
-                          id="alertByStatus"
                           filterQuery={''} // Todo
                           isInitialLoading={false} // Todo
-                          loading={false} // Todo
                           showInspectButton={true} // Todo
+                          signalIndexName={signalIndexName}
                         />
                       </EuiFlexGroup>
                     )}

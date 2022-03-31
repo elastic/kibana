@@ -5,17 +5,8 @@
  * 2.0.
  */
 
+import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-
-export enum SeverityEnum {
-  critical = 'Critical',
-  high = 'High',
-  medium = 'Medium',
-  low = 'Low',
-}
-
-export type StatusSequence = Status;
-export type SeveritySequence = keyof typeof SeverityEnum;
 
 export interface StatusBySeverity {
   doc_count_error_upper_bound: number;
@@ -24,7 +15,7 @@ export interface StatusBySeverity {
 }
 
 export interface StatusBucket {
-  key: StatusSequence;
+  key: Status;
   doc_count: number;
   statusBySeverity?: StatusBySeverity;
 }
@@ -36,7 +27,7 @@ export interface ParsedStatusBucket extends StatusBucket {
 }
 
 export interface SeverityBucket {
-  key: SeveritySequence;
+  key: Severity;
   doc_count: number;
 }
 
@@ -44,8 +35,8 @@ export interface ParsedSeverityBucket {
   value: number;
   status: string;
   label: string;
-  group: StatusSequence;
-  key: SeveritySequence;
+  group: Status;
+  key: Severity;
 }
 
 export interface AlertsByStatusAgg {
@@ -56,9 +47,8 @@ export interface AlertsByStatusAgg {
   };
 }
 
-export interface AlertsResponse<Hit = {}, Aggregations = {} | undefined> {
+export interface AlertsByStatusResponse<Hit = {}, Aggregations = {} | undefined> {
   took: number;
-  timed_out: boolean;
   _shards: {
     total: number;
     successful: number;
@@ -71,7 +61,6 @@ export interface AlertsResponse<Hit = {}, Aggregations = {} | undefined> {
       value: number;
       relation: string;
     };
-    max_score: number | null;
     hits: Hit[];
   };
 }

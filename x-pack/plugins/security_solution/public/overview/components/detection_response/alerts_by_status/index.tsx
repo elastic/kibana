@@ -27,7 +27,7 @@ import { LegendItem } from '../../../../common/components/charts/draggable_legen
 import { ThemeContext } from '../../../../common/components/charts/donut_theme_context';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { DraggableLegend } from '../../../../common/components/charts/draggable_legend';
-import { ParsedStatusBucket } from './types';
+import { useAlertsByStatus } from './use_alerts_by_status';
 
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
@@ -37,15 +37,13 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 const defaultPanelHeight = 300;
 const donutHeight = 120;
 
-interface DonutCardProps {
-  donutData: ParsedStatusBucket[] | undefined;
+interface AlertsByStatusProps {
   filterQuery: string;
   headerChildren?: React.ReactNode;
-  id: string;
   isInitialLoading: boolean;
-  loading: boolean;
   showSpacer?: boolean;
   showInspectButton: boolean;
+  signalIndexName: string | null;
   subtitle?: string;
   title: string;
 }
@@ -68,7 +66,7 @@ interface Others {
   detailsButtonOptions?: ViewDetailsButtonProps;
 }
 
-type Props = DonutCardProps & Others;
+type Props = AlertsByStatusProps & Others;
 
 const DefaultPanelSettings = {
   panelHeight: defaultPanelHeight,
@@ -79,25 +77,27 @@ const legendField = 'kibana.alert.severity';
 
 export const AlertsByStatus = ({
   detailsButtonOptions,
-  donutData,
   filterQuery,
   headerChildren,
-  id,
   isInitialLoading,
-  loading,
   panelSettings = DefaultPanelSettings,
   showInspectButton,
   showSpacer,
   subtitle,
   title,
   visualizationActionsOptions,
+  signalIndexName,
 }: Props) => {
   const { cases } = useKibana().services;
   const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
   const { colors } = useContext(ThemeContext);
-
+  const {
+    items: donutData,
+    isLoading: loading,
+    queryId: id,
+  } = useAlertsByStatus({ signalIndexName });
   const legendItems: LegendItem[] = useMemo(
     () =>
       donutData && donutData?.length > 0 && legendField

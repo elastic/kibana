@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { AlertsResponse, AlertsByStatusAgg, StatusBucket, ParsedStatusBucket } from './types';
+import {
+  AlertsByStatusResponse,
+  AlertsByStatusAgg,
+  StatusBucket,
+  ParsedStatusBucket,
+} from './types';
 import { parseAlertsData } from './utils';
 
-export const mockAlertsData: AlertsResponse<[], AlertsByStatusAgg> = {
+export const mockAlertsData: AlertsByStatusResponse<[], AlertsByStatusAgg> = {
   took: 4,
-  timed_out: false,
   _shards: {
     total: 1,
     successful: 1,
@@ -22,7 +26,6 @@ export const mockAlertsData: AlertsResponse<[], AlertsByStatusAgg> = {
       value: 10000,
       relation: 'gte',
     },
-    max_score: null,
     hits: [],
   },
   aggregations: {
