@@ -757,7 +757,7 @@ export interface NavigateToUrlOptions {
    */
   skipAppLeave?: boolean;
   /**
-   * if true will force a full page reload/refresh/assign, (effectively using `window.location.assign` instead of `push`)
+   * if true will force a full page reload/refresh/assign, overriding the outcome of other url checks against current the location (effectively using `window.location.assign` instead of `push`)
    */
   forceRedirect?: boolean;
 }
