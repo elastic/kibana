@@ -6,15 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-import uuid from 'uuid';
+import { CaseStatuses } from '../../../../plugins/cases/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function CasesCommonServiceProvider({ getService, getPageObject }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const comboBox = getService('comboBox');
   const header = getPageObject('header');
+
   return {
     /**
      * Opens the create case page pressing the "create case" button.
@@ -29,125 +28,11 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       });
     },
 
-    /**
-     * it creates a new case from the create case page
-     * and leaves the navigation in the case view page
-     *
-     * Doesn't do navigation. Only works if you are already inside a cases app page.
-     * Does not work with the cases flyout.
-     */
-    async createCaseFromCreateCasePage({
-      title = 'test-' + uuid.v4(),
-      description = 'desc' + uuid.v4(),
-      tag = 'tagme',
-    }: {
-      title: string;
-      description: string;
-      tag: string;
-    }) {
-      await this.openCreateCasePage();
-
-      // case name
-      await testSubjects.setValue('input', title);
-
-      // case tag
-      await comboBox.setCustom('comboBoxInput', tag);
-
-      // case description
-      const descriptionArea = await find.byCssSelector('textarea.euiMarkdownEditorTextArea');
-      await descriptionArea.focus();
-      await descriptionArea.type(description);
-
-      // save
-      await testSubjects.click('create-case-submit');
-
-      await testSubjects.existOrFail('case-view-title');
-    },
-
-    /**
-     * Goes to the first case listed on the table.
-     *
-     * This will fail if the table doesn't have any case
-     */
-    async goToFirstListedCase() {
-      await testSubjects.existOrFail('cases-table');
-      await testSubjects.click('case-details-link');
-      await testSubjects.existOrFail('case-view-title');
-    },
-
-    /**
-     * Marks a case in progress via the status dropdown
-     */
-    async markCaseInProgressViaDropdown() {
-      await this.openCaseSetStatusDropdown();
-
-      await testSubjects.click('case-view-status-dropdown-in-progress');
-
-      // wait for backend response
-      await testSubjects.existOrFail('header-page-supplements > status-badge-in-progress', {
-        timeout: 5000,
-      });
-    },
-
-    /**
-     * Marks a case closed via the status dropdown
-     */
-    async markCaseClosedViaDropdown() {
+    async changeCaseStatusViaDropdownAndVerify(status: CaseStatuses) {
       this.openCaseSetStatusDropdown();
-
-      await testSubjects.click('case-view-status-dropdown-closed');
-
-      // wait for backend response
-      await testSubjects.existOrFail('header-page-supplements > status-badge-closed', {
-        timeout: 5000,
-      });
-    },
-
-    /**
-     * Marks a case open via the status dropdown
-     */
-    async markCaseOpenViaDropdown() {
-      this.openCaseSetStatusDropdown();
-
-      await testSubjects.click('case-view-status-dropdown-open');
-
-      // wait for backend response
-      await testSubjects.existOrFail('header-page-supplements > status-badge-open', {
-        timeout: 5000,
-      });
-    },
-
-    async bulkDeleteAllCases() {
-      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
-      const button = await find.byCssSelector('[aria-label="Bulk actions"]');
-      await button.click();
-      await testSubjects.click('cases-bulk-delete-button');
-      await testSubjects.click('confirmModalConfirmButton');
-    },
-
-    async selectAndDeleteAllCases() {
+      await testSubjects.click(`case-view-status-dropdown-${status}`);
       await header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
-      let rows: WebElementWrapper[];
-      do {
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
-        rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
-        if (rows.length > 0) {
-          await this.bulkDeleteAllCases();
-          // wait for a second
-          await new Promise((r) => setTimeout(r, 1000));
-          await header.waitUntilLoadingHasFinished();
-        }
-      } while (rows.length > 0);
-    },
-
-    async validateCasesTableHasNthRows(nrRows: number) {
-      await header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
-      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
-      const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
-      expect(rows.length).equal(nrRows);
+      await testSubjects.existOrFail(`status-badge-${status}`);
     },
 
     async openCaseSetStatusDropdown() {
@@ -155,6 +40,23 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
         '[data-test-subj="case-view-status-dropdown"] button'
       );
       await button.click();
+    },
+
+    async assertRadioGroupValue(testSubject: string, expectedValue: string) {
+      const assertRadioGroupValue = await testSubjects.find(testSubject);
+      const input = await assertRadioGroupValue.findByCssSelector(':checked');
+      const selectedOptionId = await input.getAttribute('id');
+      expect(selectedOptionId).to.eql(
+        expectedValue,
+        `Expected the radio group value to equal "${expectedValue}" (got "${selectedOptionId}")`
+      );
+    },
+
+    async selectRadioGroupValue(testSubject: string, value: string) {
+      const radioGroup = await testSubjects.find(testSubject);
+      const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
+      await label.click();
+      await this.assertRadioGroupValue(testSubject, value);
     },
   };
 }

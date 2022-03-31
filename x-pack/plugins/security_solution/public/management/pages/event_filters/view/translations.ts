@@ -7,24 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { ServerApiError } from '../../../../common/types';
+import { EventFiltersForm } from '../types';
 
-export const getCreationSuccessMessage = (
-  entry: CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
-) => {
+export const getCreationSuccessMessage = (entry: EventFiltersForm['entry']) => {
   return i18n.translate('xpack.securitySolution.eventFilter.form.creationSuccessToastTitle', {
     defaultMessage: '"{name}" has been added to the event filters list.',
     values: { name: entry?.name },
   });
 };
 
-export const getUpdateSuccessMessage = (
-  entry: CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
-) => {
+export const getUpdateSuccessMessage = (entry: EventFiltersForm['entry']) => {
   return i18n.translate('xpack.securitySolution.eventFilter.form.updateSuccessToastTitle', {
     defaultMessage: '"{name}" has been updated successfully.',
     values: { name: entry?.name },

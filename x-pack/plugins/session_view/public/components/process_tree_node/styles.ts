@@ -13,9 +13,10 @@ interface StylesDeps {
   depth: number;
   hasAlerts: boolean;
   hasInvestigatedAlert: boolean;
+  isSelected: boolean;
 }
 
-export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps) => {
+export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
@@ -25,13 +26,10 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
 
     const darkText: CSSObject = {
       color: colors.text,
+      fontFamily: font.familyCode,
+      paddingLeft: size.xxs,
+      paddingRight: size.xs,
     };
-
-    const searchHighlight = `
-      background-color: ${colors.highlight};
-      color: ${colors.fullShade};
-      border-radius: ${border.radius.medium};
-    `;
 
     const children: CSSObject = {
       position: 'relative',
@@ -48,6 +46,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
       let bgColor = 'none';
       const hoverColor = transparentize(colors.primary, 0.04);
       let borderColor = 'transparent';
+      let searchResColor = transparentize(colors.warning, 0.32);
 
       if (hasAlerts) {
         borderColor = colors.danger;
@@ -57,10 +56,14 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
         bgColor = transparentize(colors.danger, 0.04);
       }
 
-      return { bgColor, borderColor, hoverColor };
+      if (isSelected) {
+        searchResColor = colors.warning;
+      }
+
+      return { bgColor, borderColor, hoverColor, searchResColor };
     };
 
-    const { bgColor, borderColor, hoverColor } = getHighlightColors();
+    const { bgColor, borderColor, hoverColor, searchResColor } = getHighlightColors();
 
     const processNode: CSSObject = {
       display: 'block',
@@ -84,6 +87,12 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
       },
     };
 
+    const searchHighlight = `
+      color: ${colors.fullShade};
+      border-radius: '0px';
+      background-color: ${searchResColor};
+    `;
+
     const wrapper: CSSObject = {
       paddingLeft: size.s,
       position: 'relative',
@@ -96,6 +105,10 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
 
     const workingDir: CSSObject = {
       color: colors.successText,
+      fontFamily: font.familyCode,
+      fontWeight: font.weight.medium,
+      paddingLeft: size.s,
+      paddingRight: size.xxs,
     };
 
     const timeStamp: CSSObject = {
@@ -124,7 +137,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert }: StylesDeps
       timeStamp,
       alertDetails,
     };
-  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert]);
+  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected]);
 
   return cached;
 };
