@@ -55,7 +55,6 @@ export class TimesliderEmbeddableFactory
   public getDisplayName = () => TimeSliderStrings.getDisplayName();
   public getIconType = () => 'clock';
   public getDescription = () => TimeSliderStrings.getDescription();
-  public getIconType = () => 'clock';
 
   public inject = createOptionsListInject();
   public extract = createOptionsListExtract();
