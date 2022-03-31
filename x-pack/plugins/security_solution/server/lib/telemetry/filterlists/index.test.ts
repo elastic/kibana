@@ -16,6 +16,8 @@ describe('Security Telemetry filters', () => {
       c: {
         d: true,
       },
+      'kibana.alert.ancestors': true,
+      'kibana.alert.original_event.module': true,
     };
 
     it('filters top level', () => {
@@ -124,6 +126,20 @@ describe('Security Telemetry filters', () => {
       expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
         a: 'a',
         b: 'b',
+      });
+    });
+
+    it("copies long nested strings that shouldn't be broken up on customer deployments", () => {
+      const event = {
+        'kibana.alert.ancestors': 'a',
+        'kibana.alert.original_event.module': 'b',
+        'kibana.random.long.alert.string': {
+          info: 'data',
+        },
+      };
+      expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
+        'kibana.alert.ancestors': 'a',
+        'kibana.alert.original_event.module': 'b',
       });
     });
   });

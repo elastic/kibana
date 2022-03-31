@@ -9,6 +9,7 @@ import {
   ElasticsearchClient,
   SavedObjectsClientContract,
   Logger,
+  KibanaRequest,
 } from 'kibana/server';
 import { PackagePolicy } from '../../../../fleet/common';
 import {
@@ -22,6 +23,7 @@ import {
 import { getApmPackagePolicyDefinition } from './get_apm_package_policy_definition';
 import { Setup } from '../../lib/helpers/setup_request';
 import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
+import { ELASTIC_CLOUD_APM_AGENT_POLICY_ID } from '../../../common/fleet';
 
 export async function createCloudApmPackgePolicy({
   cloudPluginSetup,
@@ -30,7 +32,7 @@ export async function createCloudApmPackgePolicy({
   esClient,
   logger,
   setup,
-  kibanaVersion,
+  request,
 }: {
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
@@ -38,7 +40,7 @@ export async function createCloudApmPackgePolicy({
   esClient: ElasticsearchClient;
   logger: Logger;
   setup: Setup;
-  kibanaVersion: string;
+  request: KibanaRequest;
 }): Promise<PackagePolicy> {
   const { attributes } = await savedObjectsClient.get(
     APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
@@ -52,7 +54,7 @@ export async function createCloudApmPackgePolicy({
     apmServerSchema,
     cloudPluginSetup,
     fleetPluginStart,
-    kibanaVersion,
+    request,
   });
   const mergedAPMPackagePolicy = await mergePackagePolicyWithApm({
     setup,
@@ -64,7 +66,7 @@ export async function createCloudApmPackgePolicy({
     savedObjectsClient,
     esClient,
     mergedAPMPackagePolicy,
-    { force: true, bumpRevision: true }
+    { id: ELASTIC_CLOUD_APM_AGENT_POLICY_ID, force: true, bumpRevision: true }
   );
   logger.info(`Fleet migration on Cloud - apmPackagePolicy create end`);
   return apmPackagePolicy;
