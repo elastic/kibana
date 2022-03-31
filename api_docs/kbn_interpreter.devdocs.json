@@ -456,20 +456,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/interpreter",
-        "id": "def-server.typedParse",
-        "type": "Function",
-        "tags": [],
-        "label": "typedParse",
-        "description": [],
-        "signature": [
-          "Parse"
-        ],
-        "path": "packages/kbn-interpreter/src/common/lib/parse.ts",
-        "deprecated": false,
-        "initialIsOpen": false
       }
     ],
     "interfaces": [],
@@ -646,6 +632,20 @@
           "[]; }>>"
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-server.typedParse",
+        "type": "Any",
+        "tags": [],
+        "label": "typedParse",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/parse.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

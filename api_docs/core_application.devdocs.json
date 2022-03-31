@@ -1386,20 +1386,8 @@
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/target/types/public/applications/fleet/index.d.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/target/types/public/applications/integrations/index.d.ts"
-              },
-              {
                 "plugin": "kibanaOverview",
                 "path": "src/plugins/kibana_overview/public/application.tsx"
-              },
-              {
-                "plugin": "management",
-                "path": "src/plugins/management/target/types/public/application.d.ts"
               }
             ]
           },
@@ -1490,40 +1478,8 @@
                 "path": "x-pack/plugins/security_solution/public/app/index.tsx"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/target/types/public/render_app.d.ts"
-              },
-              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_page.d.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/target/types/public/types.d.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/target/types/public/visualize_app/app.d.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/target/types/public/visualize_app/index.d.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/target/types/public/visualize_app/components/visualize_editor_common.d.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/target/types/public/visualize_app/components/visualize_top_nav.d.ts"
               }
             ],
             "children": [
