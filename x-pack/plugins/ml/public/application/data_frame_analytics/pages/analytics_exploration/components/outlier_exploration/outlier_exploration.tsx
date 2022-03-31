@@ -66,16 +66,14 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
 
   const { columnsWithCharts, tableItems } = outlierData;
 
-  const featureCount = getFeatureCount(jobConfig?.dest?.results_field || '', tableItems);
+  const resultsField = jobConfig?.dest.results_field ?? '';
+  const featureCount = getFeatureCount(resultsField, tableItems);
   const colorRange = useColorRange(COLOR_RANGE.BLUE, COLOR_RANGE_SCALE.INFLUENCER, featureCount);
 
   // Show the color range only if feature influence is enabled and there's more than 0 features.
   const showColorRange =
-    featureCount > 0 &&
     isOutlierAnalysis(jobConfig?.analysis) &&
     jobConfig?.analysis.outlier_detection.compute_feature_influence === true;
-
-  const resultsField = jobConfig?.dest.results_field ?? '';
 
   // Identify if the results index has a legacy feature influence format.
   // If feature influence was enabled for the legacy job we'll show a callout
