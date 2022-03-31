@@ -94,6 +94,21 @@ export const findThresholdSignals = async ({
   // 2) return the latest hit for each bucket so that we can persist the timestamp of the event in the
   // `original_time` of the signal. This will be used for dupe mitigation purposes by the detection
   // engine.
+
+  // TODO: handle when no threshold fields are provided
+  const aggregations = {
+    thresholdTerms: {
+      multi_terms: {
+        terms: thresholdFields.map((term) => ({ field: term })),
+        min_doc_count: threshold.value,
+        ...(threshold.cardinality?.length ? { order: { cardinality_count: 'desc' } } : {}),
+        size: 10000,
+      },
+      aggs: leafAggs,
+    },
+  };
+
+  /*
   const aggregations = thresholdFields.length
     ? thresholdFields.reduce((acc, field, i) => {
         const aggPath = [...Array(i + 1).keys()]
@@ -127,7 +142,8 @@ export const findThresholdSignals = async ({
           },
           aggs: leafAggs,
         },
-      };
+    };
+  */
 
   return singleSearchAfter({
     aggregations,

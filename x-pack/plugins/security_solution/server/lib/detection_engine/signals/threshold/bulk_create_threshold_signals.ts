@@ -58,6 +58,8 @@ const getTransformedHits = (
   if (results.aggregations == null) {
     return [];
   }
+  // TODO: handle when there are no threshold fields
+  /*
   const aggParts = threshold.field.length
     ? getThresholdAggregationParts(results.aggregations)
     : {
@@ -69,6 +71,7 @@ const getTransformedHits = (
   if (!aggParts) {
     return [];
   }
+  */
 
   const getCombinations = (buckets: TermAggregationBucket[], i: number, field: string | null) => {
     return buckets.reduce((acc: MultiAggBucket[], bucket: TermAggregationBucket) => {
@@ -125,6 +128,39 @@ const getTransformedHits = (
     }, []);
   };
 
+  // TODO: handle single term (use terms aggregations)
+  console.log('THE SEARCH RESPONSE');
+  console.log(JSON.stringify(results));
+  return results.aggregations.thresholdTerms.buckets.map((bucket, i) => ({
+    _index: inputIndex,
+    _id: calculateThresholdSignalUuid(
+      ruleId,
+      startedAt,
+      threshold.field,
+      bucket.key.sort().join(',')
+    ),
+    _source: {
+      [TIMESTAMP]: bucket.max_timestamp.value_as_string,
+      ...bucket.key.reduce(
+        (acc, val, i) => ({
+          ...acc,
+          [threshold.field[i]]: val,
+        }),
+        {}
+      ),
+      threshold_result: {
+        terms: bucket.key.map((term, j) => ({
+          field: threshold.field[j],
+          value: term,
+        })),
+        cardinality: bucket.cardinality_count?.value,
+        count: bucket.doc_count,
+        from: new Date(bucket.min_timestamp.value_as_string) ?? from,
+      },
+    },
+  }));
+
+  /*
   return getCombinations(
     (results.aggregations[aggParts.name] as { buckets: TermAggregationBucket[] }).buckets,
     0,
@@ -171,6 +207,7 @@ const getTransformedHits = (
 
     return acc;
   }, []);
+  */
 };
 
 export const transformThresholdResultsToEcs = (
@@ -189,6 +226,8 @@ export const transformThresholdResultsToEcs = (
     threshold,
     ruleId
   );
+  console.log('TRANSFORMED HITS');
+  console.log(JSON.stringify(transformedHits));
   const thresholdResults = {
     ...results,
     hits: {
