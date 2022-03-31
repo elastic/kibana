@@ -18,9 +18,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
-  describe('visualize', () => {
+  describe('visualize spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/visualize/default');
     });
 
     describe('space with no features disabled', () => {
@@ -36,6 +37,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           name: 'custom_space',
           disabledFeatures: [],
         });
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/visualize/custom_space',
+          { space: 'custom_space' }
+        );
       });
 
       after(async () => {
@@ -54,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`can view existing Visualization`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'visualize',
-          `${VisualizeConstants.EDIT_PATH}/i-exist`,
+          `${VisualizeConstants.EDIT_PATH}/custom_i-exist`,
           {
             basePath: '/s/custom_space',
             ensureCurrentUrl: false,
