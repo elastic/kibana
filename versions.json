@@ -3,16 +3,19 @@
     {
       "version": "8.3.0",
       "branch": "main",
+      "currentMajor": true,
       "currentMinor": true
     },
     {
       "version": "8.2.0",
       "branch": "8.2",
+      "currentMajor": true,
       "previousMinor": true
     },
     {
       "version": "8.1.2",
-      "branch": "8.1"
+      "branch": "8.1",
+      "currentMajor": true
     },
     {
       "version": "7.17.2",
