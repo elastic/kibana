@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-// FIXME:PT implement a React context to manage consoles
+export { ConsoleManager, useConsoleManager } from './console_manager';
