@@ -25,7 +25,6 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-  IAbortableEsClient,
 } from '../../../../../../alerting/server';
 import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
 import { ITelemetryEventsSender } from '../../../telemetry/sender';
@@ -44,7 +43,6 @@ import { IRuleDataClient } from '../../../../../../rule_registry/server';
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface UpdatePercolatorIndexOptions {
-  abortableEsClient: IAbortableEsClient;
   esClient: ElasticsearchClient;
   exceptionItems: ExceptionListItemSchema[];
   logDebugMessage: (message: string) => void;
@@ -241,7 +239,7 @@ export interface PercolatorQuery {
 }
 
 export interface GetNextPageOptions {
-  abortableEsClient: IAbortableEsClient;
+  esClient: ElasticsearchClient;
   exceptionItems: ExceptionListItemSchema[];
   filters: unknown[];
   index: string[];
@@ -254,7 +252,7 @@ export interface GetNextPageOptions {
 }
 
 export interface CreatePercolatorQueriesOptions {
-  abortableEsClient: IAbortableEsClient;
+  esClient: ElasticsearchClient;
   exceptionItems: ExceptionListItemSchema[];
   logDebugMessage: (message: string) => void;
   perPage?: number;
@@ -267,12 +265,12 @@ export interface CreatePercolatorQueriesOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
-  pitId: OpenPointInTimeResponse['id'];
-  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  // pitId: OpenPointInTimeResponse['id'];
+  // reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
 
 export interface FetchItemsOptions<T> {
-  abortableEsClient: IAbortableEsClient;
+  esClient: ElasticsearchClient;
   exceptionItems: ExceptionListItemSchema[];
   filters: unknown[];
   index: ThreatIndex;
@@ -357,10 +355,6 @@ export interface EventsOptions {
   tuple: RuleRangeTuple;
 }
 
-export interface EventDoc {
-  [key: string]: unknown;
-}
-
 export type EventItem = estypes.SearchHit<EventDoc>;
 export interface EventCountOptions {
   esClient: ElasticsearchClient;
@@ -383,5 +377,5 @@ export type GetDocumentListInterface = (params: {
 }) => Promise<estypes.SearchResponse<EventDoc | ThreatListDoc>>;
 
 export type CreateSignalInterface = (
-  params: EventItem[] | ThreatListItem[]
+  params: EventItem[] | IndicatorHit[]
 ) => Promise<SearchAfterAndBulkCreateReturnType>;

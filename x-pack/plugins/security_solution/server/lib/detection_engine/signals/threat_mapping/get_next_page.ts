@@ -14,7 +14,7 @@ import {
 } from '../../../../../common/constants';
 
 export const getNextPage = async ({
-  abortableEsClient,
+  esClient,
   exceptionItems,
   filters,
   index,
@@ -34,10 +34,7 @@ export const getNextPage = async ({
     `Querying indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
-  const { body: response } = await abortableEsClient.search<
-    EventDoc,
-    Record<string, estypes.AggregationsAggregate>
-  >({
+  const response = await esClient.search<EventDoc, Record<string, estypes.AggregationsAggregate>>({
     body: {
       query: getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems),
       search_after: searchAfter,

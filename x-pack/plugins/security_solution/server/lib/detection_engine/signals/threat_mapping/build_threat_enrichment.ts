@@ -32,8 +32,8 @@ export const buildThreatEnrichment = ({
         },
       },
     };
-    const threatResponse = await getNextPage({
-      abortableEsClient: services.search.asCurrentUser,
+    const threatResponse = await getThreatList({
+      esClient: services.scopedClusterClient.asCurrentUser,
       exceptionItems,
       filters: [...threatFilters, matchedThreatsFilter],
       query: threatQuery,

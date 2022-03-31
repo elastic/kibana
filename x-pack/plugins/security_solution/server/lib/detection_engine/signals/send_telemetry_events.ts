@@ -19,9 +19,7 @@ interface SearchResultSource {
 type CreatedSignalId = string;
 type AlertId = string;
 
-export function selectEventsFromHits(
-  eventHits: Array<estypes.SearchHit<SignalSource>>
-): TelemetryEvent[] {
+export function selectEvents(eventHits: Array<estypes.SearchHit<SignalSource>>): TelemetryEvent[] {
   // @ts-expect-error @elastic/elasticsearch _source is optional
   const sources: TelemetryEvent[] = eventHits.map(function (
     obj: SearchResultSource
@@ -31,10 +29,6 @@ export function selectEventsFromHits(
 
   // Filter out non-endpoint alerts
   return sources.filter((obj: TelemetryEvent) => obj.data_stream?.dataset === 'endpoint.alerts');
-}
-
-export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
-  return selectEventsFromHits(filteredEvents.hits.hits);
 }
 
 export function enrichEndpointAlertsSignalID(
@@ -53,7 +47,7 @@ export function enrichEndpointAlertsSignalID(
 export function sendAlertTelemetryEvents(
   logger: Logger,
   eventsTelemetry: ITelemetryEventsSender | undefined,
-  filteredEvents: SignalSearchResponse,
+  filteredEvents: SignalSearchResponse | Array<estypes.SearchHit<SignalSource>>,
   createdEvents: SignalSource[],
   buildRuleMessage: BuildRuleMessage
 ) {
@@ -61,7 +55,9 @@ export function sendAlertTelemetryEvents(
     return;
   }
 
-  let selectedEvents = selectEvents(filteredEvents);
+  let selectedEvents = selectEvents(
+    Array.isArray(filteredEvents) ? filteredEvents : filteredEvents.hits.hits
+  );
   if (selectedEvents.length > 0) {
     // Create map of ancenstor_id -> alert_id
     let signalIdMap = new Map<CreatedSignalId, AlertId>();

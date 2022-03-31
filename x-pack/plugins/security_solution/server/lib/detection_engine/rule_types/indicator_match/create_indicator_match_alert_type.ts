@@ -12,8 +12,8 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { percolateExecutor } from './percolator/percolate_executor';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions & { percolatorRuleDataClient: IRuleDataClient }
@@ -76,21 +76,21 @@ export const createIndicatorMatchAlertType = (
       const result = await indicatorMatchExecutor({
         buildRuleMessage,
         bulkCreate,
-        completeRule,
-        eventsTelemetry,
         exceptionItems,
         experimentalFeatures,
+        eventsTelemetry,
         listClient,
         logger,
+        completeRule,
         percolatorRuleDataClient,
         searchAfterSize,
         services,
-        spaceId,
         tuple,
-        tupleIndex,
         version,
-        withTimeout,
         wrapHits,
+        tupleIndex,
+        withTimeout,
+        spaceId,
       });
       return { ...result, state };
     },

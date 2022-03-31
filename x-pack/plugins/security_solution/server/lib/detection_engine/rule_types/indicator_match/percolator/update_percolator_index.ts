@@ -27,7 +27,6 @@ import {
 } from './persist_indicator_search_after';
 
 export const updatePercolatorIndex = async ({
-  abortableEsClient,
   esClient,
   exceptionItems,
   logDebugMessage,
@@ -67,7 +66,7 @@ export const updatePercolatorIndex = async ({
     { items: PercolatorQuery[]; updatedSearchAfter: SortResults | undefined },
     CreatePercolatorQueriesOptions
   >(createPercolatorQueries, {
-    abortableEsClient,
+    esClient,
     exceptionItems,
     logDebugMessage,
     perPage,

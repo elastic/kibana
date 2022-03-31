@@ -18,7 +18,7 @@ import { updatePercolatorIndex } from './update_percolator_index';
 import { getEventCount } from '../../../signals/threat_mapping/get_event_count';
 import { buildReasonMessageForThreatMatchAlert } from '../../../signals/reason_formatters';
 import { EventCountOptions } from '../../../signals/threat_mapping/types';
-import { sendAlertTelemetryEventsFromHits } from '../../../signals/send_telemetry_events';
+import { sendAlertTelemetryEvents } from '../../../signals/send_telemetry_events';
 
 export const percolateExecutor = ({
   buildRuleMessage,
@@ -62,7 +62,6 @@ export const percolateExecutor = ({
       version: ruleVersion,
       threatIndicatorPath = DEFAULT_INDICATOR_SOURCE_PATH,
     } = completeRule.ruleParams;
-    const abortableEsClient = services.search.asCurrentUser;
     const esClient = services.scopedClusterClient.asCurrentUser;
     const inputIndex = await getInputIndex({
       experimentalFeatures,
@@ -89,7 +88,6 @@ export const percolateExecutor = ({
       if (tupleIndex === 0) {
         try {
           await updatePercolatorIndex({
-            abortableEsClient,
             esClient,
             exceptionItems: [],
             logDebugMessage,
@@ -177,7 +175,7 @@ export const percolateExecutor = ({
         }),
       ]);
 
-      sendAlertTelemetryEventsFromHits(logger, eventsTelemetry, alertCandidates, buildRuleMessage);
+      sendAlertTelemetryEvents(logger, eventsTelemetry, alertCandidates, [], buildRuleMessage);
     }
 
     logDebugMessage('Indicator matching rule has completed');

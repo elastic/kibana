@@ -14,7 +14,7 @@ import {
 import { getNextPage } from '../../../signals/threat_mapping/get_next_page';
 
 export const createPercolatorQueries = async ({
-  abortableEsClient,
+  esClient,
   exceptionItems,
   logDebugMessage,
   perPage,
@@ -37,7 +37,7 @@ export const createPercolatorQueries = async ({
   };
 
   let indicatorPage = await getNextPage({
-    abortableEsClient,
+    esClient,
     exceptionItems,
     filters,
     index,
@@ -63,7 +63,7 @@ export const createPercolatorQueries = async ({
     updatedSearchAfter = indicatorPage.hits.hits[indicatorPage.hits.hits.length - 1].sort;
 
     indicatorPage = await getNextPage({
-      abortableEsClient,
+      esClient,
       exceptionItems,
       filters,
       index,
