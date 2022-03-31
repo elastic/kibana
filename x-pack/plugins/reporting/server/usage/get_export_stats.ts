@@ -9,6 +9,7 @@ import { DEPRECATED_JOB_TYPES } from '../../common/constants';
 import { ExportTypesHandler } from './get_export_type_handler';
 import {
   AvailableTotal,
+  ErrorCodeStats,
   FeatureAvailabilityMap,
   JobTypes,
   LayoutCounts,
@@ -59,8 +60,9 @@ const metricsForFeature: { [K in keyof JobTypes]: JobTypes[K]['metrics'] } = {
 };
 
 type CombinedJobTypeStats = AvailableTotal & {
-  layout?: LayoutCounts;
   metrics: Partial<MetricsStats>;
+  error_codes?: Partial<ErrorCodeStats>;
+  layout?: LayoutCounts;
 };
 
 const isAvailable = (featureAvailability: FeatureAvailabilityMap, feature: string) =>
@@ -82,6 +84,7 @@ function getAvailableTotalForFeature(
     output_size: { ...defaultTotalsForFeature.output_size, ...jobType?.output_size },
     metrics: { ...metricsForFeature[exportType], ...jobType?.metrics },
     app: { ...defaultTotalsForFeature.app, ...jobType?.app },
+    error_codes: jobType?.error_codes,
     layout: jobTypeIsPdf(exportType)
       ? { ...defaultTotalsForFeature.layout, ...jobType?.layout }
       : undefined,
