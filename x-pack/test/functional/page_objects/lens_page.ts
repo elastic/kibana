@@ -1313,7 +1313,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async toggleFullscreen() {
-      await testSubjects.click('lnsFormula-fullscreen');
+      await retry.try(async () => {
+        await testSubjects.click('lnsFormula-fullscreen');
+      });
     },
 
     async goToListingPageViaBreadcrumbs() {
