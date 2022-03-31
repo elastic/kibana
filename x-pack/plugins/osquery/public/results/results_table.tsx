@@ -305,7 +305,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     setVisibleColumns(map('id', newColumns));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allResultsData?.columns.length, ecsMappingColumns, getHeaderDisplay]);
-  
+
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
