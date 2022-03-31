@@ -7,6 +7,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, Logger } from 'kibana/server';
+import { chunk } from 'lodash';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import { getRemoteRoutePaths } from '../../common';
 import { FlameGraph } from '../../common/flamegraph';
@@ -75,11 +76,11 @@ export function parallelMget(
 ): Array<Promise<any>> {
   const futures: Array<Promise<any>> = [];
   [...Array(nQueries).keys()].forEach((i) => {
-    const chunk = stackTraceIDs.slice(chunkSize * i, chunkSize * (i + 1));
+    const ids = stackTraceIDs.slice(chunkSize * i, chunkSize * (i + 1));
     futures.push(
       client.mget({
         index: 'profiling-stacktraces',
-        ids: [...chunk],
+        ids,
         _source_includes: ['FrameID', 'Type'],
       })
     );
@@ -174,73 +175,68 @@ async function queryFlameGraph(
   const stackTraces = new Map<StackTraceID, StackTrace>();
   const stackFrameDocIDs = new Set<string>(); // Set of unique FrameIDs
   const executableDocIDs = new Set<string>(); // Set of unique executable FileIDs.
+  const stackTraceIDs = [...stackTraceEvents.keys()];
+  const chunkSize = Math.floor(stackTraceEvents.size / nQueries);
+  const chunks = chunk(stackTraceIDs, chunkSize);
 
-  await logExecutionLatency(
+  const stackResponses = await logExecutionLatency(
     logger,
     'mget query for ' + stackTraceEvents.size + ' stacktraces',
     async () => {
-      const promises = new Array(nQueries);
-      const chunkSize = Math.floor(stackTraceEvents.size / nQueries);
-      const stackTraceIDs = [...stackTraceEvents.keys()];
-
-      for (let i = 0; i < nQueries; i++) {
-        const func = async () => {
-          const chunk = stackTraceIDs.slice(chunkSize * i, chunkSize * (i + 1));
-          const res = await client.mget({
+      return await Promise.all(
+        chunks.map((ids) => {
+          return client.mget({
             index: 'profiling-stacktraces',
-            ids: [...chunk],
+            ids,
             _source_includes: ['FrameID', 'Type'],
           });
-
-          if (testing) {
-            for (const trace of res.body.hits.hits) {
-              const frameIDs = trace.fields.FrameID as string[];
-              const fileIDs = extractFileIDArrayFromFrameIDArray(frameIDs);
-              stackTraces.set(trace._id, {
-                FileID: fileIDs,
-                FrameID: frameIDs,
-                Type: trace.fields.Type,
-              });
-              for (const frameID of frameIDs) {
-                stackFrameDocIDs.add(frameID);
-              }
-              for (const fileID of fileIDs) {
-                executableDocIDs.add(fileID);
-              }
-            }
-          } else {
-            for (const trace of res.body.docs) {
-              // Sometimes we don't find the trace.
-              // This is due to ES delays writing (data is not immediately seen after write).
-              // Also, ES doesn't know about transactions.
-              if (trace.found) {
-                const frameIDs = trace._source.FrameID as string[];
-                const fileIDs = extractFileIDArrayFromFrameIDArray(frameIDs);
-                stackTraces.set(trace._id, {
-                  FileID: fileIDs,
-                  FrameID: frameIDs,
-                  Type: trace._source.Type,
-                });
-                for (const frameID of frameIDs) {
-                  stackFrameDocIDs.add(frameID);
-                }
-                for (const fileID of fileIDs) {
-                  executableDocIDs.add(fileID);
-                }
-              }
-            }
-          }
-        };
-
-        // Build and send the queries asynchronously.
-        promises[i] = func();
-      }
-
-      await Promise.all(promises).catch((err) => {
-        logger.error('Failed to get stacktraces from _mget: ' + err.message);
-      });
+        })
+      );
     }
   );
+
+  await logExecutionLatency(logger, 'processing data', async () => {
+    if (testing) {
+      const traces = stackResponses.flatMap((response) => response.body.hits.hits);
+      for (const trace of traces) {
+        const frameIDs = trace.fields.FrameID as string[];
+        const fileIDs = extractFileIDArrayFromFrameIDArray(frameIDs);
+        stackTraces.set(trace._id, {
+          FileID: fileIDs,
+          FrameID: frameIDs,
+          Type: trace.fields.Type,
+        });
+        for (const frameID of frameIDs) {
+          stackFrameDocIDs.add(frameID);
+        }
+        for (const fileID of fileIDs) {
+          executableDocIDs.add(fileID);
+        }
+      }
+    } else {
+      const traces = stackResponses.flatMap((response) => response.body.docs);
+      for (const trace of traces) {
+        // Sometimes we don't find the trace.
+        // This is due to ES delays writing (data is not immediately seen after write).
+        // Also, ES doesn't know about transactions.
+        if (trace.found) {
+          const frameIDs = trace._source.FrameID as string[];
+          const fileIDs = extractFileIDArrayFromFrameIDArray(frameIDs);
+          stackTraces.set(trace._id, {
+            FileID: fileIDs,
+            FrameID: frameIDs,
+            Type: trace._source.Type,
+          });
+          for (const frameID of frameIDs) {
+            stackFrameDocIDs.add(frameID);
+          }
+          for (const fileID of fileIDs) {
+            executableDocIDs.add(fileID);
+          }
+        }
+      }
+    }
+  });
 
   if (stackTraces.size < stackTraceEvents.size) {
     logger.info(
@@ -276,20 +272,22 @@ async function queryFlameGraph(
   // Create a lookup map StackFrameID -> StackFrame.
   const stackFrames = new Map<StackFrameID, StackFrame>();
   let framesFound = 0;
-  for (const frame of resStackFrames.body.docs) {
-    if (frame.found) {
-      stackFrames.set(frame._id, frame._source);
-      framesFound++;
-    } else {
-      stackFrames.set(frame._id, {
-        FileName: '',
-        FunctionName: '',
-        FunctionOffset: 0,
-        LineNumber: 0,
-        SourceType: 0,
-      });
+  await logExecutionLatency(logger, 'processing data', async () => {
+    for (const frame of resStackFrames.body.docs) {
+      if (frame.found) {
+        stackFrames.set(frame._id, frame._source);
+        framesFound++;
+      } else {
+        stackFrames.set(frame._id, {
+          FileName: '',
+          FunctionName: '',
+          FunctionOffset: 0,
+          LineNumber: 0,
+          SourceType: 0,
+        });
+      }
     }
-  }
+  });
   logger.info('found ' + framesFound + ' / ' + stackFrameDocIDs.size + ' frames');
 
   const resExecutables = await logExecutionLatency(
@@ -306,15 +304,17 @@ async function queryFlameGraph(
 
   // Create a lookup map StackFrameID -> StackFrame.
   const executables = new Map<FileID, Executable>();
-  for (const exe of resExecutables.body.docs) {
-    if (exe.found) {
-      executables.set(exe._id, exe._source);
-    } else {
-      executables.set(exe._id, {
-        FileName: '',
-      });
+  await logExecutionLatency(logger, 'processing data', async () => {
+    for (const exe of resExecutables.body.docs) {
+      if (exe.found) {
+        executables.set(exe._id, exe._source);
+      } else {
+        executables.set(exe._id, {
+          FileName: '',
+        });
+      }
     }
-  }
+  });
 
   return new Promise<FlameGraph>((resolve, _) => {
     return resolve(
