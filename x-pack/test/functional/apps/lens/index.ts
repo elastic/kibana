@@ -32,7 +32,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     };
     let esNode: EsArchiver;
     let fixtureDirs: {
-      esArchive: string;
       lensBasic: string;
       lensDefault: string;
     };
