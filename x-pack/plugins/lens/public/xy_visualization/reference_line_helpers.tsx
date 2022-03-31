@@ -258,13 +258,13 @@ function computeStaticValueForGroup(
 }
 
 /**
- * @function convertActiveDataFromIndexesToLayers - converts hashmap of tables, stored by layers' indexes
+ * Converts hashmap of tables, stored by layers' indexes
  * (created at `layeredXyVis` expression function), to hashmap of tables, stored by layers' ids. Before,
  * layers, passed to `xy` expression function contained layerIds. But it is impossible to continue using
  * this approach any more, as far as the idea of multitable is going to be deprecated.
- * @param activeData - hashmap of tables, containing requested data.
- * @param layers - array of data visualization configuration. Each layer has its own table at the `activeData`.
- * @returns - new hashmap of tables, where all the tables are mapped by layerId.
+ * @param activeData hashmap of tables, containing requested data.
+ * @param layers array of data visualization configuration. Each layer has its own table at the `activeData`.
+ * @returns new hashmap of tables, where all the tables are mapped by layerId.
  */
 export const convertActiveDataFromIndexesToLayers = (
   activeData: Record<string, Datatable> | undefined = {},
