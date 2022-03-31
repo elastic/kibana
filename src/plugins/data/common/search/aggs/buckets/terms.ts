@@ -118,6 +118,9 @@ export const getTermsBucketAgg = () =>
       },
       {
         name: 'shardSize',
+        write: (aggConfig, output) => {
+          output.params.shard_size = aggConfig.params.shardSize;
+        },
       },
       {
         name: 'otherBucket',
