@@ -26,7 +26,7 @@ import { Network } from './network';
 import { NetworkRoutes } from './navigation';
 import { mockCasesContract } from '../../../../cases/public/mocks';
 import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
-import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_overview';
+import { getAppLandingUrl } from '../../common/components/link_to';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -135,7 +135,7 @@ describe('Network page - rendering', () => {
 
     expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
       deepLinkId: SecurityPageName.landing,
-      path: getAppLandingUrl(),
+      path: getAppLandingUrl(SecurityPageName.landing),
     });
   });
 

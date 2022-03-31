@@ -28,7 +28,7 @@ import { initialUserPrivilegesState } from '../../common/components/user_privile
 import { EndpointPrivileges } from '../../../common/endpoint/types';
 import { useHostRiskScore } from '../../risk_score/containers';
 import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
-import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_overview';
+import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_landing';
 import { mockCasesContract } from '../../../../cases/public/mocks';
 
 const mockNavigateToApp = jest.fn();

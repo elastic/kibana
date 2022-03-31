@@ -26,7 +26,7 @@ import { HostsTabs } from './hosts_tabs';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { mockCasesContract } from '../../../../cases/public/mocks';
 import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
-import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_overview';
+import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_landing';
 
 jest.mock('../../common/containers/sourcerer');
 

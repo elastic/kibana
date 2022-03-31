@@ -16,7 +16,7 @@ import { Users } from './users';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { mockCasesContext } from '../../../../cases/public/mocks/mock_cases_context';
 import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
-import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_overview';
+import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_landing';
 
 jest.mock('../../common/containers/sourcerer');
 jest.mock('../../common/components/search_bar', () => ({
