@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'common',
     'settings',
-    'header',
     'savedObjects',
     'dashboard',
     'timePicker',
