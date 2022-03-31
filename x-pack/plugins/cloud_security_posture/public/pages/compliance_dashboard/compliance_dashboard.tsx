@@ -35,6 +35,7 @@ const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataCo
 export const ComplianceDashboard = () => {
   const getDashboardDataQuery = useComplianceDashboardDataApi();
   useCspBreadcrumbs([allNavigationItems.dashboard]);
+  console.log(getDashboardDataQuery);
 
   return (
     <CspPageTemplate

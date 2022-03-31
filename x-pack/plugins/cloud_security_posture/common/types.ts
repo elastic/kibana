@@ -33,12 +33,18 @@ export interface Cluster {
   };
   stats: Stats;
   resourcesTypes: ResourceType[];
+  trend: PostureTrend;
+}
+
+export interface PostureTrend {
+  trend: any;
 }
 
 export interface ComplianceDashboardData {
   stats: Stats;
   resourcesTypes: ResourceType[];
   clusters: Cluster[];
+  trend: PostureTrend;
 }
 
 export interface Benchmark {

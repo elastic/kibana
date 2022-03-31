@@ -20,6 +20,7 @@ import { getResourcesTypes } from './get_resources_types';
 import { getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
+import { getTrend } from './get_trend';
 
 export interface ClusterBucket {
   ordered_top_hits: AggregationsTopHitsAggregate;
@@ -96,16 +97,18 @@ export const defineGetComplianceDashboardRoute = (
           },
         };
 
-        const [stats, resourcesTypes, clusters] = await Promise.all([
+        const [stats, resourcesTypes, clusters, trend] = await Promise.all([
           getStats(esClient, query),
           getResourcesTypes(esClient, query),
           getClusters(esClient, query),
+          getTrend(esClient, query),
         ]);
 
         const body: ComplianceDashboardData = {
           stats,
           resourcesTypes,
           clusters,
+          trend,
         };
 
         return response.ok({
