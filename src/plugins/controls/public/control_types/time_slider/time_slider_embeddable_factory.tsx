@@ -53,6 +53,7 @@ export class TimesliderEmbeddableFactory
   public isEditable = () => Promise.resolve(false);
 
   public getDisplayName = () => TimeSliderStrings.getDisplayName();
+  public getIconType = () => 'clock';
   public getDescription = () => TimeSliderStrings.getDescription();
   public getIconType = () => 'clock';
 
