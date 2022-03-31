@@ -32,6 +32,8 @@ export class DuplicateField extends KbnError {
 export class SavedObjectNotFound extends KbnError {
   public savedObjectType: string;
   public savedObjectId?: string;
+  public isSavedObjectNotFoundError: boolean;
+
   constructor(type: string, id?: string, link?: string, customMessage?: string) {
     const idMsg = id ? ` (id: ${id})` : '';
     let message = `Could not locate that ${type}${idMsg}`;
@@ -44,7 +46,20 @@ export class SavedObjectNotFound extends KbnError {
 
     this.savedObjectType = type;
     this.savedObjectId = id;
+    this.isSavedObjectNotFoundError = true;
   }
+}
+
+/**
+ * Checks whether the given error is a SavedObjectNotFound error
+ * @param {boolean} error - true iif the error is a SavedObjectNotFound error
+ */
+export function isSavedObjectNotFoundError(error: Error | undefined): error is SavedObjectNotFound {
+  // we can't check "error instanceof SavedObjectNotFound" since this class can live in a separate bundle
+  // and the error will be an instance of other class with the same interface
+  // (actually the copy of SavedObjectNotFound class)
+  const savedObjectError = error as unknown as SavedObjectNotFound;
+  return savedObjectError ? !!savedObjectError.isSavedObjectNotFoundError : false;
 }
 
 /**
