@@ -84,6 +84,7 @@ export const mockState: AppState = {
     enablement: null,
     syntheticsService: {
       loading: false,
+      signupUrl: null,
     },
   },
   ml: {
